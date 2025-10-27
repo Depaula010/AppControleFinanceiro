@@ -21,7 +21,7 @@ except KeyError:
 # Configurar o cliente do Gemini
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-pro') # Usando o modelo mais rápido
+    model = genai.GenerativeModel('models/gemini-1.5-flash-latest') # Usando o modelo mais rápido
 
 # Configurar a conexão com o Banco de Dados
 if DATABASE_URL:
