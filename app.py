@@ -32,7 +32,7 @@ else:
     engine = None
 
 
-# ========= 2. ROTAS ADMINISTRATIVAS =========
+# ========= 2. ROTAS ADMINISTRATIVAS ========
 
 @app.route('/admin/setup-database', methods=['GET'])
 def setup_database():
