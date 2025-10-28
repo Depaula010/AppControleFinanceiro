@@ -238,7 +238,7 @@ def populate_global_categories():
     ((SELECT id FROM MacroCategoria WHERE nome_macro = 'Assinaturas e Serviços' AND usuario_id IS NULL), 'Outros'),
     ((SELECT id FROM MacroCategoria WHERE nome_macro = 'Cuidados Pessoais' AND usuario_id IS NULL), 'Outros'),
     ((SELECT id FROM MacroCategoria WHERE nome_macro = 'Compras Pessoais' AND usuario_id IS NULL), 'Outros');
-
+                            
     COMMIT;
     """)
     
