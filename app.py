@@ -264,8 +264,7 @@ def setup_user_data():
     """ Rota para inserir o usuário e suas contas. Execute TERCEIRO. """
     if not engine: return "Erro: Banco não configurado.", 500
     
-    # !!! IMPORTANTE: SUBSTITUIR PELO SEU NÚMERO REAL !!!
-    numero_whatsapp_usuario = '5531999998888' 
+    numero_whatsapp_usuario = '553194001072' 
 
     sql_user = text(f"INSERT INTO Usuarios (nome, numero_whatsapp) VALUES ('Rafael', '{numero_whatsapp_usuario}') ON CONFLICT (numero_whatsapp) DO NOTHING RETURNING id;")
     sql_accounts = text("""
