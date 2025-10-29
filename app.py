@@ -340,7 +340,7 @@ def handle_automate_webhook():
             # --- 7. LÓGICA DE NOTIFICAÇÃO (FUTURO) ---
             if id_categoria_final == id_outros_fallback:
                 print(f"[WHATSAPP] Ação necessária: Transação '{transacao_descricao}' salva como 'Outros'. Notificar usuário (Ainda não implementado).")
-                # Aqui chamaremos o bot da Fase 4
+                # Aqui chamaremos o bot da Fase 4 para notificar o usuário via WhatsApp
             
         print(f"[DATABASE] Transação salva com sucesso (Usuário: {usuario_id_fixo}, Conta: {conta_id_transacao}, SubCat: {id_categoria_final}, Fatura: {fatura_id_transacao})!")
         return jsonify({"status": "sucesso", "transacao_salva": transacao_gemini, "categoria_id_escolhida": id_categoria_final}), 200
