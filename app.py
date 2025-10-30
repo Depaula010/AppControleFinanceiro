@@ -395,7 +395,14 @@ def handle_whatsapp_webhook():
 
             sql_get_cats = text(f"SELECT s.id, s.nome_sub, m.nome_macro FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id JOIN GrupoCategoria g ON m.grupo_id = g.id WHERE (s.usuario_id IS NULL OR s.usuario_id = :uid) AND ({grupo_filtro_sql})")
             categories_list_result = conn.execute(sql_get_cats, {"uid": usuario_id}).fetchall()
-            categories_json_list = [dict(row._mapping) for row in categories_list_result]
+            # Conversão robusta de lista de 'Row' para lista de 'dict'
+            categories_json_list = []
+            if categories_list_result:
+            # Pega as chaves (ex: 'id', 'nome_sub', 'nome_macro') da primeira linha
+                keys = categories_list_result[0].keys()
+            # Mapeia os valores de cada linha para as chaves
+            for row in categories_list_result:
+                categories_json_list.append(dict(zip(keys, row)))
             
             nome_macro_outros = 'Receitas Gerais' if tipo_transacao_db == 'Renda' else 'Despesas Gerais'
             sql_get_outros_id = text("SELECT s.id FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id WHERE m.nome_macro = :nome_macro AND s.nome_sub = 'Outros' AND s.usuario_id IS NULL LIMIT 1")
