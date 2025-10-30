@@ -39,6 +39,14 @@ else:
 # ... (Vou omitir por brevidade, mas elas NÃO mudam) ...
 @app.route('/admin/setup-database', methods=['GET'])
 def setup_database():
+    """Sets up the database schema.
+
+    This function executes a SQL script to drop all existing tables and recreate them.
+    This is useful for initializing the database or resetting it to a clean state.
+
+    Returns:
+        A tuple containing a success message and a 200 status code, or an error message and a 500 status code.
+    """
     # ... (Código DDL v10 completo) ...
     sql_script_ddl = """
     DROP TABLE IF EXISTS PoteSubCategorias CASCADE;
@@ -92,6 +100,14 @@ def setup_database():
 
 @app.route('/admin/populate-global-categories', methods=['GET'])
 def populate_global_categories():
+    """Populates the database with global categories.
+
+    This function inserts a set of predefined global categories into the database.
+    These categories are used for classifying transactions.
+
+    Returns:
+        A tuple containing a success message and a 200 status code, or an error message and a 500 status code.
+    """
     # ... (Código DML completo está aqui, mas escondido para focar na mudança) ...
     sql_populate_dml = text("""
     BEGIN;
@@ -136,6 +152,14 @@ def populate_global_categories():
 
 @app.route('/admin/setup-user-data', methods=['GET']) 
 def setup_user_data():
+    """Sets up a dummy user for testing.
+
+    This function inserts a dummy user and some accounts into the database.
+    This is useful for testing the application without having to manually create a user.
+
+    Returns:
+        A tuple containing a success message and a 200 status code, or an error message and a 500 status code.
+    """
     # ... (Código para inserir usuário e contas, como antes) ...
     if not engine: return "Erro: Banco não configurado.", 500
     numero_whatsapp_usuario = '553194001072' # <<< SUBSTITUA
@@ -165,6 +189,20 @@ def setup_user_data():
 # ========= 3. LÓGICA DE FATURA (Função Auxiliar - Sem Alteração) =========
 
 def get_or_create_fatura(conn, conta_id, data_transacao, usuario_id):
+    """Gets an existing fatura (invoice) or creates a new one.
+
+    This function checks if a fatura already exists for a given credit card account and transaction date.
+    If a fatura does not exist, it creates a new one.
+
+    Args:
+        conn: The database connection.
+        conta_id: The ID of the credit card account.
+        data_transacao: The date of the transaction.
+        usuario_id: The ID of the user.
+
+    Returns:
+        The ID of the fatura, or None if the account is not a credit card account.
+    """
     # ... (Lógica completa de cálculo de fatura, como antes) ...
     # (O código está aqui, mas escondido para focar na mudança)
     sql_get_card_info = text("SELECT dia_fechamento, dia_vencimento FROM Contas WHERE id = :conta_id AND usuario_id = :uid AND tipo_conta = 'Cartão de Crédito'")
@@ -202,13 +240,25 @@ def get_or_create_fatura(conn, conta_id, data_transacao, usuario_id):
 
 @app.route('/')
 def home():
+    """The home route of the Flask application.
+
+    Returns:
+        A string indicating that the API is running.
+    """
     return "API do Bot Financeiro v10 (Fase 3 Completa) está no ar!"
 
 @app.route('/webhook-automate', methods=['POST'])
 def handle_automate_webhook():
-    """
-    Rota principal que recebe a notificação, faz 2 chamadas ao Gemini 
-    (Extração e Categorização) e salva a transação no banco.
+    """Handles the main webhook for automating transactions.
+
+    This function receives a notification, makes two calls to the Gemini API
+    (for extraction and categorization), and saves the transaction in the database.
+
+    The request body should be a JSON object containing a "texto" key with the
+    notification text.
+
+    Returns:
+        A JSON response indicating the status of the operation.
     """
     if not engine or not model:
         return jsonify({"status": "erro", "mensagem": "Serviço não configurado"}), 500
@@ -361,4 +411,11 @@ def handle_automate_webhook():
 
 @app.route('/webhook-whatsapp', methods=['POST'])
 def handle_whatsapp_webhook():
+    """Placeholder for handling WhatsApp webhooks.
+
+    This function is not yet implemented.
+
+    Returns:
+        A JSON object with a status of "Ainda não implementado" and a 200 status code.
+    """
     return jsonify({"status": "Ainda não implementado"}), 200
