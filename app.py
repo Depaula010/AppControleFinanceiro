@@ -397,12 +397,11 @@ def handle_whatsapp_webhook():
             categories_list_result = conn.execute(sql_get_cats, {"uid": usuario_id}).fetchall()
             # Conversão robusta de lista de 'Row' para lista de 'dict'
             categories_json_list = []
-            if categories_list_result:
-            # Pega as chaves (ex: 'id', 'nome_sub', 'nome_macro') da primeira linha
-                keys = categories_list_result[0].keys()
-            # Mapeia os valores de cada linha para as chaves
             for row in categories_list_result:
-                categories_json_list.append(dict(zip(keys, row)))
+                categories_json_list.append({
+                    "id": row['id'],
+                    "nome_sub": row['nome_sub'],
+                    "nome_macro": row['nome_macro']})
             
             nome_macro_outros = 'Receitas Gerais' if tipo_transacao_db == 'Renda' else 'Despesas Gerais'
             sql_get_outros_id = text("SELECT s.id FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id WHERE m.nome_macro = :nome_macro AND s.nome_sub = 'Outros' AND s.usuario_id IS NULL LIMIT 1")
