@@ -317,7 +317,157 @@ def handle_automate_webhook():
 
 
 # === ESTE É O ENDPOINT ATUALIZADO (Onde o Bot vai chamar) ===
+# === SUBSTITUA O ENDPOINT /webhook-whatsapp ANTIGO POR ESTE ===
 @app.route('/webhook-whatsapp', methods=['POST'])
+def handle_whatsapp_webhook():
+    """
+    Recebe uma mensagem manual do bot WhatsApp, verifica o usuário,
+    processa no Gemini e salva no banco.
+    """
+    if not engine or not model:
+        return jsonify({"status": "erro", "mensagem": "Serviço não configurado"}), 503
+
+    # --- 1. VERIFICAÇÃO DE SEGURANÇA (Chave da API do Bot) ---
+    secret_key_recebida = request.headers.get('x-api-key')
+    if secret_key_recebida != API_SECRET_KEY:
+        print(f"[SEGURANÇA] /webhook-whatsapp: Chave de API inválida recebida.")
+        return jsonify({"status": "erro", "resposta": "Chave de API inválida."}), 401
+    
+    # --- 2. PEGA DADOS e VERIFICA USUÁRIO ---
+    try:
+        data = request.json
+        texto_msg = data.get('texto')
+        numero_remetente = data.get('numero_remetente')
+
+        if not texto_msg or not numero_remetente:
+            return jsonify({"status": "erro", "mensagem": "Faltando 'texto' ou 'numero_remetente'"}), 400
+
+        # <<< CORREÇÃO AQUI >>>
+        # Limpa o sufixo '@c.us' do WhatsApp para bater com o banco
+        numero_limpo = numero_remetente.split('@')[0]
+        # <<< FIM DA CORREÇÃO >>>
+
+        print(f"[WHATSAPP] Mensagem recebida de {numero_limpo}: {texto_msg}")
+
+        usuario_id = None
+        with engine.connect() as conn:
+            # Verifica o número LIMPO no banco
+            sql_find_user = text("SELECT id FROM Usuarios WHERE numero_whatsapp = :num")
+            # <<< CORREÇÃO AQUI >>>
+            result = conn.execute(sql_find_user, {"num": numero_limpo})
+            # <<< FIM DA CORREÇÃO >>>
+            usuario_id = result.scalar_one_or_none()
+
+        if usuario_id is None:
+            print(f"[SEGURANÇA] /webhook-whatsapp: Número {numero_limpo} não autorizado.")
+            # AQUI RETORNAMOS 401, e o bot (index.js) vai reagir com '🚫'
+            return jsonify({"status": "erro", "resposta": "Usuário não autorizado."}), 401
+        
+        print(f"[WHATSAPP] Usuário autenticado (ID: {usuario_id}). Processando...")
+
+        # --- 3. PROCESSAMENTO GEMINI (Igual ao /webhook-automate) ---
+        
+        # 3.1 Extração
+        prompt_1 = f"""
+        Analise a mensagem do usuário: "{texto_msg}"
+        Ele está registrando um gasto ou renda manual.
+        Retorne APENAS JSON com: "valor_decimal", "descricao_bruta", "tipo_fluxo" ("Renda" ou "Despesa").
+        Ex1: "gastei 50 na padaria" -> {{"valor_decimal": 50.00, "descricao_bruta": "Padaria", "tipo_fluxo": "Despesa"}}
+        Ex2: "recebi 100 do freela" -> {{"valor_decimal": 100.00, "descricao_bruta": "Freela", "tipo_fluxo": "Renda"}}
+        """
+        response_1 = model.generate_content(prompt_1)
+        json_response_text_1 = response_1.text.strip().replace("```json", "").replace("```", "")
+        transacao_gemini = json.loads(json_response_text_1)
+        
+        tipo_transacao_db = transacao_gemini.get('tipo_fluxo', 'Despesa')
+        transacao_descricao = transacao_gemini.get('descricao_bruta')
+        data_hoje = date.today()
+        id_categoria_final = None
+        id_outros_fallback = None
+
+        with engine.connect() as conn:
+            conn.begin() 
+
+            # 3.2 Categorização (Pega o "menu" do usuário)
+            grupo_filtro_sql = "g.nome_grupo = 'Renda'"
+            if tipo_transacao_db == 'Despesa':
+                grupo_filtro_sql = "g.nome_grupo IN ('Despesa Essencial', 'Despesa Discricionária', 'Meta Financeira', 'Geral')"
+
+            sql_get_cats = text(f"SELECT s.id, s.nome_sub, m.nome_macro FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id JOIN GrupoCategoria g ON m.grupo_id = g.id WHERE (s.usuario_id IS NULL OR s.usuario_id = :uid) AND ({grupo_filtro_sql})")
+            categories_list_result = conn.execute(sql_get_cats, {"uid": usuario_id}).fetchall()
+            categories_json_list = [dict(row._mapping) for row in categories_list_result]
+            
+            nome_macro_outros = 'Receitas Gerais' if tipo_transacao_db == 'Renda' else 'Despesas Gerais'
+            sql_get_outros_id = text("SELECT s.id FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id WHERE m.nome_macro = :nome_macro AND s.nome_sub = 'Outros' AND s.usuario_id IS NULL LIMIT 1")
+            id_outros_fallback = conn.execute(sql_get_outros_id, {"nome_macro": nome_macro_outros}).scalar_one_or_none()
+
+            # 3.3 Chamada 2 do Gemini (Escolha da Categoria)
+            prompt_2 = f"""
+            Minhas subcategorias são: {json.dumps(categories_json_list)}
+            A transação foi: "{transacao_descricao}"
+            O tipo é: "{tipo_transacao_db}"
+            Qual é o "id" da subcategoria que melhor corresponde?
+            Se for genérico, use o "id" de "Outros" (que é {id_outros_fallback}).
+            Responda APENAS com o número do ID.
+            """
+            response_2 = model.generate_content(prompt_2)
+            id_categoria_str = response_2.text.strip().replace("`", "")
+            
+            try:
+                id_categoria_final = int(id_categoria_str)
+                if id_categoria_final not in [cat['id'] for cat in categories_list_result]:
+                    id_categoria_final = id_outros_fallback
+            except ValueError:
+                id_categoria_final = id_outros_fallback
+            
+            print(f"[GEMINI-2] ID de Categoria (Manual) escolhido: {id_categoria_final}")
+
+            # --- 4. SALVANDO NO BANCO ---
+            conta_nome_padrao = 'Banco Inter' if tipo_transacao_db == 'Renda' else 'Carteira'
+            sql_get_conta_id = text("SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta = :nome")
+            conta_id_transacao = conn.execute(sql_get_conta_id, {"uid": usuario_id, "nome": conta_nome_padrao}).scalar_one_or_none()
+            
+            if conta_id_transacao is None: 
+                sql_get_conta_id = text("SELECT id FROM Contas WHERE usuario_id = :uid LIMIT 1")
+                conta_id_transacao = conn.execute(sql_get_conta_id, {"uid": usuario_id}).scalar_one()
+
+            sql_insert = text("""
+            INSERT INTO Transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, transferencia_par_id, descricao, valor, tipo_transacao, data_transacao)
+            VALUES (:uid, :cid, :scid, NULL, NULL, :desc, :val, :tipo, :data) 
+            """) 
+            
+            conn.execute(sql_insert, {
+                "uid": usuario_id,
+                "cid": conta_id_transacao, 
+                "scid": id_categoria_final, 
+                "desc": transacao_descricao,
+                "val": transacao_gemini.get('valor_decimal'), 
+                "tipo": tipo_transacao_db,
+                "data": data_hoje
+            })
+            
+            conn.commit()
+            
+            sql_get_cat_nome = text("SELECT nome_sub FROM SubCategoria WHERE id = :scid")
+            nome_categoria_salva = conn.execute(sql_get_cat_nome, {"scid": id_categoria_final}).scalar_one()
+
+        print(f"[DATABASE] Transação MANUAL salva com sucesso (Usuário: {usuario_id}, Conta: {conta_id_transacao}, SubCat: {id_categoria_final})!")
+        
+        resposta_para_usuario = f"✅ Transação manual salva!\nDescrição: {transacao_descricao}\nValor: R$ {transacao_gemini.get('valor_decimal'):.2f}\nCategoria: {nome_categoria_salva}"
+        return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+    except sqlalchemy_exc.SQLAlchemyError as db_err:
+        print(f"Erro de Banco de Dados: {db_err}")
+        try: 
+            with engine.connect() as conn: conn.rollback()
+        except: pass
+        return jsonify({"status": "erro", "mensagem": f"Erro de Banco de Dados: {db_err}"}), 500
+    except Exception as e:
+        print(f"Erro geral: {e}")
+        try: 
+            with engine.connect() as conn: conn.rollback()
+        except: pass
+        return jsonify({"status": "erro", "mensagem": str(e)}), 500
 def handle_whatsapp_webhook():
     """
     Recebe uma mensagem manual do bot WhatsApp, verifica o usuário,
