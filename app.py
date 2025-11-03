@@ -5,6 +5,7 @@ import google.generativeai as genai
 from sqlalchemy import create_engine, text, exc as sqlalchemy_exc
 from datetime import date, timedelta
 from calendar import monthrange
+from motor_agendamentos import processar_agendamentos
 
 # ========= 1. CONFIGURAÇÃO INICIAL E CONEXÃO =========
 
@@ -157,6 +158,29 @@ def setup_user_data():
                 conn.rollback()
         except: pass
         return f"Erro ao inserir dados do usuário: {e}", 500
+    
+@app.route('/admin/run-motor-agendamentos', methods=['POST'])
+def run_motor_agendamentos():
+    """
+    Esta é a rota secreta que o UptimeRobot (ou outro Cron) vai chamar.
+    Ela é protegida por uma chave secreta no header.
+    """
+    # 1. Verifica a chave secreta do Cron
+    cron_secret_recebida = request.headers.get('x-cron-secret')
+    CRON_SECRET_KEY = os.environ.get('CRON_SECRET_KEY', 'minha-senha-super-secreta-do-cron') # Crie uma senha
+
+    if cron_secret_recebida != CRON_SECRET_KEY:
+        print(f"[MOTOR] Acesso negado à rota /run-motor-agendamentos. Chave errada.")
+        return jsonify({"status": "erro", "mensagem": "Não autorizado"}), 401
+
+    # 2. Se a chave estiver correta, roda o motor
+    try:
+        print("[MOTOR] Rota /run-motor-agendamentos chamada com sucesso! Iniciando processamento...")
+        processar_agendamentos() # Chama a função do outro arquivo
+        return jsonify({"status": "sucesso", "mensagem": "Agendamentos processados."}), 200
+    except Exception as e:
+        print(f"[MOTOR] ERRO CRÍTICO ao rodar /run-motor-agendamentos: {e}")
+        return jsonify({"status": "erro", "mensagem": str(e)}), 500
 
 # ========= 3. LÓGICA DE FATURA (Função Auxiliar - Sem Alteração) =========
 def get_or_create_fatura(conn, conta_id, data_transacao, usuario_id):
