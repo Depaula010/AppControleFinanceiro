@@ -227,146 +227,131 @@ def home():
 
 @app.route('/webhook-automate', methods=['POST'])
 def handle_automate_webhook():
-    """ Rota do Gatilho Android (Notificações Automáticas) """
+    """ 
+    Rota do Gatilho Android (Notificações Automáticas) 
+    *** ATUALIZADA: Salva Despesa como valor negativo ***
+    """
     if not engine or not model:
         return jsonify({"status": "erro", "mensagem": "Serviço não configurado"}), 503
-
     try:
         data = request.json
         texto_notificacao = data.get('texto')
-        if not texto_notificacao: return jsonify({"status": "erro", "mensagem": "Chave 'texto' faltando"}), 400
+        user_api_key = data.get('user_api_key') 
+        if not texto_notificacao or not user_api_key:
+            return jsonify({"status": "erro", "mensagem": "Chave 'texto' ou 'user_api_key' faltando"}), 400
         print(f"[AUTOMATE] Recebido: {texto_notificacao}")
         
-        usuario_id_fixo = 1 
+        usuario_id = None
+        numero_whatsapp_usuario = None
+        with engine.connect() as conn:
+            sql_find_user = text("SELECT id, numero_whatsapp FROM Usuarios WHERE api_key_automate = :api_key")
+            result = conn.execute(sql_find_user, {"api_key": user_api_key}).fetchone()
+            if not result:
+                return jsonify({"status": "erro", "mensagem": "Chave de API de usuário inválida"}), 401
+            usuario_id = result[0]; numero_whatsapp_usuario = result[1] 
+        print(f"[AUTOMATE] Usuário autenticado (ID: {usuario_id}). Processando...")
+
         prompt_1 = f"""
         Analise a notificação: "{texto_notificacao}"
         Retorne APENAS JSON com: "valor_decimal" (sempre positivo), "descricao_bruta", "tipo_fluxo" ("Renda" ou "Despesa").
-        Ex: {{"valor_decimal": 45.00, "descricao_bruta": "PADARIA", "tipo_fluxo": "Despesa"}}
-        """
-        response_1 = model.generate_content(prompt_1)
-        json_response_text_1 = response_1.text.strip().replace("```json", "").replace("```", "")
-        transacao_gemini = json.loads(json_response_text_1)
+        """; response_1 = model.generate_content(prompt_1); json_response_text_1 = response_1.text.strip().replace("```json", "").replace("```", ""); transacao_gemini = json.loads(json_response_text_1)
         print(f"[GEMINI-1] Extração: {json_response_text_1}")
         
-        tipo_transacao_db = transacao_gemini.get('tipo_fluxo', 'Despesa')
-        transacao_descricao = transacao_gemini.get('descricao_bruta')
-        data_hoje = date.today()
-        id_categoria_final = None
-        id_outros_fallback = None
+        tipo_transacao_db = transacao_gemini.get('tipo_fluxo', 'Despesa'); transacao_descricao = transacao_gemini.get('descricao_bruta'); data_hoje = date.today(); id_categoria_final = None; id_outros_fallback = None
+        valor_decimal = transacao_gemini.get('valor_decimal')
 
         with engine.connect() as conn:
             conn.begin() 
-
-            conta_id_transacao = 1 
+            sql_get_contas = text("SELECT id, nome_conta, tipo_conta FROM Contas WHERE usuario_id = :uid"); contas_usuario = conn.execute(sql_get_contas, {"uid": usuario_id}).fetchall()
+            conta_id_transacao = None
             if tipo_transacao_db == 'Despesa' and any(kw in texto_notificacao.lower() for kw in ['cartão', 'compra', 'credit']):
-                 conta_id_transacao = 2 
+                conta_id_transacao = next((c[0] for c in contas_usuario if c[2] == 'Cartão de Crédito'), None)
+            if not conta_id_transacao:
+                conta_id_transacao = next((c[0] for c in contas_usuario if c[2] == 'Conta Corrente'), contas_usuario[0][0]) 
 
             grupo_filtro_sql = "g.nome_grupo = 'Renda'"
-            if tipo_transacao_db == 'Despesa':
-                grupo_filtro_sql = "g.nome_grupo IN ('Despesa Essencial', 'Despesa Discricionária', 'Meta Financeira', 'Geral')"
-
+            if tipo_transacao_db == 'Despesa': grupo_filtro_sql = "g.nome_grupo IN ('Despesa Essencial', 'Despesa Discricionária', 'Meta Financeira', 'Geral')"
             sql_get_cats = text(f"SELECT s.id, s.nome_sub, m.nome_macro FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id JOIN GrupoCategoria g ON m.grupo_id = g.id WHERE (s.usuario_id IS NULL OR s.usuario_id = :uid) AND ({grupo_filtro_sql})")
-            categories_list_result = conn.execute(sql_get_cats, {"uid": usuario_id_fixo}).fetchall()
+            categories_list_result = conn.execute(sql_get_cats, {"uid": usuario_id}).fetchall()
             
-            # === CORREÇÃO v11 (Manual Dict Conversion) ===
             categories_json_list = []
-            for row in categories_list_result:
-                categories_json_list.append({
-                    "id": row[0], # s.id
-                    "nome_sub": row[1], # s.nome_sub
-                    "nome_macro": row[2] # m.nome_macro
-                })
-            # === FIM DA CORREÇÃO ===
+            for row in categories_list_result: categories_json_list.append({"id": row[0], "nome_sub": row[1], "nome_macro": row[2]})
             
-            nome_macro_outros = 'Receitas Gerais' if tipo_transacao_db == 'Renda' else 'Despesas Gerais'
-            sql_get_outros_id = text("SELECT s.id FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id WHERE m.nome_macro = :nome_macro AND s.nome_sub = 'Outros' AND s.usuario_id IS NULL LIMIT 1")
-            id_outros_fallback = conn.execute(sql_get_outros_id, {"nome_macro": nome_macro_outros}).scalar_one_or_none()
-
-            if id_outros_fallback is None:
-                 print(f"ERRO CRÍTICO: SubCategoria global 'Outros' para '{nome_macro_outros}' não encontrada")
-                 conn.rollback()
-                 return jsonify({"status": "erro", "mensagem": "Erro interno: Categoria 'Outros' não encontrada"}), 500
+            nome_macro_outros = 'Receitas Gerais' if tipo_transacao_db == 'Renda' else 'Despesas Gerais'; sql_get_outros_id = text("SELECT s.id FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id WHERE m.nome_macro = :nome_macro AND s.nome_sub = 'Outros' AND s.usuario_id IS NULL LIMIT 1"); id_outros_fallback = conn.execute(sql_get_outros_id, {"nome_macro": nome_macro_outros}).scalar_one_or_none()
+            if id_outros_fallback is None: conn.rollback(); return jsonify({"status": "erro", "mensagem": "Erro interno: Categoria 'Outros' não encontrada"}), 500
 
             prompt_2 = f"""
             Minhas subcategorias são: {json.dumps(categories_json_list)}
-            A transação teve a descrição: "{transacao_descricao}"
-            O tipo é: "{tipo_transacao_db}"
-            Qual é o "id" da subcategoria que melhor corresponde?
-            Se for genérico, use o "id" de "Outros" (que é {id_outros_fallback}).
+            A transação teve a descrição: "{transacao_descricao}"; O tipo é: "{tipo_transacao_db}"
+            Qual é o "id" da subcategoria que melhor corresponde? Se for genérico, use o "id" de "Outros" (que é {id_outros_fallback}).
             Responda APENAS com o número do ID.
-            """
-            response_2 = model.generate_content(prompt_2)
-            id_categoria_str = response_2.text.strip().replace("`", "")
+            """; response_2 = model.generate_content(prompt_2); id_categoria_str = response_2.text.strip().replace("`", "")
             
             try:
                 id_categoria_final = int(id_categoria_str)
-                if id_categoria_final not in [cat['id'] for cat in categories_json_list]:
-                    print(f"[GEMINI-2] AVISO: Gemini retornou um ID inválido ({id_categoria_final}). Usando 'Outros' ({id_outros_fallback}).")
-                    id_categoria_final = id_outros_fallback
-            except ValueError:
-                print(f"[GEMINI-2] ERRO: Gemini não retornou um número ({id_categoria_str}). Usando 'Outros' ({id_outros_fallback}).")
-                id_categoria_final = id_outros_fallback
-            
+                if id_categoria_final not in [cat['id'] for cat in categories_json_list]: id_categoria_final = id_outros_fallback
+            except ValueError: id_categoria_final = id_outros_fallback
             print(f"[GEMINI-2] ID de Categoria escolhido: {id_categoria_final}")
 
             fatura_id_transacao = None
-            sql_check_conta_tipo = text("SELECT tipo_conta FROM Contas WHERE id = :cid AND usuario_id = :uid")
-            conta_tipo_result = conn.execute(sql_check_conta_tipo, {"cid": conta_id_transacao, "uid": usuario_id_fixo}).scalar_one_or_none()
-            
+            sql_check_conta_tipo = text("SELECT tipo_conta FROM Contas WHERE id = :cid AND usuario_id = :uid"); conta_tipo_result = conn.execute(sql_check_conta_tipo, {"cid": conta_id_transacao, "uid": usuario_id}).scalar_one_or_none()
             if conta_tipo_result == 'Cartão de Crédito':
-                fatura_id_transacao = get_or_create_fatura(conn, conta_id_transacao, data_hoje, usuario_id_fixo)
-                if fatura_id_transacao is None:
-                     print(f"AVISO: Cartão {conta_id_transacao} não está configurado. Salvando transação sem fatura.")
+                fatura_id_transacao = get_or_create_fatura(conn, conta_id_transacao, data_hoje, usuario_id)
+                if fatura_id_transacao is None: print(f"AVISO: Cartão {conta_id_transacao} não está configurado. Salvando transação sem fatura.")
             
-            sql_insert = text("""
-            INSERT INTO Transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, transferencia_par_id, descricao, valor, tipo_transacao, data_transacao)
-            VALUES (:uid, :cid, :scid, :fid, NULL, :desc, :val, :tipo, :data) 
-            """) 
+            # *** ATUALIZAÇÃO: Salva despesa como valor negativo ***
+            valor_para_db = valor_decimal if tipo_transacao_db == 'Renda' else (valor_decimal * -1)
+
+            sql_insert = text("INSERT INTO Transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, transferencia_par_id, descricao, valor, tipo_transacao, data_transacao) VALUES (:uid, :cid, :scid, :fid, NULL, :desc, :val, :tipo, :data) "); 
+            conn.execute(sql_insert, {"uid": usuario_id, "cid": conta_id_transacao, "scid": id_categoria_final, "fid": fatura_id_transacao, "desc": transacao_descricao, "val": valor_para_db, "tipo": tipo_transacao_db, "data": data_hoje})
             
-            conn.execute(sql_insert, {
-                "uid": usuario_id_fixo, "cid": conta_id_transacao, "scid": id_categoria_final, 
-                "fid": fatura_id_transacao, "desc": transacao_descricao,
-                "val": transacao_gemini.get('valor_decimal'), "tipo": tipo_transacao_db, "data": data_hoje
-            })
+            sql_get_cat_nome = text("SELECT s.nome_sub, m.nome_macro FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id WHERE s.id = :scid");
+            cat_info = conn.execute(sql_get_cat_nome, {"scid": id_categoria_final}).fetchone(); nome_categoria_salva = f"{cat_info[1]} -> {cat_info[0]}"
             conn.commit()
             
-            if id_categoria_final == id_outros_fallback:
-                print(f"[WHATSAPP] Ação necessária: Transação '{transacao_descricao}' salva como 'Outros'. Notificar usuário (Ainda não implementado).")
-            
-        print(f"[DATABASE] Transação salva com sucesso (Usuário: {usuario_id_fixo}, Conta: {conta_id_transacao}, SubCat: {id_categoria_final}, Fatura: {fatura_id_transacao})!")
+        mensagem_notificacao = f"✅ Transação Automática Salva!\n\nDescrição: {transacao_descricao}\nValor: R$ {valor_decimal:.2f} ({tipo_transacao_db})\nCategoria: {nome_categoria_salva}"
+        if id_categoria_final == id_outros_fallback:
+            mensagem_notificacao += f"\n\n*Atenção:* Não soube categorizar esta despesa. Salvei em 'Outros'."
+            print(f"[WHATSAPP] Ação necessária: Transação '{transacao_descricao}' salva como 'Outros'.")
+        
+        try:
+            headers = {'x-api-key': API_SECRET_KEY}; payload = {'numero': numero_whatsapp_usuario, 'mensagem': mensagem_notificacao}
+            response_bot = requests.post(f"{BOT_WHATSAPP_URL}/enviar-mensagem", json=payload, headers=headers)
+            if response_bot.status_code == 200: print(f"[BOT-WPP] Notificação enviada com sucesso para {numero_whatsapp_usuario}.")
+            else: print(f"[BOT-WPP] ERRO: Bot respondeu com status {response_bot.status_code}")
+        except Exception as bot_err:
+            print(f"[BOT-WPP] ERRO: Falha ao chamar a API do Bot: {bot_err}")
+
         return jsonify({"status": "sucesso", "transacao_salva": transacao_gemini, "categoria_id_escolhida": id_categoria_final}), 200
 
-    except sqlalchemy_exc.SQLAlchemyError as db_err:
-        print(f"Erro de Banco de Dados: {db_err}")
-        try: 
-            with engine.connect() as conn: 
-                conn.rollback()
-        except: pass
-        return jsonify({"status": "erro", "mensagem": f"Erro de Banco de Dados: {db_err}"}), 500
     except Exception as e:
-        print(f"Erro geral: {e}")
+        print(f"Erro geral: {e}"); 
         try: 
-            with engine.connect() as conn: 
-                conn.rollback()
-        except: pass
-        return jsonify({"status": "erro", "mensagem": str(e)}), 500
+            with engine.connect() as conn: conn.rollback()
+        except: pass; return jsonify({"status": "erro", "mensagem": str(e)}), 500
 
 
 @app.route('/webhook-whatsapp', methods=['POST'])
 def handle_whatsapp_webhook():
-    """ Rota do Gatilho WhatsApp (Entrada Manual) """
+    """
+    Recebe uma mensagem manual do bot WhatsApp, classifica a INTENÇÃO,
+    verifica o usuário, processa no Gemini e salva no banco.
+    """
     if not engine or not model:
         return jsonify({"status": "erro", "mensagem": "Serviço não configurado"}), 503
 
+    # --- 1. VERIFICAÇÃO DE SEGURANÇA (Chave da API do Bot) ---
     secret_key_recebida = request.headers.get('x-api-key')
     if secret_key_recebida != API_SECRET_KEY:
         print(f"[SEGURANÇA] /webhook-whatsapp: Chave de API inválida recebida.")
         return jsonify({"status": "erro", "resposta": "Chave de API inválida."}), 401
     
+    # --- 2. PEGA DADOS e VERIFICA USUÁRIO ---
     try:
         data = request.json
         texto_msg = data.get('texto')
         numero_remetente = data.get('numero_remetente')
+
         if not texto_msg or not numero_remetente:
             return jsonify({"status": "erro", "mensagem": "Faltando 'texto' ou 'numero_remetente'"}), 400
 
@@ -385,107 +370,194 @@ def handle_whatsapp_webhook():
         
         print(f"[WHATSAPP] Usuário autenticado (ID: {usuario_id}). Processando...")
 
-        prompt_1 = f"""
+        # --- 3. [NOVO] GEMINI CALL 1 (Classificador de Intenção) ---
+        prompt_intent = f"""
         Analise a mensagem do usuário: "{texto_msg}"
-        Ele está registrando um gasto ou renda manual.
-        Retorne APENAS JSON com: "valor_decimal", "descricao_bruta", "tipo_fluxo" ("Renda" ou "Despesa").
-        Ex1: "gastei 50 na padaria" -> {{"valor_decimal": 50.00, "descricao_bruta": "Padaria", "tipo_fluxo": "Despesa"}}
-        Ex2: "recebi 100 do freela" -> {{"valor_decimal": 100.00, "descricao_bruta": "Freela", "tipo_fluxo": "Renda"}}
+        Classifique a intenção principal como "Renda", "Despesa" ou "Transferência".
+        Responda APENAS com um JSON contendo a chave "intent".
+        Exemplos:
+        - "gastei 50 na padaria" -> {{"intent": "Despesa"}}
+        - "recebi 100 do freela" -> {{"intent": "Renda"}}
+        - "transferi 500 do Inter para o Nubank" -> {{"intent": "Transferência"}}
+        - "paguei a fatura do cartão" -> {{"intent": "Transferência"}}
         """
-        response_1 = model.generate_content(prompt_1)
-        json_response_text_1 = response_1.text.strip().replace("```json", "").replace("```", "")
-        transacao_gemini = json.loads(json_response_text_1)
+        response_intent = model.generate_content(prompt_intent)
+        json_intent_text = response_intent.text.strip().replace("```json", "").replace("```", "")
+        intent_data = json.loads(json_intent_text)
+        intent = intent_data.get('intent')
         
-        tipo_transacao_db = transacao_gemini.get('tipo_fluxo', 'Despesa')
-        transacao_descricao = transacao_gemini.get('descricao_bruta')
-        data_hoje = date.today()
-        id_categoria_final = None
-        id_outros_fallback = None
+        print(f"[GEMINI-INTENT] Intenção detectada: {intent}")
 
+        # --- 4. FLUXO DE LÓGICA BASEADO NA INTENÇÃO ---
+        
         with engine.connect() as conn:
-            conn.begin() 
-
-            grupo_filtro_sql = "g.nome_grupo = 'Renda'"
-            if tipo_transacao_db == 'Despesa':
-                grupo_filtro_sql = "g.nome_grupo IN ('Despesa Essencial', 'Despesa Discricionária', 'Meta Financeira', 'Geral')"
-
-            sql_get_cats = text(f"SELECT s.id, s.nome_sub, m.nome_macro FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id JOIN GrupoCategoria g ON m.grupo_id = g.id WHERE (s.usuario_id IS NULL OR s.usuario_id = :uid) AND ({grupo_filtro_sql})")
-            categories_list_result = conn.execute(sql_get_cats, {"uid": usuario_id}).fetchall()
+            conn.begin() # Inicia a transação
             
-            # === CORREÇÃO v11 (Manual Dict Conversion) ===
-            categories_json_list = []
-            for row in categories_list_result:
-                categories_json_list.append({
-                    "id": row[0], # s.id
-                    "nome_sub": row[1], # s.nome_sub
-                    "nome_macro": row[2] # m.nome_macro
-                })
-            # === FIM DA CORREÇÃO ===
-            
-            nome_macro_outros = 'Receitas Gerais' if tipo_transacao_db == 'Renda' else 'Despesas Gerais'
-            sql_get_outros_id = text("SELECT s.id FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id WHERE m.nome_macro = :nome_macro AND s.nome_sub = 'Outros' AND s.usuario_id IS NULL LIMIT 1")
-            id_outros_fallback = conn.execute(sql_get_outros_id, {"nome_macro": nome_macro_outros}).scalar_one_or_none()
+            data_hoje = date.today()
+            resposta_para_usuario = "" # Mensagem que enviaremos de volta
 
-            prompt_2 = f"""
-            Minhas subcategorias são: {json.dumps(categories_json_list)}
-            A transação foi: "{transacao_descricao}"
-            O tipo é: "{tipo_transacao_db}"
-            Qual é o "id" da subcategoria que melhor corresponde?
-            Se for genérico, use o "id" de "Outros" (que é {id_outros_fallback}).
-            Responda APENAS com o número do ID.
-            """
-            response_2 = model.generate_content(prompt_2)
-            id_categoria_str = response_2.text.strip().replace("`", "")
-            
-            try:
-                id_categoria_final = int(id_categoria_str)
-                if id_categoria_final not in [cat['id'] for cat in categories_json_list]:
+            # --- FLUXO 4.A: SE FOR RENDA OU DESPESA ---
+            if intent == 'Renda' or intent == 'Despesa':
+                
+                # --- GEMINI CALL 2 (Extração Padrão) ---
+                prompt_extract = f"""
+                Analise a mensagem: "{texto_msg}"
+                O tipo é: "{intent}".
+                Extraia "valor_decimal" (sempre positivo) e "descricao_bruta".
+                Responda APENAS com JSON.
+                Ex: {{"valor_decimal": 50.00, "descricao_bruta": "Padaria"}}
+                """
+                response_extract = model.generate_content(prompt_extract)
+                json_extract_text = response_extract.text.strip().replace("```json", "").replace("```", "")
+                transacao_gemini = json.loads(json_extract_text)
+                print(f"[GEMINI-EXTRACT] Extração (R/D): {json_extract_text}")
+                
+                transacao_descricao = transacao_gemini.get('descricao_bruta')
+                valor_decimal = transacao_gemini.get('valor_decimal')
+                
+                # --- GEMINI CALL 3 (Categorização Padrão) ---
+                grupo_filtro_sql = "g.nome_grupo = 'Renda'"
+                if intent == 'Despesa':
+                    grupo_filtro_sql = "g.nome_grupo IN ('Despesa Essencial', 'Despesa Discricionária', 'Meta Financeira', 'Geral')"
+                
+                sql_get_cats = text(f"SELECT s.id, s.nome_sub, m.nome_macro FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id JOIN GrupoCategoria g ON m.grupo_id = g.id WHERE (s.usuario_id IS NULL OR s.usuario_id = :uid) AND ({grupo_filtro_sql})")
+                categories_list_result = conn.execute(sql_get_cats, {"uid": usuario_id}).fetchall()
+                categories_json_list = [{"id": row[0], "nome_sub": row[1], "nome_macro": row[2]} for row in categories_list_result]
+                
+                nome_macro_outros = 'Receitas Gerais' if intent == 'Renda' else 'Despesas Gerais'
+                sql_get_outros_id = text("SELECT s.id FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id WHERE m.nome_macro = :nome_macro AND s.nome_sub = 'Outros' AND s.usuario_id IS NULL LIMIT 1")
+                id_outros_fallback = conn.execute(sql_get_outros_id, {"nome_macro": nome_macro_outros}).scalar_one_or_none()
+
+                prompt_categorize = f"""
+                Minhas subcategorias são: {json.dumps(categories_json_list)}
+                A transação foi: "{transacao_descricao}" (Tipo: "{intent}")
+                Qual é o "id" da subcategoria que melhor corresponde?
+                Se for genérico, use o "id" de "Outros" (que é {id_outros_fallback}).
+                Responda APENAS com o número do ID.
+                """
+                response_cat = model.generate_content(prompt_categorize)
+                id_categoria_str = response_cat.text.strip().replace("`", "")
+                
+                try:
+                    id_categoria_final = int(id_categoria_str)
+                    if id_categoria_final not in [cat['id'] for cat in categories_json_list]:
+                        id_categoria_final = id_outros_fallback
+                except ValueError:
                     id_categoria_final = id_outros_fallback
-            except ValueError:
-                id_categoria_final = id_outros_fallback
-            
-            print(f"[GEMINI-2] ID de Categoria (Manual) escolhido: {id_categoria_final}")
+                print(f"[GEMINI-CAT] ID de Categoria (Manual) escolhido: {id_categoria_final}")
 
-            conta_nome_padrao = 'Banco Inter' if tipo_transacao_db == 'Renda' else 'Carteira'
-            sql_get_conta_id = text("SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta = :nome")
-            conta_id_transacao = conn.execute(sql_get_conta_id, {"uid": usuario_id, "nome": conta_nome_padrao}).scalar_one_or_none()
-            
-            if conta_id_transacao is None: 
-                sql_get_conta_id = text("SELECT id FROM Contas WHERE usuario_id = :uid LIMIT 1")
-                conta_id_transacao = conn.execute(sql_get_conta_id, {"uid": usuario_id}).scalar_one()
+                # --- LÓGICA DE CONTA E VALOR ---
+                conta_nome_padrao = 'Banco Inter' if intent == 'Renda' else 'Carteira'
+                sql_get_conta_id = text("SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta = :nome")
+                conta_id_transacao = conn.execute(sql_get_conta_id, {"uid": usuario_id, "nome": conta_nome_padrao}).scalar_one_or_none()
+                if conta_id_transacao is None: 
+                    sql_get_conta_id = text("SELECT id FROM Contas WHERE usuario_id = :uid LIMIT 1")
+                    conta_id_transacao = conn.execute(sql_get_conta_id, {"uid": usuario_id}).scalar_one()
 
-            sql_insert = text("""
-            INSERT INTO Transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, transferencia_par_id, descricao, valor, tipo_transacao, data_transacao)
-            VALUES (:uid, :cid, :scid, NULL, NULL, :desc, :val, :tipo, :data) 
-            """) 
-            
-            conn.execute(sql_insert, {
-                "uid": usuario_id, "cid": conta_id_transacao, "scid": id_categoria_final, 
-                "desc": transacao_descricao, "val": transacao_gemini.get('valor_decimal'), 
-                "tipo": tipo_transacao_db, "data": data_hoje
-            })
-            conn.commit()
-            
-            sql_get_cat_nome = text("SELECT s.nome_sub, m.nome_macro FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id WHERE s.id = :scid")
-            cat_info = conn.execute(sql_get_cat_nome, {"scid": id_categoria_final}).fetchone()
-            nome_categoria_salva = f"{cat_info[1]} -> {cat_info[0]}" # Ex: "Lazer -> Restaurantes"
+                # *** VALOR: Positivo para Renda, Negativo para Despesa ***
+                valor_para_db = valor_decimal if intent == 'Renda' else (valor_decimal * -1)
 
-        print(f"[DATABASE] Transação MANUAL salva com sucesso (Usuário: {usuario_id}, Conta: {conta_id_transacao}, SubCat: {id_categoria_final})!")
+                # --- SALVAR TRANSAÇÃO (ÚNICA) ---
+                sql_insert = text("""
+                INSERT INTO Transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, transferencia_par_id, descricao, valor, tipo_transacao, data_transacao)
+                VALUES (:uid, :cid, :scid, NULL, NULL, :desc, :val, :tipo, :data) 
+                """) 
+                conn.execute(sql_insert, {
+                    "uid": usuario_id, "cid": conta_id_transacao, "scid": id_categoria_final, 
+                    "desc": transacao_descricao, "val": valor_para_db, 
+                    "tipo": intent, "data": data_hoje
+                })
+                
+                sql_get_cat_nome = text("SELECT s.nome_sub, m.nome_macro FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id WHERE s.id = :scid");
+                cat_info = conn.execute(sql_get_cat_nome, {"scid": id_categoria_final}).fetchone(); 
+                nome_categoria_salva = f"{cat_info[1]} -> {cat_info[0]}"
+                resposta_para_usuario = f"✅ {intent} manual salva!\nDescrição: {transacao_descricao}\nValor: R$ {valor_decimal:.2f}\nCategoria: {nome_categoria_salva}"
+
+            # --- FLUXO 4.B: SE FOR TRANSFERÊNCIA ---
+            elif intent == 'Transferência':
+                print(f"[WHATSAPP] Processando Lógica de Transferência...")
+                
+                # --- GEMINI CALL 2 (Extração de Transferência) ---
+                # Pega as contas do usuário para ajudar o Gemini
+                sql_get_contas = text("SELECT nome_conta FROM Contas WHERE usuario_id = :uid")
+                contas_usuario = [row[0] for row in conn.execute(sql_get_contas, {"uid": usuario_id}).fetchall()]
+                
+                prompt_extract_transfer = f"""
+                Analise a mensagem de transferência: "{texto_msg}"
+                Minhas contas são: {json.dumps(contas_usuario)}
+                Extraia "valor_decimal", "conta_origem" (o nome da conta de saída), e "conta_destino" (o nome da conta de entrada).
+                Responda APENAS com JSON.
+                Ex: "transferi 500 do Inter para o Nubank" -> {{"valor_decimal": 500.00, "conta_origem": "Banco Inter", "conta_destino": "Nubank"}}
+                """
+                response_extract = model.generate_content(prompt_extract_transfer)
+                json_extract_text = response_extract.text.strip().replace("```json", "").replace("```", "")
+                transfer_data = json.loads(json_extract_text)
+                print(f"[GEMINI-EXTRACT] Extração (Transf): {json_extract_text}")
+                
+                valor_decimal = transfer_data.get('valor_decimal')
+                conta_origem_nome = transfer_data.get('conta_origem')
+                conta_destino_nome = transfer_data.get('conta_destino')
+                
+                if not valor_decimal or not conta_origem_nome or not conta_destino_nome:
+                    raise Exception("Gemini não conseguiu extrair os dados da transferência (valor, origem, destino).")
+
+                # --- LÓGICA DE CONTA E SUBCATEGORIA ---
+                sql_get_conta_id = text("SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta ILIKE :nome")
+                conta_id_origem = conn.execute(sql_get_conta_id, {"uid": usuario_id, "nome": f"%{conta_origem_nome}%"}).scalar_one_or_none()
+                conta_id_destino = conn.execute(sql_get_conta_id, {"uid": usuario_id, "nome": f"%{conta_destino_nome}%"}).scalar_one_or_none()
+                
+                # Busca uma subcategoria genérica de "Meta Financeira" (ex: Aporte)
+                sql_get_subcat_transfer = text("SELECT s.id FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id JOIN GrupoCategoria g ON m.grupo_id = g.id WHERE g.nome_grupo = 'Meta Financeira' AND (s.usuario_id IS NULL OR s.usuario_id = :uid) LIMIT 1")
+                id_subcat_transfer = conn.execute(sql_get_subcat_transfer, {"uid": usuario_id}).scalar_one_or_none()
+
+                if not conta_id_origem or not conta_id_destino or not id_subcat_transfer:
+                    raise Exception(f"Não foi possível encontrar as contas ({conta_origem_nome} -> {conta_destino_nome}) ou a subcategoria de transferência.")
+
+                # --- SALVAR TRANSAÇÕES (DUAS PERNAS) ---
+                sql_insert_transf = text("""
+                INSERT INTO Transacoes (usuario_id, conta_id, subcategoria_id, descricao, valor, tipo_transacao, data_transacao)
+                VALUES (:uid, :cid, :scid, :desc, :val, 'Transferência', :data) RETURNING id
+                """)
+                
+                # Perna A (Saída)
+                desc_saida = f"Transferência para {conta_destino_nome}"
+                result_saida = conn.execute(sql_insert_transf, {
+                    "uid": usuario_id, "cid": conta_id_origem, "scid": id_subcat_transfer,
+                    "desc": desc_saida, "val": (valor_decimal * -1), "data": data_hoje
+                })
+                id_transacao_saida = result_saida.scalar_one()
+                
+                # Perna B (Entrada)
+                desc_entrada = f"Transferência de {conta_origem_nome}"
+                result_entrada = conn.execute(sql_insert_transf, {
+                    "uid": usuario_id, "cid": conta_id_destino, "scid": id_subcat_transfer,
+                    "desc": desc_entrada, "val": valor_decimal, "data": data_hoje
+                })
+                id_transacao_entrada = result_entrada.scalar_one()
+
+                # --- "AMARRAR" AS DUAS PERNAS ---
+                sql_update_par = text("UPDATE Transacoes SET transferencia_par_id = :par_id WHERE id = :id_alvo")
+                conn.execute(sql_update_par, {"par_id": id_transacao_entrada, "id_alvo": id_transacao_saida})
+                conn.execute(sql_update_par, {"par_id": id_transacao_saida, "id_alvo": id_transacao_entrada})
+                
+                resposta_para_usuario = f"✅ Transferência salva!\n\nValor: R$ {valor_decimal:.2f}\nDe: {conta_origem_nome}\nPara: {conta_destino_nome}"
+
+            else:
+                # Se o Gemini não reconheceu a intenção
+                resposta_para_usuario = f"🤔 Desculpe, não entendi. Você quis dizer uma 'Renda', 'Despesa' ou 'Transferência'?"
+
+            conn.commit() # Confirma a Renda, Despesa ou Transferência
         
-        resposta_para_usuario = f"✅ Transação manual salva!\nDescrição: {transacao_descricao}\nValor: R$ {transacao_gemini.get('valor_decimal'):.2f}\nCategoria: {nome_categoria_salva}"
+        print(f"[DATABASE] Processamento MANUAL concluído (Usuário: {usuario_id})!")
         return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
     except sqlalchemy_exc.SQLAlchemyError as db_err:
-        print(f"Erro de Banco de Dados: {db_err}")
+        print(f"Erro de Banco de Dados: {db_err}"); 
         try: 
-            with engine.connect() as conn: 
-                conn.rollback()
-        except: pass
-        return jsonify({"status": "erro", "mensagem": f"Erro de Banco de Dados: {db_err}"}), 500
+            with engine.connect() as conn: conn.rollback()
+        except: pass; return jsonify({"status": "erro", "mensagem": f"Erro de Banco de Dados: {db_err}"}), 500
     except Exception as e:
-        print(f"Erro geral: {e}")
+        print(f"Erro geral: {e}"); 
         try: 
-            with engine.connect() as conn: 
-                conn.rollback()
-        except: pass
-        return jsonify({"status": "erro", "mensagem": str(e)}), 500
+            with engine.connect() as conn: conn.rollback()
+        except: pass; return jsonify({"status": "erro", "mensagem": str(e)}), 500
