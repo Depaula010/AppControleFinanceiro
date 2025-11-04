@@ -31,6 +31,18 @@ except locale.Error:
     except Exception as e:
         print(f"[AVISO] Não foi possível definir o locale 'pt_BR'. Usando padrão. Erro: {e}")
 
+def formatar_moeda(valor):
+    """ Tenta formatar como R$ (BRL). Se falhar, usa um formato simples. """
+    if valor is None:
+        return "R$ 0,00"
+    try:
+        # Tenta usar a formatação de moeda do locale configurado (pt_BR)
+        return formatar_moeda(valor, grouping=True)
+    except Exception:
+        # Se o locale 'pt_BR' não estiver disponível no servidor, usa um fallback manual.
+        # Formata com 2 casas decimais, troca ',' por 'X', '.' por ',' e 'X' por '.'
+        return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
 # Carregar as "senhas"
 try:
     GEMINI_API_KEY = os.environ['GEMINI_API_KEY']
@@ -387,7 +399,7 @@ def handle_automate_webhook():
             cat_info = conn.execute(sql_get_cat_nome, {"scid": id_categoria_final}).fetchone(); nome_categoria_salva = f"{cat_info[1]} -> {cat_info[0]}"
             conn.commit()
             
-        valor_formatado = locale.currency(valor_decimal, grouping=True)
+        valor_formatado = formatar_moeda(valor_decimal, grouping=True)
         mensagem_notificacao = f"✅ Transação Automática Salva!\n\nDescrição: {transacao_descricao}\nValor: {valor_formatado} ({tipo_transacao_db})\nCategoria: {nome_categoria_salva}"
         if id_categoria_final == id_outros_fallback:
             mensagem_notificacao += f"\n\n*Atenção:* Não soube categorizar esta despesa. Salvei em 'Outros'."
@@ -542,7 +554,7 @@ def handle_whatsapp_webhook():
                 conn.execute(sql_insert, {"uid": usuario_id, "cid": conta_id_transacao, "scid": id_categoria_final, "desc": transacao_descricao, "val": valor_para_db, "tipo": intent, "data": data_hoje})
                 sql_get_cat_nome = text("SELECT s.nome_sub, m.nome_macro FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id WHERE s.id = :scid");
                 cat_info = conn.execute(sql_get_cat_nome, {"scid": id_categoria_final}).fetchone(); nome_categoria_salva = f"{cat_info[1]} -> {cat_info[0]}"
-                valor_formatado = locale.currency(valor_decimal, grouping=True)
+                valor_formatado = formatar_moeda(valor_decimal, grouping=True)
                 resposta_para_usuario = f"✅ {intent} manual salva!\nDescrição: {transacao_descricao}\nValor: {valor_formatado}\nCategoria: {nome_categoria_salva}"
 
             elif intent == 'Transferência':
@@ -569,7 +581,7 @@ def handle_whatsapp_webhook():
                 desc_saida = f"Transferência para {conta_destino_nome}"; result_saida = conn.execute(sql_insert_transf, {"uid": usuario_id, "cid": conta_id_origem, "scid": id_subcat_transfer, "desc": desc_saida, "val": (valor_decimal * -1), "data": data_hoje}); id_transacao_saida = result_saida.scalar_one()
                 desc_entrada = f"Transferência de {conta_origem_nome}"; result_entrada = conn.execute(sql_insert_transf, {"uid": usuario_id, "cid": conta_id_destino, "scid": id_subcat_transfer, "desc": desc_entrada, "val": valor_decimal, "data": data_hoje}); id_transacao_entrada = result_entrada.scalar_one()
                 sql_update_par = text("UPDATE Transacoes SET transferencia_par_id = :par_id WHERE id = :id_alvo"); conn.execute(sql_update_par, {"par_id": id_transacao_entrada, "id_alvo": id_transacao_saida}); conn.execute(sql_update_par, {"par_id": id_transacao_saida, "id_alvo": id_transacao_entrada})
-                valor_formatado = locale.currency(valor_decimal, grouping=True)
+                valor_formatado = formatar_moeda(valor_decimal, grouping=True)
                 resposta_para_usuario = f"✅ Transferência salva!\n\nValor: {valor_formatado}\nDe: {conta_origem_nome}\nPara: {conta_destino_nome}"
 
             elif intent == 'Pagamento Fatura':
@@ -598,7 +610,7 @@ def handle_whatsapp_webhook():
                 desc_entrada = f"Pagamento Recebido (de {conta_origem_nome})"; result_entrada = conn.execute(sql_insert_transf, {"uid": usuario_id, "cid": conta_id_cartao, "scid": id_subcat_pagto, "fid": fatura_id_pagar, "desc": desc_entrada, "val": valor_decimal, "data": data_hoje}); id_transacao_entrada = result_entrada.scalar_one()
                 sql_update_par = text("UPDATE Transacoes SET transferencia_par_id = :par_id WHERE id = :id_alvo"); conn.execute(sql_update_par, {"par_id": id_transacao_entrada, "id_alvo": id_transacao_saida}); conn.execute(sql_update_par, {"par_id": id_transacao_saida, "id_alvo": id_transacao_entrada})
                 sql_update_fatura = text("UPDATE Faturas SET status = 'Paga' WHERE id = :fid"); conn.execute(sql_update_fatura, {"fid": fatura_id_pagar})
-                valor_formatado = locale.currency(valor_decimal, grouping=True)
+                valor_formatado = formatar_moeda(valor_decimal, grouping=True)
                 resposta_para_usuario = f"✅ Pagamento da fatura '{conta_cartao_nome}' ({valor_formatado}) registrado com sucesso!"
 
             elif intent == 'Consulta Potes':
@@ -628,9 +640,9 @@ def handle_whatsapp_webhook():
                     for pote in potes_result:
                         valor_limite = float(pote[1]); valor_gasto = float(pote[2] or 0) * -1; valor_restante = valor_limite - valor_gasto
                         resposta_para_usuario += f"🍯 *{pote[0]}*:\n"
-                        resposta_para_usuario += f"   - Gasto: *{locale.currency(valor_gasto, grouping=True)}*\n"
-                        resposta_para_usuario += f"   - Limite: {locale.currency(valor_limite, grouping=True)}\n"
-                        resposta_para_usuario += f"   - Restante: {locale.currency(valor_restante, grouping=True)}\n\n"
+                        resposta_para_usuario += f"   - Gasto: *{formatar_moeda(valor_gasto, grouping=True)}*\n"
+                        resposta_para_usuario += f"   - Limite: {formatar_moeda(valor_limite, grouping=True)}\n"
+                        resposta_para_usuario += f"   - Restante: {formatar_moeda(valor_restante, grouping=True)}\n\n"
 
             elif intent == 'Consulta Reserva':
                 print(f"[WHATSAPP] Processando Lógica de Consulta de Reserva...")
@@ -651,8 +663,8 @@ def handle_whatsapp_webhook():
                 total_essencial_3_meses = conn.execute(sql_get_essenciais, {"uid": usuario_id}).scalar()
                 media_mensal_essencial = (float(total_essencial_3_meses or 0) * -1) / 3; reserva_ideal_6_meses = media_mensal_essencial * 6
                 resposta_para_usuario = "🆘 *Cálculo da Reserva de Emergência* 🆘\n\n"
-                resposta_para_usuario += f"Sua média de gastos essenciais (últimos 3 meses) é: *{locale.currency(media_mensal_essencial, grouping=True)}* / mês\n"
-                resposta_para_usuario += f"Sua reserva ideal (6x) é: *{locale.currency(reserva_ideal_6_meses, grouping=True)}*"
+                resposta_para_usuario += f"Sua média de gastos essenciais (últimos 3 meses) é: *{formatar_moeda(media_mensal_essencial, grouping=True)}* / mês\n"
+                resposta_para_usuario += f"Sua reserva ideal (6x) é: *{formatar_moeda(reserva_ideal_6_meses, grouping=True)}*"
 
             elif intent == 'Consulta Categoria Específica':
                 print(f"[WHATSAPP] Processando Lógica de Consulta de Categoria...")
@@ -697,7 +709,7 @@ def handle_whatsapp_webhook():
                 gasto_total = conn.execute(sql_find_gasto, {"uid": usuario_id, "nome_cat": f"%{nome_categoria_consulta}%"}).scalar()
                 valor_gasto = (float(gasto_total or 0)) * -1
                 resposta_para_usuario = f"ℹ️ *Consulta de Categoria (Este Mês)*\n\n"
-                resposta_para_usuario += f"Você gastou *{locale.currency(valor_gasto, grouping=True)}* com '{nome_categoria_consulta}'."
+                resposta_para_usuario += f"Você gastou *{formatar_moeda(valor_gasto, grouping=True)}* com '{nome_categoria_consulta}'."
 
             else:
                 resposta_para_usuario = f"🤔 Desculpe, não entendi. Tente 'gastei 50', 'transferi 100', 'paguei a fatura', 'meus potes' ou 'minha reserva'."

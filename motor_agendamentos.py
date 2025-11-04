@@ -14,6 +14,21 @@ except locale.Error:
     except Exception as e:
         print(f"[MOTOR AVISO] Locale 'pt_BR' não encontrado. Usando padrão. Erro: {e}")
 
+
+def formatar_moeda(valor):
+    """ Tenta formatar como R$ (BRL). Se falhar, usa um formato simples. """
+    if valor is None:
+        return "R$ 0,00"
+    try:
+        # Tenta usar a formatação de moeda do locale configurado (pt_BR)
+        return formatar_moeda(valor, grouping=True)
+    except Exception:
+        # Se o locale 'pt_BR' não estiver disponível no servidor, usa um fallback manual.
+        # Formata com 2 casas decimais, troca ',' por 'X', '.' por ',' e 'X' por '.'
+        return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    
+    
+
 # (Função de fatura, oculta por brevidade)
 def get_or_create_fatura(conn, conta_id, data_transacao, usuario_id):
     # ... (Lógica completa de cálculo de fatura) ...
@@ -110,7 +125,7 @@ def processar_agendamentos():
                             
                             valor_formatado = "???"
                             if ag.valor_previsto:
-                                valor_formatado = locale.currency(ag.valor_previsto, grouping=True)
+                                valor_formatado = formatar_moeda(ag.valor_previsto, grouping=True)
 
                             mensagem = f"🔔 *LEMBRETE DE CONTA VARIÁVEL* 🔔\n\nSua conta '{ag.descricao}' vence em {ag.notificar_antes_dias} dias (no dia {ag.dia_execucao}).\n\nO valor previsto é: *{valor_formatado}*\n\nPor favor, me diga o valor exato deste mês para eu registrar (ex: 'gastei 150.50 na conta de luz')."
                             enviar_notificacao_whatsapp(ag.numero_whatsapp, mensagem, BOT_WHATSAPP_URL, API_SECRET_KEY)
