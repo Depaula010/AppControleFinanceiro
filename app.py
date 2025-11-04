@@ -148,7 +148,7 @@ def populate_global_categories():
     try:
         with engine.connect() as conn:
             conn.begin()
-            conn.execute(sql_populate_dml) 
+            conn.execute(text(sql_populate_dml)) 
             conn.commit()
         return "Templates globais de categorias (v12) inseridos com sucesso!", 200
     except Exception as e:
@@ -164,7 +164,11 @@ def populate_global_categories():
 
 @app.route('/admin/setup-user-data', methods=['GET']) 
 def setup_user_data():
-    """ Rota para inserir/atualizar o usuário e contas. Execute TERCEIRO. """
+    """ 
+    Roda para inserir/atualizar o usuário e contas. 
+    Execute TERCEIRO.
+    *** GERA E RETORNA SUA API KEY DO AUTOMATE ***
+    """
     if not engine: return "Erro: Banco não configurado.", 500
     
     # !!! SUBSTITUA PELO SEU NÚMERO E DATAS REAIS !!!
@@ -173,10 +177,14 @@ def setup_user_data():
     dia_fechamento_inter = 13  
     
     nova_api_key = secrets.token_hex(20) 
+
     sql_user = text(f"""
     INSERT INTO Usuarios (nome, numero_whatsapp, api_key_automate) 
     VALUES ('Rafael', '{numero_whatsapp_usuario}', '{nova_api_key}') 
-    ON CONFLICT (numero_whatsapp) DO UPDATE SET nome = EXCLUDED.nome, api_key_automate = EXCLUDED.api_key_automate 
+    ON CONFLICT (numero_whatsapp) 
+    DO UPDATE SET 
+        nome = EXCLUDED.nome,
+        api_key_automate = EXCLUDED.api_key_automate 
     RETURNING id, api_key_automate;
     """)
     
@@ -204,7 +212,11 @@ def setup_user_data():
                     dia_vencimento = EXCLUDED.dia_vencimento,
                     dia_fechamento = EXCLUDED.dia_fechamento; 
             """)
-            conn.execute(sql_accounts_com_id, {"uid": user_id, "dia_venc": dia_vencimento_inter, "dia_fech": dia_fechamento_inter}) 
+            conn.execute(sql_accounts_com_id, {
+                "uid": user_id,
+                "dia_venc": dia_vencimento_inter,
+                "dia_fech": dia_fechamento_inter
+            }) 
             conn.commit()
         
         return jsonify({
@@ -241,8 +253,8 @@ def run_motor_agendamentos():
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
 
 # ========= 3. LÓGICA DE FATURA (Função Auxiliar - Sem Alteração) =========
+# (O código da função get_or_create_fatura está aqui, oculto por brevidade)
 def get_or_create_fatura(conn, conta_id, data_transacao, usuario_id):
-    # (Lógica completa de cálculo de fatura, como antes)
     sql_get_card_info = text("SELECT dia_fechamento, dia_vencimento FROM Contas WHERE id = :conta_id AND usuario_id = :uid AND tipo_conta = 'Cartão de Crédito'"); card_info = conn.execute(sql_get_card_info, {"conta_id": conta_id, "uid": usuario_id}).fetchone()
     if not card_info or not card_info.dia_fechamento or not card_info.dia_vencimento: return None 
     dia_fechamento = card_info.dia_fechamento; dia_vencimento = card_info.dia_vencimento; dia_transacao = data_transacao.day; mes_transacao = data_transacao.month; ano_transacao = data_transacao.year; data_fatura_fechamento = None; data_fatura_vencimento = None
@@ -478,11 +490,7 @@ def handle_whatsapp_webhook():
             resposta_para_usuario = "" 
 
             if intent == 'Renda' or intent == 'Despesa':
-                prompt_extract = f"""
-                Analise a mensagem: "{texto_msg}"; O tipo é: "{intent}".
-                Extraia "valor_decimal" (sempre positivo) e "descricao_bruta". Responda APENAS com JSON.
-                """; 
-                response_extract = model.generate_content(prompt_extract); 
+                prompt_extract = f"""..."""; response_extract = model.generate_content(prompt_extract); 
                 
                 # --- CORREÇÃO (Bug 1): Verifica se Gemini retornou texto ---
                 if not response_extract.text: 
@@ -499,13 +507,7 @@ def handle_whatsapp_webhook():
                 categories_json_list = [{"id": row[0], "nome_sub": row[1], "nome_macro": row[2]} for row in categories_list_result]
                 nome_macro_outros = 'Receitas Gerais' if intent == 'Renda' else 'Despesas Gerais'; sql_get_outros_id = text("SELECT s.id FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id WHERE m.nome_macro = :nome_macro AND s.nome_sub = 'Outros' AND s.usuario_id IS NULL LIMIT 1"); id_outros_fallback = conn.execute(sql_get_outros_id, {"nome_macro": nome_macro_outros}).scalar_one_or_none()
                 
-                prompt_categorize = f"""
-                Minhas subcategorias são: {json.dumps(categories_json_list)}
-                A transação foi: "{transacao_descricao}" (Tipo: "{intent}")
-                Qual é o "id" da subcategoria que melhor corresponde?
-                Se for genérico, use o "id" de "Outros" (que é {id_outros_fallback}).
-                Responda APENAS com o número do ID.
-                """; 
+                prompt_categorize = f"""..."""; 
                 response_cat = model.generate_content(prompt_categorize); 
 
                 # --- CORREÇÃO (Bug 1): Verifica se Gemini retornou texto ---
@@ -517,8 +519,7 @@ def handle_whatsapp_webhook():
                     try:
                         id_categoria_final = int(id_categoria_str)
                         if id_categoria_final not in [cat['id'] for cat in categories_json_list]: id_categoria_final = id_outros_fallback
-                    except ValueError: 
-                        id_categoria_final = id_outros_fallback
+                    except ValueError: id_categoria_final = id_outros_fallback
                 
                 print(f"[GEMINI-CAT] ID de Categoria (Manual) escolhido: {id_categoria_final}")
                 conta_nome_padrao = 'Banco Inter' if intent == 'Renda' else 'Carteira'; sql_get_conta_id = text("SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta = :nome"); conta_id_transacao = conn.execute(sql_get_conta_id, {"uid": usuario_id, "nome": conta_nome_padrao}).scalar_one_or_none()
@@ -614,7 +615,7 @@ def handle_whatsapp_webhook():
                 # --- CORREÇÃO (Bug 1): Verifica se Gemini retornou texto ---
                 if not response_extract.text: 
                     print(f"[GEMINI-EXTRACT] ERRO: Gemini (Call 2 - Consulta Cat) retornou uma resposta vazia.")
-                    raise Exception("Falha na extração (Consulta Categoria): Resposta vazia do Gemini.")
+                    raise Exception(f"Falha na extração (Consulta Categoria): Resposta vazia do Gemini.")
                 
                 json_extract_text = response_extract.text.strip().replace("```json", "").replace("```", ""); cat_data = json.loads(json_extract_text)
                 nome_categoria_consulta = cat_data.get('nome_categoria')

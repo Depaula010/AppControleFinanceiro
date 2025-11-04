@@ -9,7 +9,10 @@ from calendar import monthrange
 try:
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 except locale.Error:
-    print("[MOTOR AVISO] Locale 'pt_BR.UTF-8' não encontrado. Usando locale padrão.")
+    try:
+        locale.setlocale(locale.LC_ALL, 'Portuguese_Brazil.1252') # Windows
+    except Exception as e:
+        print(f"[MOTOR AVISO] Locale 'pt_BR' não encontrado. Usando padrão. Erro: {e}")
 
 # (Copiamos a função de fatura do app.py, pois o motor também precisa dela)
 def get_or_create_fatura(conn, conta_id, data_transacao, usuario_id):
@@ -42,12 +45,19 @@ def get_or_create_fatura(conn, conta_id, data_transacao, usuario_id):
 
 
 def enviar_notificacao_whatsapp(numero, mensagem, bot_url, api_key):
-    # ... (Lógica de enviar notificação, sem mudança) ...
+    """ Função auxiliar para chamar a API do nosso bot Node.js. """
     try:
-        headers = {'x-api-key': api_key}; payload = {'numero': numero, 'mensagem': mensagem}
+        headers = {'x-api-key': api_key}
+        payload = {
+            'numero': numero, 
+            'mensagem': mensagem
+        }
         response = requests.post(f"{bot_url}/enviar-mensagem", json=payload, headers=headers)
-        if response.status_code == 200: print(f"[MOTOR] Notificação enviada com sucesso para {numero}.")
-        else: print(f"[MOTOR] ERRO: Bot respondeu com status {response.status_code}")
+        
+        if response.status_code == 200:
+            print(f"[MOTOR] Notificação enviada com sucesso para {numero}.")
+        else:
+            print(f"[MOTOR] ERRO: Bot respondeu com status {response.status_code}")
     except Exception as e:
         print(f"[MOTOR] ERRO: Falha ao chamar a API do Bot: {e}")
 
@@ -62,7 +72,8 @@ def processar_agendamentos():
         API_SECRET_KEY = os.environ['API_SECRET_KEY']
         BOT_WHATSAPP_URL = os.environ['BOT_WHATSAPP_URL']
     except KeyError as e:
-        print(f"[MOTOR] ERRO CRÍTICO: Variável de ambiente faltando: {e}"); return
+        print(f"[MOTOR] ERRO CRÍTICO: Variável de ambiente faltando: {e}")
+        return
 
     # 2. Conectar ao Banco
     if DATABASE_URL.startswith("postgres://"):
@@ -77,7 +88,20 @@ def processar_agendamentos():
             dia_hoje = hoje.day
             
             # 4. Buscar agendamentos e usuários
-            sql_get_agendamentos = text("""..."""); # (SQL Oculta)
+            sql_get_agendamentos = text("""
+                SELECT 
+                    a.id as agendamento_id, a.usuario_id, a.conta_id, a.subcategoria_id,
+                    a.descricao, a.valor_previsto, a.tipo_agendamento, a.periodicidade,
+                    a.dia_execucao, a.total_parcelas, a.parcelas_executadas, 
+                    a.notificar_antes_dias,
+                    u.numero_whatsapp,
+                    c.tipo_conta
+                FROM Agendamentos a
+                JOIN Usuarios u ON a.usuario_id = u.id
+                JOIN Contas c ON a.conta_id = c.id
+                WHERE a.ativo = TRUE
+            """)
+            
             agendamentos = conn.execute(sql_get_agendamentos).fetchall()
             print(f"[MOTOR] {len(agendamentos)} agendamentos ativos encontrados.")
 
@@ -92,8 +116,10 @@ def processar_agendamentos():
                         if dia_hoje == dia_notificacao:
                             print(f"[MOTOR] Processando LEMBRETE para Agendamento ID {ag.agendamento_id}...")
                             
-                            # --- ATUALIZAÇÃO DA MENSAGEM (Formato R$) ---
-                            valor_formatado = locale.currency(ag.valor_previsto or 0, grouping=True) if ag.valor_previsto else "???"
+                            valor_formatado = "???"
+                            if ag.valor_previsto:
+                                valor_formatado = locale.currency(ag.valor_previsto, grouping=True)
+
                             mensagem = f"🔔 *LEMBRETE DE CONTA VARIÁVEL* 🔔\n\nSua conta '{ag.descricao}' vence em {ag.notificar_antes_dias} dias (no dia {ag.dia_execucao}).\n\nO valor previsto é: *{valor_formatado}*\n\nPor favor, me diga o valor exato deste mês para eu registrar (ex: 'gastei 150.50 na conta de luz')."
                             enviar_notificacao_whatsapp(ag.numero_whatsapp, mensagem, BOT_WHATSAPP_URL, API_SECRET_KEY)
 
@@ -105,16 +131,19 @@ def processar_agendamentos():
                             if ag.tipo_conta == 'Cartão de Crédito':
                                 fatura_id = get_or_create_fatura(conn, ag.conta_id, hoje, ag.usuario_id)
 
-                            # --- ATUALIZAÇÃO DO VALOR (Negativo) ---
-                            valor_para_db = ag.valor_previsto * -1
+                            valor_para_db = (ag.valor_previsto or 0) * -1 # Salva como negativo
 
                             sql_insert = text("INSERT INTO Transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, descricao, valor, tipo_transacao, data_transacao) VALUES (:uid, :cid, :scid, :fid, :desc, :val, :tipo, :data)")
-                            conn.execute(sql_insert, {"uid": ag.usuario_id, "cid": ag.conta_id, "scid": ag.subcategoria_id, "fid": fatura_id, "desc": ag.descricao, "val": valor_para_db, "tipo": 'Despesa', "data": hoje})
+                            conn.execute(sql_insert, {
+                                "uid": ag.usuario_id, "cid": ag.conta_id, "scid": ag.subcategoria_id,
+                                "fid": fatura_id, "desc": ag.descricao, "val": valor_para_db,
+                                "tipo": 'Despesa', "data": hoje
+                            })
                             print(f"[MOTOR] Transação 'FIXO' (ID {ag.agendamento_id}) inserida com sucesso.")
 
                     # --- Lógica de Gasto Parcelado ---
                     elif ag.tipo_agendamento == 'PARCELADO':
-                        if dia_hoje == ag.dia_execucao and ag.parcelas_executadas < ag.total_parcelas:
+                        if dia_hoje == ag.dia_execucao and (ag.total_parcelas is None or ag.parcelas_executadas < ag.total_parcelas):
                             print(f"[MOTOR] Processando PARCELA {ag.parcelas_executadas + 1}/{ag.total_parcelas} para Agendamento ID {ag.agendamento_id}...")
                             
                             fatura_id = None
@@ -122,15 +151,13 @@ def processar_agendamentos():
                                 fatura_id = get_or_create_fatura(conn, ag.conta_id, hoje, ag.usuario_id)
                             
                             descricao_parcela = f"{ag.descricao} ({ag.parcelas_executadas + 1}/{ag.total_parcelas})"
-                            
-                            # --- ATUALIZAÇÃO DO VALOR (Negativo) ---
-                            valor_para_db = ag.valor_previsto * -1
+                            valor_para_db = (ag.valor_previsto or 0) * -1 # Salva como negativo
                             
                             sql_insert_parc = text("INSERT INTO Transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, descricao, valor, tipo_transacao, data_transacao) VALUES (:uid, :cid, :scid, :fid, :desc, :val, :tipo, :data)")
                             conn.execute(sql_insert_parc, {"uid": ag.usuario_id, "cid": ag.conta_id, "scid": ag.subcategoria_id, "fid": fatura_id, "desc": descricao_parcela, "val": valor_para_db, "tipo": 'Despesa', "data": hoje})
                             
                             nova_parcela_exec = ag.parcelas_executadas + 1
-                            desativar_agendamento = (nova_parcela_exec == ag.total_parcelas)
+                            desativar_agendamento = (ag.total_parcelas is not None and nova_parcela_exec == ag.total_parcelas)
                             
                             sql_update_ag = text("UPDATE Agendamentos SET parcelas_executadas = :nova_parcela, ativo = :novo_ativo WHERE id = :ag_id")
                             conn.execute(sql_update_ag, {"nova_parcela": nova_parcela_exec, "novo_ativo": not desativar_agendamento, "ag_id": ag.agendamento_id})
@@ -138,9 +165,14 @@ def processar_agendamentos():
 
                     conn.commit() 
                 
+                # --- CORREÇÃO DE SINTAXE ---
                 except Exception as e_ag:
                     print(f"[MOTOR] ERRO ao processar Agendamento ID {ag.agendamento_id}: {e_ag}")
-                    conn.rollback() 
+                    try:
+                        conn.rollback()
+                    except:
+                        pass
+                # --- FIM DA CORREÇÃO ---
 
     except sqlalchemy_exc.SQLAlchemyError as db_err:
         print(f"[MOTOR] ERRO CRÍTICO de Banco de Dados: {db_err}")
