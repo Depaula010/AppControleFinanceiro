@@ -558,7 +558,7 @@ def handle_whatsapp_webhook():
     """
     Recebe uma mensagem manual, classifica a INTENÇÃO,
     verifica o usuário, processa no Gemini e salva no banco.
-    *** CORRIGIDA: Bloco 'except' e verificação de resposta vazia do Gemini ***
+    *** CORRIGIDA: Verificação de resposta vazia do Gemini E sintaxe do 'except' ***
     """
     if not engine or not model:
         return jsonify({"status": "erro", "mensagem": "Serviço não configurado"}), 503
@@ -628,26 +628,55 @@ def handle_whatsapp_webhook():
             # --- FLUXO 4.A: SE FOR RENDA OU DESPESA ---
             if intent == 'Renda' or intent == 'Despesa':
                 
-                # ... (Lógica de Renda/Despesa - Oculto por brevidade) ...
-                prompt_extract = f"""..."""; response_extract = model.generate_content(prompt_extract); 
-                if not response_extract.text: raise Exception(f"Falha na extração (R/D): Resposta vazia do Gemini.")
+                # --- GEMINI CALL 2 (Extração Padrão) ---
+                prompt_extract = f"""
+                Analise a mensagem: "{texto_msg}"
+                O tipo é: "{intent}".
+                Extraia "valor_decimal" (sempre positivo) e "descricao_bruta".
+                Responda APENAS com JSON.
+                Ex: {{"valor_decimal": 50.00, "descricao_bruta": "Padaria"}}
+                """
+                response_extract = model.generate_content(prompt_extract)
+                
+                # --- CORREÇÃO (Bug 1): Verifica se Gemini retornou texto ---
+                if not response_extract.text:
+                    print(f"[GEMINI-EXTRACT] ERRO: Gemini (Call 2 - R/D) retornou uma resposta vazia.")
+                    raise Exception("Falha na extração (R/D): Resposta vazia do Gemini.")
+                
                 json_extract_text = response_extract.text.strip().replace("```json", "").replace("```", ""); transacao_gemini = json.loads(json_extract_text)
                 print(f"[GEMINI-EXTRACT] Extração (R/D): {json_extract_text}")
+                
                 transacao_descricao = transacao_gemini.get('descricao_bruta'); valor_decimal = transacao_gemini.get('valor_decimal')
+                
+                # --- GEMINI CALL 3 (Categorização Padrão) ---
                 grupo_filtro_sql = "g.nome_grupo = 'Renda'"
                 if intent == 'Despesa': grupo_filtro_sql = "g.nome_grupo IN ('Despesa Essencial', 'Despesa Discricionária', 'Meta Financeira', 'Geral')"
                 sql_get_cats = text(f"SELECT s.id, s.nome_sub, m.nome_macro FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id JOIN GrupoCategoria g ON m.grupo_id = g.id WHERE (s.usuario_id IS NULL OR s.usuario_id = :uid) AND ({grupo_filtro_sql})")
                 categories_list_result = conn.execute(sql_get_cats, {"uid": usuario_id}).fetchall()
                 categories_json_list = [{"id": row[0], "nome_sub": row[1], "nome_macro": row[2]} for row in categories_list_result]
                 nome_macro_outros = 'Receitas Gerais' if intent == 'Renda' else 'Despesas Gerais'; sql_get_outros_id = text("SELECT s.id FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id WHERE m.nome_macro = :nome_macro AND s.nome_sub = 'Outros' AND s.usuario_id IS NULL LIMIT 1"); id_outros_fallback = conn.execute(sql_get_outros_id, {"nome_macro": nome_macro_outros}).scalar_one_or_none()
-                prompt_categorize = f"""..."""; response_cat = model.generate_content(prompt_categorize); 
-                if not response_cat.text: raise Exception(f"Falha na categorização (R/D): Resposta vazia do Gemini.")
+
+                prompt_categorize = f"""
+                Minhas subcategorias são: {json.dumps(categories_json_list)}
+                A transação foi: "{transacao_descricao}" (Tipo: "{intent}")
+                Qual é o "id" da subcategoria que melhor corresponde?
+                Se for genérico, use o "id" de "Outros" (que é {id_outros_fallback}).
+                Responda APENAS com o número do ID.
+                """
+                response_cat = model.generate_content(prompt_categorize)
+                
+                # --- CORREÇÃO (Bug 1): Verifica se Gemini retornou texto ---
+                if not response_cat.text:
+                    print(f"[GEMINI-CAT] ERRO: Gemini (Call 3 - R/D) retornou uma resposta vazia.")
+                    raise Exception("Falha na categorização (R/D): Resposta vazia do Gemini.")
+                
                 id_categoria_str = response_cat.text.strip().replace("`", "")
                 try:
                     id_categoria_final = int(id_categoria_str)
                     if id_categoria_final not in [cat['id'] for cat in categories_json_list]: id_categoria_final = id_outros_fallback
                 except ValueError: id_categoria_final = id_outros_fallback
                 print(f"[GEMINI-CAT] ID de Categoria (Manual) escolhido: {id_categoria_final}")
+                
                 conta_nome_padrao = 'Banco Inter' if intent == 'Renda' else 'Carteira'; sql_get_conta_id = text("SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta = :nome"); conta_id_transacao = conn.execute(sql_get_conta_id, {"uid": usuario_id, "nome": conta_nome_padrao}).scalar_one_or_none()
                 if conta_id_transacao is None: sql_get_conta_id = text("SELECT id FROM Contas WHERE usuario_id = :uid LIMIT 1"); conta_id_transacao = conn.execute(sql_get_conta_id, {"uid": usuario_id}).scalar_one()
                 valor_para_db = valor_decimal if intent == 'Renda' else (valor_decimal * -1)
@@ -692,13 +721,24 @@ def handle_whatsapp_webhook():
 
             # --- FLUXO 4.C: SE FOR PAGAMENTO DE FATURA ---
             elif intent == 'Pagamento Fatura':
-                # ... (Lógica de Pagamento de Fatura - Oculto por brevidade) ...
+                
                 print(f"[WHATSAPP] Processando Lógica de Pagamento de Fatura...")
                 sql_get_contas = text("SELECT nome_conta, tipo_conta FROM Contas WHERE usuario_id = :uid"); contas_usuario = conn.execute(sql_get_contas, {"uid": usuario_id}).fetchall(); contas_json_list = [{"nome": row[0], "tipo": row[1]} for row in contas_usuario]
-                prompt_extract_fatura = f"""..."""; response_extract = model.generate_content(prompt_extract_fatura);
-                if not response_extract.text: raise Exception(f"Falha na extração (Pagto Fatura): Resposta vazia do Gemini.")
+                prompt_extract_fatura = f"""
+                Analise a mensagem de pagamento de fatura: "{texto_msg}"
+                Minhas contas são: {json.dumps(contas_json_list)}
+                Extraia "valor_decimal", "conta_origem", e "conta_cartao". Responda APENAS com JSON.
+                """;
+                response_extract = model.generate_content(prompt_extract_fatura)
+                
+                # --- CORREÇÃO (Bug 1): Verifica se Gemini retornou texto ---
+                if not response_extract.text:
+                    print(f"[GEMINI-EXTRACT] ERRO: Gemini (Call 2 - Pagto Fatura) retornou uma resposta vazia.")
+                    raise Exception("Falha na extração (Pagto Fatura): Resposta vazia do Gemini.")
+                
                 json_extract_text = response_extract.text.strip().replace("```json", "").replace("```", ""); fatura_data = json.loads(json_extract_text)
                 print(f"[GEMINI-EXTRACT] Extração (Pagto Fatura): {json_extract_text}")
+                
                 valor_decimal = fatura_data.get('valor_decimal'); conta_origem_nome = fatura_data.get('conta_origem'); conta_cartao_nome = fatura_data.get('conta_cartao')
                 if not valor_decimal or not conta_origem_nome or not conta_cartao_nome: raise Exception("Gemini não conseguiu extrair os dados do pagamento (valor, origem, cartão).")
                 sql_get_conta_id = text("SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta ILIKE :nome"); conta_id_origem = conn.execute(sql_get_conta_id, {"uid": usuario_id, "nome": f"%{conta_origem_nome}%"}).scalar_one_or_none(); conta_id_cartao = conn.execute(sql_get_conta_id, {"uid": usuario_id, "nome": f"%{conta_cartao_nome}%"}).scalar_one_or_none()
@@ -715,7 +755,7 @@ def handle_whatsapp_webhook():
 
             # --- FLUXO 4.D: CONSULTA DE POTES ---
             elif intent == 'Consulta Potes':
-                # ... (Lógica de Consulta de Potes - Sem Mudança, Oculto por brevidade) ...
+                # ... (Lógica de Consulta de Potes - Sem Mudança) ...
                 print(f"[WHATSAPP] Processando Lógica de Consulta de Potes...")
                 sql_get_potes = text("""..."""); potes_result = conn.execute(sql_get_potes, {"uid": usuario_id}).fetchall()
                 resposta_para_usuario = "📊 *Status dos Seus Potes (Este Mês)* 📊\n\n"
@@ -728,7 +768,7 @@ def handle_whatsapp_webhook():
 
             # --- FLUXO 4.E: CONSULTA DE RESERVA ---
             elif intent == 'Consulta Reserva':
-                # ... (Lógica de Consulta de Reserva - Sem Mudança, Oculto por brevidade) ...
+                # ... (Lógica de Consulta de Reserva - Sem Mudança) ...
                 print(f"[WHATSAPP] Processando Lógica de Consulta de Reserva...")
                 sql_get_essenciais = text("""..."""); total_essencial_3_meses = conn.execute(sql_get_essenciais, {"uid": usuario_id}).scalar()
                 media_mensal_essencial = float(total_essencial_3_meses or 0) / 3; reserva_ideal_6_meses = media_mensal_essencial * 6
