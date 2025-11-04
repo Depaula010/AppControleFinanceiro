@@ -125,7 +125,7 @@ def processar_agendamentos():
                             
                             valor_formatado = "???"
                             if ag.valor_previsto:
-                                valor_formatado = formatar_moeda(ag.valor_previsto, grouping=True)
+                                valor_formatado = formatar_moeda(ag.valor_previsto)
 
                             mensagem = f"🔔 *LEMBRETE DE CONTA VARIÁVEL* 🔔\n\nSua conta '{ag.descricao}' vence em {ag.notificar_antes_dias} dias (no dia {ag.dia_execucao}).\n\nO valor previsto é: *{valor_formatado}*\n\nPor favor, me diga o valor exato deste mês para eu registrar (ex: 'gastei 150.50 na conta de luz')."
                             enviar_notificacao_whatsapp(ag.numero_whatsapp, mensagem, BOT_WHATSAPP_URL, API_SECRET_KEY)
