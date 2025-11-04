@@ -454,13 +454,18 @@ def handle_whatsapp_webhook():
             return jsonify({"status": "erro", "resposta": "Usuário não autorizado."}), 401
         
         print(f"[WHATSAPP] Usuário autenticado (ID: {usuario_id}). Processando...")
-        
-        prompt_intent = f"""
-        Analise a mensagem do usuário: "{texto_msg}"
+
+        prompt_intent = f"""Analise a mensagem do usuário: "{texto_msg}"
         Classifique a intenção principal como "Renda", "Despesa", "Transferência", "Pagamento Fatura", "Consulta Potes", "Consulta Reserva", ou "Consulta Categoria Específica".
         Responda APENAS com um JSON contendo a chave "intent".
-        ... (Exemplos omitidos) ...
-        """;
+        Exemplos:
+        - "gastei 50 na padaria" -> {{"intent": "Despesa"}}
+        - "recebi 100 do freela" -> {{"intent": "Renda"}}
+        - "transferi 500 do Inter para o Nubank" -> {{"intent": "Transferência"}}
+        - "paguei a fatura de 1500 do cartão inter" -> {{"intent": "Pagamento Fatura"}}
+        - "como estão meus potes?" -> {{"intent": "Consulta Potes"}}
+        - "qual minha reserva de emergência?" -> {{"intent": "Consulta Reserva"}}
+        - "quanto gastei com supermercado este mês?" -> {{"intent": "Consulta Categoria Específica"}}""";
         response_intent = model.generate_content(prompt_intent)
         
         # --- CORREÇÃO (Bug 1): Verifica se Gemini retornou texto ---
@@ -486,7 +491,11 @@ def handle_whatsapp_webhook():
             resposta_para_usuario = "" 
 
             if intent == 'Renda' or intent == 'Despesa':
-                prompt_extract = f"""..."""; 
+                prompt_extract = f"""Analise a mensagem: "{texto_msg}"
+                O tipo é: "{intent}".
+                Extraia "valor_decimal" (sempre positivo) e "descricao_bruta".
+                Responda APENAS com JSON.
+                Ex: {{"valor_decimal": 50.00, "descricao_bruta": "Padaria"}}"""; 
                 response_extract = model.generate_content(prompt_extract); 
                 
                 try: response_text_extract = response_extract.text
@@ -503,7 +512,11 @@ def handle_whatsapp_webhook():
                 categories_json_list = [{"id": row[0], "nome_sub": row[1], "nome_macro": row[2]} for row in categories_list_result]
                 nome_macro_outros = 'Receitas Gerais' if intent == 'Renda' else 'Despesas Gerais'; sql_get_outros_id = text("SELECT s.id FROM SubCategoria s JOIN MacroCategoria m ON s.macro_id = m.id WHERE m.nome_macro = :nome_macro AND s.nome_sub = 'Outros' AND s.usuario_id IS NULL LIMIT 1"); id_outros_fallback = conn.execute(sql_get_outros_id, {"nome_macro": nome_macro_outros}).scalar_one_or_none()
                 
-                prompt_categorize = f"""..."""; 
+                prompt_categorize = f"""Minhas subcategorias são: {json.dumps(categories_json_list)}
+                A transação foi: "{transacao_descricao}" (Tipo: "{intent}")
+                Qual é o "id" da subcategoria que melhor corresponde?
+                Se for genérico, use o "id" de "Outros" (que é {id_outros_fallback}).
+                Responda APENAS com o número do ID."""; 
                 response_cat = model.generate_content(prompt_categorize); 
 
                 try: response_text_cat = response_cat.text
@@ -535,7 +548,9 @@ def handle_whatsapp_webhook():
             elif intent == 'Transferência':
                 print(f"[WHATSAPP] Processando Lógica de Transferência Pura...")
                 sql_get_contas = text("SELECT nome_conta, tipo_conta FROM Contas WHERE usuario_id = :uid"); contas_usuario = conn.execute(sql_get_contas, {"uid": usuario_id}).fetchall(); contas_json_list = [{"nome": row[0], "tipo": row[1]} for row in contas_usuario]
-                prompt_extract_transfer = f"""..."""; 
+                prompt_extract_transfer = f"""Analise a mensagem de transferência: "{texto_msg}"
+                Minhas contas são: {json.dumps(contas_json_list)}
+                Extraia "valor_decimal", "conta_origem", e "conta_destino". Responda APENAS com JSON."""; 
                 response_extract = model.generate_content(prompt_extract_transfer);
                 
                 try: response_text_extract = response_extract.text
@@ -560,7 +575,9 @@ def handle_whatsapp_webhook():
             elif intent == 'Pagamento Fatura':
                 print(f"[WHATSAPP] Processando Lógica de Pagamento de Fatura...")
                 sql_get_contas = text("SELECT nome_conta, tipo_conta FROM Contas WHERE usuario_id = :uid"); contas_usuario = conn.execute(sql_get_contas, {"uid": usuario_id}).fetchall(); contas_json_list = [{"nome": row[0], "tipo": row[1]} for row in contas_usuario]
-                prompt_extract_fatura = f"""..."""; 
+                prompt_extract_fatura = f"""Analise a mensagem de pagamento de fatura: "{texto_msg}"
+                Minhas contas são: {json.dumps(contas_json_list)}
+                Extraia "valor_decimal", "conta_origem", e "conta_cartao". Responda APENAS com JSON."""; 
                 response_extract = model.generate_content(prompt_extract_fatura);
                 
                 try: response_text_extract_fatura = response_extract.text
@@ -639,7 +656,11 @@ def handle_whatsapp_webhook():
 
             elif intent == 'Consulta Categoria Específica':
                 print(f"[WHATSAPP] Processando Lógica de Consulta de Categoria...")
-                prompt_extract_cat = f"""..."""; 
+                prompt_extract_cat = f"""Analise a pergunta: "{texto_msg}"
+                Extraia o nome da categoria ou subcategoria que o usuário quer consultar.
+                Responda APENAS com JSON: {{"nome_categoria": "..."}}
+                Ex1: "quanto gastei com supermercado" -> {{"nome_categoria": "Supermercado / Mercearia"}}
+                Ex2: "qual foi meu gasto com lazer?" -> {{"nome_categoria": "Lazer e Entretenimento"}}"""; 
                 response_extract = model.generate_content(prompt_extract_cat)
                 
                 try: response_text_extract_cat = response_extract.text
