@@ -320,11 +320,18 @@ def handle_automate_webhook():
         response_1 = model.generate_content(prompt_1); 
         
         # --- CORREÇÃO (Bug 1): Verifica se Gemini retornou texto ---
-        if not response_1.text:
-            print(f"[GEMINI-1] ERRO: Gemini (Call 1) retornou uma resposta vazia.")
+        try:
+            response_text = response_1.text
+        except ValueError as e:
+            # Isso acontece se a resposta foi bloqueada (ex: safety_ratings)
+            print(f"[GEMINI-1] ERRO: Resposta do Gemini bloqueada ou inválida. {e}")
+            print(f"[GEMINI-1] Feedback: {response_1.prompt_feedback}")
+            raise Exception(f"Falha na extração (Automate): Resposta do Gemini bloqueada. {response_1.prompt_feedback}")
+            
+        if not response_text:
             raise Exception("Falha na extração (Automate): Resposta vazia do Gemini.")
 
-        json_response_text_1 = response_1.text.strip().replace("```json", "").replace("```", ""); transacao_gemini = json.loads(json_response_text_1)
+        json_response_text_1 = response_text.strip().replace("```json", "").replace("```", ""); transacao_gemini = json.loads(json_response_text_1)
         print(f"[GEMINI-1] Extração: {json_response_text_1}")
         
         tipo_transacao_db = transacao_gemini.get('tipo_fluxo', 'Despesa'); transacao_descricao = transacao_gemini.get('descricao_bruta'); data_hoje = date.today(); id_categoria_final = None; id_outros_fallback = None
@@ -359,11 +366,18 @@ def handle_automate_webhook():
             response_2 = model.generate_content(prompt_2); 
 
             # --- CORREÇÃO (Bug 1): Verifica se Gemini retornou texto ---
-            if not response_2.text:
+            try:
+                response_text_2 = response_2.text
+            except ValueError as e:
+                print(f"[GEMINI-2] ERRO: Resposta do Gemini bloqueada ou inválida. {e}")
+                print(f"[GEMINI-2] Feedback: {response_2.prompt_feedback}")
+                response_text_2 = "" # Força o fallback para "Outros"
+            
+            if not response_text_2:
                 print(f"[GEMINI-2] ERRO: Gemini (Call 2 - Automate) retornou uma resposta vazia. Usando 'Outros'.")
                 id_categoria_final = id_outros_fallback
             else:
-                id_categoria_str = response_2.text.strip().replace("`", "")
+                id_categoria_str = response_text_2.strip().replace("`", "")
                 try:
                     id_categoria_final = int(id_categoria_str)
                     if id_categoria_final not in [cat['id'] for cat in categories_json_list]:
@@ -462,23 +476,23 @@ def handle_whatsapp_webhook():
         Analise a mensagem do usuário: "{texto_msg}"
         Classifique a intenção principal como "Renda", "Despesa", "Transferência", "Pagamento Fatura", "Consulta Potes", "Consulta Reserva", ou "Consulta Categoria Específica".
         Responda APENAS com um JSON contendo a chave "intent".
-        Exemplos:
-        - "gastei 50 na padaria" -> {{"intent": "Despesa"}}
-        - "recebi 100 do freela" -> {{"intent": "Renda"}}
-        - "transferi 500 do Inter para o Nubank" -> {{"intent": "Transferência"}}
-        - "paguei a fatura de 1500 do cartão inter" -> {{"intent": "Pagamento Fatura"}}
-        - "como estão meus potes?" -> {{"intent": "Consulta Potes"}}
-        - "qual minha reserva de emergência?" -> {{"intent": "Consulta Reserva"}}
-        - "quanto gastei com supermercado este mês?" -> {{"intent": "Consulta Categoria Específica"}}
+        ... (Exemplos omitidos) ...
         """;
         response_intent = model.generate_content(prompt_intent)
         
         # --- CORREÇÃO (Bug 1): Verifica se Gemini retornou texto ---
-        if not response_intent.text:
+        try:
+            response_text_intent = response_intent.text
+        except ValueError as e:
+            print(f"[GEMINI-INTENT] ERRO: Resposta do Gemini bloqueada ou inválida. {e}")
+            print(f"[GEMINI-INTENT] Feedback: {response_intent.prompt_feedback}")
+            raise Exception(f"Falha na classificação da intenção: Resposta do Gemini bloqueada. {response_intent.prompt_feedback}")
+
+        if not response_text_intent:
             print(f"[GEMINI-INTENT] ERRO: Gemini (Call 1) retornou uma resposta vazia.")
             raise Exception("Falha na classificação da intenção: Resposta vazia do Gemini.")
             
-        json_intent_text = response_intent.text.strip().replace("```json", "").replace("```", "")
+        json_intent_text = response_text_intent.strip().replace("```json", "").replace("```", "")
         intent_data = json.loads(json_intent_text)
         intent = intent_data.get('intent')
         
@@ -490,14 +504,14 @@ def handle_whatsapp_webhook():
             resposta_para_usuario = "" 
 
             if intent == 'Renda' or intent == 'Despesa':
-                prompt_extract = f"""..."""; response_extract = model.generate_content(prompt_extract); 
+                prompt_extract = f"""..."""; 
+                response_extract = model.generate_content(prompt_extract); 
                 
-                # --- CORREÇÃO (Bug 1): Verifica se Gemini retornou texto ---
-                if not response_extract.text: 
-                    print(f"[GEMINI-EXTRACT] ERRO: Gemini (Call 2 - R/D) retornou uma resposta vazia.")
-                    raise Exception(f"Falha na extração (R/D): Resposta vazia do Gemini.")
+                try: response_text_extract = response_extract.text
+                except ValueError as e: raise Exception(f"Falha na extração (R/D): Resposta do Gemini bloqueada. {response_extract.prompt_feedback}")
+                if not response_text_extract: raise Exception(f"Falha na extração (R/D): Resposta vazia do Gemini.")
                 
-                json_extract_text = response_extract.text.strip().replace("```json", "").replace("```", ""); transacao_gemini = json.loads(json_extract_text)
+                json_extract_text = response_text_extract.strip().replace("```json", "").replace("```", ""); transacao_gemini = json.loads(json_extract_text)
                 print(f"[GEMINI-EXTRACT] Extração (R/D): {json_extract_text}")
                 transacao_descricao = transacao_gemini.get('descricao_bruta'); valor_decimal = transacao_gemini.get('valor_decimal')
                 grupo_filtro_sql = "g.nome_grupo = 'Renda'"
@@ -511,15 +525,20 @@ def handle_whatsapp_webhook():
                 response_cat = model.generate_content(prompt_categorize); 
 
                 # --- CORREÇÃO (Bug 1): Verifica se Gemini retornou texto ---
-                if not response_cat.text: 
-                    print(f"[GEMINI-CAT] ERRO: Gemini (Call 3 - R/D) retornou uma resposta vazia. Usando 'Outros'.")
+                try: response_text_cat = response_cat.text
+                except ValueError as e: 
+                    print(f"[GEMINI-CAT] ERRO: Resposta do Gemini bloqueada. Usando 'Outros'. {e}"); 
                     id_categoria_final = id_outros_fallback
                 else:
-                    id_categoria_str = response_cat.text.strip().replace("`", "")
-                    try:
-                        id_categoria_final = int(id_categoria_str)
-                        if id_categoria_final not in [cat['id'] for cat in categories_json_list]: id_categoria_final = id_outros_fallback
-                    except ValueError: id_categoria_final = id_outros_fallback
+                    if not response_text_cat: 
+                        print(f"[GEMINI-CAT] ERRO: Gemini (Call 3 - R/D) retornou uma resposta vazia. Usando 'Outros'.")
+                        id_categoria_final = id_outros_fallback
+                    else:
+                        id_categoria_str = response_text_cat.strip().replace("`", "")
+                        try:
+                            id_categoria_final = int(id_categoria_str)
+                            if id_categoria_final not in [cat['id'] for cat in categories_json_list]: id_categoria_final = id_outros_fallback
+                        except ValueError: id_categoria_final = id_outros_fallback
                 
                 print(f"[GEMINI-CAT] ID de Categoria (Manual) escolhido: {id_categoria_final}")
                 conta_nome_padrao = 'Banco Inter' if intent == 'Renda' else 'Carteira'; sql_get_conta_id = text("SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta = :nome"); conta_id_transacao = conn.execute(sql_get_conta_id, {"uid": usuario_id, "nome": conta_nome_padrao}).scalar_one_or_none()
@@ -539,11 +558,11 @@ def handle_whatsapp_webhook():
                 response_extract = model.generate_content(prompt_extract_transfer);
                 
                 # --- CORREÇÃO (Bug 1): Verifica se Gemini retornou texto ---
-                if not response_extract.text: 
-                    print(f"[GEMINI-EXTRACT] ERRO: Gemini (Call 2 - Transfer) retornou uma resposta vazia.")
-                    raise Exception(f"Falha na extração (Transfer): Resposta vazia do Gemini.")
+                try: response_text_extract = response_extract.text
+                except ValueError as e: raise Exception(f"Falha na extração (Transfer): Resposta do Gemini bloqueada. {response_extract.prompt_feedback}")
+                if not response_text_extract: raise Exception(f"Falha na extração (Transfer): Resposta vazia do Gemini.")
                 
-                json_extract_text = response_extract.text.strip().replace("```json", "").replace("```", ""); transfer_data = json.loads(json_extract_text)
+                json_extract_text = response_text_extract.strip().replace("```json", "").replace("```", ""); transfer_data = json.loads(json_extract_text)
                 print(f"[GEMINI-EXTRACT] Extração (Transf): {json_extract_text}")
                 valor_decimal = transfer_data.get('valor_decimal'); conta_origem_nome = transfer_data.get('conta_origem'); conta_destino_nome = transfer_data.get('conta_destino')
                 if not valor_decimal or not conta_origem_nome or not conta_destino_nome: raise Exception("Gemini não conseguiu extrair os dados da transferência (valor, origem, destino).")
@@ -565,11 +584,11 @@ def handle_whatsapp_webhook():
                 response_extract = model.generate_content(prompt_extract_fatura);
                 
                 # --- CORREÇÃO (Bug 1): Verifica se Gemini retornou texto ---
-                if not response_extract.text: 
-                    print(f"[GEMINI-EXTRACT] ERRO: Gemini (Call 2 - Pagto Fatura) retornou uma resposta vazia.")
-                    raise Exception(f"Falha na extração (Pagto Fatura): Resposta vazia do Gemini.")
+                try: response_text_extract_fatura = response_extract.text
+                except ValueError as e: raise Exception(f"Falha na extração (Pagto Fatura): Resposta do Gemini bloqueada. {response_extract.prompt_feedback}")
+                if not response_text_extract_fatura: raise Exception(f"Falha na extração (Pagto Fatura): Resposta vazia do Gemini.")
                 
-                json_extract_text = response_extract.text.strip().replace("```json", "").replace("```", ""); fatura_data = json.loads(json_extract_text)
+                json_extract_text = response_text_extract_fatura.strip().replace("```json", "").replace("```", ""); fatura_data = json.loads(json_extract_text)
                 print(f"[GEMINI-EXTRACT] Extração (Pagto Fatura): {json_extract_text}")
                 valor_decimal = fatura_data.get('valor_decimal'); conta_origem_nome = fatura_data.get('conta_origem'); conta_cartao_nome = fatura_data.get('conta_cartao')
                 if not valor_decimal or not conta_origem_nome or not conta_cartao_nome: raise Exception("Gemini não conseguiu extrair os dados do pagamento (valor, origem, cartão).")
@@ -588,7 +607,25 @@ def handle_whatsapp_webhook():
 
             elif intent == 'Consulta Potes':
                 print(f"[WHATSAPP] Processando Lógica de Consulta de Potes...")
-                sql_get_potes = text("""..."""); potes_result = conn.execute(sql_get_potes, {"uid": usuario_id}).fetchall()
+                # *** CORREÇÃO: SQL estava com '...' ***
+                sql_get_potes = text("""
+                    SELECT
+                        p.nome_pote, p.valor_limite,
+                        COALESCE(SUM(t.valor), 0) AS valor_gasto_negativo
+                    FROM PotesDeGastos p
+                    LEFT JOIN PoteSubCategorias psc ON p.id = psc.pote_id
+                    LEFT JOIN Transacoes t ON psc.subcategoria_id = t.subcategoria_id
+                        AND t.tipo_transacao = 'Despesa'
+                        AND t.usuario_id = :uid
+                        AND EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM CURRENT_DATE)
+                        AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM CURRENT_DATE)
+                    WHERE
+                        p.usuario_id = :uid
+                        AND p.ativo = TRUE
+                    GROUP BY p.id, p.nome_pote, p.valor_limite
+                    ORDER BY p.nome_pote;
+                """)
+                potes_result = conn.execute(sql_get_potes, {"uid": usuario_id}).fetchall()
                 resposta_para_usuario = "📊 *Status dos Seus Potes (Este Mês)* 📊\n\n"
                 if not potes_result: resposta_para_usuario = "Você ainda não configurou nenhum 'Pote de Gasto' (Orçamento)."
                 else:
@@ -601,7 +638,21 @@ def handle_whatsapp_webhook():
 
             elif intent == 'Consulta Reserva':
                 print(f"[WHATSAPP] Processando Lógica de Consulta de Reserva...")
-                sql_get_essenciais = text("""..."""); total_essencial_3_meses = conn.execute(sql_get_essenciais, {"uid": usuario_id}).scalar()
+                # *** CORREÇÃO: SQL estava com '...' ***
+                sql_get_essenciais = text("""
+                    SELECT 
+                        COALESCE(SUM(t.valor), 0) AS total_essencial_negativo
+                    FROM Transacoes t
+                    JOIN SubCategoria s ON t.subcategoria_id = s.id 
+                    JOIN MacroCategoria m ON s.macro_id = m.id 
+                    JOIN GrupoCategoria g ON m.grupo_id = g.id
+                    WHERE t.usuario_id = :uid
+                      AND g.nome_grupo = 'Despesa Essencial'
+                      AND t.tipo_transacao = 'Despesa'
+                      AND t.data_transacao >= date_trunc('month', CURRENT_DATE) - interval '3 month'
+                      AND t.data_transacao < date_trunc('month', CURRENT_DATE)
+                """)
+                total_essencial_3_meses = conn.execute(sql_get_essenciais, {"uid": usuario_id}).scalar()
                 media_mensal_essencial = (float(total_essencial_3_meses or 0) * -1) / 3; reserva_ideal_6_meses = media_mensal_essencial * 6
                 resposta_para_usuario = "🆘 *Cálculo da Reserva de Emergência* 🆘\n\n"
                 resposta_para_usuario += f"Sua média de gastos essenciais (últimos 3 meses) é: *{locale.currency(media_mensal_essencial, grouping=True)}* / mês\n"
@@ -613,16 +664,37 @@ def handle_whatsapp_webhook():
                 response_extract = model.generate_content(prompt_extract_cat)
                 
                 # --- CORREÇÃO (Bug 1): Verifica se Gemini retornou texto ---
-                if not response_extract.text: 
-                    print(f"[GEMINI-EXTRACT] ERRO: Gemini (Call 2 - Consulta Cat) retornou uma resposta vazia.")
-                    raise Exception(f"Falha na extração (Consulta Categoria): Resposta vazia do Gemini.")
+                try: response_text_extract_cat = response_extract.text
+                except ValueError as e: raise Exception(f"Falha na extração (Consulta Cat): Resposta do Gemini bloqueada. {response_extract.prompt_feedback}")
+                if not response_text_extract_cat: raise Exception(f"Falha na extração (Consulta Cat): Resposta vazia do Gemini.")
                 
-                json_extract_text = response_extract.text.strip().replace("```json", "").replace("```", ""); cat_data = json.loads(json_extract_text)
+                json_extract_text = response_text_extract_cat.strip().replace("```json", "").replace("```", ""); cat_data = json.loads(json_extract_text)
                 nome_categoria_consulta = cat_data.get('nome_categoria')
                 if not nome_categoria_consulta: raise Exception("Gemini não conseguiu extrair o nome da categoria da consulta.")
                 print(f"[GEMINI-EXTRACT] Categoria para consulta: {nome_categoria_consulta}")
 
-                sql_find_gasto = text("""...""");
+                # *** CORREÇÃO: SQL estava com '...' ***
+                sql_find_gasto = text("""
+                    WITH CategoriaAlvo AS (
+                        SELECT id FROM SubCategoria 
+                        WHERE (usuario_id = :uid OR usuario_id IS NULL) 
+                          AND nome_sub ILIKE :nome_cat
+                        
+                        UNION
+                        
+                        SELECT s.id FROM SubCategoria s
+                        JOIN MacroCategoria m ON s.macro_id = m.id
+                        WHERE (m.usuario_id = :uid OR m.usuario_id IS NULL) 
+                          AND m.nome_macro ILIKE :nome_cat
+                    )
+                    SELECT COALESCE(SUM(t.valor), 0) AS valor_gasto_total
+                    FROM Transacoes t
+                    WHERE t.usuario_id = :uid
+                      AND t.tipo_transacao = 'Despesa'
+                      AND EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM CURRENT_DATE)
+                      AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM CURRENT_DATE)
+                      AND t.subcategoria_id IN (SELECT id FROM CategoriaAlvo);
+                """)
                 gasto_total = conn.execute(sql_find_gasto, {"uid": usuario_id, "nome_cat": f"%{nome_categoria_consulta}%"}).scalar()
                 valor_gasto = (float(gasto_total or 0)) * -1
                 resposta_para_usuario = f"ℹ️ *Consulta de Categoria (Este Mês)*\n\n"

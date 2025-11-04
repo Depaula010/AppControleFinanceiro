@@ -1,11 +1,11 @@
 import os
 import requests
-import locale # <<< NOVO IMPORT
+import locale 
 from sqlalchemy import create_engine, text, exc as sqlalchemy_exc
 from datetime import date, timedelta
 from calendar import monthrange
 
-# <<< NOVA CONFIGURAÇÃO DE LOCALIZAÇÃO >>>
+# Configura o locale para R$ (Padrão Brasileiro)
 try:
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 except locale.Error:
@@ -16,7 +16,7 @@ except locale.Error:
 
 # (Copiamos a função de fatura do app.py, pois o motor também precisa dela)
 def get_or_create_fatura(conn, conta_id, data_transacao, usuario_id):
-    # ... (Lógica completa de cálculo de fatura, como antes) ...
+    # (Lógica completa de cálculo de fatura, como antes)
     sql_get_card_info = text("SELECT dia_fechamento, dia_vencimento FROM Contas WHERE id = :conta_id AND usuario_id = :uid AND tipo_conta = 'Cartão de Crédito'"); card_info = conn.execute(sql_get_card_info, {"conta_id": conta_id, "uid": usuario_id}).fetchone()
     if not card_info or not card_info.dia_fechamento or not card_info.dia_vencimento: return None 
     dia_fechamento = card_info.dia_fechamento; dia_vencimento = card_info.dia_vencimento; dia_transacao = data_transacao.day; mes_transacao = data_transacao.month; ano_transacao = data_transacao.year; data_fatura_fechamento = None; data_fatura_vencimento = None
