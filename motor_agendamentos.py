@@ -14,9 +14,9 @@ except locale.Error:
     except Exception as e:
         print(f"[MOTOR AVISO] Locale 'pt_BR' não encontrado. Usando padrão. Erro: {e}")
 
-# (Copiamos a função de fatura do app.py, pois o motor também precisa dela)
+# (Função de fatura, oculta por brevidade)
 def get_or_create_fatura(conn, conta_id, data_transacao, usuario_id):
-    # (Lógica completa de cálculo de fatura, como antes)
+    # ... (Lógica completa de cálculo de fatura) ...
     sql_get_card_info = text("SELECT dia_fechamento, dia_vencimento FROM Contas WHERE id = :conta_id AND usuario_id = :uid AND tipo_conta = 'Cartão de Crédito'"); card_info = conn.execute(sql_get_card_info, {"conta_id": conta_id, "uid": usuario_id}).fetchone()
     if not card_info or not card_info.dia_fechamento or not card_info.dia_vencimento: return None 
     dia_fechamento = card_info.dia_fechamento; dia_vencimento = card_info.dia_vencimento; dia_transacao = data_transacao.day; mes_transacao = data_transacao.month; ano_transacao = data_transacao.year; data_fatura_fechamento = None; data_fatura_vencimento = None
@@ -43,21 +43,13 @@ def get_or_create_fatura(conn, conta_id, data_transacao, usuario_id):
         print(f"[MOTOR] Fatura ID {fatura_id} (Venc: {data_fatura_vencimento}) sendo usada/criada para Cartão ID {conta_id}")
     return fatura_id
 
-
 def enviar_notificacao_whatsapp(numero, mensagem, bot_url, api_key):
-    """ Função auxiliar para chamar a API do nosso bot Node.js. """
+    # ... (Lógica de enviar notificação, sem mudança) ...
     try:
-        headers = {'x-api-key': api_key}
-        payload = {
-            'numero': numero, 
-            'mensagem': mensagem
-        }
-        response = requests.post(f"{bot_url}/enviar-mensagem", json=payload, headers=headers)
-        
-        if response.status_code == 200:
-            print(f"[MOTOR] Notificação enviada com sucesso para {numero}.")
-        else:
-            print(f"[MOTOR] ERRO: Bot respondeu com status {response.status_code}")
+        headers = {'x-api-key': api_key}; payload = {'numero': numero, 'mensagem': mensagem}
+        response = requests.post(f"{bot_url}/enviar-mensagem", json=payload, headers=headers, timeout=10) # Adicionado timeout
+        if response.status_code == 200: print(f"[MOTOR] Notificação enviada com sucesso para {numero}.")
+        else: print(f"[MOTOR] ERRO: Bot respondeu com status {response.status_code}")
     except Exception as e:
         print(f"[MOTOR] ERRO: Falha ao chamar a API do Bot: {e}")
 
@@ -130,35 +122,24 @@ def processar_agendamentos():
                             fatura_id = None
                             if ag.tipo_conta == 'Cartão de Crédito':
                                 fatura_id = get_or_create_fatura(conn, ag.conta_id, hoje, ag.usuario_id)
-
-                            valor_para_db = (ag.valor_previsto or 0) * -1 # Salva como negativo
-
+                            valor_para_db = (ag.valor_previsto or 0) * -1 
                             sql_insert = text("INSERT INTO Transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, descricao, valor, tipo_transacao, data_transacao) VALUES (:uid, :cid, :scid, :fid, :desc, :val, :tipo, :data)")
-                            conn.execute(sql_insert, {
-                                "uid": ag.usuario_id, "cid": ag.conta_id, "scid": ag.subcategoria_id,
-                                "fid": fatura_id, "desc": ag.descricao, "val": valor_para_db,
-                                "tipo": 'Despesa', "data": hoje
-                            })
+                            conn.execute(sql_insert, {"uid": ag.usuario_id, "cid": ag.conta_id, "scid": ag.subcategoria_id, "fid": fatura_id, "desc": ag.descricao, "val": valor_para_db, "tipo": 'Despesa', "data": hoje})
                             print(f"[MOTOR] Transação 'FIXO' (ID {ag.agendamento_id}) inserida com sucesso.")
 
                     # --- Lógica de Gasto Parcelado ---
                     elif ag.tipo_agendamento == 'PARCELADO':
                         if dia_hoje == ag.dia_execucao and (ag.total_parcelas is None or ag.parcelas_executadas < ag.total_parcelas):
                             print(f"[MOTOR] Processando PARCELA {ag.parcelas_executadas + 1}/{ag.total_parcelas} para Agendamento ID {ag.agendamento_id}...")
-                            
                             fatura_id = None
                             if ag.tipo_conta == 'Cartão de Crédito':
                                 fatura_id = get_or_create_fatura(conn, ag.conta_id, hoje, ag.usuario_id)
-                            
                             descricao_parcela = f"{ag.descricao} ({ag.parcelas_executadas + 1}/{ag.total_parcelas})"
-                            valor_para_db = (ag.valor_previsto or 0) * -1 # Salva como negativo
-                            
+                            valor_para_db = (ag.valor_previsto or 0) * -1
                             sql_insert_parc = text("INSERT INTO Transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, descricao, valor, tipo_transacao, data_transacao) VALUES (:uid, :cid, :scid, :fid, :desc, :val, :tipo, :data)")
                             conn.execute(sql_insert_parc, {"uid": ag.usuario_id, "cid": ag.conta_id, "scid": ag.subcategoria_id, "fid": fatura_id, "desc": descricao_parcela, "val": valor_para_db, "tipo": 'Despesa', "data": hoje})
-                            
                             nova_parcela_exec = ag.parcelas_executadas + 1
                             desativar_agendamento = (ag.total_parcelas is not None and nova_parcela_exec == ag.total_parcelas)
-                            
                             sql_update_ag = text("UPDATE Agendamentos SET parcelas_executadas = :nova_parcela, ativo = :novo_ativo WHERE id = :ag_id")
                             conn.execute(sql_update_ag, {"nova_parcela": nova_parcela_exec, "novo_ativo": not desativar_agendamento, "ag_id": ag.agendamento_id})
                             print(f"[MOTOR] Parcela (ID {ag.agendamento_id}) inserida e agendamento atualizado.")
