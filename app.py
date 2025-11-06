@@ -327,7 +327,9 @@ def get_or_create_fatura(conn, conta_id, data_transacao, usuario_id):
 
 @app.route('/')
 def home():
-    return "API do Bot Financeiro v14 (Bug Fixes Finais) está no ar!"
+# MUDANÇA PARA TESTE DE DEPLOY
+    print("TESTE DE DEPLOY v99 FUNCIONOU!") 
+    return "API DO BOT FINANCEIRO - DEPLOY v99 - FUNCIONOU!"
 
 # (Helper para checar a resposta do Gemini)
 def get_gemini_text_response(response):
