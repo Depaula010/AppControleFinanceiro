@@ -485,6 +485,12 @@ def handle_whatsapp_webhook():
     """
     if not engine or not model:
         return jsonify({"status": "erro", "mensagem": "Serviço não configurado"}), 503
+    
+    secret_key_recebida = request.headers.get('x-api-key')
+    
+    # --- ADICIONE ESTA LINHA DE DEBUG ---
+    print(f"[DEBUG-KEY] Chave Recebida: '{secret_key_recebida}' | Chave Esperada: '{API_SECRET_KEY}'")
+    # --- FIM DA LINHA DE DEBUG ---
 
     secret_key_recebida = request.headers.get('x-api-key')
     if secret_key_recebida != API_SECRET_KEY:
