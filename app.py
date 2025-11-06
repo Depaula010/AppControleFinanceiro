@@ -72,6 +72,51 @@ else:
 
 # ========= 2. ROTAS ADMINISTRATIVAS (Com Correção 'TextClause') =========
 
+# [COLE ESTE BLOCO DE CÓDIGO NO SEU app.py]
+
+@app.route('/admin/clear-bot-session', methods=['POST'])
+def clear_bot_session():
+    """
+    ENDPOINT DE EMERGÊNCIA: Limpa a tabela 'baileys_auth' para forçar o bot
+    a gerar um novo QR code e limpar sessões corrompidas.
+    """
+    # 1. Verificação de Segurança
+    secret_key_recebida = request.headers.get('x-api-key')
+    if secret_key_recebida != API_SECRET_KEY: 
+        print(f"[ADMIN-FIX] Acesso negado à rota /clear-bot-session. Chave errada.")
+        return jsonify({"status": "erro", "mensagem": "Não autorizado"}), 401
+    
+    if not engine: 
+        return jsonify({"status": "erro", "mensagem": "Banco não configurado"}), 500
+
+    # 2. SQL para limpar a sessão do bot (com base no seu index.js)
+    sql_clear = text("DELETE FROM baileys_auth WHERE session_id = 'baileys_session';")
+
+    try:
+        with engine.connect() as conn:
+            conn.begin()
+            # Executa o delete
+            result = conn.execute(sql_clear)
+            conn.commit()
+        
+        deleted_rows = result.rowcount
+        mensagem_sucesso = f"Sessão do bot ('baileys_auth') limpa com sucesso. {deleted_rows} linhas deletadas."
+        print(f"[ADMIN-FIX] {mensagem_sucesso}")
+        
+        return jsonify({
+            "status": "sucesso", 
+            "mensagem": mensagem_sucesso
+        }), 200
+
+    except Exception as e:
+        print(f"[ADMIN-FIX] Erro ao limpar a sessão do bot: {e}")
+        try: 
+            with engine.connect() as conn: 
+                conn.rollback()
+        except: 
+            pass
+        return jsonify({"status": "erro", "mensagem": f"Erro ao limpar sessão: {str(e)}"}), 500
+
 @app.route('/admin/setup-database', methods=['GET'])
 def setup_database():
     """ 
