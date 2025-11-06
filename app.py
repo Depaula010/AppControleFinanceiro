@@ -36,8 +36,11 @@ def formatar_moeda(valor):
     if valor is None:
         return "R$ 0,00"
     try:
-        # Tenta usar a formatação de moeda do locale configurado (pt_BR)
-        return formatar_moeda(valor)
+        # --- CORREÇÃO ---
+        # A chamada original 'return formatar_moeda(valor)' era uma recursão infinita.
+        # A chamada correta é para a biblioteca 'locale'.
+        return locale.currency(valor, grouping=True)
+        # --- FIM DA CORREÇÃO ---
     except Exception:
         # Se o locale 'pt_BR' não estiver disponível no servidor, usa um fallback manual.
         # Formata com 2 casas decimais, troca ',' por 'X', '.' por ',' e 'X' por '.'
