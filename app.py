@@ -22,6 +22,13 @@ except ImportError:
 
 app = Flask(__name__)
 
+# --- ADICIONE ESTA ROTA DE HEALTH CHECK ---
+@app.route('/ping')
+def ping():
+    """ Rota de Health Check para o Render. """
+    return "pong", 200
+# --- FIM DA ADIÇÃO ---
+
 # Configura o locale para R$ (Padrão Brasileiro)
 try:
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
