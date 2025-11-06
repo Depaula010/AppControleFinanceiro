@@ -487,22 +487,27 @@ def handle_whatsapp_webhook():
     """
     if not engine or not model:
         return jsonify({"status": "erro", "mensagem": "Serviço não configurado"}), 503
-    
-    # secret_key_recebida = request.headers.get('x-api-key')
-    
-    # # --- MUDANÇA 1: DEBUG MELHORADO (USE repr()) ---
-    # if secret_key_recebida:
-    #     print(f"[DEBUG-KEY] Chave Recebida: {repr(secret_key_recebida)} | Chave Esperada: {repr(API_SECRET_KEY)}")
-    # else:
-    #     print("[DEBUG-KEY] NENHUMA CHAVE RECEBIDA (x-api-key está vazia)")
-    # # --- FIM DA MUDANÇA 1 ---
 
-    # # --- MUDANÇA 2: A CORREÇÃO (USE .strip()) ---
-    # # Compara as chaves APÓS limpar caracteres invisíveis das pontas
-    # if not secret_key_recebida or secret_key_recebida.strip() != API_SECRET_KEY.strip():
-    #     print("[DEBUG-KEY] COMPARAÇÃO FALHOU! (Verifique acima)")
-    #     return jsonify({"status": "erro", "resposta": "Chave de API inválida."}), 401
-    # # --- FIM DA MUDANÇA 2 ---
+    # Recebe e limpa a chave
+    secret_key_recebida = request.headers.get('x-api-key', '').strip()
+    
+    # ============================================
+    # DEBUG DETALHADO (REMOVA DEPOIS DE FUNCIONAR)
+    # ============================================
+    print(f"[DEBUG-KEY] Chave Recebida: '{secret_key_recebida}'")
+    print(f"[DEBUG-KEY] Tamanho Recebido: {len(secret_key_recebida)}")
+    print(f"[DEBUG-KEY] Bytes Recebidos: {secret_key_recebida.encode('utf-8')}")
+    print(f"[DEBUG-KEY] Chave Esperada: '{API_SECRET_KEY}'")
+    print(f"[DEBUG-KEY] Tamanho Esperado: {len(API_SECRET_KEY)}")
+    print(f"[DEBUG-KEY] Bytes Esperados: {API_SECRET_KEY.encode('utf-8')}")
+    # ============================================
+    
+    # Validação
+    if not secret_key_recebida or secret_key_recebida != API_SECRET_KEY:
+        print("[DEBUG-KEY] ❌ VALIDAÇÃO FALHOU!")
+        return jsonify({"status": "erro", "resposta": "Chave de API inválida."}), 401
+    
+    print("[DEBUG-KEY] ✅ Chave validada com sucesso!")
     
     try:
         data = request.json
