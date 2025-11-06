@@ -80,12 +80,7 @@ def clear_bot_session():
     ENDPOINT DE EMERGÊNCIA: Limpa a tabela 'baileys_auth' para forçar o bot
     a gerar um novo QR code e limpar sessões corrompidas.
     """
-    # 1. Verificação de Segurança
-    secret_key_recebida = request.headers.get('x-api-key')
-    if secret_key_recebida != API_SECRET_KEY: 
-        print(f"[ADMIN-FIX] Acesso negado à rota /clear-bot-session. Chave errada.")
-        return jsonify({"status": "erro", "mensagem": "Não autorizado"}), 401
-    
+   
     if not engine: 
         return jsonify({"status": "erro", "mensagem": "Banco não configurado"}), 500
 
