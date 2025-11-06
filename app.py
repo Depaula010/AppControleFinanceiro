@@ -488,13 +488,18 @@ def handle_whatsapp_webhook():
     
     secret_key_recebida = request.headers.get('x-api-key')
     
-    # --- ADICIONE ESTA LINHA DE DEBUG ---
-    print(f"[DEBUG-KEY] Chave Recebida: '{secret_key_recebida}' | Chave Esperada: '{API_SECRET_KEY}'")
-    # --- FIM DA LINHA DE DEBUG ---
+    # --- MUDANÇA 1: DEBUG MELHORADO (USE repr()) ---
+    if secret_key_recebida:
+        print(f"[DEBUG-KEY] Chave Recebida: {repr(secret_key_recebida)} | Chave Esperada: {repr(API_SECRET_KEY)}")
+    else:
+        print("[DEBUG-KEY] NENHUMA CHAVE RECEBIDA (x-api-key está vazia)")
+    # --- FIM DA MUDANÇA 1 ---
 
-    secret_key_recebida = request.headers.get('x-api-key')
-    if secret_key_recebida != API_SECRET_KEY:
+    # --- MUDANÇA 2: A CORREÇÃO (USE .strip()) ---
+    if not secret_key_recebida or secret_key_recebida.strip() != API_SECRET_KEY.strip():
+        print("[DEBUG-KEY] COMPARAÇÃO FALHOU! (Verifique acima)")
         return jsonify({"status": "erro", "resposta": "Chave de API inválida."}), 401
+    # --- FIM DA MUDANÇA 2 ---
     
     try:
         data = request.json
