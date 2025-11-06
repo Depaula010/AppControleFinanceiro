@@ -22,13 +22,6 @@ except ImportError:
 
 app = Flask(__name__)
 
-# --- ADICIONE ESTA ROTA DE HEALTH CHECK ---
-@app.route('/ping')
-def ping():
-    """ Rota de Health Check para o Render. """
-    return "pong", 200
-# --- FIM DA ADIÇÃO ---
-
 # Configura o locale para R$ (Padrão Brasileiro)
 try:
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
@@ -503,6 +496,7 @@ def handle_whatsapp_webhook():
     # --- FIM DA MUDANÇA 1 ---
 
     # --- MUDANÇA 2: A CORREÇÃO (USE .strip()) ---
+    # Compara as chaves APÓS limpar caracteres invisíveis das pontas
     if not secret_key_recebida or secret_key_recebida.strip() != API_SECRET_KEY.strip():
         print("[DEBUG-KEY] COMPARAÇÃO FALHOU! (Verifique acima)")
         return jsonify({"status": "erro", "resposta": "Chave de API inválida."}), 401
