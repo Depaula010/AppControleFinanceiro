@@ -14,6 +14,7 @@ from app.utils import formatar_moeda
 from app.services import finance_service
 from app.services import gemini_service
 from app.services import notification_service
+from app.services import user_service
 
 # Cria o Blueprint
 webhooks_bp = Blueprint('webhooks', __name__)
@@ -122,7 +123,8 @@ def handle_automate_webhook():
 @webhooks_bp.route('/webhook-whatsapp', methods=['POST'])
 def handle_whatsapp_webhook():
     """
-    Recebe uma mensagem manual, classifica a INTENÇÃO, processa e salva/consulta.
+    Recebe mensagem manual, verifica se usuário existe, 
+    processa cadastro ou classifica intenção.
     """
     if not db_engine or not gemini_service.gemini_model:
         return jsonify({"status": "erro", "mensagem": "Serviço não configurado"}), 503
@@ -139,30 +141,57 @@ def handle_whatsapp_webhook():
         data = request.json
         texto_msg = data.get('texto')
         numero_remetente = data.get('numero_remetente')
+        
         if not texto_msg or not numero_remetente:
             return jsonify({"status": "erro", "mensagem": "Faltando 'texto' ou 'numero_remetente'"}), 400
 
         numero_limpo = numero_remetente.split('@')[0]
         print(f"[WHATSAPP] Mensagem recebida de {numero_limpo}: {texto_msg}")
 
-        # 2. Autenticar Usuário (Camada de Serviço)
-        usuario_id = finance_service.get_user_by_whatsapp(numero_limpo)
-        if usuario_id is None:
-            return jsonify({"status": "erro", "resposta": "Usuário não autorizado."}), 401
+        # 2. VERIFICAR SE USUÁRIO EXISTE OU ESTÁ EM CADASTRO
+        user_info = user_service.check_user_exists(numero_limpo)
+        registration_state = user_service.get_registration_state(numero_limpo)
         
+        # 2.1. Se está em processo de cadastro
+        if registration_state:
+            # Permitir cancelamento
+            if texto_msg.lower().strip() in ['cancelar', 'sair', 'parar']:
+                user_service.cancel_registration(numero_limpo)
+                return jsonify({
+                    "status": "sucesso", 
+                    "resposta": "Cadastro cancelado. Se quiser tentar novamente, basta me enviar uma mensagem! 👋"
+                }), 200
+            
+            # Processar próximo passo
+            resposta, completo = user_service.process_registration_step(numero_limpo, texto_msg)
+            return jsonify({"status": "sucesso", "resposta": resposta}), 200
+        
+        # 2.2. Se usuário NÃO existe, iniciar cadastro
+        if not user_info:
+            user_service.start_registration(numero_limpo)
+            mensagem_boas_vindas = (
+                "👋 *Olá! Bem-vindo ao seu Assistente Financeiro Pessoal!*\n\n"
+                "Vejo que você é novo por aqui. Vamos fazer um cadastro rápido?\n\n"
+                "📝 *Primeiro, como você gostaria de ser chamado?*\n"
+                "(Digite seu nome)\n\n"
+                "_Digite 'cancelar' a qualquer momento para sair._"
+            )
+            return jsonify({"status": "sucesso", "resposta": mensagem_boas_vindas}), 200
+        
+        # 3. Usuário existe, processar normalmente
+        usuario_id = user_info[0]
         print(f"[WHATSAPP] Usuário autenticado (ID: {usuario_id}). Processando...")
 
-        # 3. Classificar Intenção com IA (Camada de Serviço)
+        # 3.1. Classificar Intenção com IA
         intent = gemini_service.get_message_intent(texto_msg)
         
         data_hoje = date.today()
         resposta_para_usuario = "" 
 
-        # Inicia a transação de banco
         with db_engine.connect() as conn:
             conn.begin() 
             
-            # 4. Lógica de Negócios (orquestrando serviços)
+            # 4. Lógica de Negócios (igual ao código anterior)
             
             if intent == 'Renda' or intent == 'Despesa':
                 trans_data = gemini_service.extract_transaction_details(texto_msg, intent)
@@ -198,7 +227,7 @@ def handle_whatsapp_webhook():
                 nome_destino = transf_data.get('conta_destino')
                 
                 if not valor_dec or not nome_origem or not nome_destino:
-                    raise Exception("Gemini não conseguiu extrair os dados da transferência (valor, origem, destino).")
+                    raise Exception("Gemini não conseguiu extrair os dados da transferência.")
 
                 conta_id_origem = finance_service.get_account_by_name(conn, usuario_id, nome_origem)
                 conta_id_destino = finance_service.get_account_by_name(conn, usuario_id, nome_destino)
@@ -223,30 +252,32 @@ def handle_whatsapp_webhook():
                 nome_cartao = fatura_data.get('conta_cartao')
 
                 if not valor_dec or not nome_origem or not nome_cartao:
-                    raise Exception("Gemini não conseguiu extrair os dados do pagamento (valor, origem, cartão).")
+                    raise Exception("Gemini não conseguiu extrair os dados do pagamento.")
                 
                 conta_id_origem = finance_service.get_account_by_name(conn, usuario_id, nome_origem)
                 conta_id_cartao = finance_service.get_account_by_name(conn, usuario_id, nome_cartao)
 
                 if not conta_id_origem or not conta_id_cartao:
-                    raise Exception(f"Não foi possível encontrar as contas ({nome_origem} -> {nome_cartao}).")
+                    raise Exception(f"Não foi possível encontrar as contas.")
                 
                 nome_cartao_pago = finance_service.create_fatura_payment(
                     conn, usuario_id, conta_id_origem, conta_id_cartao, valor_dec, data_hoje
                 )
                 
                 valor_fmt = formatar_moeda(valor_dec)
-                resposta_para_usuario = f"✅ Pagamento da fatura '{nome_cartao_pago}' ({valor_fmt}) registrado com sucesso!"
+                resposta_para_usuario = f"✅ Pagamento da fatura '{nome_cartao_pago}' ({valor_fmt}) registrado!"
 
             elif intent == 'Consulta Potes':
                 potes_result = finance_service.get_pote_status(conn, usuario_id)
                 resposta_para_usuario = "📊 *Status dos Seus Potes (Este Mês)* 📊\n\n"
                 if not potes_result: 
-                    resposta_para_usuario = "Você ainda não configurou nenhum 'Pote de Gasto' (Orçamento)."
+                    resposta_para_usuario = "Você ainda não configurou nenhum 'Pote de Gasto'."
                 else:
                     for pote in potes_result:
-                        valor_limite = float(pote[1]); valor_gasto = float(pote[2] or 0) * -1; valor_restante = valor_limite - valor_gasto
-                        resposta_para_usuario += f"🍯 *{pote[0]}*:\n"
+                        valor_limite = float(pote[1])
+                        valor_gasto = float(pote[2] or 0) * -1
+                        valor_restante = valor_limite - valor_gasto
+                        resposta_para_usuario += f"🯠*{pote[0]}*:\n"
                         resposta_para_usuario += f"   - Gasto: *{formatar_moeda(valor_gasto)}*\n"
                         resposta_para_usuario += f"   - Limite: {formatar_moeda(valor_limite)}\n"
                         resposta_para_usuario += f"   - Restante: {formatar_moeda(valor_restante)}\n\n"
@@ -254,40 +285,40 @@ def handle_whatsapp_webhook():
             elif intent == 'Consulta Reserva':
                 media_mensal, reserva_ideal = finance_service.get_reserva_status(conn, usuario_id)
                 resposta_para_usuario = "🆘 *Cálculo da Reserva de Emergência* 🆘\n\n"
-                resposta_para_usuario += f"Sua média de gastos essenciais (últimos 3 meses) é: *{formatar_moeda(media_mensal)}* / mês\n"
-                resposta_para_usuario += f"Sua reserva ideal (6x) é: *{formatar_moeda(reserva_ideal)}*"
+                resposta_para_usuario += f"Média de gastos essenciais: *{formatar_moeda(media_mensal)}* / mês\n"
+                resposta_para_usuario += f"Reserva ideal (6x): *{formatar_moeda(reserva_ideal)}*"
 
             elif intent == 'Consulta Categoria Específica':
                 cat_data = gemini_service.extract_category_query(texto_msg)
                 nome_categoria_consulta = cat_data.get('nome_categoria')
                 if not nome_categoria_consulta: 
-                    raise Exception("Gemini não conseguiu extrair o nome da categoria da consulta.")
+                    raise Exception("Gemini não conseguiu extrair o nome da categoria.")
                 
                 valor_gasto = finance_service.get_category_spending(conn, usuario_id, nome_categoria_consulta)
-                
                 resposta_para_usuario = f"ℹ️ *Consulta de Categoria (Este Mês)*\n\n"
                 resposta_para_usuario += f"Você gastou *{formatar_moeda(valor_gasto)}* com '{nome_categoria_consulta}'."
 
             else:
-                resposta_para_usuario = f"🤔 Desculpe, não entendi. Tente 'gastei 50', 'transferi 100', 'paguei a fatura', 'meus potes' ou 'minha reserva'."
+                resposta_para_usuario = "🤔 Desculpe, não entendi. Tente 'gastei 50', 'meus potes' ou 'minha reserva'."
 
             conn.commit() 
         
-        print(f"[DATABASE] Processamento MANUAL concluído (Usuário: {usuario_id})!")
+        print(f"[DATABASE] Processamento concluído (Usuário: {usuario_id})!")
         return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
     except sqlalchemy_exc.SQLAlchemyError as db_err:
-        print(f"[ERRO] Erro de Banco de Dados: {db_err}")
+        print(f"[ERRO] Erro de Banco: {db_err}")
         try: 
             with db_engine.connect() as conn: 
                 conn.rollback()
-        except: pass
-        return jsonify({"status": "erro", "resposta": f"Erro de Banco de Dados. Tente novamente."}), 200
+        except: 
+            pass
+        return jsonify({"status": "erro", "resposta": "Erro de Banco de Dados. Tente novamente."}), 200
     except Exception as e:
         print(f"[ERRO] Erro geral: {e}")
         try: 
             with db_engine.connect() as conn: 
                 conn.rollback()
-        except: pass
-        # Não envie o 'str(e)' para o usuário por segurança
-        return jsonify({"status": "erro", "resposta": f"Ocorreu um erro ao processar sua solicitação. Tente novamente."}), 500
+        except: 
+            pass
+        return jsonify({"status": "erro", "resposta": "Erro ao processar. Tente novamente."}), 500
