@@ -1,74 +1,23 @@
+# motor_agendamentos.py
 import os
-import requests
-import locale 
+import locale # Removido, pois o app/__init__ já configura
 from sqlalchemy import create_engine, text, exc as sqlalchemy_exc
-from datetime import date, timedelta
-from calendar import monthrange
+from datetime import date
+from calendar import monthrange # Removido, pois agora está no finance_service
 
-# Configura o locale para R$ (Padrão Brasileiro)
-try:
-    locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
-except locale.Error:
-    try:
-        locale.setlocale(locale.LC_ALL, 'Portuguese_Brazil.1252') # Windows
-    except Exception as e:
-        print(f"[MOTOR AVISO] Locale 'pt_BR' não encontrado. Usando padrão. Erro: {e}")
+# --- NOVAS IMPORTAÇÕES ---
+# Importa os serviços que criamos
+from app.utils import formatar_moeda
+from app.services.finance_service import get_or_create_fatura
+from app.services.notification_service import enviar_notificacao_whatsapp
+# --- FIM DAS NOVAS IMPORTAÇÕES ---
 
 
-def formatar_moeda(valor):
-    """ Tenta formatar como R$ (BRL). Se falhar, usa um formato simples. """
-    if valor is None:
-        return "R$ 0,00"
-    try:
-        # --- CORREÇÃO ---
-        # A chamada original 'return formatar_moeda(valor)' era uma recursão infinita.
-        # A chamada correta é para a biblioteca 'locale'.
-        return locale.currency(valor, grouping=True)
-        # --- FIM DA CORREÇÃO ---
-    except Exception:
-        # Se o locale 'pt_BR' não estiver disponível no servidor, usa um fallback manual.
-        # Formata com 2 casas decimais, troca ',' por 'X', '.' por ',' e 'X' por '.'
-        return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")    
-    
+# A função 'formatar_moeda' foi REMOVIDA daqui (agora importada)
 
-# (Função de fatura, oculta por brevidade)
-def get_or_create_fatura(conn, conta_id, data_transacao, usuario_id):
-    # ... (Lógica completa de cálculo de fatura) ...
-    sql_get_card_info = text("SELECT dia_fechamento, dia_vencimento FROM Contas WHERE id = :conta_id AND usuario_id = :uid AND tipo_conta = 'Cartão de Crédito'"); card_info = conn.execute(sql_get_card_info, {"conta_id": conta_id, "uid": usuario_id}).fetchone()
-    if not card_info or not card_info.dia_fechamento or not card_info.dia_vencimento: return None 
-    dia_fechamento = card_info.dia_fechamento; dia_vencimento = card_info.dia_vencimento; dia_transacao = data_transacao.day; mes_transacao = data_transacao.month; ano_transacao = data_transacao.year; data_fatura_fechamento = None; data_fatura_vencimento = None
-    try: data_fechamento_mes_atual = date(ano_transacao, mes_transacao, dia_fechamento)
-    except ValueError: _, ultimo_dia_mes = monthrange(ano_transacao, mes_transacao); data_fechamento_mes_atual = date(ano_transacao, mes_transacao, ultimo_dia_mes)
-    if data_transacao <= data_fechamento_mes_atual:
-        try: data_fatura_vencimento = date(ano_transacao, mes_transacao, dia_vencimento)
-        except ValueError: _, ultimo_dia_mes = monthrange(ano_transacao, mes_transacao); data_fatura_vencimento = date(ano_transacao, mes_transacao, ultimo_dia_mes)
-        data_fatura_fechamento = data_fechamento_mes_atual
-        if dia_vencimento < dia_fechamento: 
-            ano_venc, mes_venc = (ano_transacao, mes_transacao + 1) if mes_transacao < 12 else (ano_transacao + 1, 1)
-            try: data_fatura_vencimento = date(ano_venc, mes_venc, dia_vencimento)
-            except ValueError: _, ultimo_dia_mes = monthrange(ano_venc, mes_venc); data_fatura_vencimento = date(ano_venc, mes_venc, ultimo_dia_mes)
-    else:
-        ano_fech, mes_fech = (ano_transacao, mes_transacao + 1) if mes_transacao < 12 else (ano_transacao + 1, 1); ano_venc, mes_venc = (ano_fech, mes_fech + 1) if mes_fech < 12 else (ano_fech + 1, 1)
-        try: data_fatura_fechamento = date(ano_fech, mes_fech, dia_fechamento)
-        except ValueError: _, ultimo_dia_mes = monthrange(ano_fech, mes_fech); data_fatura_fechamento = date(ano_fech, mes_fech, ultimo_dia_mes)
-        try: data_fatura_vencimento = date(ano_venc, mes_venc, dia_vencimento)
-        except ValueError: _, ultimo_dia_mes = monthrange(ano_venc, mes_venc); data_fatura_vencimento = date(ano_venc, mes_venc, ultimo_dia_mes)
-    sql_find_fatura = text("SELECT id FROM Faturas WHERE conta_id = :cid AND data_vencimento = :dv"); result = conn.execute(sql_find_fatura, {"cid": conta_id, "dv": data_fatura_vencimento}); fatura_id = result.scalar_one_or_none()
-    if fatura_id is None:
-        sql_create_fatura = text("INSERT INTO Faturas (conta_id, data_vencimento, data_fechamento, status) VALUES (:cid, :dv, :df, 'Aberta') ON CONFLICT (conta_id, data_vencimento) DO NOTHING RETURNING id"); result = conn.execute(sql_create_fatura, {"cid": conta_id, "dv": data_fatura_vencimento, "df": data_fatura_fechamento}); fatura_id = result.scalar_one_or_none()
-        if fatura_id is None: result = conn.execute(sql_find_fatura, {"cid": conta_id, "dv": data_fatura_vencimento}); fatura_id = result.scalar_one_or_none()
-        print(f"[MOTOR] Fatura ID {fatura_id} (Venc: {data_fatura_vencimento}) sendo usada/criada para Cartão ID {conta_id}")
-    return fatura_id
+# A função 'get_or_create_fatura' foi REMOVIDA daqui (agora importada)
 
-def enviar_notificacao_whatsapp(numero, mensagem, bot_url, api_key):
-    # ... (Lógica de enviar notificação, sem mudança) ...
-    try:
-        headers = {'x-api-key': api_key}; payload = {'numero': numero, 'mensagem': mensagem}
-        response = requests.post(f"{bot_url}/enviar-mensagem", json=payload, headers=headers, timeout=10) # Adicionado timeout
-        if response.status_code == 200: print(f"[MOTOR] Notificação enviada com sucesso para {numero}.")
-        else: print(f"[MOTOR] ERRO: Bot respondeu com status {response.status_code}")
-    except Exception as e:
-        print(f"[MOTOR] ERRO: Falha ao chamar a API do Bot: {e}")
+# A função 'enviar_notificacao_whatsapp' foi REMOVIDA daqui (agora importada)
 
 
 def processar_agendamentos():
@@ -77,7 +26,11 @@ def processar_agendamentos():
     
     # 1. Carregar Configurações
     try:
-        DATABASE_URL = os.environ['DATABASE_URL']
+        # Note: Se este script rodar *totalmente* fora do contexto do Flask
+        # (ex: python motor_agendamentos.py), ele não lerá do app/config.py.
+        # Mas como ele é chamado pela rota /run-motor-agendamentos,
+        # as variáveis de ambiente já estarão carregadas.
+        DATABASE_URL_ENV = os.environ['DATABASE_URL']
         API_SECRET_KEY = os.environ['API_SECRET_KEY']
         BOT_WHATSAPP_URL = os.environ['BOT_WHATSAPP_URL']
     except KeyError as e:
@@ -85,6 +38,7 @@ def processar_agendamentos():
         return
 
     # 2. Conectar ao Banco
+    DATABASE_URL = DATABASE_URL_ENV
     if DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
     
@@ -127,9 +81,12 @@ def processar_agendamentos():
                             
                             valor_formatado = "???"
                             if ag.valor_previsto:
+                                # Usa a função importada!
                                 valor_formatado = formatar_moeda(ag.valor_previsto)
 
                             mensagem = f"🔔 *LEMBRETE DE CONTA VARIÁVEL* 🔔\n\nSua conta '{ag.descricao}' vence em {ag.notificar_antes_dias} dias (no dia {ag.dia_execucao}).\n\nO valor previsto é: *{valor_formatado}*\n\nPor favor, me diga o valor exato deste mês para eu registrar (ex: 'gastei 150.50 na conta de luz')."
+                            
+                            # Usa a função importada!
                             enviar_notificacao_whatsapp(ag.numero_whatsapp, mensagem, BOT_WHATSAPP_URL, API_SECRET_KEY)
 
                     # --- Lógica de Gasto Fixo ---
@@ -138,7 +95,9 @@ def processar_agendamentos():
                             print(f"[MOTOR] Processando GASTO FIXO para Agendamento ID {ag.agendamento_id}...")
                             fatura_id = None
                             if ag.tipo_conta == 'Cartão de Crédito':
+                                # Usa a função importada!
                                 fatura_id = get_or_create_fatura(conn, ag.conta_id, hoje, ag.usuario_id)
+                            
                             valor_para_db = (ag.valor_previsto or 0) * -1 
                             sql_insert = text("INSERT INTO Transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, descricao, valor, tipo_transacao, data_transacao) VALUES (:uid, :cid, :scid, :fid, :desc, :val, :tipo, :data)")
                             conn.execute(sql_insert, {"uid": ag.usuario_id, "cid": ag.conta_id, "scid": ag.subcategoria_id, "fid": fatura_id, "desc": ag.descricao, "val": valor_para_db, "tipo": 'Despesa', "data": hoje})
@@ -150,11 +109,14 @@ def processar_agendamentos():
                             print(f"[MOTOR] Processando PARCELA {ag.parcelas_executadas + 1}/{ag.total_parcelas} para Agendamento ID {ag.agendamento_id}...")
                             fatura_id = None
                             if ag.tipo_conta == 'Cartão de Crédito':
+                                # Usa a função importada!
                                 fatura_id = get_or_create_fatura(conn, ag.conta_id, hoje, ag.usuario_id)
+                            
                             descricao_parcela = f"{ag.descricao} ({ag.parcelas_executadas + 1}/{ag.total_parcelas})"
                             valor_para_db = (ag.valor_previsto or 0) * -1
                             sql_insert_parc = text("INSERT INTO Transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, descricao, valor, tipo_transacao, data_transacao) VALUES (:uid, :cid, :scid, :fid, :desc, :val, :tipo, :data)")
                             conn.execute(sql_insert_parc, {"uid": ag.usuario_id, "cid": ag.conta_id, "scid": ag.subcategoria_id, "fid": fatura_id, "desc": descricao_parcela, "val": valor_para_db, "tipo": 'Despesa', "data": hoje})
+                            
                             nova_parcela_exec = ag.parcelas_executadas + 1
                             desativar_agendamento = (ag.total_parcelas is not None and nova_parcela_exec == ag.total_parcelas)
                             sql_update_ag = text("UPDATE Agendamentos SET parcelas_executadas = :nova_parcela, ativo = :novo_ativo WHERE id = :ag_id")
@@ -163,14 +125,12 @@ def processar_agendamentos():
 
                     conn.commit() 
                 
-                # --- CORREÇÃO DE SINTAXE ---
                 except Exception as e_ag:
                     print(f"[MOTOR] ERRO ao processar Agendamento ID {ag.agendamento_id}: {e_ag}")
                     try:
                         conn.rollback()
                     except:
                         pass
-                # --- FIM DA CORREÇÃO ---
 
     except sqlalchemy_exc.SQLAlchemyError as db_err:
         print(f"[MOTOR] ERRO CRÍTICO de Banco de Dados: {db_err}")
@@ -181,6 +141,9 @@ def processar_agendamentos():
 
 # Ponto de Entrada (só para testes locais)
 if __name__ == "__main__":
+    # Para rodar isso localmente (python motor_agendamentos.py), 
+    # você precisará de um .env ou similar, pois o app/__init__.py não foi executado.
+    # Mas para o servidor, está correto.
     if 'DATABASE_URL' not in os.environ:
         print("AVISO: Rode este script definindo as variáveis de ambiente.")
     else:
