@@ -4,6 +4,7 @@ import google.generativeai as genai
 from flask import Flask
 from sqlalchemy import create_engine
 from .config import GEMINI_API_KEY, DATABASE_URL
+from app.services.redis_service import redis_service
 
 # Variáveis globais que serão "injetadas" (acessíveis) em outros módulos
 # (Similar a registrar singletons no DI do .NET)
@@ -42,6 +43,9 @@ def create_app():
     else: 
         print("AVISO CRÍTICO: Chave do Gemini (GEMINI_API_KEY) não configurada.")
         
+    # Verificar conexão Redis na inicialização
+    if not redis_service.is_connected():
+        print("AVISO: Redis não conectado. Sistema de confirmação desabilitado.")
     
     # 4. Registrar os "Controllers" (Blueprints)
     # Vamos criar esses arquivos no próximo passo
