@@ -17,6 +17,8 @@ API_SECRET_KEY = os.environ.get('API_SECRET_KEY', 'uma-senha-bem-forte-12345')
 # URL do serviço do Bot (para enviar notificações)
 BOT_WHATSAPP_URL = os.environ.get('BOT_WHATSAPP_URL', 'https://bot-appfinanceiro-whatsapp.onrender.com')
 
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
+
 # Configuração do Banco de Dados
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
