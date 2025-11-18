@@ -23,7 +23,7 @@ GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
 GOOGLE_REDIRECT_URI = os.environ.get(
     'GOOGLE_REDIRECT_URI', 
-    'https://bot-appfinanceiro-whatsapp.onrender.com/oauth2callback'  # Mudar para Render depois
+    'https://app-controle-financeiro-oh32.onrender.com/oauth2callback'
 )
 
 # Configuração do Banco de Dados
