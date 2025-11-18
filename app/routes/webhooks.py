@@ -506,16 +506,17 @@ def handle_whatsapp_webhook():
         return jsonify({"status": "erro", "resposta": "Erro ao processar."}), 500
     
 
-@webhooks_bp.route('/webhook-swile-payment', methods=['POST'])
+@webhooks_bp.route('/webhook-sms-payment', methods=['POST'])
 def handle_swile_payment():
     '''
-    Endpoint específico para pagamentos via Swile (iPhone Automation).
+    Endpoint específico para pagamentos via Sms (iPhone Automation).
     
     Payload esperado:
     {
         "user_api_key": "...",
         "descricao_pagamento": "Conta de Água",
         "valor_pago": 150.50,
+        "conta_pagamento": "swile",
         "data_pagamento": "2024-01-15" (opcional, padrão: hoje)
     }
     '''
@@ -524,9 +525,10 @@ def handle_swile_payment():
         user_api_key = data.get('user_api_key')
         descricao = data.get('descricao_pagamento')
         valor = data.get('valor_pago')
+        conta_pagamento = data.get('conta_pagamento')
         data_pag = data.get('data_pagamento')
         
-        if not all([user_api_key, descricao, valor]):
+        if not all([user_api_key, descricao, valor, conta_pagamento]):
             return jsonify({"status": "erro", "mensagem": "Dados faltando"}), 400
         
         # Autenticar usuário
@@ -553,18 +555,18 @@ def handle_swile_payment():
                 agendamento_id, desc_original, valor_previsto, dia_venc, categoria = match
                 
                 # Buscar conta "Swile" (ou criar se não existir)
-                sql_swile = text("SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta ILIKE '%swile%' LIMIT 1")
-                conta_swile_id = conn.execute(sql_swile, {"uid": usuario_id}).scalar_one_or_none()
+                sql_conta_pagamento = text("SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta ILIKE '%{conta}%' LIMIT 1")
+                conta_id = conn.execute(sql_conta_pagamento, {"uid": usuario_id}).scalar_one_or_none()
                 
-                if not conta_swile_id:
+                if not conta_id:
                     # Usar conta padrão
-                    conta_swile_id = None
+                    conta_id = None
                 
                 # Quitar a conta fixa
                 transaction_id = FixedBillsService.settle_fixed_bill(
                     conn, usuario_id, agendamento_id, valor, data_pagamento,
-                    conta_pagamento_id=conta_swile_id,
-                    observacao="Pago via Swile"
+                    conta_pagamento_id=conta_id,
+                    observacao="Pago via {conta}"
                 )
                 
                 conn.commit()
@@ -606,7 +608,7 @@ def handle_swile_payment():
                 
                 finance_service.create_transaction(
                     conn, usuario_id, conta_id, id_categoria, None,
-                    f"{descricao} (Swile)", float(valor) * -1, 'Despesa', data_pagamento
+                    f"{descricao} ({conta_pagamento})", float(valor) * -1, 'Despesa', data_pagamento
                 )
                 
                 conn.commit()
@@ -615,7 +617,7 @@ def handle_swile_payment():
                     f"✅ Pagamento Registrado!\n\n"
                     f"📝 {descricao}\n"
                     f"💰 {formatar_moeda(valor)}\n"
-                    f"💳 Via Swile\n\n"
+                    f"💳 {conta_pagamento}\n\n"
                     f"_Não encontrei uma conta fixa correspondente, então registrei como despesa avulsa._"
                 )
                 
@@ -630,5 +632,5 @@ def handle_swile_payment():
                 }), 200
         
     except Exception as e:
-        print(f"[SWILE] Erro: {e}")
+        print(f"[{conta_pagamento}] Erro: {e}")
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
