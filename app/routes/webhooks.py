@@ -505,7 +505,7 @@ def handle_whatsapp_webhook():
                 resposta_para_usuario = f"✅ Pagamento da fatura '{nome_cartao_pago}' ({valor_fmt}) registrado com sucesso!"
             
             #=== INTENÇÃO: Consulta Agenda =====    
-            elif intent == 'Consulta Agenda':
+            elif intent == 'Consultar Agenda':
                 print(f"[WHATSAPP] Intenção de Consulta Agenda detectada.")
                 calendar_data = gemini_service.extract_calendar_query(texto_msg)
                 period_type = calendar_data.get('period_type', 'hoje')
