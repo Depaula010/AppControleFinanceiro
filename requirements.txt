@@ -1,7 +1,11 @@
 Flask==3.0.0
 gunicorn==21.2.0
-google-generativeai==0.5.4  # Para o Gemini
-SQLAlchemy==2.0.30          # Para o Banco de Dados
-psycopg2-binary==2.9.9      # "Driver" para o PostgreSQL
+google-generativeai==0.5.4  
+SQLAlchemy==2.0.30
+psycopg2-binary==2.9.9
 requests==2.32.3
 redis==5.0.1
+google-auth==2.23.4
+google-auth-oauthlib==1.1.0
+google-auth-httplib2==0.1.1
+google-api-python-client==2.108.0

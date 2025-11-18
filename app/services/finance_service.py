@@ -248,7 +248,6 @@ def setup_user_data(numero_whatsapp, dia_venc_cartao, dia_fech_cartao):
         except: pass
         raise e
     
-
 def get_user_by_api_key(api_key):
     """ Encontra um usuário pela sua API key do Automate. """
     if not db_engine: raise Exception("Banco não configurado")
@@ -462,3 +461,35 @@ def get_category_spending(conn, usuario_id, nome_categoria_consulta):
     """)
     gasto_total_negativo = conn.execute(sql, {"uid": usuario_id, "nome_cat": f"%{nome_categoria_consulta}%"}).scalar()
     return (float(gasto_total_negativo or 0)) * -1
+
+def add_google_calendar_tokens_table():
+    """Adiciona tabela para armazenar tokens OAuth2 do Google Calendar"""
+    if not db_engine:
+        raise Exception("Banco não configurado")
+    
+    sql = text("""
+        CREATE TABLE IF NOT EXISTS GoogleCalendarTokens (
+            id SERIAL PRIMARY KEY,
+            usuario_id INT NOT NULL REFERENCES Usuarios(id) ON DELETE CASCADE,
+            access_token TEXT NOT NULL,
+            refresh_token TEXT,
+            token_expiry TIMESTAMP WITH TIME ZONE,
+            scopes TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(usuario_id)
+        );
+        
+        CREATE INDEX IF NOT EXISTS idx_calendar_tokens_usuario 
+        ON GoogleCalendarTokens(usuario_id);
+    """)
+    
+    try:
+        with db_engine.connect() as conn:
+            conn.begin()
+            conn.execute(sql)
+            conn.commit()
+            print("[DB] ✅ Tabela GoogleCalendarTokens criada/verificada")
+    except Exception as e:
+        print(f"[DB] Erro ao criar tabela: {e}")
+        raise
