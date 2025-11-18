@@ -102,6 +102,7 @@ def get_message_intent(texto_msg):
     - "quanto gastei ontem?" → {{"intent": "Consulta Período"}}
     - "gastos do final de semana" → {{"intent": "Consulta Período"}}
     - "minhas contas fixas" → {{"intent": "Consulta Contas Fixas"}}
+    - "tenho compromisso hoje?" → {{"intent": "Consulta Agenda"}}
     - "paguei a água no valor de 150" → {{"intent": "Quitar Conta Fixa"}}
     '''
     
@@ -254,4 +255,38 @@ def extract_bill_payment(texto_msg):
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-BILL] Pagamento extraído: {json_text}")
+    return json.loads(json_text)
+
+def extract_calendar_query(texto_msg):
+    '''
+    Extrai o período da consulta de agenda.
+    
+    Returns:
+        {"period_type": "hoje" | "amanha" | "final_de_semana" | etc.}
+    '''
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+    
+    prompt = f'''Analise a pergunta sobre agenda: "{texto_msg}"
+    
+    Identifique o período:
+    - "hoje" → {{"period_type": "hoje"}}
+    - "amanhã" → {{"period_type": "amanha"}}
+    - "final de semana" / "fds" → {{"period_type": "final_de_semana"}}
+    - "esta semana" → {{"period_type": "esta_semana"}}
+    - "próxima semana" / "semana que vem" → {{"period_type": "proxima_semana"}}
+    - "próximo mês" / "mês que vem" → {{"period_type": "proximo_mes"}}
+    
+    Responda APENAS com JSON.
+    
+    Exemplos:
+    - "tenho compromisso hoje?" → {{"period_type": "hoje"}}
+    - "minha agenda amanhã" → {{"period_type": "amanha"}}
+    - "compromissos do final de semana" → {{"period_type": "final_de_semana"}}
+    '''
+    
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-CALENDAR] Período: {json_text}")
     return json.loads(json_text)
