@@ -94,3 +94,11 @@ def run_motor_agendamentos():
     except Exception as e:
         print(f"[MOTOR] ERRO CRÍTICO ao rodar /run-motor-agendamentos: {e}")
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
+    
+@admin_bp.route('/setup-calendar-table', methods=['GET'])
+def setup_calendar_table():
+    try:
+        finance_service.add_google_calendar_tokens_table()
+        return "✅ Tabela GoogleCalendarTokens criada!", 200
+    except Exception as e:
+        return f"❌ Erro: {str(e)}", 500
