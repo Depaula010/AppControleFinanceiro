@@ -264,6 +264,8 @@ def extract_calendar_query(texto_msg):
     Returns:
         {"period_type": "hoje" | "amanha" | "final_de_semana" | etc.}
     '''
+    print(f"[GEMINI-CALENDAR] Extraindo período da mensagem: {texto_msg}")
+    
     if not gemini_model:
         raise Exception("Modelo Gemini não configurado.")
     
