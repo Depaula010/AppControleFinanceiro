@@ -76,11 +76,13 @@ class CalendarQueryService:
         Returns:
             str: Mensagem formatada para WhatsApp
         """
+        print(f"[CALENDAR] Consultando agenda do usuário {usuario_id} para período '{period_type}'")
         # Verificar se usuário conectou
         if not GoogleCalendarOAuthService.is_user_connected(usuario_id):
             # Gerar link de conexão
             base_url = GOOGLE_REDIRECT_URI.rsplit('/', 1)[0]  # Remove /oauth2callback
             connect_url = f"{base_url}/connect-calendar/{usuario_id}"
+            print(f"[CALENDAR] Usuário conectado. Link de conexão: {connect_url}")
             
             return (
                 f"📅 *Google Calendar não conectado*\n\n"

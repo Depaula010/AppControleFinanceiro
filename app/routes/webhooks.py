@@ -506,12 +506,13 @@ def handle_whatsapp_webhook():
             
             #=== INTENÇÃO: Consulta Agenda =====    
             elif intent == 'Consulta Agenda':
+                print(f"[WHATSAPP] Intenção de Consulta Agenda detectada.")
                 calendar_data = gemini_service.extract_calendar_query(texto_msg)
                 period_type = calendar_data.get('period_type', 'hoje')
 
                 # Usar novo serviço OAuth
                 resposta_para_usuario = CalendarQueryService.query_agenda(usuario_id, period_type)
-
+                print(f"[WHATSAPP] Resposta da Consulta Agenda: {resposta_para_usuario}")
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
             
             #=== INTENÇÃO: Consulta Categoria Específica =====
