@@ -86,14 +86,15 @@ def get_message_intent(texto_msg):
     Classifique a intenção principal como:
     - "Renda"
     - "Despesa"
+    - "Consulta Reserva"
+    - "Consulta Período" ("perguntas como "quanto gastei ontem?", "gastos do fds")
+    - "Consulta Potes"
+    - "Consulta Contas Fixas" ("minhas contas fixas", "contas pendentes")
+    - "Quitar Conta Fixa ("paguei a conta de água")
     - "Transferência"
     - "Pagamento Fatura"
-    - "Consulta Potes"
-    - "Consulta Reserva"
+    - "Consultar Agenda"
     - "Consulta Categoria Específica"
-    - "Consulta Período" (NOVO: perguntas como "quanto gastei ontem?", "gastos do fds")
-    - "Consulta Contas Fixas" (NOVO: "minhas contas fixas", "contas pendentes")
-    - "Quitar Conta Fixa" (NOVO: "paguei a conta de água")
     
     Responda APENAS com JSON: {{"intent": "..."}}
     
