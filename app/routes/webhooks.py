@@ -503,7 +503,8 @@ def handle_whatsapp_webhook():
                 
                 valor_fmt = formatar_moeda(valor_dec)
                 resposta_para_usuario = f"✅ Pagamento da fatura '{nome_cartao_pago}' ({valor_fmt}) registrado com sucesso!"
-                
+            
+            #=== INTENÇÃO: Consulta Agenda =====    
             elif intent == 'Consulta Agenda':
                 calendar_data = gemini_service.extract_calendar_query(texto_msg)
                 period_type = calendar_data.get('period_type', 'hoje')
@@ -512,6 +513,18 @@ def handle_whatsapp_webhook():
                 resposta_para_usuario = CalendarQueryService.query_agenda(usuario_id, period_type)
 
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+            
+            #=== INTENÇÃO: Consulta Categoria Específica =====
+            elif intent == 'Consulta Categoria Específica':
+                cat_data = gemini_service.extract_category_query(texto_msg)
+                nome_categoria_consulta = cat_data.get('nome_categoria')
+                if not nome_categoria_consulta: 
+                    raise Exception("Gemini não conseguiu extrair o nome da categoria.")
+
+                valor_gasto = finance_service.get_category_spending(conn, usuario_id, nome_categoria_consulta)
+                
+                resposta_para_usuario = f"ℹ️ *Consulta de Categoria (Este Mês)*\n\n"
+                resposta_para_usuario += f"Você gastou *{formatar_moeda(valor_gasto)}* com '{nome_categoria_consulta}'."
 
             else:
                 return jsonify({"status": "sucesso", "resposta": "🤔 Não entendi. Tente 'gastei 50' ou 'meus potes'."}), 200
