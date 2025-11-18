@@ -78,28 +78,43 @@ def get_message_intent(texto_msg):
     """
     Usa o Gemini para classificar a intenção principal da mensagem do WhatsApp.
     """
-    if not gemini_model: raise Exception("Modelo Gemini não configurado.")
+    if not gemini_model: 
+        raise Exception("Modelo Gemini não configurado.")
     
-    prompt = f"""Analise a mensagem do usuário: "{texto_msg}"
-    Classifique a intenção principal como "Renda", "Despesa", "Transferência", "Pagamento Fatura", "Consulta Potes", "Consulta Reserva", ou "Consulta Categoria Específica".
-    Responda APENAS com um JSON contendo a chave "intent".
+    prompt = f'''Analise a mensagem: "{texto_msg}"
+    
+    Classifique a intenção principal como:
+    - "Renda"
+    - "Despesa"
+    - "Transferência"
+    - "Pagamento Fatura"
+    - "Consulta Potes"
+    - "Consulta Reserva"
+    - "Consulta Categoria Específica"
+    - "Consulta Período" (NOVO: perguntas como "quanto gastei ontem?", "gastos do fds")
+    - "Consulta Contas Fixas" (NOVO: "minhas contas fixas", "contas pendentes")
+    - "Quitar Conta Fixa" (NOVO: "paguei a conta de água")
+    
+    Responda APENAS com JSON: {{"intent": "..."}}
+    
     Exemplos:
-    - "gastei 50 na padaria" -> {{"intent": "Despesa"}}
-    - "recebi 100 do freela" -> {{"intent": "Renda"}}
-    - "transferi 500 do Inter para o Nubank" -> {{"intent": "Transferência"}}
-    - "paguei a fatura de 1500 do cartão inter" -> {{"intent": "Pagamento Fatura"}}
-    - "como estão meus potes?" -> {{"intent": "Consulta Potes"}}
-    - "qual minha reserva de emergência?" -> {{"intent": "Consulta Reserva"}}
-    - "quanto gastei com supermercado este mês?" -> {{"intent": "Consulta Categoria Específica"}}""";
+    - "quanto gastei ontem?" → {{"intent": "Consulta Período"}}
+    - "gastos do final de semana" → {{"intent": "Consulta Período"}}
+    - "minhas contas fixas" → {{"intent": "Consulta Contas Fixas"}}
+    - "paguei a água no valor de 150" → {{"intent": "Quitar Conta Fixa"}}
+    '''
+    
     response = gemini_model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     
     if not response_text:
         raise Exception("Falha na classificação da intenção: Resposta vazia do Gemini.")
         
-    json_intent_text = response_text.strip().replace("```json", "").replace("```", "")
-    intent_data = json.loads(json_intent_text)
-    print(f"[GEMINI-INTENT] Intenção detectada: {intent_data.get('intent')}")
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    intent_data = json.loads(json_text)
+    print(f"[GEMINI-INTENT] Intenção: {intent_data.get('intent')}")
     return intent_data.get('intent')
 
 def extract_transaction_details(texto_msg, intent):
@@ -165,3 +180,77 @@ def extract_category_query(texto_msg):
     json_extract_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-EXTRACT] Categoria para consulta: {json_extract_text}")
     return json.loads(json_extract_text)
+
+def extract_period_query(texto_msg):
+    '''
+    Extrai o tipo de período da mensagem do usuário.
+    
+    Returns:
+        {
+            "period_type": "ontem" | "hoje" | "final_de_semana" | etc.,
+            "categoria": "supermercado" (opcional)
+        }
+    '''
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+    
+    prompt = f'''Analise a pergunta: "{texto_msg}"
+    
+    Identifique o período que o usuário quer consultar:
+    - "ontem" → {{"period_type": "ontem"}}
+    - "hoje" → {{"period_type": "hoje"}}
+    - "final de semana" / "fds" → {{"period_type": "final_de_semana"}}
+    - "esta semana" → {{"period_type": "esta_semana"}}
+    - "semana passada" → {{"period_type": "semana_passada"}}
+    - "últimos 7 dias" → {{"period_type": "ultimos_7_dias"}}
+    - "este mês" → {{"period_type": "este_mes"}}
+    - "mês passado" → {{"period_type": "mes_passado"}}
+    
+    Se mencionar uma categoria específica, inclua também:
+    {{"period_type": "...", "categoria": "supermercado"}}
+    
+    Responda APENAS com JSON.
+    
+    Exemplos:
+    - "quanto gastei ontem?" → {{"period_type": "ontem"}}
+    - "gastos do final de semana" → {{"period_type": "final_de_semana"}}
+    - "quanto gastei com uber esta semana?" → {{"period_type": "esta_semana", "categoria": "uber"}}
+    '''
+    
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-PERIOD] Período extraído: {json_text}")
+    return json.loads(json_text)
+
+def extract_bill_payment(texto_msg):
+    '''
+    Extrai dados de um pagamento de conta fixa.
+    
+    Returns:
+        {
+            "descricao": "conta de água",
+            "valor": 150.50
+        }
+    '''
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+    
+    prompt = f'''Analise: "{texto_msg}"
+    
+    O usuário pagou uma conta. Extraia:
+    - "descricao": nome da conta (ex: "conta de água", "seguro carro")
+    - "valor": valor pago
+    
+    Responda APENAS com JSON.
+    
+    Exemplos:
+    - "paguei 150 da água" → {{"descricao": "conta de água", "valor": 150.00}}
+    - "quitei o seguro do carro, 800 reais" → {{"descricao": "seguro carro", "valor": 800.00}}
+    '''
+    
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-BILL] Pagamento extraído: {json_text}")
+    return json.loads(json_text)

@@ -2,6 +2,10 @@
 from flask import Blueprint, jsonify, request
 from sqlalchemy import exc as sqlalchemy_exc
 from datetime import date
+from app.services.period_query_service import PeriodQueryService
+from app.services.fixed_bills_service import FixedBillsService
+
+from sqlalchemy import text
 
 from app import db_engine
 from app.config import API_SECRET_KEY, BOT_WHATSAPP_URL
@@ -324,10 +328,59 @@ def handle_whatsapp_webhook():
                     nome_cat = finance_service.get_category_name_by_id(conn, id_categoria)
                     resp = f"✅ {intent} salva!\n{trans_desc}\n{formatar_moeda(valor_dec)}\n{nome_cat}"
                     return jsonify({"status": "sucesso", "resposta": resp}), 200
+                
+            # ===== INTENÇÃO: Consulta Reserva =====
+            elif intent == 'Consulta Reserva':
+                media_mensal, reserva_ideal = finance_service.get_reserva_status(conn, usuario_id)
+                resposta_para_usuario = "🆘 *Cálculo da Reserva de Emergência* 🆘\n\n"
+                resposta_para_usuario += f"Média de gastos essenciais: *{formatar_moeda(media_mensal)}* / mês\n"
+                resposta_para_usuario += f"Reserva ideal (6x): *{formatar_moeda(reserva_ideal)}*"
+                             
+            # ===== INTENÇÃO: Consulta por Período =====
+            elif intent == 'Consulta Período':
+                
+                # Extrair período da mensagem
+                period_data = gemini_service.extract_period_query(texto_msg)
+                period_type = period_data.get('period_type', 'hoje')
+                categoria_filtro = period_data.get('categoria')
+
+                # Calcular datas
+                data_inicio, data_fim, desc_periodo = PeriodQueryService.get_period_dates(period_type)
+
+                if categoria_filtro:
+                    # Consulta com filtro de categoria
+                    total, transacoes_raw = PeriodQueryService.query_by_category_and_period(
+                        conn, usuario_id, categoria_filtro, data_inicio, data_fim
+                    )
+
+                    if total == 0:
+                        resposta_para_usuario = f"✅ Você não gastou nada com '{categoria_filtro}' {desc_periodo}! 🎉"
+                    else:
+                        resposta_para_usuario = f"💸 *GASTOS COM {categoria_filtro.upper()}* {desc_periodo.upper()}\n\n"
+                        resposta_para_usuario += f"💰 Total: *{formatar_moeda(total)}*\n\n"
+                        resposta_para_usuario += "📋 Transações:\n"
+
+                        for trans in transacoes_raw[:10]:  # Limitar a 10
+                            desc, valor, data_trans = trans
+                            valor_abs = abs(float(valor))
+                            data_fmt = data_trans.strftime('%d/%m')
+                            resposta_para_usuario += f"• {desc}: {formatar_moeda(valor_abs)} ({data_fmt})\n"
+
+                        if len(transacoes_raw) > 10:
+                            resposta_para_usuario += f"\n... e mais {len(transacoes_raw) - 10} transação(ões)"
+                else:
+                    # Consulta geral do período
+                    total, transacoes = PeriodQueryService.query_expenses_by_period(
+                        conn, usuario_id, data_inicio, data_fim
+                    )
+
+                    resposta_para_usuario = PeriodQueryService.format_period_query_response(
+                        total, transacoes, desc_periodo
+                    )
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
             
-            # Outros intents (Transferência, Consultas, etc.) - SEM confirmação
-            # ... (manter código anterior)
-            
+            # ===== INTENÇÃO: Consulta Potes =====
             elif intent == 'Consulta Potes':
                 potes = finance_service.get_pote_status(conn, usuario_id)
                 resp = "📊 *Seus Potes:*\n\n"
@@ -340,12 +393,242 @@ def handle_whatsapp_webhook():
                         rest = limite - gasto
                         resp += f"🯠*{p[0]}*\n  Gasto: {formatar_moeda(gasto)}\n  Limite: {formatar_moeda(limite)}\n  Resta: {formatar_moeda(rest)}\n\n"
                 return jsonify({"status": "sucesso", "resposta": resp}), 200
+                        
+            # ===== INTENÇÃO: Consulta Contas Fixas Pendentes =====
+            elif intent == 'Consulta Contas Fixas':
+                resposta_para_usuario = FixedBillsService.list_pending_bills_formatted(conn, usuario_id)
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
             
-            # ... (outros intents)
+            # ===== INTENÇÃO: Quitar Conta Fixa Manualmente =====
+            elif intent == 'Quitar Conta Fixa':
+                # Extrair dados do pagamento
+                payment_data = gemini_service.extract_bill_payment(texto_msg)
+                descricao_pag = payment_data.get('descricao')
+                valor_pago = float(payment_data.get('valor', 0))
+
+                if not descricao_pag or not valor_pago:
+                    raise Exception("Não consegui identificar qual conta você pagou ou o valor.")
+
+                # Buscar conta correspondente
+                match = FixedBillsService.find_matching_bill(conn, usuario_id, descricao_pag)
+
+                if not match:
+                    resposta_para_usuario = (
+                        f"🤔 Não encontrei uma conta fixa chamada '{descricao_pag}'.\n\n"
+                        f"Você quis dizer:\n"
+                        f"• \"Paguei a conta de água no valor de {formatar_moeda(valor_pago)}\"?\n\n"
+                        f"Ou prefere ver suas contas pendentes? Digite: *minhas contas fixas*"
+                    )
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                agendamento_id, desc_original, valor_previsto, dia_venc, categoria = match
+
+                # Quitar a conta
+                transaction_id = FixedBillsService.settle_fixed_bill(
+                    conn, usuario_id, agendamento_id, valor_pago, date.today(),
+                    observacao="Quitado manualmente"
+                )
+
+                conn.commit()
+
+                resposta_para_usuario = FixedBillsService.mark_bill_as_paid_response(
+                    desc_original, valor_pago, categoria
+                )
+
+                # Alertar se valor diferente do previsto
+                if abs(float(valor_previsto) - valor_pago) > 1:
+                    diferenca = valor_pago - float(valor_previsto)
+                    resposta_para_usuario += f"\n\n💡 *Atenção:* O valor pago ({formatar_moeda(valor_pago)}) "
+                    if diferenca > 0:
+                        resposta_para_usuario += f"foi *{formatar_moeda(diferenca)}* maior que o previsto."
+                    else:
+                        resposta_para_usuario += f"foi *{formatar_moeda(abs(diferenca))}* menor que o previsto."
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
             
+            #==== INTENÇÃO: Transferência =====
+            elif intent == 'Transferência':
+                contas_raw = finance_service.get_user_accounts(conn, usuario_id)
+                contas_list = [{"nome": c[1], "tipo": c[2]} for c in contas_raw]
+                
+                transf_data = gemini_service.extract_transfer_details(texto_msg, contas_list)
+                valor_dec = float(transf_data.get('valor_decimal', 0))
+                nome_origem = transf_data.get('conta_origem')
+                nome_destino = transf_data.get('conta_destino')
+                
+                if not valor_dec or not nome_origem or not nome_destino:
+                    raise Exception("Gemini não conseguiu extrair os dados da transferência (valor, origem, destino).")
+
+                conta_id_origem = finance_service.get_account_by_name(conn, usuario_id, nome_origem)
+                conta_id_destino = finance_service.get_account_by_name(conn, usuario_id, nome_destino)
+                
+                if not conta_id_origem or not conta_id_destino:
+                    raise Exception(f"Não foi possível encontrar as contas ({nome_origem} -> {nome_destino}).")
+                
+                nome_orig, nome_dest = finance_service.create_transfer_pair(
+                    conn, usuario_id, conta_id_origem, conta_id_destino, valor_dec, data_hoje
+                )
+                
+                valor_fmt = formatar_moeda(valor_dec)
+                resposta_para_usuario = f"✅ Transferência salva!\n\nValor: {valor_fmt}\nDe: {nome_orig}\nPara: {nome_dest}"
+
+            #==== INTENÇÃO: Pagamento Fatura =====
+            elif intent == 'Pagamento Fatura':
+                contas_raw = finance_service.get_user_accounts(conn, usuario_id)
+                contas_list = [{"nome": c[1], "tipo": c[2]} for c in contas_raw]
+
+                fatura_data = gemini_service.extract_fatura_payment_details(texto_msg, contas_list)
+                valor_dec = float(fatura_data.get('valor_decimal', 0))
+                nome_origem = fatura_data.get('conta_origem')
+                nome_cartao = fatura_data.get('conta_cartao')
+
+                if not valor_dec or not nome_origem or not nome_cartao:
+                    raise Exception("Gemini não conseguiu extrair os dados do pagamento (valor, origem, cartão).")
+                
+                conta_id_origem = finance_service.get_account_by_name(conn, usuario_id, nome_origem)
+                conta_id_cartao = finance_service.get_account_by_name(conn, usuario_id, nome_cartao)
+
+                if not conta_id_origem or not conta_id_cartao:
+                    raise Exception(f"Não foi possível encontrar as contas ({nome_origem} -> {nome_cartao}).")
+                
+                nome_cartao_pago = finance_service.create_fatura_payment(
+                    conn, usuario_id, conta_id_origem, conta_id_cartao, valor_dec, data_hoje
+                )
+                
+                valor_fmt = formatar_moeda(valor_dec)
+                resposta_para_usuario = f"✅ Pagamento da fatura '{nome_cartao_pago}' ({valor_fmt}) registrado com sucesso!"
+
             else:
                 return jsonify({"status": "sucesso", "resposta": "🤔 Não entendi. Tente 'gastei 50' ou 'meus potes'."}), 200
 
     except Exception as e:
         print(f"[WHATSAPP] Erro: {e}")
         return jsonify({"status": "erro", "resposta": "Erro ao processar."}), 500
+    
+
+@webhooks_bp.route('/webhook-swile-payment', methods=['POST'])
+def handle_swile_payment():
+    '''
+    Endpoint específico para pagamentos via Swile (iPhone Automation).
+    
+    Payload esperado:
+    {
+        "user_api_key": "...",
+        "descricao_pagamento": "Conta de Água",
+        "valor_pago": 150.50,
+        "data_pagamento": "2024-01-15" (opcional, padrão: hoje)
+    }
+    '''
+    try:
+        data = request.json
+        user_api_key = data.get('user_api_key')
+        descricao = data.get('descricao_pagamento')
+        valor = data.get('valor_pago')
+        data_pag = data.get('data_pagamento')
+        
+        if not all([user_api_key, descricao, valor]):
+            return jsonify({"status": "erro", "mensagem": "Dados faltando"}), 400
+        
+        # Autenticar usuário
+        user_info = finance_service.get_user_by_api_key(user_api_key)
+        if not user_info:
+            return jsonify({"status": "erro", "mensagem": "API key inválida"}), 401
+        
+        usuario_id, numero_whatsapp = user_info
+        
+        # Data do pagamento
+        if data_pag:
+            data_pagamento = date.fromisoformat(data_pag)
+        else:
+            data_pagamento = date.today()
+        
+        with db_engine.connect() as conn:
+            conn.begin()
+            
+            # Buscar conta fixa correspondente
+            match = FixedBillsService.find_matching_bill(conn, usuario_id, descricao)
+            
+            if match:
+                # Encontrou conta fixa correspondente
+                agendamento_id, desc_original, valor_previsto, dia_venc, categoria = match
+                
+                # Buscar conta "Swile" (ou criar se não existir)
+                sql_swile = text("SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta ILIKE '%swile%' LIMIT 1")
+                conta_swile_id = conn.execute(sql_swile, {"uid": usuario_id}).scalar_one_or_none()
+                
+                if not conta_swile_id:
+                    # Usar conta padrão
+                    conta_swile_id = None
+                
+                # Quitar a conta fixa
+                transaction_id = FixedBillsService.settle_fixed_bill(
+                    conn, usuario_id, agendamento_id, valor, data_pagamento,
+                    conta_pagamento_id=conta_swile_id,
+                    observacao="Pago via Swile"
+                )
+                
+                conn.commit()
+                
+                # Notificar usuário
+                mensagem = FixedBillsService.mark_bill_as_paid_response(
+                    desc_original, valor, categoria
+                )
+                
+                notification_service.enviar_notificacao_whatsapp(
+                    numero_whatsapp, mensagem, BOT_WHATSAPP_URL, API_SECRET_KEY
+                )
+                
+                return jsonify({
+                    "status": "sucesso",
+                    "mensagem": "Conta fixa quitada com sucesso!",
+                    "conta_identificada": desc_original,
+                    "transaction_id": transaction_id
+                }), 200
+                
+            else:
+                # Não encontrou conta fixa, registrar como despesa normal
+                # (usar fluxo normal de categorização)
+                
+                # Extrair tipo e categoria com IA
+                trans_data = gemini_service.extract_transaction_details(
+                    f"Paguei {valor} de {descricao}",
+                    'Despesa'
+                )
+                
+                cats = finance_service.get_user_categories(conn, usuario_id, 'Despesa')
+                id_outros = finance_service.get_fallback_category_id(conn, 'Despesa')
+                
+                id_categoria = gemini_service.categorize_transaction(
+                    cats, descricao, 'Despesa', id_outros
+                )
+                
+                conta_id = finance_service.get_account_by_name(conn, usuario_id, 'Carteira', fallback=True)
+                
+                finance_service.create_transaction(
+                    conn, usuario_id, conta_id, id_categoria, None,
+                    f"{descricao} (Swile)", float(valor) * -1, 'Despesa', data_pagamento
+                )
+                
+                conn.commit()
+                
+                mensagem = (
+                    f"✅ Pagamento Registrado!\n\n"
+                    f"📝 {descricao}\n"
+                    f"💰 {formatar_moeda(valor)}\n"
+                    f"💳 Via Swile\n\n"
+                    f"_Não encontrei uma conta fixa correspondente, então registrei como despesa avulsa._"
+                )
+                
+                notification_service.enviar_notificacao_whatsapp(
+                    numero_whatsapp, mensagem, BOT_WHATSAPP_URL, API_SECRET_KEY
+                )
+                
+                return jsonify({
+                    "status": "sucesso",
+                    "mensagem": "Despesa registrada",
+                    "conta_identificada": None
+                }), 200
+        
+    except Exception as e:
+        print(f"[SWILE] Erro: {e}")
+        return jsonify({"status": "erro", "mensagem": str(e)}), 500

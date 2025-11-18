@@ -1,0 +1,264 @@
+# app/services/fixed_bills_service.py
+"""
+Serviço para gerenciar contas fixas/agendamentos e quitação antecipada
+"""
+from sqlalchemy import text
+from datetime import date
+from calendar import monthrange
+from app.utils import formatar_moeda
+
+class FixedBillsService:
+    """Gerencia contas fixas e suas quitações"""
+    
+    @staticmethod
+    def get_pending_bills_for_month(conn, usuario_id, mes=None, ano=None):
+        """
+        Busca contas fixas que ainda não foram executadas no mês.
+        
+        Args:
+            conn: Conexão do banco
+            usuario_id: ID do usuário
+            mes: Mês (1-12), padrão: mês atual
+            ano: Ano (YYYY), padrão: ano atual
+        
+        Returns:
+            Lista de agendamentos pendentes
+        """
+        hoje = date.today()
+        mes = mes or hoje.month
+        ano = ano or hoje.year
+        
+        # Primeiro e último dia do mês
+        primeiro_dia = date(ano, mes, 1)
+        ultimo_dia = date(ano, mes, monthrange(ano, mes)[1])
+        
+        sql = text("""
+            SELECT 
+                a.id,
+                a.descricao,
+                a.valor_previsto,
+                a.dia_execucao,
+                a.tipo_agendamento,
+                s.nome_sub as categoria,
+                c.nome_conta,
+                -- Verificar se já foi executado este mês
+                (SELECT COUNT(*) FROM Transacoes t 
+                 WHERE t.descricao = a.descricao 
+                   AND t.usuario_id = a.usuario_id
+                   AND t.data_transacao >= :primeiro_dia
+                   AND t.data_transacao <= :ultimo_dia
+                   AND t.tipo_transacao = 'Despesa') as ja_executado
+            FROM Agendamentos a
+            JOIN SubCategoria s ON a.subcategoria_id = s.id
+            JOIN Contas c ON a.conta_id = c.id
+            WHERE a.usuario_id = :uid
+              AND a.ativo = TRUE
+              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+            ORDER BY a.dia_execucao ASC
+        """)
+        
+        result = conn.execute(sql, {
+            "uid": usuario_id,
+            "primeiro_dia": primeiro_dia,
+            "ultimo_dia": ultimo_dia
+        }).fetchall()
+        
+        # Filtrar apenas os não executados
+        pendentes = [row for row in result if row.ja_executado == 0]
+        
+        return pendentes
+    
+    @staticmethod
+    def find_matching_bill(conn, usuario_id, descricao_pagamento):
+        """
+        Busca uma conta fixa que combine com a descrição do pagamento.
+        Usa fuzzy matching para encontrar correspondências.
+        
+        Args:
+            descricao_pagamento: Texto do pagamento (ex: "conta de água", "seguro carro")
+        
+        Returns:
+            (agendamento_id, descricao_original, valor_previsto) ou None
+        """
+        # Buscar todas as contas fixas ativas do usuário
+        sql = text("""
+            SELECT 
+                a.id,
+                a.descricao,
+                a.valor_previsto,
+                a.dia_execucao,
+                s.nome_sub as categoria
+            FROM Agendamentos a
+            JOIN SubCategoria s ON a.subcategoria_id = s.id
+            WHERE a.usuario_id = :uid
+              AND a.ativo = TRUE
+              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+        """)
+        
+        bills = conn.execute(sql, {"uid": usuario_id}).fetchall()
+        
+        # Normalizar descrição do pagamento
+        desc_normalizada = descricao_pagamento.lower().strip()
+        
+        # Palavras-chave comuns
+        palavras_chave_map = {
+            'agua': ['água', 'agua', 'sabesp', 'copasa', 'saneamento'],
+            'luz': ['luz', 'energia', 'eletricidade', 'cemig', 'copel', 'eletropaulo'],
+            'internet': ['internet', 'net', 'wifi', 'fibra'],
+            'seguro': ['seguro', 'porto seguro', 'liberty', 'bradesco seguros'],
+            'condominio': ['condomínio', 'condominio', 'taxa condominial'],
+            'telefone': ['telefone', 'celular', 'vivo', 'claro', 'tim', 'oi'],
+            'gas': ['gás', 'gas', 'ultragaz', 'liquigás']
+        }
+        
+        # Tentar match exato ou parcial
+        for bill in bills:
+            desc_bill = bill.descricao.lower()
+            
+            # Match exato
+            if desc_bill in desc_normalizada or desc_normalizada in desc_bill:
+                return (bill.id, bill.descricao, bill.valor_previsto, bill.dia_execucao, bill.categoria)
+            
+            # Match por palavras-chave
+            for palavra_chave, sinonimos in palavras_chave_map.items():
+                if any(sin in desc_normalizada for sin in sinonimos):
+                    if any(sin in desc_bill for sin in sinonimos):
+                        return (bill.id, bill.descricao, bill.valor_previsto, bill.dia_execucao, bill.categoria)
+        
+        return None
+    
+    @staticmethod
+    def settle_fixed_bill(conn, usuario_id, agendamento_id, valor_pago, data_pagamento, 
+                         conta_pagamento_id=None, observacao=None):
+        """
+        Quita uma conta fixa antecipadamente (antes da data de vencimento).
+        
+        Args:
+            agendamento_id: ID do agendamento
+            valor_pago: Valor efetivamente pago
+            data_pagamento: Data em que foi pago
+            conta_pagamento_id: Conta usada para pagar (opcional)
+            observacao: Observação adicional (ex: "Pago via Swile")
+        
+        Returns:
+            transaction_id: ID da transação criada
+        """
+        # Buscar dados do agendamento
+        sql_get_agendamento = text("""
+            SELECT 
+                a.descricao,
+                a.conta_id,
+                a.subcategoria_id,
+                a.valor_previsto,
+                c.tipo_conta
+            FROM Agendamentos a
+            JOIN Contas c ON a.conta_id = c.id
+            WHERE a.id = :aid AND a.usuario_id = :uid
+        """)
+        
+        agendamento = conn.execute(sql_get_agendamento, {
+            "aid": agendamento_id,
+            "uid": usuario_id
+        }).fetchone()
+        
+        if not agendamento:
+            raise Exception(f"Agendamento {agendamento_id} não encontrado")
+        
+        descricao_original = agendamento.descricao
+        conta_id = conta_pagamento_id or agendamento.conta_id
+        subcategoria_id = agendamento.subcategoria_id
+        tipo_conta = agendamento.tipo_conta
+        
+        # Preparar descrição com observação
+        descricao_final = descricao_original
+        if observacao:
+            descricao_final = f"{descricao_original} ({observacao})"
+        
+        # Criar transação
+        fatura_id = None
+        if tipo_conta == 'Cartão de Crédito':
+            from app.services.finance_service import get_or_create_fatura
+            fatura_id = get_or_create_fatura(conn, conta_id, data_pagamento, usuario_id)
+        
+        valor_para_db = float(valor_pago) * -1  # Negativo = despesa
+        
+        sql_insert = text("""
+            INSERT INTO Transacoes 
+            (usuario_id, conta_id, subcategoria_id, fatura_id, descricao, valor, tipo_transacao, data_transacao)
+            VALUES (:uid, :cid, :scid, :fid, :desc, :val, 'Despesa', :data)
+            RETURNING id
+        """)
+        
+        result = conn.execute(sql_insert, {
+            "uid": usuario_id,
+            "cid": conta_id,
+            "scid": subcategoria_id,
+            "fid": fatura_id,
+            "desc": descricao_final,
+            "val": valor_para_db,
+            "data": data_pagamento
+        })
+        
+        transaction_id = result.scalar_one()
+        
+        print(f"[FIXED-BILLS] Conta fixa '{descricao_original}' quitada antecipadamente. Transaction ID: {transaction_id}")
+        
+        return transaction_id
+    
+    @staticmethod
+    def list_pending_bills_formatted(conn, usuario_id):
+        """
+        Retorna uma lista formatada de contas fixas pendentes para WhatsApp.
+        """
+        pendentes = FixedBillsService.get_pending_bills_for_month(conn, usuario_id)
+        
+        if not pendentes:
+            return "✅ Você não tem contas fixas pendentes este mês! 🎉"
+        
+        hoje = date.today()
+        resposta = f"📋 *CONTAS FIXAS PENDENTES - {hoje.strftime('%B/%Y').upper()}* 📋\n\n"
+        
+        total_previsto = 0
+        
+        for idx, conta in enumerate(pendentes, 1):
+            agendamento_id, descricao, valor_previsto, dia_execucao, tipo, categoria, conta_nome, _ = conta
+            
+            valor_float = float(valor_previsto or 0)
+            total_previsto += valor_float
+            
+            # Calcular se está atrasado
+            try:
+                data_vencimento = date(hoje.year, hoje.month, dia_execucao)
+                dias_restantes = (data_vencimento - hoje).days
+                
+                if dias_restantes < 0:
+                    status = "🔴 *ATRASADO*"
+                elif dias_restantes == 0:
+                    status = "⚠️ *VENCE HOJE*"
+                elif dias_restantes <= 3:
+                    status = f"🟡 Vence em {dias_restantes} dias"
+                else:
+                    status = f"🟢 Vence dia {dia_execucao}"
+            except ValueError:
+                status = f"Vence dia {dia_execucao}"
+            
+            resposta += f"{idx}. *{descricao}*\n"
+            resposta += f"   💰 {formatar_moeda(valor_float)}\n"
+            resposta += f"   📊 {categoria}\n"
+            resposta += f"   {status}\n\n"
+        
+        resposta += "━━━━━━━━━━━━━━━━━━━━\n"
+        resposta += f"💵 *Total Previsto: {formatar_moeda(total_previsto)}*"
+        
+        return resposta
+    
+    @staticmethod
+    def mark_bill_as_paid_response(descricao, valor_pago, categoria):
+        """Formata mensagem de confirmação de pagamento"""
+        return (
+            f"✅ *CONTA QUITADA!* ✅\n\n"
+            f"📝 {descricao}\n"
+            f"💰 {formatar_moeda(valor_pago)}\n"
+            f"📊 {categoria}\n\n"
+            f"_Esta conta não será mais cobrada automaticamente este mês._"
+        )
