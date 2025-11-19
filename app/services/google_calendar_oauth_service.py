@@ -225,9 +225,15 @@ class GoogleCalendarOAuthService:
             expiry=expiry_dt  # Passa a data GARANTIDAMENTE aware
         )
         
-        # Verificar expiração de forma segura
+        # Verificar expiração de forma segura MANUALMENTE
+        # CORREÇÃO: Não usar credentials.expired pois ele usa datetime.now() naive
+        # e compara com expiry aware, causando erro de comparação
         try:
-            if credentials.expired:
+            # Fazer comparação manual com datetimes timezone-aware
+            now_utc = datetime.now(timezone.utc)
+            is_expired = expiry_dt and expiry_dt <= now_utc
+
+            if is_expired:
                 print(f"[OAUTH] ⏰ Token expirado. Renovando...")
                 if credentials.refresh_token:
                     credentials.refresh(Request())
