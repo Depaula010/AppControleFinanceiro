@@ -10,6 +10,7 @@ from sqlalchemy import text
 from app import db_engine
 from app.config import API_SECRET_KEY, BOT_WHATSAPP_URL
 from app.utils import formatar_moeda
+from app.utils import ensure_db_connection
 
 from app.services import finance_service
 from app.services import gemini_service
@@ -161,6 +162,14 @@ def handle_automate_webhook():
 @webhooks_bp.route('/webhook-whatsapp', methods=['POST'])
 def handle_whatsapp_webhook():
     """Webhook WhatsApp com CONFIRMAÇÃO e suporte a cadastro"""
+    
+    try:
+        ensure_db_connection()
+    except Exception as e:
+        return jsonify({
+            "status": "erro",
+            "resposta": "Banco de dados temporariamente indisponível"
+        }), 503
     
     if not db_engine or not gemini_service.gemini_model:
         return jsonify({"status": "erro", "mensagem": "Serviço não configurado"}), 503
@@ -550,6 +559,14 @@ def handle_sms_payment():
     }
     '''
     try:
+        ensure_db_connection()
+    except Exception as e:
+        return jsonify({
+            "status": "erro",
+            "resposta": "Banco de dados temporariamente indisponível"
+        }), 503    
+    
+    try:
         data = request.json
         user_api_key = data.get('user_api_key')
         descricao = data.get('descricao_pagamento')
@@ -670,6 +687,14 @@ def connect_calendar(usuario_id):
     Endpoint para iniciar processo de conexão OAuth2.
     Usuário acessa via link enviado pelo WhatsApp.
     """
+    try:
+        ensure_db_connection()
+    except Exception as e:
+        return jsonify({
+            "status": "erro",
+            "resposta": "Banco de dados temporariamente indisponível"
+        }), 503
+        
     try:
         # Verificar se usuário existe
         with db_engine.connect() as conn:
