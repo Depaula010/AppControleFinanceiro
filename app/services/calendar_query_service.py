@@ -110,27 +110,42 @@ class CalendarQueryService:
             
             # Obter serviço do Calendar
             service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
+            print(f"[CALENDAR] Serviço obtido com sucesso")
             
             # Calcular período
             start_date, end_date, description = CalendarQueryService.get_period_dates_for_calendar(period_type)
+            print(f"[CALENDAR] Período: {start_date} a {end_date} ({description})")
             
-            # Buscar eventos
-            print(f"[CALENDAR] Buscando eventos de {start_date} a {end_date}")
-            
+            # Buscar eventos COM PROTEÇÃO EXTRA
             if start_date == end_date:
                 # Um dia
-                events = CalendarQueryService._get_events_for_date(service, start_date)
-                print(f"[CALENDAR] Encontrados {len(events)} eventos")
-                return GoogleCalendarService.format_events_for_whatsapp(events, start_date)
+                print(f"[CALENDAR] Buscando eventos de UM dia")
+                try:
+                    events = CalendarQueryService._get_events_for_date(service, start_date)
+                    print(f"[CALENDAR] Encontrados {len(events)} eventos")
+                    return GoogleCalendarService.format_events_for_whatsapp(events, start_date)
+                except Exception as e_day:
+                    print(f"[CALENDAR] ❌ Erro específico em _get_events_for_date: {e_day}")
+                    import traceback
+                    traceback.print_exc()
+                    raise
             else:
                 # Múltiplos dias
-                events_by_date = CalendarQueryService._get_events_for_period(service, start_date, end_date)
-                total_events = sum(len(events) for events in events_by_date.values())
-                print(f"[CALENDAR] Encontrados {total_events} eventos em {len(events_by_date)} dias")
-                return GoogleCalendarService.format_period_events_for_whatsapp(events_by_date, start_date, end_date)
+                print(f"[CALENDAR] Buscando eventos de MÚLTIPLOS dias")
+                try:
+                    events_by_date = CalendarQueryService._get_events_for_period(service, start_date, end_date)
+                    total_events = sum(len(events) for events in events_by_date.values())
+                    print(f"[CALENDAR] Encontrados {total_events} eventos em {len(events_by_date)} dias")
+                    return GoogleCalendarService.format_period_events_for_whatsapp(events_by_date, start_date, end_date)
+                except Exception as e_period:
+                    print(f"[CALENDAR] ❌ Erro específico em _get_events_for_period: {e_period}")
+                    import traceback
+                    traceback.print_exc()
+                    raise
         
         except Exception as e:
-            print(f"[CALENDAR] ❌ Erro ao consultar: {e}")
+            print(f"[CALENDAR] ❌ Erro geral ao consultar: {e}")
+            print(f"[CALENDAR] Tipo do erro: {type(e).__name__}")
             import traceback
             traceback.print_exc()
             
@@ -142,82 +157,131 @@ class CalendarQueryService:
     @staticmethod
     def _get_events_for_date(service, target_date):
         """Busca eventos de um dia usando serviço OAuth"""
-        # CORREÇÃO: Usar timezone-aware datetime
-        start_of_day = datetime.combine(target_date, datetime.min.time()).replace(tzinfo=timezone.utc).isoformat()
-        end_of_day = datetime.combine(target_date, datetime.max.time()).replace(tzinfo=timezone.utc).isoformat()
-        
-        print(f"[CALENDAR] Buscando de {start_of_day} até {end_of_day}")
-        
-        events_result = service.events().list(
-            calendarId='primary',
-            timeMin=start_of_day,
-            timeMax=end_of_day,
-            singleEvents=True,
-            orderBy='startTime'
-        ).execute()
-        
-        events = events_result.get('items', [])
-        print(f"[CALENDAR] API retornou {len(events)} eventos")
-        
-        formatted_events = []
-        for event in events:
-            start = event['start'].get('dateTime', event['start'].get('date'))
-            end = event['end'].get('dateTime', event['end'].get('date'))
+        try:
+            # CORREÇÃO CRÍTICA: API do Google espera strings RFC3339, não objetos datetime
+            # Criar strings diretamente sem usar objetos datetime aware
             
-            formatted_events.append({
-                'summary': event.get('summary', 'Sem título'),
-                'start': start,
-                'end': end,
-                'location': event.get('location', ''),
-                'description': event.get('description', ''),
-                'all_day': 'date' in event['start']
-            })
-        
-        return formatted_events
+            # Formato: "YYYY-MM-DDTHH:MM:SS.000Z"
+            date_str = target_date.strftime('%Y-%m-%d')
+            start_iso = f"{date_str}T00:00:00Z"
+            end_iso = f"{date_str}T23:59:59Z"
+            
+            print(f"[CALENDAR] Buscando de {start_iso} até {end_iso}")
+            
+            events_result = service.events().list(
+                calendarId='primary',
+                timeMin=start_iso,
+                timeMax=end_iso,
+                singleEvents=True,
+                orderBy='startTime'
+            ).execute()
+            
+            events = events_result.get('items', [])
+            print(f"[CALENDAR] API retornou {len(events)} eventos")
+            
+            formatted_events = []
+            for event in events:
+                try:
+                    start = event['start'].get('dateTime', event['start'].get('date'))
+                    end = event['end'].get('dateTime', event['end'].get('date'))
+                    
+                    formatted_events.append({
+                        'summary': event.get('summary', 'Sem título'),
+                        'start': start,
+                        'end': end,
+                        'location': event.get('location', ''),
+                        'description': event.get('description', ''),
+                        'all_day': 'date' in event['start']
+                    })
+                except Exception as e:
+                    print(f"[CALENDAR] Erro ao processar evento: {e}")
+                    continue
+            
+            return formatted_events
+            
+        except Exception as e:
+            print(f"[CALENDAR] ❌ Erro em _get_events_for_date: {e}")
+            import traceback
+            traceback.print_exc()
+            raise
     
     @staticmethod
     def _get_events_for_period(service, start_date, end_date):
         """Busca eventos de um período usando serviço OAuth"""
-        # CORREÇÃO: Usar timezone-aware datetime
-        start_datetime = datetime.combine(start_date, datetime.min.time()).replace(tzinfo=timezone.utc).isoformat()
-        end_datetime = datetime.combine(end_date, datetime.max.time()).replace(tzinfo=timezone.utc).isoformat()
-        
-        print(f"[CALENDAR] Buscando período de {start_datetime} até {end_datetime}")
-        
-        events_result = service.events().list(
-            calendarId='primary',
-            timeMin=start_datetime,
-            timeMax=end_datetime,
-            singleEvents=True,
-            orderBy='startTime'
-        ).execute()
-        
-        events = events_result.get('items', [])
-        print(f"[CALENDAR] API retornou {len(events)} eventos")
-        
-        events_by_date = {}
-        
-        for event in events:
-            start = event['start'].get('dateTime', event['start'].get('date'))
+        try:
+            # CORREÇÃO DEFENSIVA: Criar datetime timezone-aware de forma explícita
+            from datetime import time
             
-            # Parse da data
-            if 'T' in start:
-                # DateTime com hora
-                event_date = datetime.fromisoformat(start.replace('Z', '+00:00')).date()
-            else:
-                # Date sem hora (evento de dia inteiro)
-                event_date = date.fromisoformat(start)
+            # Início do período (00:00:00 UTC)
+            start_dt = datetime.combine(start_date, time.min)
+            start_datetime = start_dt.replace(tzinfo=timezone.utc)
             
-            if event_date not in events_by_date:
-                events_by_date[event_date] = []
+            # Fim do período (23:59:59 UTC)
+            end_dt = datetime.combine(end_date, time.max)
+            end_datetime = end_dt.replace(tzinfo=timezone.utc)
             
-            events_by_date[event_date].append({
-                'summary': event.get('summary', 'Sem título'),
-                'start': start,
-                'end': event['end'].get('dateTime', event['end'].get('date')),
-                'location': event.get('location', ''),
-                'description': event.get('description', ''),
-                'all_day': 'date' in event['start']
-            })
-        
-        return events_by_date
+            # Converter para ISO string
+            start_iso = start_datetime.isoformat()
+            end_iso = end_datetime.isoformat()
+            
+            print(f"[CALENDAR] Buscando período de {start_iso} até {end_iso}")
+            
+            events_result = service.events().list(
+                calendarId='primary',
+                timeMin=start_iso,
+                timeMax=end_iso,
+                singleEvents=True,
+                orderBy='startTime'
+            ).execute()
+            
+            events = events_result.get('items', [])
+            print(f"[CALENDAR] API retornou {len(events)} eventos")
+            
+            events_by_date = {}
+            
+            for event in events:
+                try:
+                    start = event['start'].get('dateTime', event['start'].get('date'))
+                    
+                    # Parse da data - SEM COMPARAÇÕES DE DATETIME
+                    if 'T' in start:
+                        # DateTime com hora - extrair apenas a data
+                        # Usar parsing seguro
+                        if start.endswith('Z'):
+                            start_clean = start.replace('Z', '+00:00')
+                        else:
+                            start_clean = start
+                        
+                        try:
+                            event_dt = datetime.fromisoformat(start_clean)
+                            event_date = event_dt.date()
+                        except:
+                            # Fallback: extrair data manualmente
+                            event_date = date.fromisoformat(start.split('T')[0])
+                    else:
+                        # Date sem hora (evento de dia inteiro)
+                        event_date = date.fromisoformat(start)
+                    
+                    if event_date not in events_by_date:
+                        events_by_date[event_date] = []
+                    
+                    events_by_date[event_date].append({
+                        'summary': event.get('summary', 'Sem título'),
+                        'start': start,
+                        'end': event['end'].get('dateTime', event['end'].get('date')),
+                        'location': event.get('location', ''),
+                        'description': event.get('description', ''),
+                        'all_day': 'date' in event['start']
+                    })
+                    
+                except Exception as e:
+                    print(f"[CALENDAR] Erro ao processar evento: {e}")
+                    continue
+            
+            return events_by_date
+            
+        except Exception as e:
+            print(f"[CALENDAR] ❌ Erro em _get_events_for_period: {e}")
+            import traceback
+            traceback.print_exc()
+            raise
