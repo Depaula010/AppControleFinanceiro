@@ -1,7 +1,8 @@
+# app/services/google_calendar_oauth_service.py (VERSÃO CORRIGIDA COMPLETA)
+
 import json
-import pickle
 import base64
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from google.auth.transport.requests import Request
@@ -103,6 +104,15 @@ class GoogleCalendarOAuthService:
         # Serializar scopes
         scopes_str = json.dumps(credentials.scopes) if credentials.scopes else None
         
+        # CORREÇÃO: Garantir que expiry seja timezone-aware antes de salvar
+        token_expiry = None
+        if credentials.expiry:
+            if credentials.expiry.tzinfo is None:
+                # Se naive, adicionar UTC
+                token_expiry = credentials.expiry.replace(tzinfo=timezone.utc)
+            else:
+                token_expiry = credentials.expiry
+        
         sql = text("""
             INSERT INTO GoogleCalendarTokens 
             (usuario_id, access_token, refresh_token, token_expiry, scopes, updated_at)
@@ -122,10 +132,12 @@ class GoogleCalendarOAuthService:
                 "uid": usuario_id,
                 "access": credentials.token,
                 "refresh": credentials.refresh_token,
-                "expiry": credentials.expiry,
+                "expiry": token_expiry,
                 "scopes": scopes_str
             })
             conn.commit()
+        
+        print(f"[OAUTH] Credenciais salvas. Expiry: {token_expiry}")
     
     @staticmethod
     def get_credentials(usuario_id):
@@ -136,10 +148,10 @@ class GoogleCalendarOAuthService:
         Returns:
             Credentials ou None
         """
+        print(f"[OAUTH] Recuperando credenciais para usuário {usuario_id}...")
+        
         if not db_engine:
             raise Exception("Banco não configurado")
-        
-        print(f"[OAUTH] Recuperando credenciais para usuário {usuario_id}...")
         
         sql = text("""
             SELECT access_token, refresh_token, token_expiry, scopes
@@ -151,7 +163,10 @@ class GoogleCalendarOAuthService:
             result = conn.execute(sql, {"uid": usuario_id}).fetchone()
         
         if not result:
+            print(f"[OAUTH] ❌ Nenhuma credencial encontrada para usuário {usuario_id}")
             return None
+        
+        print(f"[OAUTH] ✅ Credenciais encontradas. Token expiry: {result.token_expiry}")
         
         # Deserializar scopes
         scopes = json.loads(result.scopes) if result.scopes else GoogleCalendarOAuthService.SCOPES
@@ -166,13 +181,29 @@ class GoogleCalendarOAuthService:
             scopes=scopes
         )
         
-        # Verificar se expirou
+        # CORREÇÃO CRÍTICA: Verificar expiração com timezone-aware
         if result.token_expiry:
-            credentials.expiry = result.token_expiry
+            # Converter token_expiry para timezone-aware se necessário
+            if result.token_expiry.tzinfo is None:
+                print(f"[OAUTH] ⚠️ Token expiry é naive, convertendo para UTC")
+                token_expiry_aware = result.token_expiry.replace(tzinfo=timezone.utc)
+            else:
+                token_expiry_aware = result.token_expiry
             
-            # Se expirou, renovar
-            if credentials.expired and credentials.refresh_token:
-                print(f"[OAUTH] Token expirado. Renovando para usuário {usuario_id}...")
+            # Atribuir ao credentials
+            credentials.expiry = token_expiry_aware
+            
+            # Agora verificar se expirou (ambos são timezone-aware)
+            now_utc = datetime.now(timezone.utc)
+            
+            print(f"[OAUTH] Verificando expiração:")
+            print(f"  - Agora (UTC): {now_utc}")
+            print(f"  - Expiry: {token_expiry_aware}")
+            print(f"  - Expirado? {token_expiry_aware < now_utc}")
+            
+            # Se expirou E tem refresh_token, renovar
+            if token_expiry_aware < now_utc and credentials.refresh_token:
+                print(f"[OAUTH] ⏰ Token expirado. Renovando...")
                 try:
                     credentials.refresh(Request())
                     GoogleCalendarOAuthService.save_credentials(usuario_id, credentials)
@@ -180,6 +211,11 @@ class GoogleCalendarOAuthService:
                 except Exception as e:
                     print(f"[OAUTH] ❌ Erro ao renovar token: {e}")
                     return None
+            elif token_expiry_aware < now_utc:
+                print(f"[OAUTH] ❌ Token expirado e sem refresh_token")
+                return None
+            else:
+                print(f"[OAUTH] ✅ Token ainda válido")
         
         return credentials
     
@@ -187,7 +223,9 @@ class GoogleCalendarOAuthService:
     def is_user_connected(usuario_id):
         """Verifica se usuário já conectou Google Calendar"""
         credentials = GoogleCalendarOAuthService.get_credentials(usuario_id)
-        return credentials is not None
+        is_connected = credentials is not None
+        print(f"[OAUTH] Usuário {usuario_id} conectado? {is_connected}")
+        return is_connected
     
     @staticmethod
     def revoke_access(usuario_id):
@@ -226,6 +264,8 @@ class GoogleCalendarOAuthService:
         Returns:
             Google Calendar API Resource
         """
+        print(f"[OAUTH] Criando serviço Calendar para usuário {usuario_id}")
+        
         credentials = GoogleCalendarOAuthService.get_credentials(usuario_id)
         
         if not credentials:
@@ -233,9 +273,10 @@ class GoogleCalendarOAuthService:
         
         try:
             service = build('calendar', 'v3', credentials=credentials)
+            print(f"[OAUTH] ✅ Serviço Calendar criado com sucesso")
             return service
         except Exception as e:
-            print(f"[OAUTH] Erro ao criar serviço: {e}")
+            print(f"[OAUTH] ❌ Erro ao criar serviço: {e}")
             raise
     
     @staticmethod
