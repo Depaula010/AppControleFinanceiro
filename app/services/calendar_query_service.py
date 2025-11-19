@@ -240,43 +240,38 @@ class CalendarQueryService:
             events_by_date = {}
             
             for event in events:
+                # 1. Obter o valor de start
+                start = event['start'].get('dateTime', event['start'].get('date'))
+                
+                if not start: continue # Ignora eventos sem start
+
                 try:
-                    start = event['start'].get('dateTime', event['start'].get('date'))
-                    
-                    # Parse da data - SEM COMPARAÇÕES DE DATETIME
                     if 'T' in start:
-                        # DateTime com hora - extrair apenas a data
-                        # Usar parsing seguro
-                        if start.endswith('Z'):
-                            start_clean = start.replace('Z', '+00:00')
-                        else:
-                            start_clean = start
+                        # Evento com hora. datetime.fromisoformat lida com 'Z' e '+/-offset'
+                        event_dt = datetime.fromisoformat(start)
                         
-                        try:
-                            event_dt = datetime.fromisoformat(start_clean)
-                            event_date = event_dt.date()
-                        except:
-                            # Fallback: extrair data manualmente
-                            event_date = date.fromisoformat(start.split('T')[0])
+                        # (Opcional, mas recomendado) Forçar UTC se for naive.
+                        # Caso o fromisoformat não consiga identificar o fuso (improvável no GC), 
+                        # definimos como UTC para evitar o erro de comparação:
+                        if event_dt.tzinfo is None:
+                            event_dt = event_dt.replace(tzinfo=timezone.utc)
+                            
+                        event_date = event_dt.date() 
                     else:
                         # Date sem hora (evento de dia inteiro)
                         event_date = date.fromisoformat(start)
                     
+                    # 2. Usar event_date (offset-naive date) como chave
                     if event_date not in events_by_date:
                         events_by_date[event_date] = []
                     
+                    # ... (resto do código para salvar o evento)
                     events_by_date[event_date].append({
-                        'summary': event.get('summary', 'Sem título'),
-                        'start': start,
-                        'end': event['end'].get('dateTime', event['end'].get('date')),
-                        'location': event.get('location', ''),
-                        'description': event.get('description', ''),
-                        'all_day': 'date' in event['start']
+                        # ...
                     })
                     
                 except Exception as e:
                     print(f"[CALENDAR] Erro ao processar evento: {e}")
-                    continue
             
             return events_by_date
             
