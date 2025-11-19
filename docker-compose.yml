@@ -7,8 +7,9 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
+    networks:
+      - rede-global
     environment:
-      # Passamos as variáveis, mas o valor real vem do arquivo .env
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - DATABASE_URL=${DATABASE_URL}
       - REDIS_URL=${REDIS_URL}
@@ -18,36 +19,27 @@ services:
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
       - PYTHON_VERSION=${PYTHON_VERSION:-3.11}
-    networks:
-      - app-network
     depends_on:
-      # Removemos o postgres daqui, pois ele já está rodando no outro projeto
       redis:
         condition: service_started
     volumes:
       - ./logs:/app/logs
 
-  # O Redis continua aqui pois é o cache rápido exclusivo desse sistema
   redis:
     image: redis:7-alpine
     container_name: meu-secretario-redis
     restart: unless-stopped
+    networks:
+      - rede-global
     ports:
       - "6379:6379"
     volumes:
       - redis-data:/data
-    networks:
-      - app-network
     command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
 
 volumes:
   redis-data:
 
 networks:
-  app-network:
-    driver: bridge
+  rede-global:
+    external: true
