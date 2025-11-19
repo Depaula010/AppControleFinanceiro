@@ -260,6 +260,7 @@ def extract_bill_payment(texto_msg):
 def extract_calendar_query(texto_msg):
     '''
     Extrai o período da consulta de agenda.
+    CORREÇÃO: Melhor detecção de "este mês", "esse mês", etc.
     
     Returns:
         {"period_type": "hoje" | "amanha" | "final_de_semana" | etc.}
@@ -271,20 +272,27 @@ def extract_calendar_query(texto_msg):
     
     prompt = f'''Analise a pergunta sobre agenda: "{texto_msg}"
     
-    Identifique o período:
+    Identifique o período que o usuário quer consultar:
     - "hoje" → {{"period_type": "hoje"}}
     - "amanhã" → {{"period_type": "amanha"}}
     - "final de semana" / "fds" → {{"period_type": "final_de_semana"}}
-    - "esta semana" → {{"period_type": "esta_semana"}}
+    - "esta semana" / "essa semana" → {{"period_type": "esta_semana"}}
     - "próxima semana" / "semana que vem" → {{"period_type": "proxima_semana"}}
+    - "este mês" / "esse mês" / "mês atual" → {{"period_type": "este_mes"}}
+    - "mês passado" → {{"period_type": "mes_passado"}}
     - "próximo mês" / "mês que vem" → {{"period_type": "proximo_mes"}}
+    
+    ATENÇÃO:
+    - "esse mês", "este mês", "neste mês", "no mês" → SEMPRE "este_mes"
+    - "essa semana", "esta semana", "nesta semana" → SEMPRE "esta_semana"
     
     Responda APENAS com JSON.
     
-    Exemplos:
-    - "tenho compromisso hoje?" → {{"period_type": "hoje"}}
-    - "minha agenda amanhã" → {{"period_type": "amanha"}}
-    - "compromissos do final de semana" → {{"period_type": "final_de_semana"}}
+    Exemplos CRÍTICOS:
+    - "quais meus compromissos esse mês?" → {{"period_type": "este_mes"}}
+    - "eventos deste mês" → {{"period_type": "este_mes"}}
+    - "agenda do mês" → {{"period_type": "este_mes"}}
+    - "compromissos essa semana" → {{"period_type": "esta_semana"}}
     '''
     
     response = gemini_model.generate_content(prompt)

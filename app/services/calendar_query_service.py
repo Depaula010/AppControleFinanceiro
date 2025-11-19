@@ -1,4 +1,4 @@
-# app/services/calendar_query_service.py (VERSÃO FINAL CORRIGIDA)
+# app/services/calendar_query_service.py (VERSÃO FINAL - TODOS OS CALENDÁRIOS)
 
 from datetime import date, datetime, timedelta, time
 from zoneinfo import ZoneInfo
@@ -19,7 +19,6 @@ class CalendarQueryService:
     def get_period_dates_for_calendar(period_type):
         """
         Similar ao PeriodQueryService, mas para agenda.
-        CORREÇÃO: Adicionado suporte para 'este_mes' e 'mes_passado'.
         
         Returns:
             (start_date, end_date, description)
@@ -59,9 +58,8 @@ class CalendarQueryService:
             return segunda, domingo, "na próxima semana"
         
         elif period_type == 'este_mes':
-            # CORREÇÃO: Primeiro dia do mês até hoje
+            # Primeiro dia do mês até último
             primeiro_dia = hoje.replace(day=1)
-            # Último dia do mês
             if hoje.month == 12:
                 ultimo_dia = date(hoje.year + 1, 1, 1) - timedelta(days=1)
             else:
@@ -70,7 +68,6 @@ class CalendarQueryService:
             return primeiro_dia, ultimo_dia, f"este mês ({hoje.strftime('%B/%Y')})"
         
         elif period_type == 'mes_passado':
-            # CORREÇÃO: Mês passado completo
             primeiro_dia_este_mes = hoje.replace(day=1)
             ultimo_dia_mes_passado = primeiro_dia_este_mes - timedelta(days=1)
             primeiro_dia_mes_passado = ultimo_dia_mes_passado.replace(day=1)
@@ -79,13 +76,11 @@ class CalendarQueryService:
                    f"no mês passado ({ultimo_dia_mes_passado.strftime('%B/%Y')})"
         
         elif period_type == 'proximo_mes':
-            # Primeiro dia do próximo mês
             if hoje.month == 12:
                 primeiro_dia = date(hoje.year + 1, 1, 1)
             else:
                 primeiro_dia = date(hoje.year, hoje.month + 1, 1)
             
-            # Último dia do próximo mês
             if primeiro_dia.month == 12:
                 ultimo_dia = date(primeiro_dia.year + 1, 1, 1) - timedelta(days=1)
             else:
@@ -94,7 +89,6 @@ class CalendarQueryService:
             return primeiro_dia, ultimo_dia, f"no próximo mês ({primeiro_dia.strftime('%B/%Y')})"
         
         else:
-            # Padrão: hoje
             return hoje, hoje, "hoje"
     
     @staticmethod
@@ -115,7 +109,6 @@ class CalendarQueryService:
                     "O administrador precisa configurar as credenciais OAuth2."
                 )
             
-            # Gerar link de conexão
             base_url = GOOGLE_REDIRECT_URI.rsplit('/', 1)[0]
             connect_url = f"{base_url}/connect-calendar/{usuario_id}"
             
@@ -133,7 +126,6 @@ class CalendarQueryService:
         try:
             print(f"[CALENDAR] Usuário CONECTADO. Buscando eventos...")
             
-            # Obter serviço do Calendar
             service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
             print(f"[CALENDAR] Serviço obtido com sucesso")
             
@@ -143,13 +135,11 @@ class CalendarQueryService:
             
             # Buscar eventos
             if start_date == end_date:
-                # Um dia
                 print(f"[CALENDAR] Buscando eventos de UM dia")
                 events = CalendarQueryService._get_events_for_date(service, start_date)
                 print(f"[CALENDAR] Encontrados {len(events)} eventos")
                 return GoogleCalendarService.format_events_for_whatsapp(events, start_date)
             else:
-                # Múltiplos dias
                 print(f"[CALENDAR] Buscando eventos de MÚLTIPLOS dias")
                 events_by_date = CalendarQueryService._get_events_for_period(service, start_date, end_date)
                 total_events = sum(len(events) for events in events_by_date.values())
@@ -168,43 +158,95 @@ class CalendarQueryService:
             )
     
     @staticmethod
-    def _get_events_for_date(service, target_date):
+    def _get_all_calendar_ids(service):
         """
-        Busca eventos de um dia usando serviço OAuth.
-        CORREÇÃO: Usa timezone do Brasil (GMT-03) para buscar corretamente.
+        NOVO: Busca IDs de TODOS os calendários do usuário.
+        
+        Returns:
+            list: Lista de dicts com {id, summary, selected}
         """
         try:
+            calendars_result = service.calendarList().list().execute()
+            calendars = calendars_result.get('items', [])
+            
+            # Filtrar apenas calendários selecionados (visíveis)
+            calendar_ids = []
+            for cal in calendars:
+                # Pegar apenas calendários selecionados
+                if cal.get('selected', False):
+                    calendar_ids.append({
+                        'id': cal['id'],
+                        'summary': cal.get('summary', 'Sem nome'),
+                        'primary': cal.get('primary', False)
+                    })
+            
+            print(f"[CALENDAR] {len(calendar_ids)} calendários selecionados encontrados")
+            for cal in calendar_ids:
+                primary_tag = " (PRIMARY)" if cal['primary'] else ""
+                print(f"[CALENDAR]   - {cal['summary']}{primary_tag}")
+            
+            return calendar_ids
+            
+        except Exception as e:
+            print(f"[CALENDAR] Erro ao listar calendários: {e}")
+            # Fallback: retornar apenas primary
+            return [{'id': 'primary', 'summary': 'Primary', 'primary': True}]
+    
+    @staticmethod
+    def _get_events_for_date(service, target_date):
+        """
+        Busca eventos de um dia em TODOS os calendários.
+        CORREÇÃO: Busca em múltiplos calendários.
+        """
+        try:
+            # Obter todos os calendários
+            calendar_ids = CalendarQueryService._get_all_calendar_ids(service)
+            
             # Criar datetime no timezone do Brasil
-            start_datetime = datetime.combine(
-                target_date, 
-                time.min
-            ).replace(tzinfo=CalendarQueryService.TIMEZONE_BR)
+            start_datetime = datetime.combine(target_date, time.min).replace(tzinfo=CalendarQueryService.TIMEZONE_BR)
+            end_datetime = datetime.combine(target_date, time.max).replace(tzinfo=CalendarQueryService.TIMEZONE_BR)
             
-            end_datetime = datetime.combine(
-                target_date,
-                time.max
-            ).replace(tzinfo=CalendarQueryService.TIMEZONE_BR)
-            
-            # Converter para ISO com timezone
             start_iso = start_datetime.isoformat()
             end_iso = end_datetime.isoformat()
 
             print(f"[CALENDAR] Buscando de {start_iso} até {end_iso}")
             print(f"[CALENDAR] (Timezone: America/Sao_Paulo)")
 
-            events_result = service.events().list(
-                calendarId='primary',
-                timeMin=start_iso,
-                timeMax=end_iso,
-                singleEvents=True,
-                orderBy='startTime'
-            ).execute()
+            # Buscar em TODOS os calendários
+            all_events = []
+            for calendar in calendar_ids:
+                cal_id = calendar['id']
+                cal_name = calendar['summary']
+                
+                try:
+                    events_result = service.events().list(
+                        calendarId=cal_id,
+                        timeMin=start_iso,
+                        timeMax=end_iso,
+                        singleEvents=True,
+                        orderBy='startTime'
+                    ).execute()
 
-            events = events_result.get('items', [])
-            print(f"[CALENDAR] API retornou {len(events)} eventos")
+                    events = events_result.get('items', [])
+                    
+                    if events:
+                        print(f"[CALENDAR]   📅 {cal_name}: {len(events)} eventos")
+                    
+                    # Adicionar info do calendário em cada evento
+                    for event in events:
+                        event['_calendar_name'] = cal_name
+                        event['_calendar_id'] = cal_id
+                        all_events.append(event)
+                        
+                except Exception as e:
+                    print(f"[CALENDAR] Erro ao buscar em '{cal_name}': {e}")
+                    continue
 
+            print(f"[CALENDAR] API retornou {len(all_events)} eventos no total")
+
+            # Formatar eventos
             formatted_events = []
-            for event in events:
+            for event in all_events:
                 try:
                     start = event['start'].get('dateTime', event['start'].get('date'))
                     end = event['end'].get('dateTime', event['end'].get('date'))
@@ -215,11 +257,15 @@ class CalendarQueryService:
                         'end': end,
                         'location': event.get('location', ''),
                         'description': event.get('description', ''),
-                        'all_day': 'date' in event['start']
+                        'all_day': 'date' in event['start'],
+                        'calendar_name': event.get('_calendar_name', '')
                     })
                 except Exception as e:
                     print(f"[CALENDAR] Erro ao processar evento: {e}")
                     continue
+            
+            # Ordenar por horário
+            formatted_events.sort(key=lambda x: x['start'])
                 
             return formatted_events
 
@@ -232,61 +278,69 @@ class CalendarQueryService:
     @staticmethod
     def _get_events_for_period(service, start_date, end_date):
         """
-        Busca eventos de um período usando serviço OAuth.
-        CORREÇÃO: Usa timezone do Brasil (GMT-03).
+        Busca eventos de um período em TODOS os calendários.
+        CORREÇÃO: Busca em múltiplos calendários.
         """
         try:
-            # Início do período no timezone do Brasil
-            start_datetime = datetime.combine(
-                start_date,
-                time.min
-            ).replace(tzinfo=CalendarQueryService.TIMEZONE_BR)
+            # Obter todos os calendários
+            calendar_ids = CalendarQueryService._get_all_calendar_ids(service)
             
-            # Fim do período no timezone do Brasil
-            end_datetime = datetime.combine(
-                end_date,
-                time.max
-            ).replace(tzinfo=CalendarQueryService.TIMEZONE_BR)
+            # Criar datetime no timezone do Brasil
+            start_datetime = datetime.combine(start_date, time.min).replace(tzinfo=CalendarQueryService.TIMEZONE_BR)
+            end_datetime = datetime.combine(end_date, time.max).replace(tzinfo=CalendarQueryService.TIMEZONE_BR)
             
-            # Converter para ISO
             start_iso = start_datetime.isoformat()
             end_iso = end_datetime.isoformat()
             
             print(f"[CALENDAR] Buscando período de {start_iso} até {end_iso}")
             print(f"[CALENDAR] (Timezone: America/Sao_Paulo)")
             
-            events_result = service.events().list(
-                calendarId='primary',
-                timeMin=start_iso,
-                timeMax=end_iso,
-                singleEvents=True,
-                orderBy='startTime'
-            ).execute()
+            # Buscar em TODOS os calendários
+            all_events = []
+            for calendar in calendar_ids:
+                cal_id = calendar['id']
+                cal_name = calendar['summary']
+                
+                try:
+                    events_result = service.events().list(
+                        calendarId=cal_id,
+                        timeMin=start_iso,
+                        timeMax=end_iso,
+                        singleEvents=True,
+                        orderBy='startTime'
+                    ).execute()
+                    
+                    events = events_result.get('items', [])
+                    
+                    if events:
+                        print(f"[CALENDAR]   📅 {cal_name}: {len(events)} eventos")
+                    
+                    for event in events:
+                        event['_calendar_name'] = cal_name
+                        event['_calendar_id'] = cal_id
+                        all_events.append(event)
+                        
+                except Exception as e:
+                    print(f"[CALENDAR] Erro ao buscar em '{cal_name}': {e}")
+                    continue
             
-            events = events_result.get('items', [])
-            print(f"[CALENDAR] API retornou {len(events)} eventos")
+            print(f"[CALENDAR] API retornou {len(all_events)} eventos no total")
             
+            # Agrupar por data
             events_by_date = {}
             
-            for event in events:
+            for event in all_events:
                 try:
                     start_str = event['start'].get('dateTime', event['start'].get('date'))
                     
-                    # Parse da data do evento
                     if 'T' in start_str:
-                        # DateTime com hora
                         event_dt = datetime.fromisoformat(start_str)
-                        
-                        # Converter para timezone do Brasil
                         if event_dt.tzinfo is None:
                             event_dt = event_dt.replace(tzinfo=CalendarQueryService.TIMEZONE_BR)
                         else:
                             event_dt = event_dt.astimezone(CalendarQueryService.TIMEZONE_BR)
-                        
-                        # Extrair data
                         event_date = event_dt.date()
                     else:
-                        # Date sem hora (evento de dia inteiro)
                         event_date = date.fromisoformat(start_str)
                     
                     if event_date not in events_by_date:
@@ -298,12 +352,17 @@ class CalendarQueryService:
                         'end': event['end'].get('dateTime', event['end'].get('date')),
                         'location': event.get('location', ''),
                         'description': event.get('description', ''),
-                        'all_day': 'date' in event['start']
+                        'all_day': 'date' in event['start'],
+                        'calendar_name': event.get('_calendar_name', '')
                     })
                     
                 except Exception as e:
                     print(f"[CALENDAR] Erro ao processar evento: {e}")
                     continue
+            
+            # Ordenar eventos de cada dia por horário
+            for event_date in events_by_date:
+                events_by_date[event_date].sort(key=lambda x: x['start'])
                 
             return events_by_date
             
