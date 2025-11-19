@@ -139,7 +139,7 @@ class CalendarQueryService:
 
                 description = f"{description} {time_desc}"
 
-            return GoogleCalendarService.format_events_for_whatsapp(events, start_date, description)
+            return GoogleCalendarService.format_events_for_whatsapp(events, start_date)
         else:
             # Para múltiplos dias, filtro de horário não faz muito sentido
             events_by_date = CalendarQueryService._get_events_for_period(service, start_date, end_date)
