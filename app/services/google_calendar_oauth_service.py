@@ -139,6 +139,8 @@ class GoogleCalendarOAuthService:
         if not db_engine:
             raise Exception("Banco não configurado")
         
+        print(f"[OAUTH] Recuperando credenciais para usuário {usuario_id}...")
+        
         sql = text("""
             SELECT access_token, refresh_token, token_expiry, scopes
             FROM GoogleCalendarTokens
