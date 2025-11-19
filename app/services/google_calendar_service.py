@@ -1,203 +1,88 @@
-import json
-import os
 from datetime import datetime, date, timedelta
-from google.oauth2.credentials import Credentials
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 
 class GoogleCalendarService:
-    """Serviço para integração com Google Calendar"""
+    """Serviço para formatação de eventos do Google Calendar"""
     
     def __init__(self):
-        self.service = None
-        self._initialize_service()
-    
-    def _initialize_service(self):
-        """Inicializa o serviço do Google Calendar"""
-        try:
-            # Opção 1: Service Account (recomendado para servidor)
-            # Você precisa criar uma Service Account no Google Cloud Console
-            credentials_json = os.environ.get('GOOGLE_CALENDAR_CREDENTIALS_JSON')
-            
-            if not credentials_json:
-                print("[CALENDAR] ⚠️ Credenciais do Google Calendar não configuradas")
-                return
-            
-            # Parse das credenciais
-            credentials_dict = json.loads(credentials_json)
-            
-            # Criar credenciais de Service Account
-            credentials = service_account.Credentials.from_service_account_info(
-                credentials_dict,
-                scopes=['https://www.googleapis.com/auth/calendar.readonly']
-            )
-            
-            # Criar serviço
-            self.service = build('calendar', 'v3', credentials=credentials)
-            print("[CALENDAR] ✅ Google Calendar conectado com sucesso!")
-            
-        except Exception as e:
-            print(f"[CALENDAR] ❌ Erro ao conectar Google Calendar: {e}")
-            self.service = None
-    
-    def is_connected(self):
-        """Verifica se está conectado"""
-        return self.service is not None
-    
-    def get_events_for_date(self, target_date, calendar_id='primary'):
         """
-        Busca eventos de uma data específica.
-        
-        Args:
-            target_date: date object
-            calendar_id: ID do calendário (padrão: 'primary')
-        
-        Returns:
-            Lista de eventos: [{'summary': '...', 'start': '...', 'end': '...', 'location': '...'}, ...]
+        NOTA: Este serviço agora é apenas para formatação.
+        O acesso à API é feito via GoogleCalendarOAuthService.
         """
-        if not self.is_connected():
-            raise Exception("Google Calendar não está conectado")
-        
-        try:
-            # Definir início e fim do dia
-            start_of_day = datetime.combine(target_date, datetime.min.time()).isoformat() + 'Z'
-            end_of_day = datetime.combine(target_date, datetime.max.time()).isoformat() + 'Z'
-            
-            # Buscar eventos
-            events_result = self.service.events().list(
-                calendarId=calendar_id,
-                timeMin=start_of_day,
-                timeMax=end_of_day,
-                singleEvents=True,
-                orderBy='startTime'
-            ).execute()
-            
-            events = events_result.get('items', [])
-            
-            # Formatar eventos
-            formatted_events = []
-            for event in events:
-                start = event['start'].get('dateTime', event['start'].get('date'))
-                end = event['end'].get('dateTime', event['end'].get('date'))
-                
-                formatted_events.append({
-                    'summary': event.get('summary', 'Sem título'),
-                    'start': start,
-                    'end': end,
-                    'location': event.get('location', ''),
-                    'description': event.get('description', ''),
-                    'all_day': 'date' in event['start']  # Evento de dia inteiro
-                })
-            
-            return formatted_events
-            
-        except HttpError as error:
-            print(f"[CALENDAR] Erro ao buscar eventos: {error}")
-            raise Exception(f"Erro ao acessar Google Calendar: {error}")
-    
-    def get_events_for_period(self, start_date, end_date, calendar_id='primary'):
-        """
-        Busca eventos de um período (múltiplos dias).
-        
-        Args:
-            start_date: date object (início)
-            end_date: date object (fim, inclusivo)
-            calendar_id: ID do calendário
-        
-        Returns:
-            Lista de eventos agrupados por data
-        """
-        if not self.is_connected():
-            raise Exception("Google Calendar não está conectado")
-        
-        try:
-            start_datetime = datetime.combine(start_date, datetime.min.time()).isoformat() + 'Z'
-            end_datetime = datetime.combine(end_date, datetime.max.time()).isoformat() + 'Z'
-            
-            events_result = self.service.events().list(
-                calendarId=calendar_id,
-                timeMin=start_datetime,
-                timeMax=end_datetime,
-                singleEvents=True,
-                orderBy='startTime'
-            ).execute()
-            
-            events = events_result.get('items', [])
-            
-            # Agrupar por data
-            events_by_date = {}
-            
-            for event in events:
-                start = event['start'].get('dateTime', event['start'].get('date'))
-                
-                # Extrair data
-                if 'T' in start:
-                    event_date = datetime.fromisoformat(start.replace('Z', '')).date()
-                else:
-                    event_date = date.fromisoformat(start)
-                
-                if event_date not in events_by_date:
-                    events_by_date[event_date] = []
-                
-                events_by_date[event_date].append({
-                    'summary': event.get('summary', 'Sem título'),
-                    'start': start,
-                    'end': event['end'].get('dateTime', event['end'].get('date')),
-                    'location': event.get('location', ''),
-                    'description': event.get('description', ''),
-                    'all_day': 'date' in event['start']
-                })
-            
-            return events_by_date
-            
-        except HttpError as error:
-            print(f"[CALENDAR] Erro ao buscar eventos: {error}")
-            raise Exception(f"Erro ao acessar Google Calendar: {error}")
+        pass
     
     @staticmethod
     def format_time(time_str):
-        """Formata hora para exibição (HH:MM)"""
+        """
+        Formata hora para exibição (HH:MM).
+        SEM COMPARAÇÕES DE DATETIME - apenas parsing de string.
+        """
         if not time_str:
             return ""
         
         try:
+            # Se tem 'T', é datetime ISO
             if 'T' in time_str:
-                dt = datetime.fromisoformat(time_str.replace('Z', ''))
-                return dt.strftime('%H:%M')
+                # Extrair apenas a parte de hora (HH:MM)
+                time_part = time_str.split('T')[1]
+                
+                # Remover timezone (Z ou +XX:XX)
+                if 'Z' in time_part:
+                    time_part = time_part.split('Z')[0]
+                elif '+' in time_part:
+                    time_part = time_part.split('+')[0]
+                elif '-' in time_part and ':' in time_part.split('-')[-1]:
+                    # Timezone negativo (ex: -03:00)
+                    time_part = '-'.join(time_part.split('-')[:-1])
+                
+                # Pegar apenas HH:MM
+                return time_part[:5]
+            
             return ""
-        except:
+        except Exception as e:
+            print(f"[CALENDAR-FORMAT] Erro ao formatar hora '{time_str}': {e}")
             return ""
     
     @staticmethod
     def format_events_for_whatsapp(events, target_date):
         """
-        Formata eventos para mensagem do WhatsApp.
+        Formata eventos de UM DIA para mensagem do WhatsApp.
+        SEM COMPARAÇÕES DE DATETIME.
         
         Args:
-            events: Lista de eventos
-            target_date: date object (para contexto)
+            events: Lista de eventos (dicts)
+            target_date: date object
         
         Returns:
             Mensagem formatada
         """
         if not events:
-            date_str = target_date.strftime('%d/%m/%Y')
-            
-            # Verificar se é hoje, amanhã, etc
+            # Verificar se é hoje, amanhã, etc (comparação de DATE, não datetime)
             hoje = date.today()
+            
             if target_date == hoje:
                 desc = "hoje"
             elif target_date == hoje + timedelta(days=1):
                 desc = "amanhã"
             else:
-                desc = f"no dia {date_str}"
+                desc = f"no dia {target_date.strftime('%d/%m/%Y')}"
             
             return f"📅 Você não tem compromissos agendados {desc}! 🎉"
         
-        # Header
-        date_str = target_date.strftime('%d/%m/%Y (%A)')
-        mensagem = f"📅 *AGENDA - {date_str.upper()}* 📅\n\n"
+        # Header - usar apenas date.strftime (sem datetime)
+        dia_semana_map = {
+            0: 'Segunda-feira',
+            1: 'Terça-feira',
+            2: 'Quarta-feira',
+            3: 'Quinta-feira',
+            4: 'Sexta-feira',
+            5: 'Sábado',
+            6: 'Domingo'
+        }
+        
+        dia_semana = dia_semana_map.get(target_date.weekday(), '')
+        date_str = target_date.strftime('%d/%m/%Y')
+        
+        mensagem = f"📅 *AGENDA - {date_str} ({dia_semana.upper()})* 📅\n\n"
         mensagem += f"📊 Total de compromissos: *{len(events)}*\n\n"
         mensagem += "━━━━━━━━━━━━━━━━━━━━\n\n"
         
@@ -212,10 +97,18 @@ class GoogleCalendarService:
             else:
                 start_time = GoogleCalendarService.format_time(event['start'])
                 end_time = GoogleCalendarService.format_time(event['end'])
-                mensagem += f"   ⏰ {start_time} - {end_time}\n"
+                
+                if start_time and end_time:
+                    mensagem += f"   ⏰ {start_time} - {end_time}\n"
+                elif start_time:
+                    mensagem += f"   ⏰ {start_time}\n"
             
             if event['location']:
-                mensagem += f"   📍 {event['location']}\n"
+                # Limitar localização a 50 caracteres
+                location = event['location'][:50]
+                if len(event['location']) > 50:
+                    location += "..."
+                mensagem += f"   📍 {location}\n"
             
             if event['description']:
                 # Limitar descrição a 50 caracteres
@@ -231,11 +124,12 @@ class GoogleCalendarService:
     @staticmethod
     def format_period_events_for_whatsapp(events_by_date, start_date, end_date):
         """
-        Formata eventos de um período para WhatsApp.
+        Formata eventos de MÚLTIPLOS DIAS para WhatsApp.
+        SEM COMPARAÇÕES DE DATETIME.
         
         Args:
             events_by_date: Dict {date: [eventos]}
-            start_date, end_date: Período
+            start_date, end_date: date objects
         
         Returns:
             Mensagem formatada
@@ -249,14 +143,22 @@ class GoogleCalendarService:
         mensagem += f"📊 Total: *{total_events} compromisso(s)* em *{len(events_by_date)} dia(s)*\n\n"
         mensagem += "━━━━━━━━━━━━━━━━━━━━\n\n"
         
-        # Ordenar datas
+        # Mapa de dias da semana
+        dia_semana_map = {
+            0: 'Seg', 1: 'Ter', 2: 'Qua',
+            3: 'Qui', 4: 'Sex', 5: 'Sáb', 6: 'Dom'
+        }
+        
+        # Ordenar datas (comparação de date, não datetime)
         sorted_dates = sorted(events_by_date.keys())
         
         for event_date in sorted_dates:
             events = events_by_date[event_date]
             
             # Header do dia
-            day_str = event_date.strftime('%d/%m (%a)')
+            dia_semana = dia_semana_map.get(event_date.weekday(), '')
+            day_str = f"{event_date.strftime('%d/%m')} ({dia_semana})"
+            
             mensagem += f"📆 *{day_str}* - {len(events)} compromisso(s)\n"
             
             for event in events:
@@ -264,7 +166,10 @@ class GoogleCalendarService:
                     mensagem += f"  • {event['summary']} (dia inteiro)\n"
                 else:
                     start_time = GoogleCalendarService.format_time(event['start'])
-                    mensagem += f"  • {start_time} - {event['summary']}\n"
+                    if start_time:
+                        mensagem += f"  • {start_time} - {event['summary']}\n"
+                    else:
+                        mensagem += f"  • {event['summary']}\n"
             
             mensagem += "\n"
         
