@@ -1,11 +1,23 @@
 # app/routes/admin.py
 from flask import Blueprint, jsonify, request
+from sqlalchemy import text
 # Importa o motor (ainda necessário para a rota do motor)
 from motor_agendamentos import processar_agendamentos
 # Importa nossos novos serviços
 from app.services import finance_service
 # Importa a config
-from app.config import API_SECRET_KEY
+from app.config import API_SECRET_KEY, BOT_WHATSAPP_URL
+from app import db_engine
+
+from datetime import datetime, date, time, timedelta
+from zoneinfo import ZoneInfo
+from app.services.google_calendar_oauth_service import GoogleCalendarOAuthService
+from app.services.calendar_query_service import CalendarQueryService
+from app.services.notification_processor_service import NotificationProcessorService
+from app.services.notification_service import enviar_notificacao_whatsapp
+from app.utils import formatar_moeda
+
+TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
 
 # Este é o equivalente ao [Route("admin")] do .NET
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -183,3 +195,182 @@ def debug_calendar():
         output.append("\n" + traceback.format_exc().replace("\n", "<br>"))
     
     return "<pre>" + "\n".join(output) + "</pre>"
+
+@admin_bp.route('/trigger-agenda-notifications', methods=['POST'])
+def trigger_agenda_notifications():
+    """
+    Endpoint para UptimeRobot disparar notificações de agenda diária.
+    
+    UptimeRobot deve chamar a cada hora:
+    POST https://seu-backend.onrender.com/admin/trigger-agenda-notifications
+    Header: x-api-key: SUA_SECRET_KEY
+    """
+    # Autenticar
+    secret_key = request.headers.get('x-api-key')
+    if secret_key != API_SECRET_KEY:
+        print("[AGENDA-NOTIF] ❌ Tentativa não autorizada")
+        return jsonify({"status": "erro", "mensagem": "Não autorizado"}), 401
+    
+    try:
+        resultado = NotificationProcessorService.processar_agenda_diaria(
+            BOT_WHATSAPP_URL,
+            API_SECRET_KEY
+        )
+        
+        return jsonify({
+            "status": "sucesso",
+            **resultado
+        }), 200
+        
+    except Exception as e:
+        print(f"[AGENDA-NOTIF] ❌ Erro crítico: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "erro",
+            "mensagem": str(e)
+        }), 500
+
+
+@admin_bp.route('/trigger-bills-notifications', methods=['POST'])
+def trigger_bills_notifications():
+    """
+    Endpoint para UptimeRobot disparar notificações de contas a vencer.
+    
+    UptimeRobot deve chamar a cada hora:
+    POST https://seu-backend.onrender.com/admin/trigger-bills-notifications
+    Header: x-api-key: SUA_SECRET_KEY
+    """
+    # Autenticar
+    secret_key = request.headers.get('x-api-key')
+    if secret_key != API_SECRET_KEY:
+        print("[BILLS-NOTIF] ❌ Tentativa não autorizada")
+        return jsonify({"status": "erro", "mensagem": "Não autorizado"}), 401
+    
+    try:
+        resultado = NotificationProcessorService.processar_contas_vencer(
+            BOT_WHATSAPP_URL,
+            API_SECRET_KEY
+        )
+        
+        return jsonify({
+            "status": "sucesso",
+            **resultado
+        }), 200
+        
+    except Exception as e:
+        print(f"[BILLS-NOTIF] ❌ Erro crítico: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "erro",
+            "mensagem": str(e)
+        }), 500
+
+
+@admin_bp.route('/test-notification', methods=['POST'])
+def test_notification():
+    """
+    Endpoint para testar notificações manualmente.
+
+    Body JSON:
+    {
+        "tipo": "agenda" ou "contas",
+        "usuario_id": 1
+    }
+    """
+    secret_key = request.headers.get('x-api-key')
+    if secret_key != API_SECRET_KEY:
+        return jsonify({"status": "erro", "mensagem": "Não autorizado"}), 401
+
+    try:
+        data = request.json
+        tipo = data.get('tipo', 'agenda')
+        usuario_id = data.get('usuario_id', 1)
+
+        # Buscar dados do usuário
+        with db_engine.connect() as conn:
+            sql = text("SELECT nome, numero_whatsapp FROM Usuarios WHERE id = :uid")
+            usuario = conn.execute(sql, {"uid": usuario_id}).fetchone()
+
+        if not usuario:
+            return jsonify({"status": "erro", "mensagem": "Usuário não encontrado"}), 404
+
+        nome, numero_whatsapp = usuario
+
+        if tipo == 'agenda':
+            # Testar agenda
+            if not GoogleCalendarOAuthService.is_user_connected(usuario_id):
+                return jsonify({
+                    "status": "erro",
+                    "mensagem": "Usuário não conectou Google Calendar"
+                }), 400
+
+            service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
+            hoje = date.today()
+            events = CalendarQueryService._get_events_for_date(service, hoje)
+
+            mensagem = f"🧪 *TESTE - Agenda de Hoje*\n\n"
+            mensagem += f"📅 {len(events)} evento(s) encontrado(s)\n\n"
+
+            for idx, event in enumerate(events[:5], 1):
+                mensagem += f"{idx}. {event['summary']}\n"
+
+            if len(events) > 5:
+                mensagem += f"\n... e mais {len(events) - 5}"
+
+        elif tipo == 'contas':
+            # Testar contas
+            amanha = date.today() + timedelta(days=1)
+
+            with db_engine.connect() as conn:
+                sql = text("""
+                    SELECT descricao, valor_previsto
+                    FROM Agendamentos
+                    WHERE usuario_id = :uid
+                      AND ativo = TRUE
+                      AND dia_execucao = :dia
+                    LIMIT 5
+                """)
+                contas = conn.execute(sql, {
+                    "uid": usuario_id,
+                    "dia": amanha.day
+                }).fetchall()
+
+            mensagem = f"🧪 *TESTE - Contas de Amanhã*\n\n"
+            mensagem += f"💰 {len(contas)} conta(s) encontrada(s)\n\n"
+
+            for idx, conta in enumerate(contas, 1):
+                desc, valor = conta
+                mensagem += f"{idx}. {desc}: {formatar_moeda(float(valor or 0))}\n"
+
+        else:
+            return jsonify({"status": "erro", "mensagem": "Tipo inválido"}), 400
+
+        # Enviar
+        sucesso = enviar_notificacao_whatsapp(
+            numero_whatsapp,
+            mensagem,
+            BOT_WHATSAPP_URL,
+            API_SECRET_KEY
+        )
+
+        if sucesso:
+            return jsonify({
+                "status": "sucesso",
+                "mensagem": f"Notificação de teste enviada para {nome}"
+            }), 200
+        else:
+            return jsonify({
+                "status": "erro",
+                "mensagem": "Falha ao enviar notificação"
+            }), 500
+
+    except Exception as e:
+        print(f"[TEST-NOTIF] Erro: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "erro",
+            "mensagem": str(e)
+        }), 500
