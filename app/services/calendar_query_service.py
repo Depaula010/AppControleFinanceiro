@@ -34,9 +34,6 @@ class CalendarQueryService:
         TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
         now = datetime.now(TIMEZONE_BR)
 
-        print(f"[FILTER] Filtrando {len(events)} eventos para período '{period}'")
-        print(f"[FILTER] Hora atual: {now.strftime('%Y-%m-%d %H:%M:%S %Z')}")
-
         # Definir ranges de horário
         time_ranges = {
             'madrugada': (time(0, 0), time(5, 59)),
@@ -74,15 +71,11 @@ class CalendarQueryService:
         
         elif period in time_ranges:
             start_range, end_range = time_ranges[period]
-            print(f"[FILTER] Range de horário: {start_range} - {end_range}")
 
             filtered = []
             for event in events:
-                event_summary = event.get('summary', 'Sem título')
-
                 if event['all_day']:
                     # Eventos de dia inteiro são incluídos em todos os períodos
-                    print(f"[FILTER]   ✅ '{event_summary}' - evento de dia inteiro (incluído)")
                     filtered.append(event)
                     continue
 
@@ -97,26 +90,12 @@ class CalendarQueryService:
 
                         event_time = event_dt.time()
 
-                        # Debug detalhado
-                        is_in_range = start_range <= event_time <= end_range
-                        is_future = event_dt > now
-
-                        print(f"[FILTER]   📅 '{event_summary}'")
-                        print(f"[FILTER]      Horário: {event_time}")
-                        print(f"[FILTER]      No range? {is_in_range}")
-                        print(f"[FILTER]      Futuro? {is_future} (evento: {event_dt.strftime('%H:%M')}, agora: {now.strftime('%H:%M')})")
-
                         # Verificar se está no range E ainda não aconteceu
-                        if is_in_range and is_future:
-                            print(f"[FILTER]      ✅ INCLUÍDO")
+                        if start_range <= event_time <= end_range and event_dt > now:
                             filtered.append(event)
-                        else:
-                            print(f"[FILTER]      ❌ REJEITADO")
-                except Exception as e:
-                    print(f"[FILTER]   ❌ Erro ao processar '{event_summary}': {e}")
+                except:
                     continue
 
-            print(f"[FILTER] Total filtrado: {len(filtered)} de {len(events)} eventos")
             return filtered
 
         else:
