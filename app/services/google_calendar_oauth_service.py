@@ -308,5 +308,5 @@ class GoogleCalendarOAuthService:
             print(f"[OAUTH] ✅ Conexão OK. {len(calendars.get('items', []))} calendários encontrados")
             return True
         except Exception as e:
-            print(f"[OAXUTH] ❌ Teste de conexão falhou: {e}")
+            print(f"[OAUTH] ❌ Teste de conexão falhou: {e}")
             return False
