@@ -102,3 +102,84 @@ def setup_calendar_table():
         return "✅ Tabela GoogleCalendarTokens criada!", 200
     except Exception as e:
         return f"❌ Erro: {str(e)}", 500
+    
+    
+@admin_bp.route('/debug-calendar', methods=['GET'])
+def debug_calendar():
+    """Rota temporária para debug do Calendar"""
+    from app.services.google_calendar_oauth_service import GoogleCalendarOAuthService
+    from datetime import datetime, date, timezone, time
+    
+    output = []
+    output.append("=" * 60)
+    output.append("🧪 TESTE DE DEBUG - GOOGLE CALENDAR")
+    output.append("=" * 60)
+    
+    usuario_id = 1
+    
+    try:
+        # TESTE 1: Verificar conexão
+        output.append("\n[TESTE 1] Verificando conexão...")
+        is_connected = GoogleCalendarOAuthService.is_user_connected(usuario_id)
+        output.append(f"✅ Usuário conectado? {is_connected}")
+        
+        if not is_connected:
+            return "<br>".join(output) + "<br>❌ Usuário não conectado!"
+        
+        # TESTE 2: Obter credenciais
+        output.append("\n[TESTE 2] Obtendo credenciais...")
+        credentials = GoogleCalendarOAuthService.get_credentials(usuario_id)
+        if credentials:
+            output.append(f"✅ Credenciais obtidas")
+            output.append(f"   - Token: {credentials.token[:20]}...")
+            output.append(f"   - Expiry: {credentials.expiry}")
+        
+        # TESTE 3: Criar serviço
+        output.append("\n[TESTE 3] Criando serviço Calendar...")
+        service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
+        output.append(f"✅ Serviço criado")
+        
+        # TESTE 4: Listar calendários
+        output.append("\n[TESTE 4] Listando calendários...")
+        calendars = service.calendarList().list().execute()
+        output.append(f"✅ {len(calendars.get('items', []))} calendários encontrados")
+        
+        # TESTE 5: Buscar eventos de HOJE
+        output.append("\n[TESTE 5] Buscando eventos de HOJE...")
+        hoje = date.today()
+        output.append(f"   Data: {hoje}")
+        
+        # CORREÇÃO: Usar string direta
+        date_str = hoje.strftime('%Y-%m-%d')
+        start_iso = f"{date_str}T00:00:00Z"
+        end_iso = f"{date_str}T23:59:59Z"
+        
+        output.append(f"   Start ISO: {start_iso}")
+        output.append(f"   End ISO: {end_iso}")
+        
+        # Chamar API
+        output.append("\n   Chamando API...")
+        events_result = service.events().list(
+            calendarId='primary',
+            timeMin=start_iso,
+            timeMax=end_iso,
+            singleEvents=True,
+            orderBy='startTime'
+        ).execute()
+        
+        events = events_result.get('items', [])
+        output.append(f"✅ API retornou {len(events)} eventos")
+        
+        if events:
+            output.append("\n   Eventos encontrados:")
+            for idx, event in enumerate(events[:3], 1):
+                output.append(f"   {idx}. {event.get('summary')}")
+        
+        output.append("\n✅ TODOS OS TESTES PASSARAM!")
+        
+    except Exception as e:
+        output.append(f"\n❌ ERRO: {e}")
+        import traceback
+        output.append("\n" + traceback.format_exc().replace("\n", "<br>"))
+    
+    return "<pre>" + "\n".join(output) + "</pre>"
