@@ -11,6 +11,9 @@ google-auth==2.29.0
 google-auth-oauthlib==1.2.0
 google-api-python-client==2.122.0
 
+# Timezone support (necessário para Python < 3.9 ou sistemas sem tzdata)
+tzdata==2024.1
+
 # Relatórios (PDF e Gráficos)
 matplotlib==3.8.2
 pillow==10.1.0
