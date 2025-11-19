@@ -97,66 +97,65 @@ class CalendarQueryService:
                     continue
                 
             return filtered
-        
+
         else:
             # Período desconhecido, retornar todos
             return events
 
+    @staticmethod
+    def query_agenda_with_time_filter(usuario_id, period_type='hoje', time_filter=None):
+        """
+        Consulta agenda com filtro de horário.
 
-@staticmethod
-def query_agenda_with_time_filter(usuario_id, period_type='hoje', time_filter=None):
-    """
-    Consulta agenda com filtro de horário.
-    
-    Args:
-        usuario_id: ID do usuário
-        period_type: 'hoje', 'amanha', etc
-        time_filter: 'manha', 'tarde', 'noite', 'agora', ou None
-    
-    Returns:
-        str: Mensagem formatada
-    """
-    print(f"[CALENDAR] Consultando com filtro de horário: {time_filter}")
-    
-    # Obter eventos normalmente
-    service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
-    start_date, end_date, description = CalendarQueryService.get_period_dates_for_calendar(period_type)
-    
-    if start_date == end_date:
-        events = CalendarQueryService._get_events_for_date(service, start_date)
-        
-        # Aplicar filtro de horário se fornecido
-        if time_filter:
-            events = CalendarQueryService.filter_events_by_time_period(events, time_filter)
-            
-            # Ajustar descrição
-            time_desc = {
-                'manha': 'da manhã',
-                'tarde': 'da tarde', 
-                'noite': 'da noite',
-                'madrugada': 'da madrugada',
-                'agora': 'nas próximas horas'
-            }.get(time_filter, '')
-            
-            description = f"{description} {time_desc}"
-        
-        return GoogleCalendarService.format_events_for_whatsapp(events, start_date, description)
-    else:
-        # Para múltiplos dias, filtro de horário não faz muito sentido
-        events_by_date = CalendarQueryService._get_events_for_period(service, start_date, end_date)
-        
-        if time_filter:
-            # Aplicar filtro em cada dia
-            for event_date in events_by_date:
-                events_by_date[event_date] = CalendarQueryService.filter_events_by_time_period(
-                    events_by_date[event_date], 
-                    time_filter
-                )
-            
-            # Remover dias sem eventos
-            events_by_date = {d: e for d, e in events_by_date.items() if e}
-        
-        return GoogleCalendarService.format_period_events_for_whatsapp(events_by_date, start_date, end_date)
+        Args:
+            usuario_id: ID do usuário
+            period_type: 'hoje', 'amanha', etc
+            time_filter: 'manha', 'tarde', 'noite', 'agora', ou None
+
+        Returns:
+            str: Mensagem formatada
+        """
+        print(f"[CALENDAR] Consultando com filtro de horário: {time_filter}")
+
+        # Obter eventos normalmente
+        service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
+        start_date, end_date, description = CalendarQueryService.get_period_dates_for_calendar(period_type)
+
+        if start_date == end_date:
+            events = CalendarQueryService._get_events_for_date(service, start_date)
+
+            # Aplicar filtro de horário se fornecido
+            if time_filter:
+                events = CalendarQueryService.filter_events_by_time_period(events, time_filter)
+
+                # Ajustar descrição
+                time_desc = {
+                    'manha': 'da manhã',
+                    'tarde': 'da tarde',
+                    'noite': 'da noite',
+                    'madrugada': 'da madrugada',
+                    'agora': 'nas próximas horas'
+                }.get(time_filter, '')
+
+                description = f"{description} {time_desc}"
+
+            return GoogleCalendarService.format_events_for_whatsapp(events, start_date, description)
+        else:
+            # Para múltiplos dias, filtro de horário não faz muito sentido
+            events_by_date = CalendarQueryService._get_events_for_period(service, start_date, end_date)
+
+            if time_filter:
+                # Aplicar filtro em cada dia
+                for event_date in events_by_date:
+                    events_by_date[event_date] = CalendarQueryService.filter_events_by_time_period(
+                        events_by_date[event_date],
+                        time_filter
+                    )
+
+                # Remover dias sem eventos
+                events_by_date = {d: e for d, e in events_by_date.items() if e}
+
+            return GoogleCalendarService.format_period_events_for_whatsapp(events_by_date, start_date, end_date)
     
     @staticmethod
     def get_period_dates_for_calendar(period_type):
