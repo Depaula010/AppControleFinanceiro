@@ -7,10 +7,9 @@ requests==2.32.3
 redis==5.0.1
 
 # Google Calendar OAuth2
-google-auth==2.23.4
-google-auth-oauthlib==1.1.0
-google-auth-httplib2==0.1.1
-google-api-python-client==2.108.0
+google-auth==2.29.0
+google-auth-oauthlib==1.2.0
+google-api-python-client==2.122.0
 
 # Relatórios (PDF e Gráficos)
 matplotlib==3.8.2
