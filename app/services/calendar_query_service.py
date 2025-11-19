@@ -158,16 +158,15 @@ class CalendarQueryService:
     def _get_events_for_date(service, target_date):
         """Busca eventos de um dia usando serviço OAuth"""
         try:
-            # CORREÇÃO CRÍTICA: API do Google espera strings RFC3339, não objetos datetime
-            # Criar strings diretamente sem usar objetos datetime aware
-            
-            # Formato: "YYYY-MM-DDTHH:MM:SS.000Z"
+            # A API do Google espera strings RFC3339.
+            # Estas strings já estão no formato correto, definidas na rota admin/debug,
+            # portanto, a chamada à API está correta.
             date_str = target_date.strftime('%Y-%m-%d')
             start_iso = f"{date_str}T00:00:00Z"
             end_iso = f"{date_str}T23:59:59Z"
-            
+
             print(f"[CALENDAR] Buscando de {start_iso} até {end_iso}")
-            
+
             events_result = service.events().list(
                 calendarId='primary',
                 timeMin=start_iso,
@@ -175,30 +174,34 @@ class CalendarQueryService:
                 singleEvents=True,
                 orderBy='startTime'
             ).execute()
-            
+
             events = events_result.get('items', [])
             print(f"[CALENDAR] API retornou {len(events)} eventos")
-            
+
             formatted_events = []
             for event in events:
                 try:
+                    # --- CORREÇÃO DE PROCESSAMENTO DE START/END TIME ---
+                    # Pega a string. Pode ser dateTime (aware) ou date (naive)
                     start = event['start'].get('dateTime', event['start'].get('date'))
                     end = event['end'].get('dateTime', event['end'].get('date'))
-                    
+
                     formatted_events.append({
                         'summary': event.get('summary', 'Sem título'),
-                        'start': start,
+                        'start': start, # Mantemos a string bruta para formatação
                         'end': end,
                         'location': event.get('location', ''),
                         'description': event.get('description', ''),
                         'all_day': 'date' in event['start']
                     })
                 except Exception as e:
+                    # O erro de timezone não deve mais acontecer aqui se a correção #1 estiver OK,
+                    # mas mantemos o try/except para eventos malformados.
                     print(f"[CALENDAR] Erro ao processar evento: {e}")
                     continue
-            
+                
             return formatted_events
-            
+
         except Exception as e:
             print(f"[CALENDAR] ❌ Erro em _get_events_for_date: {e}")
             import traceback
@@ -209,7 +212,6 @@ class CalendarQueryService:
     def _get_events_for_period(service, start_date, end_date):
         """Busca eventos de um período usando serviço OAuth"""
         try:
-            # CORREÇÃO DEFENSIVA: Criar datetime timezone-aware de forma explícita
             from datetime import time
             
             # Início do período (00:00:00 UTC)
@@ -240,39 +242,43 @@ class CalendarQueryService:
             events_by_date = {}
             
             for event in events:
-                # 1. Obter o valor de start
-                start = event['start'].get('dateTime', event['start'].get('date'))
-                
-                if not start: continue # Ignora eventos sem start
-
                 try:
-                    if 'T' in start:
-                        # Evento com hora. datetime.fromisoformat lida com 'Z' e '+/-offset'
-                        event_dt = datetime.fromisoformat(start)
+                    start_str = event['start'].get('dateTime', event['start'].get('date'))
+                    
+                    # --- CORREÇÃO DE PROCESSAMENTO DE START TIME PARA AGRUPAMENTO ---
+                    if 'T' in start_str:
+                        # Se tem T, é dateTime (aware ou naive). Usamos fromisoformat para analisar
+                        event_dt = datetime.fromisoformat(start_str)
                         
-                        # (Opcional, mas recomendado) Forçar UTC se for naive.
-                        # Caso o fromisoformat não consiga identificar o fuso (improvável no GC), 
-                        # definimos como UTC para evitar o erro de comparação:
+                        # Se for naive, o que é comum se o fuso horário for removido na persistência,
+                        # o marcamos como UTC para fins de processamento interno/comparação.
                         if event_dt.tzinfo is None:
-                            event_dt = event_dt.replace(tzinfo=timezone.utc)
-                            
-                        event_date = event_dt.date() 
+                             event_dt = event_dt.replace(tzinfo=timezone.utc)
+    
+                        # Extraímos a data (date object, que é sempre naive, bom para chaves de dicionário)
+                        event_date = event_dt.date()
                     else:
                         # Date sem hora (evento de dia inteiro)
-                        event_date = date.fromisoformat(start)
+                        event_date = date.fromisoformat(start_str)
                     
-                    # 2. Usar event_date (offset-naive date) como chave
+                    # --- FIM DA CORREÇÃO ---
+    
                     if event_date not in events_by_date:
                         events_by_date[event_date] = []
                     
-                    # ... (resto do código para salvar o evento)
                     events_by_date[event_date].append({
-                        # ...
+                        'summary': event.get('summary', 'Sem título'),
+                        'start': start_str, # Mantemos a string bruta
+                        'end': event['end'].get('dateTime', event['end'].get('date')),
+                        'location': event.get('location', ''),
+                        'description': event.get('description', ''),
+                        'all_day': 'date' in event['start']
                     })
                     
                 except Exception as e:
                     print(f"[CALENDAR] Erro ao processar evento: {e}")
-            
+                    continue
+                
             return events_by_date
             
         except Exception as e:

@@ -145,6 +145,8 @@ class GoogleCalendarOAuthService:
         Recupera e valida credenciais do usuário.
         Renova automaticamente se expiradas.
         
+        CORREÇÃO: Garante que a data de expiração carregada do banco seja offset-aware (UTC).
+        
         Returns:
             Credentials ou None
         """
@@ -159,6 +161,14 @@ class GoogleCalendarOAuthService:
             WHERE usuario_id = :uid
         """)
         
+        # Criar um flow de forma defensiva para obter a URL do token
+        try:
+            flow_temp = GoogleCalendarOAuthService.create_flow()
+            token_url = flow_temp.oauth2session.token_url
+        except:
+            token_url = "https://oauth2.googleapis.com/token"
+    
+        
         with db_engine.connect() as conn:
             result = conn.execute(sql, {"uid": usuario_id}).fetchone()
         
@@ -168,6 +178,14 @@ class GoogleCalendarOAuthService:
         
         print(f"[OAUTH] ✅ Credenciais encontradas. Token expiry: {result.token_expiry}")
         
+        # --- CORREÇÃO CRÍTICA DO TIMEZONE AQUI ---
+        expiry_dt = result.token_expiry
+        if expiry_dt and expiry_dt.tzinfo is None:
+            # A data do banco (TIMESTAMP WITH TIME ZONE) é implicitamente UTC
+            # e é convertida para aware para satisfazer a biblioteca google-auth.
+            expiry_dt = expiry_dt.replace(tzinfo=timezone.utc)
+        # --- FIM DA CORREÇÃO ---
+            
         # Deserializar scopes
         scopes = json.loads(result.scopes) if result.scopes else GoogleCalendarOAuthService.SCOPES
         
@@ -175,34 +193,20 @@ class GoogleCalendarOAuthService:
         credentials = Credentials(
             token=result.access_token,
             refresh_token=result.refresh_token,
-            token_uri="https://oauth2.googleapis.com/token",
+            token_uri=token_url,
             client_id=GOOGLE_CLIENT_ID,
             client_secret=GOOGLE_CLIENT_SECRET,
-            scopes=scopes
+            scopes=scopes,
+            expiry=expiry_dt # Passa a data corrigida (aware)
         )
         
-        # CORREÇÃO CRÍTICA: Verificar expiração com timezone-aware
-        if result.token_expiry:
-            # Converter token_expiry para timezone-aware se necessário
-            if result.token_expiry.tzinfo is None:
-                print(f"[OAUTH] ⚠️ Token expiry é naive, convertendo para UTC")
-                token_expiry_aware = result.token_expiry.replace(tzinfo=timezone.utc)
-            else:
-                token_expiry_aware = result.token_expiry
-            
-            # Atribuir ao credentials
-            credentials.expiry = token_expiry_aware
-            
-            # Agora verificar se expirou (ambos são timezone-aware)
+        # Agora verificar se expirou (o check interno não falhará mais)
+        if expiry_dt:
             now_utc = datetime.now(timezone.utc)
             
-            print(f"[OAUTH] Verificando expiração:")
-            print(f"  - Agora (UTC): {now_utc}")
-            print(f"  - Expiry: {token_expiry_aware}")
-            print(f"  - Expirado? {token_expiry_aware < now_utc}")
-            
-            # Se expirou E tem refresh_token, renovar
-            if token_expiry_aware < now_utc and credentials.refresh_token:
+            # A checagem `if credentials.expired:` executa o código que falhou
+            # Vamos usar a checagem que o Google faz internamente
+            if expiry_dt < now_utc and credentials.refresh_token:
                 print(f"[OAUTH] ⏰ Token expirado. Renovando...")
                 try:
                     credentials.refresh(Request())
@@ -211,14 +215,14 @@ class GoogleCalendarOAuthService:
                 except Exception as e:
                     print(f"[OAUTH] ❌ Erro ao renovar token: {e}")
                     return None
-            elif token_expiry_aware < now_utc:
+            elif expiry_dt < now_utc:
                 print(f"[OAUTH] ❌ Token expirado e sem refresh_token")
                 return None
             else:
                 print(f"[OAUTH] ✅ Token ainda válido")
         
         return credentials
-    
+        
     @staticmethod
     def is_user_connected(usuario_id):
         """Verifica se usuário já conectou Google Calendar"""
