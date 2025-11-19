@@ -1,0 +1,124 @@
+name: Deploy to Contabo
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:  # Permite trigger manual
+
+env:
+  DEPLOY_PATH: /opt/meu-secretario
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.CONTABO_SSH_KEY }}
+
+      - name: 📝 Add Contabo to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.CONTABO_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🧪 Test SSH Connection
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.CONTABO_USER }}@${{ secrets.CONTABO_HOST }} "echo '✅ SSH connection successful'"
+
+      - name: 🚀 Deploy to Contabo
+        env:
+          HOST: ${{ secrets.CONTABO_HOST }}
+          USER: ${{ secrets.CONTABO_USER }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          API_SECRET_KEY: ${{ secrets.API_SECRET_KEY }}
+          BOT_WHATSAPP_URL: ${{ secrets.BOT_WHATSAPP_URL }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          ssh $USER@$HOST bash << 'ENDSSH'
+            set -e  # Exit on error
+            
+            echo "📂 Navigating to project directory..."
+            cd ${{ env.DEPLOY_PATH }}
+            
+            echo "📥 Pulling latest code from GitHub..."
+            git fetch origin
+            git reset --hard origin/main  # ou origin/master
+            
+            echo "📝 Updating .env file..."
+            cat > .env << 'ENVEOF'
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          DATABASE_URL=postgresql://postgres:${{ secrets.DB_PASSWORD }}@postgres:5432/meu_secretario
+          REDIS_URL=redis://redis:6379
+          API_SECRET_KEY=${{ secrets.API_SECRET_KEY }}
+          BOT_WHATSAPP_URL=${{ secrets.BOT_WHATSAPP_URL }}
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          PYTHON_VERSION=3.11
+          ENVEOF
+            
+            echo "🛑 Stopping containers..."
+            docker compose down --remove-orphans
+            
+            echo "🗑️ Cleaning old images..."
+            docker system prune -f
+            
+            echo "🏗️ Building new images..."
+            docker compose build --no-cache
+            
+            echo "🚀 Starting containers..."
+            docker compose up -d
+            
+            echo "⏳ Waiting for containers to be healthy..."
+            sleep 20
+            
+            echo "📊 Container status:"
+            docker compose ps
+            
+            echo "📋 Recent logs:"
+            docker compose logs --tail=30 web
+            
+            echo "✅ Deployment completed successfully!"
+          ENDSSH
+
+      - name: 🔍 Health Check
+        run: |
+          sleep 10
+          response=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.CONTABO_HOST }}:8000/)
+          if [ $response -eq 200 ]; then
+            echo "✅ Health check passed! Application is running."
+          else
+            echo "❌ Health check failed! HTTP status: $response"
+            exit 1
+          fi
+
+      - name: 🎉 Deployment Success Notification
+        if: success()
+        run: |
+          echo "=================================================="
+          echo "✅ Deployment successful!"
+          echo "🌐 Application URL: http://${{ secrets.CONTABO_HOST }}:8000"
+          echo "📊 Check logs: docker compose logs -f web"
+          echo "=================================================="
+
+      - name: ❌ Deployment Failed Notification
+        if: failure()
+        run: |
+          echo "=================================================="
+          echo "❌ Deployment failed!"
+          echo "🔍 Check the logs above for details"
+          echo "💡 SSH to server: ssh ${{ secrets.CONTABO_USER }}@${{ secrets.CONTABO_HOST }}"
+          echo "📋 View logs: docker compose logs web"
+          echo "=================================================="
