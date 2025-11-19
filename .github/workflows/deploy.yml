@@ -58,7 +58,7 @@ jobs:
             echo "📝 Updating .env file..."
             cat > .env << 'ENVEOF'
           GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-          DATABASE_URL=postgresql://postgres:${{ secrets.DB_PASSWORD }}@postgres:5432/meu_secretario
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
           REDIS_URL=redis://redis:6379
           API_SECRET_KEY=${{ secrets.API_SECRET_KEY }}
           BOT_WHATSAPP_URL=${{ secrets.BOT_WHATSAPP_URL }}
