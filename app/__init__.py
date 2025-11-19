@@ -2,7 +2,7 @@
 import locale
 import google.generativeai as genai
 from flask import Flask
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.pool import NullPool, QueuePool
 from .config import GEMINI_API_KEY, DATABASE_URL
 from app.services.redis_service import redis_service
@@ -61,10 +61,12 @@ def create_app():
         
         @event.listens_for(db_engine, "checkout")
         def receive_checkout(dbapi_conn, connection_record, connection_proxy):
-            # Testa a conexão antes de entregar
+            # Testa a conexão antes de entregar (usando DBAPI diretamente)
             cursor = dbapi_conn.cursor()
             try:
+                # DBAPI usa SQL puro, não precisa de text()
                 cursor.execute("SELECT 1")
+                cursor.fetchone()
             except Exception as e:
                 print(f"[DB] ⚠️ Conexão inválida detectada, descartando: {e}")
                 # Força reconexão
@@ -102,12 +104,12 @@ def create_app():
         # Teste de conexão do banco
         try:
             with db_engine.connect() as conn:
-                conn.execute("SELECT 1")
+                conn.execute(text("SELECT 1"))
                 db_status = "✅ Conectado"
         except Exception as e:
             db_status = f"❌ Erro: {str(e)[:50]}"
-        
-        print("TESTE DE DEPLOY v99 FUNCIONOU!") 
+
+        print("TESTE DE DEPLOY v99 FUNCIONOU!")
         return f"API DO BOT FINANCEIRO - DEPLOY v99 - FUNCIONOU!<br>DB: {db_status}"
         
     return app

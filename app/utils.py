@@ -2,6 +2,7 @@
 import locale
 import time
 from functools import wraps
+from sqlalchemy import text
 from sqlalchemy.exc import OperationalError, DBAPIError
 
 def formatar_moeda(valor):
@@ -91,7 +92,7 @@ def check_db_connection():
     
     try:
         with db_engine.connect() as conn:
-            result = conn.execute("SELECT 1").scalar()
+            result = conn.execute(text("SELECT 1")).scalar()
             if result == 1:
                 return True, "Conexão OK"
             else:
@@ -111,15 +112,15 @@ def ensure_db_connection():
     
     try:
         with db_engine.connect() as conn:
-            conn.execute("SELECT 1")
+            conn.execute(text("SELECT 1"))
     except Exception as e:
         print(f"[DB] Conexão perdida, resetando pool: {e}")
         db_engine.dispose()
-        
+
         # Tentar reconectar
         try:
             with db_engine.connect() as conn:
-                conn.execute("SELECT 1")
+                conn.execute(text("SELECT 1"))
             print("[DB] ✅ Reconectado com sucesso")
         except Exception as e2:
             print(f"[DB] ❌ Falha ao reconectar: {e2}")
