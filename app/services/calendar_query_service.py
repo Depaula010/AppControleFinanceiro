@@ -1,7 +1,8 @@
-from datetime import date, timedelta
+# app/services/calendar_query_service.py (VERSÃO CORRIGIDA)
+
+from datetime import date, datetime, timedelta, timezone
 from app.services.google_calendar_service import GoogleCalendarService
 from app.services.google_calendar_oauth_service import GoogleCalendarOAuthService
-from app.services.google_calendar_service import GoogleCalendarService
 from app.config import GOOGLE_REDIRECT_URI
 
 # Singleton
@@ -18,6 +19,8 @@ class CalendarQueryService:
         Returns:
             (start_date, end_date, description)
         """
+        print(f"[CALENDAR] Calculando datas para período '{period_type}'")
+        
         hoje = date.today()
         
         if period_type == 'hoje':
@@ -77,12 +80,21 @@ class CalendarQueryService:
             str: Mensagem formatada para WhatsApp
         """
         print(f"[CALENDAR] Consultando agenda do usuário {usuario_id} para período '{period_type}'")
+        
         # Verificar se usuário conectou
         if not GoogleCalendarOAuthService.is_user_connected(usuario_id):
+            # CORREÇÃO: Verificar se GOOGLE_REDIRECT_URI existe
+            if not GOOGLE_REDIRECT_URI:
+                return (
+                    "⚠️ *Google Calendar não configurado*\n\n"
+                    "O administrador precisa configurar as credenciais OAuth2."
+                )
+            
             # Gerar link de conexão
             base_url = GOOGLE_REDIRECT_URI.rsplit('/', 1)[0]  # Remove /oauth2callback
             connect_url = f"{base_url}/connect-calendar/{usuario_id}"
-            print(f"[CALENDAR] Usuário conectado. Link de conexão: {connect_url}")
+            
+            print(f"[CALENDAR] Usuário NÃO conectado. Link de conexão: {connect_url}")
             
             return (
                 f"📅 *Google Calendar não conectado*\n\n"
@@ -94,6 +106,8 @@ class CalendarQueryService:
             )
         
         try:
+            print(f"[CALENDAR] Usuário CONECTADO. Buscando eventos...")
+            
             # Obter serviço do Calendar
             service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
             
@@ -101,26 +115,38 @@ class CalendarQueryService:
             start_date, end_date, description = CalendarQueryService.get_period_dates_for_calendar(period_type)
             
             # Buscar eventos
+            print(f"[CALENDAR] Buscando eventos de {start_date} a {end_date}")
+            
             if start_date == end_date:
                 # Um dia
                 events = CalendarQueryService._get_events_for_date(service, start_date)
+                print(f"[CALENDAR] Encontrados {len(events)} eventos")
                 return GoogleCalendarService.format_events_for_whatsapp(events, start_date)
             else:
                 # Múltiplos dias
                 events_by_date = CalendarQueryService._get_events_for_period(service, start_date, end_date)
+                total_events = sum(len(events) for events in events_by_date.values())
+                print(f"[CALENDAR] Encontrados {total_events} eventos em {len(events_by_date)} dias")
                 return GoogleCalendarService.format_period_events_for_whatsapp(events_by_date, start_date, end_date)
         
         except Exception as e:
-            print(f"[CALENDAR] Erro ao consultar: {e}")
-            return f"❌ Erro ao consultar agenda: {str(e)}\n\nTente reconectar seu Google Calendar."
+            print(f"[CALENDAR] ❌ Erro ao consultar: {e}")
+            import traceback
+            traceback.print_exc()
+            
+            return (
+                f"❌ Erro ao consultar agenda: {str(e)}\n\n"
+                f"Tente reconectar seu Google Calendar."
+            )
     
     @staticmethod
     def _get_events_for_date(service, target_date):
         """Busca eventos de um dia usando serviço OAuth"""
-        from datetime import datetime
+        # CORREÇÃO: Usar timezone-aware datetime
+        start_of_day = datetime.combine(target_date, datetime.min.time()).replace(tzinfo=timezone.utc).isoformat()
+        end_of_day = datetime.combine(target_date, datetime.max.time()).replace(tzinfo=timezone.utc).isoformat()
         
-        start_of_day = datetime.combine(target_date, datetime.min.time()).isoformat() + 'Z'
-        end_of_day = datetime.combine(target_date, datetime.max.time()).isoformat() + 'Z'
+        print(f"[CALENDAR] Buscando de {start_of_day} até {end_of_day}")
         
         events_result = service.events().list(
             calendarId='primary',
@@ -131,6 +157,7 @@ class CalendarQueryService:
         ).execute()
         
         events = events_result.get('items', [])
+        print(f"[CALENDAR] API retornou {len(events)} eventos")
         
         formatted_events = []
         for event in events:
@@ -151,10 +178,11 @@ class CalendarQueryService:
     @staticmethod
     def _get_events_for_period(service, start_date, end_date):
         """Busca eventos de um período usando serviço OAuth"""
-        from datetime import datetime
+        # CORREÇÃO: Usar timezone-aware datetime
+        start_datetime = datetime.combine(start_date, datetime.min.time()).replace(tzinfo=timezone.utc).isoformat()
+        end_datetime = datetime.combine(end_date, datetime.max.time()).replace(tzinfo=timezone.utc).isoformat()
         
-        start_datetime = datetime.combine(start_date, datetime.min.time()).isoformat() + 'Z'
-        end_datetime = datetime.combine(end_date, datetime.max.time()).isoformat() + 'Z'
+        print(f"[CALENDAR] Buscando período de {start_datetime} até {end_datetime}")
         
         events_result = service.events().list(
             calendarId='primary',
@@ -165,16 +193,19 @@ class CalendarQueryService:
         ).execute()
         
         events = events_result.get('items', [])
+        print(f"[CALENDAR] API retornou {len(events)} eventos")
         
         events_by_date = {}
         
         for event in events:
             start = event['start'].get('dateTime', event['start'].get('date'))
             
+            # Parse da data
             if 'T' in start:
-                event_date = datetime.fromisoformat(start.replace('Z', '')).date()
+                # DateTime com hora
+                event_date = datetime.fromisoformat(start.replace('Z', '+00:00')).date()
             else:
-                from datetime import date
+                # Date sem hora (evento de dia inteiro)
                 event_date = date.fromisoformat(start)
             
             if event_date not in events_by_date:
