@@ -8,6 +8,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      # Passamos as variáveis, mas o valor real vem do arquivo .env
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - DATABASE_URL=${DATABASE_URL}
       - REDIS_URL=${REDIS_URL}
@@ -20,33 +21,13 @@ services:
     networks:
       - app-network
     depends_on:
-      postgres:
-        condition: service_healthy
+      # Removemos o postgres daqui, pois ele já está rodando no outro projeto
       redis:
         condition: service_started
     volumes:
       - ./logs:/app/logs
 
-  postgres:
-    image: postgres:15-alpine
-    container_name: meu-secretario-db
-    restart: unless-stopped
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=meu_secretario
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - app-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
+  # O Redis continua aqui pois é o cache rápido exclusivo desse sistema
   redis:
     image: redis:7-alpine
     container_name: meu-secretario-redis
@@ -65,7 +46,6 @@ services:
       retries: 5
 
 volumes:
-  postgres-data:
   redis-data:
 
 networks:
