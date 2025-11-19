@@ -1,4 +1,4 @@
-# app/services/google_calendar_oauth_service.py (VERSÃO CORRIGIDA COMPLETA)
+# app/services/google_calendar_oauth_service.py (VERSÃO CORRIGIDA FINAL)
 
 import json
 import base64
@@ -145,7 +145,7 @@ class GoogleCalendarOAuthService:
         Recupera e valida credenciais do usuário.
         Renova automaticamente se expiradas.
         
-        CORREÇÃO: Garante que a data de expiração carregada do banco seja offset-aware (UTC).
+        CORREÇÃO FINAL: Garante timezone-aware em TODAS as situações.
         
         Returns:
             Credentials ou None
@@ -161,13 +161,12 @@ class GoogleCalendarOAuthService:
             WHERE usuario_id = :uid
         """)
         
-        # Criar um flow de forma defensiva para obter a URL do token
+        # Criar um flow para obter URL do token
         try:
             flow_temp = GoogleCalendarOAuthService.create_flow()
             token_url = flow_temp.oauth2session.token_url
         except:
             token_url = "https://oauth2.googleapis.com/token"
-    
         
         with db_engine.connect() as conn:
             result = conn.execute(sql, {"uid": usuario_id}).fetchone()
@@ -176,27 +175,40 @@ class GoogleCalendarOAuthService:
             print(f"[OAUTH] ❌ Nenhuma credencial encontrada para usuário {usuario_id}")
             return None
         
-        print(f"[OAUTH] ✅ Credenciais encontradas. Token expiry: {result.token_expiry}")
+        print(f"[OAUTH] ✅ Credenciais encontradas. Token expiry (raw): {result.token_expiry} (tipo: {type(result.token_expiry)})")
         
-        # --- CORREÇÃO CRÍTICA DO TIMEZONE AQUI ---
+        # --- CORREÇÃO CRÍTICA E COMPLETA DO TIMEZONE ---
         expiry_dt = result.token_expiry
 
-        # Se a data vier como string do SQLite, converte para datetime
+        # 1. Se vier como string (SQLite ou serialização)
         if expiry_dt and isinstance(expiry_dt, str):
             try:
-                # Remove o 'Z' se presente e assume UTC
+                # Remove 'Z' se presente
                 if expiry_dt.endswith('Z'):
                     expiry_dt = expiry_dt[:-1]
+                # Tenta parse ISO
                 expiry_dt = datetime.fromisoformat(expiry_dt)
             except ValueError:
-                 # Tenta outro formato se o ISO falhar
-                 expiry_dt = datetime.strptime(expiry_dt, "%Y-%m-%d %H:%M:%S.%f")
+                try:
+                    # Tenta outro formato comum
+                    expiry_dt = datetime.strptime(expiry_dt, "%Y-%m-%d %H:%M:%S.%f")
+                except ValueError:
+                    # Formato sem microssegundos
+                    expiry_dt = datetime.strptime(expiry_dt, "%Y-%m-%d %H:%M:%S")
 
-
-        if expiry_dt and expiry_dt.tzinfo is None:
-            # A data do banco (TIMESTAMP WITH TIME ZONE) é implicitamente UTC
-            # e é convertida para aware para satisfazer a biblioteca google-auth.
-            expiry_dt = expiry_dt.replace(tzinfo=timezone.utc)
+        # 2. Se for datetime, SEMPRE verificar e garantir timezone
+        if expiry_dt and isinstance(expiry_dt, datetime):
+            if expiry_dt.tzinfo is None:
+                # NAIVE - adicionar UTC explicitamente
+                print(f"[OAUTH] ⚠️ Token expiry é NAIVE. Convertendo para UTC.")
+                expiry_dt = expiry_dt.replace(tzinfo=timezone.utc)
+            else:
+                # JÁ É AWARE - garantir que está em UTC
+                print(f"[OAUTH] ✅ Token expiry já é AWARE ({expiry_dt.tzinfo})")
+                if expiry_dt.tzinfo != timezone.utc:
+                    expiry_dt = expiry_dt.astimezone(timezone.utc)
+        
+        print(f"[OAUTH] Token expiry (processado): {expiry_dt} (tzinfo: {expiry_dt.tzinfo if expiry_dt else None})")
         # --- FIM DA CORREÇÃO ---
             
         # Deserializar scopes
@@ -210,29 +222,36 @@ class GoogleCalendarOAuthService:
             client_id=GOOGLE_CLIENT_ID,
             client_secret=GOOGLE_CLIENT_SECRET,
             scopes=scopes,
-            expiry=expiry_dt # Passa a data corrigida (aware)
+            expiry=expiry_dt  # Passa a data GARANTIDAMENTE aware
         )
         
-        # Agora verificar se expirou (o check interno não falhará mais)
-        if expiry_dt:
-            now_utc = datetime.now(timezone.utc)
-            
-            # A checagem `if credentials.expired:` executa o código que falhou
-            # Vamos usar a checagem que o Google faz internamente
-            if expiry_dt < now_utc and credentials.refresh_token:
+        # Verificar expiração de forma segura
+        try:
+            if credentials.expired:
                 print(f"[OAUTH] ⏰ Token expirado. Renovando...")
-                try:
+                if credentials.refresh_token:
                     credentials.refresh(Request())
                     GoogleCalendarOAuthService.save_credentials(usuario_id, credentials)
                     print(f"[OAUTH] ✅ Token renovado com sucesso")
-                except Exception as e:
-                    print(f"[OAUTH] ❌ Erro ao renovar token: {e}")
+                else:
+                    print(f"[OAUTH] ❌ Token expirado sem refresh_token")
                     return None
-            elif expiry_dt < now_utc:
-                print(f"[OAUTH] ❌ Token expirado e sem refresh_token")
-                return None
             else:
                 print(f"[OAUTH] ✅ Token ainda válido")
+        except Exception as e:
+            print(f"[OAUTH] ❌ Erro ao verificar expiração: {e}")
+            # Se falhar, tentar renovar
+            if credentials.refresh_token:
+                try:
+                    print(f"[OAUTH] Tentando renovar mesmo assim...")
+                    credentials.refresh(Request())
+                    GoogleCalendarOAuthService.save_credentials(usuario_id, credentials)
+                    print(f"[OAUTH] ✅ Token renovado (fallback)")
+                except Exception as e2:
+                    print(f"[OAUTH] ❌ Falha ao renovar: {e2}")
+                    return None
+            else:
+                return None
         
         return credentials
         
