@@ -16,6 +16,149 @@ class CalendarQueryService:
     TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
     
     @staticmethod
+    def filter_events_by_time_period(events, period='tarde'):
+        """
+        Filtra eventos por período do dia.
+        
+        Args:
+            events: Lista de eventos
+            period: 'manha' (6h-12h), 'tarde' (12h-18h), 'noite' (18h-23h59), 
+                    'madrugada' (0h-6h), 'agora' (próximas 4 horas)
+        
+        Returns:
+            Lista de eventos filtrados
+        """
+        from datetime import datetime, time
+        from zoneinfo import ZoneInfo
+        
+        TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
+        now = datetime.now(TIMEZONE_BR)
+        
+        # Definir ranges de horário
+        time_ranges = {
+            'madrugada': (time(0, 0), time(5, 59)),
+            'manha': (time(6, 0), time(11, 59)),
+            'tarde': (time(12, 0), time(17, 59)),
+            'noite': (time(18, 0), time(23, 59))
+        }
+        
+        if period == 'agora':
+            # Próximas 4 horas a partir de agora
+            cutoff_time = now + timedelta(hours=4)
+            
+            filtered = []
+            for event in events:
+                if event['all_day']:
+                    continue  # Ignorar eventos de dia inteiro
+                
+                try:
+                    # Parse start time
+                    start_str = event['start']
+                    if 'T' in start_str:
+                        event_dt = datetime.fromisoformat(start_str)
+                        if event_dt.tzinfo is None:
+                            event_dt = event_dt.replace(tzinfo=TIMEZONE_BR)
+                        else:
+                            event_dt = event_dt.astimezone(TIMEZONE_BR)
+                        
+                        # Evento deve começar entre now e cutoff_time
+                        if now <= event_dt <= cutoff_time:
+                            filtered.append(event)
+                except:
+                    continue
+                
+            return filtered
+        
+        elif period in time_ranges:
+            start_range, end_range = time_ranges[period]
+            
+            filtered = []
+            for event in events:
+                if event['all_day']:
+                    # Eventos de dia inteiro são incluídos em todos os períodos
+                    filtered.append(event)
+                    continue
+                
+                try:
+                    start_str = event['start']
+                    if 'T' in start_str:
+                        event_dt = datetime.fromisoformat(start_str)
+                        if event_dt.tzinfo is None:
+                            event_dt = event_dt.replace(tzinfo=TIMEZONE_BR)
+                        else:
+                            event_dt = event_dt.astimezone(TIMEZONE_BR)
+                        
+                        event_time = event_dt.time()
+                        
+                        # Verificar se está no range E ainda não aconteceu
+                        if start_range <= event_time <= end_range and event_dt > now:
+                            filtered.append(event)
+                except:
+                    continue
+                
+            return filtered
+        
+        else:
+            # Período desconhecido, retornar todos
+            return events
+
+
+@staticmethod
+def query_agenda_with_time_filter(usuario_id, period_type='hoje', time_filter=None):
+    """
+    Consulta agenda com filtro de horário.
+    
+    Args:
+        usuario_id: ID do usuário
+        period_type: 'hoje', 'amanha', etc
+        time_filter: 'manha', 'tarde', 'noite', 'agora', ou None
+    
+    Returns:
+        str: Mensagem formatada
+    """
+    print(f"[CALENDAR] Consultando com filtro de horário: {time_filter}")
+    
+    # Obter eventos normalmente
+    service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
+    start_date, end_date, description = CalendarQueryService.get_period_dates_for_calendar(period_type)
+    
+    if start_date == end_date:
+        events = CalendarQueryService._get_events_for_date(service, start_date)
+        
+        # Aplicar filtro de horário se fornecido
+        if time_filter:
+            events = CalendarQueryService.filter_events_by_time_period(events, time_filter)
+            
+            # Ajustar descrição
+            time_desc = {
+                'manha': 'da manhã',
+                'tarde': 'da tarde', 
+                'noite': 'da noite',
+                'madrugada': 'da madrugada',
+                'agora': 'nas próximas horas'
+            }.get(time_filter, '')
+            
+            description = f"{description} {time_desc}"
+        
+        return GoogleCalendarService.format_events_for_whatsapp(events, start_date, description)
+    else:
+        # Para múltiplos dias, filtro de horário não faz muito sentido
+        events_by_date = CalendarQueryService._get_events_for_period(service, start_date, end_date)
+        
+        if time_filter:
+            # Aplicar filtro em cada dia
+            for event_date in events_by_date:
+                events_by_date[event_date] = CalendarQueryService.filter_events_by_time_period(
+                    events_by_date[event_date], 
+                    time_filter
+                )
+            
+            # Remover dias sem eventos
+            events_by_date = {d: e for d, e in events_by_date.items() if e}
+        
+        return GoogleCalendarService.format_period_events_for_whatsapp(events_by_date, start_date, end_date)
+    
+    @staticmethod
     def get_period_dates_for_calendar(period_type):
         """
         Similar ao PeriodQueryService, mas para agenda.

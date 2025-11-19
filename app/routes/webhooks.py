@@ -25,6 +25,10 @@ from app.services import finance_service, notification_service
 from app.config import BOT_WHATSAPP_URL, API_SECRET_KEY
 from app.services.calendar_query_service import CalendarQueryService
 
+from app.services.calendar_management_service import CalendarManagementService
+from app.services.notification_config_service import NotificationConfigService
+from datetime import date, timedelta
+
 webhooks_bp = Blueprint('webhooks', __name__)
 
 
@@ -513,17 +517,6 @@ def handle_whatsapp_webhook():
                 valor_fmt = formatar_moeda(valor_dec)
                 resposta_para_usuario = f"✅ Pagamento da fatura '{nome_cartao_pago}' ({valor_fmt}) registrado com sucesso!"
             
-            #=== INTENÇÃO: Consulta Agenda =====    
-            elif intent == 'Consultar Agenda':
-                print(f"[WHATSAPP] Intenção de Consulta Agenda detectada.")
-                calendar_data = gemini_service.extract_calendar_query(texto_msg)
-                period_type = calendar_data.get('period_type', 'hoje')
-
-                # Usar novo serviço OAuth
-                resposta_para_usuario = CalendarQueryService.query_agenda(usuario_id, period_type)
-                print(f"[WHATSAPP] Resposta da Consulta Agenda: {resposta_para_usuario}")
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-            
             #=== INTENÇÃO: Consulta Categoria Específica =====
             elif intent == 'Consulta Categoria Específica':
                 cat_data = gemini_service.extract_category_query(texto_msg)
@@ -535,6 +528,226 @@ def handle_whatsapp_webhook():
                 
                 resposta_para_usuario = f"ℹ️ *Consulta de Categoria (Este Mês)*\n\n"
                 resposta_para_usuario += f"Você gastou *{formatar_moeda(valor_gasto)}* com '{nome_categoria_consulta}'."
+                
+            #==== INTENÇÃO: Criar Evento ====
+            elif intent == 'Criar Evento':
+                print(f"[WHATSAPP] Intenção de Criar Evento detectada")
+                
+                event_data = gemini_service.extract_event_creation_details(texto_msg)
+                
+                titulo = event_data.get('titulo')
+                data_str = event_data.get('data')
+                hora_inicio = event_data.get('hora_inicio')
+                hora_fim = event_data.get('hora_fim')
+                descricao = event_data.get('descricao')
+                localizacao = event_data.get('localizacao')
+                
+                if not titulo or not data_str:
+                    return jsonify({
+                        "status": "sucesso",
+                        "resposta": "❌ Não consegui identificar o título ou data do evento. Tente algo como: 'Criar evento Academia amanhã às 7h'"
+                    }), 200
+                
+                # Processar data
+                if data_str == 'hoje':
+                    data_evento = date.today()
+                elif data_str == 'amanha':
+                    data_evento = date.today() + timedelta(days=1)
+                else:
+                    try:
+                        data_evento = date.fromisoformat(data_str)
+                    except:
+                        return jsonify({
+                            "status": "sucesso",
+                            "resposta": f"❌ Data inválida: {data_str}"
+                        }), 200
+                
+                # Criar evento
+                sucesso, mensagem, event_id = CalendarManagementService.create_event(
+                    usuario_id=usuario_id,
+                    titulo=titulo,
+                    data_evento=data_evento,
+                    hora_inicio=hora_inicio,
+                    hora_fim=hora_fim,
+                    descricao=descricao,
+                    localizacao=localizacao
+                )
+                
+                if sucesso:
+                    resposta_para_usuario = f"✅ *Evento Criado!*\n\n"
+                    resposta_para_usuario += f"📝 {titulo}\n"
+                    resposta_para_usuario += f"📅 {data_evento.strftime('%d/%m/%Y')}\n"
+                    
+                    if hora_inicio:
+                        resposta_para_usuario += f"⏰ {hora_inicio}"
+                        if hora_fim:
+                            resposta_para_usuario += f" - {hora_fim}"
+                        resposta_para_usuario += "\n"
+                    
+                    if localizacao:
+                        resposta_para_usuario += f"📍 {localizacao}\n"
+                    
+                    resposta_para_usuario += f"\n_ID: {event_id}_"
+                else:
+                    resposta_para_usuario = f"❌ {mensagem}"
+                
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+            
+            #==== INTENÇÃO: Deletar Evento ====
+            elif intent == 'Deletar Evento':
+                print(f"[WHATSAPP] Intenção de Deletar Evento detectada")
+                
+                delete_data = gemini_service.extract_event_deletion_query(texto_msg)
+                
+                titulo_busca = delete_data.get('titulo_busca')
+                quando = delete_data.get('quando')
+                
+                if not titulo_busca:
+                    return jsonify({
+                        "status": "sucesso",
+                        "resposta": "❌ Não consegui identificar qual evento deletar. Tente algo como: 'Deletar academia de hoje'"
+                    }), 200
+                
+                # Buscar eventos
+                eventos_encontrados = CalendarManagementService.find_events_by_title(
+                    usuario_id, titulo_busca, max_results=5
+                )
+                
+                # Filtrar por quando se fornecido
+                if quando:
+                    data_alvo = date.today() if quando == 'hoje' else date.today() + timedelta(days=1)
+                    eventos_encontrados = [
+                        e for e in eventos_encontrados 
+                        if date.fromisoformat(e['start'].split('T')[0]) == data_alvo
+                    ]
+                
+                if not eventos_encontrados:
+                    resposta_para_usuario = f"🤔 Não encontrei eventos com '{titulo_busca}'"
+                    if quando:
+                        resposta_para_usuario += f" para {quando}"
+                    resposta_para_usuario += ".\n\nTente buscar com outras palavras."
+                    
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                
+                if len(eventos_encontrados) == 1:
+                    # Deletar automaticamente
+                    evento = eventos_encontrados[0]
+                    sucesso, mensagem = CalendarManagementService.delete_event(
+                        usuario_id,
+                        evento['id'],
+                        evento['calendar_id']
+                    )
+                    
+                    resposta_para_usuario = f"✅ {mensagem}" if sucesso else f"❌ {mensagem}"
+                else:
+                    # Múltiplos eventos encontrados, pedir confirmação
+                    resposta_para_usuario = f"📋 Encontrei {len(eventos_encontrados)} eventos:\n\n"
+                    
+                    for idx, evento in enumerate(eventos_encontrados, 1):
+                        data_evento = datetime.fromisoformat(evento['start']).strftime('%d/%m às %H:%M') if 'T' in evento['start'] else date.fromisoformat(evento['start']).strftime('%d/%m')
+                        resposta_para_usuario += f"{idx}. *{evento['summary']}*\n"
+                        resposta_para_usuario += f"   📅 {data_evento}\n"
+                        resposta_para_usuario += f"   📂 {evento['calendar_name']}\n"
+                        resposta_para_usuario += f"   _ID: {evento['id']}_\n\n"
+                    
+                    resposta_para_usuario += "Para deletar um específico, envie:\n"
+                    resposta_para_usuario += f"'Deletar evento {eventos_encontrados[0]['id']}'"
+                
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+            
+            #==== INTENÇÃO: Consulta Agenda com Filtro de Horário ====
+            elif intent == 'Consultar Agenda':
+                print(f"[WHATSAPP] Intenção de Consulta Agenda detectada")
+                
+                # Extrair período
+                calendar_data = gemini_service.extract_calendar_query(texto_msg)
+                period_type = calendar_data.get('period_type', 'hoje')
+                
+                # NOVO: Extrair filtro de horário
+                time_data = gemini_service.extract_time_filter_query(texto_msg)
+                time_filter = time_data.get('time_filter')
+                
+                if time_filter:
+                    print(f"[WHATSAPP] Filtro de horário: {time_filter}")
+                    from app.services.calendar_query_service import CalendarQueryService
+                    resposta_para_usuario = CalendarQueryService.query_agenda_with_time_filter(
+                        usuario_id, period_type, time_filter
+                    )
+                else:
+                    # Consulta normal sem filtro
+                    resposta_para_usuario = CalendarQueryService.query_agenda(usuario_id, period_type)
+                
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+            
+            #==== INTENÇÃO: Configurar Notificações ====
+            elif intent == 'Configurar Notificações':
+                print(f"[WHATSAPP] Intenção de Configurar Notificações detectada")
+                
+                config_data = gemini_service.extract_notification_config(texto_msg)
+                
+                tipo = config_data.get('tipo')
+                acao = config_data.get('acao')
+                hora = config_data.get('hora')
+                dias_antes = config_data.get('dias_antes')
+                
+                if tipo == 'agenda_diaria':
+                    if acao == 'ativar':
+                        sucesso, msg = NotificationConfigService.update_agenda_diaria_config(
+                            usuario_id, ativa=True
+                        )
+                    elif acao == 'desativar':
+                        sucesso, msg = NotificationConfigService.update_agenda_diaria_config(
+                            usuario_id, ativa=False
+                        )
+                    elif acao == 'configurar':
+                        sucesso, msg = NotificationConfigService.update_agenda_diaria_config(
+                            usuario_id, ativa=True, hora=hora
+                        )
+                    else:
+                        sucesso = False
+                        msg = "Ação não reconhecida"
+                    
+                    if sucesso:
+                        # Buscar config atual
+                        config = NotificationConfigService.get_or_create_config(usuario_id)
+                        resposta_para_usuario = f"✅ {msg}\n\n"
+                        resposta_para_usuario += f"📱 *Status atual:*\n"
+                        resposta_para_usuario += f"• Ativa: {'Sim' if config['agenda_diaria_ativa'] else 'Não'}\n"
+                        resposta_para_usuario += f"• Horário: {config['agenda_diaria_hora'].strftime('%H:%M')}\n"
+                    else:
+                        resposta_para_usuario = f"❌ {msg}"
+                
+                elif tipo == 'contas_vencer':
+                    if acao == 'ativar':
+                        sucesso, msg = NotificationConfigService.update_contas_vencer_config(
+                            usuario_id, ativa=True
+                        )
+                    elif acao == 'desativar':
+                        sucesso, msg = NotificationConfigService.update_contas_vencer_config(
+                            usuario_id, ativa=False
+                        )
+                    elif acao == 'configurar':
+                        sucesso, msg = NotificationConfigService.update_contas_vencer_config(
+                            usuario_id, ativa=True, dias_antes=dias_antes, hora=hora
+                        )
+                    else:
+                        sucesso = False
+                        msg = "Ação não reconhecida"
+                    
+                    if sucesso:
+                        config = NotificationConfigService.get_or_create_config(usuario_id)
+                        resposta_para_usuario = f"✅ {msg}\n\n"
+                        resposta_para_usuario += f"📱 *Status atual:*\n"
+                        resposta_para_usuario += f"• Ativa: {'Sim' if config['contas_vencer_ativa'] else 'Não'}\n"
+                        resposta_para_usuario += f"• Dias antes: {config['contas_vencer_dias_antes']}\n"
+                        resposta_para_usuario += f"• Horário: {config['contas_vencer_hora'].strftime('%H:%M')}\n"
+                    else:
+                        resposta_para_usuario = f"❌ {msg}"
+                
+                else:
+                    resposta_para_usuario = "🤔 Não entendi qual tipo de notificação você quer configurar."
+                
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
             else:
                 return jsonify({"status": "sucesso", "resposta": "🤔 Não entendi. Tente 'gastei 50' ou 'meus potes'."}), 200

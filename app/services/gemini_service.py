@@ -87,23 +87,25 @@ def get_message_intent(texto_msg):
     - "Renda"
     - "Despesa"
     - "Consulta Reserva"
-    - "Consulta Período" ("perguntas como "quanto gastei ontem?", "gastos do fds")
+    - "Consulta Período"
     - "Consulta Potes"
-    - "Consulta Contas Fixas" ("minhas contas fixas", "contas pendentes")
-    - "Quitar Conta Fixa ("paguei a conta de água")
+    - "Consulta Contas Fixas"
+    - "Quitar Conta Fixa"
     - "Transferência"
     - "Pagamento Fatura"
     - "Consultar Agenda"
+    - "Criar Evento" (criar/agendar/marcar evento)
+    - "Deletar Evento" (deletar/cancelar/remover evento)
+    - "Configurar Notificações" (configurar/ativar/desativar notificações)
     - "Consulta Categoria Específica"
     
     Responda APENAS com JSON: {{"intent": "..."}}
     
     Exemplos:
-    - "quanto gastei ontem?" → {{"intent": "Consulta Período"}}
-    - "gastos do final de semana" → {{"intent": "Consulta Período"}}
-    - "minhas contas fixas" → {{"intent": "Consulta Contas Fixas"}}
-    - "tenho compromisso hoje?" → {{"intent": "Consulta Agenda"}}
-    - "paguei a água no valor de 150" → {{"intent": "Quitar Conta Fixa"}}
+    - "criar evento academia amanhã" → {{"intent": "Criar Evento"}}
+    - "deletar reunião de hoje" → {{"intent": "Deletar Evento"}}
+    - "quero receber minha agenda às 8h" → {{"intent": "Configurar Notificações"}}
+    - "tenho compromisso agora à tarde?" → {{"intent": "Consultar Agenda"}}
     '''
     
     response = gemini_model.generate_content(prompt)
@@ -299,4 +301,162 @@ def extract_calendar_query(texto_msg):
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-CALENDAR] Período: {json_text}")
+    return json.loads(json_text)
+
+def extract_event_creation_details(texto_msg):
+    '''
+    Extrai dados para criar um evento.
+    
+    Returns:
+        {
+            "titulo": "Academia",
+            "data": "2025-11-20" ou "hoje" ou "amanha",
+            "hora_inicio": "07:00" ou null,
+            "hora_fim": "08:30" ou null,
+            "descricao": "..." ou null,
+            "localizacao": "..." ou null
+        }
+    '''
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+    
+    prompt = f'''Analise a mensagem de criação de evento: "{texto_msg}"
+    
+    Extraia os seguintes dados:
+    - titulo: Título/nome do evento (obrigatório)
+    - data: Data no formato YYYY-MM-DD, ou "hoje", ou "amanha"
+    - hora_inicio: Horário de início no formato HH:MM (ou null para dia inteiro)
+    - hora_fim: Horário de fim no formato HH:MM (ou null)
+    - descricao: Descrição adicional (ou null)
+    - localizacao: Local do evento (ou null)
+    
+    Responda APENAS com JSON válido.
+    
+    Exemplos:
+    - "Criar evento Academia amanhã às 7h" → 
+      {{"titulo": "Academia", "data": "amanha", "hora_inicio": "07:00", "hora_fim": null, "descricao": null, "localizacao": null}}
+    
+    - "Agendar reunião com João dia 25/11 às 14h na sala 3" →
+      {{"titulo": "Reunião com João", "data": "2025-11-25", "hora_inicio": "14:00", "hora_fim": null, "descricao": null, "localizacao": "Sala 3"}}
+    
+    - "Marcar aniversário da Maria dia 15 de dezembro" →
+      {{"titulo": "Aniversário da Maria", "data": "2025-12-15", "hora_inicio": null, "hora_fim": null, "descricao": null, "localizacao": null}}
+    '''
+    
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-EVENT] Criação extraída: {json_text}")
+    return json.loads(json_text)
+
+
+def extract_event_deletion_query(texto_msg):
+    '''
+    Extrai termo de busca para deletar evento.
+    
+    Returns:
+        {"titulo_busca": "academia", "quando": "hoje" ou "amanha" ou null}
+    '''
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+    
+    prompt = f'''Analise a mensagem de exclusão de evento: "{texto_msg}"
+    
+    Extraia:
+    - titulo_busca: Título/palavra-chave para buscar o evento
+    - quando: "hoje", "amanha", ou null (qualquer data)
+    
+    Responda APENAS com JSON.
+    
+    Exemplos:
+    - "Deletar academia de hoje" → {{"titulo_busca": "academia", "quando": "hoje"}}
+    - "Cancelar reunião de amanhã" → {{"titulo_busca": "reunião", "quando": "amanha"}}
+    - "Remover aniversário da Maria" → {{"titulo_busca": "aniversário maria", "quando": null}}
+    '''
+    
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-EVENT] Exclusão extraída: {json_text}")
+    return json.loads(json_text)
+
+
+def extract_time_filter_query(texto_msg):
+    '''
+    Extrai filtro de horário da consulta.
+    
+    Returns:
+        {"time_filter": "tarde" | "manha" | "noite" | "agora" | null}
+    '''
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+    
+    prompt = f'''Analise a pergunta sobre agenda: "{texto_msg}"
+    
+    Identifique se há filtro de horário:
+    - "manhã" / "de manhã" → {{"time_filter": "manha"}}
+    - "tarde" / "à tarde" / "da tarde" → {{"time_filter": "tarde"}}
+    - "noite" / "à noite" / "da noite" → {{"time_filter": "noite"}}
+    - "agora" / "próximas horas" / "daqui a pouco" → {{"time_filter": "agora"}}
+    - Sem filtro específico → {{"time_filter": null}}
+    
+    Responda APENAS com JSON.
+    
+    Exemplos:
+    - "tenho compromisso agora à tarde?" → {{"time_filter": "tarde"}}
+    - "eventos de manhã" → {{"time_filter": "manha"}}
+    - "o que tenho agora?" → {{"time_filter": "agora"}}
+    - "meus compromissos hoje" → {{"time_filter": null}}
+    '''
+    
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-TIME] Filtro extraído: {json_text}")
+    return json.loads(json_text)
+
+
+def extract_notification_config(texto_msg):
+    '''
+    Extrai configuração de notificações.
+    
+    Returns:
+        {
+            "tipo": "agenda_diaria" | "contas_vencer",
+            "acao": "ativar" | "desativar" | "configurar",
+            "hora": "08:00" ou null,
+            "dias_antes": 1 ou null (só para contas)
+        }
+    '''
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+    
+    prompt = f'''Analise a mensagem sobre configuração de notificações: "{texto_msg}"
+    
+    Extraia:
+    - tipo: "agenda_diaria" (agenda do dia) ou "contas_vencer" (contas a pagar)
+    - acao: "ativar", "desativar", ou "configurar" (mudar horário/dias)
+    - hora: Horário no formato HH:MM (ou null)
+    - dias_antes: Número de dias antes (1, 2, 3...) (ou null, só para contas)
+    
+    Responda APENAS com JSON.
+    
+    Exemplos:
+    - "Quero receber minha agenda diária às 8h" →
+      {{"tipo": "agenda_diaria", "acao": "configurar", "hora": "08:00", "dias_antes": null}}
+    
+    - "Ativar notificação de contas" →
+      {{"tipo": "contas_vencer", "acao": "ativar", "hora": null, "dias_antes": null}}
+    
+    - "Desligar lembrete de agenda" →
+      {{"tipo": "agenda_diaria", "acao": "desativar", "hora": null, "dias_antes": null}}
+    
+    - "Avisar 2 dias antes das contas vencerem, às 9h" →
+      {{"tipo": "contas_vencer", "acao": "configurar", "hora": "09:00", "dias_antes": 2}}
+    '''
+    
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-NOTIF] Config extraída: {json_text}")
     return json.loads(json_text)
