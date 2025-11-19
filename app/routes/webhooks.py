@@ -658,18 +658,20 @@ def handle_whatsapp_webhook():
             #==== INTENÇÃO: Consulta Agenda com Filtro de Horário ====
             elif intent == 'Consultar Agenda':
                 print(f"[WHATSAPP] Intenção de Consulta Agenda detectada")
-                
+
+                # Importar serviço
+                from app.services.calendar_query_service import CalendarQueryService
+
                 # Extrair período
                 calendar_data = gemini_service.extract_calendar_query(texto_msg)
                 period_type = calendar_data.get('period_type', 'hoje')
-                
+
                 # NOVO: Extrair filtro de horário
                 time_data = gemini_service.extract_time_filter_query(texto_msg)
                 time_filter = time_data.get('time_filter')
-                
+
                 if time_filter:
                     print(f"[WHATSAPP] Filtro de horário: {time_filter}")
-                    from app.services.calendar_query_service import CalendarQueryService
                     resposta_para_usuario = CalendarQueryService.query_agenda_with_time_filter(
                         usuario_id, period_type, time_filter
                     )
