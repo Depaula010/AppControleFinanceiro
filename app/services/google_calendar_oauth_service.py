@@ -180,6 +180,19 @@ class GoogleCalendarOAuthService:
         
         # --- CORREÇÃO CRÍTICA DO TIMEZONE AQUI ---
         expiry_dt = result.token_expiry
+
+        # Se a data vier como string do SQLite, converte para datetime
+        if expiry_dt and isinstance(expiry_dt, str):
+            try:
+                # Remove o 'Z' se presente e assume UTC
+                if expiry_dt.endswith('Z'):
+                    expiry_dt = expiry_dt[:-1]
+                expiry_dt = datetime.fromisoformat(expiry_dt)
+            except ValueError:
+                 # Tenta outro formato se o ISO falhar
+                 expiry_dt = datetime.strptime(expiry_dt, "%Y-%m-%d %H:%M:%S.%f")
+
+
         if expiry_dt and expiry_dt.tzinfo is None:
             # A data do banco (TIMESTAMP WITH TIME ZONE) é implicitamente UTC
             # e é convertida para aware para satisfazer a biblioteca google-auth.
@@ -295,5 +308,5 @@ class GoogleCalendarOAuthService:
             print(f"[OAUTH] ✅ Conexão OK. {len(calendars.get('items', []))} calendários encontrados")
             return True
         except Exception as e:
-            print(f"[OAUTH] ❌ Teste de conexão falhou: {e}")
+            print(f"[OAXUTH] ❌ Teste de conexão falhou: {e}")
             return False
