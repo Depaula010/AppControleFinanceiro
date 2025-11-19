@@ -100,17 +100,19 @@ class GoogleCalendarOAuthService:
         """Salva credenciais OAuth2 no banco de dados"""
         if not db_engine:
             raise Exception("Banco não configurado")
-        
+
         # Serializar scopes
         scopes_str = json.dumps(credentials.scopes) if credentials.scopes else None
-        
-        # CORREÇÃO: Garantir que expiry seja timezone-aware antes de salvar
+
+        # CORREÇÃO: Salvar como timezone-aware no banco
+        # A biblioteca Google retorna expiry como NAIVE UTC
         token_expiry = None
         if credentials.expiry:
             if credentials.expiry.tzinfo is None:
-                # Se naive, adicionar UTC
+                # É naive UTC - adicionar tzinfo para salvar no banco
                 token_expiry = credentials.expiry.replace(tzinfo=timezone.utc)
             else:
+                # Já tem tzinfo (caso raro)
                 token_expiry = credentials.expiry
         
         sql = text("""
@@ -178,7 +180,10 @@ class GoogleCalendarOAuthService:
         print(f"[OAUTH] ✅ Credenciais encontradas. Token expiry (raw): {result.token_expiry} (tipo: {type(result.token_expiry)})")
         
         # --- CORREÇÃO CRÍTICA E COMPLETA DO TIMEZONE ---
+        # IMPORTANTE: A biblioteca Google OAuth2 espera expiry como NAIVE UTC
+        # Internamente ela usa datetime.utcnow() (naive) para comparações
         expiry_dt = result.token_expiry
+        expiry_aware = None  # Guardar versão aware para comparação manual
 
         # 1. Se vier como string (SQLite ou serialização)
         if expiry_dt and isinstance(expiry_dt, str):
@@ -196,19 +201,21 @@ class GoogleCalendarOAuthService:
                     # Formato sem microssegundos
                     expiry_dt = datetime.strptime(expiry_dt, "%Y-%m-%d %H:%M:%S")
 
-        # 2. Se for datetime, SEMPRE verificar e garantir timezone
+        # 2. Se for datetime, converter para NAIVE UTC (requerido pela lib Google)
         if expiry_dt and isinstance(expiry_dt, datetime):
             if expiry_dt.tzinfo is None:
-                # NAIVE - adicionar UTC explicitamente
-                print(f"[OAUTH] ⚠️ Token expiry é NAIVE. Convertendo para UTC.")
-                expiry_dt = expiry_dt.replace(tzinfo=timezone.utc)
+                # JÁ É NAIVE - assumir que é UTC
+                print(f"[OAUTH] Token expiry é NAIVE (assumindo UTC)")
+                expiry_aware = expiry_dt.replace(tzinfo=timezone.utc)
+                # Manter naive para Credentials
             else:
-                # JÁ É AWARE - garantir que está em UTC
-                print(f"[OAUTH] ✅ Token expiry já é AWARE ({expiry_dt.tzinfo})")
-                if expiry_dt.tzinfo != timezone.utc:
-                    expiry_dt = expiry_dt.astimezone(timezone.utc)
-        
-        print(f"[OAUTH] Token expiry (processado): {expiry_dt} (tzinfo: {expiry_dt.tzinfo if expiry_dt else None})")
+                # É AWARE - salvar versão aware e converter para naive UTC
+                print(f"[OAUTH] ✅ Token expiry é AWARE ({expiry_dt.tzinfo})")
+                expiry_aware = expiry_dt.astimezone(timezone.utc)
+                # Converter para NAIVE UTC removendo tzinfo
+                expiry_dt = expiry_aware.replace(tzinfo=None)
+
+        print(f"[OAUTH] Token expiry (para Credentials): {expiry_dt} (tzinfo: {expiry_dt.tzinfo if expiry_dt else None})")
         # --- FIM DA CORREÇÃO ---
             
         # Deserializar scopes
@@ -222,18 +229,13 @@ class GoogleCalendarOAuthService:
             client_id=GOOGLE_CLIENT_ID,
             client_secret=GOOGLE_CLIENT_SECRET,
             scopes=scopes,
-            expiry=expiry_dt  # Passa a data GARANTIDAMENTE aware
+            expiry=expiry_dt  # Passa datetime NAIVE UTC (requerido pela lib)
         )
-        
-        # Verificar expiração de forma segura MANUALMENTE
-        # CORREÇÃO: Não usar credentials.expired pois ele usa datetime.now() naive
-        # e compara com expiry aware, causando erro de comparação
-        try:
-            # Fazer comparação manual com datetimes timezone-aware
-            now_utc = datetime.now(timezone.utc)
-            is_expired = expiry_dt and expiry_dt <= now_utc
 
-            if is_expired:
+        # Verificar expiração usando a propriedade nativa da biblioteca
+        # Agora funciona porque expiry_dt é naive UTC
+        try:
+            if credentials.expired:
                 print(f"[OAUTH] ⏰ Token expirado. Renovando...")
                 if credentials.refresh_token:
                     credentials.refresh(Request())
