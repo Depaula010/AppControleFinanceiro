@@ -1,72 +1,105 @@
-# Financial Bot API
+# Meu Secretário
 
-This project is a Financial Bot API built with Python and the Flask framework. It uses SQLAlchemy for database operations against a PostgreSQL database, and it integrates with the Google Gemini API for natural language processing.
+![Logo do Meu Secretário](https://i.imgur.com/8pA0S6C.png)
 
-## Purpose
+## Sua Vida Financeira e Agenda, Simplificadas por IA
 
-The main purpose of this API is to provide a backend for a financial bot. The bot can be used to track expenses, manage budgets, and provide financial insights. The API exposes a set of endpoints for creating, retrieving, updating, and deleting financial data.
+---
 
-## Setup
+### Visão Geral (Para Usuários)
 
-To get started with this project, you'll need to have Python 3 and PostgreSQL installed on your system. You'll also need to create a virtual environment and install the required packages.
+**Qual problema resolvemos?**
 
-1. **Clone the repository:**
+Você já se esqueceu de pagar uma conta ou perdeu o controle dos seus gastos mensais? O "Meu Secretário" nasceu para resolver exatamente isso. Nossa missão é simplificar sua vida financeira, automatizando o registro de despesas e garantindo que você nunca mais perca um compromisso importante.
 
-   ```bash
-   git clone https://github.com/your-username/financial-bot-api.git
-   ```
+**Como funciona?**
 
-2. **Create a virtual environment:**
+A mágica acontece de forma simples e direta, diretamente no seu WhatsApp:
 
-   ```bash
-   python3 -m venv venv
-   ```
+1.  **Registro Rápido:** Basta enviar uma mensagem para o nosso bot no WhatsApp para registrar um novo gasto.
+2.  **Lembretes Inteligentes:** O sistema te avisa proativamente sobre contas a pagar e eventos importantes do seu calendário.
+3.  **Automação Pessoal:** Para os usuários mais avançados, oferecemos endpoints de API que permitem criar automações personalizadas com ferramentas como o "Atalhos" da Apple e outras soluções para Android.
 
-3. **Activate the virtual environment:**
+**Funcionalidades Atuais**
 
-   ```bash
-   source venv/bin/activate
-   ```
+*   ✅ **Registro de Transações via WhatsApp:** Adicione novas despesas de forma rápida e conversacional.
+*   ✅ **Chatbot Inteligente:** Uma interface amigável no WhatsApp (construída com Baileys) para interagir com o sistema.
+*   ✅ **Endpoints para Automação:** Crie seus próprios fluxos de trabalho para registrar pagamentos e outras ações financeiras.
 
-4. **Install the required packages:**
+**Funcionalidades Futuras**
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+Estamos sempre trabalhando para tornar o "Meu Secretário" ainda mais poderoso. Aqui está o que vem por aí:
 
-5. **Set up the database:**
+*   ⏳ **Frontend Dedicado:** Uma interface web completa para visualizar e gerenciar suas finanças.
+*   ⏳ **Relatórios Detalhados:** Gere relatórios em PDF e PNG para analisar seus gastos, metas e evolução financeira.
+*   ⏳ **Metas e Alertas de Gastos:** Crie metas de gastos personalizadas ("potes") e receba alertas quando estiver se aproximando dos seus limites.
 
-   - Make sure you have PostgreSQL installed and running.
-   - Create a new database for the project.
-   - Set the `DATABASE_URL` environment variable to the connection string for your database.
+---
 
-6. **Set up the Gemini API:**
+### Documentação Técnica (Para Desenvolvedores)
 
-   - Get an API key from Google AI Studio.
-   - Set the `GEMINI_API_KEY` environment variable to your API key.
+**Stack Tecnológica**
 
-## Usage
+*   **Backend:** Python com Flask
+*   **Banco de Dados:** SQLAlchemy (compatível com PostgreSQL)
+*   **IA & NLP:** Google Gemini
+*   **Cache & Mensageria:** Redis
+*   **Servidor:** Gunicorn
 
-To run the application, you can use the following command:
+**Pré-requisitos**
 
-```bash
-gunicorn app:app
+*   Python 3.8+
+*   Pip (gerenciador de pacotes)
+*   Uma instância de PostgreSQL
+*   Uma instância de Redis
+*   Uma chave de API para o Google Gemini
+
+**Como Rodar Localmente**
+
+1.  **Clone o Repositório:**
+    ```bash
+    git clone https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git
+    cd SEU_REPOSITORIO
+    ```
+
+2.  **Crie e Ative um Ambiente Virtual:**
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # No Windows, use `venv\Scripts\activate`
+    ```
+
+3.  **Instale as Dependências:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Configure as Variáveis de Ambiente:**
+    Crie um arquivo `.env` na raiz do projeto e adicione as seguintes variáveis:
+    ```
+    GEMINI_API_KEY="SUA_CHAVE_DO_GEMINI"
+    DATABASE_URL="postgresql://USUARIO:SENHA@HOST:PORTA/NOME_DO_BANCO"
+    REDIS_URL="redis://HOST:PORTA"
+    ```
+
+5.  **Execute a Aplicação:**
+    ```bash
+    gunicorn app:create_app()
+    ```
+    Para desenvolvimento, você pode usar:
+    ```bash
+    python run.py
+    ```
+
+**Estrutura do Projeto**
+
+O projeto segue uma estrutura modular para facilitar a manutenção e o desenvolvimento:
+
 ```
-
-This will start the development server at `http://127.0.0.1:8000`. You can then use a tool like `curl` or Postman to send requests to the API.
-
-### Endpoints
-
-The API exposes the following endpoints:
-
-- `GET /`: The home route of the Flask application.
-- `POST /webhook-automate`: The main route that receives notifications, makes two calls to the Gemini API (for extraction and categorization), and saves the transaction in the database.
-- `POST /webhook-whatsapp`: A placeholder for handling WhatsApp webhooks.
-
-### Admin Endpoints
-
-The API also exposes the following admin endpoints:
-
-- `GET /admin/setup-database`: Sets up the database schema.
-- `GET /admin/populate-global-categories`: Populates the database with global categories.
-- `GET /admin/setup-user-data`: Sets up a dummy user for testing.
+├── app/                  # Contém o núcleo da aplicação
+│   ├── routes/           # Blueprints do Flask (Controllers)
+│   ├── services/         # Lógica de negócio e integrações
+│   ├── __init__.py       # Fábrica da aplicação Flask (criação do app)
+│   └── config.py         # Configurações e chaves de API
+├── requirements.txt      # Dependências do Python
+└── run.py                # Ponto de entrada para a aplicação
+```
