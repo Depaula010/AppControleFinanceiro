@@ -17,8 +17,7 @@ class GoogleCalendarOAuthService:
     """Gerencia autenticação OAuth2 para múltiplos usuários"""
     
     SCOPES = [
-        'https://www.googleapis.com/auth/calendar.readonly',
-        'https://www.googleapis.com/auth/calendar.events.readonly'
+        'https://www.googleapis.com/auth/calendar'
     ]
     
     @staticmethod
