@@ -101,6 +101,7 @@ def get_message_intent(texto_msg):
     - "Consulta Categoria Específica"
     - "Análise Inteligente" (analisar gastos, insights, relatório financeiro, análise financeira, padrões de consumo)
     - "Comparação Mensal" (comparar mês atual com anterior, evolução mensal)
+    - "Previsão de Gastos" (quanto vou gastar, previsão, projeção, orçamento futuro, estimativa de gastos)
 
     Responda APENAS com JSON: {{"intent": "..."}}
 
@@ -115,6 +116,9 @@ def get_message_intent(texto_msg):
     - "analisar meus gastos" → {{"intent": "Análise Inteligente"}}
     - "quero um relatório financeiro" → {{"intent": "Análise Inteligente"}}
     - "comparar este mês com o anterior" → {{"intent": "Comparação Mensal"}}
+    - "quanto vou gastar este mês" → {{"intent": "Previsão de Gastos"}}
+    - "qual a projeção de gastos" → {{"intent": "Previsão de Gastos"}}
+    - "estimativa de gastos próximo mês" → {{"intent": "Previsão de Gastos"}}
     '''
     
     response = gemini_model.generate_content(prompt)

@@ -847,6 +847,23 @@ def handle_whatsapp_webhook():
 
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
+            #==== INTENÇÃO: Previsão de Gastos ====
+            elif intent == 'Previsão de Gastos':
+                print(f"[WHATSAPP] Intenção de Previsão de Gastos detectada")
+
+                from app.services.forecast_service import generate_forecast_insights
+
+                try:
+                    # Gerar previsão de gastos futuros
+                    previsao = generate_forecast_insights(usuario_id)
+                    resposta_para_usuario = f"📈 *Previsão de Gastos*\n\n{previsao}"
+
+                except Exception as e:
+                    print(f"[FORECAST] Erro ao gerar previsão: {e}")
+                    resposta_para_usuario = f"❌ Não consegui gerar a previsão. Erro: {str(e)}"
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
             else:
                 return jsonify({"status": "sucesso", "resposta": "🤔 Não entendi. Tente 'gastei 50' ou 'meus potes'."}), 200
 
