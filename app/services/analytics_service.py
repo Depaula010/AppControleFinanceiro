@@ -54,17 +54,17 @@ def get_spending_analysis(usuario_id, meses_analise=3):
         sql_gastos_categoria = text("""
             SELECT
                 mc.nome_macro_categoria,
-                sc.nome_subcategoria,
+                sc.nome_sub as nome_subcategoria,
                 SUM(t.valor) as total,
                 COUNT(*) as quantidade
             FROM Transacoes t
             JOIN SubCategoria sc ON t.subcategoria_id = sc.id
-            JOIN MacroCategoria mc ON sc.macro_categoria_id = mc.id
+            JOIN MacroCategoria mc ON sc.macro_id = mc.id
             WHERE t.usuario_id = :uid
                 AND t.tipo_transacao = 'Despesa'
                 AND t.consolidada = true
                 AND TO_CHAR(t.data_transacao, 'YYYY-MM') = :mes
-            GROUP BY mc.nome_macro_categoria, sc.nome_subcategoria
+            GROUP BY mc.nome_macro_categoria, sc.nome_sub
             ORDER BY total DESC
             LIMIT 10
         """)
@@ -144,7 +144,7 @@ def get_spending_analysis(usuario_id, meses_analise=3):
                 descricao,
                 valor,
                 data_transacao,
-                sc.nome_subcategoria
+                sc.nome_sub as nome_subcategoria
             FROM Transacoes t
             JOIN SubCategoria sc ON t.subcategoria_id = sc.id
             WHERE t.usuario_id = :uid
@@ -164,16 +164,16 @@ def get_spending_analysis(usuario_id, meses_analise=3):
         sql_categoria_especifica = text("""
             SELECT
                 TO_CHAR(t.data_transacao, 'YYYY-MM') as mes,
-                sc.nome_subcategoria,
+                sc.nome_sub as nome_subcategoria,
                 SUM(t.valor) as total
             FROM Transacoes t
             JOIN SubCategoria sc ON t.subcategoria_id = sc.id
             WHERE t.usuario_id = :uid
                 AND t.tipo_transacao = 'Despesa'
                 AND t.consolidada = true
-                AND sc.nome_subcategoria ILIKE '%delivery%'
+                AND sc.nome_sub ILIKE '%delivery%'
                 AND t.data_transacao >= :data_inicio
-            GROUP BY TO_CHAR(t.data_transacao, 'YYYY-MM'), sc.nome_subcategoria
+            GROUP BY TO_CHAR(t.data_transacao, 'YYYY-MM'), sc.nome_sub
             ORDER BY mes DESC
         """)
 
@@ -383,21 +383,21 @@ def get_category_comparison(usuario_id, categoria_nome, meses=3):
             SELECT
                 TO_CHAR(t.data_transacao, 'YYYY-MM') as mes,
                 mc.nome_macro_categoria,
-                sc.nome_subcategoria,
+                sc.nome_sub as nome_subcategoria,
                 SUM(t.valor) as total,
                 COUNT(*) as quantidade
             FROM Transacoes t
             JOIN SubCategoria sc ON t.subcategoria_id = sc.id
-            JOIN MacroCategoria mc ON sc.macro_categoria_id = mc.id
+            JOIN MacroCategoria mc ON sc.macro_id = mc.id
             WHERE t.usuario_id = :uid
                 AND t.tipo_transacao = 'Despesa'
                 AND t.consolidada = true
                 AND (
                     mc.nome_macro_categoria ILIKE :categoria
-                    OR sc.nome_subcategoria ILIKE :categoria
+                    OR sc.nome_sub ILIKE :categoria
                 )
                 AND t.data_transacao >= :data_inicio
-            GROUP BY TO_CHAR(t.data_transacao, 'YYYY-MM'), mc.nome_macro_categoria, sc.nome_subcategoria
+            GROUP BY TO_CHAR(t.data_transacao, 'YYYY-MM'), mc.nome_macro_categoria, sc.nome_sub
             ORDER BY mes DESC
         """)
 
@@ -463,7 +463,7 @@ def get_monthly_comparison(usuario_id, mes_referencia=None):
                 SUM(t.valor) as total
             FROM Transacoes t
             JOIN SubCategoria sc ON t.subcategoria_id = sc.id
-            JOIN MacroCategoria mc ON sc.macro_categoria_id = mc.id
+            JOIN MacroCategoria mc ON sc.macro_id = mc.id
             WHERE t.usuario_id = :uid
                 AND t.tipo_transacao = 'Despesa'
                 AND t.consolidada = true

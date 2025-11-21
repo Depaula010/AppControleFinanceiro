@@ -552,14 +552,16 @@ def handle_whatsapp_webhook():
             elif intent == 'Consulta Categoria Específica':
                 cat_data = gemini_service.extract_category_query(texto_msg)
                 nome_categoria_consulta = cat_data.get('nome_categoria')
-                if not nome_categoria_consulta: 
+                if not nome_categoria_consulta:
                     raise Exception("Gemini não conseguiu extrair o nome da categoria.")
 
                 valor_gasto = finance_service.get_category_spending(conn, usuario_id, nome_categoria_consulta)
-                
+
                 resposta_para_usuario = f"ℹ️ *Consulta de Categoria (Este Mês)*\n\n"
                 resposta_para_usuario += f"Você gastou *{formatar_moeda(valor_gasto)}* com '{nome_categoria_consulta}'."
-                
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
             #==== INTENÇÃO: Criar Evento ====
             elif intent == 'Criar Evento':
                 print(f"[WHATSAPP] Intenção de Criar Evento detectada")
