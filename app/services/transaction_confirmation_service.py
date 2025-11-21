@@ -75,6 +75,10 @@ class TransactionConfirmationService:
         tipo_pagamento = transacao_data.get('tipo_pagamento')
         fatura_id = transacao_data.get('fatura_id')
 
+        # Informações de parcelamento
+        num_parcelas = transacao_data.get('num_parcelas')
+        valor_total = transacao_data.get('valor_total')
+
         # Fallback: se não tiver 'local', usar 'descricao' antiga
         if not local:
             # Formato antigo
@@ -110,7 +114,14 @@ class TransactionConfirmationService:
         if descricao:
             mensagem += f"📝 Itens: {descricao}\n"
 
-        mensagem += f"💵 Valor: *{valor_fmt}*\n"
+        # Mostrar valor (com informação de parcelamento se houver)
+        if num_parcelas and num_parcelas > 1:
+            valor_total_fmt = formatar_moeda(valor_total)
+            mensagem += f"💵 Valor Total: *{valor_total_fmt}*\n"
+            mensagem += f"💳 Parcelas: *{num_parcelas}x de {valor_fmt}*\n"
+        else:
+            mensagem += f"💵 Valor: *{valor_fmt}*\n"
+
         mensagem += f"📊 Tipo: *{tipo}*\n"
 
         # Mostrar informações da conta
@@ -118,7 +129,10 @@ class TransactionConfirmationService:
             if tipo_pagamento == 'credito' and fatura_id:
                 # É cartão de crédito, mostrar fatura
                 mensagem += f"💳 Conta: *{conta_nome}* ({conta_tipo})\n"
-                mensagem += f"🔴 *CRÉDITO* → Irá para fatura\n"
+                if num_parcelas and num_parcelas > 1:
+                    mensagem += f"🔴 *CRÉDITO* → Primeira parcela irá para fatura atual\n"
+                else:
+                    mensagem += f"🔴 *CRÉDITO* → Irá para fatura\n"
             else:
                 # Outras formas de pagamento
                 tipo_pag_label = {

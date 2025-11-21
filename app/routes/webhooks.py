@@ -548,6 +548,24 @@ def handle_whatsapp_webhook():
                             date.fromisoformat(dados['data_transacao'])
                         )
 
+                        # Se for parcelado, criar agendamentos para as parcelas futuras
+                        num_parcelas = dados.get('num_parcelas')
+                        if num_parcelas and num_parcelas > 1:
+                            valor_parcela = abs(dados['valor_db'])  # Valor positivo da parcela
+                            data_primeira = date.fromisoformat(dados['data_transacao'])
+
+                            agendamento_id = finance_service.create_parcelamento_agendamento(
+                                conn,
+                                dados['usuario_id'],
+                                dados['conta_id'],
+                                dados['categoria_id'],
+                                descricao_para_salvar,
+                                valor_parcela,
+                                num_parcelas,
+                                data_primeira
+                            )
+                            print(f"[CONFIRM-SAVE] Agendamento de parcelas criado: {agendamento_id}")
+
                         nome_cat = finance_service.get_category_name_by_id(conn, dados['categoria_id'])
                         conn.commit()
                     
@@ -612,6 +630,21 @@ def handle_whatsapp_webhook():
                 trans_desc = trans_data.get('descricao_bruta')
                 valor_dec = float(trans_data.get('valor_decimal', 0))
 
+                # Detectar parcelamento (apenas para despesas)
+                parcelamento_info = None
+                num_parcelas = None
+                valor_parcela = valor_dec
+
+                if intent == 'Despesa':
+                    parcelamento_info = gemini_service.extract_parcelamento_info(texto_msg)
+                    if parcelamento_info.get('parcelado'):
+                        num_parcelas = parcelamento_info.get('num_parcelas')
+                        if num_parcelas and num_parcelas > 1:
+                            valor_parcela = valor_dec / num_parcelas
+                            # Usar descrição limpa (sem info de parcelamento)
+                            trans_desc = parcelamento_info.get('descricao_limpa', trans_desc)
+                            print(f"[PARCELAMENTO] Detectado: {num_parcelas}x de {valor_parcela:.2f}")
+
                 cats_list = finance_service.get_user_categories(conn, usuario_id, intent)
                 id_outros = finance_service.get_fallback_category_id(conn, intent)
                 id_categoria = gemini_service.categorize_transaction(cats_list, trans_desc, intent, id_outros)
@@ -667,7 +700,11 @@ def handle_whatsapp_webhook():
                             conta_nome = conta_info[1]
                             conta_tipo = conta_info[2]
 
-                valor_db = valor_dec if intent == 'Renda' else (valor_dec * -1)
+                # Para parcelamento, o valor_db é o valor da parcela (não o total)
+                if num_parcelas and num_parcelas > 1:
+                    valor_db = (valor_parcela * -1) if intent == 'Despesa' else valor_parcela
+                else:
+                    valor_db = (valor_dec * -1) if intent == 'Despesa' else valor_dec
 
                 # Criar pendente
                 transacao_data = {
@@ -679,7 +716,9 @@ def handle_whatsapp_webhook():
                     'fatura_id': fatura_id,
                     'descricao': trans_desc,
                     'valor_db': valor_db,
-                    'valor_original': valor_dec,
+                    'valor_original': valor_parcela if (num_parcelas and num_parcelas > 1) else valor_dec,
+                    'valor_total': valor_dec if (num_parcelas and num_parcelas > 1) else None,
+                    'num_parcelas': num_parcelas,
                     'tipo_transacao': intent,
                     'tipo_pagamento': 'credito' if fatura_id else 'debito',
                     'data_transacao': str(data_hoje),

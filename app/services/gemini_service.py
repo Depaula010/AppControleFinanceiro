@@ -651,3 +651,52 @@ def extract_saldo_query(texto_msg, contas_json_list):
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-SALDO-QUERY] Query extraída: {json_text}")
     return json.loads(json_text)
+
+
+def extract_parcelamento_info(texto_msg):
+    '''
+    Detecta se a compra é parcelada e extrai informações de parcelamento.
+
+    Returns:
+        {
+            "parcelado": true/false,
+            "num_parcelas": 3 ou null,
+            "descricao_limpa": "suplemento alimentar" (sem info de parcelamento)
+        }
+    '''
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+
+    prompt = f'''Analise a mensagem de compra: "{texto_msg}"
+
+    Identifique se é uma compra parcelada e extraia:
+    - parcelado: true se menciona parcelamento, false caso contrário
+    - num_parcelas: número de parcelas (ex: 3, 6, 12) ou null se não parcelado
+    - descricao_limpa: descrição da compra SEM informações de parcelamento
+
+    Palavras-chave de parcelamento:
+    - "parcelado", "parcelada", "dividido", "dividida"
+    - "3x", "6x", "12x", "em 3 vezes", "em 6 vezes"
+    - "3 vezes", "três vezes", "seis vezes"
+
+    Responda APENAS com JSON.
+
+    Exemplos:
+    - "comprei notebook de 3000 parcelado em 12x" →
+      {{"parcelado": true, "num_parcelas": 12, "descricao_limpa": "notebook"}}
+
+    - "suplemento alimentar no crédito dividido de três vezes" →
+      {{"parcelado": true, "num_parcelas": 3, "descricao_limpa": "suplemento alimentar"}}
+
+    - "comprei uma cadeira de 800" →
+      {{"parcelado": false, "num_parcelas": null, "descricao_limpa": "cadeira"}}
+
+    - "celular 2000 reais em 10x sem juros" →
+      {{"parcelado": true, "num_parcelas": 10, "descricao_limpa": "celular"}}
+    '''
+
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-PARCELAMENTO] Info extraída: {json_text}")
+    return json.loads(json_text)
