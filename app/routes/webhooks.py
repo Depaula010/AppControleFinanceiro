@@ -7,7 +7,7 @@ from app.services.fixed_bills_service import FixedBillsService
 
 from sqlalchemy import text
 
-from app import db_engine
+from app import db_engine, gemini_model
 from app.config import API_SECRET_KEY, BOT_WHATSAPP_URL
 from app.utils import formatar_moeda
 from app.utils import ensure_db_connection
@@ -38,7 +38,7 @@ webhooks_bp = Blueprint('webhooks', __name__)
 def handle_automate_webhook():
     """Rota do Gatilho Android com CONFIRMAÇÃO"""
     
-    if not db_engine or not gemini_service.gemini_model:
+    if not db_engine or not gemini_model:
         return jsonify({"status": "erro", "mensagem": "Serviço não configurado"}), 503
     
     try:
@@ -177,7 +177,7 @@ def handle_whatsapp_webhook():
             "resposta": "Banco de dados temporariamente indisponível"
         }), 503
     
-    if not db_engine or not gemini_service.gemini_model:
+    if not db_engine or not gemini_model:
         return jsonify({"status": "erro", "mensagem": "Serviço não configurado"}), 503
 
     # 1. Autenticar API
