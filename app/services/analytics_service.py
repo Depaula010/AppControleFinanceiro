@@ -53,7 +53,7 @@ def get_spending_analysis(usuario_id, meses_analise=3):
         mes_atual = hoje.strftime('%Y-%m')
         sql_gastos_categoria = text("""
             SELECT
-                mc.nome_macro_categoria,
+                mc.nome_macro,
                 sc.nome_sub as nome_subcategoria,
                 SUM(t.valor) as total,
                 COUNT(*) as quantidade
@@ -64,7 +64,7 @@ def get_spending_analysis(usuario_id, meses_analise=3):
                 AND t.tipo_transacao = 'Despesa'
                 AND t.consolidada = true
                 AND TO_CHAR(t.data_transacao, 'YYYY-MM') = :mes
-            GROUP BY mc.nome_macro_categoria, sc.nome_sub
+            GROUP BY mc.nome_macro, sc.nome_sub
             ORDER BY total DESC
             LIMIT 10
         """)
@@ -210,7 +210,7 @@ def get_spending_analysis(usuario_id, meses_analise=3):
             ],
             "gastos_por_categoria": [
                 {
-                    "categoria": row.nome_macro_categoria,
+                    "categoria": row.nome_macro,
                     "subcategoria": row.nome_subcategoria,
                     "total": float(row.total),
                     "quantidade": row.quantidade
@@ -382,7 +382,7 @@ def get_category_comparison(usuario_id, categoria_nome, meses=3):
         sql_comparacao = text("""
             SELECT
                 TO_CHAR(t.data_transacao, 'YYYY-MM') as mes,
-                mc.nome_macro_categoria,
+                mc.nome_macro,
                 sc.nome_sub as nome_subcategoria,
                 SUM(t.valor) as total,
                 COUNT(*) as quantidade
@@ -393,11 +393,11 @@ def get_category_comparison(usuario_id, categoria_nome, meses=3):
                 AND t.tipo_transacao = 'Despesa'
                 AND t.consolidada = true
                 AND (
-                    mc.nome_macro_categoria ILIKE :categoria
+                    mc.nome_macro ILIKE :categoria
                     OR sc.nome_sub ILIKE :categoria
                 )
                 AND t.data_transacao >= :data_inicio
-            GROUP BY TO_CHAR(t.data_transacao, 'YYYY-MM'), mc.nome_macro_categoria, sc.nome_sub
+            GROUP BY TO_CHAR(t.data_transacao, 'YYYY-MM'), mc.nome_macro, sc.nome_sub
             ORDER BY mes DESC
         """)
 
@@ -459,7 +459,7 @@ def get_monthly_comparison(usuario_id, mes_referencia=None):
         sql_comparacao_categorias = text("""
             SELECT
                 TO_CHAR(t.data_transacao, 'YYYY-MM') as mes,
-                mc.nome_macro_categoria,
+                mc.nome_macro,
                 SUM(t.valor) as total
             FROM Transacoes t
             JOIN SubCategoria sc ON t.subcategoria_id = sc.id
@@ -468,7 +468,7 @@ def get_monthly_comparison(usuario_id, mes_referencia=None):
                 AND t.tipo_transacao = 'Despesa'
                 AND t.consolidada = true
                 AND TO_CHAR(t.data_transacao, 'YYYY-MM') IN (:mes_ref, :mes_ant)
-            GROUP BY TO_CHAR(t.data_transacao, 'YYYY-MM'), mc.nome_macro_categoria
+            GROUP BY TO_CHAR(t.data_transacao, 'YYYY-MM'), mc.nome_macro
             ORDER BY total DESC
         """)
 
@@ -487,9 +487,9 @@ def get_monthly_comparison(usuario_id, mes_referencia=None):
 
         for row in resultados:
             if row.mes == mes_referencia:
-                gastos_ref[row.nome_macro_categoria] = float(row.total)
+                gastos_ref[row.nome_macro] = float(row.total)
             else:
-                gastos_ant[row.nome_macro_categoria] = float(row.total)
+                gastos_ant[row.nome_macro] = float(row.total)
 
         total_ref = sum(gastos_ref.values())
         total_ant = sum(gastos_ant.values())
