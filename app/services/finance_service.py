@@ -478,6 +478,62 @@ def get_fatura_valor(conn, usuario_id, conta_id_cartao=None):
 
     return faturas
 
+def get_saldo_contas(conn, usuario_id, conta_id=None):
+    """
+    Consulta o saldo atual das contas do usuário.
+
+    Args:
+        conn: Conexão com o banco
+        usuario_id: ID do usuário
+        conta_id: ID da conta específica (opcional). Se None, retorna todas.
+
+    Returns:
+        List de dicts com saldos:
+        [{
+            "nome_conta": "Nubank",
+            "tipo_conta": "Conta Corrente",
+            "saldo": 1500.50
+        }]
+    """
+    if conta_id:
+        # Consultar saldo de uma conta específica
+        sql = text("""
+            SELECT
+                c.nome_conta,
+                c.tipo_conta,
+                COALESCE(SUM(t.valor), 0) as saldo
+            FROM Contas c
+            LEFT JOIN Transacoes t ON c.id = t.conta_id
+            WHERE c.usuario_id = :uid
+                AND c.id = :cid
+            GROUP BY c.nome_conta, c.tipo_conta
+        """)
+        result = conn.execute(sql, {"uid": usuario_id, "cid": conta_id}).fetchall()
+    else:
+        # Consultar todas as contas
+        sql = text("""
+            SELECT
+                c.nome_conta,
+                c.tipo_conta,
+                COALESCE(SUM(t.valor), 0) as saldo
+            FROM Contas c
+            LEFT JOIN Transacoes t ON c.id = t.conta_id
+            WHERE c.usuario_id = :uid
+            GROUP BY c.nome_conta, c.tipo_conta
+            ORDER BY c.tipo_conta, c.nome_conta
+        """)
+        result = conn.execute(sql, {"uid": usuario_id}).fetchall()
+
+    contas = []
+    for row in result:
+        contas.append({
+            "nome_conta": row[0],
+            "tipo_conta": row[1],
+            "saldo": float(row[2])
+        })
+
+    return contas
+
 def get_pote_status(conn, usuario_id):
     """ Consulta o status de todos os potes de gasto do mês. (Requer conexão). """
     sql = text("""

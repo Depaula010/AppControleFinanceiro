@@ -652,6 +652,77 @@ def handle_whatsapp_webhook():
 
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
+            # ===== INTENÇÃO: Consulta Saldo =====
+            elif intent == 'Consulta Saldo':
+                contas_raw = finance_service.get_user_accounts(conn, usuario_id)
+                contas_list = [{"nome": c[1], "tipo": c[2]} for c in contas_raw]
+
+                saldo_query = gemini_service.extract_saldo_query(texto_msg, contas_list)
+                nome_conta = saldo_query.get('nome_conta')
+
+                conta_id = None
+                if nome_conta:
+                    conta_id = finance_service.get_account_by_name(conn, usuario_id, nome_conta)
+                    if not conta_id:
+                        resposta_para_usuario = f"🤔 Não encontrei uma conta chamada '{nome_conta}'."
+                        return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                # Buscar saldo(s)
+                contas_saldo = finance_service.get_saldo_contas(conn, usuario_id, conta_id)
+
+                if not contas_saldo:
+                    resposta_para_usuario = "❌ Você não tem contas cadastradas."
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                # Formatar resposta
+                if len(contas_saldo) == 1:
+                    conta = contas_saldo[0]
+                    icone = "💳" if conta['tipo_conta'] == "Cartão de Crédito" else "🏦" if conta['tipo_conta'] == "Conta Corrente" else "💰"
+                    resposta_para_usuario = f"{icone} *{conta['nome_conta']}* ({conta['tipo_conta']})\n\n"
+                    resposta_para_usuario += f"💵 Saldo: *{formatar_moeda(conta['saldo'])}*"
+                else:
+                    resposta_para_usuario = "💰 *Seus Saldos:*\n\n"
+                    total_geral = 0
+                    for conta in contas_saldo:
+                        icone = "💳" if conta['tipo_conta'] == "Cartão de Crédito" else "🏦" if conta['tipo_conta'] == "Conta Corrente" else "💰"
+                        resposta_para_usuario += f"{icone} *{conta['nome_conta']}*\n"
+                        resposta_para_usuario += f"   {formatar_moeda(conta['saldo'])}\n\n"
+                        total_geral += conta['saldo']
+
+                    resposta_para_usuario += f"💵 *Total Geral:* {formatar_moeda(total_geral)}"
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+            # ===== INTENÇÃO: Listar Contas =====
+            elif intent == 'Listar Contas':
+                contas_raw = finance_service.get_user_accounts(conn, usuario_id)
+
+                if not contas_raw:
+                    resposta_para_usuario = "❌ Você não tem contas cadastradas."
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                resposta_para_usuario = "📋 *Suas Contas Cadastradas:*\n\n"
+
+                # Agrupar por tipo
+                contas_por_tipo = {}
+                for conta in contas_raw:
+                    conta_id, nome, tipo = conta[0], conta[1], conta[2]
+                    if tipo not in contas_por_tipo:
+                        contas_por_tipo[tipo] = []
+                    contas_por_tipo[tipo].append(nome)
+
+                # Formatar resposta
+                for tipo, nomes in contas_por_tipo.items():
+                    icone = "💳" if tipo == "Cartão de Crédito" else "🏦" if tipo == "Conta Corrente" else "💰"
+                    resposta_para_usuario += f"{icone} *{tipo}*\n"
+                    for nome in nomes:
+                        resposta_para_usuario += f"   • {nome}\n"
+                    resposta_para_usuario += "\n"
+
+                resposta_para_usuario += f"_Total: {len(contas_raw)} conta(s)_"
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
             # ===== INTENÇÃO: Consulta por Período =====
             elif intent == 'Consulta Período':
                 

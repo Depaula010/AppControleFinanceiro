@@ -86,7 +86,9 @@ def get_message_intent(texto_msg):
     Classifique a intenção principal como:
     - "Renda"
     - "Despesa"
-    - "Consulta Reserva"
+    - "Consulta Saldo" (quando o usuário quer saber quanto TEM nas contas)
+    - "Listar Contas" (quando o usuário quer saber QUAIS contas tem cadastradas)
+    - "Consulta Reserva" (cálculo de reserva de emergência, 6 meses)
     - "Consulta Período"
     - "Consulta Potes"
     - "Consulta Contas Fixas"
@@ -130,6 +132,12 @@ def get_message_intent(texto_msg):
     - "paguei 500 da fatura do nubank" → {{"intent": "Pagamento Fatura"}}
     - "qual o valor da minha fatura?" → {{"intent": "Consulta Valor Fatura"}}
     - "quanto está a fatura do cartão?" → {{"intent": "Consulta Valor Fatura"}}
+    - "quanto eu tenho na minha conta?" → {{"intent": "Consulta Saldo"}}
+    - "qual meu saldo?" → {{"intent": "Consulta Saldo"}}
+    - "quanto tenho no banco?" → {{"intent": "Consulta Saldo"}}
+    - "quais contas eu tenho?" → {{"intent": "Listar Contas"}}
+    - "minhas contas cadastradas" → {{"intent": "Listar Contas"}}
+    - "mostre minhas contas" → {{"intent": "Listar Contas"}}
     '''
     
     response = gemini_model.generate_content(prompt)
@@ -607,4 +615,39 @@ def extract_fatura_query(texto_msg, contas_json_list):
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-FATURA-QUERY] Query extraída: {json_text}")
+    return json.loads(json_text)
+
+
+def extract_saldo_query(texto_msg, contas_json_list):
+    '''
+    Extrai informações sobre qual(is) conta(s) o usuário quer consultar o saldo.
+
+    Returns:
+        {
+            "nome_conta": "Nubank" ou null (se não especificou, retorna todas)
+        }
+    '''
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+
+    prompt = f'''Analise a pergunta sobre consulta de saldo: "{texto_msg}"
+
+    Minhas contas são: {json.dumps(contas_json_list)}
+
+    Extraia:
+    - nome_conta: Nome da conta que o usuário quer consultar (ou null se não especificou)
+
+    Responda APENAS com JSON.
+
+    Exemplos:
+    - "quanto eu tenho na minha conta?" → {{"nome_conta": null}}
+    - "qual meu saldo?" → {{"nome_conta": null}}
+    - "quanto tenho no Nubank?" → {{"nome_conta": "Nubank"}}
+    - "saldo da carteira" → {{"nome_conta": "Carteira"}}
+    '''
+
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-SALDO-QUERY] Query extraída: {json_text}")
     return json.loads(json_text)
