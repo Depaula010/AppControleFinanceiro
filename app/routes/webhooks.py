@@ -608,7 +608,7 @@ def handle_whatsapp_webhook():
                 }
 
                 # Criar evento pendente no Redis
-                event_id = EventConfirmationService.create_pending_event(numero_whatsapp, event_data)
+                event_id = EventConfirmationService.create_pending_event(numero_limpo, event_data)
 
                 if event_id:
                     # Formatar mensagem de confirmação
