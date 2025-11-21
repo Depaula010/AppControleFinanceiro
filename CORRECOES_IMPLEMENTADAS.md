@@ -64,6 +64,34 @@ elif intent == 'Gráfico de Gastos':
 
 ---
 
+### ✅ Correção 3: Erro "cannot access local variable 'text'"
+
+**Erro original:**
+```
+[CHART] Erro ao gerar gráfico de pizza: cannot access local variable 'text' where it is not associated with a value
+```
+
+**Causa:**
+No `chart_service.py`, havia um loop `for text in texts:` (linha 84) que criava uma variável local chamada `text`. Por causa das regras de escopo do Python, isso fazia com que `text` fosse tratada como variável local em **toda a função**, causando conflito com a função `text()` do SQLAlchemy usada na linha 39.
+
+**Solução:**
+Renomear a variável do loop para evitar conflito:
+
+```python
+# Antes (INCORRETO):
+for text in texts:
+    text.set_fontsize(11)
+
+# Depois (CORRETO):
+for text_label in texts:
+    text_label.set_fontsize(11)
+```
+
+**Arquivo modificado:**
+- [app/services/chart_service.py:84](e:\Projetos\Projetos\AppControleFinanceiro\app\services\chart_service.py#L84) - Variável renomeada
+
+---
+
 ## Como Testar Agora
 
 ### 1. Reiniciar o servidor:

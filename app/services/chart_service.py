@@ -81,8 +81,8 @@ def generate_pie_chart(usuario_id, period_days=30):
                 autotext.set_fontsize(10)
                 autotext.set_weight('bold')
 
-            for text in texts:
-                text.set_fontsize(11)
+            for text_label in texts:
+                text_label.set_fontsize(11)
 
             plt.title(f'Gastos por Categoria - Últimos {period_days} dias',
                      fontsize=14, weight='bold', pad=20)
