@@ -185,6 +185,10 @@ def handle_api_transacao():
 
     try:
         data = request.json
+
+        # Log do payload recebido (sem expor a API key completa)
+        print(f"[API-TRANSACAO] Payload recebido: {data}")
+
         user_api_key = data.get('user_api_key')
         valor = data.get('valor')
         local = data.get('local')
@@ -192,11 +196,26 @@ def handle_api_transacao():
         conta_nome = data.get('conta')
         tipo_pagamento = data.get('tipo_pagamento')
 
-        # Validações de campos obrigatórios
-        if not all([user_api_key, valor, local, conta_nome, tipo_pagamento]):
+        # Validações de campos obrigatórios com detalhamento
+        campos_faltando = []
+        if not user_api_key:
+            campos_faltando.append('user_api_key')
+        if not valor:
+            campos_faltando.append('valor')
+        if not local:
+            campos_faltando.append('local')
+        if not conta_nome:
+            campos_faltando.append('conta')
+        if not tipo_pagamento:
+            campos_faltando.append('tipo_pagamento')
+
+        if campos_faltando:
+            erro_msg = f"Campos obrigatórios faltando: {', '.join(campos_faltando)}"
+            print(f"[API-TRANSACAO] ERRO: {erro_msg}")
+            print(f"[API-TRANSACAO] Dados recebidos: user_api_key={bool(user_api_key)}, valor={valor}, local={local}, conta={conta_nome}, tipo_pagamento={tipo_pagamento}")
             return jsonify({
                 "status": "erro",
-                "mensagem": "Campos obrigatórios faltando: user_api_key, valor, local, conta, tipo_pagamento"
+                "mensagem": erro_msg
             }), 400
 
         # Validar valor numérico positivo
