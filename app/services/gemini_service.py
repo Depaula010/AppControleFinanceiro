@@ -103,6 +103,7 @@ def get_message_intent(texto_msg):
     - "Comparação Mensal" (comparar mês atual com anterior, evolução mensal)
     - "Previsão de Gastos" (quanto vou gastar, previsão, projeção, orçamento futuro, estimativa de gastos)
     - "Gráfico de Gastos" (gráfico, gráficos, visualizar gastos, mostrar gráfico, gerar gráfico)
+    - "Solicitar API Key" (minha api key, qual minha chave, api key, chave de acesso, credenciais)
 
     Responda APENAS com JSON: {{"intent": "..."}}
 
@@ -123,6 +124,8 @@ def get_message_intent(texto_msg):
     - "gráfico de gastos" → {{"intent": "Gráfico de Gastos"}}
     - "mostrar gráfico" → {{"intent": "Gráfico de Gastos"}}
     - "visualizar meus gastos" → {{"intent": "Gráfico de Gastos"}}
+    - "qual minha api key" → {{"intent": "Solicitar API Key"}}
+    - "me dá minha chave de acesso" → {{"intent": "Solicitar API Key"}}
     '''
     
     response = gemini_model.generate_content(prompt)

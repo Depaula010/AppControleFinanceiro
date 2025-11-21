@@ -165,6 +165,223 @@ def handle_automate_webhook():
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
 
 
+@webhooks_bp.route('/api/transacao', methods=['POST'])
+def handle_api_transacao():
+    """
+    Endpoint direto para registro de transações via iPhone/automações.
+
+    Payload esperado:
+    {
+        "user_api_key": "...",
+        "valor": 15.90,
+        "local": "sorveteria",
+        "descricao": "2 sorvetes" (opcional),
+        "conta": "Nubank",
+        "tipo_pagamento": "credito"  // credito/debito/pix/dinheiro
+    }
+    """
+    if not db_engine or not gemini_model:
+        return jsonify({"status": "erro", "mensagem": "Serviço não configurado"}), 503
+
+    try:
+        data = request.json
+        user_api_key = data.get('user_api_key')
+        valor = data.get('valor')
+        local = data.get('local')
+        descricao = data.get('descricao')
+        conta_nome = data.get('conta')
+        tipo_pagamento = data.get('tipo_pagamento')
+
+        # Validações de campos obrigatórios
+        if not all([user_api_key, valor, local, conta_nome, tipo_pagamento]):
+            return jsonify({
+                "status": "erro",
+                "mensagem": "Campos obrigatórios faltando: user_api_key, valor, local, conta, tipo_pagamento"
+            }), 400
+
+        # Validar valor numérico positivo
+        try:
+            valor = float(valor)
+            if valor <= 0:
+                raise ValueError("Valor deve ser positivo")
+        except (ValueError, TypeError):
+            return jsonify({
+                "status": "erro",
+                "mensagem": "Valor inválido. Deve ser um número positivo."
+            }), 400
+
+        # Validar tipo_pagamento
+        tipos_validos = ['credito', 'debito', 'pix', 'dinheiro']
+        if tipo_pagamento not in tipos_validos:
+            return jsonify({
+                "status": "erro",
+                "mensagem": f"tipo_pagamento inválido. Use: {', '.join(tipos_validos)}"
+            }), 400
+
+        # Normalizar descricao (pode ser None)
+        if descricao:
+            descricao = descricao.strip()
+            if len(descricao) == 0:
+                descricao = None
+
+        print(f"[API-TRANSACAO] Recebido: {valor} - {local} ({conta_nome} / {tipo_pagamento})")
+
+        # 1. Autenticar usuário
+        user_info = finance_service.get_user_by_api_key(user_api_key)
+        if not user_info:
+            return jsonify({"status": "erro", "mensagem": "API key inválida"}), 401
+
+        usuario_id, numero_whatsapp_usuario = user_info
+        print(f"[API-TRANSACAO] Usuário: {usuario_id}")
+
+        with db_engine.connect() as conn:
+            # 2. Buscar conta pelo nome
+            conta_detalhes = finance_service.get_account_details_by_name(conn, usuario_id, conta_nome)
+
+            if not conta_detalhes:
+                return jsonify({
+                    "status": "erro",
+                    "mensagem": f"Conta '{conta_nome}' não encontrada. Verifique o nome exato."
+                }), 400
+
+            conta_id = conta_detalhes['id']
+            conta_tipo = conta_detalhes['tipo']
+            conta_nome_real = conta_detalhes['nome']
+
+            print(f"[API-TRANSACAO] Conta encontrada: {conta_nome_real} (ID: {conta_id}, Tipo: {conta_tipo})")
+
+            # 3. Preparar texto para categorização IA
+            texto_para_ia = local
+            if descricao:
+                texto_para_ia = f"{local} - {descricao}"
+
+            # 4. Categorizar com IA
+            categorias = finance_service.get_user_categories(conn, usuario_id, 'Despesa')
+            id_categoria_outros = finance_service.get_fallback_category_id(conn, 'Despesa')
+
+            id_categoria = gemini_service.categorize_transaction(
+                categorias,
+                texto_para_ia,
+                'Despesa',
+                id_categoria_outros
+            )
+
+            print(f"[API-TRANSACAO] Categoria IA: {id_categoria}")
+
+            # 5. Detectar se precisa vincular à fatura
+            fatura_id = None
+            if tipo_pagamento == 'credito':
+                # Vincular à fatura
+                data_hoje = date.today()
+                fatura_id = finance_service.get_or_create_fatura(conn, conta_id, data_hoje, usuario_id)
+                print(f"[API-TRANSACAO] Fatura ID: {fatura_id}")
+
+            # 6. Preparar descrição final para salvar
+            descricao_final = local
+            if descricao:
+                descricao_final = f"{local} - {descricao}"
+
+            # 7. Preparar dados para transação pendente
+            valor_db = valor * -1  # Negativo para despesa
+
+            transacao_data = {
+                'usuario_id': usuario_id,
+                'conta_id': conta_id,
+                'conta_nome': conta_nome_real,
+                'conta_tipo': conta_tipo,
+                'categoria_id': id_categoria,
+                'fatura_id': fatura_id,
+                'local': local,
+                'descricao': descricao,  # Guardar separado para mensagem
+                'descricao_final': descricao_final,  # Combinado para salvar
+                'valor_db': valor_db,
+                'valor_original': valor,
+                'tipo_transacao': 'Despesa',
+                'tipo_pagamento': tipo_pagamento,
+                'data_transacao': str(date.today()),
+                'origem': 'api_endpoint'
+            }
+
+            # 8. Verificar se Redis está disponível
+            if not redis_service.is_connected():
+                # Fallback: Salvar direto sem confirmação
+                print("[API-TRANSACAO] Redis indisponível. Salvando direto.")
+                finance_service.create_transaction(
+                    conn, usuario_id, conta_id, id_categoria,
+                    fatura_id, descricao_final, valor_db,
+                    'Despesa', date.today()
+                )
+                conn.commit()
+
+                nome_cat = finance_service.get_category_name_by_id(conn, id_categoria)
+                mensagem = f"✅ Transação salva!\n\n📍 {descricao_final}\n💵 {formatar_moeda(valor)}\n🏷️ {nome_cat}"
+                notification_service.enviar_notificacao_whatsapp(
+                    numero_whatsapp_usuario, mensagem, BOT_WHATSAPP_URL, API_SECRET_KEY
+                )
+
+                return jsonify({
+                    "status": "success",
+                    "message": "Transação salva com sucesso (Redis indisponível)",
+                    "categoria_sugerida": nome_cat
+                }), 200
+
+            # 9. Criar transação pendente no Redis
+            transaction_id = TransactionConfirmationService.create_pending_transaction(
+                numero_whatsapp_usuario,
+                transacao_data
+            )
+
+            if not transaction_id:
+                # Erro no Redis, salvar direto
+                finance_service.create_transaction(
+                    conn, usuario_id, conta_id, id_categoria,
+                    fatura_id, descricao_final, valor_db,
+                    'Despesa', date.today()
+                )
+                conn.commit()
+
+                return jsonify({
+                    "status": "success",
+                    "message": "Transação salva (erro no Redis)",
+                    "transaction_id": None
+                }), 200
+
+            # 10. Salvar como "última pendente" para contexto
+            redis_service.set_with_ttl(f"last_pending:{numero_whatsapp_usuario}", transaction_id, 300)
+
+            # 11. Formatar e enviar mensagem de confirmação
+            mensagem_confirmacao = TransactionConfirmationService.format_confirmation_message(
+                transacao_data,
+                categorias,
+                transaction_id
+            )
+
+            notification_service.enviar_notificacao_whatsapp(
+                numero_whatsapp_usuario,
+                mensagem_confirmacao,
+                BOT_WHATSAPP_URL,
+                API_SECRET_KEY
+            )
+
+            # 12. Buscar nome da categoria para response
+            nome_categoria = finance_service.get_category_name_by_id(conn, id_categoria)
+
+            return jsonify({
+                "status": "success",
+                "message": "Transação pendente de confirmação no WhatsApp",
+                "transaction_id": transaction_id,
+                "categoria_sugerida": nome_categoria,
+                "conta_utilizada": conta_nome_real,
+                "vinculado_fatura": fatura_id is not None
+            }), 200
+
+    except Exception as e:
+        print(f"[API-TRANSACAO] Erro: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"status": "erro", "mensagem": str(e)}), 500
+
+
 @webhooks_bp.route('/webhook-whatsapp', methods=['POST'])
 def handle_whatsapp_webhook():
     """Webhook WhatsApp com CONFIRMAÇÃO e suporte a cadastro"""
@@ -277,13 +494,17 @@ def handle_whatsapp_webhook():
                     # Salvar no banco
                     with db_engine.connect() as conn:
                         conn.begin()
+
+                        # Usar descricao_final se disponível, senão usar descricao
+                        descricao_para_salvar = dados.get('descricao_final', dados.get('descricao'))
+
                         finance_service.create_transaction(
                             conn,
                             dados['usuario_id'],
                             dados['conta_id'],
                             dados['categoria_id'],
                             dados['fatura_id'],
-                            dados['descricao'],
+                            descricao_para_salvar,
                             dados['valor_db'],
                             dados['tipo_transacao'],
                             date.fromisoformat(dados['data_transacao'])
@@ -294,12 +515,25 @@ def handle_whatsapp_webhook():
                     
                     # Limpar last_pending
                     redis_service.delete(last_tx_key)
-                    
+
+                    # Formatar descrição para exibição
+                    local = dados.get('local')
+                    descricao = dados.get('descricao')
+
+                    if local:
+                        # Novo formato
+                        texto_desc = f"📍 {local}"
+                        if descricao:
+                            texto_desc += f" - {descricao}"
+                    else:
+                        # Formato antigo (compatibilidade)
+                        texto_desc = f"📝 {dados.get('descricao_final', dados.get('descricao'))}"
+
                     resposta = f"✅ *Transação Salva com Sucesso!*\n\n"
-                    resposta += f"📝 {dados['descricao']}\n"
+                    resposta += f"{texto_desc}\n"
                     resposta += f"💵 {formatar_moeda(dados['valor_original'])}\n"
                     resposta += f"🏷️ {nome_cat}"
-                    
+
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
                 
                 elif status == 'awaiting_category':
@@ -920,6 +1154,42 @@ def handle_whatsapp_webhook():
                     import traceback
                     traceback.print_exc()
                     resposta_para_usuario = f"❌ Não consegui gerar o gráfico. Erro: {str(e)}"
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+            #==== INTENÇÃO: Solicitar API Key ====
+            elif intent == 'Solicitar API Key':
+                print(f"[WHATSAPP] Intenção de Solicitar API Key detectada")
+
+                try:
+                    # Buscar API key do usuário
+                    sql_api_key = text("SELECT api_key_automate, nome FROM Usuarios WHERE id = :uid")
+                    result = conn.execute(sql_api_key, {"uid": usuario_id}).fetchone()
+
+                    if result and result[0]:
+                        api_key = result[0]
+                        nome_usuario = result[1]
+
+                        resposta_para_usuario = f"🔑 *Sua API Key*\n\n"
+                        resposta_para_usuario += f"Olá {nome_usuario}!\n\n"
+                        resposta_para_usuario += f"Sua chave de acesso:\n"
+                        resposta_para_usuario += f"`{api_key}`\n\n"
+                        resposta_para_usuario += f"⚠️ *Importante:*\n"
+                        resposta_para_usuario += f"• Não compartilhe esta chave com ninguém\n"
+                        resposta_para_usuario += f"• Use-a para configurar automações no iPhone\n"
+                        resposta_para_usuario += f"• Esta chave dá acesso total à sua conta\n\n"
+                        resposta_para_usuario += f"📱 *Para usar no iPhone:*\n"
+                        resposta_para_usuario += f"1. Copie a chave acima\n"
+                        resposta_para_usuario += f"2. No atalho, cole no campo `user_api_key`\n"
+                        resposta_para_usuario += f"3. Teste enviando um gasto!\n\n"
+                        resposta_para_usuario += f"💡 *Endpoint:*\n"
+                        resposta_para_usuario += f"`POST /api/transacao`"
+                    else:
+                        resposta_para_usuario = "❌ Não encontrei sua API Key. Entre em contato com o suporte."
+
+                except Exception as e:
+                    print(f"[API-KEY] Erro ao buscar API Key: {e}")
+                    resposta_para_usuario = f"❌ Erro ao buscar sua API Key. Tente novamente mais tarde."
 
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 

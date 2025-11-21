@@ -298,18 +298,35 @@ def get_account_by_name(conn, usuario_id, nome_conta, fallback=False):
     """ Busca um ID de conta pelo nome (exato ou ILIKE). (Requer conexão). """
     sql_exact = text("SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta = :nome")
     conta_id = conn.execute(sql_exact, {"uid": usuario_id, "nome": nome_conta}).scalar_one_or_none()
-    
+
     if conta_id: return conta_id
 
     sql_like = text("SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta ILIKE :nome_like")
     conta_id = conn.execute(sql_like, {"uid": usuario_id, "nome_like": f"%{nome_conta}%"}).scalar_one_or_none()
 
     if conta_id: return conta_id
-    
+
     if fallback:
         sql_fallback = text("SELECT id FROM Contas WHERE usuario_id = :uid LIMIT 1")
         return conn.execute(sql_fallback, {"uid": usuario_id}).scalar_one()
-        
+
+    return None
+
+def get_account_details_by_name(conn, usuario_id, nome_conta):
+    """ Busca detalhes completos de uma conta pelo nome (id, nome, tipo). (Requer conexão). """
+    sql_exact = text("SELECT id, nome_conta, tipo_conta FROM Contas WHERE usuario_id = :uid AND nome_conta = :nome")
+    conta = conn.execute(sql_exact, {"uid": usuario_id, "nome": nome_conta}).fetchone()
+
+    if conta:
+        return {"id": conta[0], "nome": conta[1], "tipo": conta[2]}
+
+    # Tentar busca parcial (ILIKE)
+    sql_like = text("SELECT id, nome_conta, tipo_conta FROM Contas WHERE usuario_id = :uid AND nome_conta ILIKE :nome_like")
+    conta = conn.execute(sql_like, {"uid": usuario_id, "nome_like": f"%{nome_conta}%"}).fetchone()
+
+    if conta:
+        return {"id": conta[0], "nome": conta[1], "tipo": conta[2]}
+
     return None
 
 def get_category_name_by_id(conn, subcategoria_id):

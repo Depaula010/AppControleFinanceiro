@@ -54,43 +54,90 @@ class TransactionConfirmationService:
     def format_confirmation_message(transacao_data, categorias_disponiveis, transaction_id):
         """
         Formata a mensagem de confirmação para o usuário.
-        
+
         Args:
             transacao_data: Dados da transação
             categorias_disponiveis: Lista de categorias do usuário
             transaction_id: ID da transação pendente
-            
+
         Returns:
             Mensagem formatada para WhatsApp
         """
         tipo = transacao_data['tipo_transacao']
-        descricao = transacao_data['descricao']
         valor = transacao_data['valor_original']
         categoria_sugerida_id = transacao_data['categoria_id']
-        
+
+        # Extrair campos novos (com fallback para compatibilidade)
+        local = transacao_data.get('local')
+        descricao = transacao_data.get('descricao')
+        conta_nome = transacao_data.get('conta_nome')
+        conta_tipo = transacao_data.get('conta_tipo')
+        tipo_pagamento = transacao_data.get('tipo_pagamento')
+        fatura_id = transacao_data.get('fatura_id')
+
+        # Fallback: se não tiver 'local', usar 'descricao' antiga
+        if not local:
+            # Formato antigo
+            local = transacao_data.get('descricao')
+            descricao = None
+
         # Encontra o nome da categoria sugerida
         categoria_sugerida_nome = "Desconhecida"
         for cat in categorias_disponiveis:
             if cat['id'] == categoria_sugerida_id:
                 categoria_sugerida_nome = f"{cat['nome_macro']} → {cat['nome_sub']}"
                 break
-        
+
         valor_fmt = formatar_moeda(valor)
         emoji = "💰" if tipo == "Renda" else "💸"
-        
-        mensagem = f"{emoji} *CONFIRME SUA TRANSAÇÃO* {emoji}\n\n"
-        mensagem += f"📝 Descrição: *{descricao}*\n"
+
+        # Emoji para tipo de pagamento
+        if tipo_pagamento == 'credito':
+            emoji_pagamento = "💳"
+        elif tipo_pagamento == 'debito':
+            emoji_pagamento = "💰"
+        elif tipo_pagamento == 'pix':
+            emoji_pagamento = "📱"
+        elif tipo_pagamento == 'dinheiro':
+            emoji_pagamento = "💵"
+        else:
+            emoji_pagamento = "💸"
+
+        mensagem = f"{emoji_pagamento} *CONFIRME SUA TRANSAÇÃO* {emoji_pagamento}\n\n"
+
+        # Mostrar Local e Itens separados
+        mensagem += f"📍 Local: *{local}*\n"
+        if descricao:
+            mensagem += f"📝 Itens: {descricao}\n"
+
         mensagem += f"💵 Valor: *{valor_fmt}*\n"
         mensagem += f"📊 Tipo: *{tipo}*\n"
-        mensagem += f"🏷️ Categoria Sugerida: *{categoria_sugerida_nome}*\n\n"
-        
+
+        # Mostrar informações da conta
+        if conta_nome:
+            if tipo_pagamento == 'credito' and fatura_id:
+                # É cartão de crédito, mostrar fatura
+                mensagem += f"💳 Conta: *{conta_nome}* ({conta_tipo})\n"
+                mensagem += f"🔴 *CRÉDITO* → Irá para fatura\n"
+            else:
+                # Outras formas de pagamento
+                tipo_pag_label = {
+                    'debito': 'Débito - desconto imediato',
+                    'pix': 'PIX - desconto imediato',
+                    'dinheiro': 'Dinheiro'
+                }.get(tipo_pagamento, tipo_pagamento)
+
+                mensagem += f"🏦 Conta: *{conta_nome}* ({tipo_pag_label})\n"
+
+        mensagem += f"📂 Categoria: *{categoria_sugerida_nome}*\n\n"
+
         mensagem += "━━━━━━━━━━━━━━━━━━━━\n"
         mensagem += "🔹 *OPÇÕES:*\n\n"
-        mensagem += f"✅ Digite *CONFIRMAR* ou *OK* para salvar\n"
-        mensagem += f"✏️ Digite *TROCAR* para escolher outra categoria\n"
-        mensagem += f"❌ Digite *CANCELAR* para descartar\n\n"
-        mensagem += f"_ID: {transaction_id} | Expira em 5 minutos_"
-        
+        mensagem += f"✅ *OK* para confirmar\n"
+        mensagem += f"✏️ *TROCAR* para mudar categoria\n"
+        mensagem += f"❌ *CANCELAR* para descartar\n\n"
+        mensagem += f"_ID: {transaction_id} | Expira em 5 min_"
+
         return mensagem
     
     @staticmethod
