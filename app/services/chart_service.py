@@ -38,15 +38,15 @@ def generate_pie_chart(usuario_id, period_days=30):
             # Busca gastos por categoria
             sql = text("""
                 SELECT
-                    COALESCE(mc.nome, 'Outros') as categoria,
+                    COALESCE(mc.nome_macro, 'Outros') as categoria,
                     SUM(t.valor) as total
                 FROM Transacoes t
-                LEFT JOIN SubCategoria sc ON t.id_subcategoria = sc.id
-                LEFT JOIN MacroCategoria mc ON sc.id_macrocategoria = mc.id
+                LEFT JOIN SubCategoria sc ON t.subcategoria_id = sc.id
+                LEFT JOIN MacroCategoria mc ON sc.macro_id = mc.id
                 WHERE t.usuario_id = :uid
-                    AND t.tipo_fluxo = 'Despesa'
+                    AND t.tipo_transacao = 'Despesa'
                     AND t.data_transacao >= :data_inicio
-                GROUP BY mc.nome
+                GROUP BY mc.nome_macro
                 ORDER BY total DESC
             """)
 
@@ -121,21 +121,23 @@ def generate_bar_chart(usuario_id, num_months=6):
     try:
         with db_engine.connect() as conn:
             # Busca gastos por mês
+            data_inicio = datetime.now().date() - timedelta(days=num_months * 30)
+
             sql = text("""
                 SELECT
                     DATE_TRUNC('month', data_transacao) as mes,
-                    SUM(CASE WHEN tipo_fluxo = 'Despesa' THEN valor ELSE 0 END) as despesas,
-                    SUM(CASE WHEN tipo_fluxo = 'Renda' THEN valor ELSE 0 END) as rendas
+                    SUM(CASE WHEN tipo_transacao = 'Despesa' THEN valor ELSE 0 END) as despesas,
+                    SUM(CASE WHEN tipo_transacao = 'Renda' THEN valor ELSE 0 END) as rendas
                 FROM Transacoes
                 WHERE usuario_id = :uid
-                    AND data_transacao >= CURRENT_DATE - INTERVAL ':months months'
+                    AND data_transacao >= :data_inicio
                 GROUP BY mes
                 ORDER BY mes
             """)
 
             result = conn.execute(sql, {
                 "uid": usuario_id,
-                "months": num_months
+                "data_inicio": data_inicio
             }).fetchall()
 
             if not result or len(result) == 0:
@@ -210,7 +212,7 @@ def generate_line_chart(usuario_id, num_months=6):
             sql = text("""
                 SELECT
                     data_transacao,
-                    SUM(CASE WHEN tipo_fluxo = 'Renda' THEN valor ELSE -valor END)
+                    SUM(CASE WHEN tipo_transacao = 'Renda' THEN valor ELSE -valor END)
                         OVER (ORDER BY data_transacao) as saldo_acumulado
                 FROM Transacoes
                 WHERE usuario_id = :uid
