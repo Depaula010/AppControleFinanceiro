@@ -504,15 +504,14 @@ def handle_whatsapp_webhook():
         msg_upper = texto_msg.strip().upper()
         if any(word in msg_upper for word in ['CONFIRMAR', 'OK', 'TROCAR', 'CANCELAR']) or msg_upper.isdigit():
             # Provável resposta de confirmação
-            # Buscar última transação pendente (você pode melhorar isso)
-            # Por ora, vamos precisar que o usuário responda em sequência
-            # Alternativa: Armazenar "última_transaction_id" no Redis por usuário
-            
-            # Implementação simplificada:
-            # Vamos criar uma chave especial no Redis: last_pending:{numero}
+            print(f"[CONFIRM-CHECK] Detectada possível confirmação: '{texto_msg}'")
+
+            # Buscar última transação pendente
             last_tx_key = f"last_pending:{numero_limpo}"
             last_transaction_id = redis_service.get(last_tx_key)
-            
+
+            print(f"[CONFIRM-CHECK] Buscando {last_tx_key} -> {last_transaction_id}")
+
             if last_transaction_id:
                 status, mensagem, dados = TransactionConfirmationService.process_confirmation_response(
                     numero_limpo,
@@ -586,6 +585,10 @@ def handle_whatsapp_webhook():
                 
                 elif status == 'error':
                     return jsonify({"status": "sucesso", "resposta": mensagem}), 200
+            else:
+                # Palavra-chave de confirmação detectada, mas sem transação pendente
+                print(f"[CONFIRM-CHECK] Palavra de confirmação detectada, mas nenhuma transação pendente encontrada")
+                # Continuar para fluxo normal (pode ser uma pergunta normal que contém "ok")
 
         # 4. Classificar intenção (fluxo normal)
         intent = gemini_service.get_message_intent(texto_msg)
@@ -599,21 +602,47 @@ def handle_whatsapp_webhook():
                 trans_data = gemini_service.extract_transaction_details(texto_msg, intent)
                 trans_desc = trans_data.get('descricao_bruta')
                 valor_dec = float(trans_data.get('valor_decimal', 0))
-                
+
                 cats_list = finance_service.get_user_categories(conn, usuario_id, intent)
                 id_outros = finance_service.get_fallback_category_id(conn, intent)
                 id_categoria = gemini_service.categorize_transaction(cats_list, trans_desc, intent, id_outros)
-                
-                conta_nome = 'Banco Inter' if intent == 'Renda' else 'Carteira'
-                conta_id = finance_service.get_account_by_name(conn, usuario_id, conta_nome, fallback=True)
+
+                # Detectar se mencionou cartão de crédito
+                fatura_id = None
+                if intent == 'Renda':
+                    conta_nome = 'Banco Inter'
+                    conta_id = finance_service.get_account_by_name(conn, usuario_id, conta_nome, fallback=True)
+                else:  # Despesa
+                    # Verificar se mencionou cartão
+                    palavras_cartao = ['cartão', 'cartao', 'crédito', 'credito', 'card']
+                    menciona_cartao = any(palavra in texto_msg.lower() for palavra in palavras_cartao)
+
+                    if menciona_cartao:
+                        # Buscar primeiro cartão de crédito do usuário
+                        contas_usuario = finance_service.get_user_accounts(conn, usuario_id)
+                        conta_cartao = next((c for c in contas_usuario if c[2] == 'Cartão de Crédito'), None)
+
+                        if conta_cartao:
+                            conta_id = conta_cartao[0]
+                            # Criar/buscar fatura
+                            fatura_id = finance_service.get_or_create_fatura(conn, conta_id, data_hoje, usuario_id)
+                        else:
+                            # Não tem cartão, usar carteira
+                            conta_nome = 'Carteira'
+                            conta_id = finance_service.get_account_by_name(conn, usuario_id, conta_nome, fallback=True)
+                    else:
+                        # Não mencionou cartão, usar carteira
+                        conta_nome = 'Carteira'
+                        conta_id = finance_service.get_account_by_name(conn, usuario_id, conta_nome, fallback=True)
+
                 valor_db = valor_dec if intent == 'Renda' else (valor_dec * -1)
-                
+
                 # Criar pendente
                 transacao_data = {
                     'usuario_id': usuario_id,
                     'conta_id': conta_id,
                     'categoria_id': id_categoria,
-                    'fatura_id': None,
+                    'fatura_id': fatura_id,
                     'descricao': trans_desc,
                     'valor_db': valor_db,
                     'valor_original': valor_dec,
