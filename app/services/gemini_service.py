@@ -99,6 +99,8 @@ def get_message_intent(texto_msg):
     - "Deletar Evento" (deletar/cancelar/remover evento)
     - "Configurar Notificações" (configurar/ativar/desativar notificações)
     - "Consulta Categoria Específica"
+    - "Análise Inteligente" (analisar gastos, insights, relatório financeiro, análise financeira, padrões de consumo)
+    - "Comparação Mensal" (comparar mês atual com anterior, evolução mensal)
 
     Responda APENAS com JSON: {{"intent": "..."}}
 
@@ -110,6 +112,9 @@ def get_message_intent(texto_msg):
     - "quando posso marcar dentista esta semana?" → {{"intent": "Horários Livres"}}
     - "quando estou livre amanhã?" → {{"intent": "Horários Livres"}}
     - "melhor horário para reunião hoje" → {{"intent": "Horários Livres"}}
+    - "analisar meus gastos" → {{"intent": "Análise Inteligente"}}
+    - "quero um relatório financeiro" → {{"intent": "Análise Inteligente"}}
+    - "comparar este mês com o anterior" → {{"intent": "Comparação Mensal"}}
     '''
     
     response = gemini_model.generate_content(prompt)

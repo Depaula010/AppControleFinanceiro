@@ -808,7 +808,41 @@ def handle_whatsapp_webhook():
                 
                 else:
                     resposta_para_usuario = "🤔 Não entendi qual tipo de notificação você quer configurar."
-                
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+            #==== INTENÇÃO: Análise Inteligente ====
+            elif intent == 'Análise Inteligente':
+                print(f"[WHATSAPP] Intenção de Análise Inteligente detectada")
+
+                from app.services.analytics_service import generate_ai_insights
+
+                try:
+                    # Gerar insights com IA
+                    insights = generate_ai_insights(usuario_id)
+                    resposta_para_usuario = f"📊 *Análise Inteligente de Gastos*\n\n{insights}"
+
+                except Exception as e:
+                    print(f"[ANALYTICS] Erro ao gerar insights: {e}")
+                    resposta_para_usuario = f"❌ Não consegui gerar a análise no momento. Erro: {str(e)}"
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+            #==== INTENÇÃO: Comparação Mensal ====
+            elif intent == 'Comparação Mensal':
+                print(f"[WHATSAPP] Intenção de Comparação Mensal detectada")
+
+                from app.services.analytics_service import get_monthly_comparison
+
+                try:
+                    # Comparar mês atual com anterior
+                    comparacao = get_monthly_comparison(usuario_id)
+                    resposta_para_usuario = comparacao
+
+                except Exception as e:
+                    print(f"[ANALYTICS] Erro ao comparar meses: {e}")
+                    resposta_para_usuario = f"❌ Não consegui fazer a comparação. Erro: {str(e)}"
+
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
             else:
