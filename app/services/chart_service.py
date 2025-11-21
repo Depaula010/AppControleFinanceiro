@@ -58,9 +58,18 @@ def generate_pie_chart(usuario_id, period_days=30):
             if not result or len(result) == 0:
                 return None
 
-            # Preparar dados
-            categorias = [row.categoria for row in result]
-            valores = [float(row.total) for row in result]
+            # Preparar dados (filtrar apenas valores positivos)
+            categorias = []
+            valores = []
+
+            for row in result:
+                if row.categoria and row.total and float(row.total) > 0:
+                    categorias.append(row.categoria)
+                    valores.append(float(row.total))
+
+            # Verificar se há dados válidos
+            if not categorias or not valores:
+                return None
 
             # Criar gráfico
             plt.figure(figsize=(10, 8))
