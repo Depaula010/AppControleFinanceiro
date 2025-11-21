@@ -2,7 +2,7 @@
 
 ## Data: 2025-11-21
 
-### Problema: Erro ao acessar `gemini_service.gemini_model`
+### ✅ Correção 1: Erro ao acessar `gemini_service.gemini_model`
 
 **Erro original:**
 ```
@@ -30,6 +30,37 @@ if not db_engine or not gemini_model:
 **Arquivo modificado:**
 - [app/routes/webhooks.py:10](e:\Projetos\Projetos\AppControleFinanceiro\app\routes\webhooks.py#L10) - Importação corrigida
 - [app/routes/webhooks.py:180](e:\Projetos\Projetos\AppControleFinanceiro\app\routes\webhooks.py#L180) - Verificação corrigida
+
+---
+
+### ✅ Correção 2: Erro "cannot access local variable 'gemini_service'"
+
+**Erro original:**
+```
+[WHATSAPP] Erro: cannot access local variable 'gemini_service' where it is not associated with a value
+```
+
+**Causa:**
+Dentro do handler de gráficos (linha 871), estávamos reimportando `gemini_service`, causando conflito de escopo com a importação global.
+
+**Solução:**
+Remover reimportação desnecessária, usando apenas a importação global:
+
+```python
+# Antes (INCORRETO):
+elif intent == 'Gráfico de Gastos':
+    from app.services import gemini_service, chart_service, notification_service
+    # ...
+
+# Depois (CORRETO):
+elif intent == 'Gráfico de Gastos':
+    from app.services import chart_service
+    # gemini_service e notification_service já estão importados no topo
+    # ...
+```
+
+**Arquivo modificado:**
+- [app/routes/webhooks.py:871](e:\Projetos\Projetos\AppControleFinanceiro\app\routes\webhooks.py#L871) - Removida reimportação
 
 ---
 

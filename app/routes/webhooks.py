@@ -868,7 +868,7 @@ def handle_whatsapp_webhook():
             elif intent == 'Gráfico de Gastos':
                 print(f"[WHATSAPP] Intenção de Gráfico de Gastos detectada")
 
-                from app.services import gemini_service, chart_service, notification_service
+                from app.services import chart_service
 
                 try:
                     # Extrair tipo de gráfico solicitado
