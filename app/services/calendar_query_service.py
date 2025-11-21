@@ -166,12 +166,13 @@ class CalendarQueryService:
             (start_date, end_date, description)
         """
         print(f"[CALENDAR] Calculando datas para período '{period_type}'")
-        
-        hoje = date.today()
-        
+
+        # Usar timezone do Brasil para calcular "hoje"
+        hoje = datetime.now(CalendarQueryService.TIMEZONE_BR).date()
+
         if period_type == 'hoje':
             return hoje, hoje, "hoje"
-        
+
         elif period_type == 'amanha':
             amanha = hoje + timedelta(days=1)
             return amanha, amanha, "amanhã"

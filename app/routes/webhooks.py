@@ -27,7 +27,8 @@ from app.services.calendar_query_service import CalendarQueryService
 
 from app.services.calendar_management_service import CalendarManagementService
 from app.services.notification_config_service import NotificationConfigService
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
+from zoneinfo import ZoneInfo
 
 webhooks_bp = Blueprint('webhooks', __name__)
 
@@ -548,11 +549,14 @@ def handle_whatsapp_webhook():
                         "resposta": "❌ Não consegui identificar o título ou data do evento. Tente algo como: 'Criar evento Academia amanhã às 7h'"
                     }), 200
                 
-                # Processar data
+                # Processar data (usando timezone do Brasil)
+                TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
+                hoje_br = datetime.now(TIMEZONE_BR).date()
+
                 if data_str == 'hoje':
-                    data_evento = date.today()
+                    data_evento = hoje_br
                 elif data_str == 'amanha':
-                    data_evento = date.today() + timedelta(days=1)
+                    data_evento = hoje_br + timedelta(days=1)
                 else:
                     try:
                         data_evento = date.fromisoformat(data_str)
