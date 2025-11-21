@@ -196,6 +196,17 @@ def handle_api_transacao():
         conta_nome = data.get('conta')
         tipo_pagamento = data.get('tipo_pagamento')
 
+        # Normalizar strings (remover espaços e acentos)
+        if conta_nome:
+            conta_nome = conta_nome.strip()
+        if local:
+            local = local.strip()
+        if tipo_pagamento:
+            # Remover espaços e normalizar acentos
+            tipo_pagamento = tipo_pagamento.strip().lower()
+            # Normalizar variações comuns
+            tipo_pagamento = tipo_pagamento.replace('é', 'e').replace('í', 'i')
+
         # Validações de campos obrigatórios com detalhamento
         campos_faltando = []
         if not user_api_key:
