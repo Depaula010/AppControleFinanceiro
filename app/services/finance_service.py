@@ -412,6 +412,72 @@ def create_fatura_payment(conn, usuario_id, conta_id_origem, conta_id_cartao, va
     
     return nome_cartao
 
+def get_fatura_valor(conn, usuario_id, conta_id_cartao=None):
+    """
+    Consulta o valor atual da(s) fatura(s) em aberto.
+
+    Args:
+        conn: Conexão com o banco
+        usuario_id: ID do usuário
+        conta_id_cartao: ID do cartão (opcional). Se None, retorna todas as faturas.
+
+    Returns:
+        List de dicts com informações das faturas:
+        [{
+            "nome_cartao": "Nubank",
+            "valor_fatura": 1500.50,
+            "data_vencimento": date(2025, 12, 15),
+            "status": "Aberta"
+        }]
+    """
+    if conta_id_cartao:
+        # Consultar fatura específica de um cartão
+        sql = text("""
+            SELECT
+                c.nome_conta,
+                COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) as valor_fatura,
+                f.data_vencimento,
+                f.status
+            FROM Faturas f
+            JOIN Contas c ON f.conta_id = c.id
+            LEFT JOIN Transacoes t ON f.id = t.fatura_id
+            WHERE c.usuario_id = :uid
+                AND c.id = :cid
+                AND f.status = 'Aberta'
+            GROUP BY c.nome_conta, f.data_vencimento, f.status
+            ORDER BY f.data_vencimento ASC
+            LIMIT 1
+        """)
+        result = conn.execute(sql, {"uid": usuario_id, "cid": conta_id_cartao}).fetchall()
+    else:
+        # Consultar todas as faturas abertas
+        sql = text("""
+            SELECT
+                c.nome_conta,
+                COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) as valor_fatura,
+                f.data_vencimento,
+                f.status
+            FROM Faturas f
+            JOIN Contas c ON f.conta_id = c.id
+            LEFT JOIN Transacoes t ON f.id = t.fatura_id
+            WHERE c.usuario_id = :uid
+                AND f.status = 'Aberta'
+            GROUP BY c.nome_conta, f.data_vencimento, f.status
+            ORDER BY f.data_vencimento ASC
+        """)
+        result = conn.execute(sql, {"uid": usuario_id}).fetchall()
+
+    faturas = []
+    for row in result:
+        faturas.append({
+            "nome_cartao": row[0],
+            "valor_fatura": float(row[1]),
+            "data_vencimento": row[2],
+            "status": row[3]
+        })
+
+    return faturas
+
 def get_pote_status(conn, usuario_id):
     """ Consulta o status de todos os potes de gasto do mês. (Requer conexão). """
     sql = text("""

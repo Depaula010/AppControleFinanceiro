@@ -649,7 +649,9 @@ def handle_whatsapp_webhook():
                 resposta_para_usuario = "🆘 *Cálculo da Reserva de Emergência* 🆘\n\n"
                 resposta_para_usuario += f"Média de gastos essenciais: *{formatar_moeda(media_mensal)}* / mês\n"
                 resposta_para_usuario += f"Reserva ideal (6x): *{formatar_moeda(reserva_ideal)}*"
-                             
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
             # ===== INTENÇÃO: Consulta por Período =====
             elif intent == 'Consulta Período':
                 
@@ -782,9 +784,13 @@ def handle_whatsapp_webhook():
                 nome_orig, nome_dest = finance_service.create_transfer_pair(
                     conn, usuario_id, conta_id_origem, conta_id_destino, valor_dec, data_hoje
                 )
-                
+
+                conn.commit()
+
                 valor_fmt = formatar_moeda(valor_dec)
                 resposta_para_usuario = f"✅ Transferência salva!\n\nValor: {valor_fmt}\nDe: {nome_orig}\nPara: {nome_dest}"
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
             #==== INTENÇÃO: Pagamento Fatura =====
             elif intent == 'Pagamento Fatura':
@@ -792,26 +798,89 @@ def handle_whatsapp_webhook():
                 contas_list = [{"nome": c[1], "tipo": c[2]} for c in contas_raw]
 
                 fatura_data = gemini_service.extract_fatura_payment_details(texto_msg, contas_list)
-                valor_dec = float(fatura_data.get('valor_decimal', 0))
+
+                # Validar se conseguiu extrair os dados necessários
+                valor_decimal_raw = fatura_data.get('valor_decimal')
                 nome_origem = fatura_data.get('conta_origem')
                 nome_cartao = fatura_data.get('conta_cartao')
 
-                if not valor_dec or not nome_origem or not nome_cartao:
-                    raise Exception("Gemini não conseguiu extrair os dados do pagamento (valor, origem, cartão).")
-                
+                if not valor_decimal_raw or not nome_origem or not nome_cartao:
+                    resposta_para_usuario = (
+                        "🤔 Não consegui identificar todos os dados do pagamento.\n\n"
+                        "Por favor, informe:\n"
+                        "• Valor pago\n"
+                        "• Conta de origem\n"
+                        "• Cartão que foi pago\n\n"
+                        "Exemplo: *Paguei 500 reais da fatura do Nubank com o Inter*"
+                    )
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                valor_dec = float(valor_decimal_raw)
+
                 conta_id_origem = finance_service.get_account_by_name(conn, usuario_id, nome_origem)
                 conta_id_cartao = finance_service.get_account_by_name(conn, usuario_id, nome_cartao)
 
                 if not conta_id_origem or not conta_id_cartao:
-                    raise Exception(f"Não foi possível encontrar as contas ({nome_origem} -> {nome_cartao}).")
-                
+                    resposta_para_usuario = f"❌ Não encontrei as contas mencionadas ({nome_origem} → {nome_cartao})."
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
                 nome_cartao_pago = finance_service.create_fatura_payment(
                     conn, usuario_id, conta_id_origem, conta_id_cartao, valor_dec, data_hoje
                 )
-                
+
+                conn.commit()
+
                 valor_fmt = formatar_moeda(valor_dec)
                 resposta_para_usuario = f"✅ Pagamento da fatura '{nome_cartao_pago}' ({valor_fmt}) registrado com sucesso!"
-            
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+            #==== INTENÇÃO: Consulta Valor Fatura =====
+            elif intent == 'Consulta Valor Fatura':
+                contas_raw = finance_service.get_user_accounts(conn, usuario_id)
+                contas_list = [{"nome": c[1], "tipo": c[2]} for c in contas_raw]
+
+                fatura_query = gemini_service.extract_fatura_query(texto_msg, contas_list)
+                nome_cartao = fatura_query.get('conta_cartao')
+
+                conta_id_cartao = None
+                if nome_cartao:
+                    conta_id_cartao = finance_service.get_account_by_name(conn, usuario_id, nome_cartao)
+                    if not conta_id_cartao:
+                        resposta_para_usuario = f"🤔 Não encontrei um cartão chamado '{nome_cartao}'."
+                        return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                # Buscar valor(es) da(s) fatura(s)
+                faturas = finance_service.get_fatura_valor(conn, usuario_id, conta_id_cartao)
+
+                if not faturas:
+                    if nome_cartao:
+                        resposta_para_usuario = f"✅ Você não tem faturas em aberto no cartão '{nome_cartao}'! 🎉"
+                    else:
+                        resposta_para_usuario = "✅ Você não tem nenhuma fatura em aberto! 🎉"
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                # Formatar resposta
+                if len(faturas) == 1:
+                    fatura = faturas[0]
+                    data_venc = fatura['data_vencimento'].strftime('%d/%m/%Y')
+                    resposta_para_usuario = f"💳 *Fatura {fatura['nome_cartao']}*\n\n"
+                    resposta_para_usuario += f"💰 Valor atual: *{formatar_moeda(fatura['valor_fatura'])}*\n"
+                    resposta_para_usuario += f"📅 Vencimento: {data_venc}\n"
+                    resposta_para_usuario += f"📊 Status: {fatura['status']}"
+                else:
+                    resposta_para_usuario = "💳 *Suas Faturas em Aberto:*\n\n"
+                    total_geral = 0
+                    for fatura in faturas:
+                        data_venc = fatura['data_vencimento'].strftime('%d/%m')
+                        resposta_para_usuario += f"🔹 *{fatura['nome_cartao']}*\n"
+                        resposta_para_usuario += f"   💰 {formatar_moeda(fatura['valor_fatura'])} (Venc: {data_venc})\n\n"
+                        total_geral += fatura['valor_fatura']
+
+                    resposta_para_usuario += f"💵 *Total Geral:* {formatar_moeda(total_geral)}"
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
             #=== INTENÇÃO: Consulta Categoria Específica =====
             elif intent == 'Consulta Categoria Específica':
                 cat_data = gemini_service.extract_category_query(texto_msg)

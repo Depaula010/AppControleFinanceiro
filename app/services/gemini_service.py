@@ -92,7 +92,8 @@ def get_message_intent(texto_msg):
     - "Consulta Contas Fixas"
     - "Quitar Conta Fixa"
     - "Transferência"
-    - "Pagamento Fatura"
+    - "Pagamento Fatura" (quando o usuário PAGOU/vai PAGAR a fatura)
+    - "Consulta Valor Fatura" (quando o usuário quer SABER o valor da fatura)
     - "Consultar Agenda"
     - "Horários Livres" (quando estou livre, melhor horário para, quando posso marcar)
     - "Criar Evento" (criar/agendar/marcar evento)
@@ -126,6 +127,9 @@ def get_message_intent(texto_msg):
     - "visualizar meus gastos" → {{"intent": "Gráfico de Gastos"}}
     - "qual minha api key" → {{"intent": "Solicitar API Key"}}
     - "me dá minha chave de acesso" → {{"intent": "Solicitar API Key"}}
+    - "paguei 500 da fatura do nubank" → {{"intent": "Pagamento Fatura"}}
+    - "qual o valor da minha fatura?" → {{"intent": "Consulta Valor Fatura"}}
+    - "quanto está a fatura do cartão?" → {{"intent": "Consulta Valor Fatura"}}
     '''
     
     response = gemini_model.generate_content(prompt)
@@ -569,4 +573,38 @@ def extract_free_time_query(texto_msg):
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-FREE-TIME] Query extraída: {json_text}")
+    return json.loads(json_text)
+
+
+def extract_fatura_query(texto_msg, contas_json_list):
+    '''
+    Extrai informações sobre qual fatura o usuário quer consultar.
+
+    Returns:
+        {
+            "conta_cartao": "Nubank" ou null (se não especificou, retorna todas)
+        }
+    '''
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+
+    prompt = f'''Analise a pergunta sobre consulta de fatura: "{texto_msg}"
+
+    Minhas contas são: {json.dumps(contas_json_list)}
+
+    Extraia:
+    - conta_cartao: Nome do cartão/conta que o usuário quer consultar (ou null se não especificou)
+
+    Responda APENAS com JSON.
+
+    Exemplos:
+    - "qual o valor da minha fatura?" → {{"conta_cartao": null}}
+    - "quanto está a fatura do Nubank?" → {{"conta_cartao": "Nubank"}}
+    - "valor da fatura do Inter" → {{"conta_cartao": "Inter"}}
+    '''
+
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-FATURA-QUERY] Query extraída: {json_text}")
     return json.loads(json_text)
