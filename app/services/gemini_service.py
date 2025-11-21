@@ -82,7 +82,7 @@ def get_message_intent(texto_msg):
         raise Exception("Modelo Gemini não configurado.")
     
     prompt = f'''Analise a mensagem: "{texto_msg}"
-    
+
     Classifique a intenção principal como:
     - "Renda"
     - "Despesa"
@@ -94,18 +94,22 @@ def get_message_intent(texto_msg):
     - "Transferência"
     - "Pagamento Fatura"
     - "Consultar Agenda"
+    - "Horários Livres" (quando estou livre, melhor horário para, quando posso marcar)
     - "Criar Evento" (criar/agendar/marcar evento)
     - "Deletar Evento" (deletar/cancelar/remover evento)
     - "Configurar Notificações" (configurar/ativar/desativar notificações)
     - "Consulta Categoria Específica"
-    
+
     Responda APENAS com JSON: {{"intent": "..."}}
-    
+
     Exemplos:
     - "criar evento academia amanhã" → {{"intent": "Criar Evento"}}
     - "deletar reunião de hoje" → {{"intent": "Deletar Evento"}}
     - "quero receber minha agenda às 8h" → {{"intent": "Configurar Notificações"}}
     - "tenho compromisso agora à tarde?" → {{"intent": "Consultar Agenda"}}
+    - "quando posso marcar dentista esta semana?" → {{"intent": "Horários Livres"}}
+    - "quando estou livre amanhã?" → {{"intent": "Horários Livres"}}
+    - "melhor horário para reunião hoje" → {{"intent": "Horários Livres"}}
     '''
     
     response = gemini_model.generate_content(prompt)
@@ -459,4 +463,48 @@ def extract_notification_config(texto_msg):
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-NOTIF] Config extraída: {json_text}")
+    return json.loads(json_text)
+
+
+def extract_free_time_query(texto_msg):
+    '''
+    Extrai período e duração desejada para buscar horários livres.
+
+    Returns:
+        {
+            "period_type": "hoje" | "amanha" | "esta_semana" | "proxima_semana",
+            "duracao_minutos": 60 (default) ou valor especificado,
+            "contexto": "dentista" ou null (opcional, para IA sugerir melhor horário)
+        }
+    '''
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+
+    prompt = f'''Analise a pergunta sobre horários livres: "{texto_msg}"
+
+    Extraia:
+    - period_type: "hoje", "amanha", "esta_semana", "proxima_semana"
+    - duracao_minutos: Duração estimada da atividade em minutos (default: 60)
+    - contexto: O que o usuário quer marcar (dentista, reunião, etc.) ou null
+
+    Responda APENAS com JSON.
+
+    Exemplos:
+    - "quando estou livre amanhã?" →
+      {{"period_type": "amanha", "duracao_minutos": 60, "contexto": null}}
+
+    - "quando posso marcar dentista esta semana?" →
+      {{"period_type": "esta_semana", "duracao_minutos": 60, "contexto": "dentista"}}
+
+    - "melhor horário para reunião de 2 horas hoje" →
+      {{"period_type": "hoje", "duracao_minutos": 120, "contexto": "reunião"}}
+
+    - "horários livres na próxima semana" →
+      {{"period_type": "proxima_semana", "duracao_minutos": 60, "contexto": null}}
+    '''
+
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-FREE-TIME] Query extraída: {json_text}")
     return json.loads(json_text)

@@ -707,7 +707,40 @@ def handle_whatsapp_webhook():
                     resposta_para_usuario = CalendarQueryService.query_agenda(usuario_id, period_type)
                 
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-            
+
+            #==== INTENÇÃO: Horários Livres ====
+            elif intent == 'Horários Livres':
+                print(f"[WHATSAPP] Intenção de Horários Livres detectada")
+
+                # Importar services
+                from app.services.free_time_finder_service import FreeTimeFinderService
+
+                # Extrair período e contexto
+                free_time_data = gemini_service.extract_free_time_query(texto_msg)
+                period_type = free_time_data.get('period_type', 'hoje')
+                duracao_minutos = free_time_data.get('duracao_minutos', 60)
+                contexto = free_time_data.get('contexto')
+
+                print(f"[WHATSAPP] Buscando horários livres: {period_type}, duração: {duracao_minutos}min")
+
+                # Buscar horários livres
+                result = FreeTimeFinderService.find_free_slots(
+                    db_engine, usuario_id, period_type, duracao_minutos
+                )
+
+                # Formatar mensagem
+                resposta_para_usuario = FreeTimeFinderService.format_free_slots_message(result, contexto)
+
+                # BONUS: Sugestão da IA (se houver contexto)
+                if contexto and result.get("slots_livres"):
+                    sugestao_ai = FreeTimeFinderService.suggest_best_slot_with_ai(
+                        result, contexto, result.get("insights_usuario", "")
+                    )
+                    if sugestao_ai:
+                        resposta_para_usuario += f"\n\n{sugestao_ai}"
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
             #==== INTENÇÃO: Configurar Notificações ====
             elif intent == 'Configurar Notificações':
                 print(f"[WHATSAPP] Intenção de Configurar Notificações detectada")
