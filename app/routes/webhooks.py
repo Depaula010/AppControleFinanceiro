@@ -638,9 +638,11 @@ def handle_whatsapp_webhook():
                     usuario_id, titulo_busca, max_results=5
                 )
                 
-                # Filtrar por quando se fornecido
+                # Filtrar por quando se fornecido (usando timezone do Brasil)
                 if quando:
-                    data_alvo = date.today() if quando == 'hoje' else date.today() + timedelta(days=1)
+                    TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
+                    hoje_br = datetime.now(TIMEZONE_BR).date()
+                    data_alvo = hoje_br if quando == 'hoje' else hoje_br + timedelta(days=1)
                     eventos_encontrados = [
                         e for e in eventos_encontrados 
                         if date.fromisoformat(e['start'].split('T')[0]) == data_alvo
