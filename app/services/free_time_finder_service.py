@@ -200,9 +200,12 @@ class FreeTimeFinderService:
 
         for event in events:
             start = event.get('start', {})
+            end = event.get('end', {})
 
             # Ignorar eventos de dia inteiro (não bloqueiam horários específicos)
+            # Verifica tanto pelo campo 'date' quanto por eventos que duram 24h ou mais
             if 'date' in start:
+                print(f"[FREE-TIME] Ignorando evento de dia inteiro (date): {event.get('summary', 'Sem título')}")
                 continue
 
             if 'dateTime' in start:
@@ -214,12 +217,17 @@ class FreeTimeFinderService:
                         start_dt = start_dt.astimezone(TIMEZONE_BR)
 
                     if start_dt.date() == target_date:
-                        end = event.get('end', {})
                         end_dt = datetime.fromisoformat(end['dateTime'].replace('Z', '+00:00'))
                         if end_dt.tzinfo is None:
                             end_dt = end_dt.replace(tzinfo=TIMEZONE_BR)
                         else:
                             end_dt = end_dt.astimezone(TIMEZONE_BR)
+
+                        # CORREÇÃO: Ignorar eventos que duram 18+ horas (provavelmente dia inteiro)
+                        duracao_horas = (end_dt - start_dt).total_seconds() / 3600
+                        if duracao_horas >= 18:
+                            print(f"[FREE-TIME] Ignorando evento longo ({duracao_horas:.1f}h): {event.get('summary', 'Sem título')}")
+                            continue
 
                         day_events.append({
                             "start": start_dt,
