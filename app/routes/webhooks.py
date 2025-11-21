@@ -864,6 +864,65 @@ def handle_whatsapp_webhook():
 
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
+            #==== INTENÇÃO: Gráfico de Gastos ====
+            elif intent == 'Gráfico de Gastos':
+                print(f"[WHATSAPP] Intenção de Gráfico de Gastos detectada")
+
+                from app.services import gemini_service, chart_service, notification_service
+
+                try:
+                    # Extrair tipo de gráfico solicitado
+                    chart_info = gemini_service.extract_chart_type(texto_msg)
+                    tipo_grafico = chart_info.get('tipo_grafico', 'pizza')
+
+                    print(f"[CHART] Gerando gráfico tipo: {tipo_grafico}")
+
+                    # Gerar gráfico apropriado
+                    chart_bytes = None
+                    caption = ""
+
+                    if tipo_grafico == 'pizza':
+                        periodo_dias = chart_info.get('periodo_dias', 30)
+                        chart_bytes = chart_service.generate_pie_chart(usuario_id, periodo_dias)
+                        caption = f"📊 Gastos por Categoria - Últimos {periodo_dias} dias"
+
+                    elif tipo_grafico == 'barras':
+                        num_meses = chart_info.get('num_meses', 6)
+                        chart_bytes = chart_service.generate_bar_chart(usuario_id, num_meses)
+                        caption = f"📊 Evolução Mensal - Últimos {num_meses} meses"
+
+                    elif tipo_grafico == 'linha':
+                        num_meses = chart_info.get('num_meses', 6)
+                        chart_bytes = chart_service.generate_line_chart(usuario_id, num_meses)
+                        caption = f"📈 Evolução do Saldo - Últimos {num_meses} meses"
+
+                    # Verificar se gráfico foi gerado
+                    if chart_bytes is None:
+                        resposta_para_usuario = "❌ Não há dados suficientes para gerar o gráfico no período solicitado."
+                        return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                    # Enviar imagem via WhatsApp
+                    sucesso = notification_service.enviar_imagem_whatsapp_bytes(
+                        numero_remetente,
+                        chart_bytes,
+                        caption,
+                        BOT_WHATSAPP_URL,
+                        API_SECRET_KEY
+                    )
+
+                    if sucesso:
+                        resposta_para_usuario = f"✅ {caption}"
+                    else:
+                        resposta_para_usuario = "❌ Não consegui enviar o gráfico. Tente novamente mais tarde."
+
+                except Exception as e:
+                    print(f"[CHART] Erro ao gerar gráfico: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    resposta_para_usuario = f"❌ Não consegui gerar o gráfico. Erro: {str(e)}"
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
             else:
                 return jsonify({"status": "sucesso", "resposta": "🤔 Não entendi. Tente 'gastei 50' ou 'meus potes'."}), 200
 

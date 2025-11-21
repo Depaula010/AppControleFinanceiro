@@ -102,6 +102,7 @@ def get_message_intent(texto_msg):
     - "Análise Inteligente" (analisar gastos, insights, relatório financeiro, análise financeira, padrões de consumo)
     - "Comparação Mensal" (comparar mês atual com anterior, evolução mensal)
     - "Previsão de Gastos" (quanto vou gastar, previsão, projeção, orçamento futuro, estimativa de gastos)
+    - "Gráfico de Gastos" (gráfico, gráficos, visualizar gastos, mostrar gráfico, gerar gráfico)
 
     Responda APENAS com JSON: {{"intent": "..."}}
 
@@ -119,6 +120,9 @@ def get_message_intent(texto_msg):
     - "quanto vou gastar este mês" → {{"intent": "Previsão de Gastos"}}
     - "qual a projeção de gastos" → {{"intent": "Previsão de Gastos"}}
     - "estimativa de gastos próximo mês" → {{"intent": "Previsão de Gastos"}}
+    - "gráfico de gastos" → {{"intent": "Gráfico de Gastos"}}
+    - "mostrar gráfico" → {{"intent": "Gráfico de Gastos"}}
+    - "visualizar meus gastos" → {{"intent": "Gráfico de Gastos"}}
     '''
     
     response = gemini_model.generate_content(prompt)
@@ -238,6 +242,52 @@ def extract_period_query(texto_msg):
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-PERIOD] Período extraído: {json_text}")
+    return json.loads(json_text)
+
+def extract_chart_type(texto_msg):
+    '''
+    Extrai o tipo de gráfico e período desejado pelo usuário.
+
+    Returns:
+        {
+            "tipo_grafico": "pizza" | "barras" | "linha",
+            "periodo_dias": int (opcional, para gráfico de pizza),
+            "num_meses": int (opcional, para gráficos de barras e linha)
+        }
+    '''
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+
+    prompt = f'''Analise a mensagem: "{texto_msg}"
+
+    Identifique o tipo de gráfico desejado e período:
+
+    Tipos de gráfico:
+    - "pizza" → Gastos por categoria (padrão: últimos 30 dias)
+    - "barras" → Evolução mensal de despesas vs rendas (padrão: 6 meses)
+    - "linha" → Saldo ao longo do tempo (padrão: 6 meses)
+
+    Se não especificar o tipo, use "pizza" como padrão.
+
+    Responda APENAS com JSON:
+    - Para gráfico de pizza: {{"tipo_grafico": "pizza", "periodo_dias": 30}}
+    - Para gráfico de barras: {{"tipo_grafico": "barras", "num_meses": 6}}
+    - Para gráfico de linha: {{"tipo_grafico": "linha", "num_meses": 6}}
+
+    Exemplos:
+    - "gráfico de gastos" → {{"tipo_grafico": "pizza", "periodo_dias": 30}}
+    - "gráfico de pizza" → {{"tipo_grafico": "pizza", "periodo_dias": 30}}
+    - "mostrar gráfico de gastos por categoria" → {{"tipo_grafico": "pizza", "periodo_dias": 30}}
+    - "gráfico de evolução mensal" → {{"tipo_grafico": "barras", "num_meses": 6}}
+    - "gráfico de barras dos últimos 3 meses" → {{"tipo_grafico": "barras", "num_meses": 3}}
+    - "gráfico de saldo" → {{"tipo_grafico": "linha", "num_meses": 6}}
+    - "evolução do saldo" → {{"tipo_grafico": "linha", "num_meses": 6}}
+    '''
+
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-CHART] Tipo de gráfico extraído: {json_text}")
     return json.loads(json_text)
 
 def extract_bill_payment(texto_msg):
