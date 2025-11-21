@@ -123,8 +123,8 @@ def get_spending_analysis(usuario_id, meses_analise=3):
                 p.periodicidade,
                 COALESCE(SUM(t.valor), 0) as gasto_atual
             FROM PotesDeGastos p
-            LEFT JOIN PoteCategorias pc ON p.id = pc.pote_id
-            LEFT JOIN Transacoes t ON pc.subcategoria_id = t.subcategoria_id
+            LEFT JOIN PoteSubCategorias psc ON p.id = psc.pote_id
+            LEFT JOIN Transacoes t ON psc.subcategoria_id = t.subcategoria_id
                 AND t.usuario_id = :uid
                 AND t.tipo_transacao = 'Despesa'
                 AND t.consolidada = true
