@@ -524,6 +524,15 @@ def handle_whatsapp_webhook():
                     with db_engine.connect() as conn:
                         conn.begin()
 
+                        # Se fatura_id é 'PENDING', criar/buscar fatura agora
+                        fatura_id_final = dados.get('fatura_id')
+                        if fatura_id_final == 'PENDING':
+                            conta_id = dados['conta_id']
+                            usuario_id_tx = dados['usuario_id']
+                            data_tx = date.fromisoformat(dados['data_transacao'])
+                            fatura_id_final = finance_service.get_or_create_fatura(conn, conta_id, data_tx, usuario_id_tx)
+                            print(f"[CONFIRM-SAVE] Fatura criada/encontrada: {fatura_id_final}")
+
                         # Usar descricao_final se disponível, senão usar descricao
                         descricao_para_salvar = dados.get('descricao_final', dados.get('descricao'))
 
@@ -532,13 +541,13 @@ def handle_whatsapp_webhook():
                             dados['usuario_id'],
                             dados['conta_id'],
                             dados['categoria_id'],
-                            dados['fatura_id'],
+                            fatura_id_final,
                             descricao_para_salvar,
                             dados['valor_db'],
                             dados['tipo_transacao'],
                             date.fromisoformat(dados['data_transacao'])
                         )
-                        
+
                         nome_cat = finance_service.get_category_name_by_id(conn, dados['categoria_id'])
                         conn.commit()
                     
@@ -596,7 +605,7 @@ def handle_whatsapp_webhook():
 
         with db_engine.connect() as conn:
             conn.begin()
-            
+
             # Fluxo de Renda/Despesa com CONFIRMAÇÃO
             if intent == 'Renda' or intent == 'Despesa':
                 trans_data = gemini_service.extract_transaction_details(texto_msg, intent)
@@ -609,9 +618,18 @@ def handle_whatsapp_webhook():
 
                 # Detectar se mencionou cartão de crédito
                 fatura_id = None
+                conta_nome = None
+                conta_tipo = None
+
                 if intent == 'Renda':
                     conta_nome = 'Banco Inter'
                     conta_id = finance_service.get_account_by_name(conn, usuario_id, conta_nome, fallback=True)
+                    # Buscar tipo da conta
+                    contas_usuario = finance_service.get_user_accounts(conn, usuario_id)
+                    conta_info = next((c for c in contas_usuario if c[0] == conta_id), None)
+                    if conta_info:
+                        conta_nome = conta_info[1]
+                        conta_tipo = conta_info[2]
                 else:  # Despesa
                     # Verificar se mencionou cartão
                     palavras_cartao = ['cartão', 'cartao', 'crédito', 'credito', 'card']
@@ -624,16 +642,30 @@ def handle_whatsapp_webhook():
 
                         if conta_cartao:
                             conta_id = conta_cartao[0]
-                            # Criar/buscar fatura
-                            fatura_id = finance_service.get_or_create_fatura(conn, conta_id, data_hoje, usuario_id)
+                            conta_nome = conta_cartao[1]
+                            conta_tipo = conta_cartao[2]
+                            # Não criar fatura agora - será criada quando confirmar
+                            # Apenas marcamos que precisa criar
+                            fatura_id = 'PENDING'  # Marcador especial
+                            print(f"[WHATSAPP-DESPESA] Cartão detectado: {conta_nome}, fatura será criada após confirmação")
                         else:
                             # Não tem cartão, usar carteira
                             conta_nome = 'Carteira'
                             conta_id = finance_service.get_account_by_name(conn, usuario_id, conta_nome, fallback=True)
+                            contas_usuario = finance_service.get_user_accounts(conn, usuario_id)
+                            conta_info = next((c for c in contas_usuario if c[0] == conta_id), None)
+                            if conta_info:
+                                conta_nome = conta_info[1]
+                                conta_tipo = conta_info[2]
                     else:
                         # Não mencionou cartão, usar carteira
                         conta_nome = 'Carteira'
                         conta_id = finance_service.get_account_by_name(conn, usuario_id, conta_nome, fallback=True)
+                        contas_usuario = finance_service.get_user_accounts(conn, usuario_id)
+                        conta_info = next((c for c in contas_usuario if c[0] == conta_id), None)
+                        if conta_info:
+                            conta_nome = conta_info[1]
+                            conta_tipo = conta_info[2]
 
                 valor_db = valor_dec if intent == 'Renda' else (valor_dec * -1)
 
@@ -641,12 +673,15 @@ def handle_whatsapp_webhook():
                 transacao_data = {
                     'usuario_id': usuario_id,
                     'conta_id': conta_id,
+                    'conta_nome': conta_nome,
+                    'conta_tipo': conta_tipo,
                     'categoria_id': id_categoria,
                     'fatura_id': fatura_id,
                     'descricao': trans_desc,
                     'valor_db': valor_db,
                     'valor_original': valor_dec,
                     'tipo_transacao': intent,
+                    'tipo_pagamento': 'credito' if fatura_id else 'debito',
                     'data_transacao': str(data_hoje),
                     'origem': 'whatsapp'
                 }
