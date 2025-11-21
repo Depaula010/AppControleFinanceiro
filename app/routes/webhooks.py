@@ -27,6 +27,7 @@ from app.services.calendar_query_service import CalendarQueryService
 
 from app.services.calendar_management_service import CalendarManagementService
 from app.services.notification_config_service import NotificationConfigService
+from app.services.event_confirmation_service import EventConfirmationService
 from datetime import date, timedelta, datetime
 from zoneinfo import ZoneInfo
 
@@ -216,13 +217,42 @@ def handle_whatsapp_webhook():
         
         usuario_id = user_info[0]
 
-        # 3. NOVO: Verificar se está respondendo a uma confirmação
+        # 3. NOVO: Verificar confirmações/cancelamentos de EVENTOS
+        msg_lower = texto_msg.strip().lower()
+        palavras_confirmacao_evento = ['sim', 'confirmar', 'confirma', 'ok', 's']
+        palavras_cancelamento_evento = ['não', 'nao', 'cancelar', 'cancela', 'desistir', 'n']
+
+        # Verificar se é resposta simples de confirmação/cancelamento
+        if msg_lower in palavras_confirmacao_evento or msg_lower in palavras_cancelamento_evento:
+            # Buscar evento pendente
+            event_id, event_data = EventConfirmationService.get_latest_pending_event(numero_limpo)
+
+            if event_data:
+                if msg_lower in palavras_confirmacao_evento:
+                    # Confirmar e criar evento
+                    sucesso, mensagem, google_event_id = EventConfirmationService.confirm_and_create_event(numero_limpo, event_id)
+
+                    if sucesso:
+                        titulo = event_data['titulo']
+                        resposta_para_usuario = f"✅ *Evento Criado!*\n\n"
+                        resposta_para_usuario += f"📝 {titulo}\n"
+                        resposta_para_usuario += f"{mensagem}"
+                    else:
+                        resposta_para_usuario = f"❌ {mensagem}"
+
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                else:  # Cancelamento
+                    sucesso, mensagem = EventConfirmationService.cancel_pending_event(numero_limpo, event_id)
+                    return jsonify({"status": "sucesso", "resposta": mensagem}), 200
+
+        # 3.1. Verificar se está respondendo a uma confirmação de TRANSAÇÃO
         # Tentar identificar transaction_id na mensagem ou buscar última pendente
         # (Simplificado: buscar por padrão "ID: XXXX" na última msg ou assumir contexto)
-        
+
         # Por simplicidade, vamos checar se existe alguma pendente recente
         # Em produção, você pode enviar o transaction_id na mensagem ou usar contexto
-        
+
         # Verificar se mensagem parece uma resposta de confirmação
         msg_upper = texto_msg.strip().upper()
         if any(word in msg_upper for word in ['CONFIRMAR', 'OK', 'TROCAR', 'CANCELAR']) or msg_upper.isdigit():
@@ -565,36 +595,27 @@ def handle_whatsapp_webhook():
                             "status": "sucesso",
                             "resposta": f"❌ Data inválida: {data_str}"
                         }), 200
-                
-                # Criar evento
-                sucesso, mensagem, event_id = CalendarManagementService.create_event(
-                    usuario_id=usuario_id,
-                    titulo=titulo,
-                    data_evento=data_evento,
-                    hora_inicio=hora_inicio,
-                    hora_fim=hora_fim,
-                    descricao=descricao,
-                    localizacao=localizacao
-                )
-                
-                if sucesso:
-                    resposta_para_usuario = f"✅ *Evento Criado!*\n\n"
-                    resposta_para_usuario += f"📝 {titulo}\n"
-                    resposta_para_usuario += f"📅 {data_evento.strftime('%d/%m/%Y')}\n"
-                    
-                    if hora_inicio:
-                        resposta_para_usuario += f"⏰ {hora_inicio}"
-                        if hora_fim:
-                            resposta_para_usuario += f" - {hora_fim}"
-                        resposta_para_usuario += "\n"
-                    
-                    if localizacao:
-                        resposta_para_usuario += f"📍 {localizacao}\n"
-                    
-                    resposta_para_usuario += f"\n_ID: {event_id}_"
+
+                # Preparar dados do evento para confirmação
+                event_data = {
+                    "usuario_id": usuario_id,
+                    "titulo": titulo,
+                    "data_evento": data_evento.isoformat(),  # Salvar como string ISO
+                    "hora_inicio": hora_inicio,
+                    "hora_fim": hora_fim,
+                    "descricao": descricao,
+                    "localizacao": localizacao
+                }
+
+                # Criar evento pendente no Redis
+                event_id = EventConfirmationService.create_pending_event(numero_whatsapp, event_data)
+
+                if event_id:
+                    # Formatar mensagem de confirmação
+                    resposta_para_usuario = EventConfirmationService.format_confirmation_message(event_data)
                 else:
-                    resposta_para_usuario = f"❌ {mensagem}"
-                
+                    resposta_para_usuario = "❌ Erro ao processar evento. Tente novamente."
+
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
             
             #==== INTENÇÃO: Deletar Evento ====

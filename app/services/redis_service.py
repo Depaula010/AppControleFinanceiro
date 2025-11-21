@@ -67,5 +67,23 @@ class RedisService:
             print(f"[REDIS] Erro ao verificar {key}: {e}")
             return False
 
+    def get_keys_by_pattern(self, pattern):
+        """
+        Busca chaves que correspondem a um padrão.
+
+        Args:
+            pattern: Padrão Redis (ex: "pending_event:553194001072:*")
+
+        Returns:
+            list: Lista de chaves encontradas
+        """
+        if not self.is_connected():
+            return []
+        try:
+            return self.redis_client.keys(pattern)
+        except Exception as e:
+            print(f"[REDIS] Erro ao buscar padrão {pattern}: {e}")
+            return []
+
 # Instância global (singleton)
 redis_service = RedisService()
