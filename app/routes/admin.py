@@ -374,3 +374,15 @@ def test_notification():
             "status": "erro",
             "mensagem": str(e)
         }), 500
+
+@admin_bp.route('/oauth-config-check', methods=['GET'])
+def oauth_config_check():
+    """Endpoint para verificar configuração OAuth"""
+    from app.config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI
+
+    return jsonify({
+        "client_id_configured": bool(GOOGLE_CLIENT_ID),
+        "client_id_prefix": GOOGLE_CLIENT_ID[:20] + "..." if GOOGLE_CLIENT_ID else None,
+        "client_secret_configured": bool(GOOGLE_CLIENT_SECRET),
+        "redirect_uri": GOOGLE_REDIRECT_URI
+    }), 200
