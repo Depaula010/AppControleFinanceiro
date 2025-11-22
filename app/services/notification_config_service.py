@@ -309,7 +309,7 @@ class NotificationConfigService:
             hora: time object, string 'HH:MM', ou None (manter atual)
 
         Returns:
-            (sucesso: bool, mensagem: str)
+            (sucesso: bool, mensagem: str, config: dict or None)
         """
         if not db_engine:
             raise Exception("Banco não configurado")
@@ -334,18 +334,19 @@ class NotificationConfigService:
             params['hora'] = hora
 
         if not updates:
-            return False, "Nenhuma alteração fornecida"
+            return False, "Nenhuma alteração fornecida", None
 
         sql = text(f"""
             UPDATE NotificationConfigs
             SET {', '.join(updates)}, updated_at = CURRENT_TIMESTAMP
             WHERE usuario_id = :uid
+            RETURNING resumo_matinal_ativo, resumo_matinal_hora
         """)
 
         try:
             with db_engine.connect() as conn:
                 with conn.begin():
-                    conn.execute(sql, params)
+                    result = conn.execute(sql, params).fetchone()
 
             status = "ativado" if ativo else "desativado" if ativo is False else None
             hora_fmt = hora.strftime('%H:%M') if hora else None
@@ -358,12 +359,17 @@ class NotificationConfigService:
 
             mensagem = " e ".join(msg_parts) if msg_parts else "Configuração atualizada"
 
+            config = {
+                'resumo_matinal_ativo': result.resumo_matinal_ativo,
+                'resumo_matinal_hora': result.resumo_matinal_hora
+            }
+
             print(f"[NOTIF-CONFIG] Resumo matinal atualizado para usuário {usuario_id}")
-            return True, mensagem
+            return True, mensagem, config
 
         except Exception as e:
             print(f"[NOTIF-CONFIG] Erro ao atualizar: {e}")
-            return False, f"Erro ao atualizar configuração: {str(e)}"
+            return False, f"Erro ao atualizar configuração: {str(e)}", None
 
     @staticmethod
     def get_users_with_resumo_matinal_active(target_hour):

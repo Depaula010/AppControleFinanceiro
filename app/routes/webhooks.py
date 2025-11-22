@@ -1282,24 +1282,23 @@ def handle_whatsapp_webhook():
 
                     # Executar ação
                     if acao == 'ativar':
-                        sucesso, msg = NotificationConfigService.update_resumo_matinal_config(
+                        sucesso, msg, config = NotificationConfigService.update_resumo_matinal_config(
                             usuario_id, ativo=True, hora=hora if hora else None
                         )
                     elif acao == 'desativar':
-                        sucesso, msg = NotificationConfigService.update_resumo_matinal_config(
+                        sucesso, msg, config = NotificationConfigService.update_resumo_matinal_config(
                             usuario_id, ativo=False
                         )
                     elif acao == 'configurar':
-                        sucesso, msg = NotificationConfigService.update_resumo_matinal_config(
+                        sucesso, msg, config = NotificationConfigService.update_resumo_matinal_config(
                             usuario_id, ativo=True, hora=hora
                         )
                     else:
                         sucesso = False
                         msg = "Ação não reconhecida"
+                        config = None
 
-                    if sucesso:
-                        # Buscar config atual
-                        config = NotificationConfigService.get_or_create_config(usuario_id)
+                    if sucesso and config:
                         resposta_para_usuario = f"✅ {msg}\n\n"
                         resposta_para_usuario += f"📱 *Resumo Matinal - Status atual:*\n"
                         resposta_para_usuario += f"• Ativo: {'Sim' if config['resumo_matinal_ativo'] else 'Não'}\n"
