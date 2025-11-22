@@ -107,6 +107,7 @@ def get_message_intent(texto_msg):
     - "Previsão de Gastos" (quanto vou gastar, previsão, projeção, orçamento futuro, estimativa de gastos)
     - "Gráfico de Gastos" (gráfico, gráficos, visualizar gastos, mostrar gráfico, gerar gráfico)
     - "Solicitar API Key" (minha api key, qual minha chave, api key, chave de acesso, credenciais)
+    - "Configurar Relatório Mensal" (configurar relatório mensal, ativar relatório, desativar relatório, alterar hora relatório, mudar horário relatório)
 
     Responda APENAS com JSON: {{"intent": "..."}}
 
@@ -129,6 +130,9 @@ def get_message_intent(texto_msg):
     - "visualizar meus gastos" → {{"intent": "Gráfico de Gastos"}}
     - "qual minha api key" → {{"intent": "Solicitar API Key"}}
     - "me dá minha chave de acesso" → {{"intent": "Solicitar API Key"}}
+    - "configurar relatório mensal" → {{"intent": "Configurar Relatório Mensal"}}
+    - "quero receber relatório todo dia 1" → {{"intent": "Configurar Relatório Mensal"}}
+    - "ativar relatório mensal às 10h" → {{"intent": "Configurar Relatório Mensal"}}
     - "paguei 500 da fatura do nubank" → {{"intent": "Pagamento Fatura"}}
     - "qual o valor da minha fatura?" → {{"intent": "Consulta Valor Fatura"}}
     - "quanto está a fatura do cartão?" → {{"intent": "Consulta Valor Fatura"}}
@@ -699,4 +703,68 @@ def extract_parcelamento_info(texto_msg):
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-PARCELAMENTO] Info extraída: {json_text}")
+    return json.loads(json_text)
+
+def extract_monthly_report_config(texto_msg):
+    """
+    Extrai configurações de relatório mensal da mensagem do usuário.
+
+    Args:
+        texto_msg: Mensagem do usuário
+
+    Returns:
+        dict: {
+            "acao": "ativar" | "desativar" | "configurar",
+            "momento_envio": "INICIO_MES" | "FIM_MES" | null,
+            "hora_envio": "HH:MM" | null
+        }
+    """
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+
+    prompt = f'''Analise a mensagem sobre configuração de relatório mensal: "{texto_msg}"
+
+    Extraia as seguintes informações:
+
+    1. "acao":
+       - "ativar" (se o usuário quer ATIVAR/LIGAR o relatório)
+       - "desativar" (se o usuário quer DESATIVAR/DESLIGAR o relatório)
+       - "configurar" (se o usuário quer CONFIGURAR/ALTERAR as preferências)
+       - "consultar" (se o usuário quer CONSULTAR/VER as configurações atuais)
+
+    2. "momento_envio":
+       - "INICIO_MES" (se menciona: início do mês, dia 1, começo do mês, primeiro dia)
+       - "FIM_MES" (se menciona: fim do mês, final do mês, último dia do mês)
+       - null (se não especificou)
+
+    3. "hora_envio":
+       - Formato "HH:MM" em 24h (ex: "08:00", "14:30", "22:00")
+       - null (se não especificou)
+
+    Responda APENAS com JSON: {{"acao": "...", "momento_envio": "..." ou null, "hora_envio": "..." ou null}}
+
+    Exemplos:
+    - "quero receber relatório todo dia 1 às 8h" →
+      {{"acao": "configurar", "momento_envio": "INICIO_MES", "hora_envio": "08:00"}}
+
+    - "ativar relatório mensal no fim do mês às 10h" →
+      {{"acao": "ativar", "momento_envio": "FIM_MES", "hora_envio": "10:00"}}
+
+    - "desativar relatório mensal" →
+      {{"acao": "desativar", "momento_envio": null, "hora_envio": null}}
+
+    - "mudar hora do relatório para 14:00" →
+      {{"acao": "configurar", "momento_envio": null, "hora_envio": "14:00"}}
+
+    - "quero receber no último dia do mês" →
+      {{"acao": "configurar", "momento_envio": "FIM_MES", "hora_envio": null}}
+
+    - "como está configurado meu relatório?" →
+      {{"acao": "consultar", "momento_envio": null, "hora_envio": null}}
+    '''
+
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-RELATORIO-CONFIG] Configuração extraída: {json_text}")
     return json.loads(json_text)

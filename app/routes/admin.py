@@ -15,6 +15,8 @@ from app.services.google_calendar_oauth_service import GoogleCalendarOAuthServic
 from app.services.calendar_query_service import CalendarQueryService
 from app.services.notification_processor_service import NotificationProcessorService
 from app.services.notification_service import enviar_notificacao_whatsapp
+from app.services.monthly_report_config_service import criar_tabela_monthly_report_configs
+from app.services.monthly_report_processor_service import processar_relatorios_mensais, enviar_relatorio_manual
 from app.utils import formatar_moeda
 
 TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
@@ -386,3 +388,157 @@ def oauth_config_check():
         "client_secret_configured": bool(GOOGLE_CLIENT_SECRET),
         "redirect_uri": GOOGLE_REDIRECT_URI
     }), 200
+
+
+@admin_bp.route('/setup-monthly-reports-table', methods=['GET'])
+def setup_monthly_reports_table():
+    """
+    Cria a tabela MonthlyReportConfigs para configuração de relatórios mensais.
+
+    Exemplo:
+    GET https://seu-backend.onrender.com/admin/setup-monthly-reports-table
+    """
+    try:
+        criar_tabela_monthly_report_configs()
+        return jsonify({
+            "status": "sucesso",
+            "mensagem": "✅ Tabela MonthlyReportConfigs criada com sucesso!"
+        }), 200
+    except Exception as e:
+        print(f"[MONTHLY-REPORT] ❌ Erro ao criar tabela: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "erro",
+            "mensagem": f"Erro ao criar tabela: {str(e)}"
+        }), 500
+
+
+@admin_bp.route('/trigger-monthly-reports-inicio', methods=['POST'])
+def trigger_monthly_reports_inicio():
+    """
+    Endpoint para cron job disparar relatórios mensais no início do mês.
+    Relatório refere-se ao MÊS ANTERIOR.
+
+    Cron job deve chamar a cada hora no dia 1:
+    POST https://seu-backend.onrender.com/admin/trigger-monthly-reports-inicio
+    Header: x-api-key: SUA_SECRET_KEY
+    """
+    # Autenticar
+    secret_key = request.headers.get('x-api-key')
+    if secret_key != API_SECRET_KEY:
+        print("[MONTHLY-REPORT] ❌ Tentativa não autorizada (INICIO)")
+        return jsonify({"status": "erro", "mensagem": "Não autorizado"}), 401
+
+    try:
+        print("[MONTHLY-REPORT] 📊 Processando relatórios de INICIO DO MES...")
+        resultado = processar_relatorios_mensais(
+            momento_envio='INICIO_MES',
+            janela_minutos=5
+        )
+
+        print(f"[MONTHLY-REPORT] ✅ Processamento concluído: {resultado['enviados_sucesso']} enviados")
+
+        return jsonify({
+            "status": "sucesso",
+            **resultado
+        }), 200
+
+    except Exception as e:
+        print(f"[MONTHLY-REPORT] ❌ Erro crítico: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "erro",
+            "mensagem": str(e)
+        }), 500
+
+
+@admin_bp.route('/trigger-monthly-reports-fim', methods=['POST'])
+def trigger_monthly_reports_fim():
+    """
+    Endpoint para cron job disparar relatórios mensais no fim do mês.
+    Relatório refere-se ao MÊS ATUAL.
+
+    Cron job deve chamar a cada hora no último dia do mês:
+    POST https://seu-backend.onrender.com/admin/trigger-monthly-reports-fim
+    Header: x-api-key: SUA_SECRET_KEY
+    """
+    # Autenticar
+    secret_key = request.headers.get('x-api-key')
+    if secret_key != API_SECRET_KEY:
+        print("[MONTHLY-REPORT] ❌ Tentativa não autorizada (FIM)")
+        return jsonify({"status": "erro", "mensagem": "Não autorizado"}), 401
+
+    try:
+        print("[MONTHLY-REPORT] 📊 Processando relatórios de FIM DO MES...")
+        resultado = processar_relatorios_mensais(
+            momento_envio='FIM_MES',
+            janela_minutos=5
+        )
+
+        print(f"[MONTHLY-REPORT] ✅ Processamento concluído: {resultado['enviados_sucesso']} enviados")
+
+        return jsonify({
+            "status": "sucesso",
+            **resultado
+        }), 200
+
+    except Exception as e:
+        print(f"[MONTHLY-REPORT] ❌ Erro crítico: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "erro",
+            "mensagem": str(e)
+        }), 500
+
+
+@admin_bp.route('/test-monthly-report/<int:usuario_id>', methods=['POST'])
+def test_monthly_report(usuario_id):
+    """
+    Endpoint para testar envio manual de relatório mensal.
+
+    Query params:
+        - momento: 'INICIO_MES' (padrão) ou 'FIM_MES'
+
+    Exemplo:
+    POST https://seu-backend.onrender.com/admin/test-monthly-report/1?momento=INICIO_MES
+    Header: x-api-key: SUA_SECRET_KEY
+    """
+    # Autenticar
+    secret_key = request.headers.get('x-api-key')
+    if secret_key != API_SECRET_KEY:
+        return jsonify({"status": "erro", "mensagem": "Não autorizado"}), 401
+
+    try:
+        momento_envio = request.args.get('momento', 'INICIO_MES')
+
+        if momento_envio not in ['INICIO_MES', 'FIM_MES']:
+            return jsonify({
+                "status": "erro",
+                "mensagem": "Parâmetro 'momento' deve ser 'INICIO_MES' ou 'FIM_MES'"
+            }), 400
+
+        print(f"[MONTHLY-REPORT-TEST] 📊 Enviando relatório manual para usuário {usuario_id}...")
+        resultado = enviar_relatorio_manual(usuario_id, momento_envio)
+
+        if resultado['sucesso']:
+            return jsonify({
+                "status": "sucesso",
+                **resultado
+            }), 200
+        else:
+            return jsonify({
+                "status": "erro",
+                **resultado
+            }), 400
+
+    except Exception as e:
+        print(f"[MONTHLY-REPORT-TEST] ❌ Erro: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "erro",
+            "mensagem": str(e)
+        }), 500

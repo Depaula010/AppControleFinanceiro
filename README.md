@@ -73,6 +73,21 @@ A mágica acontece de forma simples e direta, diretamente no seu WhatsApp:
 *   ✅ **Detecção de Padrões:** Identifica comportamentos sazonais e tendências
 *   ✅ **Sugestões de Economia:** Recomendações baseadas em seu histórico
 
+#### 🆕 Relatório Mensal Automático
+*   ✅ **Envio Automático via WhatsApp:** Relatório completo entregue automaticamente no horário configurado
+*   ✅ **Configuração Personalizável:** Escolha receber no início ou fim do mês, no horário que preferir
+*   ✅ **Conteúdo Completo:**
+    - Gastos totais (Receitas, Despesas, Saldo)
+    - Top 5 categorias com maior gasto
+    - Comparação com mês anterior (% de variação)
+    - Status dos potes de gastos (usado vs limite)
+    - Contas pagas vs pendentes
+    - Gráfico de pizza com categorias
+*   ✅ **Configuração via WhatsApp:** Ative, desative e configure tudo por mensagem
+*   ✅ **Dois Momentos de Envio:**
+    - Início do mês (dia 1): Relatório do **mês anterior**
+    - Fim do mês (último dia): Relatório do **mês atual**
+
 ---
 
 ### 🔔 Contas Fixas e Agendamentos

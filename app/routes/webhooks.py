@@ -1466,6 +1466,120 @@ def handle_whatsapp_webhook():
 
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
+            #==== INTENÇÃO: Configurar Relatório Mensal ====
+            elif intent == 'Configurar Relatório Mensal':
+                print(f"[WHATSAPP] Intenção de Configurar Relatório Mensal detectada")
+
+                from app.services.monthly_report_config_service import (
+                    get_or_create_config,
+                    update_config,
+                    ativar_config,
+                    desativar_config
+                )
+
+                try:
+                    # Extrair configurações da mensagem
+                    config_info = gemini_service.extract_monthly_report_config(texto_msg)
+                    acao = config_info.get('acao')
+                    momento_envio = config_info.get('momento_envio')
+                    hora_envio = config_info.get('hora_envio')
+
+                    print(f"[MONTHLY-REPORT-CONFIG] Ação: {acao}, Momento: {momento_envio}, Hora: {hora_envio}")
+
+                    # Buscar configuração atual
+                    config_atual = get_or_create_config(usuario_id)
+
+                    if acao == 'consultar':
+                        # Mostrar configuração atual
+                        status = "✅ Ativo" if config_atual['ativo'] else "❌ Desativado"
+                        momento = "Início do mês (dia 1)" if config_atual['momento_envio'] == 'INICIO_MES' else "Fim do mês (último dia)"
+                        hora = config_atual['hora_envio'].strftime('%H:%M') if config_atual['hora_envio'] else "08:00"
+
+                        resposta_para_usuario = "📊 *CONFIGURAÇÃO DO RELATÓRIO MENSAL*\n\n"
+                        resposta_para_usuario += f"Status: {status}\n"
+                        resposta_para_usuario += f"Momento: {momento}\n"
+                        resposta_para_usuario += f"Horário: {hora}\n\n"
+                        resposta_para_usuario += "_Para alterar, envie: 'configurar relatório mensal no início do mês às 10h'_"
+
+                    elif acao == 'desativar':
+                        # Desativar relatório
+                        desativar_config(usuario_id)
+                        resposta_para_usuario = "✅ Relatório mensal desativado com sucesso!\n\n"
+                        resposta_para_usuario += "_Para reativar, envie: 'ativar relatório mensal'_"
+
+                    elif acao == 'ativar':
+                        # Ativar relatório (aplicar novas configurações se fornecidas)
+                        params = {'ativo': True}
+                        if momento_envio:
+                            params['momento_envio'] = momento_envio
+                        if hora_envio:
+                            params['hora_envio'] = hora_envio
+
+                        config_nova = update_config(usuario_id, **params)
+
+                        momento_texto = "início do mês (dia 1)" if config_nova['momento_envio'] == 'INICIO_MES' else "fim do mês (último dia)"
+                        hora_texto = config_nova['hora_envio'].strftime('%H:%M')
+
+                        resposta_para_usuario = "✅ *Relatório mensal ativado!*\n\n"
+                        resposta_para_usuario += f"📅 Momento: {momento_texto}\n"
+                        resposta_para_usuario += f"🕐 Horário: {hora_texto}\n\n"
+                        resposta_para_usuario += "📊 *O que você vai receber:*\n"
+                        resposta_para_usuario += "• Gastos totais do mês\n"
+                        resposta_para_usuario += "• Top 5 categorias\n"
+                        resposta_para_usuario += "• Comparação com mês anterior\n"
+                        resposta_para_usuario += "• Status dos potes de gastos\n"
+                        resposta_para_usuario += "• Contas pagas vs pendentes\n"
+                        resposta_para_usuario += "• Gráfico de pizza com categorias\n\n"
+                        resposta_para_usuario += "_Você receberá automaticamente no horário configurado!_"
+
+                    elif acao == 'configurar':
+                        # Atualizar configurações
+                        params = {}
+                        if momento_envio:
+                            params['momento_envio'] = momento_envio
+                        if hora_envio:
+                            params['hora_envio'] = hora_envio
+
+                        if not params:
+                            resposta_para_usuario = "❌ Não entendi o que você quer configurar.\n\n"
+                            resposta_para_usuario += "Exemplos:\n"
+                            resposta_para_usuario += "• 'quero receber no início do mês às 8h'\n"
+                            resposta_para_usuario += "• 'mudar hora do relatório para 14:00'\n"
+                            resposta_para_usuario += "• 'receber no fim do mês'"
+                        else:
+                            config_nova = update_config(usuario_id, **params)
+
+                            momento_texto = "início do mês (dia 1)" if config_nova['momento_envio'] == 'INICIO_MES' else "fim do mês (último dia)"
+                            hora_texto = config_nova['hora_envio'].strftime('%H:%M')
+
+                            resposta_para_usuario = "✅ *Configuração atualizada!*\n\n"
+                            resposta_para_usuario += f"📅 Momento: {momento_texto}\n"
+                            resposta_para_usuario += f"🕐 Horário: {hora_texto}\n\n"
+                            resposta_para_usuario += "O relatório será enviado automaticamente no horário configurado."
+
+                    else:
+                        resposta_para_usuario = "❌ Não entendi a ação desejada.\n\n"
+                        resposta_para_usuario += "Exemplos:\n"
+                        resposta_para_usuario += "• 'ativar relatório mensal'\n"
+                        resposta_para_usuario += "• 'desativar relatório mensal'\n"
+                        resposta_para_usuario += "• 'configurar relatório mensal às 10h'\n"
+                        resposta_para_usuario += "• 'como está configurado meu relatório?'"
+
+                except ValueError as ve:
+                    print(f"[MONTHLY-REPORT-CONFIG] Erro de validação: {ve}")
+                    resposta_para_usuario = f"❌ {str(ve)}\n\n"
+                    resposta_para_usuario += "Exemplos válidos:\n"
+                    resposta_para_usuario += "• Momento: 'início do mês' ou 'fim do mês'\n"
+                    resposta_para_usuario += "• Horário: '08:00' ou '14:30'"
+
+                except Exception as e:
+                    print(f"[MONTHLY-REPORT-CONFIG] Erro: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    resposta_para_usuario = f"❌ Erro ao configurar relatório mensal. Tente novamente mais tarde."
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
             else:
                 return jsonify({"status": "sucesso", "resposta": "🤔 Não entendi. Tente 'gastei 50' ou 'meus potes'."}), 200
 
