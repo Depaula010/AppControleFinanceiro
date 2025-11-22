@@ -108,6 +108,7 @@ def get_message_intent(texto_msg):
     - "Gráfico de Gastos" (gráfico, gráficos, visualizar gastos, mostrar gráfico, gerar gráfico)
     - "Solicitar API Key" (minha api key, qual minha chave, api key, chave de acesso, credenciais)
     - "Configurar Relatório Mensal" (configurar relatório mensal, ativar relatório, desativar relatório, alterar hora relatório, mudar horário relatório)
+    - "Configurar Localização" (configurar localização, minha cidade, mudar cidade, definir localização, onde estou)
 
     Responda APENAS com JSON: {{"intent": "..."}}
 
@@ -133,6 +134,9 @@ def get_message_intent(texto_msg):
     - "configurar relatório mensal" → {{"intent": "Configurar Relatório Mensal"}}
     - "quero receber relatório todo dia 1" → {{"intent": "Configurar Relatório Mensal"}}
     - "ativar relatório mensal às 10h" → {{"intent": "Configurar Relatório Mensal"}}
+    - "configurar localização São Paulo, SP" → {{"intent": "Configurar Localização"}}
+    - "minha cidade é Campinas" → {{"intent": "Configurar Localização"}}
+    - "mudar minha localização" → {{"intent": "Configurar Localização"}}
     - "paguei 500 da fatura do nubank" → {{"intent": "Pagamento Fatura"}}
     - "qual o valor da minha fatura?" → {{"intent": "Consulta Valor Fatura"}}
     - "quanto está a fatura do cartão?" → {{"intent": "Consulta Valor Fatura"}}
@@ -767,4 +771,195 @@ def extract_monthly_report_config(texto_msg):
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-RELATORIO-CONFIG] Configuração extraída: {json_text}")
+    return json.loads(json_text)
+
+def generate_daily_briefing(briefing_data):
+    """
+    Gera resumo matinal humanizado da agenda usando Gemini AI.
+
+    Args:
+        briefing_data: dict com:
+            - eventos: lista de eventos do dia
+            - clima_principal: dict com clima da cidade do usuário
+            - climas_adicionais: lista de climas de outras cidades (eventos)
+            - gaps: lista de intervalos livres entre eventos
+            - total_eventos: int
+            - eventos_remotos: int
+            - eventos_presenciais: int
+
+    Returns:
+        str: Mensagem humanizada formatada para WhatsApp
+    """
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+
+    # Formatar eventos para o prompt
+    eventos_texto = []
+    for idx, evento in enumerate(briefing_data['eventos'], 1):
+        titulo = evento.get('summary', 'Sem título')
+
+        # Horário
+        if evento.get('all_day'):
+            horario = "Dia inteiro"
+        else:
+            start = evento.get('start', '')
+            end = evento.get('end', '')
+
+            try:
+                from datetime import datetime
+                start_dt = datetime.fromisoformat(start.replace('Z', '+00:00'))
+                horario = start_dt.strftime('%H:%M')
+
+                if end:
+                    end_dt = datetime.fromisoformat(end.replace('Z', '+00:00'))
+                    duracao_min = int((end_dt - start_dt).total_seconds() / 60)
+                    horario += f" ({duracao_min} min)"
+            except:
+                horario = "Horário não especificado"
+
+        # Local
+        local = evento.get('location', '')
+        tipo_str = ""
+
+        # Detectar se é remoto
+        titulo_lower = titulo.lower()
+        desc_lower = (evento.get('description') or '').lower()
+        local_lower = local.lower()
+
+        if any(kw in f"{titulo_lower} {desc_lower} {local_lower}" for kw in ['meet', 'zoom', 'teams', 'online', 'remoto']):
+            tipo_str = " [remoto]"
+        elif local:
+            tipo_str = f" em {local}"
+
+        eventos_texto.append(f"{idx}. {horario} - {titulo}{tipo_str}")
+
+    eventos_str = "\n".join(eventos_texto)
+
+    # Formatar clima
+    clima_texto = ""
+    if briefing_data.get('clima_principal'):
+        clima = briefing_data['clima_principal']
+        clima_texto = f"Clima: {clima['descricao_completa']}"
+
+        # Adicionar chance de chuva se alta
+        if clima.get('chance_chuva', 0) >= 30:
+            clima_texto += f" - Chance de chuva: {clima['chance_chuva']}%"
+
+    # Climas adicionais (outras cidades)
+    climas_extras = ""
+    if briefing_data.get('climas_adicionais'):
+        climas_list = []
+        for loc in briefing_data['climas_adicionais']:
+            cidade = loc['cidade']
+            clima = loc['clima']
+            climas_list.append(f"{cidade}: {clima['descricao_completa']}")
+
+        if climas_list:
+            climas_extras = f"\nClimas em outras cidades (você tem eventos lá):\n" + "\n".join(climas_list)
+
+    # Intervalos livres
+    gaps_texto = ""
+    if briefing_data.get('gaps'):
+        gaps_list = []
+        for gap in briefing_data['gaps']:
+            duracao_h = gap['duracao_minutos'] // 60
+            duracao_m = gap['duracao_minutos'] % 60
+
+            if duracao_h > 0:
+                duracao_str = f"{duracao_h}h" + (f"{duracao_m}min" if duracao_m > 0 else "")
+            else:
+                duracao_str = f"{duracao_m} min"
+
+            gaps_list.append(f"{gap['inicio']}-{gap['fim']} ({duracao_str})")
+
+        if gaps_list:
+            gaps_texto = f"\n\nHorários livres entre eventos:\n" + "\n".join(f"• {g}" for g in gaps_list)
+
+    # Montar prompt para Gemini
+    prompt = f"""Você é um assistente pessoal humanizado. Gere um resumo matinal da agenda do usuário.
+
+EVENTOS DO DIA:
+{eventos_str}
+
+{clima_texto}
+{climas_extras}
+{gaps_texto}
+
+INSTRUÇÕES:
+1. Comece com uma saudação amigável (ex: "☀️ Bom dia!", "🌅 Olá!")
+2. Resuma os compromissos de forma clara e objetiva
+3. Use emojis apropriados (mas sem exagerar)
+4. Destaque informações importantes:
+   - Se há eventos remotos vs presenciais
+   - Horários livres úteis para trabalho focado ou pausa
+   - Clima (especialmente se for chover ou temperatura extrema)
+   - Dicas úteis (ex: "saia cedo", "leve guarda-chuva", "tempo livre para almoço")
+5. Seja conciso mas informativo (máximo 15 linhas)
+6. Mantenha tom profissional mas amigável
+7. NÃO invente informações que não estão nos dados fornecidos
+
+Gere APENAS o texto da mensagem, sem introduções ou formatação extra.
+"""
+
+    try:
+        response = gemini_model.generate_content(prompt)
+        response_text = get_gemini_text_response(response)
+
+        # Limpar qualquer formatação extra
+        mensagem = response_text.strip()
+
+        print(f"[GEMINI-BRIEFING] Resumo gerado com sucesso ({len(mensagem)} chars)")
+        return mensagem
+
+    except Exception as e:
+        print(f"[GEMINI-BRIEFING] Erro ao gerar resumo: {e}")
+
+        # Fallback: gerar mensagem básica sem IA
+        msg = "☀️ Bom dia! Sua agenda de hoje:\n\n"
+        msg += eventos_str
+
+        if clima_texto:
+            msg += f"\n\n{clima_texto}"
+
+        if gaps_texto:
+            msg += gaps_texto
+
+        return msg
+
+def extract_location_config(texto_msg):
+    """
+    Extrai configuração de localização (cidade e estado) da mensagem do usuário.
+
+    Args:
+        texto_msg: Mensagem do usuário
+
+    Returns:
+        dict: {
+            "cidade": "São Paulo",
+            "estado": "SP"
+        }
+    """
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+
+    prompt = f'''Analise a mensagem sobre configuração de localização: "{texto_msg}"
+
+    Extraia a cidade e o estado (sigla de 2 letras) que o usuário deseja configurar.
+
+    Responda APENAS com JSON: {{"cidade": "...", "estado": "..."}}
+
+    Exemplos:
+    - "configurar localização São Paulo, SP" → {{"cidade": "São Paulo", "estado": "SP"}}
+    - "minha cidade é Campinas SP" → {{"cidade": "Campinas", "estado": "SP"}}
+    - "localização: Rio de Janeiro, RJ" → {{"cidade": "Rio de Janeiro", "estado": "RJ"}}
+    - "moro em Belo Horizonte MG" → {{"cidade": "Belo Horizonte", "estado": "MG"}}
+    - "estou em Curitiba" → {{"cidade": "Curitiba", "estado": "PR"}} (inferir estado conhecido)
+
+    Se não conseguir extrair o estado, retorne null para estado.
+    '''
+
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-LOCATION] Localização extraída: {json_text}")
     return json.loads(json_text)

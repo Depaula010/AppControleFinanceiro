@@ -20,24 +20,28 @@ class NotificationConfigService:
             CREATE TABLE IF NOT EXISTS NotificationConfigs (
                 id SERIAL PRIMARY KEY,
                 usuario_id INT NOT NULL REFERENCES Usuarios(id) ON DELETE CASCADE,
-                
+
                 -- Agenda Diária
                 agenda_diaria_ativa BOOLEAN NOT NULL DEFAULT TRUE,
                 agenda_diaria_hora TIME NOT NULL DEFAULT '08:00:00',
-                
+
+                -- Resumo Matinal (Daily Briefing)
+                resumo_matinal_ativo BOOLEAN NOT NULL DEFAULT TRUE,
+                resumo_matinal_hora TIME NOT NULL DEFAULT '07:00:00',
+
                 -- Contas a Vencer
                 contas_vencer_ativa BOOLEAN NOT NULL DEFAULT TRUE,
                 contas_vencer_dias_antes INT NOT NULL DEFAULT 1,
                 contas_vencer_hora TIME NOT NULL DEFAULT '09:00:00',
-                
+
                 -- Timestamps
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                
+
                 UNIQUE(usuario_id)
             );
-            
-            CREATE INDEX IF NOT EXISTS idx_notification_configs_usuario 
+
+            CREATE INDEX IF NOT EXISTS idx_notification_configs_usuario
             ON NotificationConfigs(usuario_id);
         """)
         
@@ -63,8 +67,9 @@ class NotificationConfigService:
             raise Exception("Banco não configurado")
         
         sql_get = text("""
-            SELECT 
+            SELECT
                 agenda_diaria_ativa, agenda_diaria_hora,
+                resumo_matinal_ativo, resumo_matinal_hora,
                 contas_vencer_ativa, contas_vencer_dias_antes, contas_vencer_hora
             FROM NotificationConfigs
             WHERE usuario_id = :uid
@@ -77,6 +82,8 @@ class NotificationConfigService:
                 return {
                     'agenda_diaria_ativa': result.agenda_diaria_ativa,
                     'agenda_diaria_hora': result.agenda_diaria_hora,
+                    'resumo_matinal_ativo': result.resumo_matinal_ativo,
+                    'resumo_matinal_hora': result.resumo_matinal_hora,
                     'contas_vencer_ativa': result.contas_vencer_ativa,
                     'contas_vencer_dias_antes': result.contas_vencer_dias_antes,
                     'contas_vencer_hora': result.contas_vencer_hora
@@ -86,8 +93,9 @@ class NotificationConfigService:
                 sql_create = text("""
                     INSERT INTO NotificationConfigs (usuario_id)
                     VALUES (:uid)
-                    RETURNING 
+                    RETURNING
                         agenda_diaria_ativa, agenda_diaria_hora,
+                        resumo_matinal_ativo, resumo_matinal_hora,
                         contas_vencer_ativa, contas_vencer_dias_antes, contas_vencer_hora
                 """)
                 
@@ -98,6 +106,8 @@ class NotificationConfigService:
                 return {
                     'agenda_diaria_ativa': result.agenda_diaria_ativa,
                     'agenda_diaria_hora': result.agenda_diaria_hora,
+                    'resumo_matinal_ativo': result.resumo_matinal_ativo,
+                    'resumo_matinal_hora': result.resumo_matinal_hora,
                     'contas_vencer_ativa': result.contas_vencer_ativa,
                     'contas_vencer_dias_antes': result.contas_vencer_dias_antes,
                     'contas_vencer_hora': result.contas_vencer_hora
@@ -288,6 +298,99 @@ class NotificationConfigService:
             WHERE nc.contas_vencer_ativa = TRUE
               AND nc.contas_vencer_hora = :hora
         """)
-        
+
+        with db_engine.connect() as conn:
+            return conn.execute(sql, {"hora": target_hour}).fetchall()
+
+    @staticmethod
+    def update_resumo_matinal_config(usuario_id, ativo=None, hora=None):
+        """
+        Atualiza configuração de resumo matinal.
+
+        Args:
+            usuario_id: ID do usuário
+            ativo: True/False ou None (manter atual)
+            hora: time object, string 'HH:MM', ou None (manter atual)
+
+        Returns:
+            (sucesso: bool, mensagem: str)
+        """
+        if not db_engine:
+            raise Exception("Banco não configurado")
+
+        # Garantir que config existe
+        NotificationConfigService.get_or_create_config(usuario_id)
+
+        updates = []
+        params = {"uid": usuario_id}
+
+        if ativo is not None:
+            updates.append("resumo_matinal_ativo = :ativo")
+            params['ativo'] = ativo
+
+        if hora is not None:
+            if isinstance(hora, str):
+                # Converter 'HH:MM' para time
+                from datetime import datetime
+                hora = datetime.strptime(hora, '%H:%M').time()
+
+            updates.append("resumo_matinal_hora = :hora")
+            params['hora'] = hora
+
+        if not updates:
+            return False, "Nenhuma alteração fornecida"
+
+        sql = text(f"""
+            UPDATE NotificationConfigs
+            SET {', '.join(updates)}, updated_at = CURRENT_TIMESTAMP
+            WHERE usuario_id = :uid
+        """)
+
+        try:
+            with db_engine.connect() as conn:
+                conn.begin()
+                conn.execute(sql, params)
+                conn.commit()
+
+                status = "ativado" if ativo else "desativado" if ativo is False else None
+                hora_fmt = hora.strftime('%H:%M') if hora else None
+
+                msg_parts = []
+                if status:
+                    msg_parts.append(f"Resumo matinal {status}")
+                if hora_fmt:
+                    msg_parts.append(f"horário configurado para {hora_fmt}")
+
+                mensagem = " e ".join(msg_parts) if msg_parts else "Configuração atualizada"
+
+                print(f"[NOTIF-CONFIG] Resumo matinal atualizado para usuário {usuario_id}")
+                return True, mensagem
+
+        except Exception as e:
+            print(f"[NOTIF-CONFIG] Erro ao atualizar: {e}")
+            return False, f"Erro ao atualizar configuração: {str(e)}"
+
+    @staticmethod
+    def get_users_with_resumo_matinal_active(target_hour):
+        """
+        Retorna usuários que devem receber resumo matinal agora.
+
+        Args:
+            target_hour: time object da hora atual
+
+        Returns:
+            list: [(usuario_id, numero_whatsapp), ...]
+        """
+        if not db_engine:
+            raise Exception("Banco não configurado")
+
+        sql = text("""
+            SELECT u.id, u.numero_whatsapp
+            FROM NotificationConfigs nc
+            JOIN Usuarios u ON nc.usuario_id = u.id
+            WHERE nc.resumo_matinal_ativo = TRUE
+              AND nc.resumo_matinal_hora = :hora
+        """)
+
         with db_engine.connect() as conn:
             return conn.execute(sql, {"hora": target_hour}).fetchall()

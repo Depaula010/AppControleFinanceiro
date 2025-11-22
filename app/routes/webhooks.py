@@ -1253,14 +1253,72 @@ def handle_whatsapp_webhook():
             #==== INTENÇÃO: Configurar Notificações ====
             elif intent == 'Configurar Notificações':
                 print(f"[WHATSAPP] Intenção de Configurar Notificações detectada")
-                
+
+                # Verificar se é sobre RESUMO MATINAL especificamente
+                texto_lower = texto_msg.lower()
+                is_resumo_matinal = any(kw in texto_lower for kw in ['resumo', 'matinal', 'briefing', 'preparação do dia'])
+
+                if is_resumo_matinal:
+                    # HANDLER ESPECÍFICO PARA RESUMO MATINAL
+                    print(f"[WHATSAPP] Configuração de Resumo Matinal detectada")
+
+                    # Detectar ação (ativar/desativar/configurar)
+                    if any(kw in texto_lower for kw in ['ativar', 'ligar', 'ativa', 'ative']):
+                        acao = 'ativar'
+                    elif any(kw in texto_lower for kw in ['desativar', 'desligar', 'desative']):
+                        acao = 'desativar'
+                    else:
+                        acao = 'configurar'
+
+                    # Extrair horário (se houver)
+                    import re
+                    hora_match = re.search(r'(\d{1,2})[h:](\d{2})?', texto_msg)
+                    hora = None
+
+                    if hora_match:
+                        hora_h = int(hora_match.group(1))
+                        hora_m = int(hora_match.group(2)) if hora_match.group(2) else 0
+                        hora = f"{hora_h:02d}:{hora_m:02d}"
+
+                    # Executar ação
+                    if acao == 'ativar':
+                        sucesso, msg = NotificationConfigService.update_resumo_matinal_config(
+                            usuario_id, ativo=True, hora=hora if hora else None
+                        )
+                    elif acao == 'desativar':
+                        sucesso, msg = NotificationConfigService.update_resumo_matinal_config(
+                            usuario_id, ativo=False
+                        )
+                    elif acao == 'configurar':
+                        sucesso, msg = NotificationConfigService.update_resumo_matinal_config(
+                            usuario_id, ativo=True, hora=hora
+                        )
+                    else:
+                        sucesso = False
+                        msg = "Ação não reconhecida"
+
+                    if sucesso:
+                        # Buscar config atual
+                        config = NotificationConfigService.get_or_create_config(usuario_id)
+                        resposta_para_usuario = f"✅ {msg}\n\n"
+                        resposta_para_usuario += f"📱 *Resumo Matinal - Status atual:*\n"
+                        resposta_para_usuario += f"• Ativo: {'Sim' if config['resumo_matinal_ativo'] else 'Não'}\n"
+                        resposta_para_usuario += f"• Horário: {config['resumo_matinal_hora'].strftime('%H:%M')}\n\n"
+                        resposta_para_usuario += "💡 Configure sua localização para receber informações de clima:\n"
+                        resposta_para_usuario += '"Configurar localização: [Cidade], [Estado]"'
+                    else:
+                        resposta_para_usuario = f"❌ {msg}"
+
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                # Se NÃO for resumo matinal, processar outras notificações (CÓDIGO EXISTENTE)
                 config_data = gemini_service.extract_notification_config(texto_msg)
-                
+
                 tipo = config_data.get('tipo')
                 acao = config_data.get('acao')
                 hora = config_data.get('hora')
                 dias_antes = config_data.get('dias_antes')
-                
+
                 if tipo == 'agenda_diaria':
                     if acao == 'ativar':
                         sucesso, msg = NotificationConfigService.update_agenda_diaria_config(
@@ -1282,7 +1340,7 @@ def handle_whatsapp_webhook():
                         # Buscar config atual
                         config = NotificationConfigService.get_or_create_config(usuario_id)
                         resposta_para_usuario = f"✅ {msg}\n\n"
-                        resposta_para_usuario += f"📱 *Status atual:*\n"
+                        resposta_para_usuario += f"📱 *Agenda Diária - Status atual:*\n"
                         resposta_para_usuario += f"• Ativa: {'Sim' if config['agenda_diaria_ativa'] else 'Não'}\n"
                         resposta_para_usuario += f"• Horário: {config['agenda_diaria_hora'].strftime('%H:%M')}\n"
                     else:
@@ -1308,7 +1366,7 @@ def handle_whatsapp_webhook():
                     if sucesso:
                         config = NotificationConfigService.get_or_create_config(usuario_id)
                         resposta_para_usuario = f"✅ {msg}\n\n"
-                        resposta_para_usuario += f"📱 *Status atual:*\n"
+                        resposta_para_usuario += f"📱 *Contas a Vencer - Status atual:*\n"
                         resposta_para_usuario += f"• Ativa: {'Sim' if config['contas_vencer_ativa'] else 'Não'}\n"
                         resposta_para_usuario += f"• Dias antes: {config['contas_vencer_dias_antes']}\n"
                         resposta_para_usuario += f"• Horário: {config['contas_vencer_hora'].strftime('%H:%M')}\n"
@@ -1317,6 +1375,45 @@ def handle_whatsapp_webhook():
                 
                 else:
                     resposta_para_usuario = "🤔 Não entendi qual tipo de notificação você quer configurar."
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+            #==== INTENÇÃO: Configurar Localização ====
+            elif intent == 'Configurar Localização':
+                print(f"[WHATSAPP] Intenção de Configurar Localização detectada")
+
+                from app.services.gemini_service import extract_location_config
+                from app.services.location_service import LocationService
+
+                try:
+                    # Extrair cidade e estado com Gemini
+                    location_data = extract_location_config(texto_msg)
+                    cidade = location_data.get('cidade')
+                    estado = location_data.get('estado')
+
+                    if not cidade:
+                        resposta_para_usuario = ("❌ Não consegui identificar a cidade.\n\n"
+                                                "Por favor, envie no formato:\n"
+                                                '"Configurar localização: São Paulo, SP"')
+                        return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                    # Atualizar no banco
+                    sucesso, mensagem = LocationService.update_user_location(
+                        usuario_id,
+                        cidade,
+                        estado
+                    )
+
+                    if sucesso:
+                        resposta_para_usuario = f"✅ {mensagem}\n\n"
+                        resposta_para_usuario += "Agora você receberá informações de clima nos resumos matinais!"
+                    else:
+                        resposta_para_usuario = f"❌ {mensagem}"
+
+                except Exception as e:
+                    print(f"[WHATSAPP] Erro ao configurar localização: {e}")
+                    resposta_para_usuario = ("❌ Erro ao configurar localização.\n\n"
+                                            "Tente: 'Configurar localização: São Paulo, SP'")
 
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
