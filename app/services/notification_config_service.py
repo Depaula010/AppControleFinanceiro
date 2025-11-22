@@ -58,13 +58,13 @@ class NotificationConfigService:
     def get_or_create_config(usuario_id):
         """
         Obtém configuração do usuário ou cria uma padrão.
-        
+
         Returns:
             dict com configurações
         """
         if not db_engine:
             raise Exception("Banco não configurado")
-        
+
         sql_get = text("""
             SELECT
                 agenda_diaria_ativa, agenda_diaria_hora,
@@ -73,10 +73,10 @@ class NotificationConfigService:
             FROM NotificationConfigs
             WHERE usuario_id = :uid
         """)
-        
+
         with db_engine.connect() as conn:
             result = conn.execute(sql_get, {"uid": usuario_id}).fetchone()
-            
+
             if result:
                 return {
                     'agenda_diaria_ativa': result.agenda_diaria_ativa,
@@ -87,29 +87,30 @@ class NotificationConfigService:
                     'contas_vencer_dias_antes': result.contas_vencer_dias_antes,
                     'contas_vencer_hora': result.contas_vencer_hora
                 }
-            else:
-                # Criar configuração padrão
-                sql_create = text("""
-                    INSERT INTO NotificationConfigs (usuario_id)
-                    VALUES (:uid)
-                    RETURNING
-                        agenda_diaria_ativa, agenda_diaria_hora,
-                        resumo_matinal_ativo, resumo_matinal_hora,
-                        contas_vencer_ativa, contas_vencer_dias_antes, contas_vencer_hora
-                """)
 
-                with conn.begin():
-                    result = conn.execute(sql_create, {"uid": usuario_id}).fetchone()
+        # Se não existir, criar em uma nova conexão com transação
+        sql_create = text("""
+            INSERT INTO NotificationConfigs (usuario_id)
+            VALUES (:uid)
+            RETURNING
+                agenda_diaria_ativa, agenda_diaria_hora,
+                resumo_matinal_ativo, resumo_matinal_hora,
+                contas_vencer_ativa, contas_vencer_dias_antes, contas_vencer_hora
+        """)
 
-                return {
-                    'agenda_diaria_ativa': result.agenda_diaria_ativa,
-                    'agenda_diaria_hora': result.agenda_diaria_hora,
-                    'resumo_matinal_ativo': result.resumo_matinal_ativo,
-                    'resumo_matinal_hora': result.resumo_matinal_hora,
-                    'contas_vencer_ativa': result.contas_vencer_ativa,
-                    'contas_vencer_dias_antes': result.contas_vencer_dias_antes,
-                    'contas_vencer_hora': result.contas_vencer_hora
-                }
+        with db_engine.connect() as conn:
+            with conn.begin():
+                result = conn.execute(sql_create, {"uid": usuario_id}).fetchone()
+
+        return {
+            'agenda_diaria_ativa': result.agenda_diaria_ativa,
+            'agenda_diaria_hora': result.agenda_diaria_hora,
+            'resumo_matinal_ativo': result.resumo_matinal_ativo,
+            'resumo_matinal_hora': result.resumo_matinal_hora,
+            'contas_vencer_ativa': result.contas_vencer_ativa,
+            'contas_vencer_dias_antes': result.contas_vencer_dias_antes,
+            'contas_vencer_hora': result.contas_vencer_hora
+        }
     
     @staticmethod
     def update_agenda_diaria_config(usuario_id, ativa=None, hora=None):
