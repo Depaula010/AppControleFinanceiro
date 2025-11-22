@@ -542,3 +542,175 @@ def test_monthly_report(usuario_id):
             "status": "erro",
             "mensagem": str(e)
         }), 500
+
+
+@admin_bp.route('/setup-resumo-matinal', methods=['GET'])
+def setup_resumo_matinal():
+    """
+    Cria as colunas necessárias para o Resumo Matinal.
+
+    - Adiciona 'cidade' e 'estado' na tabela Usuarios
+    - Adiciona 'resumo_matinal_ativo' e 'resumo_matinal_hora' na tabela NotificationConfigs
+
+    Exemplo:
+    GET http://212.47.65.37:8000/admin/setup-resumo-matinal
+    """
+    try:
+        output = []
+        output.append("="*60)
+        output.append("SETUP: Resumo Matinal (Daily Briefing)")
+        output.append("="*60)
+
+        # Migration 1: Campos de localização
+        output.append("\n[1/2] Adicionando campos de localizacao na tabela Usuarios...")
+
+        sql_location = text("""
+            ALTER TABLE Usuarios
+            ADD COLUMN IF NOT EXISTS cidade VARCHAR(100) DEFAULT 'Sao Paulo';
+
+            ALTER TABLE Usuarios
+            ADD COLUMN IF NOT EXISTS estado VARCHAR(2) DEFAULT 'SP';
+
+            CREATE INDEX IF NOT EXISTS idx_usuarios_localizacao
+            ON Usuarios(cidade, estado);
+        """)
+
+        with db_engine.connect() as conn:
+            conn.begin()
+            conn.execute(sql_location)
+            conn.commit()
+
+        output.append("OK - Campos 'cidade' e 'estado' adicionados!")
+
+        # Migration 2: Campos de resumo matinal
+        output.append("\n[2/2] Adicionando campos de resumo matinal na tabela NotificationConfigs...")
+
+        sql_briefing = text("""
+            ALTER TABLE NotificationConfigs
+            ADD COLUMN IF NOT EXISTS resumo_matinal_ativo BOOLEAN NOT NULL DEFAULT TRUE;
+
+            ALTER TABLE NotificationConfigs
+            ADD COLUMN IF NOT EXISTS resumo_matinal_hora TIME NOT NULL DEFAULT '07:00:00';
+        """)
+
+        with db_engine.connect() as conn:
+            conn.begin()
+            conn.execute(sql_briefing)
+            conn.commit()
+
+        output.append("OK - Campos 'resumo_matinal_ativo' e 'resumo_matinal_hora' adicionados!")
+
+        output.append("\n" + "="*60)
+        output.append("SUCESSO! Resumo Matinal configurado")
+        output.append("="*60)
+        output.append("\nProximos passos:")
+        output.append("1. Configurar WEATHER_API_KEY no .env (opcional)")
+        output.append("2. Testar via WhatsApp: 'Configurar localizacao: Sao Paulo, SP'")
+        output.append("3. Testar via WhatsApp: 'Ativar resumo matinal'")
+        output.append("4. Configurar cron job para /admin/trigger-daily-briefing")
+
+        return "<pre>" + "\n".join(output) + "</pre>", 200
+
+    except Exception as e:
+        print(f"[RESUMO-MATINAL-SETUP] Erro: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"<pre>Erro ao configurar Resumo Matinal:\n\n{traceback.format_exc()}</pre>", 500
+
+
+@admin_bp.route('/trigger-daily-briefing', methods=['POST'])
+def trigger_daily_briefing():
+    """
+    Endpoint para cron job disparar resumos matinais.
+
+    Deve ser chamado a cada hora pelo UptimeRobot/cron:
+    POST https://seu-backend.onrender.com/admin/trigger-daily-briefing
+    Header: x-api-key: SUA_SECRET_KEY
+    """
+    # Autenticar
+    secret_key = request.headers.get('x-api-key')
+    if secret_key != API_SECRET_KEY:
+        print("[DAILY-BRIEFING] Tentativa nao autorizada")
+        return jsonify({"status": "erro", "mensagem": "Nao autorizado"}), 401
+
+    try:
+        from app.services.notification_config_service import NotificationConfigService
+        from app.services.daily_briefing_service import DailyBriefingService
+        from app.services.gemini_service import generate_daily_briefing
+        from datetime import datetime
+
+        hora_atual = datetime.now().time().replace(second=0, microsecond=0)
+
+        print(f"[DAILY-BRIEFING] Processando resumos matinais para horario {hora_atual.strftime('%H:%M')}...")
+
+        # Buscar usuários que devem receber neste horário
+        usuarios = NotificationConfigService.get_users_with_resumo_matinal_active(hora_atual)
+
+        if not usuarios:
+            return jsonify({
+                "status": "sucesso",
+                "mensagem": f"Nenhum usuario configurado para {hora_atual.strftime('%H:%M')}",
+                "usuarios_processados": 0,
+                "enviados_sucesso": 0
+            }), 200
+
+        briefing_service = DailyBriefingService()
+        enviados = 0
+        erros = 0
+
+        for usuario_id, numero_whatsapp in usuarios:
+            try:
+                # Preparar dados
+                briefing_data = briefing_service.prepare_briefing_data(usuario_id, date.today())
+
+                if not briefing_data:
+                    print(f"[DAILY-BRIEFING] Erro ao preparar dados para usuario {usuario_id}")
+                    erros += 1
+                    continue
+
+                # Gerar mensagem
+                if briefing_data['total_eventos'] == 0:
+                    mensagem = briefing_service.generate_briefing_message(usuario_id, date.today())
+                else:
+                    mensagem = generate_daily_briefing(briefing_data)
+
+                if not mensagem:
+                    print(f"[DAILY-BRIEFING] Falha ao gerar mensagem para usuario {usuario_id}")
+                    erros += 1
+                    continue
+
+                # Enviar
+                sucesso = enviar_notificacao_whatsapp(
+                    numero_whatsapp,
+                    mensagem,
+                    BOT_WHATSAPP_URL,
+                    API_SECRET_KEY
+                )
+
+                if sucesso:
+                    enviados += 1
+                    print(f"[DAILY-BRIEFING] Resumo enviado para usuario {usuario_id}")
+                else:
+                    erros += 1
+                    print(f"[DAILY-BRIEFING] Falha ao enviar para usuario {usuario_id}")
+
+            except Exception as e:
+                erros += 1
+                print(f"[DAILY-BRIEFING] Erro ao processar usuario {usuario_id}: {e}")
+
+        return jsonify({
+            "status": "sucesso",
+            "usuarios_processados": len(usuarios),
+            "enviados_sucesso": enviados,
+            "erros": erros,
+            "horario": hora_atual.strftime('%H:%M')
+        }), 200
+
+    except Exception as e:
+        print(f"[DAILY-BRIEFING] Erro critico: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "erro",
+            "mensagem": str(e)
+        }), 500
