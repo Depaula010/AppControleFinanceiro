@@ -98,11 +98,10 @@ class NotificationConfigService:
                         resumo_matinal_ativo, resumo_matinal_hora,
                         contas_vencer_ativa, contas_vencer_dias_antes, contas_vencer_hora
                 """)
-                
-                conn.begin()
-                result = conn.execute(sql_create, {"uid": usuario_id}).fetchone()
-                conn.commit()
-                
+
+                with conn.begin():
+                    result = conn.execute(sql_create, {"uid": usuario_id}).fetchone()
+
                 return {
                     'agenda_diaria_ativa': result.agenda_diaria_ativa,
                     'agenda_diaria_hora': result.agenda_diaria_hora,
@@ -348,23 +347,22 @@ class NotificationConfigService:
 
         try:
             with db_engine.connect() as conn:
-                conn.begin()
-                conn.execute(sql, params)
-                conn.commit()
+                with conn.begin():
+                    conn.execute(sql, params)
 
-                status = "ativado" if ativo else "desativado" if ativo is False else None
-                hora_fmt = hora.strftime('%H:%M') if hora else None
+            status = "ativado" if ativo else "desativado" if ativo is False else None
+            hora_fmt = hora.strftime('%H:%M') if hora else None
 
-                msg_parts = []
-                if status:
-                    msg_parts.append(f"Resumo matinal {status}")
-                if hora_fmt:
-                    msg_parts.append(f"horário configurado para {hora_fmt}")
+            msg_parts = []
+            if status:
+                msg_parts.append(f"Resumo matinal {status}")
+            if hora_fmt:
+                msg_parts.append(f"horário configurado para {hora_fmt}")
 
-                mensagem = " e ".join(msg_parts) if msg_parts else "Configuração atualizada"
+            mensagem = " e ".join(msg_parts) if msg_parts else "Configuração atualizada"
 
-                print(f"[NOTIF-CONFIG] Resumo matinal atualizado para usuário {usuario_id}")
-                return True, mensagem
+            print(f"[NOTIF-CONFIG] Resumo matinal atualizado para usuário {usuario_id}")
+            return True, mensagem
 
         except Exception as e:
             print(f"[NOTIF-CONFIG] Erro ao atualizar: {e}")

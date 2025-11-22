@@ -47,8 +47,9 @@ POST http://212.47.65.37:8000/webhook-whatsapp
 ```
 
 **Headers:**
-```json
+```
 Content-Type: application/json
+x-api-key: uma-senha-bem-forte-12345
 ```
 
 **Body (JSON):**
@@ -78,6 +79,12 @@ Content-Type: application/json
 POST http://212.47.65.37:8000/webhook-whatsapp
 ```
 
+**Headers:**
+```
+Content-Type: application/json
+x-api-key: uma-senha-bem-forte-12345
+```
+
 **Body (JSON):**
 ```json
 {
@@ -103,6 +110,12 @@ POST http://212.47.65.37:8000/webhook-whatsapp
 
 ```
 POST http://212.47.65.37:8000/webhook-whatsapp
+```
+
+**Headers:**
+```
+Content-Type: application/json
+x-api-key: uma-senha-bem-forte-12345
 ```
 
 **Body (JSON):**
@@ -157,13 +170,13 @@ x-api-key: SUA_API_SECRET_KEY
 
 ## 📋 **Resumo Ultra-Rápido**
 
-| Passo | Método | URL | Body/Headers |
-|-------|--------|-----|--------------|
-| 1️⃣ Criar tabelas | `GET` | `/admin/setup-resumo-matinal` | Nada |
-| 2️⃣ Configurar localização | `POST` | `/webhook-whatsapp` | `{"texto": "Configurar localização: São Paulo, SP", "numero": "553194001072"}` |
-| 3️⃣ Ativar resumo | `POST` | `/webhook-whatsapp` | `{"texto": "Ativar resumo matinal", "numero": "553194001072"}` |
-| 4️⃣ Configurar horário | `POST` | `/webhook-whatsapp` | `{"texto": "Configurar resumo matinal às 8h", "numero": "553194001072"}` |
-| 5️⃣ Testar trigger | `POST` | `/admin/trigger-daily-briefing` | Header: `x-api-key: SUA_KEY` |
+| Passo | Método | URL | Headers | Body |
+|-------|--------|-----|---------|------|
+| 1️⃣ Criar tabelas | `GET` | `/admin/setup-resumo-matinal` | - | - |
+| 2️⃣ Configurar localização | `POST` | `/webhook-whatsapp` | `x-api-key: uma-senha-bem-forte-12345` | `{"texto": "Configurar localização: São Paulo, SP", "numero": "553194001072"}` |
+| 3️⃣ Ativar resumo | `POST` | `/webhook-whatsapp` | `x-api-key: uma-senha-bem-forte-12345` | `{"texto": "Ativar resumo matinal", "numero": "553194001072"}` |
+| 4️⃣ Configurar horário | `POST` | `/webhook-whatsapp` | `x-api-key: uma-senha-bem-forte-12345` | `{"texto": "Configurar resumo matinal às 8h", "numero": "553194001072"}` |
+| 5️⃣ Testar trigger | `POST` | `/admin/trigger-daily-briefing` | `x-api-key: uma-senha-bem-forte-12345` | - |
 
 ---
 
