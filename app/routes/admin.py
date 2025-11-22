@@ -561,8 +561,43 @@ def setup_resumo_matinal():
         output.append("SETUP: Resumo Matinal (Daily Briefing)")
         output.append("="*60)
 
+        # Migration 0: Criar tabela NotificationConfigs se não existir
+        output.append("\n[0/3] Verificando tabela NotificationConfigs...")
+
+        sql_create_table = text("""
+            CREATE TABLE IF NOT EXISTS NotificationConfigs (
+                id SERIAL PRIMARY KEY,
+                usuario_id INT NOT NULL REFERENCES Usuarios(id) ON DELETE CASCADE,
+
+                -- Agenda Diária
+                agenda_diaria_ativa BOOLEAN NOT NULL DEFAULT TRUE,
+                agenda_diaria_hora TIME NOT NULL DEFAULT '08:00:00',
+
+                -- Contas a Vencer
+                contas_vencer_ativa BOOLEAN NOT NULL DEFAULT TRUE,
+                contas_vencer_dias_antes INT NOT NULL DEFAULT 1,
+                contas_vencer_hora TIME NOT NULL DEFAULT '09:00:00',
+
+                -- Timestamps
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+                UNIQUE(usuario_id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_notification_configs_usuario
+            ON NotificationConfigs(usuario_id);
+        """)
+
+        with db_engine.connect() as conn:
+            conn.begin()
+            conn.execute(sql_create_table)
+            conn.commit()
+
+        output.append("OK - Tabela NotificationConfigs criada/verificada!")
+
         # Migration 1: Campos de localização
-        output.append("\n[1/2] Adicionando campos de localizacao na tabela Usuarios...")
+        output.append("\n[1/3] Adicionando campos de localizacao na tabela Usuarios...")
 
         sql_location = text("""
             ALTER TABLE Usuarios
@@ -583,7 +618,7 @@ def setup_resumo_matinal():
         output.append("OK - Campos 'cidade' e 'estado' adicionados!")
 
         # Migration 2: Campos de resumo matinal
-        output.append("\n[2/2] Adicionando campos de resumo matinal na tabela NotificationConfigs...")
+        output.append("\n[2/3] Adicionando campos de resumo matinal na tabela NotificationConfigs...")
 
         sql_briefing = text("""
             ALTER TABLE NotificationConfigs
