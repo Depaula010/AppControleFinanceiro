@@ -749,3 +749,43 @@ def trigger_daily_briefing():
             "status": "erro",
             "mensagem": str(e)
         }), 500
+
+
+@admin_bp.route('/get-notification-config/<int:usuario_id>', methods=['GET'])
+def get_notification_config(usuario_id):
+    """
+    Endpoint para visualizar configurações de notificação de um usuário.
+
+    Exemplo:
+    GET http://212.47.65.37:8000/admin/get-notification-config/1
+    """
+    try:
+        from app.services.notification_config_service import NotificationConfigService
+
+        config = NotificationConfigService.get_or_create_config(usuario_id)
+
+        # Converter objetos time para string para JSON
+        config_json = {
+            'agenda_diaria_ativa': config['agenda_diaria_ativa'],
+            'agenda_diaria_hora': config['agenda_diaria_hora'].strftime('%H:%M'),
+            'resumo_matinal_ativo': config['resumo_matinal_ativo'],
+            'resumo_matinal_hora': config['resumo_matinal_hora'].strftime('%H:%M'),
+            'contas_vencer_ativa': config['contas_vencer_ativa'],
+            'contas_vencer_dias_antes': config['contas_vencer_dias_antes'],
+            'contas_vencer_hora': config['contas_vencer_hora'].strftime('%H:%M')
+        }
+
+        return jsonify({
+            "status": "sucesso",
+            "usuario_id": usuario_id,
+            "configuracoes": config_json
+        }), 200
+
+    except Exception as e:
+        print(f"[GET-CONFIG] Erro: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "erro",
+            "mensagem": str(e)
+        }), 500
