@@ -47,9 +47,8 @@ class NotificationConfigService:
         
         try:
             with db_engine.connect() as conn:
-                conn.begin()
-                conn.execute(sql)
-                conn.commit()
+                with conn.begin():
+                    conn.execute(sql)
                 print("[NOTIF-CONFIG] ✅ Tabela NotificationConfigs criada")
         except Exception as e:
             print(f"[NOTIF-CONFIG] Erro ao criar tabela: {e}")
@@ -158,24 +157,23 @@ class NotificationConfigService:
         
         try:
             with db_engine.connect() as conn:
-                conn.begin()
-                conn.execute(sql, params)
-                conn.commit()
-                
-                status = "ativa" if ativa else "desativada" if ativa is False else None
-                hora_fmt = hora.strftime('%H:%M') if hora else None
-                
-                msg_parts = []
-                if status:
-                    msg_parts.append(f"Notificação de agenda diária {status}")
-                if hora_fmt:
-                    msg_parts.append(f"horário configurado para {hora_fmt}")
-                
-                mensagem = " e ".join(msg_parts) if msg_parts else "Configuração atualizada"
-                
-                print(f"[NOTIF-CONFIG] Agenda diária atualizada para usuário {usuario_id}")
-                return True, mensagem
-                
+                with conn.begin():
+                    conn.execute(sql, params)
+
+            status = "ativa" if ativa else "desativada" if ativa is False else None
+            hora_fmt = hora.strftime('%H:%M') if hora else None
+
+            msg_parts = []
+            if status:
+                msg_parts.append(f"Notificação de agenda diária {status}")
+            if hora_fmt:
+                msg_parts.append(f"horário configurado para {hora_fmt}")
+
+            mensagem = " e ".join(msg_parts) if msg_parts else "Configuração atualizada"
+
+            print(f"[NOTIF-CONFIG] Agenda diária atualizada para usuário {usuario_id}")
+            return True, mensagem
+
         except Exception as e:
             print(f"[NOTIF-CONFIG] Erro ao atualizar: {e}")
             return False, f"Erro ao atualizar configuração: {str(e)}"
@@ -229,24 +227,23 @@ class NotificationConfigService:
         
         try:
             with db_engine.connect() as conn:
-                conn.begin()
-                conn.execute(sql, params)
-                conn.commit()
-                
-                msg_parts = []
-                if ativa is not None:
-                    status = "ativa" if ativa else "desativada"
-                    msg_parts.append(f"Notificação de contas {status}")
-                if dias_antes:
-                    msg_parts.append(f"alerta configurado para {dias_antes} dia(s) antes")
-                if hora:
-                    msg_parts.append(f"horário às {hora.strftime('%H:%M')}")
-                
-                mensagem = ", ".join(msg_parts) if msg_parts else "Configuração atualizada"
-                
-                print(f"[NOTIF-CONFIG] Contas a vencer atualizada para usuário {usuario_id}")
-                return True, mensagem
-                
+                with conn.begin():
+                    conn.execute(sql, params)
+
+            msg_parts = []
+            if ativa is not None:
+                status = "ativa" if ativa else "desativada"
+                msg_parts.append(f"Notificação de contas {status}")
+            if dias_antes:
+                msg_parts.append(f"alerta configurado para {dias_antes} dia(s) antes")
+            if hora:
+                msg_parts.append(f"horário às {hora.strftime('%H:%M')}")
+
+            mensagem = ", ".join(msg_parts) if msg_parts else "Configuração atualizada"
+
+            print(f"[NOTIF-CONFIG] Contas a vencer atualizada para usuário {usuario_id}")
+            return True, mensagem
+
         except Exception as e:
             print(f"[NOTIF-CONFIG] Erro ao atualizar: {e}")
             return False, f"Erro: {str(e)}"
