@@ -65,7 +65,7 @@ def get_gastos_totais(usuario_id: int, data_inicio: date, data_fim: date) -> dic
         FROM Transacoes
         WHERE usuario_id = :usuario_id
           AND data_transacao BETWEEN :data_inicio AND :data_fim
-          AND consolidada = 1
+          AND consolidada = TRUE
           AND tipo_transacao IN ('Despesa', 'Renda')
         GROUP BY tipo_transacao
     """)
@@ -110,7 +110,7 @@ def get_top_categorias(usuario_id: int, data_inicio: date, data_fim: date, limit
         list: [{'categoria': str, 'valor': float, 'percentual': float}, ...]
     """
     query_sql = text("""
-        SELECT TOP (:limit)
+        SELECT
             sc.nome_sub AS categoria,
             SUM(t.valor) AS total_gasto
         FROM Transacoes t
@@ -118,9 +118,10 @@ def get_top_categorias(usuario_id: int, data_inicio: date, data_fim: date, limit
         WHERE t.usuario_id = :usuario_id
           AND t.data_transacao BETWEEN :data_inicio AND :data_fim
           AND t.tipo_transacao = 'Despesa'
-          AND t.consolidada = 1
+          AND t.consolidada = TRUE
         GROUP BY sc.nome_sub
         ORDER BY total_gasto DESC
+        LIMIT :limit
     """)
 
     with db_engine.connect() as conn:
@@ -177,7 +178,7 @@ def get_comparacao_mes_anterior(usuario_id: int, data_inicio: date, data_fim: da
         FROM Transacoes
         WHERE usuario_id = :usuario_id
           AND tipo_transacao = 'Despesa'
-          AND consolidada = 1
+          AND consolidada = TRUE
           AND data_transacao BETWEEN :data_inicio_ant AND :data_fim
     """)
 
@@ -216,15 +217,15 @@ def get_status_potes(usuario_id: int, data_inicio: date, data_fim: date) -> list
         SELECT
             p.nome_pote,
             p.valor_limite,
-            ISNULL(SUM(t.valor), 0) AS total_usado
+            COALESCE(SUM(t.valor), 0) AS total_usado
         FROM PotesDeGastos p
         LEFT JOIN PoteSubCategorias psc ON p.id = psc.pote_id
         LEFT JOIN Transacoes t ON psc.subcategoria_id = t.subcategoria_id
             AND t.data_transacao BETWEEN :data_inicio AND :data_fim
             AND t.tipo_transacao = 'Despesa'
-            AND t.consolidada = 1
+            AND t.consolidada = TRUE
         WHERE p.usuario_id = :usuario_id
-          AND p.ativo = 1
+          AND p.ativo = TRUE
         GROUP BY p.id, p.nome_pote, p.valor_limite
         ORDER BY p.nome_pote
     """)
@@ -270,7 +271,7 @@ def get_contas_status(usuario_id: int, data_inicio: date, data_fim: date) -> dic
         WHERE usuario_id = :usuario_id
           AND data_transacao BETWEEN :data_inicio AND :data_fim
           AND tipo_transacao = 'Despesa'
-          AND consolidada = 1
+          AND consolidada = TRUE
     """)
 
     # Contas pendentes (agendamentos não executados)
@@ -280,7 +281,7 @@ def get_contas_status(usuario_id: int, data_inicio: date, data_fim: date) -> dic
             SUM(valor_previsto) AS total
         FROM Agendamentos
         WHERE usuario_id = :usuario_id
-          AND ativo = 1
+          AND ativo = TRUE
           AND (
               (tipo_agendamento = 'FIXO' AND data_inicio <= :data_fim)
               OR

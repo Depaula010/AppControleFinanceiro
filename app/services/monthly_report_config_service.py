@@ -24,12 +24,12 @@ def criar_tabela_monthly_report_configs():
     create_table_sql = text("""
         CREATE TABLE IF NOT EXISTS MonthlyReportConfigs (
             usuario_id INT PRIMARY KEY,
-            ativo BIT DEFAULT 1,
+            ativo BOOLEAN DEFAULT TRUE,
             momento_envio VARCHAR(20) DEFAULT 'INICIO_MES'
                 CHECK (momento_envio IN ('INICIO_MES', 'FIM_MES')),
             hora_envio TIME DEFAULT '08:00:00',
-            created_at DATETIME DEFAULT GETDATE(),
-            updated_at DATETIME DEFAULT GETDATE(),
+            created_at TIMESTAMP DEFAULT NOW(),
+            updated_at TIMESTAMP DEFAULT NOW(),
             FOREIGN KEY (usuario_id) REFERENCES Usuarios(id) ON DELETE CASCADE
         )
     """)
@@ -83,7 +83,7 @@ def get_or_create_config(usuario_id: int) -> dict:
             INSERT INTO MonthlyReportConfigs
                 (usuario_id, ativo, momento_envio, hora_envio)
             VALUES
-                (:usuario_id, 1, 'INICIO_MES', '08:00:00')
+                (:usuario_id, TRUE, 'INICIO_MES', '08:00:00')
         """)
 
         conn.execute(insert_sql, {"usuario_id": usuario_id})
@@ -142,7 +142,7 @@ def update_config(usuario_id: int, ativo: bool = None,
 
     if ativo is not None:
         updates.append("ativo = :ativo")
-        params["ativo"] = 1 if ativo else 0
+        params["ativo"] = ativo
 
     if momento_envio:
         updates.append("momento_envio = :momento_envio")
@@ -153,7 +153,7 @@ def update_config(usuario_id: int, ativo: bool = None,
         params["hora_envio"] = hora_envio
 
     if updates:
-        updates.append("updated_at = GETDATE()")
+        updates.append("updated_at = NOW()")
 
         update_sql = text(f"""
             UPDATE MonthlyReportConfigs

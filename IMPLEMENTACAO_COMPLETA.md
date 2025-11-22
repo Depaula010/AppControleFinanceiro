@@ -116,14 +116,14 @@ A funcionalidade de **Relatório Mensal Automático** foi implementada com suces
 ### Nova Tabela: MonthlyReportConfigs
 
 ```sql
-CREATE TABLE MonthlyReportConfigs (
+CREATE TABLE IF NOT EXISTS MonthlyReportConfigs (
     usuario_id INT PRIMARY KEY,
-    ativo BIT DEFAULT 1,
+    ativo BOOLEAN DEFAULT TRUE,
     momento_envio VARCHAR(20) DEFAULT 'INICIO_MES'
         CHECK (momento_envio IN ('INICIO_MES', 'FIM_MES')),
     hora_envio TIME DEFAULT '08:00:00',
-    created_at DATETIME DEFAULT GETDATE(),
-    updated_at DATETIME DEFAULT GETDATE(),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
     FOREIGN KEY (usuario_id) REFERENCES Usuarios(id) ON DELETE CASCADE
 );
 ```
