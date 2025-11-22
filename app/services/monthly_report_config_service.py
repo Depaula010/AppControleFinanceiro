@@ -13,7 +13,7 @@ TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
 MOMENTOS_VALIDOS = ['INICIO_MES', 'FIM_MES']
 
 
-@with_db_retry
+@with_db_retry()
 def criar_tabela_monthly_report_configs():
     """
     Cria a tabela de configurações de relatórios mensais se não existir.
@@ -41,7 +41,7 @@ def criar_tabela_monthly_report_configs():
     return True
 
 
-@with_db_retry
+@with_db_retry()
 def get_or_create_config(usuario_id: int) -> dict:
     """
     Obtém a configuração de relatório mensal do usuário ou cria uma padrão.
@@ -102,7 +102,7 @@ def get_or_create_config(usuario_id: int) -> dict:
         }
 
 
-@with_db_retry
+@with_db_retry()
 def update_config(usuario_id: int, ativo: bool = None,
                   momento_envio: str = None, hora_envio: str = None) -> dict:
     """
@@ -168,7 +168,7 @@ def update_config(usuario_id: int, ativo: bool = None,
     return get_or_create_config(usuario_id)
 
 
-@with_db_retry
+@with_db_retry()
 def get_users_to_notify(momento_envio: str, janela_minutos: int = 5) -> list:
     """
     Retorna usuários que devem receber o relatório no momento atual.
@@ -230,7 +230,7 @@ def get_users_to_notify(momento_envio: str, janela_minutos: int = 5) -> list:
         ]
 
 
-@with_db_retry
+@with_db_retry()
 def desativar_config(usuario_id: int) -> dict:
     """
     Desativa o envio automático de relatórios mensais para o usuário.
@@ -244,7 +244,7 @@ def desativar_config(usuario_id: int) -> dict:
     return update_config(usuario_id, ativo=False)
 
 
-@with_db_retry
+@with_db_retry()
 def ativar_config(usuario_id: int) -> dict:
     """
     Ativa o envio automático de relatórios mensais para o usuário.

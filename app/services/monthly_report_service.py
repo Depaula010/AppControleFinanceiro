@@ -44,7 +44,7 @@ def calcular_periodo_relatorio(momento_envio: str) -> tuple:
     return mes, ano, data_inicio, data_fim
 
 
-@with_db_retry
+@with_db_retry()
 def get_gastos_totais(usuario_id: int, data_inicio: date, data_fim: date) -> dict:
     """
     Calcula gastos totais por tipo de transação no período.
@@ -101,7 +101,7 @@ def get_gastos_totais(usuario_id: int, data_inicio: date, data_fim: date) -> dic
         }
 
 
-@with_db_retry
+@with_db_retry()
 def get_top_categorias(usuario_id: int, data_inicio: date, data_fim: date, limit: int = 5) -> list:
     """
     Retorna as top N categorias com maior gasto no período.
@@ -144,7 +144,7 @@ def get_top_categorias(usuario_id: int, data_inicio: date, data_fim: date, limit
         ]
 
 
-@with_db_retry
+@with_db_retry()
 def get_comparacao_mes_anterior(usuario_id: int, data_inicio: date, data_fim: date) -> dict:
     """
     Compara gastos do mês atual com o mês anterior.
@@ -204,7 +204,7 @@ def get_comparacao_mes_anterior(usuario_id: int, data_inicio: date, data_fim: da
         }
 
 
-@with_db_retry
+@with_db_retry()
 def get_status_potes(usuario_id: int, data_inicio: date, data_fim: date) -> list:
     """
     Retorna status de utilização dos potes no período.
@@ -248,7 +248,7 @@ def get_status_potes(usuario_id: int, data_inicio: date, data_fim: date) -> list
         ]
 
 
-@with_db_retry
+@with_db_retry()
 def get_contas_status(usuario_id: int, data_inicio: date, data_fim: date) -> dict:
     """
     Retorna status de contas pagas vs pendentes no período.
