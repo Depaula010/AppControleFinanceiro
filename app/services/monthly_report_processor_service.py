@@ -185,21 +185,25 @@ def enviar_relatorio_manual(usuario_id: int, momento_envio: str = 'INICIO_MES') 
     Returns:
         dict: Resultado do envio
     """
-    from app.services.user_service import get_user_by_id
+    from sqlalchemy import text
+    from app import db_engine
 
     logger.info(f"Envio manual de relatório para usuário {usuario_id}")
 
     try:
         # Buscar dados do usuário
-        usuario = get_user_by_id(usuario_id)
+        with db_engine.connect() as conn:
+            sql = text("SELECT nome, numero_whatsapp FROM Usuarios WHERE id = :uid")
+            usuario = conn.execute(sql, {"uid": usuario_id}).fetchone()
+
         if not usuario:
             return {
                 'sucesso': False,
                 'erro': 'Usuário não encontrado'
             }
 
-        nome = usuario['nome']
-        numero_whatsapp = usuario['numero_whatsapp']
+        nome = usuario[0]
+        numero_whatsapp = usuario[1]
 
         # Gerar relatório
         report_data = generate_monthly_report_data(usuario_id, momento_envio)
