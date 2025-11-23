@@ -390,6 +390,31 @@ def oauth_config_check():
     }), 200
 
 
+@admin_bp.route('/security-stats', methods=['GET'])
+def security_stats():
+    """
+    Endpoint para visualizar estatísticas de segurança
+
+    Retorna:
+    - IPs bloqueados atualmente
+    - Atividade suspeita recente
+    - Totais de bloqueios e tentativas
+
+    Exemplo:
+    GET https://seu-backend.onrender.com/admin/security-stats
+    Header: x-api-key: sua_chave_secreta
+    """
+    # Verificar autenticação
+    api_key = request.headers.get('x-api-key')
+    if api_key != API_SECRET_KEY:
+        return jsonify({"erro": "Chave de API inválida"}), 401
+
+    from app.middleware.security import get_security_stats
+
+    stats = get_security_stats()
+    return jsonify(stats), 200
+
+
 @admin_bp.route('/setup-monthly-reports-table', methods=['GET'])
 def setup_monthly_reports_table():
     """

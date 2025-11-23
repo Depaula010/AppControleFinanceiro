@@ -116,15 +116,25 @@ def process_registration_step(numero_whatsapp, user_message):
     return "Erro no processo de cadastro. Tente novamente.", False
 
 def complete_registration(numero_whatsapp, nome, dia_venc, dia_fech):
-    """Salva o novo usuário no banco"""
+    """Salva o novo usuário no banco com API key criptografada"""
     if not db_engine:
         raise Exception("Banco não configurado")
-    
-    nova_api_key = secrets.token_hex(20)
-    
+
+    from app.services.encryption_service import encryption_service
+
+    # Gerar nova API key
+    nova_api_key = secrets.token_urlsafe(32)  # Chave mais forte
+
+    # Criptografar antes de salvar
+    try:
+        api_key_encrypted = encryption_service.encrypt(nova_api_key)
+    except Exception as e:
+        print(f"[USER-SERVICE] ⚠️  Erro ao criptografar API key, salvando em plain text: {e}")
+        api_key_encrypted = nova_api_key  # Fallback
+
     sql_user = text("""
-        INSERT INTO Usuarios (nome, numero_whatsapp, api_key_automate) 
-        VALUES (:nome, :num_wpp, :api_key) 
+        INSERT INTO Usuarios (nome, numero_whatsapp, api_key_automate)
+        VALUES (:nome, :num_wpp, :api_key)
         RETURNING id;
     """)
     
@@ -144,7 +154,7 @@ def complete_registration(numero_whatsapp, nome, dia_venc, dia_fech):
             result = conn.execute(sql_user, {
                 "nome": nome,
                 "num_wpp": numero_whatsapp,
-                "api_key": nova_api_key
+                "api_key": api_key_encrypted  # Salvar versão criptografada
             })
             user_id = result.scalar_one()
             

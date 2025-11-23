@@ -1,11 +1,22 @@
-# app/__init__.py (VERSÃO CORRIGIDA COM POOL RESILIENTE)
+# app/__init__.py (VERSÃO CORRIGIDA COM POOL RESILIENTE + SEGURANÇA)
 import locale
+import logging
+import os
+from datetime import datetime
 import google.generativeai as genai
-from flask import Flask
+from flask import Flask, request, jsonify
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.pool import NullPool, QueuePool
 from .config import GEMINI_API_KEY, DATABASE_URL
 from app.services.redis_service import redis_service
+
+# Imports de segurança
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_talisman import Talisman
+from flask_cors import CORS
+from app.middleware.security import security_filter, get_security_stats
+from app import security_config
 
 # Variáveis globais que serão "injetadas" (acessíveis) em outros módulos
 db_engine = None
@@ -16,9 +27,66 @@ def create_app():
     Esta é a "Application Factory", o equivalente ao seu Program.cs / Startup.cs
     """
     app = Flask(__name__)
-    
+
     # 1. Carregar a Configuração
     app.config.from_object('app.config')
+
+    # ========== CONFIGURAÇÃO DE SEGURANÇA ==========
+
+    # 1.1. Configurar logging de segurança
+    os.makedirs('logs', exist_ok=True)
+    security_handler = logging.FileHandler(security_config.SECURITY_LOG_FILE)
+    security_handler.setLevel(getattr(logging, security_config.SECURITY_LOG_LEVEL))
+    security_handler.setFormatter(logging.Formatter(
+        '[%(asctime)s] %(levelname)s: %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    ))
+
+    security_logger = logging.getLogger('security')
+    security_logger.addHandler(security_handler)
+    security_logger.addHandler(logging.StreamHandler())  # Também no console
+
+    # 1.2. Rate Limiting
+    if security_config.RATELIMIT_ENABLED:
+        limiter = Limiter(
+            app=app,
+            key_func=get_remote_address,
+            storage_uri=security_config.RATELIMIT_STORAGE_URI,
+            strategy=security_config.RATELIMIT_STRATEGY,
+            default_limits=[security_config.RATELIMIT_DEFAULTS['default']]
+        )
+        print("[SECURITY] ✅ Rate Limiting ativado")
+
+    # 1.3. CORS (apenas se configurado)
+    if security_config.CORS_ENABLED:
+        CORS(app, origins=security_config.CORS_ORIGINS)
+        print(f"[SECURITY] ✅ CORS ativado | Origins: {security_config.CORS_ORIGINS}")
+
+    # 1.4. Security Headers (Talisman)
+    if security_config.SECURITY_HEADERS_ENABLED:
+        # Configurar Talisman com política moderada
+        Talisman(
+            app,
+            force_https=False,  # Deixar HTTPS para o proxy reverso (Render.com)
+            strict_transport_security=True,
+            strict_transport_security_max_age=31536000,
+            content_security_policy=security_config.CSP_CONFIG,
+            content_security_policy_nonce_in=['script-src'],
+            frame_options='DENY',
+            frame_options_allow_from=None,
+            referrer_policy='strict-origin-when-cross-origin',
+        )
+        print("[SECURITY] ✅ Security Headers ativados")
+
+    # 1.5. Middleware customizado de proteção contra bots
+    if security_config.BOT_PROTECTION_ENABLED:
+        @app.before_request
+        def apply_security_filter():
+            return security_filter()
+
+        print("[SECURITY] ✅ Bot Protection ativado")
+
+    # ========== FIM CONFIGURAÇÃO DE SEGURANÇA ==========
     
     # 2. Configurar o Locale (Movido do app.py)
     try:

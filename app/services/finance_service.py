@@ -249,11 +249,41 @@ def setup_user_data(numero_whatsapp, dia_venc_cartao, dia_fech_cartao):
         raise e
     
 def get_user_by_api_key(api_key):
-    """ Encontra um usuário pela sua API key do Automate. """
-    if not db_engine: raise Exception("Banco não configurado")
-    sql = text("SELECT id, numero_whatsapp FROM Usuarios WHERE api_key_automate = :api_key")
+    """
+    Encontra um usuário pela sua API key do Automate.
+
+    NOTA: Busca todas as API keys e descriptografa para comparar.
+    Em produção com muitos usuários, considere indexar hash da chave.
+    """
+    if not db_engine:
+        raise Exception("Banco não configurado")
+
+    from app.services.encryption_service import encryption_service
+
+    # Buscar todos os usuários com API key
+    sql = text("SELECT id, numero_whatsapp, api_key_automate FROM Usuarios WHERE api_key_automate IS NOT NULL")
+
     with db_engine.connect() as conn:
-        return conn.execute(sql, {"api_key": api_key}).fetchone() # Retorna (id, numero) ou None
+        results = conn.execute(sql).fetchall()
+
+        # Comparar descriptografando cada chave
+        for row in results:
+            stored_key = row.api_key_automate
+
+            try:
+                # Tentar descriptografar
+                decrypted_key = encryption_service.decrypt(stored_key)
+
+                if decrypted_key == api_key:
+                    # Retornar no mesmo formato que antes
+                    return (row.id, row.numero_whatsapp)
+            except:
+                # Chave pode estar em plain text (dados antigos)
+                # Comparação direta como fallback
+                if stored_key == api_key:
+                    return (row.id, row.numero_whatsapp)
+
+        return None  # Nenhuma chave correspondente encontrada
 
 def get_user_by_whatsapp(numero_whatsapp):
     """ Encontra um usuário pelo seu número de WhatsApp. """
