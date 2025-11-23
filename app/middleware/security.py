@@ -169,7 +169,7 @@ def block_ip(ip, duration_minutes=60):
     redis_service.set_with_ttl(
         key,
         json.dumps(block_data),
-        ttl=duration_minutes * 60
+        ttl_seconds=duration_minutes * 60
     )
 
     # Log do bloqueio
@@ -218,7 +218,7 @@ def track_failed_attempt(ip, reason):
     redis_service.set_with_ttl(
         key,
         json.dumps(attempts),
-        ttl=ATTEMPTS_TTL
+        ttl_seconds=ATTEMPTS_TTL
     )
 
     # Bloquear se muitas tentativas suspeitas (5 em 10 minutos)
