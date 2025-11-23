@@ -27,7 +27,7 @@ ATTEMPTS_TTL = 600  # 10 minutos em segundos
 SUSPICIOUS_PATTERNS = [
     r'/\.env',
     r'/\.git',
-    r'/admin',
+    # r'/admin',  # Removido - endpoints /admin são legítimos e protegidos por x-api-key
     r'/phpMyAdmin',
     r'/phpmyadmin',
     r'/wp-admin',
