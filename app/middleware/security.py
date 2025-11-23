@@ -90,6 +90,7 @@ VALID_ENDPOINTS = {
     '/admin/trigger-daily-briefing',
     '/admin/get-notification-config',
     '/admin/oauth-config-check',
+    '/admin/setup-potes-alerts',
 }
 
 def is_suspicious_request(path, user_agent):
