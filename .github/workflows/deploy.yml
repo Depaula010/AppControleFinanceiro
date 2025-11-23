@@ -95,12 +95,20 @@ jobs:
 
       - name: 🔍 Health Check
         run: |
-          sleep 10
-          response=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.CONTABO_HOST }}/)
-          if [ $response -eq 200 ]; then
+          echo "⏳ Aguardando 30 segundos para containers iniciarem..."
+          sleep 30
+
+          echo "🔍 Testando conexão com servidor..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.CONTABO_HOST }}/ || echo "0")
+
+          echo "📡 HTTP Status Code: $response"
+
+          if [ "$response" -eq 200 ]; then
             echo "✅ Health check passed! Application is running on port 80 (Nginx)."
           else
             echo "❌ Health check failed! HTTP status: $response"
+            echo "🔍 Verificando logs do Nginx..."
+            ssh ${{ secrets.CONTABO_USER }}@${{ secrets.CONTABO_HOST }} "docker logs --tail=20 meu-secretario-nginx"
             exit 1
           fi
 
