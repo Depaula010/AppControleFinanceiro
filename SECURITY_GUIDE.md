@@ -103,16 +103,15 @@ limit_req_zone $binary_remote_addr zone=admin_limit:10m rate=5r/s;
 limit_req_zone $binary_remote_addr zone=webhook_limit:10m rate=50r/s;
 ```
 
-#### Whitelist de IPs para Admin
-```nginx
-location /admin/ {
-    allow 212.47.65.37;  # IP autorizado
-    deny all;            # Bloqueia resto
-    # ...
-}
-```
+#### Autenticação para Admin
+Endpoints `/admin/*` protegidos por:
+- ✅ Header `x-api-key` obrigatório (secret)
+- ✅ Rate limiting (5 req/s)
+- ✅ HTTPS criptografado
+- ✅ Bloqueio automático de IPs suspeitos
 
-**⚠️ IMPORTANTE:** Se seu IP mudar, edite [nginx/nginx.conf](nginx/nginx.conf#L155) e faça deploy.
+**Nota:** Whitelist de IP foi removida para facilitar desenvolvimento.
+Para produção SaaS, considere adicionar OAuth2/JWT.
 
 #### URLs Bloqueadas
 - `.env`, `.git`, `.sql`, `.bak` (arquivos sensíveis)
