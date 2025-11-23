@@ -74,23 +74,46 @@ SUSPICIOUS_USER_AGENTS = [
 
 # Endpoints válidos da aplicação (whitelist)
 VALID_ENDPOINTS = {
+    # Públicos
     '/',
     '/api/transacao',
     '/webhook-whatsapp',
     '/webhook-google-calendar',
+    '/webhook-automate',
+    '/webhook-sms-payment',
+    '/connect-calendar',  # Aceita qualquer ID
+    '/oauth2callback',
+    '/disconnect-calendar',  # Aceita qualquer ID
+
+    # Admin - Setup & Configuração
     '/admin/setup-database',
     '/admin/populate-global-categories',
     '/admin/setup-user-data',
+    '/admin/setup-calendar-table',
+    '/admin/setup-monthly-reports-table',
+    '/admin/setup-resumo-matinal',
+    '/admin/setup-potes-alerts',
+
+    # Admin - Triggers
     '/admin/run-motor-agendamentos',
     '/admin/trigger-agenda-notifications',
     '/admin/trigger-bills-notifications',
-    '/admin/trigger-monthly-reports-processing',
-    '/admin/trigger-monthly-reports-generation',
-    '/admin/trigger-monthly-reports-delivery',
     '/admin/trigger-daily-briefing',
-    '/admin/get-notification-config',
+    '/admin/trigger-monthly-reports-inicio',
+    '/admin/trigger-monthly-reports-fim',
+
+    # Admin - Testes & Debug
+    '/admin/test-notification',
+    '/admin/test-monthly-report',  # Aceita qualquer ID
+    '/admin/debug-calendar',
+
+    # Admin - Configurações & Info
+    '/admin/get-notification-config',  # Aceita qualquer ID
     '/admin/oauth-config-check',
-    '/admin/setup-potes-alerts',
+    '/admin/security-stats',
+
+    # Admin - Utilidades
+    '/admin/clear-bot-session',
 }
 
 def is_suspicious_request(path, user_agent):
@@ -109,7 +132,17 @@ def is_suspicious_request(path, user_agent):
                 return True, f"Suspicious User-Agent: {pattern}"
 
     # Verificar se é endpoint válido
-    if path not in VALID_ENDPOINTS and not path.startswith('/admin/get-notification-config/'):
+    # Endpoints com IDs dinâmicos
+    dynamic_endpoints = [
+        '/admin/get-notification-config/',
+        '/admin/test-monthly-report/',
+        '/connect-calendar/',
+        '/disconnect-calendar/',
+    ]
+
+    is_dynamic = any(path.startswith(prefix) for prefix in dynamic_endpoints)
+
+    if path not in VALID_ENDPOINTS and not is_dynamic:
         return True, f"Unknown endpoint: {path}"
 
     return False, None
