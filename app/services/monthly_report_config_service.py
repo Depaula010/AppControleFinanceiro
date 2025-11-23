@@ -206,7 +206,7 @@ def get_users_to_notify(momento_envio: str, janela_minutos: int = 5) -> list:
             mrc.hora_envio
         FROM Usuarios u
         INNER JOIN MonthlyReportConfigs mrc ON u.id = mrc.usuario_id
-        WHERE mrc.ativo = 1
+        WHERE mrc.ativo = TRUE
           AND mrc.momento_envio = :momento_envio
           AND mrc.hora_envio BETWEEN :hora_min AND :hora_max
         ORDER BY u.id
