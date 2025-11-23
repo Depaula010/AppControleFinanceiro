@@ -96,9 +96,9 @@ jobs:
       - name: 🔍 Health Check
         run: |
           sleep 10
-          response=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.CONTABO_HOST }}:8000/)
+          response=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.CONTABO_HOST }}/)
           if [ $response -eq 200 ]; then
-            echo "✅ Health check passed! Application is running."
+            echo "✅ Health check passed! Application is running on port 80 (Nginx)."
           else
             echo "❌ Health check failed! HTTP status: $response"
             exit 1
@@ -109,8 +109,10 @@ jobs:
         run: |
           echo "=================================================="
           echo "✅ Deployment successful!"
-          echo "🌐 Application URL: http://${{ secrets.CONTABO_HOST }}:8000"
+          echo "🌐 Application URL: http://${{ secrets.CONTABO_HOST }}"
+          echo "🔒 Admin Panel: http://${{ secrets.CONTABO_HOST }}/admin/"
           echo "📊 Check logs: docker compose logs -f web"
+          echo "🔐 Nginx logs: docker compose logs -f nginx"
           echo "=================================================="
 
       - name: ❌ Deployment Failed Notification

@@ -1,12 +1,32 @@
 version: '3.8'
 
 services:
+  # ============================================
+  # NGINX REVERSE PROXY (Camada de Proteção)
+  # ============================================
+  nginx:
+    image: nginx:alpine
+    container_name: meu-secretario-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"      # HTTP (redirecionado para HTTPS)
+      - "443:443"    # HTTPS (SSL/TLS habilitado)
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro  # Certificados SSL
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - web
+    networks:
+      - rede-global
+
+  # ============================================
+  # BACKEND PYTHON/FLASK (Protegido pelo Nginx)
+  # ============================================
   web:
     build: .
     container_name: meu-secretario-api
     restart: unless-stopped
-    ports:
-      - "8000:8000"
     networks:
       - rede-global
     environment:
@@ -25,14 +45,15 @@ services:
     volumes:
       - ./logs:/app/logs
 
+  # ============================================
+  # REDIS (Cache e Sessões)
+  # ============================================
   redis:
     image: redis:7-alpine
     container_name: meu-secretario-redis
     restart: unless-stopped
     networks:
       - rede-global
-    ports:
-      - "6379:6379"
     volumes:
       - redis-data:/data
     command: redis-server --appendonly yes

@@ -177,7 +177,11 @@ def create_app():
         except Exception as e:
             db_status = f"❌ Erro: {str(e)[:50]}"
 
-        print("TESTE DE DEPLOY v99 FUNCIONOU!")
-        return f"API DO BOT FINANCEIRO - DEPLOY v99 - FUNCIONOU!<br>DB: {db_status}"
-        
+        return jsonify({
+            "status": "online",
+            "service": "Meu Secretário API",
+            "database": db_status,
+            "timestamp": datetime.now().isoformat()
+        })
+
     return app
