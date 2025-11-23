@@ -2,18 +2,18 @@ version: '3.8'
 
 services:
   # ============================================
-  # NGINX REVERSE PROXY (Camada de Proteção)
+  # NGINX REVERSE PROXY
   # ============================================
   nginx:
     image: nginx:alpine
     container_name: meu-secretario-nginx
     restart: unless-stopped
     ports:
-      - "80:80"      # HTTP (redirecionado para HTTPS)
-      - "443:443"    # HTTPS (SSL/TLS habilitado)
+      - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro  # Certificados SSL
+      - ./nginx/ssl:/etc/nginx/ssl:ro
       - ./nginx/logs:/var/log/nginx
     depends_on:
       - web
@@ -21,7 +21,7 @@ services:
       - rede-global
 
   # ============================================
-  # BACKEND PYTHON/FLASK (Protegido pelo Nginx)
+  # BACKEND PYTHON/FLASK
   # ============================================
   web:
     build: .
@@ -44,9 +44,27 @@ services:
         condition: service_started
     volumes:
       - ./logs:/app/logs
+    # --- CONFIGURAÇÃO DOS CRON JOBS AQUI ---
+    labels:
+      ofelia.enabled: "true"
+      
+      # 1. Resumo Matinal (Roda toda hora, o script verifica se deve enviar)
+      ofelia.job-exec.resumo-matinal.schedule: "@hourly"
+      ofelia.job-exec.resumo-matinal.command: "python /app/processar_resumo_matinal.py"
+      
+      # 2. Relatório Mensal - Início do Mês (Dia 1 às 08:00)
+      # Usa curl interno para disparar o endpoint localmente
+      ofelia.job-exec.relatorio-inicio.schedule: "0 8 1 * *"
+      ofelia.job-exec.relatorio-inicio.command: "curl -X POST http://localhost:5000/admin/trigger-monthly-reports-inicio -H 'x-api-key: ${API_SECRET_KEY}'"
+      
+      # 3. Relatório Mensal - Fim do Mês (Último dia do mês é complexo no cron, usamos dia 28 como segurança ou script específico)
+      # Sugestão: Rodar dia 28, 29, 30, 31 e o script Python validar se é o último dia.
+      # Abaixo configurado para todo dia às 23:00, o backend deve validar se é fim de mês.
+      ofelia.job-exec.relatorio-fim.schedule: "0 23 * * *"
+      ofelia.job-exec.relatorio-fim.command: "curl -X POST http://localhost:5000/admin/trigger-monthly-reports-fim -H 'x-api-key: ${API_SECRET_KEY}'"
 
   # ============================================
-  # REDIS (Cache e Sessões)
+  # REDIS
   # ============================================
   redis:
     image: redis:7-alpine
@@ -57,6 +75,21 @@ services:
     volumes:
       - redis-data:/data
     command: redis-server --appendonly yes
+
+  # ============================================
+  # NOVO: AGENDADOR DE TAREFAS (CRON)
+  # ============================================
+  cron-scheduler:
+    image: mcuadros/ofelia:latest
+    container_name: meu-secretario-cron
+    restart: unless-stopped
+    depends_on:
+      - web
+    command: daemon --docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - rede-global
 
 volumes:
   redis-data:
