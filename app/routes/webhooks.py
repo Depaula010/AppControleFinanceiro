@@ -18,6 +18,7 @@ from app.services import notification_service
 from app.services import user_service
 from app.services.transaction_confirmation_service import TransactionConfirmationService
 from app.services.redis_service import redis_service
+from app.services.transaction_feedback_service import gerar_feedback_transacao
 
 from flask import redirect, request, render_template_string
 from app.services.google_calendar_oauth_service import GoogleCalendarOAuthService
@@ -536,7 +537,8 @@ def handle_whatsapp_webhook():
                         # Usar descricao_final se disponível, senão usar descricao
                         descricao_para_salvar = dados.get('descricao_final', dados.get('descricao'))
 
-                        finance_service.create_transaction(
+                        # Criar transação e capturar o ID
+                        transacao_id = finance_service.create_transaction(
                             conn,
                             dados['usuario_id'],
                             dados['conta_id'],
@@ -547,6 +549,7 @@ def handle_whatsapp_webhook():
                             dados['tipo_transacao'],
                             date.fromisoformat(dados['data_transacao'])
                         )
+                        print(f"[CONFIRM-SAVE] Transação criada com ID: {transacao_id}")
 
                         # Se for parcelado, criar agendamentos para as parcelas futuras
                         num_parcelas = dados.get('num_parcelas')
@@ -566,29 +569,14 @@ def handle_whatsapp_webhook():
                             )
                             print(f"[CONFIRM-SAVE] Agendamento de parcelas criado: {agendamento_id}")
 
-                        nome_cat = finance_service.get_category_name_by_id(conn, dados['categoria_id'])
+                        # Commit antes de gerar feedback (para garantir que dados estejam salvos)
                         conn.commit()
-                    
+
+                        # NOVO: Gerar mensagem de feedback enriquecida
+                        resposta = gerar_feedback_transacao(conn, transacao_id)
+
                     # Limpar last_pending
                     redis_service.delete(last_tx_key)
-
-                    # Formatar descrição para exibição
-                    local = dados.get('local')
-                    descricao = dados.get('descricao')
-
-                    if local:
-                        # Novo formato
-                        texto_desc = f"📍 {local}"
-                        if descricao:
-                            texto_desc += f" - {descricao}"
-                    else:
-                        # Formato antigo (compatibilidade)
-                        texto_desc = f"📝 {dados.get('descricao_final', dados.get('descricao'))}"
-
-                    resposta = f"✅ *Transação Salva com Sucesso!*\n\n"
-                    resposta += f"{texto_desc}\n"
-                    resposta += f"💵 {formatar_moeda(dados['valor_original'])}\n"
-                    resposta += f"🏷️ {nome_cat}"
 
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
                 

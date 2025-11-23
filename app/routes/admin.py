@@ -776,6 +776,152 @@ def trigger_daily_briefing():
         }), 500
 
 
+@admin_bp.route('/setup-potes-alerts', methods=['GET'])
+def setup_potes_alerts():
+    """
+    Adiciona colunas para alertas de potes na tabela NotificationConfigs.
+
+    - Adiciona 'alerta_potes_ativo' e 'alerta_potes_threshold'
+    - Garante que 'periodicidade' existe em PotesDeGastos
+    - Insere configurações padrão para usuários existentes
+
+    Exemplo:
+    GET http://seu-backend.com/admin/setup-potes-alerts
+    """
+    try:
+        output = []
+        output.append("="*60)
+        output.append("SETUP: Alertas de Potes (Feedback Financeiro)")
+        output.append("="*60)
+
+        # Migration 1: Criar tabela NotificationConfigs se não existir
+        output.append("\n[1/4] Verificando tabela NotificationConfigs...")
+
+        sql_create_table = text("""
+            CREATE TABLE IF NOT EXISTS NotificationConfigs (
+                id SERIAL PRIMARY KEY,
+                usuario_id INT NOT NULL REFERENCES Usuarios(id) ON DELETE CASCADE,
+
+                -- Agenda Diária
+                agenda_diaria_ativa BOOLEAN NOT NULL DEFAULT TRUE,
+                agenda_diaria_hora TIME NOT NULL DEFAULT '08:00:00',
+
+                -- Resumo Matinal
+                resumo_matinal_ativo BOOLEAN NOT NULL DEFAULT TRUE,
+                resumo_matinal_hora TIME NOT NULL DEFAULT '07:00:00',
+
+                -- Contas a Vencer
+                contas_vencer_ativa BOOLEAN NOT NULL DEFAULT TRUE,
+                contas_vencer_dias_antes INT NOT NULL DEFAULT 1,
+                contas_vencer_hora TIME NOT NULL DEFAULT '09:00:00',
+
+                -- Timestamps
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+                UNIQUE(usuario_id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_notification_configs_usuario
+            ON NotificationConfigs(usuario_id);
+        """)
+
+        with db_engine.connect() as conn:
+            conn.begin()
+            conn.execute(sql_create_table)
+            conn.commit()
+
+        output.append("OK - Tabela NotificationConfigs criada/verificada!")
+
+        # Migration 2: Adicionar colunas de alertas de potes
+        output.append("\n[2/4] Adicionando campos de alertas de potes...")
+
+        sql_potes_alerts = text("""
+            ALTER TABLE NotificationConfigs
+            ADD COLUMN IF NOT EXISTS alerta_potes_ativo BOOLEAN NOT NULL DEFAULT TRUE;
+
+            ALTER TABLE NotificationConfigs
+            ADD COLUMN IF NOT EXISTS alerta_potes_threshold INT NOT NULL DEFAULT 0;
+        """)
+
+        with db_engine.connect() as conn:
+            conn.begin()
+            conn.execute(sql_potes_alerts)
+            conn.commit()
+
+        output.append("OK - Campos 'alerta_potes_ativo' e 'alerta_potes_threshold' adicionados!")
+        output.append("    - alerta_potes_ativo: TRUE (padrao)")
+        output.append("    - alerta_potes_threshold: 0 (sempre mostrar)")
+
+        # Migration 3: Garantir que periodicidade existe em PotesDeGastos
+        output.append("\n[3/4] Verificando campo 'periodicidade' em PotesDeGastos...")
+
+        sql_periodicidade = text("""
+            ALTER TABLE PotesDeGastos
+            ADD COLUMN IF NOT EXISTS periodicidade VARCHAR(20) NOT NULL DEFAULT 'MENSAL'
+                CHECK (periodicidade IN ('SEMANAL', 'QUINZENAL', 'MENSAL', 'ANUAL'));
+        """)
+
+        with db_engine.connect() as conn:
+            conn.begin()
+            conn.execute(sql_periodicidade)
+            conn.commit()
+
+        output.append("OK - Campo 'periodicidade' verificado em PotesDeGastos!")
+
+        # Migration 4: Inserir configurações padrão para usuários existentes
+        output.append("\n[4/4] Inserindo configuracoes padrao para usuarios existentes...")
+
+        sql_insert_defaults = text("""
+            INSERT INTO NotificationConfigs (usuario_id, alerta_potes_ativo, alerta_potes_threshold)
+            SELECT id, TRUE, 0
+            FROM Usuarios
+            WHERE id NOT IN (SELECT usuario_id FROM NotificationConfigs)
+            ON CONFLICT (usuario_id) DO NOTHING;
+        """)
+
+        with db_engine.connect() as conn:
+            conn.begin()
+            result = conn.execute(sql_insert_defaults)
+            conn.commit()
+            rows_inserted = result.rowcount
+
+        output.append(f"OK - {rows_inserted} configuracao(es) padrao inserida(s)!")
+
+        # Comentários para documentação
+        sql_comments = text("""
+            COMMENT ON COLUMN NotificationConfigs.alerta_potes_ativo IS 'Se TRUE, mostra status do pote apos cada transacao';
+            COMMENT ON COLUMN NotificationConfigs.alerta_potes_threshold IS 'Threshold de % usado para mostrar alerta: 0=sempre, 50/70/90=apenas se ultrapassar';
+        """)
+
+        with db_engine.connect() as conn:
+            conn.begin()
+            conn.execute(sql_comments)
+            conn.commit()
+
+        output.append("\n" + "="*60)
+        output.append("SUCESSO! Feature de Alertas de Potes configurada")
+        output.append("="*60)
+        output.append("\nO que foi feito:")
+        output.append("1. Tabela NotificationConfigs criada/verificada")
+        output.append("2. Colunas de alertas de potes adicionadas")
+        output.append("3. Campo periodicidade em PotesDeGastos verificado")
+        output.append("4. Configuracoes padrao inseridas para usuarios existentes")
+        output.append("\nProximos passos:")
+        output.append("1. Criar potes de gastos (via WhatsApp ou SQL)")
+        output.append("2. Testar registrando uma despesa")
+        output.append("3. Verificar mensagem de feedback enriquecida")
+        output.append("4. (Futuro) Configurar threshold via WhatsApp")
+
+        return "<pre>" + "\n".join(output) + "</pre>", 200
+
+    except Exception as e:
+        print(f"[POTES-ALERTS-SETUP] Erro: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"<pre>Erro ao configurar Alertas de Potes:\n\n{traceback.format_exc()}</pre>", 500
+
+
 @admin_bp.route('/get-notification-config/<int:usuario_id>', methods=['GET'])
 def get_notification_config(usuario_id):
     """
@@ -797,7 +943,9 @@ def get_notification_config(usuario_id):
             'resumo_matinal_hora': config['resumo_matinal_hora'].strftime('%H:%M'),
             'contas_vencer_ativa': config['contas_vencer_ativa'],
             'contas_vencer_dias_antes': config['contas_vencer_dias_antes'],
-            'contas_vencer_hora': config['contas_vencer_hora'].strftime('%H:%M')
+            'contas_vencer_hora': config['contas_vencer_hora'].strftime('%H:%M'),
+            'alerta_potes_ativo': config.get('alerta_potes_ativo', True),
+            'alerta_potes_threshold': config.get('alerta_potes_threshold', 0)
         }
 
         return jsonify({

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(psql:*)",
+      "Bash(python run_migration.py:*)",
+      "Bash(.venv/Scripts/python.exe:*)",
+      "Bash(.venv/Scripts/pip.exe install:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

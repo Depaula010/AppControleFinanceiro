@@ -366,16 +366,18 @@ def get_category_name_by_id(conn, subcategoria_id):
     return f"{info[1]} -> {info[0]}" if info else "Categoria Desconhecida"
 
 def create_transaction(conn, usuario_id, conta_id, subcategoria_id, fatura_id, descricao, valor, tipo_transacao, data_transacao):
-    """ Insere uma transação simples (Renda/Despesa). (Requer conexão). """
+    """ Insere uma transação simples (Renda/Despesa). (Requer conexão). Retorna o ID da transação criada. """
     sql = text("""
-        INSERT INTO Transacoes 
-        (usuario_id, conta_id, subcategoria_id, fatura_id, transferencia_par_id, descricao, valor, tipo_transacao, data_transacao) 
+        INSERT INTO Transacoes
+        (usuario_id, conta_id, subcategoria_id, fatura_id, transferencia_par_id, descricao, valor, tipo_transacao, data_transacao)
         VALUES (:uid, :cid, :scid, :fid, NULL, :desc, :val, :tipo, :data)
+        RETURNING id
     """)
-    conn.execute(sql, {
+    result = conn.execute(sql, {
         "uid": usuario_id, "cid": conta_id, "scid": subcategoria_id, "fid": fatura_id,
         "desc": descricao, "val": valor, "tipo": tipo_transacao, "data": data_transacao
     })
+    return result.scalar_one()
 
 def create_transfer_pair(conn, usuario_id, conta_id_origem, conta_id_destino, valor, data_transacao):
     """ Cria o par de transações (entrada/saída) para uma transferência. (Requer conexão). """
