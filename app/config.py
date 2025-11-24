@@ -22,9 +22,12 @@ REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
 GOOGLE_REDIRECT_URI = os.environ.get(
-    'GOOGLE_REDIRECT_URI', 
+    'GOOGLE_REDIRECT_URI',
     'https://app-controle-financeiro-oh32.onrender.com/oauth2callback'
 )
+
+# API de Clima (opcional)
+WEATHER_API_KEY = os.environ.get('WEATHER_API_KEY')
 
 # Configuração do Banco de Dados
 if DATABASE_URL.startswith("postgres://"):
