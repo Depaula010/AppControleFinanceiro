@@ -327,12 +327,122 @@ class GoogleCalendarOAuthService:
         """Testa se conexão está funcionando"""
         try:
             service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
-            
+
             # Testar listando calendários
             calendars = service.calendarList().list().execute()
-            
+
             print(f"[OAUTH] ✅ Conexão OK. {len(calendars.get('items', []))} calendários encontrados")
             return True
         except Exception as e:
             print(f"[OAUTH] ❌ Teste de conexão falhou: {e}")
             return False
+
+    @staticmethod
+    def get_events_for_date(usuario_id, target_date):
+        """
+        Busca eventos de um dia específico para um usuário.
+
+        Args:
+            usuario_id: ID do usuário
+            target_date: date object
+
+        Returns:
+            dict: {'success': bool, 'events': list, 'error': str}
+        """
+        try:
+            from datetime import datetime, time
+            from zoneinfo import ZoneInfo
+
+            print(f"[OAUTH] Buscando eventos para usuário {usuario_id} na data {target_date}")
+
+            service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
+
+            # Timezone do Brasil
+            TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
+
+            # Criar datetime no timezone do Brasil
+            start_datetime = datetime.combine(target_date, time.min).replace(tzinfo=TIMEZONE_BR)
+            end_datetime = datetime.combine(target_date, time.max).replace(tzinfo=TIMEZONE_BR)
+
+            start_iso = start_datetime.isoformat()
+            end_iso = end_datetime.isoformat()
+
+            print(f"[OAUTH] Buscando de {start_iso} até {end_iso}")
+
+            # Buscar todos os calendários
+            calendars_result = service.calendarList().list().execute()
+            calendars = calendars_result.get('items', [])
+
+            # Filtrar apenas calendários selecionados
+            selected_calendars = [cal for cal in calendars if cal.get('selected', False)]
+
+            print(f"[OAUTH] Buscando em {len(selected_calendars)} calendários")
+
+            # Buscar eventos em todos os calendários
+            all_events = []
+            for calendar in selected_calendars:
+                cal_id = calendar['id']
+                cal_name = calendar.get('summary', 'Sem nome')
+
+                try:
+                    events_result = service.events().list(
+                        calendarId=cal_id,
+                        timeMin=start_iso,
+                        timeMax=end_iso,
+                        singleEvents=True,
+                        orderBy='startTime'
+                    ).execute()
+
+                    events = events_result.get('items', [])
+
+                    if events:
+                        print(f"[OAUTH] Calendário '{cal_name}': {len(events)} eventos")
+
+                    for event in events:
+                        event['_calendar_name'] = cal_name
+                        all_events.append(event)
+
+                except Exception as e:
+                    print(f"[OAUTH] Erro ao buscar em '{cal_name}': {e}")
+                    continue
+
+            print(f"[OAUTH] Total de {len(all_events)} eventos encontrados")
+
+            # Formatar eventos
+            formatted_events = []
+            for event in all_events:
+                try:
+                    start = event['start'].get('dateTime', event['start'].get('date'))
+                    end = event['end'].get('dateTime', event['end'].get('date'))
+
+                    formatted_events.append({
+                        'summary': event.get('summary', 'Sem título'),
+                        'start': start,
+                        'end': end,
+                        'location': event.get('location', ''),
+                        'description': event.get('description', ''),
+                        'all_day': 'date' in event['start'],
+                        'calendar_name': event.get('_calendar_name', '')
+                    })
+                except Exception as e:
+                    print(f"[OAUTH] Erro ao processar evento: {e}")
+                    continue
+
+            # Ordenar por horário
+            formatted_events.sort(key=lambda x: x['start'])
+
+            return {
+                'success': True,
+                'events': formatted_events,
+                'error': None
+            }
+
+        except Exception as e:
+            print(f"[OAUTH] ❌ Erro ao buscar eventos: {e}")
+            import traceback
+            traceback.print_exc()
+            return {
+                'success': False,
+                'events': [],
+                'error': str(e)
+            }
