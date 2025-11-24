@@ -802,7 +802,7 @@ def test_daily_briefing():
         from app.services.gemini_service import generate_daily_briefing
 
         # Pegar usuario_id do body ou usar 1 como padrão
-        data = request.get_json() or {}
+        data = request.get_json(silent=True) or {}
         usuario_id = data.get('usuario_id', 1)
 
         print(f"[TEST-BRIEFING] Testando resumo matinal para usuário {usuario_id}...")
