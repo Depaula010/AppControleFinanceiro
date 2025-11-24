@@ -842,8 +842,9 @@ def generate_daily_briefing(briefing_data):
         clima_texto = f"Clima: {clima['descricao_completa']}"
 
         # Adicionar chance de chuva se alta
-        if clima.get('chance_chuva', 0) >= 30:
-            clima_texto += f" - Chance de chuva: {clima['chance_chuva']}%"
+        chance_chuva = clima.get('chance_chuva') or 0
+        if chance_chuva >= 30:
+            clima_texto += f" - Chance de chuva: {chance_chuva}%"
 
     # Climas adicionais (outras cidades)
     climas_extras = ""
