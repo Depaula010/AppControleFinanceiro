@@ -23,28 +23,23 @@ class EncryptionService:
 
     def _initialize_cipher(self):
         """
-        Inicializa o cipher Fernet usando a API_SECRET_KEY como base
+        Inicializa o cipher Fernet usando ENCRYPTION_KEY dedicada
         """
-        # Deriva uma chave de 32 bytes (URL-safe base64) a partir da API_SECRET_KEY
-        # IMPORTANTE: Em produção, use uma chave dedicada (variável ENCRYPTION_KEY)
         encryption_key = os.getenv('ENCRYPTION_KEY')
 
         if not encryption_key:
-            # Fallback: derivar da API_SECRET_KEY
-            # Pega os primeiros 32 bytes e converte para base64
-            key_bytes = (API_SECRET_KEY + '=' * 32)[:32].encode('utf-8')
-            encryption_key = base64.urlsafe_b64encode(key_bytes)
-            print("[ENCRYPTION] ⚠️  Usando chave derivada de API_SECRET_KEY. "
-                  "Configure ENCRYPTION_KEY em produção!")
-        else:
-            encryption_key = encryption_key.encode('utf-8')
+            raise ValueError(
+                "ENCRYPTION_KEY não configurada. Esta chave é necessária para criptografar dados sensíveis. "
+                "Gere uma chave Fernet com: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\""
+            )
+
+        encryption_key = encryption_key.encode('utf-8')
 
         try:
             self._cipher = Fernet(encryption_key)
-            print("[ENCRYPTION] ✅ Serviço de criptografia inicializado")
+            print("[ENCRYPTION] ✅ Serviço de criptografia inicializado com ENCRYPTION_KEY dedicada")
         except Exception as e:
-            print(f"[ENCRYPTION] ❌ Erro ao inicializar cipher: {e}")
-            self._cipher = None
+            raise ValueError(f"ENCRYPTION_KEY inválida. Deve ser uma chave Fernet válida: {e}")
 
     def encrypt(self, plaintext: str) -> str:
         """

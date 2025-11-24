@@ -9,20 +9,44 @@ RATELIMIT_ENABLED = os.getenv('RATELIMIT_ENABLED', 'true').lower() == 'true'
 RATELIMIT_STORAGE_URI = os.getenv('REDIS_URL', 'memory://')
 RATELIMIT_STRATEGY = 'fixed-window'
 
-# Limites por tipo de endpoint (ajustados para uso real + preparado para SaaS)
+# Limites por tipo de endpoint (VALORES SEGUROS - ajustados após auditoria de segurança)
 RATELIMIT_DEFAULTS = {
-    'default': '1000 per hour',  # ~16 req/min - uso confortável pessoal
-    'api': '500 per hour',       # Endpoints de transação/consulta
-    'webhooks': '100 per minute; 3000 per hour',  # Suporta bursts do WhatsApp
-    'admin': '20 per minute; 200 per hour',       # Proteção brute force
+    'default': '100 per hour',   # ~1.6 req/min - uso pessoal normal
+    'api': '200 per hour',       # Endpoints de transação/consulta (~3 req/min)
+    'webhooks': '30 per minute; 500 per hour',  # WhatsApp: usuário não envia 30 msgs/min
+    'admin': '5 per minute; 50 per hour',       # CRÍTICO: proteção contra brute force
+}
+
+# Limites específicos por endpoint (sobrescrevem defaults)
+RATELIMIT_SPECIFIC = {
+    '/admin/setup-database': '2 per day',        # Setup é raro
+    '/admin/clear-bot-session': '5 per day',     # Limpar sessão é excepcional
+    '/webhook-whatsapp': '20 per minute',        # Conversas normais
+    '/api/transacao': '10 per minute',           # ~1 transação a cada 6 segundos
 }
 
 # Headers de segurança (Talisman)
 SECURITY_HEADERS_ENABLED = os.getenv('SECURITY_HEADERS_ENABLED', 'true').lower() == 'true'
 
-# CORS
+# CORS (Cross-Origin Resource Sharing)
 CORS_ENABLED = os.getenv('CORS_ENABLED', 'false').lower() == 'true'
-CORS_ORIGINS = os.getenv('CORS_ORIGINS', '*').split(',')
+
+# Validar configuração de CORS
+cors_origins_str = os.getenv('CORS_ORIGINS', '').strip()
+if CORS_ENABLED:
+    if not cors_origins_str:
+        raise ValueError(
+            "CORS_ENABLED=true requer CORS_ORIGINS configurado. "
+            "Defina origens explícitas, separadas por vírgula. "
+            "NUNCA use '*' (wildcard)."
+        )
+    if cors_origins_str == '*':
+        raise ValueError(
+            "CORS_ORIGINS='*' não é permitido por motivos de segurança. "
+            "Especifique domínios explícitos: https://app.exemplo.com,https://exemplo.com"
+        )
+
+CORS_ORIGINS = [o.strip() for o in cors_origins_str.split(',') if o.strip()] if cors_origins_str else []
 
 # Content Security Policy
 CSP_CONFIG = {

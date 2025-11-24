@@ -1,6 +1,10 @@
 # app/utils.py (ADICIONAR ESTAS FUNÇÕES)
 import locale
 import time
+import hmac
+import hashlib
+import secrets
+import re
 from functools import wraps
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError, DBAPIError
@@ -106,10 +110,10 @@ def ensure_db_connection():
     Chame no início de cada rota crítica.
     """
     from app import db_engine
-    
+
     if not db_engine:
         raise Exception("DB engine não configurado")
-    
+
     try:
         with db_engine.connect() as conn:
             conn.execute(text("SELECT 1"))
@@ -125,3 +129,131 @@ def ensure_db_connection():
         except Exception as e2:
             print(f"[DB] ❌ Falha ao reconectar: {e2}")
             raise
+
+
+# ============ FUNÇÕES DE SEGURANÇA ============
+
+def verify_hmac_signature(payload: bytes, signature: str, secret_key: str) -> bool:
+    """
+    Verifica assinatura HMAC-SHA256 de um payload
+
+    Args:
+        payload: Dados em bytes
+        signature: Assinatura recebida (hexadecimal)
+        secret_key: Chave secreta para verificação
+
+    Returns:
+        True se assinatura é válida, False caso contrário
+    """
+    if not signature or not secret_key:
+        return False
+
+    try:
+        expected_signature = hmac.new(
+            secret_key.encode('utf-8'),
+            payload,
+            hashlib.sha256
+        ).hexdigest()
+
+        # Usa compare_digest para evitar timing attacks
+        return secrets.compare_digest(signature, expected_signature)
+    except Exception as e:
+        print(f"[SECURITY] Erro ao verificar HMAC: {e}")
+        return False
+
+
+def generate_hmac_signature(payload: bytes, secret_key: str) -> str:
+    """
+    Gera assinatura HMAC-SHA256 de um payload
+
+    Args:
+        payload: Dados em bytes
+        secret_key: Chave secreta
+
+    Returns:
+        Assinatura em hexadecimal
+    """
+    return hmac.new(
+        secret_key.encode('utf-8'),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+
+
+def sanitize_for_log(data: dict) -> dict:
+    """
+    Remove campos sensíveis de dados antes de logar
+
+    Args:
+        data: Dicionário com dados
+
+    Returns:
+        Dicionário sanitizado (cópia)
+    """
+    if not data or not isinstance(data, dict):
+        return data
+
+    sanitized = data.copy()
+    sensitive_keys = [
+        'api_key', 'user_api_key', 'password', 'token',
+        'secret', 'access_token', 'refresh_token',
+        'authorization', 'x-api-key'
+    ]
+
+    for key in sensitive_keys:
+        if key in sanitized:
+            # Mostra apenas os primeiros 8 caracteres
+            value = str(sanitized[key])
+            sanitized[key] = f"{value[:8]}..." if len(value) > 8 else "[REDACTED]"
+
+    return sanitized
+
+
+def sanitize_input(text: str, max_length: int = 200, allow_special_chars: bool = False) -> str:
+    """
+    Sanitiza input de usuário para prevenir XSS e injection
+
+    Args:
+        text: Texto a sanitizar
+        max_length: Comprimento máximo permitido
+        allow_special_chars: Se False, remove caracteres especiais perigosos
+
+    Returns:
+        Texto sanitizado
+    """
+    if not text:
+        return text
+
+    # 1. Limitar tamanho
+    text = text[:max_length]
+
+    # 2. Remover caracteres de controle (exceto espaço, tab, newline)
+    text = ''.join(char for char in text if ord(char) >= 32 or char in '\t\n\r')
+
+    # 3. Remover caracteres perigosos se necessário
+    if not allow_special_chars:
+        # Remove: < > { } \ $ ` | ; &
+        dangerous_chars = r'[<>{}\\$`|;&]'
+        text = re.sub(dangerous_chars, '', text)
+
+    # 4. Normalizar espaços múltiplos
+    text = re.sub(r'\s+', ' ', text)
+
+    return text.strip()
+
+
+def compare_keys_safe(key1: str, key2: str) -> bool:
+    """
+    Compara duas chaves de forma segura (timing-attack resistant)
+
+    Args:
+        key1: Primeira chave
+        key2: Segunda chave
+
+    Returns:
+        True se as chaves são iguais
+    """
+    if not key1 or not key2:
+        return False
+
+    return secrets.compare_digest(key1, key2)

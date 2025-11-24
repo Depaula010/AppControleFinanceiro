@@ -8,9 +8,8 @@ from app.services.fixed_bills_service import FixedBillsService
 from sqlalchemy import text
 
 from app import db_engine, gemini_model
-from app.config import API_SECRET_KEY, BOT_WHATSAPP_URL
-from app.utils import formatar_moeda
-from app.utils import ensure_db_connection
+from app.config import API_SECRET_KEY, BOT_WHATSAPP_URL, WEBHOOK_SIGNATURE_KEY
+from app.utils import formatar_moeda, ensure_db_connection, verify_hmac_signature, compare_keys_safe, sanitize_for_log, sanitize_input
 
 from app.services import finance_service
 from app.services import gemini_service
@@ -187,26 +186,25 @@ def handle_api_transacao():
     try:
         data = request.json
 
-        # Log do payload recebido (sem expor a API key completa)
-        print(f"[API-TRANSACAO] Payload recebido: {data}")
+        # Log do payload recebido (sanitizado para não expor dados sensíveis)
+        print(f"[API-TRANSACAO] Payload recebido: {sanitize_for_log(data)}")
 
         user_api_key = data.get('user_api_key')
         valor = data.get('valor')
-        local = data.get('local')
-        descricao = data.get('descricao')
-        conta_nome = data.get('conta')
-        tipo_pagamento = data.get('tipo_pagamento')
 
-        # Normalizar strings (remover espaços e acentos)
-        if conta_nome:
-            conta_nome = conta_nome.strip()
-        if local:
-            local = local.strip()
-        if tipo_pagamento:
-            # Remover espaços e normalizar acentos
-            tipo_pagamento = tipo_pagamento.strip().lower()
+        # Sanitizar inputs de texto para prevenir XSS/injection
+        local = sanitize_input(data.get('local', ''), max_length=100) if data.get('local') else None
+        descricao = sanitize_input(data.get('descricao', ''), max_length=200, allow_special_chars=True) if data.get('descricao') else None
+        conta_nome = sanitize_input(data.get('conta', ''), max_length=50) if data.get('conta') else None
+        tipo_pagamento_raw = data.get('tipo_pagamento', '')
+
+        # Normalizar tipo_pagamento
+        if tipo_pagamento_raw:
+            tipo_pagamento = sanitize_input(tipo_pagamento_raw, max_length=20).strip().lower()
             # Normalizar variações comuns
             tipo_pagamento = tipo_pagamento.replace('é', 'e').replace('í', 'i')
+        else:
+            tipo_pagamento = None
 
         # Validações de campos obrigatórios com detalhamento
         campos_faltando = []
@@ -230,15 +228,17 @@ def handle_api_transacao():
                 "mensagem": erro_msg
             }), 400
 
-        # Validar valor numérico positivo
+        # Validar valor numérico positivo e razoável
         try:
             valor = float(valor)
             if valor <= 0:
                 raise ValueError("Valor deve ser positivo")
-        except (ValueError, TypeError):
+            if valor > 1000000000:  # 1 bilhão - limite razoável
+                raise ValueError("Valor muito alto (máx: 1 bilhão)")
+        except (ValueError, TypeError) as e:
             return jsonify({
                 "status": "erro",
-                "mensagem": "Valor inválido. Deve ser um número positivo."
+                "mensagem": f"Valor inválido: {str(e)}"
             }), 400
 
         # Validar tipo_pagamento
@@ -428,21 +428,36 @@ def handle_whatsapp_webhook():
     if not db_engine or not gemini_model:
         return jsonify({"status": "erro", "mensagem": "Serviço não configurado"}), 503
 
-    # 1. Autenticar API
+    # 1. Validar assinatura HMAC (primeira camada de segurança)
+    webhook_signature = request.headers.get('X-Webhook-Signature', '').strip()
+    if webhook_signature:
+        payload = request.get_data()
+        if not verify_hmac_signature(payload, webhook_signature, WEBHOOK_SIGNATURE_KEY):
+            print("[SECURITY] ⚠️  Assinatura HMAC inválida no webhook WhatsApp")
+            return jsonify({"status": "erro", "resposta": "Assinatura inválida"}), 401
+    else:
+        print("[SECURITY] ⚠️  Webhook sem assinatura HMAC (modo compatibilidade)")
+
+    # 2. Autenticar API key (segunda camada de segurança)
     secret_key_recebida = request.headers.get('x-api-key', '').strip()
-    if not secret_key_recebida or secret_key_recebida != API_SECRET_KEY:
+    if not secret_key_recebida or not compare_keys_safe(secret_key_recebida, API_SECRET_KEY):
         return jsonify({"status": "erro", "resposta": "Não autorizado"}), 401
     
     try:
         data = request.json
-        texto_msg = data.get('texto')
+        texto_msg_raw = data.get('texto')
         numero_remetente = data.get('numero_remetente')
-        
-        if not texto_msg or not numero_remetente:
+
+        if not texto_msg_raw or not numero_remetente:
             return jsonify({"status": "erro", "mensagem": "Dados faltando"}), 400
 
-        numero_limpo = numero_remetente.split('@')[0]
-        print(f"[WHATSAPP] Mensagem de {numero_limpo}: {texto_msg}")
+        # Sanitizar mensagem (permite caracteres especiais para nomes de lugares, etc)
+        texto_msg = sanitize_input(texto_msg_raw, max_length=1000, allow_special_chars=True)
+        numero_limpo = sanitize_input(numero_remetente.split('@')[0], max_length=20)
+
+        # Limitar tamanho da mensagem no log
+        texto_log = texto_msg[:100] + "..." if len(texto_msg) > 100 else texto_msg
+        print(f"[WHATSAPP] Mensagem de {numero_limpo}: {texto_log}")
 
         # 2. Verificar cadastro
         user_info = user_service.check_user_exists(numero_limpo)

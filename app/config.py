@@ -12,7 +12,14 @@ GEMINI_API_KEY = os.environ['GEMINI_API_KEY']
 DATABASE_URL = os.environ['DATABASE_URL']
 
 # Chave secreta da *nossa* API (para o bot e o automate)
-API_SECRET_KEY = os.environ.get('API_SECRET_KEY', 'uma-senha-bem-forte-12345') 
+# IMPORTANTE: Deve ter pelo menos 32 caracteres para segurança adequada
+API_SECRET_KEY = os.environ['API_SECRET_KEY']
+if len(API_SECRET_KEY) < 32:
+    raise ValueError("API_SECRET_KEY deve ter pelo menos 32 caracteres. "
+                     "Gere uma chave segura com: python -c \"import secrets; print(secrets.token_urlsafe(32))\"")
+
+# Chave separada para assinatura de webhooks (HMAC)
+WEBHOOK_SIGNATURE_KEY = os.environ.get('WEBHOOK_SIGNATURE_KEY', API_SECRET_KEY) 
 
 # URL do serviço do Bot (para enviar notificações)
 BOT_WHATSAPP_URL = os.environ.get('BOT_WHATSAPP_URL', 'https://bot-appfinanceiro-whatsapp.onrender.com')
