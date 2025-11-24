@@ -898,6 +898,12 @@ INSTRUÇÕES:
 6. Mantenha tom profissional mas amigável
 7. NÃO invente informações que não estão nos dados fornecidos
 
+FORMATAÇÃO (IMPORTANTE):
+- Use *texto* para negrito (WhatsApp)
+- Para listas, use "•" (bullet) ou "-", NUNCA use "*" como marcador
+- Organize seções com títulos em negrito
+- EVITE usar dois asteriscos seguidos (** ou * *)
+
 Gere APENAS o texto da mensagem, sem introduções ou formatação extra.
 """
 
@@ -907,6 +913,14 @@ Gere APENAS o texto da mensagem, sem introduções ou formatação extra.
 
         # Limpar qualquer formatação extra
         mensagem = response_text.strip()
+
+        # Corrigir formatação problemática do Gemini
+        import re
+        # Padrão principal: Remover asteriscos de marcadores de lista
+        # Converte "*   *texto" -> "   • texto" (bullet simples)
+        mensagem = re.sub(r'^\*\s+\*', '   • ', mensagem, flags=re.MULTILINE)
+        # Também trata variações como "* *texto" ou "*  *texto"
+        mensagem = re.sub(r'^\s*\*\s*\*', '   • ', mensagem, flags=re.MULTILINE)
 
         print(f"[GEMINI-BRIEFING] Resumo gerado com sucesso ({len(mensagem)} chars)")
         return mensagem
