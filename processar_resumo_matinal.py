@@ -31,8 +31,8 @@ def processar_resumo_matinal():
             from app.services.daily_briefing_service import DailyBriefingService
             from app.services.gemini_service import generate_daily_briefing
             from app.services.notification_service import enviar_notificacao_whatsapp
-            from app.config import Config
-
+            # Removido import do Config que causava erro
+            
             # Obter hora atual (zerando segundos para bater com o banco)
             hora_atual = datetime.now().time().replace(second=0, microsecond=0)
 
@@ -65,7 +65,6 @@ def processar_resumo_matinal():
                     mensagem = ""
                     # Se não há eventos, verificar se deve enviar mensagem simples ou nada
                     if briefing_data.get('total_eventos', 0) == 0:
-                        # Opcional: Você pode querer pular o envio se não tiver nada
                         print(f"[RESUMO-MATINAL] Sem eventos para usuário {usuario_id}. Gerando mensagem básica.")
                         mensagem = briefing_service.generate_briefing_message(usuario_id, date.today())
                     else:
@@ -77,12 +76,12 @@ def processar_resumo_matinal():
                         print(f"[RESUMO-MATINAL] Falha ao gerar mensagem para usuário {usuario_id}")
                         continue
 
-                    # Enviar via WhatsApp
+                    # Enviar via WhatsApp (Usando app.config diretamente)
                     enviar_notificacao_whatsapp(
                         numero_whatsapp,
                         mensagem,
-                        Config.BOT_WHATSAPP_URL,
-                        Config.API_SECRET_KEY
+                        app.config.get('BOT_WHATSAPP_URL'), # CORRIGIDO AQUI
+                        app.config.get('API_SECRET_KEY')    # CORRIGIDO AQUI
                     )
 
                     print(f"[RESUMO-MATINAL] ✅ Resumo enviado para usuário {usuario_id}")
