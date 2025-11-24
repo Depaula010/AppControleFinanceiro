@@ -776,6 +776,124 @@ def trigger_daily_briefing():
         }), 500
 
 
+@admin_bp.route('/test-daily-briefing', methods=['POST'])
+def test_daily_briefing():
+    """
+    Endpoint de TESTE para enviar resumo matinal para o usuário padrão (ID 1).
+    Ignora horário configurado - envia imediatamente.
+
+    Uso:
+    POST /admin/test-daily-briefing
+    Header: x-api-key: SUA_SECRET_KEY
+
+    Opcional - Body JSON:
+    {
+        "usuario_id": 1  // Se não informar, usa 1 como padrão
+    }
+    """
+    # Autenticar
+    secret_key = request.headers.get('x-api-key')
+    if secret_key != API_SECRET_KEY:
+        print("[TEST-BRIEFING] Tentativa não autorizada")
+        return jsonify({"status": "erro", "mensagem": "Não autorizado"}), 401
+
+    try:
+        from app.services.daily_briefing_service import DailyBriefingService
+        from app.services.gemini_service import generate_daily_briefing
+
+        # Pegar usuario_id do body ou usar 1 como padrão
+        data = request.get_json() or {}
+        usuario_id = data.get('usuario_id', 1)
+
+        print(f"[TEST-BRIEFING] Testando resumo matinal para usuário {usuario_id}...")
+
+        # Buscar dados do usuário
+        sql = text("""
+            SELECT u.numero_whatsapp
+            FROM Usuarios u
+            WHERE u.id = :uid
+        """)
+
+        with db_engine.connect() as conn:
+            result = conn.execute(sql, {"uid": usuario_id}).fetchone()
+
+        if not result:
+            return jsonify({
+                "status": "erro",
+                "mensagem": f"Usuário {usuario_id} não encontrado"
+            }), 404
+
+        numero_whatsapp = result.numero_whatsapp
+
+        if not numero_whatsapp:
+            return jsonify({
+                "status": "erro",
+                "mensagem": f"Usuário {usuario_id} não tem número de WhatsApp cadastrado"
+            }), 400
+
+        # Inicializar serviço
+        briefing_service = DailyBriefingService()
+
+        # Preparar dados do resumo
+        briefing_data = briefing_service.prepare_briefing_data(usuario_id, date.today())
+
+        if not briefing_data:
+            return jsonify({
+                "status": "erro",
+                "mensagem": "Erro ao preparar dados do briefing"
+            }), 500
+
+        # Gerar mensagem
+        mensagem = ""
+        if briefing_data['total_eventos'] == 0:
+            print(f"[TEST-BRIEFING] Sem eventos. Gerando mensagem básica.")
+            mensagem = briefing_service.generate_briefing_message(usuario_id, date.today())
+        else:
+            print(f"[TEST-BRIEFING] Gerando resumo com IA ({briefing_data['total_eventos']} eventos)...")
+            mensagem = generate_daily_briefing(briefing_data)
+
+        if not mensagem:
+            return jsonify({
+                "status": "erro",
+                "mensagem": "Falha ao gerar mensagem"
+            }), 500
+
+        # Enviar via WhatsApp
+        print(f"[TEST-BRIEFING] Enviando para {numero_whatsapp}...")
+        sucesso = enviar_notificacao_whatsapp(
+            numero_whatsapp,
+            mensagem,
+            BOT_WHATSAPP_URL,
+            API_SECRET_KEY
+        )
+
+        if sucesso:
+            print(f"[TEST-BRIEFING] ✅ Resumo enviado com sucesso!")
+            return jsonify({
+                "status": "sucesso",
+                "mensagem": "Resumo matinal enviado com sucesso",
+                "usuario_id": usuario_id,
+                "numero_whatsapp": numero_whatsapp,
+                "total_eventos": briefing_data['total_eventos'],
+                "preview_mensagem": mensagem[:200] + "..." if len(mensagem) > 200 else mensagem
+            }), 200
+        else:
+            return jsonify({
+                "status": "erro",
+                "mensagem": "Falha ao enviar WhatsApp"
+            }), 500
+
+    except Exception as e:
+        print(f"[TEST-BRIEFING] ❌ Erro: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "erro",
+            "mensagem": str(e),
+            "traceback": traceback.format_exc()
+        }), 500
+
+
 @admin_bp.route('/setup-potes-alerts', methods=['GET'])
 def setup_potes_alerts():
     """
