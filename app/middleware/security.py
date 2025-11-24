@@ -105,6 +105,7 @@ VALID_ENDPOINTS = {
     # Admin - Testes & Debug
     '/admin/test-notification',
     '/admin/test-monthly-report',  # Aceita qualquer ID
+    '/admin/test-daily-briefing',
     '/admin/debug-calendar',
 
     # Admin - Configurações & Info
