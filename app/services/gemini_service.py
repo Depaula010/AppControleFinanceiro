@@ -876,8 +876,17 @@ def generate_daily_briefing(briefing_data):
         if gaps_list:
             gaps_texto = f"\n\nHorários livres entre eventos:\n" + "\n".join(f"• {g}" for g in gaps_list)
 
+    # Informações da data
+    data_alvo = briefing_data.get('data', datetime.now().date())
+    dias_semana = ['segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira',
+                   'sexta-feira', 'sábado', 'domingo']
+    dia_semana = dias_semana[data_alvo.weekday()]
+    data_formatada = data_alvo.strftime('%d/%m/%Y')
+
     # Montar prompt para Gemini
     prompt = f"""Você é um assistente pessoal humanizado. Gere um resumo matinal da agenda do usuário.
+
+DATA: {data_formatada} ({dia_semana})
 
 EVENTOS DO DIA:
 {eventos_str}
@@ -888,16 +897,17 @@ EVENTOS DO DIA:
 
 INSTRUÇÕES:
 1. Comece com uma saudação amigável (ex: "☀️ Bom dia!", "🌅 Olá!")
-2. Resuma os compromissos de forma clara e objetiva
-3. Use emojis apropriados (mas sem exagerar)
-4. Destaque informações importantes:
+2. IMPORTANTE: Use o dia da semana CORRETO informado acima ({dia_semana})
+3. Resuma os compromissos de forma clara e objetiva
+4. Use emojis apropriados (mas sem exagerar)
+5. Destaque informações importantes:
    - Se há eventos remotos vs presenciais
    - Horários livres úteis para trabalho focado ou pausa
    - Clima (especialmente se for chover ou temperatura extrema)
    - Dicas úteis (ex: "saia cedo", "leve guarda-chuva", "tempo livre para almoço")
-5. Seja conciso mas informativo (máximo 15 linhas)
-6. Mantenha tom profissional mas amigável
-7. NÃO invente informações que não estão nos dados fornecidos
+6. Seja conciso mas informativo (máximo 15 linhas)
+7. Mantenha tom profissional mas amigável
+8. NÃO invente informações que não estão nos dados fornecidos
 
 FORMATAÇÃO (IMPORTANTE):
 - Use *texto* para negrito (WhatsApp)
