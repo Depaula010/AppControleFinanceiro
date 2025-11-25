@@ -1,5 +1,6 @@
 # app/routes/webhooks.py (COM SISTEMA DE CONFIRMAÇÃO)
 from flask import Blueprint, jsonify, request
+from werkzeug.exceptions import BadRequest
 from sqlalchemy import exc as sqlalchemy_exc
 from datetime import date
 from app.services.period_query_service import PeriodQueryService
@@ -183,11 +184,21 @@ def handle_api_transacao():
     if not db_engine or not gemini_model:
         return jsonify({"status": "erro", "mensagem": "Serviço não configurado"}), 503
 
+    # Adiciona o log para todas as requisições
+    raw_data = request.get_data(as_text=True)
+    print(f"[API-TRANSACAO] Conteúdo recebido: {raw_data}")
+
     try:
-        data = request.json
+        try:
+            data = request.get_json()
+            if data is None:
+                raise BadRequest("Request body is not JSON or is empty")
+        except BadRequest as e:
+            print(f"[API-TRANSACAO] ERRO: {e}")
+            return jsonify({"erro": "JSON inválido ou ausente"}), 400
 
         # Log do payload recebido (sanitizado para não expor dados sensíveis)
-        print(f"[API-TRANSACAO] Payload recebido: {sanitize_for_log(data)}")
+        print(f"[API-TRANSACAO] Payload JSON decodificado: {sanitize_for_log(data)}")
 
         user_api_key = data.get('user_api_key')
         valor = data.get('valor')
