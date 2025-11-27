@@ -493,17 +493,21 @@ def handle_whatsapp_webhook():
 
         # 3. NOVO: Verificar confirmações/cancelamentos de EVENTOS
         msg_lower = texto_msg.strip().lower()
+
+        # Verificar se quer calcular tempo de deslocamento
+        wants_travel_time = 'calcular' in msg_lower and 'rota' in msg_lower
+
         palavras_confirmacao_evento = ['sim', 'confirmar', 'confirma', 'ok', 's']
         palavras_cancelamento_evento = ['não', 'nao', 'cancelar', 'cancela', 'desistir', 'n']
 
-        # Verificar se é resposta simples de confirmação/cancelamento
-        if msg_lower in palavras_confirmacao_evento or msg_lower in palavras_cancelamento_evento:
+        # Verificar se é resposta simples de confirmação/cancelamento (mas não "sim, calcular")
+        if not wants_travel_time and (msg_lower in palavras_confirmacao_evento or msg_lower in palavras_cancelamento_evento):
             # Buscar evento pendente
             event_id, event_data = EventConfirmationService.get_latest_pending_event(numero_limpo)
 
             if event_data:
                 if msg_lower in palavras_confirmacao_evento:
-                    # Confirmar e criar evento
+                    # Confirmar e criar evento SEM cálculo de tempo
                     sucesso, mensagem, google_event_id = EventConfirmationService.confirm_and_create_event(numero_limpo, event_id)
 
                     if sucesso:
@@ -519,6 +523,67 @@ def handle_whatsapp_webhook():
                 else:  # Cancelamento
                     sucesso, mensagem = EventConfirmationService.cancel_pending_event(numero_limpo, event_id)
                     return jsonify({"status": "sucesso", "resposta": mensagem}), 200
+
+        # 3.1 Verificar se quer calcular tempo de deslocamento
+        if wants_travel_time:
+            from app.services.user_address_service import UserAddressService
+
+            # Buscar evento pendente
+            event_id, event_data = EventConfirmationService.get_latest_pending_event(numero_limpo)
+
+            if not event_data:
+                resposta_para_usuario = "❌ Não encontrei nenhum evento pendente de confirmação."
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+            # Verificar se evento tem localização
+            if not event_data.get('localizacao'):
+                resposta_para_usuario = "❌ Este evento não tem localização definida, não posso calcular tempo de deslocamento."
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+            # Buscar endereços cadastrados
+            usuario_id = event_data.get('usuario_id')
+            user_addresses = UserAddressService.get_user_addresses(usuario_id)
+
+            if not user_addresses or len(user_addresses) == 0:
+                resposta_para_usuario = (
+                    "❌ Você não tem endereços cadastrados.\n\n"
+                    "Configure um endereço primeiro:\n"
+                    "Exemplo: _'Configurar endereço casa: Av Paulista 1000, São Paulo-SP'_"
+                )
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+            elif len(user_addresses) == 1:
+                # Só 1 endereço: usar automaticamente
+                origem = user_addresses[0]
+                label_nome = UserAddressService.LABEL_NAMES.get(origem['label'], origem['label'].capitalize())
+                emoji = UserAddressService.LABEL_EMOJIS.get(origem['label'], '📍')
+
+                # TODO: Implementar lógica de cálculo aqui
+                resposta_para_usuario = (
+                    f"🚗 *Calculando tempo de deslocamento...*\n\n"
+                    f"Origem: {emoji} {label_nome} ({origem['endereco']})\n"
+                    f"Destino: 📍 {event_data['localizacao']}\n\n"
+                    f"⏳ Aguarde..."
+                )
+                # Por enquanto, só retorna a mensagem
+                # A implementação completa virá depois
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+            else:
+                # 2+ endereços: perguntar qual usar
+                msg = "🚗 *Qual endereço usar como origem?*\n\n"
+
+                for addr in user_addresses:
+                    label = addr['label']
+                    endereco = addr['endereco']
+                    emoji = UserAddressService.LABEL_EMOJIS.get(label, '📍')
+                    label_nome = UserAddressService.LABEL_NAMES.get(label, label.capitalize())
+
+                    msg += f"{emoji} *{label_nome}*: {endereco}\n"
+
+                msg += f"\n💬 Responda com: _'casa'_, _'trabalho'_ ou _'outro'_"
+
+                return jsonify({"status": "sucesso", "resposta": msg}), 200
 
         # 3.1. Verificar se está respondendo a uma confirmação de TRANSAÇÃO
         # Tentar identificar transaction_id na mensagem ou buscar última pendente

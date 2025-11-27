@@ -218,7 +218,7 @@ class EventConfirmationService:
             if user_addresses and len(user_addresses) > 0:
                 # Usuário tem endereços cadastrados, pode calcular tempo
                 msg += f"\n\n🚗 *Deseja calcular tempo de deslocamento?*"
-                msg += f"\n   Responda *'sim, calcular'* para incluir tempo de viagem"
+                msg += f"\n   Responda *'calcular rota'* para incluir tempo de viagem"
             else:
                 # Usuário não tem endereços, sugerir cadastrar
                 msg += f"\n\n💡 *Dica:* Configure seus endereços favoritos para calcular tempo de deslocamento!"
