@@ -505,10 +505,15 @@ def handle_whatsapp_webhook():
             # Buscar evento pendente
             event_id, event_data = EventConfirmationService.get_latest_pending_event(numero_limpo)
 
+            print(f"[EVENT-CONFIRM] Detectado '{msg_lower}' | Event ID: {event_id} | Has data: {event_data is not None}")
+
             if event_data:
                 if msg_lower in palavras_confirmacao_evento:
-                    # Confirmar e criar evento SEM cálculo de tempo
+                    # Confirmar e criar evento (com ou sem cálculo de tempo prévio)
+                    print(f"[EVENT-CONFIRM] Criando evento no Google Calendar: {event_data.get('titulo')}")
                     sucesso, mensagem, google_event_id = EventConfirmationService.confirm_and_create_event(numero_limpo, event_id)
+
+                    print(f"[EVENT-CONFIRM] Resultado: sucesso={sucesso}, google_event_id={google_event_id}")
 
                     if sucesso:
                         titulo = event_data['titulo']
@@ -523,6 +528,8 @@ def handle_whatsapp_webhook():
                 else:  # Cancelamento
                     sucesso, mensagem = EventConfirmationService.cancel_pending_event(numero_limpo, event_id)
                     return jsonify({"status": "sucesso", "resposta": mensagem}), 200
+            else:
+                print(f"[EVENT-CONFIRM] Nenhum evento pendente encontrado para '{msg_lower}'")
 
         # 3.1 Verificar se quer calcular tempo de deslocamento
         if wants_travel_time:
@@ -565,8 +572,8 @@ def handle_whatsapp_webhook():
 
                 if not dest_lat or not dest_lon:
                     resposta_para_usuario = (
-                        f"❌ Não consegui localizar o destino:\\n"
-                        f"'{event_data['localizacao']}'\\n\\n"
+                        f"❌ Não consegui localizar o destino:\n"
+                        f"'{event_data['localizacao']}'\n\n"
                         f"Verifique se o endereço está completo e tente novamente."
                     )
                     return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
@@ -582,7 +589,7 @@ def handle_whatsapp_webhook():
 
                 if not travel_info:
                     resposta_para_usuario = (
-                        f"❌ Não consegui calcular a rota.\\n\\n"
+                        f"❌ Não consegui calcular a rota.\n\n"
                         f"Tente novamente mais tarde ou confirme o evento sem cálculo de tempo."
                     )
                     return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
@@ -592,12 +599,12 @@ def handle_whatsapp_webhook():
                 distancia = travel_info['distance_km']
 
                 resposta_para_usuario = (
-                    f"✅ *Rota Calculada!*\\n\\n"
-                    f"📍 Origem: {emoji} {label_nome}\\n"
-                    f"📍 Destino: {dest_formatado or event_data['localizacao']}\\n\\n"
-                    f"⏱️ *Tempo estimado:* {duracao} minutos\\n"
-                    f"📏 *Distância:* {distancia} km\\n\\n"
-                    f"💡 Responda *'sim'* para confirmar o evento\\n"
+                    f"✅ *Rota Calculada!*\n\n"
+                    f"📍 Origem: {emoji} {label_nome}\n"
+                    f"📍 Destino: {dest_formatado or event_data['localizacao']}\n\n"
+                    f"⏱️ *Tempo estimado:* {duracao} minutos\n"
+                    f"📏 *Distância:* {distancia} km\n\n"
+                    f"💡 Responda *'sim'* para confirmar o evento\n"
                     f"ou *'não'* para cancelar"
                 )
 
@@ -626,17 +633,22 @@ def handle_whatsapp_webhook():
         # Por simplicidade, vamos checar se existe alguma pendente recente
         # Em produção, você pode enviar o transaction_id na mensagem ou usar contexto
 
-        # Verificar se mensagem parece uma resposta de confirmação
+        # Verificar se mensagem parece uma resposta de confirmação de TRANSAÇÃO
+        # IMPORTANTE: Só processar se NÃO for confirmação de evento (eventos têm prioridade)
         msg_upper = texto_msg.strip().upper()
-        if any(word in msg_upper for word in ['CONFIRMAR', 'OK', 'TROCAR', 'CANCELAR']) or msg_upper.isdigit():
-            # Provável resposta de confirmação
-            print(f"[CONFIRM-CHECK] Detectada possível confirmação: '{texto_msg}'")
+
+        # Se "sim" ou palavras de confirmação de evento, NÃO processar como transação
+        is_event_confirmation = msg_lower in palavras_confirmacao_evento or msg_lower in palavras_cancelamento_evento
+
+        if not is_event_confirmation and (any(word in msg_upper for word in ['CONFIRMAR', 'OK', 'TROCAR', 'CANCELAR']) or msg_upper.isdigit()):
+            # Provável resposta de confirmação de TRANSAÇÃO
+            print(f"[TX-CONFIRM-CHECK] Detectada possível confirmação de transação: '{texto_msg}'")
 
             # Buscar última transação pendente
             last_tx_key = f"last_pending:{numero_limpo}"
             last_transaction_id = redis_service.get(last_tx_key)
 
-            print(f"[CONFIRM-CHECK] Buscando {last_tx_key} -> {last_transaction_id}")
+            print(f"[TX-CONFIRM-CHECK] Buscando {last_tx_key} -> {last_transaction_id}")
 
             if last_transaction_id:
                 status, mensagem, dados = TransactionConfirmationService.process_confirmation_response(
