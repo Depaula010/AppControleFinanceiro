@@ -1059,6 +1059,7 @@ def get_notification_config(usuario_id):
             'agenda_diaria_hora': config['agenda_diaria_hora'].strftime('%H:%M'),
             'resumo_matinal_ativo': config['resumo_matinal_ativo'],
             'resumo_matinal_hora': config['resumo_matinal_hora'].strftime('%H:%M'),
+            'alertas_financeiros_ativos': config.get('alertas_financeiros_ativos', True),
             'contas_vencer_ativa': config['contas_vencer_ativa'],
             'contas_vencer_dias_antes': config['contas_vencer_dias_antes'],
             'contas_vencer_hora': config['contas_vencer_hora'].strftime('%H:%M'),
@@ -1074,6 +1075,158 @@ def get_notification_config(usuario_id):
 
     except Exception as e:
         print(f"[GET-CONFIG] Erro: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "erro",
+            "mensagem": str(e)
+        }), 500
+
+
+@admin_bp.route('/setup-alertas-financeiros', methods=['GET'])
+def setup_alertas_financeiros():
+    """
+    Adiciona o campo alertas_financeiros_ativos na tabela NotificationConfigs.
+    Migra dados existentes de contas_vencer_ativa para o novo campo.
+
+    Exemplo:
+    GET http://212.47.65.37:8000/admin/setup-alertas-financeiros
+    """
+    try:
+        from sqlalchemy import text
+
+        output = []
+        output.append("="*60)
+        output.append("SETUP: Alertas Financeiros Unificados")
+        output.append("="*60)
+
+        # Migration 1: Adicionar campo alertas_financeiros_ativos
+        output.append("\n[1/3] Adicionando campo alertas_financeiros_ativos...")
+
+        sql_add_column = text("""
+            ALTER TABLE NotificationConfigs
+            ADD COLUMN IF NOT EXISTS alertas_financeiros_ativos BOOLEAN DEFAULT TRUE;
+        """)
+
+        with db_engine.connect() as conn:
+            conn.begin()
+            conn.execute(sql_add_column)
+            conn.commit()
+
+        output.append("OK - Campo adicionado!")
+
+        # Migration 2: Copiar dados de contas_vencer_ativa
+        output.append("\n[2/3] Migrando dados existentes...")
+
+        sql_migrate = text("""
+            UPDATE NotificationConfigs
+            SET alertas_financeiros_ativos = contas_vencer_ativa
+            WHERE alertas_financeiros_ativos IS NULL;
+        """)
+
+        with db_engine.connect() as conn:
+            conn.begin()
+            result = conn.execute(sql_migrate)
+            conn.commit()
+            rows_updated = result.rowcount
+
+        output.append(f"OK - {rows_updated} registro(s) migrado(s)!")
+
+        # Migration 3: Adicionar comentário no banco
+        output.append("\n[3/3] Documentando estrutura...")
+
+        sql_comment = text("""
+            COMMENT ON COLUMN NotificationConfigs.alertas_financeiros_ativos IS
+            'Se TRUE, inclui alertas de contas e faturas a vencer no resumo matinal (ou envia separado se resumo desativado)';
+        """)
+
+        with db_engine.connect() as conn:
+            conn.begin()
+            conn.execute(sql_comment)
+            conn.commit()
+
+        output.append("OK - Comentário adicionado!")
+
+        output.append("\n" + "="*60)
+        output.append("SUCESSO! Alertas Financeiros Unificados configurados")
+        output.append("="*60)
+        output.append("\nO que foi feito:")
+        output.append("1. Campo 'alertas_financeiros_ativos' adicionado")
+        output.append("2. Dados migrados de 'contas_vencer_ativa'")
+        output.append("3. Estrutura documentada no banco")
+        output.append("\nComportamento:")
+        output.append("- Ambos ativos: 1 mensagem unificada (resumo + alertas)")
+        output.append("- Só resumo ativo: Apenas agenda e clima")
+        output.append("- Só alertas ativo: Apenas contas/faturas a vencer")
+        output.append("- Ambos desativados: Nenhuma mensagem enviada")
+        output.append("\nPróximos passos:")
+        output.append("1. Testar com: GET /admin/get-notification-config/1")
+        output.append("2. Configurar alertas: POST /admin/config-alertas-financeiros")
+        output.append("3. Executar processador: python processar_resumo_matinal.py")
+
+        return "<pre>" + "\n".join(output) + "</pre>", 200
+
+    except Exception as e:
+        print(f"[ALERTAS-FIN-SETUP] Erro: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"<pre>Erro ao configurar Alertas Financeiros:\n\n{traceback.format_exc()}</pre>", 500
+
+
+@admin_bp.route('/config-alertas-financeiros', methods=['POST'])
+def config_alertas_financeiros():
+    """
+    Configura alertas financeiros para um usuário.
+
+    Body JSON:
+    {
+        "usuario_id": 1,
+        "ativo": true/false
+    }
+
+    Exemplo:
+    POST http://212.47.65.37:8000/admin/config-alertas-financeiros
+    Body: {"usuario_id": 1, "ativo": true}
+    """
+    try:
+        from app.services.notification_config_service import NotificationConfigService
+
+        data = request.get_json()
+
+        if not data or 'usuario_id' not in data:
+            return jsonify({
+                "status": "erro",
+                "mensagem": "Campo 'usuario_id' é obrigatório"
+            }), 400
+
+        usuario_id = data['usuario_id']
+        ativo = data.get('ativo')
+
+        if ativo is None:
+            return jsonify({
+                "status": "erro",
+                "mensagem": "Campo 'ativo' é obrigatório (true ou false)"
+            }), 400
+
+        # Atualizar configuração
+        sucesso, mensagem, config = NotificationConfigService.update_alertas_financeiros_config(
+            usuario_id, ativo
+        )
+
+        if sucesso:
+            return jsonify({
+                "status": "sucesso",
+                "mensagem": mensagem,
+                "configuracao": config
+            }), 200
+        else:
+            return jsonify({
+                "status": "erro",
+                "mensagem": mensagem
+            }), 500
+
+    except Exception as e:
+        print(f"[CONFIG-ALERTAS-FIN] Erro: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({

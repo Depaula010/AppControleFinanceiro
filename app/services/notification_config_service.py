@@ -15,13 +15,13 @@ class NotificationConfigService:
         """Cria tabela de configurações de notificações"""
         if not db_engine:
             raise Exception("Banco não configurado")
-        
+
         sql = text("""
             CREATE TABLE IF NOT EXISTS NotificationConfigs (
                 id SERIAL PRIMARY KEY,
                 usuario_id INT NOT NULL REFERENCES Usuarios(id) ON DELETE CASCADE,
 
-                -- Agenda Diária
+                -- Agenda Diária (DEPRECATED - manter para compatibilidade)
                 agenda_diaria_ativa BOOLEAN NOT NULL DEFAULT TRUE,
                 agenda_diaria_hora TIME NOT NULL DEFAULT '08:00:00',
 
@@ -29,7 +29,10 @@ class NotificationConfigService:
                 resumo_matinal_ativo BOOLEAN NOT NULL DEFAULT TRUE,
                 resumo_matinal_hora TIME NOT NULL DEFAULT '07:00:00',
 
-                -- Contas a Vencer
+                -- Alertas Financeiros (contas e faturas)
+                alertas_financeiros_ativos BOOLEAN NOT NULL DEFAULT TRUE,
+
+                -- Contas a Vencer (DEPRECATED - manter para compatibilidade)
                 contas_vencer_ativa BOOLEAN NOT NULL DEFAULT TRUE,
                 contas_vencer_dias_antes INT NOT NULL DEFAULT 1,
                 contas_vencer_hora TIME NOT NULL DEFAULT '09:00:00',
@@ -69,6 +72,7 @@ class NotificationConfigService:
             SELECT
                 agenda_diaria_ativa, agenda_diaria_hora,
                 resumo_matinal_ativo, resumo_matinal_hora,
+                alertas_financeiros_ativos,
                 contas_vencer_ativa, contas_vencer_dias_antes, contas_vencer_hora
             FROM NotificationConfigs
             WHERE usuario_id = :uid
@@ -83,6 +87,7 @@ class NotificationConfigService:
                     'agenda_diaria_hora': result.agenda_diaria_hora,
                     'resumo_matinal_ativo': result.resumo_matinal_ativo,
                     'resumo_matinal_hora': result.resumo_matinal_hora,
+                    'alertas_financeiros_ativos': result.alertas_financeiros_ativos,
                     'contas_vencer_ativa': result.contas_vencer_ativa,
                     'contas_vencer_dias_antes': result.contas_vencer_dias_antes,
                     'contas_vencer_hora': result.contas_vencer_hora
@@ -95,6 +100,7 @@ class NotificationConfigService:
             RETURNING
                 agenda_diaria_ativa, agenda_diaria_hora,
                 resumo_matinal_ativo, resumo_matinal_hora,
+                alertas_financeiros_ativos,
                 contas_vencer_ativa, contas_vencer_dias_antes, contas_vencer_hora
         """)
 
@@ -107,6 +113,7 @@ class NotificationConfigService:
             'agenda_diaria_hora': result.agenda_diaria_hora,
             'resumo_matinal_ativo': result.resumo_matinal_ativo,
             'resumo_matinal_hora': result.resumo_matinal_hora,
+            'alertas_financeiros_ativos': result.alertas_financeiros_ativos,
             'contas_vencer_ativa': result.contas_vencer_ativa,
             'contas_vencer_dias_antes': result.contas_vencer_dias_antes,
             'contas_vencer_hora': result.contas_vencer_hora
@@ -396,3 +403,76 @@ class NotificationConfigService:
 
         with db_engine.connect() as conn:
             return conn.execute(sql, {"hora": target_hour}).fetchall()
+
+    @staticmethod
+    def get_users_with_notifications_active(target_hour):
+        """
+        Retorna usuários que devem receber QUALQUER tipo de notificação neste horário.
+        Inclui tanto resumo matinal quanto alertas financeiros.
+
+        Args:
+            target_hour: time object da hora atual
+
+        Returns:
+            list: [(usuario_id, numero_whatsapp), ...]
+        """
+        if not db_engine:
+            raise Exception("Banco não configurado")
+
+        sql = text("""
+            SELECT DISTINCT u.id, u.numero_whatsapp
+            FROM NotificationConfigs nc
+            JOIN Usuarios u ON nc.usuario_id = u.id
+            WHERE nc.resumo_matinal_hora = :hora
+              AND (nc.resumo_matinal_ativo = TRUE OR nc.alertas_financeiros_ativos = TRUE)
+        """)
+
+        with db_engine.connect() as conn:
+            return conn.execute(sql, {"hora": target_hour}).fetchall()
+
+    @staticmethod
+    def update_alertas_financeiros_config(usuario_id, ativo=None):
+        """
+        Atualiza configuração de alertas financeiros.
+
+        Args:
+            usuario_id: ID do usuário
+            ativo: True/False ou None (manter atual)
+
+        Returns:
+            (sucesso: bool, mensagem: str, config: dict or None)
+        """
+        if not db_engine:
+            raise Exception("Banco não configurado")
+
+        # Garantir que config existe
+        NotificationConfigService.get_or_create_config(usuario_id)
+
+        if ativo is None:
+            return False, "Nenhuma alteração fornecida", None
+
+        sql = text("""
+            UPDATE NotificationConfigs
+            SET alertas_financeiros_ativos = :ativo, updated_at = CURRENT_TIMESTAMP
+            WHERE usuario_id = :uid
+            RETURNING alertas_financeiros_ativos
+        """)
+
+        try:
+            with db_engine.connect() as conn:
+                with conn.begin():
+                    result = conn.execute(sql, {"uid": usuario_id, "ativo": ativo}).fetchone()
+
+            status = "ativados" if ativo else "desativados"
+            mensagem = f"Alertas financeiros {status} com sucesso"
+
+            config = {
+                'alertas_financeiros_ativos': result.alertas_financeiros_ativos
+            }
+
+            print(f"[NOTIF-CONFIG] Alertas financeiros atualizados para usuário {usuario_id}")
+            return True, mensagem, config
+
+        except Exception as e:
+            print(f"[NOTIF-CONFIG] Erro ao atualizar: {e}")
+            return False, f"Erro ao atualizar configuração: {str(e)}", None

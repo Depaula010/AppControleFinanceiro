@@ -687,11 +687,135 @@ def get_category_spending(conn, usuario_id, nome_categoria_consulta):
     gasto_total_negativo = conn.execute(sql, {"uid": usuario_id, "nome_cat": f"%{nome_categoria_consulta}%"}).scalar()
     return (float(gasto_total_negativo or 0)) * -1
 
+def get_upcoming_bills_and_invoices(conn, usuario_id, target_date=None):
+    """
+    Busca contas fixas e faturas que vão vencer hoje ou amanhã.
+
+    Args:
+        conn: Conexão com o banco
+        usuario_id: ID do usuário
+        target_date: Data de referência (padrão: hoje)
+
+    Returns:
+        dict: {
+            'contas_hoje': [...],
+            'contas_amanha': [...],
+            'faturas_hoje': [...],
+            'faturas_amanha': [...]
+        }
+    """
+    from datetime import timedelta
+
+    if target_date is None:
+        target_date = date.today()
+
+    amanha = target_date + timedelta(days=1)
+
+    # Buscar contas fixas pendentes
+    sql_contas = text("""
+        SELECT
+            a.id,
+            a.descricao,
+            a.valor_previsto,
+            a.dia_execucao,
+            s.nome_sub as categoria,
+            c.nome_conta
+        FROM Agendamentos a
+        JOIN SubCategoria s ON a.subcategoria_id = s.id
+        JOIN Contas c ON a.conta_id = c.id
+        WHERE a.usuario_id = :uid
+          AND a.ativo = TRUE
+          AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+          AND a.dia_execucao IN (:dia_hoje, :dia_amanha)
+          -- Verificar se ainda não foi executado este mês
+          AND NOT EXISTS (
+              SELECT 1 FROM Transacoes t
+              WHERE t.descricao = a.descricao
+                AND t.usuario_id = a.usuario_id
+                AND EXTRACT(MONTH FROM t.data_transacao) = :mes_ref
+                AND EXTRACT(YEAR FROM t.data_transacao) = :ano_ref
+                AND t.tipo_transacao = 'Despesa'
+          )
+        ORDER BY a.dia_execucao ASC
+    """)
+
+    contas_result = conn.execute(sql_contas, {
+        "uid": usuario_id,
+        "dia_hoje": target_date.day,
+        "dia_amanha": amanha.day,
+        "mes_ref": target_date.month,
+        "ano_ref": target_date.year
+    }).fetchall()
+
+    # Separar contas por dia
+    contas_hoje = []
+    contas_amanha = []
+
+    for conta in contas_result:
+        conta_dict = {
+            "id": conta.id,
+            "descricao": conta.descricao,
+            "valor": float(conta.valor_previsto or 0),
+            "categoria": conta.categoria,
+            "conta": conta.nome_conta
+        }
+
+        if conta.dia_execucao == target_date.day:
+            contas_hoje.append(conta_dict)
+        elif conta.dia_execucao == amanha.day:
+            contas_amanha.append(conta_dict)
+
+    # Buscar faturas de cartão de crédito
+    sql_faturas = text("""
+        SELECT
+            c.nome_conta,
+            f.data_vencimento,
+            COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) as valor_fatura,
+            f.status
+        FROM Faturas f
+        JOIN Contas c ON f.conta_id = c.id
+        LEFT JOIN Transacoes t ON f.id = t.fatura_id
+        WHERE c.usuario_id = :uid
+            AND f.status = 'Aberta'
+            AND (f.data_vencimento = :hoje OR f.data_vencimento = :amanha)
+        GROUP BY c.nome_conta, f.data_vencimento, f.status
+        ORDER BY f.data_vencimento ASC
+    """)
+
+    faturas_result = conn.execute(sql_faturas, {
+        "uid": usuario_id,
+        "hoje": target_date,
+        "amanha": amanha
+    }).fetchall()
+
+    # Separar faturas por dia
+    faturas_hoje = []
+    faturas_amanha = []
+
+    for fatura in faturas_result:
+        fatura_dict = {
+            "cartao": fatura.nome_conta,
+            "valor": float(fatura.valor_fatura),
+            "vencimento": fatura.data_vencimento
+        }
+
+        if fatura.data_vencimento == target_date:
+            faturas_hoje.append(fatura_dict)
+        elif fatura.data_vencimento == amanha:
+            faturas_amanha.append(fatura_dict)
+
+    return {
+        'contas_hoje': contas_hoje,
+        'contas_amanha': contas_amanha,
+        'faturas_hoje': faturas_hoje,
+        'faturas_amanha': faturas_amanha
+    }
+
 def add_google_calendar_tokens_table():
     """Adiciona tabela para armazenar tokens OAuth2 do Google Calendar"""
     if not db_engine:
         raise Exception("Banco não configurado")
-    
+
     sql = text("""
         CREATE TABLE IF NOT EXISTS GoogleCalendarTokens (
             id SERIAL PRIMARY KEY,
@@ -704,11 +828,11 @@ def add_google_calendar_tokens_table():
             updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(usuario_id)
         );
-        
-        CREATE INDEX IF NOT EXISTS idx_calendar_tokens_usuario 
+
+        CREATE INDEX IF NOT EXISTS idx_calendar_tokens_usuario
         ON GoogleCalendarTokens(usuario_id);
     """)
-    
+
     try:
         with db_engine.connect() as conn:
             conn.begin()

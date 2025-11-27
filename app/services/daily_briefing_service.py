@@ -181,6 +181,31 @@ class DailyBriefingService:
 
         return ''
 
+    def get_financial_alerts(self, usuario_id: int, target_date: date) -> Dict:
+        """
+        Busca contas fixas e faturas que vencem hoje ou amanhã.
+
+        Args:
+            usuario_id: ID do usuário
+            target_date: Data de referência
+
+        Returns:
+            dict: Dicionário com alertas financeiros
+        """
+        from app.services.finance_service import get_upcoming_bills_and_invoices
+
+        try:
+            with db_engine.connect() as conn:
+                return get_upcoming_bills_and_invoices(conn, usuario_id, target_date)
+        except Exception as e:
+            print(f"[BRIEFING] Erro ao buscar alertas financeiros: {e}")
+            return {
+                'contas_hoje': [],
+                'contas_amanha': [],
+                'faturas_hoje': [],
+                'faturas_amanha': []
+            }
+
     def prepare_briefing_data(self, usuario_id: int, target_date: date = None) -> Dict:
         """
         Prepara dados para o resumo matinal.
@@ -197,7 +222,8 @@ class DailyBriefingService:
                 'gaps': [...],
                 'total_eventos': int,
                 'eventos_remotos': int,
-                'eventos_presenciais': int
+                'eventos_presenciais': int,
+                'alertas_financeiros': {...}
             }
         """
         if target_date is None:
@@ -250,6 +276,9 @@ class DailyBriefingService:
             elif tipo == 'presencial':
                 eventos_presenciais += 1
 
+        # 6. Buscar alertas financeiros (contas e faturas próximas ao vencimento)
+        alertas_financeiros = self.get_financial_alerts(usuario_id, target_date)
+
         return {
             'eventos': eventos,
             'clima_principal': clima_principal,
@@ -258,6 +287,7 @@ class DailyBriefingService:
             'total_eventos': len(eventos),
             'eventos_remotos': eventos_remotos,
             'eventos_presenciais': eventos_presenciais,
+            'alertas_financeiros': alertas_financeiros,
             'data': target_date
         }
 
@@ -327,7 +357,7 @@ class DailyBriefingService:
         if not briefing_data:
             return None
 
-        # Se não há eventos, retornar mensagem simples
+        # Se não há eventos, retornar mensagem simples (mas incluir alertas financeiros se houver)
         if briefing_data['total_eventos'] == 0:
             cidade, estado = self.get_user_location(usuario_id)
             clima = briefing_data.get('clima_principal')
@@ -337,8 +367,58 @@ class DailyBriefingService:
             if clima:
                 msg += self.weather_service.format_weather_for_briefing(clima)
 
+            # Adicionar alertas financeiros se houver
+            alertas = briefing_data.get('alertas_financeiros', {})
+            alertas_msg = self._format_financial_alerts(alertas)
+            if alertas_msg:
+                msg += "\n\n" + alertas_msg
+
             return msg
 
         # Caso contrário, os dados serão enviados ao Gemini
         # (implementaremos isso no próximo passo)
         return briefing_data
+
+    def _format_financial_alerts(self, alertas: Dict) -> str:
+        """
+        Formata alertas financeiros para exibição.
+
+        Args:
+            alertas: Dicionário com alertas financeiros
+
+        Returns:
+            str: Mensagem formatada ou string vazia
+        """
+        contas_hoje = alertas.get('contas_hoje', [])
+        contas_amanha = alertas.get('contas_amanha', [])
+        faturas_hoje = alertas.get('faturas_hoje', [])
+        faturas_amanha = alertas.get('faturas_amanha', [])
+
+        tem_alertas = any([contas_hoje, contas_amanha, faturas_hoje, faturas_amanha])
+
+        if not tem_alertas:
+            return ""
+
+        msg_parts = ["💰 *ALERTAS FINANCEIROS*"]
+
+        # Vencimentos de hoje
+        if contas_hoje or faturas_hoje:
+            msg_parts.append("\n⚠️ *VENCE HOJE:*")
+
+            for conta in contas_hoje:
+                msg_parts.append(f"• {conta['descricao']} - R$ {conta['valor']:.2f}")
+
+            for fatura in faturas_hoje:
+                msg_parts.append(f"• Fatura {fatura['cartao']} - R$ {fatura['valor']:.2f}")
+
+        # Vencimentos de amanhã
+        if contas_amanha or faturas_amanha:
+            msg_parts.append("\n🔔 *VENCE AMANHÃ:*")
+
+            for conta in contas_amanha:
+                msg_parts.append(f"• {conta['descricao']} - R$ {conta['valor']:.2f}")
+
+            for fatura in faturas_amanha:
+                msg_parts.append(f"• Fatura {fatura['cartao']} - R$ {fatura['valor']:.2f}")
+
+        return "\n".join(msg_parts)

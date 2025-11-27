@@ -798,6 +798,7 @@ def generate_daily_briefing(briefing_data):
             - total_eventos: int
             - eventos_remotos: int
             - eventos_presenciais: int
+            - alertas_financeiros: dict com contas e faturas próximas ao vencimento
 
     Returns:
         str: Mensagem humanizada formatada para WhatsApp
@@ -888,6 +889,52 @@ def generate_daily_briefing(briefing_data):
         if gaps_list:
             gaps_texto = f"\n\nHorários livres entre eventos:\n" + "\n".join(f"• {g}" for g in gaps_list)
 
+    # Alertas Financeiros
+    alertas_texto = ""
+    alertas_financeiros = briefing_data.get('alertas_financeiros', {})
+
+    contas_hoje = alertas_financeiros.get('contas_hoje', [])
+    contas_amanha = alertas_financeiros.get('contas_amanha', [])
+    faturas_hoje = alertas_financeiros.get('faturas_hoje', [])
+    faturas_amanha = alertas_financeiros.get('faturas_amanha', [])
+
+    tem_alertas = any([contas_hoje, contas_amanha, faturas_hoje, faturas_amanha])
+
+    if tem_alertas:
+        alertas_partes = []
+
+        # Contas que vencem hoje
+        if contas_hoje:
+            alertas_partes.append("VENCE HOJE:")
+            for conta in contas_hoje:
+                alertas_partes.append(f"• {conta['descricao']} - R$ {conta['valor']:.2f}")
+
+        # Faturas que vencem hoje
+        if faturas_hoje:
+            if not contas_hoje:
+                alertas_partes.append("VENCE HOJE:")
+            for fatura in faturas_hoje:
+                alertas_partes.append(f"• Fatura {fatura['cartao']} - R$ {fatura['valor']:.2f}")
+
+        # Contas que vencem amanhã
+        if contas_amanha:
+            if contas_hoje or faturas_hoje:
+                alertas_partes.append("")
+            alertas_partes.append("VENCE AMANHÃ:")
+            for conta in contas_amanha:
+                alertas_partes.append(f"• {conta['descricao']} - R$ {conta['valor']:.2f}")
+
+        # Faturas que vencem amanhã
+        if faturas_amanha:
+            if not contas_amanha:
+                if contas_hoje or faturas_hoje:
+                    alertas_partes.append("")
+                alertas_partes.append("VENCE AMANHÃ:")
+            for fatura in faturas_amanha:
+                alertas_partes.append(f"• Fatura {fatura['cartao']} - R$ {fatura['valor']:.2f}")
+
+        alertas_texto = "\n\nALERTAS FINANCEIROS:\n" + "\n".join(alertas_partes)
+
     # Informações da data
     data_alvo = briefing_data.get('data', datetime.now().date())
     dias_semana = ['segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira',
@@ -906,6 +953,7 @@ EVENTOS DO DIA:
 {clima_texto}
 {climas_extras}
 {gaps_texto}
+{alertas_texto}
 
 INSTRUÇÕES:
 1. Comece com uma saudação amigável (ex: "☀️ Bom dia!", "🌅 Olá!")
@@ -916,10 +964,12 @@ INSTRUÇÕES:
    - Se há eventos remotos vs presenciais
    - Horários livres úteis para trabalho focado ou pausa
    - Clima (especialmente se for chover ou temperatura extrema)
+   - ALERTAS FINANCEIROS: contas e faturas que vencem hoje ou amanhã (use ⚠️ ou 💰)
    - Dicas úteis (ex: "saia cedo", "leve guarda-chuva", "tempo livre para almoço")
-6. Seja conciso mas informativo (máximo 15 linhas)
+6. Seja conciso mas informativo (máximo 20 linhas)
 7. Mantenha tom profissional mas amigável
 8. NÃO invente informações que não estão nos dados fornecidos
+9. Se houver alertas financeiros, destaque-os claramente no resumo
 
 FORMATAÇÃO (IMPORTANTE):
 - Use *texto* para negrito (WhatsApp)
