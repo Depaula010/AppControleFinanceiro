@@ -1690,6 +1690,80 @@ def handle_whatsapp_webhook():
 
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
+            #==== INTENÇÃO: Configurar Endereço ====
+            elif intent == 'Configurar Endereço':
+                print(f"[WHATSAPP] Intenção de Configurar Endereço detectada")
+
+                from app.services.user_address_service import UserAddressService
+
+                try:
+                    # Extrair dados do endereço
+                    addr_data = gemini_service.extract_address_config(texto_msg)
+                    label = addr_data.get('label')
+                    endereco = addr_data.get('endereco_completo')
+
+                    if not label or not endereco:
+                        resposta_para_usuario = (
+                            "❌ Não entendi o endereço.\n\n"
+                            "Use o formato:\n"
+                            "*'Configurar endereço casa: Rua X, 123, Bairro, Cidade-SP'*\n\n"
+                            "Tipos de endereço:\n"
+                            "• Casa\n"
+                            "• Trabalho\n"
+                            "• Outro"
+                        )
+                    else:
+                        # Salvar endereço
+                        sucesso, mensagem = UserAddressService.save_favorite_address(
+                            usuario_id, label, endereco
+                        )
+                        resposta_para_usuario = mensagem
+
+                except Exception as e:
+                    print(f"[CONFIG-ADDRESS] Erro: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    resposta_para_usuario = "❌ Erro ao configurar endereço. Tente novamente."
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+            #==== INTENÇÃO: Listar Endereços ====
+            elif intent == 'Listar Endereços':
+                print(f"[WHATSAPP] Intenção de Listar Endereços detectada")
+
+                from app.services.user_address_service import UserAddressService
+
+                try:
+                    mensagem = UserAddressService.format_address_list_message(usuario_id)
+                    resposta_para_usuario = mensagem
+
+                except Exception as e:
+                    print(f"[LIST-ADDRESS] Erro: {e}")
+                    resposta_para_usuario = "❌ Erro ao listar endereços. Tente novamente."
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+            #==== INTENÇÃO: Deletar Endereço ====
+            elif intent == 'Deletar Endereço':
+                print(f"[WHATSAPP] Intenção de Deletar Endereço detectada")
+
+                from app.services.user_address_service import UserAddressService
+
+                try:
+                    # Extrair label do endereço a deletar
+                    label_data = gemini_service.extract_address_label_from_deletion(texto_msg)
+                    label = label_data.get('label', 'outro')
+
+                    # Deletar endereço
+                    sucesso, mensagem = UserAddressService.delete_address(usuario_id, label)
+                    resposta_para_usuario = mensagem
+
+                except Exception as e:
+                    print(f"[DELETE-ADDRESS] Erro: {e}")
+                    resposta_para_usuario = "❌ Erro ao deletar endereço. Tente novamente."
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
             else:
                 return jsonify({"status": "sucesso", "resposta": "🤔 Não entendi. Tente 'gastei 50' ou 'meus potes'."}), 200
 

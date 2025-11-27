@@ -36,6 +36,16 @@ GOOGLE_REDIRECT_URI = os.environ.get(
 # API de Clima (opcional)
 WEATHER_API_KEY = os.environ.get('WEATHER_API_KEY')
 
+# OpenRouteService API (para cálculo de tempo de deslocamento)
+OPENROUTE_API_KEY = os.environ.get('OPENROUTE_API_KEY')
+OPENROUTE_BASE_URL = os.environ.get(
+    'OPENROUTE_BASE_URL',
+    'https://api.openrouteservice.org'
+)
+
+# Rate Limiting para cálculo de tempo de viagem
+TRAVEL_TIME_DAILY_LIMIT = int(os.environ.get('TRAVEL_TIME_DAILY_LIMIT', '10'))
+
 # Configuração do Banco de Dados
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)

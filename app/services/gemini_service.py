@@ -109,6 +109,9 @@ def get_message_intent(texto_msg):
     - "Solicitar API Key" (minha api key, qual minha chave, api key, chave de acesso, credenciais)
     - "Configurar Relatório Mensal" (configurar relatório mensal, ativar relatório, desativar relatório, alterar hora relatório, mudar horário relatório)
     - "Configurar Localização" (configurar localização, minha cidade, mudar cidade, definir localização, onde estou)
+    - "Configurar Endereço" (configurar endereço casa/trabalho, adicionar endereço, cadastrar endereço favorito)
+    - "Listar Endereços" (quais endereços tenho, meus endereços, endereços cadastrados, ver endereços)
+    - "Deletar Endereço" (remover endereço, apagar endereço, deletar endereço casa/trabalho)
 
     Responda APENAS com JSON: {{"intent": "..."}}
 
@@ -137,6 +140,15 @@ def get_message_intent(texto_msg):
     - "configurar localização São Paulo, SP" → {{"intent": "Configurar Localização"}}
     - "minha cidade é Campinas" → {{"intent": "Configurar Localização"}}
     - "mudar minha localização" → {{"intent": "Configurar Localização"}}
+    - "configurar endereço de casa" → {{"intent": "Configurar Endereço"}}
+    - "adicionar endereço do trabalho" → {{"intent": "Configurar Endereço"}}
+    - "cadastrar meu endereço" → {{"intent": "Configurar Endereço"}}
+    - "quais endereços eu tenho?" → {{"intent": "Listar Endereços"}}
+    - "meus endereços cadastrados" → {{"intent": "Listar Endereços"}}
+    - "ver meus endereços" → {{"intent": "Listar Endereços"}}
+    - "remover endereço de casa" → {{"intent": "Deletar Endereço"}}
+    - "apagar endereço do trabalho" → {{"intent": "Deletar Endereço"}}
+    - "deletar endereço" → {{"intent": "Deletar Endereço"}}
     - "paguei 500 da fatura do nubank" → {{"intent": "Pagamento Fatura"}}
     - "qual o valor da minha fatura?" → {{"intent": "Consulta Valor Fatura"}}
     - "quanto está a fatura do cartão?" → {{"intent": "Consulta Valor Fatura"}}
@@ -987,4 +999,173 @@ def extract_location_config(texto_msg):
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-LOCATION] Localização extraída: {json_text}")
+    return json.loads(json_text)
+
+def extract_address_config(texto_msg):
+    """
+    Extrai configuração de endereço favorito.
+
+    Args:
+        texto_msg: Mensagem do usuário
+
+    Returns:
+        dict: {
+            "label": "casa" | "trabalho" | "outro",
+            "endereco_completo": "Rua Exemplo, 123, Bairro, Cidade-SP, CEP"
+        }
+
+    Exemplos:
+    - "configurar endereço casa: Av Paulista 1000, SP"
+      → {"label": "casa", "endereco_completo": "Av Paulista 1000, SP"}
+    - "meu trabalho fica na Rua X, 456, Centro, Campinas"
+      → {"label": "trabalho", "endereco_completo": "Rua X, 456, Centro, Campinas"}
+    """
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+
+    prompt = f'''Analise a mensagem sobre configuração de endereço: "{texto_msg}"
+
+    Extraia:
+    - label: "casa", "trabalho" ou "outro" (qual tipo de endereço)
+    - endereco_completo: O endereço completo fornecido
+
+    Responda APENAS com JSON: {{"label": "...", "endereco_completo": "..."}}
+
+    Regras:
+    - Se mencionar "casa", "minha casa", "residência" → label: "casa"
+    - Se mencionar "trabalho", "escritório", "empresa" → label: "trabalho"
+    - Se não especificar ou mencionar "outro" → label: "outro"
+    - Extrair todo o endereço após o label (ignorar palavras como "fica", "é", "em")
+
+    Exemplos:
+    - "configurar endereço casa: Av Paulista 1000, Consolação, São Paulo-SP" →
+      {{"label": "casa", "endereco_completo": "Av Paulista 1000, Consolação, São Paulo-SP"}}
+
+    - "meu trabalho fica na Rua X, 456, Centro, Campinas-SP" →
+      {{"label": "trabalho", "endereco_completo": "Rua X, 456, Centro, Campinas-SP"}}
+
+    - "adicionar endereço: Av Brasil 200, Rio de Janeiro-RJ" →
+      {{"label": "outro", "endereco_completo": "Av Brasil 200, Rio de Janeiro-RJ"}}
+
+    - "cadastrar casa Rua das Flores 10, Belo Horizonte-MG" →
+      {{"label": "casa", "endereco_completo": "Rua das Flores 10, Belo Horizonte-MG"}}
+    '''
+
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-ADDRESS] Endereço extraído: {json_text}")
+    return json.loads(json_text)
+
+def validate_event_location_completeness(location_text):
+    """
+    Verifica se endereço do evento está completo o suficiente.
+
+    Args:
+        location_text: Texto da localização do evento
+
+    Returns:
+        dict: {
+            "is_complete": True/False,
+            "missing_info": ["cidade", "estado"] ou [],
+            "suggested_question": "Qual a cidade do evento?" ou None
+        }
+
+    Exemplos:
+    - "Academia" → incomplete, missing tudo
+    - "Shopping Iguatemi, Campinas" → complete
+    - "Rua X" → incomplete, missing cidade
+    """
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+
+    if not location_text or location_text.strip() == "":
+        return {
+            "is_complete": False,
+            "missing_info": ["endereco", "cidade", "estado"],
+            "suggested_question": "Qual o endereço completo do evento?"
+        }
+
+    prompt = f'''Analise o endereço de evento: "{location_text}"
+
+    Determine se o endereço está completo o suficiente para ser geocodificado (localizado no mapa).
+
+    Um endereço está COMPLETO se tiver:
+    - Nome de estabelecimento reconhecível + cidade (ex: "Shopping Iguatemi, Campinas")
+    - OU Rua/Avenida + número + cidade (ex: "Av Paulista 1000, São Paulo")
+    - OU Ponto de referência famoso + cidade (ex: "Maracanã, Rio de Janeiro")
+
+    Um endereço está INCOMPLETO se:
+    - Só tem nome genérico sem cidade (ex: "Academia", "Dentista")
+    - Só tem rua sem número nem cidade (ex: "Rua das Flores")
+    - Só tem bairro sem cidade (ex: "Centro")
+
+    Responda APENAS com JSON:
+    {{
+        "is_complete": true/false,
+        "missing_info": ["cidade", "estado"] ou [],
+        "suggested_question": "Qual a cidade do evento?" ou null
+    }}
+
+    Exemplos:
+    - "Academia" →
+      {{"is_complete": false, "missing_info": ["endereco", "cidade", "estado"],
+        "suggested_question": "Qual o endereço completo da academia? (Rua, bairro e cidade)"}}
+
+    - "Shopping Iguatemi, Campinas-SP" →
+      {{"is_complete": true, "missing_info": [], "suggested_question": null}}
+
+    - "Rua X" →
+      {{"is_complete": false, "missing_info": ["numero", "cidade", "estado"],
+        "suggested_question": "Qual o número e a cidade dessa rua?"}}
+
+    - "Centro Médico, Campinas" →
+      {{"is_complete": true, "missing_info": [], "suggested_question": null}}
+
+    - "Dentista Dr. Silva" →
+      {{"is_complete": false, "missing_info": ["endereco", "cidade"],
+        "suggested_question": "Qual o endereço completo? (Rua e cidade)"}}
+    '''
+
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-LOCATION-CHECK] Validação: {json_text}")
+    return json.loads(json_text)
+
+def extract_address_label_from_deletion(texto_msg):
+    """
+    Extrai o label do endereço que o usuário quer deletar.
+
+    Args:
+        texto_msg: Mensagem do usuário
+
+    Returns:
+        dict: {
+            "label": "casa" | "trabalho" | "outro"
+        }
+    """
+    if not gemini_model:
+        raise Exception("Modelo Gemini não configurado.")
+
+    prompt = f'''Analise a mensagem sobre deletar endereço: "{texto_msg}"
+
+    Extraia qual tipo de endereço o usuário quer deletar:
+    - "casa" (se mencionar casa, residência, minha casa)
+    - "trabalho" (se mencionar trabalho, escritório, empresa)
+    - "outro" (se mencionar outro ou não especificar)
+
+    Responda APENAS com JSON: {{"label": "casa" | "trabalho" | "outro"}}
+
+    Exemplos:
+    - "deletar endereço de casa" → {{"label": "casa"}}
+    - "remover endereço do trabalho" → {{"label": "trabalho"}}
+    - "apagar endereço outro" → {{"label": "outro"}}
+    - "deletar endereço" → {{"label": "outro"}} (padrão se não especificar)
+    '''
+
+    response = gemini_model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-DELETE-ADDRESS] Label extraído: {json_text}")
     return json.loads(json_text)

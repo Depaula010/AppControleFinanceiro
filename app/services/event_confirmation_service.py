@@ -208,4 +208,9 @@ class EventConfirmationService:
         msg += f"\n✅ Responda *'sim'* ou *'confirmar'* para criar"
         msg += f"\n❌ Responda *'não'* ou *'cancelar'* para desistir"
 
+        # Adicionar pergunta sobre tempo de deslocamento (só se tiver localização)
+        if localizacao:
+            msg += f"\n\n🚗 *Deseja calcular tempo de deslocamento?*"
+            msg += f"\n   Responda *'sim, calcular'* para incluir tempo de viagem"
+
         return msg
