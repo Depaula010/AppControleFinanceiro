@@ -1,5 +1,5 @@
 # app/services/user_address_service.py
-from app import db
+from app import db_engine
 from app.services.travel_time_service import TravelTimeService
 from sqlalchemy import text
 
@@ -71,14 +71,14 @@ class UserAddressService:
                     updated_at = CURRENT_TIMESTAMP
             """)
 
-            db.session.execute(upsert_sql, {
-                'usuario_id': usuario_id,
-                'label': label,
-                'endereco': endereco_formatado or endereco_completo,
-                'lat': lat,
-                'lon': lon
-            })
-            db.session.commit()
+            with db_engine.begin() as conn:
+                conn.execute(upsert_sql, {
+                    'usuario_id': usuario_id,
+                    'label': label,
+                    'endereco': endereco_formatado or endereco_completo,
+                    'lat': lat,
+                    'lon': lon
+                })
 
             emoji = UserAddressService.LABEL_EMOJIS.get(label, '📍')
             label_nome = UserAddressService.LABEL_NAMES.get(label, label.capitalize())
@@ -94,7 +94,6 @@ class UserAddressService:
 
         except Exception as e:
             print(f"[USER-ADDRESS] ERRO ao salvar endereço: {e}")
-            db.session.rollback()
             return False, f"❌ Erro ao salvar endereço: {str(e)}"
 
     @staticmethod
@@ -124,17 +123,18 @@ class UserAddressService:
                     END
             """)
 
-            result = db.session.execute(query_sql, {'usuario_id': usuario_id})
-            rows = result.fetchall()
+            with db_engine.connect() as conn:
+                result = conn.execute(query_sql, {'usuario_id': usuario_id})
+                rows = result.fetchall()
 
-            addresses = []
-            for row in rows:
-                addresses.append({
-                    'label': row[0],
-                    'endereco': row[1],
-                    'lat': float(row[2]) if row[2] else None,
-                    'lon': float(row[3]) if row[3] else None
-                })
+                addresses = []
+                for row in rows:
+                    addresses.append({
+                        'label': row[0],
+                        'endereco': row[1],
+                        'lat': float(row[2]) if row[2] else None,
+                        'lon': float(row[3]) if row[3] else None
+                    })
 
             print(f"[USER-ADDRESS] Usuário {usuario_id} tem {len(addresses)} endereços")
             return addresses
@@ -158,27 +158,27 @@ class UserAddressService:
         try:
             label = label.lower()
 
-            # Verificar se o endereço existe
-            check_sql = text("""
-                SELECT endereco_completo FROM EnderecosFavoritos
-                WHERE usuario_id = :usuario_id AND label = :label
-            """)
+            with db_engine.begin() as conn:
+                # Verificar se o endereço existe
+                check_sql = text("""
+                    SELECT endereco_completo FROM EnderecosFavoritos
+                    WHERE usuario_id = :usuario_id AND label = :label
+                """)
 
-            result = db.session.execute(check_sql, {'usuario_id': usuario_id, 'label': label})
-            row = result.fetchone()
+                result = conn.execute(check_sql, {'usuario_id': usuario_id, 'label': label})
+                row = result.fetchone()
 
-            if not row:
-                label_nome = UserAddressService.LABEL_NAMES.get(label, label.capitalize())
-                return False, f"❌ Você não tem endereço '{label_nome}' cadastrado."
+                if not row:
+                    label_nome = UserAddressService.LABEL_NAMES.get(label, label.capitalize())
+                    return False, f"❌ Você não tem endereço '{label_nome}' cadastrado."
 
-            # Deletar
-            delete_sql = text("""
-                DELETE FROM EnderecosFavoritos
-                WHERE usuario_id = :usuario_id AND label = :label
-            """)
+                # Deletar
+                delete_sql = text("""
+                    DELETE FROM EnderecosFavoritos
+                    WHERE usuario_id = :usuario_id AND label = :label
+                """)
 
-            db.session.execute(delete_sql, {'usuario_id': usuario_id, 'label': label})
-            db.session.commit()
+                conn.execute(delete_sql, {'usuario_id': usuario_id, 'label': label})
 
             emoji = UserAddressService.LABEL_EMOJIS.get(label, '📍')
             label_nome = UserAddressService.LABEL_NAMES.get(label, label.capitalize())
@@ -190,7 +190,6 @@ class UserAddressService:
 
         except Exception as e:
             print(f"[USER-ADDRESS] ERRO ao deletar endereço: {e}")
-            db.session.rollback()
             return False, f"❌ Erro ao deletar endereço: {str(e)}"
 
     @staticmethod
