@@ -169,12 +169,15 @@ class EventConfirmationService:
         Returns:
             str: Mensagem formatada
         """
+        from app.services.user_address_service import UserAddressService
+
         titulo = event_data['titulo']
         data_str = event_data['data_evento']
         hora_inicio = event_data.get('hora_inicio')
         hora_fim = event_data.get('hora_fim')
         descricao = event_data.get('descricao')
         localizacao = event_data.get('localizacao')
+        usuario_id = event_data.get('usuario_id')
 
         # Formatar data
         if isinstance(data_str, str):
@@ -208,9 +211,17 @@ class EventConfirmationService:
         msg += f"\n✅ Responda *'sim'* ou *'confirmar'* para criar"
         msg += f"\n❌ Responda *'não'* ou *'cancelar'* para desistir"
 
-        # Adicionar pergunta sobre tempo de deslocamento (só se tiver localização)
-        if localizacao:
-            msg += f"\n\n🚗 *Deseja calcular tempo de deslocamento?*"
-            msg += f"\n   Responda *'sim, calcular'* para incluir tempo de viagem"
+        # Adicionar pergunta sobre tempo de deslocamento (só se tiver localização E endereços cadastrados)
+        if localizacao and usuario_id:
+            user_addresses = UserAddressService.get_user_addresses(usuario_id)
+
+            if user_addresses and len(user_addresses) > 0:
+                # Usuário tem endereços cadastrados, pode calcular tempo
+                msg += f"\n\n🚗 *Deseja calcular tempo de deslocamento?*"
+                msg += f"\n   Responda *'sim, calcular'* para incluir tempo de viagem"
+            else:
+                # Usuário não tem endereços, sugerir cadastrar
+                msg += f"\n\n💡 *Dica:* Configure seus endereços favoritos para calcular tempo de deslocamento!"
+                msg += f"\n   Exemplo: _'Configurar endereço casa: Av Paulista 1000, São Paulo-SP'_"
 
         return msg
