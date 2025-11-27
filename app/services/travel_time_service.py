@@ -11,7 +11,8 @@ class TravelTimeService:
 
     ORS_API_KEY = config.OPENROUTE_API_KEY
     ORS_BASE_URL = config.OPENROUTE_BASE_URL
-    TIMEOUT = 5  # segundos
+    TIMEOUT = 15  # segundos (aumentado para evitar timeout)
+    MAX_RETRIES = 2  # número de tentativas
     BRAZIL_TZ = pytz.timezone('America/Sao_Paulo')
 
     @staticmethod
@@ -29,50 +30,63 @@ class TravelTimeService:
             print("[TRAVEL-TIME] ERRO: OPENROUTE_API_KEY não configurada")
             return None, None, None
 
-        try:
-            url = f"{TravelTimeService.ORS_BASE_URL}/geocode/search"
-            params = {
-                'api_key': TravelTimeService.ORS_API_KEY,
-                'text': address,
-                'boundary.country': 'BR',  # Limitar ao Brasil
-                'size': 1  # Apenas o melhor resultado
-            }
+        url = f"{TravelTimeService.ORS_BASE_URL}/geocode/search"
+        params = {
+            'api_key': TravelTimeService.ORS_API_KEY,
+            'text': address,
+            'boundary.country': 'BR',  # Limitar ao Brasil
+            'size': 1  # Apenas o melhor resultado
+        }
 
-            print(f"[TRAVEL-TIME] Geocoding: {address}")
-            response = requests.get(url, params=params, timeout=TravelTimeService.TIMEOUT)
-            response.raise_for_status()
+        print(f"[TRAVEL-TIME] Geocoding: {address}")
 
-            data = response.json()
+        # Retry logic
+        for attempt in range(TravelTimeService.MAX_RETRIES):
+            try:
+                response = requests.get(url, params=params, timeout=TravelTimeService.TIMEOUT)
+                response.raise_for_status()
 
-            if not data.get('features'):
-                print(f"[TRAVEL-TIME] Nenhum resultado encontrado para: {address}")
+                data = response.json()
+
+                if not data.get('features'):
+                    print(f"[TRAVEL-TIME] Nenhum resultado encontrado para: {address}")
+                    return None, None, None
+
+                feature = data['features'][0]
+                coords = feature['geometry']['coordinates']
+                lon, lat = coords[0], coords[1]
+
+                # Endereço formatado
+                properties = feature.get('properties', {})
+                endereco_formatado = properties.get('label', address)
+
+                # Validar coordenadas (Brasil: -33 < lat < 5, -74 < lon < -34)
+                if not (-33 <= lat <= 5 and -74 <= lon <= -34):
+                    print(f"[TRAVEL-TIME] Coordenadas fora do Brasil: {lat}, {lon}")
+                    return None, None, None
+
+                print(f"[TRAVEL-TIME] Geocoding sucesso: {lat}, {lon}")
+                return lat, lon, endereco_formatado
+
+            except requests.Timeout:
+                if attempt < TravelTimeService.MAX_RETRIES - 1:
+                    print(f"[TRAVEL-TIME] Timeout na tentativa {attempt + 1}, tentando novamente...")
+                    continue
+                else:
+                    print("[TRAVEL-TIME] ERRO: Timeout ao geocodificar endereço após múltiplas tentativas")
+                    return None, None, None
+            except requests.RequestException as e:
+                if attempt < TravelTimeService.MAX_RETRIES - 1:
+                    print(f"[TRAVEL-TIME] Erro na tentativa {attempt + 1}: {e}, tentando novamente...")
+                    continue
+                else:
+                    print(f"[TRAVEL-TIME] ERRO ao geocodificar após múltiplas tentativas: {e}")
+                    return None, None, None
+            except Exception as e:
+                print(f"[TRAVEL-TIME] ERRO inesperado: {e}")
                 return None, None, None
 
-            feature = data['features'][0]
-            coords = feature['geometry']['coordinates']
-            lon, lat = coords[0], coords[1]
-
-            # Endereço formatado
-            properties = feature.get('properties', {})
-            endereco_formatado = properties.get('label', address)
-
-            # Validar coordenadas (Brasil: -33 < lat < 5, -74 < lon < -34)
-            if not (-33 <= lat <= 5 and -74 <= lon <= -34):
-                print(f"[TRAVEL-TIME] Coordenadas fora do Brasil: {lat}, {lon}")
-                return None, None, None
-
-            print(f"[TRAVEL-TIME] Geocoding sucesso: {lat}, {lon}")
-            return lat, lon, endereco_formatado
-
-        except requests.Timeout:
-            print("[TRAVEL-TIME] ERRO: Timeout ao geocodificar endereço")
-            return None, None, None
-        except requests.RequestException as e:
-            print(f"[TRAVEL-TIME] ERRO ao geocodificar: {e}")
-            return None, None, None
-        except Exception as e:
-            print(f"[TRAVEL-TIME] ERRO inesperado: {e}")
-            return None, None, None
+        return None, None, None
 
     @staticmethod
     def calculate_travel_time(origin_lat, origin_lon, dest_lat, dest_lon):
@@ -94,65 +108,78 @@ class TravelTimeService:
             print("[TRAVEL-TIME] ERRO: OPENROUTE_API_KEY não configurada")
             return None
 
-        try:
-            url = f"{TravelTimeService.ORS_BASE_URL}/v2/directions/driving-car"
-            headers = {
-                'Authorization': TravelTimeService.ORS_API_KEY,
-                'Content-Type': 'application/json'
-            }
-            body = {
-                'coordinates': [
-                    [origin_lon, origin_lat],  # ORS usa [lon, lat]
-                    [dest_lon, dest_lat]
-                ]
-            }
+        url = f"{TravelTimeService.ORS_BASE_URL}/v2/directions/driving-car"
+        headers = {
+            'Authorization': TravelTimeService.ORS_API_KEY,
+            'Content-Type': 'application/json'
+        }
+        body = {
+            'coordinates': [
+                [origin_lon, origin_lat],  # ORS usa [lon, lat]
+                [dest_lon, dest_lat]
+            ]
+        }
 
-            print(f"[TRAVEL-TIME] Calculando rota: ({origin_lat},{origin_lon}) → ({dest_lat},{dest_lon})")
-            start_time = datetime.now()
+        print(f"[TRAVEL-TIME] Calculando rota: ({origin_lat},{origin_lon}) → ({dest_lat},{dest_lon})")
 
-            response = requests.post(url, json=body, headers=headers, timeout=TravelTimeService.TIMEOUT)
-            response.raise_for_status()
+        # Retry logic
+        for attempt in range(TravelTimeService.MAX_RETRIES):
+            try:
+                start_time = datetime.now()
 
-            elapsed_ms = int((datetime.now() - start_time).total_seconds() * 1000)
+                response = requests.post(url, json=body, headers=headers, timeout=TravelTimeService.TIMEOUT)
+                response.raise_for_status()
 
-            data = response.json()
+                elapsed_ms = int((datetime.now() - start_time).total_seconds() * 1000)
 
-            if not data.get('routes'):
-                print("[TRAVEL-TIME] Nenhuma rota encontrada")
+                data = response.json()
+
+                if not data.get('routes'):
+                    print("[TRAVEL-TIME] Nenhuma rota encontrada")
+                    return None
+
+                route = data['routes'][0]
+                summary = route['summary']
+
+                duration_seconds = summary['duration']
+                distance_meters = summary['distance']
+
+                duration_minutes = int(duration_seconds / 60)
+                distance_km = round(distance_meters / 1000, 1)
+
+                # Tentar extrair resumo da rota
+                route_summary = None
+                if route.get('segments') and route['segments'][0].get('steps'):
+                    first_step = route['segments'][0]['steps'][0]
+                    route_summary = first_step.get('name', '')
+
+                print(f"[TRAVEL-TIME] Rota calculada: {duration_minutes} min, {distance_km} km ({elapsed_ms}ms)")
+
+                return {
+                    'duration_minutes': duration_minutes,
+                    'distance_km': distance_km,
+                    'route_summary': route_summary
+                }
+
+            except requests.Timeout:
+                if attempt < TravelTimeService.MAX_RETRIES - 1:
+                    print(f"[TRAVEL-TIME] Timeout na tentativa {attempt + 1}, tentando novamente...")
+                    continue
+                else:
+                    print("[TRAVEL-TIME] ERRO: Timeout ao calcular rota após múltiplas tentativas")
+                    return None
+            except requests.RequestException as e:
+                if attempt < TravelTimeService.MAX_RETRIES - 1:
+                    print(f"[TRAVEL-TIME] Erro na tentativa {attempt + 1}: {e}, tentando novamente...")
+                    continue
+                else:
+                    print(f"[TRAVEL-TIME] ERRO ao calcular rota após múltiplas tentativas: {e}")
+                    return None
+            except Exception as e:
+                print(f"[TRAVEL-TIME] ERRO inesperado: {e}")
                 return None
 
-            route = data['routes'][0]
-            summary = route['summary']
-
-            duration_seconds = summary['duration']
-            distance_meters = summary['distance']
-
-            duration_minutes = int(duration_seconds / 60)
-            distance_km = round(distance_meters / 1000, 1)
-
-            # Tentar extrair resumo da rota
-            route_summary = None
-            if route.get('segments') and route['segments'][0].get('steps'):
-                first_step = route['segments'][0]['steps'][0]
-                route_summary = first_step.get('name', '')
-
-            print(f"[TRAVEL-TIME] Rota calculada: {duration_minutes} min, {distance_km} km ({elapsed_ms}ms)")
-
-            return {
-                'duration_minutes': duration_minutes,
-                'distance_km': distance_km,
-                'route_summary': route_summary
-            }
-
-        except requests.Timeout:
-            print("[TRAVEL-TIME] ERRO: Timeout ao calcular rota")
-            return None
-        except requests.RequestException as e:
-            print(f"[TRAVEL-TIME] ERRO ao calcular rota: {e}")
-            return None
-        except Exception as e:
-            print(f"[TRAVEL-TIME] ERRO inesperado: {e}")
-            return None
+        return None
 
     @staticmethod
     def get_next_event_after(usuario_id, event_start_datetime):
