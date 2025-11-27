@@ -554,19 +554,53 @@ def handle_whatsapp_webhook():
 
             elif len(user_addresses) == 1:
                 # Só 1 endereço: usar automaticamente
+                from app.services.travel_time_service import TravelTimeService
+
                 origem = user_addresses[0]
                 label_nome = UserAddressService.LABEL_NAMES.get(origem['label'], origem['label'].capitalize())
                 emoji = UserAddressService.LABEL_EMOJIS.get(origem['label'], '📍')
 
-                # TODO: Implementar lógica de cálculo aqui
-                resposta_para_usuario = (
-                    f"🚗 *Calculando tempo de deslocamento...*\n\n"
-                    f"Origem: {emoji} {label_nome} ({origem['endereco']})\n"
-                    f"Destino: 📍 {event_data['localizacao']}\n\n"
-                    f"⏳ Aguarde..."
+                # Geocodificar destino
+                dest_lat, dest_lon, dest_formatado = TravelTimeService.geocode_address(event_data['localizacao'])
+
+                if not dest_lat or not dest_lon:
+                    resposta_para_usuario = (
+                        f"❌ Não consegui localizar o destino:\\n"
+                        f"'{event_data['localizacao']}'\\n\\n"
+                        f"Verifique se o endereço está completo e tente novamente."
+                    )
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                # Calcular tempo de viagem
+                origem_lat = origem['lat']
+                origem_lon = origem['lon']
+
+                travel_info = TravelTimeService.calculate_travel_time(
+                    origem_lat, origem_lon,
+                    dest_lat, dest_lon
                 )
-                # Por enquanto, só retorna a mensagem
-                # A implementação completa virá depois
+
+                if not travel_info:
+                    resposta_para_usuario = (
+                        f"❌ Não consegui calcular a rota.\\n\\n"
+                        f"Tente novamente mais tarde ou confirme o evento sem cálculo de tempo."
+                    )
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                # Sucesso! Mostrar resultado
+                duracao = travel_info['duration_minutes']
+                distancia = travel_info['distance_km']
+
+                resposta_para_usuario = (
+                    f"✅ *Rota Calculada!*\\n\\n"
+                    f"📍 Origem: {emoji} {label_nome}\\n"
+                    f"📍 Destino: {dest_formatado or event_data['localizacao']}\\n\\n"
+                    f"⏱️ *Tempo estimado:* {duracao} minutos\\n"
+                    f"📏 *Distância:* {distancia} km\\n\\n"
+                    f"💡 Responda *'sim'* para confirmar o evento\\n"
+                    f"ou *'não'* para cancelar"
+                )
+
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
             else:
