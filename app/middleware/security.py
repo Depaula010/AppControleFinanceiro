@@ -18,10 +18,12 @@ security_logger.setLevel(logging.WARNING)
 # Prefixos para chaves Redis
 REDIS_PREFIX_BLOCKED = 'security:blocked:'
 REDIS_PREFIX_ATTEMPTS = 'security:attempts:'
+REDIS_PREFIX_BLACKLIST = 'security:blacklist:'  # Bloqueio permanente
 
 # TTL padrão para dados de segurança
 BLOCKED_IP_TTL = 3600  # 1 hora em segundos
 ATTEMPTS_TTL = 600  # 10 minutos em segundos
+BLACKLIST_TTL = 31536000  # 1 ano (bloqueio "permanente")
 
 # Padrões de URLs suspeitas (comum em scanners/bots)
 SUSPICIOUS_PATTERNS = [
@@ -115,6 +117,8 @@ VALID_ENDPOINTS = {
     '/admin/config-alertas-financeiros',
     '/admin/oauth-config-check',
     '/admin/security-stats',
+    '/admin/security-blacklist-add',
+    '/admin/security-blacklist-remove',
 
     # Admin - Utilidades
     '/admin/clear-bot-session',
@@ -150,6 +154,65 @@ def is_suspicious_request(path, user_agent):
         return True, f"Unknown endpoint: {path}"
 
     return False, None
+
+def is_ip_blacklisted(ip):
+    """
+    Verifica se o IP está na blacklist permanente (usando Redis)
+    """
+    if not redis_service.is_connected():
+        return False
+
+    key = f"{REDIS_PREFIX_BLACKLIST}{ip}"
+    return redis_service.get(key) is not None
+
+def blacklist_ip(ip, reason="Manual block"):
+    """
+    Adiciona IP à blacklist permanente (bloqueado por 1 ano)
+    """
+    if not redis_service.is_connected():
+        security_logger.error(
+            f"[SECURITY-BLACKLIST] Redis indisponível, não foi possível adicionar IP à blacklist: {ip}"
+        )
+        return False
+
+    key = f"{REDIS_PREFIX_BLACKLIST}{ip}"
+
+    blacklist_data = {
+        'ip': ip,
+        'reason': reason,
+        'blacklisted_at': datetime.now().isoformat(),
+        'permanent': True
+    }
+
+    redis_service.set_with_ttl(
+        key,
+        json.dumps(blacklist_data),
+        ttl_seconds=BLACKLIST_TTL
+    )
+
+    security_logger.warning(
+        f"[SECURITY-BLACKLIST] IP adicionado à blacklist permanente: {ip} | "
+        f"Razão: {reason}"
+    )
+
+    return True
+
+def remove_from_blacklist(ip):
+    """
+    Remove IP da blacklist permanente
+    """
+    if not redis_service.is_connected():
+        return False
+
+    key = f"{REDIS_PREFIX_BLACKLIST}{ip}"
+    result = redis_service.delete(key)
+
+    if result:
+        security_logger.warning(
+            f"[SECURITY-BLACKLIST] IP removido da blacklist: {ip}"
+        )
+
+    return result
 
 def is_ip_blocked(ip):
     """
@@ -286,7 +349,18 @@ def security_filter():
     path = request.path
     user_agent = request.headers.get('User-Agent', '')
 
-    # 1. Verificar se IP está bloqueado
+    # 1. PRIMEIRA VERIFICAÇÃO: Blacklist permanente
+    if is_ip_blacklisted(ip):
+        security_logger.warning(
+            f"[SECURITY-BLACKLISTED] IP na blacklist tentou acessar | "
+            f"IP: {ip} | Path: {path}"
+        )
+        return jsonify({
+            'error': 'Access permanently denied',
+            'message': 'Your IP has been permanently blocked'
+        }), 403
+
+    # 2. Verificar se IP está bloqueado temporariamente
     if is_ip_blocked(ip):
         security_logger.warning(
             f"[SECURITY-BLOCKED] IP bloqueado tentou acessar | "
@@ -297,7 +371,7 @@ def security_filter():
             'message': 'Your IP has been temporarily blocked due to suspicious activity'
         }), 403
 
-    # 2. Verificar se requisição é suspeita
+    # 3. Verificar se requisição é suspeita
     is_suspicious, reason = is_suspicious_request(path, user_agent)
 
     if is_suspicious:
@@ -314,7 +388,7 @@ def security_filter():
         # Caso contrário, apenas retornar 404 (não revelar que detectamos)
         return jsonify({'error': 'Not found'}), 404
 
-    # 3. Requisição válida, continuar
+    # 4. Requisição válida, continuar
     return None
 
 def get_security_stats():
@@ -324,17 +398,38 @@ def get_security_stats():
     if not redis_service.is_connected():
         return {
             'error': 'Redis não disponível',
+            'blacklisted_ips': [],
             'blocked_ips': [],
             'suspicious_activity': [],
+            'total_blacklisted': 0,
             'total_blocked': 0,
             'total_suspicious': 0
         }
 
     now = datetime.now()
+    blacklisted_ips = []
     blocked_ips = []
     suspicious_activity = []
 
-    # Buscar todos os IPs bloqueados
+    # Buscar todos os IPs na blacklist permanente
+    blacklist_keys = redis_service.get_keys_by_pattern(f"{REDIS_PREFIX_BLACKLIST}*")
+    for key in blacklist_keys:
+        ip = key.replace(REDIS_PREFIX_BLACKLIST, '')
+        data_str = redis_service.get(key)
+
+        if data_str:
+            try:
+                data = json.loads(data_str)
+                blacklisted_ips.append({
+                    'ip': ip,
+                    'reason': data.get('reason', 'Unknown'),
+                    'blacklisted_at': data.get('blacklisted_at', 'Unknown'),
+                    'permanent': data.get('permanent', True)
+                })
+            except (json.JSONDecodeError, KeyError):
+                continue
+
+    # Buscar todos os IPs bloqueados temporariamente
     blocked_keys = redis_service.get_keys_by_pattern(f"{REDIS_PREFIX_BLOCKED}*")
     for key in blocked_keys:
         ip = key.replace(REDIS_PREFIX_BLOCKED, '')
@@ -375,8 +470,10 @@ def get_security_stats():
                 continue
 
     return {
+        'blacklisted_ips': blacklisted_ips,
         'blocked_ips': blocked_ips,
         'suspicious_activity': suspicious_activity,
+        'total_blacklisted': len(blacklisted_ips),
         'total_blocked': len(blocked_ips),
         'total_suspicious': len(suspicious_activity),
         'redis_connected': True

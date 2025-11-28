@@ -1,0 +1,115 @@
+{
+	"info": {
+		"_postman_id": "security-blacklist-2025",
+		"name": "Security - IP Blacklist",
+		"description": "Endpoints administrativos para gerenciar blacklist permanente de IPs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Ver Estatísticas de Segurança",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "{{API_SECRET_KEY}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{BASE_URL}}/admin/security-stats",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"admin",
+						"security-stats"
+					]
+				},
+				"description": "Retorna estatísticas completas de segurança:\n- IPs na blacklist permanente\n- IPs bloqueados temporariamente\n- Atividade suspeita recente\n- Totais e métricas"
+			},
+			"response": []
+		},
+		{
+			"name": "2. Adicionar IP à Blacklist",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "{{API_SECRET_KEY}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ip\": \"172.19.0.6\",\n    \"reason\": \"Tentativas repetidas de invasão - acesso não autorizado ao endpoint /admin/setup-alertas-financeiros\"\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/admin/security-blacklist-add",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"admin",
+						"security-blacklist-add"
+					]
+				},
+				"description": "Adiciona um IP à blacklist permanente (bloqueado por 1 ano)\n\nBody JSON:\n{\n    \"ip\": \"192.168.1.100\",\n    \"reason\": \"Motivo do bloqueio\" (opcional)\n}"
+			},
+			"response": []
+		},
+		{
+			"name": "3. Remover IP da Blacklist",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "{{API_SECRET_KEY}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ip\": \"172.19.0.6\"\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/admin/security-blacklist-remove",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"admin",
+						"security-blacklist-remove"
+					]
+				},
+				"description": "Remove um IP da blacklist permanente\n\nBody JSON:\n{\n    \"ip\": \"192.168.1.100\"\n}"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "API_SECRET_KEY",
+			"value": "sua-api-key-aqui",
+			"type": "string"
+		}
+	]
+}

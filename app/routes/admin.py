@@ -396,7 +396,8 @@ def security_stats():
     Endpoint para visualizar estatísticas de segurança
 
     Retorna:
-    - IPs bloqueados atualmente
+    - IPs na blacklist permanente
+    - IPs bloqueados temporariamente
     - Atividade suspeita recente
     - Totais de bloqueios e tentativas
 
@@ -413,6 +414,100 @@ def security_stats():
 
     stats = get_security_stats()
     return jsonify(stats), 200
+
+
+@admin_bp.route('/security-blacklist-add', methods=['POST'])
+def security_blacklist_add():
+    """
+    Adiciona um IP à blacklist permanente (bloqueado por 1 ano)
+
+    Body JSON:
+    {
+        "ip": "192.168.1.100",
+        "reason": "Motivo do bloqueio" (opcional)
+    }
+
+    Exemplo:
+    POST https://seu-backend.onrender.com/admin/security-blacklist-add
+    Header: x-api-key: sua_chave_secreta
+    Body: {"ip": "172.19.0.6", "reason": "Tentativas repetidas de invasão"}
+    """
+    # Verificar autenticação
+    api_key = request.headers.get('x-api-key')
+    if api_key != API_SECRET_KEY:
+        return jsonify({"erro": "Chave de API inválida"}), 401
+
+    from app.middleware.security import blacklist_ip
+
+    data = request.get_json()
+    if not data or 'ip' not in data:
+        return jsonify({
+            "status": "erro",
+            "mensagem": "Campo 'ip' é obrigatório"
+        }), 400
+
+    ip = data['ip']
+    reason = data.get('reason', 'Manual block via API')
+
+    success = blacklist_ip(ip, reason)
+
+    if success:
+        return jsonify({
+            "status": "sucesso",
+            "mensagem": f"IP {ip} adicionado à blacklist permanente",
+            "ip": ip,
+            "reason": reason
+        }), 200
+    else:
+        return jsonify({
+            "status": "erro",
+            "mensagem": "Falha ao adicionar IP à blacklist (Redis indisponível)"
+        }), 500
+
+
+@admin_bp.route('/security-blacklist-remove', methods=['POST'])
+def security_blacklist_remove():
+    """
+    Remove um IP da blacklist permanente
+
+    Body JSON:
+    {
+        "ip": "192.168.1.100"
+    }
+
+    Exemplo:
+    POST https://seu-backend.onrender.com/admin/security-blacklist-remove
+    Header: x-api-key: sua_chave_secreta
+    Body: {"ip": "172.19.0.6"}
+    """
+    # Verificar autenticação
+    api_key = request.headers.get('x-api-key')
+    if api_key != API_SECRET_KEY:
+        return jsonify({"erro": "Chave de API inválida"}), 401
+
+    from app.middleware.security import remove_from_blacklist
+
+    data = request.get_json()
+    if not data or 'ip' not in data:
+        return jsonify({
+            "status": "erro",
+            "mensagem": "Campo 'ip' é obrigatório"
+        }), 400
+
+    ip = data['ip']
+    success = remove_from_blacklist(ip)
+
+    if success:
+        return jsonify({
+            "status": "sucesso",
+            "mensagem": f"IP {ip} removido da blacklist",
+            "ip": ip
+        }), 200
+    else:
+        return jsonify({
+            "status": "erro",
+            "mensagem": "IP não encontrado na blacklist ou Redis indisponível"
+        }), 404
 
 
 @admin_bp.route('/setup-monthly-reports-table', methods=['GET'])
