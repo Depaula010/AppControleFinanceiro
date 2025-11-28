@@ -53,6 +53,14 @@ def list_blacklisted_ips(r):
         if data_str:
             try:
                 data = json.loads(data_str)
+                
+                # CORREÇÃO: Verifica se o dado é um dicionário antes de usar .get()
+                if not isinstance(data, dict):
+                    data = {
+                        'reason': f"Formato inválido (raw): {str(data)}", 
+                        'blacklisted_at': 'Desconhecido'
+                    }
+
                 blacklisted_ips.append({
                     'ip': ip,
                     'reason': data.get('reason', 'Unknown'),
@@ -62,8 +70,11 @@ def list_blacklisted_ips(r):
                 print(f"\nIP: {ip}")
                 print(f"  Razão: {data.get('reason', 'Unknown')}")
                 print(f"  Bloqueado em: {data.get('blacklisted_at', 'Unknown')}")
+            
             except json.JSONDecodeError:
-                print(f"\nIP: {ip} (dados corrompidos)")
+                print(f"\nIP: {ip} (dados corrompidos/não-JSON)")
+            except Exception as e:
+                print(f"\nIP: {ip} (Erro ao ler dados: {e})")
 
     print("\n" + "="*60)
     print(f"Total: {len(blacklisted_ips)} IP(s) na blacklist")
@@ -88,9 +99,17 @@ def remove_ip_from_blacklist(r, ip):
     if data_str:
         try:
             data = json.loads(data_str)
-            reason = data.get('reason', 'Unknown')
-            blacklisted_at = data.get('blacklisted_at', 'Unknown')
+            
+            # CORREÇÃO: Verifica se é dicionário também na remoção
+            if isinstance(data, dict):
+                reason = data.get('reason', 'Unknown')
+                blacklisted_at = data.get('blacklisted_at', 'Unknown')
+            else:
+                reason = f"Valor Raw: {str(data)}"
+                
         except json.JSONDecodeError:
+            reason = "Dados corrompidos"
+        except Exception:
             pass
 
     # Remover
@@ -108,7 +127,7 @@ def remove_ip_from_blacklist(r, ip):
 
 def main():
     print("="*60)
-    print("SCRIPT: Remover IP da Blacklist")
+    print("SCRIPT: Remover IP da Blacklist (Fixed)")
     print("="*60)
 
     # Conectar ao Redis
@@ -132,7 +151,11 @@ def main():
 
     # Listar antes
     print("ANTES:")
-    list_blacklisted_ips(r)
+    # Envolvemos em try/except para garantir que a remoção ocorra mesmo se a listagem falhar
+    try:
+        list_blacklisted_ips(r)
+    except Exception as e:
+        print(f"[AVISO] Erro ao listar IPs (ignorando): {e}")
 
     # Remover
     success = remove_ip_from_blacklist(r, ip_to_remove)
@@ -140,7 +163,11 @@ def main():
     if success:
         # Listar depois
         print("\nDEPOIS:")
-        list_blacklisted_ips(r)
+        try:
+            list_blacklisted_ips(r)
+        except Exception:
+            pass
+            
         print("\n[OK] Operação concluída com sucesso!")
         sys.exit(0)
     else:
