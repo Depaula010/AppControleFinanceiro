@@ -1,0 +1,706 @@
+{
+	"info": {
+		"_postman_id": "complete-api-2025",
+		"name": "Meu Secretário - API Completa",
+		"description": "Collection completa com TODOS os endpoints da aplicação\n\nVariáveis necessárias:\n- BASE_URL: URL do servidor (ex: http://localhost:8000)\n- API_SECRET_KEY: Chave de autenticação para endpoints admin\n- USUARIO_ID: ID do usuário (padrão: 1)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "🏠 Home",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/",
+							"host": ["{{BASE_URL}}"],
+							"path": [""]
+						},
+						"description": "Verifica se a API está funcionando"
+					}
+				}
+			]
+		},
+		{
+			"name": "🔐 Segurança",
+			"item": [
+				{
+					"name": "Ver Estatísticas de Segurança",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{API_SECRET_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/security-stats",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "security-stats"]
+						},
+						"description": "Retorna:\n- IPs na blacklist permanente\n- IPs bloqueados temporariamente\n- Atividade suspeita recente"
+					}
+				},
+				{
+					"name": "Adicionar IP à Blacklist",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{API_SECRET_KEY}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ip\": \"192.168.1.100\",\n    \"reason\": \"Tentativas repetidas de invasão\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/admin/security-blacklist-add",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "security-blacklist-add"]
+						},
+						"description": "Bloqueia um IP permanentemente (1 ano)"
+					}
+				},
+				{
+					"name": "Remover IP da Blacklist",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{API_SECRET_KEY}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ip\": \"172.19.0.6\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/admin/security-blacklist-remove",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "security-blacklist-remove"]
+						},
+						"description": "Remove um IP da blacklist permanente"
+					}
+				}
+			]
+		},
+		{
+			"name": "🔧 Setup & Configuração",
+			"item": [
+				{
+					"name": "Setup Database",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/setup-database",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "setup-database"]
+						},
+						"description": "Cria todas as tabelas do banco de dados"
+					}
+				},
+				{
+					"name": "Populate Global Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/populate-global-categories",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "populate-global-categories"]
+						},
+						"description": "Popula categorias globais padrão"
+					}
+				},
+				{
+					"name": "Setup User Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/setup-user-data",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "setup-user-data"]
+						},
+						"description": "Configura dados do usuário padrão"
+					}
+				},
+				{
+					"name": "Setup Calendar Table",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/setup-calendar-table",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "setup-calendar-table"]
+						},
+						"description": "Cria tabela de calendário"
+					}
+				},
+				{
+					"name": "Setup Monthly Reports Table",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/setup-monthly-reports-table",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "setup-monthly-reports-table"]
+						},
+						"description": "Cria tabela de relatórios mensais"
+					}
+				},
+				{
+					"name": "Setup Resumo Matinal",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/setup-resumo-matinal",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "setup-resumo-matinal"]
+						},
+						"description": "Configura campos para resumo matinal"
+					}
+				},
+				{
+					"name": "Setup Potes Alerts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/setup-potes-alerts",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "setup-potes-alerts"]
+						},
+						"description": "Configura alertas de potes"
+					}
+				},
+				{
+					"name": "Setup Alertas Financeiros",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/setup-alertas-financeiros",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "setup-alertas-financeiros"]
+						},
+						"description": "Configura alertas financeiros unificados"
+					}
+				},
+				{
+					"name": "Cleanup Deprecated Notification Fields",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/cleanup-deprecated-notification-fields",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "cleanup-deprecated-notification-fields"]
+						},
+						"description": "Remove campos deprecados da tabela NotificationConfigs"
+					}
+				}
+			]
+		},
+		{
+			"name": "⚙️ Configurações",
+			"item": [
+				{
+					"name": "Get Notification Config",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/get-notification-config/{{USUARIO_ID}}",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "get-notification-config", "{{USUARIO_ID}}"]
+						},
+						"description": "Busca configurações de notificação do usuário"
+					}
+				},
+				{
+					"name": "Config Alertas Financeiros",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usuario_id\": {{USUARIO_ID}},\n    \"ativo\": true\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/admin/config-alertas-financeiros",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "config-alertas-financeiros"]
+						},
+						"description": "Configura alertas financeiros para um usuário"
+					}
+				},
+				{
+					"name": "OAuth Config Check",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{API_SECRET_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/oauth-config-check",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "oauth-config-check"]
+						},
+						"description": "Verifica configuração OAuth do Google"
+					}
+				}
+			]
+		},
+		{
+			"name": "🔔 Triggers & Processadores",
+			"item": [
+				{
+					"name": "Run Motor Agendamentos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{API_SECRET_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/run-motor-agendamentos",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "run-motor-agendamentos"]
+						},
+						"description": "Executa o motor de agendamentos"
+					}
+				},
+				{
+					"name": "Trigger Agenda Notifications",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{API_SECRET_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/trigger-agenda-notifications",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "trigger-agenda-notifications"]
+						},
+						"description": "Dispara notificações de agenda"
+					}
+				},
+				{
+					"name": "Trigger Bills Notifications",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{API_SECRET_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/trigger-bills-notifications",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "trigger-bills-notifications"]
+						},
+						"description": "Dispara notificações de contas a vencer"
+					}
+				},
+				{
+					"name": "Trigger Daily Briefing",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{API_SECRET_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/trigger-daily-briefing",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "trigger-daily-briefing"]
+						},
+						"description": "Dispara resumos matinais"
+					}
+				},
+				{
+					"name": "Trigger Monthly Reports - Início",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{API_SECRET_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/trigger-monthly-reports-inicio",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "trigger-monthly-reports-inicio"]
+						},
+						"description": "Dispara relatórios mensais (início do mês)"
+					}
+				},
+				{
+					"name": "Trigger Monthly Reports - Fim",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{API_SECRET_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/trigger-monthly-reports-fim",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "trigger-monthly-reports-fim"]
+						},
+						"description": "Dispara relatórios mensais (fim do mês)"
+					}
+				}
+			]
+		},
+		{
+			"name": "🧪 Testes",
+			"item": [
+				{
+					"name": "Test Notification",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{API_SECRET_KEY}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"numero\": \"5511999999999\",\n    \"mensagem\": \"Teste de notificação\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/admin/test-notification",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "test-notification"]
+						},
+						"description": "Testa envio de notificação WhatsApp"
+					}
+				},
+				{
+					"name": "Test Daily Briefing",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{API_SECRET_KEY}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usuario_id\": {{USUARIO_ID}}\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/admin/test-daily-briefing",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "test-daily-briefing"]
+						},
+						"description": "Testa resumo matinal para um usuário"
+					}
+				},
+				{
+					"name": "Test Monthly Report",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{API_SECRET_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/test-monthly-report/{{USUARIO_ID}}?momento=INICIO_MES",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "test-monthly-report", "{{USUARIO_ID}}"],
+							"query": [
+								{
+									"key": "momento",
+									"value": "INICIO_MES",
+									"description": "INICIO_MES ou FIM_MES"
+								}
+							]
+						},
+						"description": "Testa relatório mensal para um usuário"
+					}
+				},
+				{
+					"name": "Debug Calendar",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{API_SECRET_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/debug-calendar",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "debug-calendar"]
+						},
+						"description": "Debug de calendário"
+					}
+				}
+			]
+		},
+		{
+			"name": "🔌 Webhooks",
+			"item": [
+				{
+					"name": "Webhook Automate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usuario_id\": {{USUARIO_ID}},\n    \"tipo\": \"RECEITA\",\n    \"valor\": 1000.00,\n    \"descricao\": \"Teste\",\n    \"data\": \"2025-11-27\",\n    \"categoria_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/webhook-automate",
+							"host": ["{{BASE_URL}}"],
+							"path": ["webhook-automate"]
+						},
+						"description": "Webhook para automações externas"
+					}
+				},
+				{
+					"name": "Webhook WhatsApp",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"numero\": \"5511999999999\",\n    \"mensagem\": \"Olá\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/webhook-whatsapp",
+							"host": ["{{BASE_URL}}"],
+							"path": ["webhook-whatsapp"]
+						},
+						"description": "Webhook para receber mensagens do WhatsApp"
+					}
+				},
+				{
+					"name": "Webhook SMS Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"numero\": \"5511999999999\",\n    \"mensagem\": \"SMS recebido\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/webhook-sms-payment",
+							"host": ["{{BASE_URL}}"],
+							"path": ["webhook-sms-payment"]
+						},
+						"description": "Webhook para SMS de pagamento"
+					}
+				}
+			]
+		},
+		{
+			"name": "💰 Transações",
+			"item": [
+				{
+					"name": "Criar Transação",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usuario_id\": {{USUARIO_ID}},\n    \"tipo\": \"DESPESA\",\n    \"valor\": 50.00,\n    \"descricao\": \"Almoço\",\n    \"data\": \"2025-11-27\",\n    \"categoria_id\": 2,\n    \"pote_id\": null\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/transacao",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "transacao"]
+						},
+						"description": "Cria uma nova transação (receita ou despesa)"
+					}
+				}
+			]
+		},
+		{
+			"name": "📅 Google Calendar",
+			"item": [
+				{
+					"name": "Connect Calendar",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/connect-calendar/{{USUARIO_ID}}",
+							"host": ["{{BASE_URL}}"],
+							"path": ["connect-calendar", "{{USUARIO_ID}}"]
+						},
+						"description": "Inicia processo de conexão com Google Calendar"
+					}
+				},
+				{
+					"name": "OAuth2 Callback",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/oauth2callback?code=AUTH_CODE&state=USUARIO_ID",
+							"host": ["{{BASE_URL}}"],
+							"path": ["oauth2callback"],
+							"query": [
+								{
+									"key": "code",
+									"value": "AUTH_CODE"
+								},
+								{
+									"key": "state",
+									"value": "USUARIO_ID"
+								}
+							]
+						},
+						"description": "Callback do OAuth2 do Google (não chamar manualmente)"
+					}
+				},
+				{
+					"name": "Disconnect Calendar",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/disconnect-calendar/{{USUARIO_ID}}",
+							"host": ["{{BASE_URL}}"],
+							"path": ["disconnect-calendar", "{{USUARIO_ID}}"]
+						},
+						"description": "Desconecta Google Calendar do usuário"
+					}
+				}
+			]
+		},
+		{
+			"name": "🛠️ Utilidades",
+			"item": [
+				{
+					"name": "Clear Bot Session",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/admin/clear-bot-session",
+							"host": ["{{BASE_URL}}"],
+							"path": ["admin", "clear-bot-session"]
+						},
+						"description": "Limpa sessão do bot WhatsApp (use em caso de erro)"
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "API_SECRET_KEY",
+			"value": "sua-api-key-aqui",
+			"type": "string"
+		},
+		{
+			"key": "USUARIO_ID",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}
