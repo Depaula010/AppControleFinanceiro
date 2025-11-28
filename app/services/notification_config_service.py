@@ -21,21 +21,12 @@ class NotificationConfigService:
                 id SERIAL PRIMARY KEY,
                 usuario_id INT NOT NULL REFERENCES Usuarios(id) ON DELETE CASCADE,
 
-                -- Agenda Diária (DEPRECATED - manter para compatibilidade)
-                agenda_diaria_ativa BOOLEAN NOT NULL DEFAULT TRUE,
-                agenda_diaria_hora TIME NOT NULL DEFAULT '08:00:00',
-
-                -- Resumo Matinal (Daily Briefing)
+                -- Resumo Matinal (Daily Briefing com agenda e clima)
                 resumo_matinal_ativo BOOLEAN NOT NULL DEFAULT TRUE,
                 resumo_matinal_hora TIME NOT NULL DEFAULT '07:00:00',
 
-                -- Alertas Financeiros (contas e faturas)
+                -- Alertas Financeiros (contas e faturas a vencer)
                 alertas_financeiros_ativos BOOLEAN NOT NULL DEFAULT TRUE,
-
-                -- Contas a Vencer (DEPRECATED - manter para compatibilidade)
-                contas_vencer_ativa BOOLEAN NOT NULL DEFAULT TRUE,
-                contas_vencer_dias_antes INT NOT NULL DEFAULT 1,
-                contas_vencer_hora TIME NOT NULL DEFAULT '09:00:00',
 
                 -- Timestamps
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -46,6 +37,16 @@ class NotificationConfigService:
 
             CREATE INDEX IF NOT EXISTS idx_notification_configs_usuario
             ON NotificationConfigs(usuario_id);
+
+            -- Comentários para documentação
+            COMMENT ON COLUMN NotificationConfigs.resumo_matinal_ativo IS
+            'Se TRUE, envia resumo matinal com agenda e clima';
+
+            COMMENT ON COLUMN NotificationConfigs.resumo_matinal_hora IS
+            'Horário único para envio de TODAS as notificações matinais';
+
+            COMMENT ON COLUMN NotificationConfigs.alertas_financeiros_ativos IS
+            'Se TRUE, inclui alertas de contas/faturas a vencer (hoje e amanhã)';
         """)
         
         try:
@@ -70,10 +71,9 @@ class NotificationConfigService:
 
         sql_get = text("""
             SELECT
-                agenda_diaria_ativa, agenda_diaria_hora,
-                resumo_matinal_ativo, resumo_matinal_hora,
-                alertas_financeiros_ativos,
-                contas_vencer_ativa, contas_vencer_dias_antes, contas_vencer_hora
+                resumo_matinal_ativo,
+                resumo_matinal_hora,
+                alertas_financeiros_ativos
             FROM NotificationConfigs
             WHERE usuario_id = :uid
         """)
@@ -83,14 +83,9 @@ class NotificationConfigService:
 
             if result:
                 return {
-                    'agenda_diaria_ativa': result.agenda_diaria_ativa,
-                    'agenda_diaria_hora': result.agenda_diaria_hora,
                     'resumo_matinal_ativo': result.resumo_matinal_ativo,
                     'resumo_matinal_hora': result.resumo_matinal_hora,
-                    'alertas_financeiros_ativos': result.alertas_financeiros_ativos,
-                    'contas_vencer_ativa': result.contas_vencer_ativa,
-                    'contas_vencer_dias_antes': result.contas_vencer_dias_antes,
-                    'contas_vencer_hora': result.contas_vencer_hora
+                    'alertas_financeiros_ativos': result.alertas_financeiros_ativos
                 }
 
         # Se não existir, criar em uma nova conexão com transação
@@ -98,10 +93,9 @@ class NotificationConfigService:
             INSERT INTO NotificationConfigs (usuario_id)
             VALUES (:uid)
             RETURNING
-                agenda_diaria_ativa, agenda_diaria_hora,
-                resumo_matinal_ativo, resumo_matinal_hora,
-                alertas_financeiros_ativos,
-                contas_vencer_ativa, contas_vencer_dias_antes, contas_vencer_hora
+                resumo_matinal_ativo,
+                resumo_matinal_hora,
+                alertas_financeiros_ativos
         """)
 
         with db_engine.connect() as conn:
@@ -109,14 +103,9 @@ class NotificationConfigService:
                 result = conn.execute(sql_create, {"uid": usuario_id}).fetchone()
 
         return {
-            'agenda_diaria_ativa': result.agenda_diaria_ativa,
-            'agenda_diaria_hora': result.agenda_diaria_hora,
             'resumo_matinal_ativo': result.resumo_matinal_ativo,
             'resumo_matinal_hora': result.resumo_matinal_hora,
-            'alertas_financeiros_ativos': result.alertas_financeiros_ativos,
-            'contas_vencer_ativa': result.contas_vencer_ativa,
-            'contas_vencer_dias_antes': result.contas_vencer_dias_antes,
-            'contas_vencer_hora': result.contas_vencer_hora
+            'alertas_financeiros_ativos': result.alertas_financeiros_ativos
         }
     
     @staticmethod
