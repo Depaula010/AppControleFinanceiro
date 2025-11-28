@@ -4,6 +4,7 @@ Middleware de segurança para proteção contra bots, scanners e ataques
 """
 import logging
 import json
+import ipaddress
 from flask import request, jsonify
 from functools import wraps
 from datetime import datetime, timedelta
@@ -123,6 +124,22 @@ VALID_ENDPOINTS = {
     # Admin - Utilidades
     '/admin/clear-bot-session',
 }
+
+def is_trusted_ip(ip):
+    """
+    Verifica se o IP é confiável (localhost ou rede privada)
+    """
+    try:
+        ip_obj = ipaddress.ip_address(ip)
+        # Trust loopback
+        if ip_obj.is_loopback:
+            return True
+        # Trust private networks (Docker networks are usually private)
+        if ip_obj.is_private:
+            return True
+    except ValueError:
+        pass
+    return False
 
 def is_suspicious_request(path, user_agent):
     """
@@ -348,6 +365,21 @@ def security_filter():
     ip = request.remote_addr
     path = request.path
     user_agent = request.headers.get('User-Agent', '')
+
+    # 0. RESOLUÇÃO DE IP ATRÁS DE PROXY
+    # Se o IP da requisição for confiável (ex: Nginx interno, Localhost),
+    # tentamos descobrir o IP real do cliente via X-Forwarded-For.
+    # Isso evita bloquear o Proxy (Self-DoS) e permite bloquear o cliente real.
+    if is_trusted_ip(ip):
+        x_forwarded_for = request.headers.get('X-Forwarded-For')
+        if x_forwarded_for:
+            # Pega o primeiro IP da lista (Client Real, Proxy1...)
+            # Só confiamos nisso porque a origem (remote_addr) é confiável.
+            ip = x_forwarded_for.split(',')[0].strip()
+        else:
+            # Se é confiável e não tem header (ex: Health Check local, Cron interno),
+            # permitimos o acesso direto sem passar pelo filtro.
+            return None
 
     # 1. PRIMEIRA VERIFICAÇÃO: Blacklist permanente
     if is_ip_blacklisted(ip):
