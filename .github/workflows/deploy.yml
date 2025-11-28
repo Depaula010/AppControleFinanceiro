@@ -39,6 +39,8 @@ jobs:
           USER: ${{ secrets.CONTABO_USER }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           API_SECRET_KEY: ${{ secrets.API_SECRET_KEY }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+          WEBHOOK_SIGNATURE_KEY: ${{ secrets.WEBHOOK_SIGNATURE_KEY }}
           BOT_WHATSAPP_URL: ${{ secrets.BOT_WHATSAPP_URL }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
@@ -64,6 +66,8 @@ jobs:
           DATABASE_URL=${{ secrets.DATABASE_URL }}
           REDIS_URL=redis://redis:6379
           API_SECRET_KEY=${{ secrets.API_SECRET_KEY }}
+          ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}
+          WEBHOOK_SIGNATURE_KEY=${{ secrets.WEBHOOK_SIGNATURE_KEY }}
           BOT_WHATSAPP_URL=${{ secrets.BOT_WHATSAPP_URL }}
           GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
