@@ -1,0 +1,271 @@
+{
+	"info": {
+		"_postman_id": "alertas-financeiros-unificados",
+		"name": "Alertas Financeiros Unificados",
+		"description": "Collection para testar o sistema unificado de alertas financeiros com resumo matinal",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Setup - Migrar Banco de Dados",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://212.47.65.37:8000/admin/setup-alertas-financeiros",
+					"protocol": "http",
+					"host": [
+						"212",
+						"47",
+						"65",
+						"37"
+					],
+					"port": "8000",
+					"path": [
+						"admin",
+						"setup-alertas-financeiros"
+					]
+				},
+				"description": "Adiciona o campo `alertas_financeiros_ativos` na tabela NotificationConfigs e migra dados existentes."
+			},
+			"response": []
+		},
+		{
+			"name": "2. Visualizar Configurações do Usuário",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://212.47.65.37:8000/admin/get-notification-config/1",
+					"protocol": "http",
+					"host": [
+						"212",
+						"47",
+						"65",
+						"37"
+					],
+					"port": "8000",
+					"path": [
+						"admin",
+						"get-notification-config",
+						"1"
+					]
+				},
+				"description": "Retorna todas as configurações de notificações do usuário, incluindo o novo campo `alertas_financeiros_ativos`."
+			},
+			"response": []
+		},
+		{
+			"name": "3. Ativar Alertas Financeiros",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"usuario_id\": 1,\n  \"ativo\": true\n}"
+				},
+				"url": {
+					"raw": "http://212.47.65.37:8000/admin/config-alertas-financeiros",
+					"protocol": "http",
+					"host": [
+						"212",
+						"47",
+						"65",
+						"37"
+					],
+					"port": "8000",
+					"path": [
+						"admin",
+						"config-alertas-financeiros"
+					]
+				},
+				"description": "Ativa os alertas financeiros para o usuário especificado."
+			},
+			"response": []
+		},
+		{
+			"name": "4. Desativar Alertas Financeiros",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"usuario_id\": 1,\n  \"ativo\": false\n}"
+				},
+				"url": {
+					"raw": "http://212.47.65.37:8000/admin/config-alertas-financeiros",
+					"protocol": "http",
+					"host": [
+						"212",
+						"47",
+						"65",
+						"37"
+					],
+					"port": "8000",
+					"path": [
+						"admin",
+						"config-alertas-financeiros"
+					]
+				},
+				"description": "Desativa os alertas financeiros para o usuário especificado."
+			},
+			"response": []
+		},
+		{
+			"name": "5. Ativar Resumo Matinal",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"usuario_id\": 1,\n  \"ativo\": true,\n  \"hora\": \"07:00\"\n}"
+				},
+				"url": {
+					"raw": "http://212.47.65.37:8000/admin/config-resumo-matinal",
+					"protocol": "http",
+					"host": [
+						"212",
+						"47",
+						"65",
+						"37"
+					],
+					"port": "8000",
+					"path": [
+						"admin",
+						"config-resumo-matinal"
+					]
+				},
+				"description": "Ativa o resumo matinal (agenda + clima) para o usuário."
+			},
+			"response": []
+		},
+		{
+			"name": "6. Desativar Resumo Matinal",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"usuario_id\": 1,\n  \"ativo\": false\n}"
+				},
+				"url": {
+					"raw": "http://212.47.65.37:8000/admin/config-resumo-matinal",
+					"protocol": "http",
+					"host": [
+						"212",
+						"47",
+						"65",
+						"37"
+					],
+					"port": "8000",
+					"path": [
+						"admin",
+						"config-resumo-matinal"
+					]
+				},
+				"description": "Desativa o resumo matinal para o usuário."
+			},
+			"response": []
+		},
+		{
+			"name": "7. Testar Resumo Matinal (Manual)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://212.47.65.37:8000/admin/test-daily-briefing",
+					"protocol": "http",
+					"host": [
+						"212",
+						"47",
+						"65",
+						"37"
+					],
+					"port": "8000",
+					"path": [
+						"admin",
+						"test-daily-briefing"
+					]
+				},
+				"description": "Envia um resumo matinal de teste imediatamente (sem esperar o cron job)."
+			},
+			"response": []
+		},
+		{
+			"name": "8. Trigger Daily Briefing (Processador)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://212.47.65.37:8000/admin/trigger-daily-briefing",
+					"protocol": "http",
+					"host": [
+						"212",
+						"47",
+						"65",
+						"37"
+					],
+					"port": "8000",
+					"path": [
+						"admin",
+						"trigger-daily-briefing"
+					]
+				},
+				"description": "Executa o processador de resumo matinal/alertas financeiros (simula cron job)."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://212.47.65.37:8000",
+			"type": "default"
+		},
+		{
+			"key": "usuario_id",
+			"value": "1",
+			"type": "default"
+		}
+	]
+}

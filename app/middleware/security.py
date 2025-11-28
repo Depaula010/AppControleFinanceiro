@@ -93,6 +93,7 @@ VALID_ENDPOINTS = {
     '/admin/setup-monthly-reports-table',
     '/admin/setup-resumo-matinal',
     '/admin/setup-potes-alerts',
+    '/admin/setup-alertas-financeiros',
 
     # Admin - Triggers
     '/admin/run-motor-agendamentos',
@@ -110,6 +111,7 @@ VALID_ENDPOINTS = {
 
     # Admin - Configurações & Info
     '/admin/get-notification-config',  # Aceita qualquer ID
+    '/admin/config-alertas-financeiros',
     '/admin/oauth-config-check',
     '/admin/security-stats',
 
