@@ -637,10 +637,12 @@ def handle_whatsapp_webhook():
         # IMPORTANTE: Só processar se NÃO for confirmação de evento (eventos têm prioridade)
         msg_upper = texto_msg.strip().upper()
 
-        # Se "sim" ou palavras de confirmação de evento, NÃO processar como transação
-        is_event_confirmation = msg_lower in palavras_confirmacao_evento or msg_lower in palavras_cancelamento_evento
+        # Bloquear transaction handler APENAS para palavras EXCLUSIVAS de evento
+        # Palavras como "ok", "cancelar" são ambíguas - devem verificar contexto (TX pendente)
+        palavras_exclusivas_evento = ['sim', 's', 'não', 'nao', 'n', 'desistir']
+        is_exclusive_event_word = msg_lower in palavras_exclusivas_evento
 
-        if not is_event_confirmation and (any(word in msg_upper for word in ['CONFIRMAR', 'OK', 'TROCAR', 'CANCELAR']) or msg_upper.isdigit()):
+        if not is_exclusive_event_word and (any(word in msg_upper for word in ['CONFIRMAR', 'OK', 'TROCAR', 'CANCELAR']) or msg_upper.isdigit()):
             # Provável resposta de confirmação de TRANSAÇÃO
             print(f"[TX-CONFIRM-CHECK] Detectada possível confirmação de transação: '{texto_msg}'")
 
@@ -741,6 +743,20 @@ def handle_whatsapp_webhook():
                 # Palavra-chave de confirmação detectada, mas sem transação pendente
                 print(f"[CONFIRM-CHECK] Palavra de confirmação detectada, mas nenhuma transação pendente encontrada")
                 # Continuar para fluxo normal (pode ser uma pergunta normal que contém "ok")
+
+        # Safety check para "cancelar" sem contexto
+        if msg_lower in ['cancelar', 'cancela'] and len(texto_msg.strip().split()) == 1:
+            # Usuário enviou apenas "cancelar" - verificar se há algo pendente
+            has_pending_tx = redis_service.get(f"last_pending:{numero_limpo}") is not None
+            event_id, event_data = EventConfirmationService.get_latest_pending_event(numero_limpo)
+            has_pending_event = event_data is not None
+
+            if not has_pending_tx and not has_pending_event:
+                print(f"[SAFETY-CHECK] Usuário enviou 'cancelar' mas nada está pendente")
+                return jsonify({
+                    "status": "sucesso",
+                    "resposta": "❌ Não encontrei nada pendente para cancelar.\n\nSe quer deletar um evento específico, diga qual:\nExemplo: 'Deletar academia de hoje'"
+                }), 200
 
         # 4. Classificar intenção (fluxo normal)
         intent = gemini_service.get_message_intent(texto_msg)
