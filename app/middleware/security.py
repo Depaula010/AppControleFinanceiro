@@ -94,6 +94,7 @@ VALID_ENDPOINTS = {
     '/admin/setup-resumo-matinal',
     '/admin/setup-potes-alerts',
     '/admin/setup-alertas-financeiros',
+    '/admin/cleanup-deprecated-notification-fields',
 
     # Admin - Triggers
     '/admin/run-motor-agendamentos',

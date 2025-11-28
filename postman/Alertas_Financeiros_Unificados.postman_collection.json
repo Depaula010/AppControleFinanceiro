@@ -31,7 +31,31 @@
 			"response": []
 		},
 		{
-			"name": "2. Visualizar Configurações do Usuário",
+			"name": "2. Cleanup - Remover Campos Deprecados (IRREVERSÍVEL)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://212.47.65.37:8000/admin/cleanup-deprecated-notification-fields",
+					"protocol": "http",
+					"host": [
+						"212",
+						"47",
+						"65",
+						"37"
+					],
+					"port": "8000",
+					"path": [
+						"admin",
+						"cleanup-deprecated-notification-fields"
+					]
+				},
+				"description": "⚠️ ATENÇÃO: Remove PERMANENTEMENTE os campos deprecados da tabela NotificationConfigs. Esta operação é IRREVERSÍVEL! Execute apenas após confirmar que os campos antigos não são mais necessários."
+			},
+			"response": []
+		},
+		{
+			"name": "3. Visualizar Configurações do Usuário",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -56,7 +80,7 @@
 			"response": []
 		},
 		{
-			"name": "3. Ativar Alertas Financeiros",
+			"name": "4. Ativar Alertas Financeiros",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -89,7 +113,7 @@
 			"response": []
 		},
 		{
-			"name": "4. Desativar Alertas Financeiros",
+			"name": "5. Desativar Alertas Financeiros",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -122,7 +146,7 @@
 			"response": []
 		},
 		{
-			"name": "5. Ativar Resumo Matinal",
+			"name": "6. Ativar Resumo Matinal",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -155,7 +179,7 @@
 			"response": []
 		},
 		{
-			"name": "6. Desativar Resumo Matinal",
+			"name": "7. Desativar Resumo Matinal",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -188,7 +212,7 @@
 			"response": []
 		},
 		{
-			"name": "7. Testar Resumo Matinal (Manual)",
+			"name": "8. Testar Resumo Matinal (Manual)",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -212,7 +236,7 @@
 			"response": []
 		},
 		{
-			"name": "8. Trigger Daily Briefing (Processador)",
+			"name": "9. Trigger Daily Briefing (Processador)",
 			"request": {
 				"method": "GET",
 				"header": [],

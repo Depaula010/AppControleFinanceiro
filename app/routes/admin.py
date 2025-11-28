@@ -1173,6 +1173,83 @@ def setup_alertas_financeiros():
         return f"<pre>Erro ao configurar Alertas Financeiros:\n\n{traceback.format_exc()}</pre>", 500
 
 
+@admin_bp.route('/cleanup-deprecated-notification-fields', methods=['GET'])
+def cleanup_deprecated_notification_fields():
+    """
+    Remove campos DEPRECATED da tabela NotificationConfigs.
+
+    ATENÇÃO: Esta operação é IRREVERSÍVEL!
+
+    Remove os seguintes campos:
+    - agenda_diaria_ativa (substituído por resumo_matinal_ativo)
+    - agenda_diaria_hora (substituído por resumo_matinal_hora)
+    - contas_vencer_ativa (substituído por alertas_financeiros_ativos)
+    - contas_vencer_dias_antes (não mais usado - alertas sempre para hoje e amanhã)
+    - contas_vencer_hora (substituído por resumo_matinal_hora)
+
+    Exemplo:
+    GET http://212.47.65.37:8000/admin/cleanup-deprecated-notification-fields
+    """
+    try:
+        from sqlalchemy import text
+
+        output = []
+        output.append("="*60)
+        output.append("CLEANUP: Removendo campos DEPRECATED")
+        output.append("="*60)
+        output.append("\n⚠️  ATENÇÃO: Esta operação é IRREVERSÍVEL!")
+
+        # Lista de colunas a remover
+        deprecated_columns = [
+            'agenda_diaria_ativa',
+            'agenda_diaria_hora',
+            'contas_vencer_ativa',
+            'contas_vencer_dias_antes',
+            'contas_vencer_hora'
+        ]
+
+        output.append(f"\n[INFO] Removendo {len(deprecated_columns)} colunas deprecadas...")
+
+        with db_engine.connect() as conn:
+            conn.begin()
+
+            for idx, column_name in enumerate(deprecated_columns, 1):
+                output.append(f"\n[{idx}/{len(deprecated_columns)}] Removendo coluna '{column_name}'...")
+
+                sql_drop = text(f"""
+                    ALTER TABLE NotificationConfigs
+                    DROP COLUMN IF EXISTS {column_name};
+                """)
+
+                try:
+                    conn.execute(sql_drop)
+                    output.append(f"    OK - '{column_name}' removida!")
+                except Exception as e:
+                    output.append(f"    AVISO - Erro ao remover '{column_name}': {e}")
+
+            conn.commit()
+
+        output.append("\n" + "="*60)
+        output.append("SUCESSO! Campos deprecados removidos")
+        output.append("="*60)
+        output.append("\nCampos MANTIDOS (estrutura limpa):")
+        output.append("- resumo_matinal_ativo (controla resumo com agenda/clima)")
+        output.append("- resumo_matinal_hora (horário único de envio)")
+        output.append("- alertas_financeiros_ativos (controla alertas de contas/faturas)")
+        output.append("\nComportamento:")
+        output.append("- Um único horário controla todas as notificações")
+        output.append("- Usuário escolhe quais componentes quer receber")
+        output.append("- Mensagens são unificadas quando ambos estão ativos")
+
+        return "<pre>" + "\n".join(output) + "</pre>", 200
+
+    except Exception as e:
+        print(f"[CLEANUP] Erro: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"<pre>Erro ao limpar campos deprecados:\n\n{traceback.format_exc()}</pre>", 500
+
+
 @admin_bp.route('/config-alertas-financeiros', methods=['POST'])
 def config_alertas_financeiros():
     """
