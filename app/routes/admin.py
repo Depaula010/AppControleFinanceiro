@@ -1055,16 +1055,9 @@ def get_notification_config(usuario_id):
 
         # Converter objetos time para string para JSON
         config_json = {
-            'agenda_diaria_ativa': config['agenda_diaria_ativa'],
-            'agenda_diaria_hora': config['agenda_diaria_hora'].strftime('%H:%M'),
             'resumo_matinal_ativo': config['resumo_matinal_ativo'],
             'resumo_matinal_hora': config['resumo_matinal_hora'].strftime('%H:%M'),
-            'alertas_financeiros_ativos': config.get('alertas_financeiros_ativos', True),
-            'contas_vencer_ativa': config['contas_vencer_ativa'],
-            'contas_vencer_dias_antes': config['contas_vencer_dias_antes'],
-            'contas_vencer_hora': config['contas_vencer_hora'].strftime('%H:%M'),
-            'alerta_potes_ativo': config.get('alerta_potes_ativo', True),
-            'alerta_potes_threshold': config.get('alerta_potes_threshold', 0)
+            'alertas_financeiros_ativos': config['alertas_financeiros_ativos']
         }
 
         return jsonify({
@@ -1099,9 +1092,11 @@ def setup_alertas_financeiros():
         output.append("="*60)
         output.append("SETUP: Alertas Financeiros Unificados")
         output.append("="*60)
+        output.append("\nNOTA: Este endpoint verifica se a estrutura está correta.")
+        output.append("Se você já rodou o cleanup, a tabela já está limpa.\n")
 
-        # Migration 1: Adicionar campo alertas_financeiros_ativos
-        output.append("\n[1/3] Adicionando campo alertas_financeiros_ativos...")
+        # Verificar se campo existe
+        output.append("[1/2] Verificando campo alertas_financeiros_ativos...")
 
         sql_add_column = text("""
             ALTER TABLE NotificationConfigs
@@ -1113,27 +1108,10 @@ def setup_alertas_financeiros():
             conn.execute(sql_add_column)
             conn.commit()
 
-        output.append("OK - Campo adicionado!")
+        output.append("OK - Campo existe e está configurado!")
 
-        # Migration 2: Copiar dados de contas_vencer_ativa
-        output.append("\n[2/3] Migrando dados existentes...")
-
-        sql_migrate = text("""
-            UPDATE NotificationConfigs
-            SET alertas_financeiros_ativos = contas_vencer_ativa
-            WHERE alertas_financeiros_ativos IS NULL;
-        """)
-
-        with db_engine.connect() as conn:
-            conn.begin()
-            result = conn.execute(sql_migrate)
-            conn.commit()
-            rows_updated = result.rowcount
-
-        output.append(f"OK - {rows_updated} registro(s) migrado(s)!")
-
-        # Migration 3: Adicionar comentário no banco
-        output.append("\n[3/3] Documentando estrutura...")
+        # Adicionar comentário no banco
+        output.append("\n[2/2] Documentando estrutura...")
 
         sql_comment = text("""
             COMMENT ON COLUMN NotificationConfigs.alertas_financeiros_ativos IS
@@ -1148,12 +1126,12 @@ def setup_alertas_financeiros():
         output.append("OK - Comentário adicionado!")
 
         output.append("\n" + "="*60)
-        output.append("SUCESSO! Alertas Financeiros Unificados configurados")
+        output.append("SUCESSO! Sistema de Alertas Financeiros configurado")
         output.append("="*60)
-        output.append("\nO que foi feito:")
-        output.append("1. Campo 'alertas_financeiros_ativos' adicionado")
-        output.append("2. Dados migrados de 'contas_vencer_ativa'")
-        output.append("3. Estrutura documentada no banco")
+        output.append("\nEstrutura atual (limpa):")
+        output.append("- resumo_matinal_ativo (controla resumo com agenda/clima)")
+        output.append("- resumo_matinal_hora (horário único de envio)")
+        output.append("- alertas_financeiros_ativos (controla alertas de contas/faturas)")
         output.append("\nComportamento:")
         output.append("- Ambos ativos: 1 mensagem unificada (resumo + alertas)")
         output.append("- Só resumo ativo: Apenas agenda e clima")
@@ -1162,7 +1140,7 @@ def setup_alertas_financeiros():
         output.append("\nPróximos passos:")
         output.append("1. Testar com: GET /admin/get-notification-config/1")
         output.append("2. Configurar alertas: POST /admin/config-alertas-financeiros")
-        output.append("3. Executar processador: python processar_resumo_matinal.py")
+        output.append("3. Executar processador: GET /admin/trigger-daily-briefing")
 
         return "<pre>" + "\n".join(output) + "</pre>", 200
 
