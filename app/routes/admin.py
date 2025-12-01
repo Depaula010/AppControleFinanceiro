@@ -773,6 +773,55 @@ def setup_resumo_matinal():
         return f"<pre>Erro ao configurar Resumo Matinal:\n\n{traceback.format_exc()}</pre>", 500
 
 
+@admin_bp.route('/setup-checkin-noturno', methods=['GET'])
+def setup_checkin_noturno():
+    """
+    Adiciona as colunas necessárias para o Check-in Noturno.
+
+    - Adiciona 'checkin_noturno_ativo' e 'checkin_noturno_hora' na tabela NotificationConfigs
+    - Cria constraint de validação de horário (18:00-23:00)
+
+    Exemplo:
+    GET http://localhost:5000/admin/setup-checkin-noturno
+    """
+    try:
+        output = []
+        output.append("="*60)
+        output.append("SETUP: Check-in Noturno (Confirmação de Contas Pendentes)")
+        output.append("="*60)
+
+        # Usar a função de migração do finance_service
+        from app.services.finance_service import add_nightly_checkin_config_columns
+
+        output.append("\n[1/1] Adicionando campos de check-in noturno...")
+
+        sucesso = add_nightly_checkin_config_columns()
+
+        if sucesso:
+            output.append("OK - Campos 'checkin_noturno_ativo' e 'checkin_noturno_hora' adicionados!")
+            output.append("OK - Constraint de horário (18:00-23:00) criada!")
+        else:
+            output.append("ERRO - Falha ao adicionar campos (verifique logs)")
+
+        output.append("\n" + "="*60)
+        output.append("SUCESSO! Check-in Noturno configurado")
+        output.append("="*60)
+        output.append("\nPróximos passos:")
+        output.append("1. Rebuild containers: docker-compose up -d --build")
+        output.append("2. Testar via WhatsApp: 'Ativar check-in noturno às 20:00'")
+        output.append("3. Testar via WhatsApp: 'Configurar check-in noturno'")
+        output.append("4. Verificar logs Ofelia: docker logs meu-secretario-cron")
+        output.append("5. Teste manual: docker exec meu-secretario-web python /app/processar_checkin_noturno.py")
+
+        return "<pre>" + "\n".join(output) + "</pre>", 200
+
+    except Exception as e:
+        print(f"[CHECKIN-NOTURNO-SETUP] Erro: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"<pre>Erro ao configurar Check-in Noturno:\n\n{traceback.format_exc()}</pre>", 500
+
+
 @admin_bp.route('/trigger-daily-briefing', methods=['POST'])
 def trigger_daily_briefing():
     """

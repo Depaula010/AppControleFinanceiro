@@ -1476,7 +1476,62 @@ def handle_whatsapp_webhook():
 
                     return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
-                # Se NÃO for resumo matinal, processar outras notificações (CÓDIGO EXISTENTE)
+                # HANDLER ESPECÍFICO PARA CHECK-IN NOTURNO
+                is_checkin_noturno = any(kw in texto_lower for kw in ['check-in', 'checkin', 'check in', 'noturno', 'contas pendentes'])
+
+                if is_checkin_noturno:
+                    print(f"[WHATSAPP] Configuração de Check-in Noturno detectada")
+
+                    # Detectar ação (ativar/desativar/configurar)
+                    if any(kw in texto_lower for kw in ['ativar', 'ligar', 'ativa', 'ative']):
+                        acao = 'ativar'
+                    elif any(kw in texto_lower for kw in ['desativar', 'desligar', 'desative', 'off']):
+                        acao = 'desativar'
+                    else:
+                        acao = 'configurar'
+
+                    # Extrair horário (se houver)
+                    import re
+                    hora_match = re.search(r'(\d{1,2})[h:](\d{2})?', texto_msg)
+                    hora = None
+
+                    if hora_match:
+                        hora_h = int(hora_match.group(1))
+                        hora_m = int(hora_match.group(2)) if hora_match.group(2) else 0
+                        hora = f"{hora_h:02d}:{hora_m:02d}"
+
+                    # Executar ação
+                    if acao == 'ativar':
+                        sucesso, msg, config = NotificationConfigService.update_checkin_noturno_config(
+                            usuario_id, ativo=True, hora=hora if hora else None
+                        )
+                    elif acao == 'desativar':
+                        sucesso, msg, config = NotificationConfigService.update_checkin_noturno_config(
+                            usuario_id, ativo=False
+                        )
+                    elif acao == 'configurar':
+                        sucesso, msg, config = NotificationConfigService.update_checkin_noturno_config(
+                            usuario_id, ativo=True, hora=hora
+                        )
+                    else:
+                        sucesso = False
+                        msg = "Ação não reconhecida"
+                        config = None
+
+                    if sucesso and config:
+                        resposta_para_usuario = f"✅ {msg}\n\n"
+                        resposta_para_usuario += f"🌙 *Check-in Noturno - Status atual:*\n"
+                        resposta_para_usuario += f"• Ativo: {'Sim' if config['checkin_noturno_ativo'] else 'Não'}\n"
+                        resposta_para_usuario += f"• Horário: {config['checkin_noturno_hora'].strftime('%H:%M')}\n\n"
+                        resposta_para_usuario += "💡 O check-in envia uma lista de contas pendentes dos últimos 7 dias.\n"
+                        resposta_para_usuario += "Você pode confirmar todas de uma vez ou parcialmente.\n\n"
+                        resposta_para_usuario += "⏰ Horário permitido: 18:00 às 23:00"
+                    else:
+                        resposta_para_usuario = f"❌ {msg}"
+
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                # Se NÃO for resumo matinal nem check-in, processar outras notificações (CÓDIGO EXISTENTE)
                 config_data = gemini_service.extract_notification_config(texto_msg)
 
                 tipo = config_data.get('tipo')

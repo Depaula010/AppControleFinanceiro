@@ -95,6 +95,7 @@ VALID_ENDPOINTS = {
     '/admin/setup-calendar-table',
     '/admin/setup-monthly-reports-table',
     '/admin/setup-resumo-matinal',
+    '/admin/setup-checkin-noturno',
     '/admin/setup-potes-alerts',
     '/admin/setup-alertas-financeiros',
     '/admin/cleanup-deprecated-notification-fields',
