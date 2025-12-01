@@ -28,6 +28,10 @@ class NotificationConfigService:
                 -- Alertas Financeiros (contas e faturas a vencer)
                 alertas_financeiros_ativos BOOLEAN NOT NULL DEFAULT TRUE,
 
+                -- Check-in Noturno (confirmação de contas pendentes)
+                checkin_noturno_ativo BOOLEAN NOT NULL DEFAULT TRUE,
+                checkin_noturno_hora TIME NOT NULL DEFAULT '20:00:00',
+
                 -- Timestamps
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -47,6 +51,22 @@ class NotificationConfigService:
 
             COMMENT ON COLUMN NotificationConfigs.alertas_financeiros_ativos IS
             'Se TRUE, inclui alertas de contas/faturas a vencer (hoje e amanhã)';
+
+            COMMENT ON COLUMN NotificationConfigs.checkin_noturno_ativo IS
+            'Se TRUE, envia check-in noturno com contas pendentes (D-0 até D-7)';
+
+            COMMENT ON COLUMN NotificationConfigs.checkin_noturno_hora IS
+            'Horário para envio do check-in noturno (18:00-23:00)';
+
+            -- Constraint para validar horário do check-in
+            ALTER TABLE NotificationConfigs
+            DROP CONSTRAINT IF EXISTS chk_checkin_hora;
+
+            ALTER TABLE NotificationConfigs
+            ADD CONSTRAINT chk_checkin_hora CHECK (
+                checkin_noturno_hora >= '18:00:00'::TIME
+                AND checkin_noturno_hora <= '23:00:00'::TIME
+            );
         """)
         
         try:
@@ -73,7 +93,9 @@ class NotificationConfigService:
             SELECT
                 resumo_matinal_ativo,
                 resumo_matinal_hora,
-                alertas_financeiros_ativos
+                alertas_financeiros_ativos,
+                checkin_noturno_ativo,
+                checkin_noturno_hora
             FROM NotificationConfigs
             WHERE usuario_id = :uid
         """)
@@ -85,7 +107,9 @@ class NotificationConfigService:
                 return {
                     'resumo_matinal_ativo': result.resumo_matinal_ativo,
                     'resumo_matinal_hora': result.resumo_matinal_hora,
-                    'alertas_financeiros_ativos': result.alertas_financeiros_ativos
+                    'alertas_financeiros_ativos': result.alertas_financeiros_ativos,
+                    'checkin_noturno_ativo': result.checkin_noturno_ativo,
+                    'checkin_noturno_hora': result.checkin_noturno_hora
                 }
 
         # Se não existir, criar em uma nova conexão com transação
@@ -95,7 +119,9 @@ class NotificationConfigService:
             RETURNING
                 resumo_matinal_ativo,
                 resumo_matinal_hora,
-                alertas_financeiros_ativos
+                alertas_financeiros_ativos,
+                checkin_noturno_ativo,
+                checkin_noturno_hora
         """)
 
         with db_engine.connect() as conn:
@@ -105,7 +131,9 @@ class NotificationConfigService:
         return {
             'resumo_matinal_ativo': result.resumo_matinal_ativo,
             'resumo_matinal_hora': result.resumo_matinal_hora,
-            'alertas_financeiros_ativos': result.alertas_financeiros_ativos
+            'alertas_financeiros_ativos': result.alertas_financeiros_ativos,
+            'checkin_noturno_ativo': result.checkin_noturno_ativo,
+            'checkin_noturno_hora': result.checkin_noturno_hora
         }
     
     @staticmethod
@@ -465,3 +493,105 @@ class NotificationConfigService:
         except Exception as e:
             print(f"[NOTIF-CONFIG] Erro ao atualizar: {e}")
             return False, f"Erro ao atualizar configuração: {str(e)}", None
+
+    @staticmethod
+    def update_checkin_noturno_config(usuario_id, ativo=None, hora=None):
+        """
+        Atualiza configuração de check-in noturno.
+
+        Args:
+            usuario_id: ID do usuário
+            ativo: True/False ou None (manter atual)
+            hora: time object, string 'HH:MM', ou None (manter atual)
+
+        Returns:
+            (sucesso: bool, mensagem: str, config: dict or None)
+        """
+        if not db_engine:
+            raise Exception("Banco não configurado")
+
+        # Garantir que config existe
+        NotificationConfigService.get_or_create_config(usuario_id)
+
+        updates = []
+        params = {"uid": usuario_id}
+
+        if ativo is not None:
+            updates.append("checkin_noturno_ativo = :ativo")
+            params['ativo'] = ativo
+
+        if hora is not None:
+            if isinstance(hora, str):
+                # Converter 'HH:MM' para time
+                from datetime import datetime, time as time_type
+                hora = datetime.strptime(hora, '%H:%M').time()
+
+            # Validar horário (18:00 - 23:00)
+            if not (time_type(18, 0) <= hora <= time_type(23, 0)):
+                return False, "Horário deve estar entre 18:00 e 23:00", None
+
+            updates.append("checkin_noturno_hora = :hora")
+            params['hora'] = hora
+
+        if not updates:
+            return False, "Nenhuma alteração fornecida", None
+
+        sql = text(f"""
+            UPDATE NotificationConfigs
+            SET {', '.join(updates)}, updated_at = CURRENT_TIMESTAMP
+            WHERE usuario_id = :uid
+            RETURNING checkin_noturno_ativo, checkin_noturno_hora
+        """)
+
+        try:
+            with db_engine.connect() as conn:
+                with conn.begin():
+                    result = conn.execute(sql, params).fetchone()
+
+            status = "ativado" if ativo else "desativado" if ativo is False else None
+            hora_fmt = hora.strftime('%H:%M') if hora else None
+
+            msg_parts = []
+            if status:
+                msg_parts.append(f"Check-in noturno {status}")
+            if hora_fmt:
+                msg_parts.append(f"horário configurado para {hora_fmt}")
+
+            mensagem = " e ".join(msg_parts) if msg_parts else "Configuração atualizada"
+
+            config = {
+                'checkin_noturno_ativo': result.checkin_noturno_ativo,
+                'checkin_noturno_hora': result.checkin_noturno_hora
+            }
+
+            print(f"[NOTIF-CONFIG] Check-in noturno atualizado para usuário {usuario_id}")
+            return True, mensagem, config
+
+        except Exception as e:
+            print(f"[NOTIF-CONFIG] Erro ao atualizar: {e}")
+            return False, f"Erro ao atualizar configuração: {str(e)}", None
+
+    @staticmethod
+    def get_users_with_checkin_noturno_active(target_hour):
+        """
+        Retorna usuários que devem receber check-in noturno agora.
+
+        Args:
+            target_hour: time object da hora atual
+
+        Returns:
+            list: [(usuario_id, numero_whatsapp), ...]
+        """
+        if not db_engine:
+            raise Exception("Banco não configurado")
+
+        sql = text("""
+            SELECT u.id, u.numero_whatsapp
+            FROM NotificationConfigs nc
+            JOIN Usuarios u ON nc.usuario_id = u.id
+            WHERE nc.checkin_noturno_ativo = TRUE
+              AND nc.checkin_noturno_hora = :hora
+        """)
+
+        with db_engine.connect() as conn:
+            return conn.execute(sql, {"hora": target_hour}).fetchall()

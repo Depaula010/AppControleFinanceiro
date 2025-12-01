@@ -842,3 +842,52 @@ def add_google_calendar_tokens_table():
     except Exception as e:
         print(f"[DB] Erro ao criar tabela: {e}")
         raise
+
+
+def add_nightly_checkin_config_columns():
+    """
+    Adiciona colunas de check-in noturno na tabela NotificationConfigs.
+    Função idempotente - pode ser executada múltiplas vezes sem erros.
+    """
+    if not db_engine:
+        raise Exception("Banco não configurado")
+
+    sql = text("""
+        -- Adicionar colunas
+        ALTER TABLE NotificationConfigs
+        ADD COLUMN IF NOT EXISTS checkin_noturno_ativo BOOLEAN NOT NULL DEFAULT TRUE,
+        ADD COLUMN IF NOT EXISTS checkin_noturno_hora TIME NOT NULL DEFAULT '20:00:00';
+
+        -- Adicionar constraint (usando DO para evitar erro se já existe)
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM pg_constraint WHERE conname = 'chk_checkin_hora'
+            ) THEN
+                ALTER TABLE NotificationConfigs
+                ADD CONSTRAINT chk_checkin_hora CHECK (
+                    checkin_noturno_hora >= '18:00:00'::TIME
+                    AND checkin_noturno_hora <= '23:00:00'::TIME
+                );
+            END IF;
+        END $$;
+
+        -- Adicionar comentários
+        COMMENT ON COLUMN NotificationConfigs.checkin_noturno_ativo IS
+        'Se TRUE, envia check-in noturno com contas pendentes (D-0 até D-7)';
+
+        COMMENT ON COLUMN NotificationConfigs.checkin_noturno_hora IS
+        'Horário para envio do check-in noturno (18:00-23:00)';
+    """)
+
+    try:
+        with db_engine.connect() as conn:
+            with conn.begin():
+                conn.execute(sql)
+            print("[MIGRATION] ✅ Colunas de check-in noturno adicionadas com sucesso")
+            return True
+    except Exception as e:
+        print(f"[MIGRATION] ❌ Erro ao adicionar colunas: {e}")
+        import traceback
+        traceback.print_exc()
+        return False

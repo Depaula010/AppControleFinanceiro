@@ -68,6 +68,10 @@ services:
       ofelia.job-exec.relatorio-fim.schedule: "0 23 * * *"
       ofelia.job-exec.relatorio-fim.command: "curl -X POST http://localhost:5000/admin/trigger-monthly-reports-fim -H 'x-api-key: ${API_SECRET_KEY}'"
 
+      # 4. Check-in Noturno (Roda a cada hora entre 18h-23h, o script verifica configuração do usuário)
+      ofelia.job-exec.checkin-noturno.schedule: "0 18-23 * * *"
+      ofelia.job-exec.checkin-noturno.command: "python /app/processar_checkin_noturno.py"
+
   # ============================================
   # REDIS
   # ============================================

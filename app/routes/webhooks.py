@@ -17,6 +17,7 @@ from app.services import gemini_service
 from app.services import notification_service
 from app.services import user_service
 from app.services.transaction_confirmation_service import TransactionConfirmationService
+from app.services.nightly_checkin_service import NightlyCheckinService
 from app.services.redis_service import redis_service
 from app.services.transaction_feedback_service import gerar_feedback_transacao
 
@@ -625,6 +626,30 @@ def handle_whatsapp_webhook():
                 msg += f"\n💬 Responda com: _'casa'_, _'trabalho'_ ou _'outro'_"
 
                 return jsonify({"status": "sucesso", "resposta": msg}), 200
+
+        # 3.0. Verificar se está respondendo a um CHECK-IN NOTURNO (PRIORIDADE 2)
+        checkin_active_key = f"nightly_checkin_active:{numero_limpo}"
+        checkin_active = redis_service.get(checkin_active_key)
+
+        if checkin_active:
+            checkin_id = checkin_active  # O valor é o checkin_id
+            print(f"[CHECKIN-RESPONSE] Check-in ativo detectado: {checkin_id}")
+
+            # Verificar Escape Hatch (palavras-chave que quebram o check-in)
+            if any(kw in texto_msg.lower() for kw in NightlyCheckinService.ESCAPE_KEYWORDS):
+                print(f"[CHECKIN-ESCAPE] Escape hatch detectado: '{texto_msg}'")
+                redis_service.delete(checkin_active_key)
+                # Continuar para classificação normal de intent
+                # Não retorna aqui - deixa cair para o processamento normal
+            else:
+                # Processar resposta de check-in
+                print(f"[CHECKIN-RESPONSE] Processando resposta: '{texto_msg}'")
+                status, resposta = NightlyCheckinService.process_response(
+                    numero_limpo, texto_msg, checkin_id
+                )
+
+                # A flag já foi removida dentro do process_response
+                return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
         # 3.1. Verificar se está respondendo a uma confirmação de TRANSAÇÃO
         # Tentar identificar transaction_id na mensagem ou buscar última pendente
