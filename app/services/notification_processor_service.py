@@ -173,28 +173,34 @@ class NotificationProcessorService:
         hora_min = (datetime.combine(date.today(), hora_atual) - timedelta(minutes=5)).time()
         hora_max = (datetime.combine(date.today(), hora_atual) + timedelta(minutes=5)).time()
         
-        # Buscar usuários
+        # Buscar usuários com alertas financeiros ativos
+        # NOTA: Este serviço foi substituído pelo sistema de Alertas Financeiros
+        # integrado ao Resumo Matinal (resumo_matinal_hora).
+        # Mantido por compatibilidade, mas agora usa o novo schema.
         sql = text("""
-            SELECT u.id, u.numero_whatsapp, u.nome, nc.contas_vencer_dias_antes
+            SELECT u.id, u.numero_whatsapp, u.nome
             FROM NotificationConfigs nc
             JOIN Usuarios u ON nc.usuario_id = u.id
-            WHERE nc.contas_vencer_ativa = TRUE
-              AND nc.contas_vencer_hora BETWEEN :hora_min AND :hora_max
+            WHERE nc.alertas_financeiros_ativos = TRUE
+              AND nc.resumo_matinal_hora BETWEEN :hora_min AND :hora_max
         """)
-        
+
         with db_engine.connect() as conn:
             usuarios = conn.execute(sql, {
                 "hora_min": hora_min,
                 "hora_max": hora_max
             }).fetchall()
-        
+
         print(f"[BILLS-NOTIF] {len(usuarios)} usuário(s) para processar")
-        
+
         enviados = 0
         erros = 0
-        
+
+        # Alertas financeiros agora sempre verificam hoje e amanhã (sem dias_antes configurável)
+        dias_antes = 1  # Fixo: sempre verificar amanhã
+
         for usuario in usuarios:
-            usuario_id, numero_whatsapp, nome, dias_antes = usuario
+            usuario_id, numero_whatsapp, nome = usuario
             
             try:
                 print(f"[BILLS-NOTIF] Processando {nome} (ID: {usuario_id})...")

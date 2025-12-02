@@ -139,189 +139,70 @@ class NotificationConfigService:
     @staticmethod
     def update_agenda_diaria_config(usuario_id, ativa=None, hora=None):
         """
-        Atualiza configuração de agenda diária.
-        
+        [DEPRECATED] Este método foi substituído por update_resumo_matinal_config()
+
+        A funcionalidade de "agenda diária" foi integrada ao "resumo matinal".
+        Use update_resumo_matinal_config() ao invés deste método.
+
         Args:
             usuario_id: ID do usuário
             ativa: True/False ou None (manter atual)
             hora: time object, string 'HH:MM', ou None (manter atual)
-        
+
         Returns:
             (sucesso: bool, mensagem: str)
         """
-        if not db_engine:
-            raise Exception("Banco não configurado")
-        
-        # Garantir que config existe
-        NotificationConfigService.get_or_create_config(usuario_id)
-        
-        updates = []
-        params = {"uid": usuario_id}
-        
-        if ativa is not None:
-            updates.append("agenda_diaria_ativa = :ativa")
-            params['ativa'] = ativa
-        
-        if hora is not None:
-            if isinstance(hora, str):
-                # Converter 'HH:MM' para time
-                from datetime import datetime
-                hora = datetime.strptime(hora, '%H:%M').time()
-            
-            updates.append("agenda_diaria_hora = :hora")
-            params['hora'] = hora
-        
-        if not updates:
-            return False, "Nenhuma alteração fornecida"
-        
-        sql = text(f"""
-            UPDATE NotificationConfigs
-            SET {', '.join(updates)}, updated_at = CURRENT_TIMESTAMP
-            WHERE usuario_id = :uid
-        """)
-        
-        try:
-            with db_engine.connect() as conn:
-                with conn.begin():
-                    conn.execute(sql, params)
+        print("[DEPRECATED] update_agenda_diaria_config() foi substituído por update_resumo_matinal_config()")
 
-            status = "ativa" if ativa else "desativada" if ativa is False else None
-            hora_fmt = hora.strftime('%H:%M') if hora else None
+        # Redirecionar para o novo método
+        return NotificationConfigService.update_resumo_matinal_config(usuario_id, ativo=ativa, hora=hora)[:2]
 
-            msg_parts = []
-            if status:
-                msg_parts.append(f"Notificação de agenda diária {status}")
-            if hora_fmt:
-                msg_parts.append(f"horário configurado para {hora_fmt}")
-
-            mensagem = " e ".join(msg_parts) if msg_parts else "Configuração atualizada"
-
-            print(f"[NOTIF-CONFIG] Agenda diária atualizada para usuário {usuario_id}")
-            return True, mensagem
-
-        except Exception as e:
-            print(f"[NOTIF-CONFIG] Erro ao atualizar: {e}")
-            return False, f"Erro ao atualizar configuração: {str(e)}"
-    
     @staticmethod
     def update_contas_vencer_config(usuario_id, ativa=None, dias_antes=None, hora=None):
         """
-        Atualiza configuração de contas a vencer.
-        
+        [DEPRECATED] Este método foi substituído por update_alertas_financeiros_config()
+
+        A funcionalidade de "contas a vencer" foi integrada aos "alertas financeiros".
+        Agora os alertas sempre verificam hoje e amanhã (sem configuração de dias_antes).
+        O horário segue o resumo_matinal_hora.
+
         Args:
             usuario_id: ID do usuário
             ativa: True/False ou None
-            dias_antes: int (1, 2, 3...) ou None
-            hora: time object, string 'HH:MM', ou None
-        
+            dias_antes: [IGNORADO] int (1, 2, 3...) ou None
+            hora: [IGNORADO] time object, string 'HH:MM', ou None
+
         Returns:
             (sucesso: bool, mensagem: str)
         """
-        if not db_engine:
-            raise Exception("Banco não configurado")
-        
-        NotificationConfigService.get_or_create_config(usuario_id)
-        
-        updates = []
-        params = {"uid": usuario_id}
-        
-        if ativa is not None:
-            updates.append("contas_vencer_ativa = :ativa")
-            params['ativa'] = ativa
-        
-        if dias_antes is not None:
-            updates.append("contas_vencer_dias_antes = :dias")
-            params['dias'] = dias_antes
-        
-        if hora is not None:
-            if isinstance(hora, str):
-                from datetime import datetime
-                hora = datetime.strptime(hora, '%H:%M').time()
-            
-            updates.append("contas_vencer_hora = :hora")
-            params['hora'] = hora
-        
-        if not updates:
-            return False, "Nenhuma alteração fornecida"
-        
-        sql = text(f"""
-            UPDATE NotificationConfigs
-            SET {', '.join(updates)}, updated_at = CURRENT_TIMESTAMP
-            WHERE usuario_id = :uid
-        """)
-        
-        try:
-            with db_engine.connect() as conn:
-                with conn.begin():
-                    conn.execute(sql, params)
+        print("[DEPRECATED] update_contas_vencer_config() foi substituído por update_alertas_financeiros_config()")
 
-            msg_parts = []
-            if ativa is not None:
-                status = "ativa" if ativa else "desativada"
-                msg_parts.append(f"Notificação de contas {status}")
-            if dias_antes:
-                msg_parts.append(f"alerta configurado para {dias_antes} dia(s) antes")
-            if hora:
-                msg_parts.append(f"horário às {hora.strftime('%H:%M')}")
-
-            mensagem = ", ".join(msg_parts) if msg_parts else "Configuração atualizada"
-
-            print(f"[NOTIF-CONFIG] Contas a vencer atualizada para usuário {usuario_id}")
-            return True, mensagem
-
-        except Exception as e:
-            print(f"[NOTIF-CONFIG] Erro ao atualizar: {e}")
-            return False, f"Erro: {str(e)}"
+        # Redirecionar para o novo método (ignora dias_antes e hora)
+        return NotificationConfigService.update_alertas_financeiros_ativos(usuario_id, ativo=ativa)[:2]
     
     @staticmethod
     def get_users_with_agenda_diaria_active(target_hour):
         """
-        Retorna usuários que devem receber notificação de agenda diária agora.
-        
-        Args:
-            target_hour: time object da hora atual
-        
-        Returns:
-            list: [(usuario_id, numero_whatsapp), ...]
+        [DEPRECATED] Use get_users_with_resumo_matinal_active() ao invés deste.
+
+        Redireciona automaticamente para o novo método.
         """
-        if not db_engine:
-            raise Exception("Banco não configurado")
-        
-        sql = text("""
-            SELECT u.id, u.numero_whatsapp
-            FROM NotificationConfigs nc
-            JOIN Usuarios u ON nc.usuario_id = u.id
-            WHERE nc.agenda_diaria_ativa = TRUE
-              AND nc.agenda_diaria_hora = :hora
-        """)
-        
-        with db_engine.connect() as conn:
-            return conn.execute(sql, {"hora": target_hour}).fetchall()
+        print("[DEPRECATED] get_users_with_agenda_diaria_active() redirecionando para get_users_with_resumo_matinal_active()")
+        return NotificationConfigService.get_users_with_resumo_matinal_active(target_hour)
     
     @staticmethod
     def get_users_with_contas_vencer_active(target_hour):
         """
-        Retorna usuários que devem receber notificação de contas a vencer agora.
-        
-        Args:
-            target_hour: time object da hora atual
-        
-        Returns:
-            list: [(usuario_id, numero_whatsapp, dias_antes), ...]
-        """
-        if not db_engine:
-            raise Exception("Banco não configurado")
-        
-        sql = text("""
-            SELECT u.id, u.numero_whatsapp, nc.contas_vencer_dias_antes
-            FROM NotificationConfigs nc
-            JOIN Usuarios u ON nc.usuario_id = u.id
-            WHERE nc.contas_vencer_ativa = TRUE
-              AND nc.contas_vencer_hora = :hora
-        """)
+        [DEPRECATED] Use get_users_with_resumo_matinal_active() ao invés deste.
 
-        with db_engine.connect() as conn:
-            return conn.execute(sql, {"hora": target_hour}).fetchall()
+        Alertas financeiros agora são enviados junto com o resumo matinal.
+        Redireciona automaticamente para o novo método.
+        """
+        print("[DEPRECATED] get_users_with_contas_vencer_active() redirecionando para get_users_with_resumo_matinal_active()")
+        # Retorna apenas (usuario_id, numero_whatsapp) sem dias_antes
+        results = NotificationConfigService.get_users_with_resumo_matinal_active(target_hour)
+        # Adicionar dias_antes=1 fixo para compatibilidade com código legado
+        return [(uid, num, 1) for uid, num in results]
 
     @staticmethod
     def update_resumo_matinal_config(usuario_id, ativo=None, hora=None):
