@@ -1971,8 +1971,53 @@ def handle_whatsapp_webhook():
 
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
+            elif intent == "Menu de Ajuda":
+                resposta_para_usuario = """📚 *MENU DE FUNCIONALIDADES* 📚
+
+*💰 GESTÃO FINANCEIRA*
+• _"gastei 50 em comida"_ - Registrar despesa
+• _"recebi 500"_ - Registrar renda
+• _"qual meu saldo?"_ - Consultar saldo das contas
+• _"quanto gastei hoje/semana/mês?"_ - Gastos por período
+• _"meus potes"_ - Ver limite e gasto dos potes
+• _"minhas contas fixas"_ - Listar contas recorrentes
+• _"paguei água"_ - Quitar conta fixa
+• _"transferir 100 da carteira para banco"_ - Transferência
+• _"paguei 500 da fatura do nubank"_ - Pagar fatura
+• _"qual valor da fatura?"_ - Consultar valor da fatura
+• _"quanto gastei com comida?"_ - Gasto por categoria
+• _"quais contas tenho?"_ - Listar contas cadastradas
+• _"quanto de reserva?"_ - Reserva de emergência (6x média)
+
+*📅 CALENDÁRIO & AGENDA*
+• _"minha agenda amanhã"_ - Ver compromissos
+• _"criar evento academia amanhã 7h"_ - Criar evento
+• _"deletar reunião de hoje"_ - Remover evento
+• _"quando estou livre amanhã?"_ - Horários disponíveis
+
+*📊 ANÁLISES & RELATÓRIOS*
+• _"analisar meus gastos"_ - Análise inteligente com IA
+• _"comparar com mês anterior"_ - Comparação mensal
+• _"quanto vou gastar este mês"_ - Previsão de gastos
+• _"gráfico de gastos"_ - Gerar gráfico visual
+
+*⚙️ CONFIGURAÇÕES*
+• _"ativar resumo matinal"_ - Configurar notificações
+• _"configurar localização São Paulo"_ - Definir cidade
+• _"configurar relatório mensal"_ - Agendar relatório
+• _"configurar endereço casa"_ - Adicionar endereço
+• _"meus endereços"_ - Listar endereços
+• _"remover endereço casa"_ - Deletar endereço
+
+*🔑 ACESSO*
+• _"minha api key"_ - Exibir chave de integração
+
+💡 *Dica:* Use linguagem natural! Eu entendo suas mensagens."""
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
             else:
-                return jsonify({"status": "sucesso", "resposta": "🤔 Não entendi. Tente 'gastei 50' ou 'meus potes'."}), 200
+                return jsonify({"status": "sucesso", "resposta": "🤔 Não entendi. Tente 'gastei 50' ou 'o que você pode fazer?'."}), 200
 
     except Exception as e:
         print(f"[WHATSAPP] Erro: {e}")

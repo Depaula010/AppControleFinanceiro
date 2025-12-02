@@ -112,6 +112,7 @@ def get_message_intent(texto_msg):
     - "Configurar Endereço" (configurar endereço casa/trabalho, adicionar endereço, cadastrar endereço favorito)
     - "Listar Endereços" (quais endereços tenho, meus endereços, endereços cadastrados, ver endereços)
     - "Deletar Endereço" (remover endereço, apagar endereço, deletar endereço casa/trabalho)
+    - "Menu de Ajuda" (o que você pode fazer, quais funcionalidades, comandos disponíveis, o que você faz, ajuda secretário, funcionalidades do bot)
 
     Responda APENAS com JSON: {{"intent": "..."}}
 
@@ -158,6 +159,11 @@ def get_message_intent(texto_msg):
     - "quais contas eu tenho?" → {{"intent": "Listar Contas"}}
     - "minhas contas cadastradas" → {{"intent": "Listar Contas"}}
     - "mostre minhas contas" → {{"intent": "Listar Contas"}}
+    - "meu secretário o que você pode fazer?" → {{"intent": "Menu de Ajuda"}}
+    - "quais funcionalidades você tem?" → {{"intent": "Menu de Ajuda"}}
+    - "comandos disponíveis" → {{"intent": "Menu de Ajuda"}}
+    - "o que você faz?" → {{"intent": "Menu de Ajuda"}}
+    - "ajuda secretário" → {{"intent": "Menu de Ajuda"}}
     '''
     
     response = gemini_model.generate_content(prompt)
