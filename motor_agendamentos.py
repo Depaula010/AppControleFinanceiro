@@ -52,16 +52,20 @@ def processar_agendamentos():
             
             # 4. Buscar agendamentos e usuários
             sql_get_agendamentos = text("""
-                SELECT 
+                SELECT
                     a.id as agendamento_id, a.usuario_id, a.conta_id, a.subcategoria_id,
                     a.descricao, a.valor_previsto, a.tipo_agendamento, a.periodicidade,
-                    a.dia_execucao, a.total_parcelas, a.parcelas_executadas, 
+                    a.dia_execucao, a.total_parcelas, a.parcelas_executadas,
                     a.notificar_antes_dias,
                     u.numero_whatsapp,
-                    c.tipo_conta
+                    c.tipo_conta,
+                    g.nome_grupo
                 FROM Agendamentos a
                 JOIN Usuarios u ON a.usuario_id = u.id
                 JOIN Contas c ON a.conta_id = c.id
+                JOIN SubCategoria s ON a.subcategoria_id = s.id
+                JOIN MacroCategoria m ON s.macro_id = m.id
+                JOIN GrupoCategoria g ON m.grupo_id = g.id
                 WHERE a.ativo = TRUE
             """)
             
@@ -89,39 +93,47 @@ def processar_agendamentos():
                             # Usa a função importada!
                             enviar_notificacao_whatsapp(ag.numero_whatsapp, mensagem, BOT_WHATSAPP_URL, API_SECRET_KEY)
 
-                    # --- Lógica de Gasto Fixo ---
+                    # --- Lógica de Gasto/Receita Fixa ---
                     elif ag.tipo_agendamento == 'FIXO':
                         if dia_hoje == ag.dia_execucao:
-                            print(f"[MOTOR] Processando GASTO FIXO para Agendamento ID {ag.agendamento_id}...")
+                            # Determinar tipo baseado no grupo da categoria
+                            tipo_transacao = 'Renda' if ag.nome_grupo == 'Renda' else 'Despesa'
+                            print(f"[MOTOR] Processando {tipo_transacao.upper()} FIXA para Agendamento ID {ag.agendamento_id}...")
+
                             fatura_id = None
                             if ag.tipo_conta == 'Cartão de Crédito':
                                 # Usa a função importada!
                                 fatura_id = get_or_create_fatura(conn, ag.conta_id, hoje, ag.usuario_id)
-                            
-                            valor_para_db = (ag.valor_previsto or 0) * -1 
-                            sql_insert = text("INSERT INTO Transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, descricao, valor, tipo_transacao, data_transacao) VALUES (:uid, :cid, :scid, :fid, :desc, :val, :tipo, :data)")
-                            conn.execute(sql_insert, {"uid": ag.usuario_id, "cid": ag.conta_id, "scid": ag.subcategoria_id, "fid": fatura_id, "desc": ag.descricao, "val": valor_para_db, "tipo": 'Despesa', "data": hoje})
-                            print(f"[MOTOR] Transação 'FIXO' (ID {ag.agendamento_id}) inserida com sucesso.")
 
-                    # --- Lógica de Gasto Parcelado ---
+                            # Receitas: valor positivo, Despesas: valor negativo
+                            valor_para_db = (ag.valor_previsto or 0) if tipo_transacao == 'Renda' else (ag.valor_previsto or 0) * -1
+                            sql_insert = text("INSERT INTO Transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, descricao, valor, tipo_transacao, data_transacao) VALUES (:uid, :cid, :scid, :fid, :desc, :val, :tipo, :data)")
+                            conn.execute(sql_insert, {"uid": ag.usuario_id, "cid": ag.conta_id, "scid": ag.subcategoria_id, "fid": fatura_id, "desc": ag.descricao, "val": valor_para_db, "tipo": tipo_transacao, "data": hoje})
+                            print(f"[MOTOR] Transação '{tipo_transacao}' FIXA (ID {ag.agendamento_id}) inserida com sucesso.")
+
+                    # --- Lógica de Gasto/Receita Parcelada ---
                     elif ag.tipo_agendamento == 'PARCELADO':
                         if dia_hoje == ag.dia_execucao and (ag.total_parcelas is None or ag.parcelas_executadas < ag.total_parcelas):
-                            print(f"[MOTOR] Processando PARCELA {ag.parcelas_executadas + 1}/{ag.total_parcelas} para Agendamento ID {ag.agendamento_id}...")
+                            # Determinar tipo baseado no grupo da categoria
+                            tipo_transacao = 'Renda' if ag.nome_grupo == 'Renda' else 'Despesa'
+                            print(f"[MOTOR] Processando {tipo_transacao.upper()} PARCELADA {ag.parcelas_executadas + 1}/{ag.total_parcelas} para Agendamento ID {ag.agendamento_id}...")
+
                             fatura_id = None
                             if ag.tipo_conta == 'Cartão de Crédito':
                                 # Usa a função importada!
                                 fatura_id = get_or_create_fatura(conn, ag.conta_id, hoje, ag.usuario_id)
-                            
+
                             descricao_parcela = f"{ag.descricao} ({ag.parcelas_executadas + 1}/{ag.total_parcelas})"
-                            valor_para_db = (ag.valor_previsto or 0) * -1
+                            # Receitas: valor positivo, Despesas: valor negativo
+                            valor_para_db = (ag.valor_previsto or 0) if tipo_transacao == 'Renda' else (ag.valor_previsto or 0) * -1
                             sql_insert_parc = text("INSERT INTO Transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, descricao, valor, tipo_transacao, data_transacao) VALUES (:uid, :cid, :scid, :fid, :desc, :val, :tipo, :data)")
-                            conn.execute(sql_insert_parc, {"uid": ag.usuario_id, "cid": ag.conta_id, "scid": ag.subcategoria_id, "fid": fatura_id, "desc": descricao_parcela, "val": valor_para_db, "tipo": 'Despesa', "data": hoje})
-                            
+                            conn.execute(sql_insert_parc, {"uid": ag.usuario_id, "cid": ag.conta_id, "scid": ag.subcategoria_id, "fid": fatura_id, "desc": descricao_parcela, "val": valor_para_db, "tipo": tipo_transacao, "data": hoje})
+
                             nova_parcela_exec = ag.parcelas_executadas + 1
                             desativar_agendamento = (ag.total_parcelas is not None and nova_parcela_exec == ag.total_parcelas)
                             sql_update_ag = text("UPDATE Agendamentos SET parcelas_executadas = :nova_parcela, ativo = :novo_ativo WHERE id = :ag_id")
                             conn.execute(sql_update_ag, {"nova_parcela": nova_parcela_exec, "novo_ativo": not desativar_agendamento, "ag_id": ag.agendamento_id})
-                            print(f"[MOTOR] Parcela (ID {ag.agendamento_id}) inserida e agendamento atualizado.")
+                            print(f"[MOTOR] Parcela de {tipo_transacao} (ID {ag.agendamento_id}) inserida e agendamento atualizado.")
 
                     conn.commit() 
                 
