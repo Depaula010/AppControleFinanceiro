@@ -3,7 +3,7 @@
 
 from datetime import datetime, date, timezone, time
 from app import create_app
-from app.services.google_calendar_oauth_service import GoogleCalendarOAuthService
+from app.services.google_calendar_oauth_service import GoogleOAuthService
 
 app = create_app()
 
@@ -17,7 +17,7 @@ with app.app_context():
     # TESTE 1: Verificar se usuário está conectado
     print("\n[TESTE 1] Verificando conexão...")
     try:
-        is_connected = GoogleCalendarOAuthService.is_user_connected(usuario_id)
+        is_connected = GoogleOAuthService.is_user_connected(usuario_id)
         print(f"✅ Usuário conectado? {is_connected}")
     except Exception as e:
         print(f"❌ Erro ao verificar conexão: {e}")
@@ -32,7 +32,7 @@ with app.app_context():
     # TESTE 2: Obter credenciais
     print("\n[TESTE 2] Obtendo credenciais...")
     try:
-        credentials = GoogleCalendarOAuthService.get_credentials(usuario_id)
+        credentials = GoogleOAuthService.get_credentials(usuario_id)
         if credentials:
             print(f"✅ Credenciais obtidas")
             print(f"   - Token: {credentials.token[:20]}...")
@@ -51,7 +51,7 @@ with app.app_context():
     # TESTE 3: Criar serviço
     print("\n[TESTE 3] Criando serviço Calendar...")
     try:
-        service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
+        service = GoogleOAuthService.get_calendar_service(usuario_id)
         print(f"✅ Serviço criado com sucesso")
     except Exception as e:
         print(f"❌ Erro ao criar serviço: {e}")

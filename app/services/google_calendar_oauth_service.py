@@ -13,11 +13,13 @@ from sqlalchemy import text
 from app import db_engine
 from app.config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI
 
-class GoogleCalendarOAuthService:
-    """Gerencia autenticação OAuth2 para múltiplos usuários"""
-    
+class GoogleOAuthService:
+    """Gerencia autenticação OAuth2 para múltiplos usuários (Gmail + Calendar)"""
+
     SCOPES = [
-        'https://www.googleapis.com/auth/calendar'
+        'https://www.googleapis.com/auth/calendar',
+        'https://www.googleapis.com/auth/gmail.readonly',  # Ler emails
+        'https://www.googleapis.com/auth/gmail.modify',    # Labels/marcar lido
     ]
     
     @staticmethod
@@ -38,7 +40,7 @@ class GoogleCalendarOAuthService:
         
         flow = Flow.from_client_config(
             client_config,
-            scopes=GoogleCalendarOAuthService.SCOPES,
+            scopes=GoogleOAuthService.SCOPES,
             redirect_uri=GOOGLE_REDIRECT_URI
         )
         
@@ -52,7 +54,7 @@ class GoogleCalendarOAuthService:
         Returns:
             str: URL de autorização
         """
-        flow = GoogleCalendarOAuthService.create_flow()
+        flow = GoogleOAuthService.create_flow()
         
         # State = usuario_id codificado (para segurança)
         state = base64.urlsafe_b64encode(str(usuario_id).encode()).decode()
@@ -83,13 +85,13 @@ class GoogleCalendarOAuthService:
         usuario_id = int(base64.urlsafe_b64decode(state.encode()).decode())
         
         # Criar flow e trocar código
-        flow = GoogleCalendarOAuthService.create_flow()
+        flow = GoogleOAuthService.create_flow()
         flow.fetch_token(code=code)
         
         credentials = flow.credentials
         
         # Salvar no banco
-        GoogleCalendarOAuthService.save_credentials(usuario_id, credentials)
+        GoogleOAuthService.save_credentials(usuario_id, credentials)
         
         print(f"[OAUTH] ✅ Tokens salvos para usuário {usuario_id}")
         return usuario_id
@@ -115,13 +117,13 @@ class GoogleCalendarOAuthService:
                 token_expiry = credentials.expiry
         
         sql = text("""
-            INSERT INTO GoogleCalendarTokens 
+            INSERT INTO GoogleTokens 
             (usuario_id, access_token, refresh_token, token_expiry, scopes, updated_at)
             VALUES (:uid, :access, :refresh, :expiry, :scopes, CURRENT_TIMESTAMP)
             ON CONFLICT (usuario_id) 
             DO UPDATE SET 
                 access_token = EXCLUDED.access_token,
-                refresh_token = COALESCE(EXCLUDED.refresh_token, GoogleCalendarTokens.refresh_token),
+                refresh_token = COALESCE(EXCLUDED.refresh_token, GoogleTokens.refresh_token),
                 token_expiry = EXCLUDED.token_expiry,
                 scopes = EXCLUDED.scopes,
                 updated_at = CURRENT_TIMESTAMP
@@ -158,13 +160,13 @@ class GoogleCalendarOAuthService:
         
         sql = text("""
             SELECT access_token, refresh_token, token_expiry, scopes
-            FROM GoogleCalendarTokens
+            FROM GoogleTokens
             WHERE usuario_id = :uid
         """)
         
         # Criar um flow para obter URL do token
         try:
-            flow_temp = GoogleCalendarOAuthService.create_flow()
+            flow_temp = GoogleOAuthService.create_flow()
             token_url = flow_temp.oauth2session.token_url
         except:
             token_url = "https://oauth2.googleapis.com/token"
@@ -218,7 +220,7 @@ class GoogleCalendarOAuthService:
         # --- FIM DA CORREÇÃO ---
             
         # Deserializar scopes
-        scopes = json.loads(result.scopes) if result.scopes else GoogleCalendarOAuthService.SCOPES
+        scopes = json.loads(result.scopes) if result.scopes else GoogleOAuthService.SCOPES
         
         # Recriar objeto Credentials
         credentials = Credentials(
@@ -238,7 +240,7 @@ class GoogleCalendarOAuthService:
                 print(f"[OAUTH] ⏰ Token expirado. Renovando...")
                 if credentials.refresh_token:
                     credentials.refresh(Request())
-                    GoogleCalendarOAuthService.save_credentials(usuario_id, credentials)
+                    GoogleOAuthService.save_credentials(usuario_id, credentials)
                     print(f"[OAUTH] ✅ Token renovado com sucesso")
                 else:
                     print(f"[OAUTH] ❌ Token expirado sem refresh_token")
@@ -252,7 +254,7 @@ class GoogleCalendarOAuthService:
                 try:
                     print(f"[OAUTH] Tentando renovar mesmo assim...")
                     credentials.refresh(Request())
-                    GoogleCalendarOAuthService.save_credentials(usuario_id, credentials)
+                    GoogleOAuthService.save_credentials(usuario_id, credentials)
                     print(f"[OAUTH] ✅ Token renovado (fallback)")
                 except Exception as e2:
                     print(f"[OAUTH] ❌ Falha ao renovar: {e2}")
@@ -265,7 +267,7 @@ class GoogleCalendarOAuthService:
     @staticmethod
     def is_user_connected(usuario_id):
         """Verifica se usuário já conectou Google Calendar"""
-        credentials = GoogleCalendarOAuthService.get_credentials(usuario_id)
+        credentials = GoogleOAuthService.get_credentials(usuario_id)
         is_connected = credentials is not None
         print(f"[OAUTH] Usuário {usuario_id} conectado? {is_connected}")
         return is_connected
@@ -276,7 +278,7 @@ class GoogleCalendarOAuthService:
         if not db_engine:
             raise Exception("Banco não configurado")
         
-        credentials = GoogleCalendarOAuthService.get_credentials(usuario_id)
+        credentials = GoogleOAuthService.get_credentials(usuario_id)
         
         if credentials:
             try:
@@ -291,7 +293,7 @@ class GoogleCalendarOAuthService:
                 print(f"[OAUTH] Erro ao revogar no Google: {e}")
         
         # Remover do banco
-        sql = text("DELETE FROM GoogleCalendarTokens WHERE usuario_id = :uid")
+        sql = text("DELETE FROM GoogleTokens WHERE usuario_id = :uid")
         with db_engine.connect() as conn:
             conn.begin()
             conn.execute(sql, {"uid": usuario_id})
@@ -309,7 +311,7 @@ class GoogleCalendarOAuthService:
         """
         print(f"[OAUTH] Criando serviço Calendar para usuário {usuario_id}")
         
-        credentials = GoogleCalendarOAuthService.get_credentials(usuario_id)
+        credentials = GoogleOAuthService.get_credentials(usuario_id)
         
         if not credentials:
             raise Exception("Usuário não conectou Google Calendar")
@@ -326,7 +328,7 @@ class GoogleCalendarOAuthService:
     def test_connection(usuario_id):
         """Testa se conexão está funcionando"""
         try:
-            service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
+            service = GoogleOAuthService.get_calendar_service(usuario_id)
 
             # Testar listando calendários
             calendars = service.calendarList().list().execute()
@@ -355,7 +357,7 @@ class GoogleCalendarOAuthService:
 
             print(f"[OAUTH] Buscando eventos para usuário {usuario_id} na data {target_date}")
 
-            service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
+            service = GoogleOAuthService.get_calendar_service(usuario_id)
 
             # Timezone do Brasil
             TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
@@ -446,3 +448,82 @@ class GoogleCalendarOAuthService:
                 'events': [],
                 'error': str(e)
             }
+
+    @staticmethod
+    def get_gmail_service(usuario_id):
+        """
+        Cria serviço do Gmail API para um usuário.
+
+        Returns:
+            Google Gmail API Resource
+        """
+        print(f"[OAUTH-GMAIL] Criando serviço Gmail para usuário {usuario_id}")
+
+        credentials = GoogleOAuthService.get_credentials(usuario_id)
+
+        if not credentials:
+            raise Exception("Usuário não conectou Google OAuth")
+
+        try:
+            service = build('gmail', 'v1', credentials=credentials)
+            print(f"[OAUTH-GMAIL] ✅ Serviço Gmail criado com sucesso")
+            return service
+        except Exception as e:
+            print(f"[OAUTH-GMAIL] ❌ Erro ao criar serviço: {e}")
+            raise
+
+    @staticmethod
+    def setup_gmail_watch(usuario_id):
+        """
+        Configura Gmail push notifications (watch) para um usuário.
+
+        Watches expiram em 7 dias e precisam ser renovados.
+
+        Args:
+            usuario_id: ID do usuário
+
+        Returns:
+            int: Timestamp de expiração (Unix ms)
+        """
+        from app.config import GCP_PROJECT_ID, PUBSUB_TOPIC_NAME
+
+        if not GCP_PROJECT_ID or not PUBSUB_TOPIC_NAME:
+            raise Exception("GCP_PROJECT_ID ou PUBSUB_TOPIC_NAME não configurados")
+
+        print(f"[OAUTH-GMAIL] Configurando watch para usuário {usuario_id}")
+
+        service = GoogleOAuthService.get_gmail_service(usuario_id)
+
+        request_body = {
+            'topicName': f'projects/{GCP_PROJECT_ID}/topics/{PUBSUB_TOPIC_NAME}',
+            'labelIds': ['INBOX']  # Monitorar apenas inbox
+        }
+
+        try:
+            response = service.users().watch(userId='me', body=request_body).execute()
+
+            expiration = int(response['expiration'])  # Unix timestamp (ms)
+            history_id = response['historyId']
+
+            print(f"[OAUTH-GMAIL] Watch criado. Expira em: {expiration}, HistoryId: {history_id}")
+
+            # Salvar no banco
+            sql = text("""
+                UPDATE GoogleTokens
+                SET gmail_watch_expiration = :exp, gmail_history_id = :hid
+                WHERE usuario_id = :uid
+            """)
+
+            with db_engine.connect() as conn:
+                conn.begin()
+                conn.execute(sql, {"exp": expiration, "hid": history_id, "uid": usuario_id})
+                conn.commit()
+
+            print(f"[OAUTH-GMAIL] ✅ Watch configurado e salvo no banco")
+            return expiration
+
+        except Exception as e:
+            print(f"[OAUTH-GMAIL] ❌ Erro ao configurar watch: {e}")
+            import traceback
+            traceback.print_exc()
+            raise

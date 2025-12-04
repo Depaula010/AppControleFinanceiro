@@ -9,7 +9,7 @@ from typing import Dict, List, Optional
 from sqlalchemy import text
 
 from app import db_engine
-from app.services.google_calendar_oauth_service import GoogleCalendarOAuthService
+from app.services.google_calendar_oauth_service import GoogleOAuthService
 from app.services.weather_service import WeatherService
 
 
@@ -17,7 +17,7 @@ class DailyBriefingService:
     """Serviço para gerar resumo inteligente da agenda diária"""
 
     def __init__(self):
-        self.calendar_service = GoogleCalendarOAuthService()
+        self.calendar_service = GoogleOAuthService()
         self.weather_service = WeatherService()
 
     def get_user_location(self, usuario_id: int) -> tuple:

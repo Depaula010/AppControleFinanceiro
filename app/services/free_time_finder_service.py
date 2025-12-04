@@ -1,7 +1,7 @@
 # app/services/free_time_finder_service.py
 from datetime import datetime, timedelta, time
 from zoneinfo import ZoneInfo
-from app.services.google_calendar_oauth_service import GoogleCalendarOAuthService
+from app.services.google_calendar_oauth_service import GoogleOAuthService
 from app.services.user_schedule_pattern_service import UserSchedulePatternService
 from app import gemini_model
 
@@ -111,7 +111,7 @@ class FreeTimeFinderService:
         Busca eventos existentes no período via Google Calendar.
         '''
         try:
-            service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
+            service = GoogleOAuthService.get_calendar_service(usuario_id)
         except Exception as e:
             print(f"[FREE-TIME] Erro ao obter Calendar service: {e}")
             return []

@@ -44,6 +44,11 @@ services:
       - OPENROUTE_API_KEY=${OPENROUTE_API_KEY}
       - DATABASE_URL=${DATABASE_URL}
       - PYTHON_VERSION=${PYTHON_VERSION:-3.11}
+      # Gmail Push Notifications
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID}
+      - PUBSUB_TOPIC_NAME=${PUBSUB_TOPIC_NAME}
+      - GMAIL_USER_EMAIL=${GMAIL_USER_EMAIL}
+      - GMAIL_PUSH_ENABLED=${GMAIL_PUSH_ENABLED}
     depends_on:
       redis:
         condition: service_started
@@ -71,6 +76,10 @@ services:
       # 4. Check-in Noturno (Roda a cada hora entre 18h-23h, o script verifica configuração do usuário)
       ofelia.job-exec.checkin-noturno.schedule: "0 18-23 * * *"
       ofelia.job-exec.checkin-noturno.command: "python /app/processar_checkin_noturno.py"
+
+      # 5. Renovação Gmail Watches (Diário às 03:00)
+      ofelia.job-exec.renew-gmail-watches.schedule: "0 3 * * *"
+      ofelia.job-exec.renew-gmail-watches.command: "python /app/renew_gmail_watches.py"
 
   # ============================================
   # REDIS

@@ -3,7 +3,7 @@
 from datetime import date, datetime, timedelta, time
 from zoneinfo import ZoneInfo
 from app.services.google_calendar_service import GoogleCalendarService
-from app.services.google_calendar_oauth_service import GoogleCalendarOAuthService
+from app.services.google_calendar_oauth_service import GoogleOAuthService
 from app.config import GOOGLE_REDIRECT_URI
 
 # Singleton
@@ -118,7 +118,7 @@ class CalendarQueryService:
         print(f"[CALENDAR] Consultando com filtro de horário: {time_filter}")
 
         # Obter eventos normalmente
-        service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
+        service = GoogleOAuthService.get_calendar_service(usuario_id)
         start_date, end_date, description = CalendarQueryService.get_period_dates_for_calendar(period_type)
 
         if start_date == end_date:
@@ -245,7 +245,7 @@ class CalendarQueryService:
         print(f"[CALENDAR] Consultando agenda do usuário {usuario_id} para período '{period_type}'")
         
         # Verificar se usuário conectou
-        if not GoogleCalendarOAuthService.is_user_connected(usuario_id):
+        if not GoogleOAuthService.is_user_connected(usuario_id):
             if not GOOGLE_REDIRECT_URI:
                 return (
                     "⚠️ *Google Calendar não configurado*\n\n"
@@ -269,7 +269,7 @@ class CalendarQueryService:
         try:
             print(f"[CALENDAR] Usuário CONECTADO. Buscando eventos...")
             
-            service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
+            service = GoogleOAuthService.get_calendar_service(usuario_id)
             print(f"[CALENDAR] Serviço obtido com sucesso")
             
             # Calcular período
