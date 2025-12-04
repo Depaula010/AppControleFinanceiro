@@ -6,7 +6,7 @@ class GoogleCalendarService:
     def __init__(self):
         """
         NOTA: Este serviço agora é apenas para formatação.
-        O acesso à API é feito via GoogleOAuthService.
+        O acesso à API é feito via GoogleCalendarOAuthService.
         """
         pass
     

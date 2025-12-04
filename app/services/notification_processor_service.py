@@ -7,7 +7,7 @@ from datetime import date, datetime, timedelta, time
 from zoneinfo import ZoneInfo
 from sqlalchemy import text
 from app import db_engine
-from app.services.google_calendar_oauth_service import GoogleOAuthService
+from app.services.google_calendar_oauth_service import GoogleCalendarOAuthService
 from app.services.calendar_query_service import CalendarQueryService
 from app.services.notification_service import enviar_notificacao_whatsapp
 from app.utils import formatar_moeda
@@ -72,12 +72,12 @@ class NotificationProcessorService:
                 print(f"[AGENDA-NOTIF] Processando {nome} (ID: {usuario_id})...")
                 
                 # Verificar se usuário conectou Calendar
-                if not GoogleOAuthService.is_user_connected(usuario_id):
+                if not GoogleCalendarOAuthService.is_user_connected(usuario_id):
                     print(f"[AGENDA-NOTIF] ⚠️ {nome} não conectou Calendar")
                     continue
                 
                 # Buscar eventos de hoje
-                service = GoogleOAuthService.get_calendar_service(usuario_id)
+                service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
                 hoje = date.today()
                 events = CalendarQueryService._get_events_for_date(service, hoje)
                 

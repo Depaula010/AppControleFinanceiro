@@ -41,10 +41,10 @@ class UserSchedulePatternService:
                 return UserSchedulePatternService._get_default_patterns()
 
         # Buscar eventos dos últimos N dias via Google Calendar API
-        from app.services.google_calendar_oauth_service import GoogleOAuthService
+        from app.services.google_calendar_oauth_service import GoogleCalendarOAuthService
 
         try:
-            service = GoogleOAuthService.get_calendar_service(usuario_id)
+            service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
         except Exception as e:
             print(f"[PATTERN] Erro ao obter Calendar service: {e}")
             return UserSchedulePatternService._get_default_patterns()

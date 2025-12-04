@@ -38,56 +38,6 @@ def extract_from_notification(texto_notificacao):
     print(f"[GEMINI-1] Extração: {json_response_text}")
     return json.loads(json_response_text)
 
-def extract_from_email(email_subject, email_body_text):
-    """
-    Usa o Gemini para extrair dados de email PIX do Mercado Pago.
-
-    Args:
-        email_subject: Assunto do email
-        email_body_text: Corpo do email (texto ou HTML convertido)
-
-    Returns:
-        dict: {
-            'valor_decimal': 59.50,
-            'descricao_bruta': 'LOJAS REDE - COMERCIAL LTDA',
-            'tipo_fluxo': 'Despesa'  # ou 'Renda'
-        }
-    """
-    if not gemini_model:
-        raise Exception("Modelo Gemini não configurado.")
-
-    prompt = f"""
-    Analise este email de transação PIX do Mercado Pago:
-
-    Assunto: {email_subject}
-
-    Corpo:
-    {email_body_text[:1000]}
-
-    Extraia as seguintes informações:
-    - "valor_decimal": Valor da transação (sempre positivo, formato float)
-    - "descricao_bruta": Nome do destinatário ou remetente (empresa ou pessoa)
-    - "tipo_fluxo": "Renda" (se RECEBEU dinheiro) ou "Despesa" (se ENVIOU/PAGOU)
-
-    Retorne APENAS JSON válido no formato:
-    {{"valor_decimal": 0.00, "descricao_bruta": "...", "tipo_fluxo": "Despesa"}}
-
-    Exemplos de tipo_fluxo:
-    - "Seu Pix de R$ 59,50 foi enviado" → tipo_fluxo: "Despesa"
-    - "Você recebeu R$ 100" → tipo_fluxo: "Renda"
-    """
-
-    response = gemini_model.generate_content(prompt)
-    response_text = get_gemini_text_response(response)
-
-    if not response_text:
-        raise Exception("Falha na extração do email: Resposta vazia do Gemini.")
-
-    json_text = response_text.strip().replace("```json", "").replace("```", "")
-    print(f"[GEMINI-EMAIL] Extração: {json_text}")
-
-    return json.loads(json_text)
-
 def categorize_transaction(categories_json_list, transacao_descricao, tipo_transacao, id_outros_fallback):
     """
     Usa o Gemini para escolher o ID de uma categoria com base na descrição.

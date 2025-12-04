@@ -33,16 +33,6 @@ GOOGLE_REDIRECT_URI = os.environ.get(
     'https://app-controle-financeiro-oh32.onrender.com/oauth2callback'
 )
 
-# Gmail Push Notifications (Google Cloud Pub/Sub)
-GCP_PROJECT_ID = os.environ.get('GCP_PROJECT_ID')
-PUBSUB_TOPIC_NAME = os.environ.get('PUBSUB_TOPIC_NAME', 'gmail-push')
-PUBSUB_SUBSCRIPTION_NAME = os.environ.get('PUBSUB_SUBSCRIPTION_NAME', 'gmail-push-subscription')
-PUBSUB_SERVICE_ACCOUNT_EMAIL = os.environ.get('PUBSUB_SERVICE_ACCOUNT_EMAIL')
-
-GMAIL_USER_EMAIL = os.environ.get('GMAIL_USER_EMAIL', 'rafaeldepaulaextratos@gmail.com')
-GMAIL_WATCH_RENEWAL_HOURS = int(os.environ.get('GMAIL_WATCH_RENEWAL_HOURS', '24'))
-GMAIL_PUSH_ENABLED = os.environ.get('GMAIL_PUSH_ENABLED', 'true').lower() == 'true'
-
 # API de Clima (opcional)
 WEATHER_API_KEY = os.environ.get('WEATHER_API_KEY')
 

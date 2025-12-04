@@ -22,7 +22,6 @@ RATELIMIT_SPECIFIC = {
     '/admin/setup-database': '2 per day',        # Setup é raro
     '/admin/clear-bot-session': '5 per day',     # Limpar sessão é excepcional
     '/webhook-whatsapp': '20 per minute',        # Conversas normais
-    '/webhook-gmail-pubsub': '100 per minute; 1000 per hour',  # Gmail push notifications
     '/api/transacao': '10 per minute',           # ~1 transação a cada 6 segundos
 }
 

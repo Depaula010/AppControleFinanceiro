@@ -5,7 +5,7 @@ Serviço para GERENCIAR eventos do Google Calendar (criar, editar, excluir)
 
 from datetime import datetime, date, time, timedelta
 from zoneinfo import ZoneInfo
-from app.services.google_calendar_oauth_service import GoogleOAuthService
+from app.services.google_calendar_oauth_service import GoogleCalendarOAuthService
 
 class CalendarManagementService:
     """Gerencia criação, edição e exclusão de eventos"""
@@ -35,7 +35,7 @@ class CalendarManagementService:
         
         try:
             # Obter serviço
-            service = GoogleOAuthService.get_calendar_service(usuario_id)
+            service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
             
             # Processar data
             if isinstance(data_evento, str):
@@ -127,7 +127,7 @@ class CalendarManagementService:
         print(f"[CALENDAR-DELETE] Deletando evento {event_id} do usuário {usuario_id}")
         
         try:
-            service = GoogleOAuthService.get_calendar_service(usuario_id)
+            service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
             
             # Primeiro, buscar o evento para pegar o título (para mensagem)
             try:
@@ -182,7 +182,7 @@ class CalendarManagementService:
         print(f"[CALENDAR-UPDATE] Atualizando evento {event_id}")
         
         try:
-            service = GoogleOAuthService.get_calendar_service(usuario_id)
+            service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
             
             # Buscar evento atual
             event = service.events().get(
@@ -266,7 +266,7 @@ class CalendarManagementService:
         print(f"[CALENDAR-SEARCH] Buscando eventos com título '{titulo_busca}'")
         
         try:
-            service = GoogleOAuthService.get_calendar_service(usuario_id)
+            service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
             
             # Buscar em todos os calendários
             from app.services.calendar_query_service import CalendarQueryService
