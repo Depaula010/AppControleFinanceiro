@@ -60,9 +60,6 @@ def validar_chave_weather(chave):
     if not chave:
         return False, "Chave vazia"
 
-    # WeatherAPI tem 32 caracteres hexadecimais
-    if len(chave) != 32:
-        return False, f"Chave WeatherAPI deve ter 32 caracteres (encontrados {len(chave)})"
 
     if not re.match(r'^[a-f0-9]+$', chave, re.IGNORECASE):
         return False, "Chave WeatherAPI deve conter apenas caracteres hexadecimais (0-9, a-f)"
@@ -74,10 +71,7 @@ def validar_chave_openroute(chave):
     if not chave:
         return False, "Chave vazia"
 
-    # OpenRouteService tem 58 caracteres alfanuméricos
-    if len(chave) != 58:
-        return False, f"Chave OpenRouteService deve ter 58 caracteres (encontrados {len(chave)})"
-
+    
     # Geralmente começa com "5b3ce359"
     if not chave.startswith("5b3ce359"):
         return False, "Chave OpenRouteService geralmente começa com '5b3ce359'"
