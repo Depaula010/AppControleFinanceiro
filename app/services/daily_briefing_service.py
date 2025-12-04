@@ -406,19 +406,23 @@ class DailyBriefingService:
             msg_parts.append("\n⚠️ *VENCE HOJE:*")
 
             for conta in contas_hoje:
-                msg_parts.append(f"• {conta['descricao']} - R$ {conta['valor']:.2f}")
+                valor_formatado = f"{conta['valor']:.2f}".replace('.', ',')
+                msg_parts.append(f"• {conta['descricao']} - R$ {valor_formatado}")
 
             for fatura in faturas_hoje:
-                msg_parts.append(f"• Fatura {fatura['cartao']} - R$ {fatura['valor']:.2f}")
+                valor_formatado = f"{fatura['valor']:.2f}".replace('.', ',')
+                msg_parts.append(f"• Fatura {fatura['cartao']} - R$ {valor_formatado}")
 
         # Vencimentos de amanhã
         if contas_amanha or faturas_amanha:
             msg_parts.append("\n🔔 *VENCE AMANHÃ:*")
 
             for conta in contas_amanha:
-                msg_parts.append(f"• {conta['descricao']} - R$ {conta['valor']:.2f}")
+                valor_formatado = f"{conta['valor']:.2f}".replace('.', ',')
+                msg_parts.append(f"• {conta['descricao']} - R$ {valor_formatado}")
 
             for fatura in faturas_amanha:
-                msg_parts.append(f"• Fatura {fatura['cartao']} - R$ {fatura['valor']:.2f}")
+                valor_formatado = f"{fatura['valor']:.2f}".replace('.', ',')
+                msg_parts.append(f"• Fatura {fatura['cartao']} - R$ {valor_formatado}")
 
         return "\n".join(msg_parts)

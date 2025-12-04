@@ -913,14 +913,16 @@ def generate_daily_briefing(briefing_data):
         if contas_hoje:
             alertas_partes.append("VENCE HOJE:")
             for conta in contas_hoje:
-                alertas_partes.append(f"• {conta['descricao']} - R$ {conta['valor']:.2f}")
+                valor_formatado = f"{conta['valor']:.2f}".replace('.', ',')
+                alertas_partes.append(f"• {conta['descricao']} - R$ {valor_formatado}")
 
         # Faturas que vencem hoje
         if faturas_hoje:
             if not contas_hoje:
                 alertas_partes.append("VENCE HOJE:")
             for fatura in faturas_hoje:
-                alertas_partes.append(f"• Fatura {fatura['cartao']} - R$ {fatura['valor']:.2f}")
+                valor_formatado = f"{fatura['valor']:.2f}".replace('.', ',')
+                alertas_partes.append(f"• Fatura {fatura['cartao']} - R$ {valor_formatado}")
 
         # Contas que vencem amanhã
         if contas_amanha:
@@ -928,7 +930,8 @@ def generate_daily_briefing(briefing_data):
                 alertas_partes.append("")
             alertas_partes.append("VENCE AMANHÃ:")
             for conta in contas_amanha:
-                alertas_partes.append(f"• {conta['descricao']} - R$ {conta['valor']:.2f}")
+                valor_formatado = f"{conta['valor']:.2f}".replace('.', ',')
+                alertas_partes.append(f"• {conta['descricao']} - R$ {valor_formatado}")
 
         # Faturas que vencem amanhã
         if faturas_amanha:
@@ -937,7 +940,8 @@ def generate_daily_briefing(briefing_data):
                     alertas_partes.append("")
                 alertas_partes.append("VENCE AMANHÃ:")
             for fatura in faturas_amanha:
-                alertas_partes.append(f"• Fatura {fatura['cartao']} - R$ {fatura['valor']:.2f}")
+                valor_formatado = f"{fatura['valor']:.2f}".replace('.', ',')
+                alertas_partes.append(f"• Fatura {fatura['cartao']} - R$ {valor_formatado}")
 
         alertas_texto = "\n\nALERTAS FINANCEIROS:\n" + "\n".join(alertas_partes)
 
@@ -1000,6 +1004,11 @@ Gere APENAS o texto da mensagem, sem introduções ou formatação extra.
         mensagem = re.sub(r'^\*\s+\*', '   • ', mensagem, flags=re.MULTILINE)
         # Também trata variações como "* *texto" ou "*  *texto"
         mensagem = re.sub(r'^\s*\*\s*\*', '   • ', mensagem, flags=re.MULTILINE)
+
+        # Remover tags HTML indesejadas que o Gemini pode adicionar
+        mensagem = re.sub(r'</?blockquote>', '', mensagem, flags=re.IGNORECASE)
+        mensagem = re.sub(r'</?[a-z]+>', '', mensagem, flags=re.IGNORECASE)  # Remove outras tags HTML
+        mensagem = mensagem.strip()
 
         print(f"[GEMINI-BRIEFING] Resumo gerado com sucesso ({len(mensagem)} chars)")
         return mensagem

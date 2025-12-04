@@ -326,22 +326,26 @@ def formatar_mensagem_feedback(transacao, status_pote, info_rodape, tipo_conta, 
     # Cabeçalho
     msg = "✅ Transação Salva!\n"
     msg += f"📝 {transacao['descricao']}\n"
-    msg += f"💵 R$ {abs(transacao['valor']):.2f} ({transacao['nome_conta']})\n"
+    valor_formatado = f"{abs(transacao['valor']):.2f}".replace('.', ',')
+    msg += f"💵 R$ {valor_formatado} ({transacao['nome_conta']})\n"
 
     # Bloco do Pote (condicional)
     if status_pote and deve_mostrar_pote:
         emoji = get_emoji_status(status_pote['percentual_usado'])
         msg += f"\n🎯 Pote {status_pote['nome_pote']} ({status_pote['periodicidade']}):\n"
-        msg += f"Restam: R$ {status_pote['saldo_restante']:.2f} {emoji}\n"
+        saldo_formatado = f"{status_pote['saldo_restante']:.2f}".replace('.', ',')
+        msg += f"Restam: R$ {saldo_formatado} {emoji}\n"
 
     # Rodapé (condicional por tipo de conta)
     if info_rodape:
         if tipo_conta == 'credito':
             msg += f"\n💳 Fatura {info_rodape['nome_conta']}:\n"
-            msg += f"R$ {info_rodape['valor_total']:.2f} (Fecha dia {info_rodape['dia_fechamento']})\n"
+            valor_total_formatado = f"{info_rodape['valor_total']:.2f}".replace('.', ',')
+            msg += f"R$ {valor_total_formatado} (Fecha dia {info_rodape['dia_fechamento']})\n"
         else:
             msg += f"\n🏦 Saldo {info_rodape['nome_conta']}:\n"
-            msg += f"R$ {info_rodape['saldo_disponivel']:.2f} (Disponível)\n"
+            saldo_disp_formatado = f"{info_rodape['saldo_disponivel']:.2f}".replace('.', ',')
+            msg += f"R$ {saldo_disp_formatado} (Disponível)\n"
 
     return msg
 
