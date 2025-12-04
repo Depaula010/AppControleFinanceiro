@@ -99,6 +99,7 @@ VALID_ENDPOINTS = {
     '/admin/setup-potes-alerts',
     '/admin/setup-alertas-financeiros',
     '/admin/cleanup-deprecated-notification-fields',
+    '/admin/setup-api-keys-tables',
 
     # Admin - Triggers
     '/admin/run-motor-agendamentos',
