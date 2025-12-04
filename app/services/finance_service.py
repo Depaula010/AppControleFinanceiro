@@ -891,3 +891,169 @@ def add_nightly_checkin_config_columns():
         import traceback
         traceback.print_exc()
         return False
+
+
+def criar_tabelas_chaves_api():
+    """
+    Cria tabelas para sistema de chaves de API por usuário (SaaS).
+
+    NOVIDADES:
+    - ChavesApiUsuario: Armazena chaves do usuário (criptografadas)
+    - PreferenciasChaveApi: Escolha explícita (chave própria ou sistema)
+    - LogAcessoChaveApi: Auditoria de segurança
+    - RastreamentoUsoApi: Tracking para billing
+    - ConsentimentoUsuario: LGPD compliance
+    - Planos + AssinaturasUsuario: Sistema de planos (Bronze, Prata, Ouro)
+
+    Função idempotente - pode ser executada múltiplas vezes.
+    """
+    if not db_engine:
+        raise Exception("Banco não configurado")
+
+    sql = text("""
+        -- Tabela 1: Armazenamento de chaves do usuário
+        CREATE TABLE IF NOT EXISTS ChavesApiUsuario (
+            id SERIAL PRIMARY KEY,
+            usuario_id INT NOT NULL REFERENCES Usuarios(id) ON DELETE CASCADE,
+            provedor VARCHAR(50) NOT NULL,
+            chave_api_criptografada TEXT NOT NULL,
+            ativo BOOLEAN DEFAULT TRUE,
+            criado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            ultimo_uso_em TIMESTAMP WITH TIME ZONE,
+            consentimento_dado BOOLEAN DEFAULT TRUE,
+            consentimento_data TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(usuario_id, provedor)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_chaves_api_usuario ON ChavesApiUsuario(usuario_id);
+        CREATE INDEX IF NOT EXISTS idx_chaves_api_ativo
+            ON ChavesApiUsuario(usuario_id, provedor) WHERE ativo = TRUE;
+
+        -- Tabela 2: Preferências (escolha explícita do usuário)
+        CREATE TABLE IF NOT EXISTS PreferenciasChaveApi (
+            id SERIAL PRIMARY KEY,
+            usuario_id INT NOT NULL REFERENCES Usuarios(id) ON DELETE CASCADE,
+            provedor VARCHAR(50) NOT NULL,
+            usar_chave_propria BOOLEAN NOT NULL DEFAULT FALSE,
+            criado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(usuario_id, provedor)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_preferencias_usuario ON PreferenciasChaveApi(usuario_id);
+
+        COMMENT ON COLUMN PreferenciasChaveApi.usar_chave_propria IS
+        'FALSE = usa chave do sistema (PAGA), TRUE = usa chave própria (GRÁTIS)';
+
+        -- Tabela 3: Logs de acesso (auditoria)
+        CREATE TABLE IF NOT EXISTS LogAcessoChaveApi (
+            id SERIAL PRIMARY KEY,
+            usuario_id INT NOT NULL REFERENCES Usuarios(id) ON DELETE CASCADE,
+            provedor VARCHAR(50) NOT NULL,
+            tipo_chave VARCHAR(20) NOT NULL,
+            operacao VARCHAR(50) NOT NULL,
+            sucesso BOOLEAN NOT NULL,
+            mensagem_erro TEXT,
+            timestamp_acesso TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            endereco_ip VARCHAR(45),
+            criado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_log_acesso_usuario
+            ON LogAcessoChaveApi(usuario_id, timestamp_acesso DESC);
+        CREATE INDEX IF NOT EXISTS idx_log_acesso_provedor
+            ON LogAcessoChaveApi(provedor, timestamp_acesso DESC);
+
+        -- Tabela 4: Rastreamento de uso (billing)
+        CREATE TABLE IF NOT EXISTS RastreamentoUsoApi (
+            id SERIAL PRIMARY KEY,
+            usuario_id INT NOT NULL REFERENCES Usuarios(id) ON DELETE CASCADE,
+            provedor VARCHAR(50) NOT NULL,
+            tipo_chave VARCHAR(20) NOT NULL,
+            quantidade_chamadas INT DEFAULT 0,
+            mes_ano VARCHAR(7) NOT NULL,
+            valor_cobrado NUMERIC(10, 2) DEFAULT 0.00,
+            criado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(usuario_id, provedor, tipo_chave, mes_ano)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_rastreamento_mes ON RastreamentoUsoApi(mes_ano, provedor);
+        CREATE INDEX IF NOT EXISTS idx_rastreamento_usuario ON RastreamentoUsoApi(usuario_id, mes_ano DESC);
+
+        -- Tabela 5: Consentimentos LGPD
+        CREATE TABLE IF NOT EXISTS ConsentimentoUsuario (
+            id SERIAL PRIMARY KEY,
+            usuario_id INT NOT NULL REFERENCES Usuarios(id) ON DELETE CASCADE,
+            tipo_consentimento VARCHAR(50) NOT NULL,
+            versao_consentimento VARCHAR(20) NOT NULL,
+            consentimento_dado BOOLEAN NOT NULL,
+            data_consentimento TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            ip_consentimento VARCHAR(45),
+            texto_consentimento TEXT,
+            revogado_em TIMESTAMP WITH TIME ZONE,
+            UNIQUE(usuario_id, tipo_consentimento, versao_consentimento)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_consentimento_ativo
+            ON ConsentimentoUsuario(usuario_id, tipo_consentimento)
+            WHERE consentimento_dado = TRUE AND revogado_em IS NULL;
+
+        -- Tabela 6: Planos (sistema de assinaturas)
+        CREATE TABLE IF NOT EXISTS Planos (
+            id SERIAL PRIMARY KEY,
+            nome_plano VARCHAR(50) NOT NULL UNIQUE,
+            descricao TEXT,
+            preco_mensal NUMERIC(10, 2) NOT NULL,
+            limite_gemini INT,
+            limite_weather INT,
+            limite_openroute INT,
+            custo_por_chamada_gemini NUMERIC(10, 4) DEFAULT 0.01,
+            custo_por_chamada_weather NUMERIC(10, 4) DEFAULT 0.005,
+            custo_por_chamada_openroute NUMERIC(10, 4) DEFAULT 0.02,
+            permite_chaves_proprias BOOLEAN DEFAULT TRUE,
+            ativo BOOLEAN DEFAULT TRUE,
+            criado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Inserir planos padrão (idempotente)
+        INSERT INTO Planos (nome_plano, descricao, preco_mensal, limite_gemini, limite_weather, limite_openroute)
+        VALUES
+            ('Bronze', 'Plano básico gratuito', 0.00, 100, 50, 10),
+            ('Prata', 'Plano intermediário', 29.90, 500, 200, 50),
+            ('Ouro', 'Plano premium ilimitado', 79.90, NULL, NULL, NULL)
+        ON CONFLICT (nome_plano) DO NOTHING;
+
+        -- Tabela 7: Assinaturas dos usuários
+        CREATE TABLE IF NOT EXISTS AssinaturasUsuario (
+            id SERIAL PRIMARY KEY,
+            usuario_id INT NOT NULL REFERENCES Usuarios(id) ON DELETE CASCADE,
+            plano_id INT NOT NULL REFERENCES Planos(id) ON DELETE RESTRICT,
+            data_inicio TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            data_fim TIMESTAMP WITH TIME ZONE,
+            status VARCHAR(20) NOT NULL DEFAULT 'ativo',
+            criado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_assinaturas_usuario ON AssinaturasUsuario(usuario_id, status);
+        CREATE INDEX IF NOT EXISTS idx_assinaturas_ativas ON AssinaturasUsuario(usuario_id)
+            WHERE status = 'ativo' AND (data_fim IS NULL OR data_fim > CURRENT_TIMESTAMP);
+    """)
+
+    try:
+        with db_engine.connect() as conn:
+            conn.begin()
+            conn.execute(sql)
+            conn.commit()
+            print("[DB] ✅ Tabelas de chaves de API criadas com sucesso (PT-BR)")
+            print("[DB] ℹ️ Tabelas criadas: ChavesApiUsuario, PreferenciasChaveApi, LogAcessoChaveApi,")
+            print("[DB] ℹ️                    RastreamentoUsoApi, ConsentimentoUsuario, Planos, AssinaturasUsuario")
+            return True
+    except Exception as e:
+        print(f"[DB] ❌ Erro ao criar tabelas: {e}")
+        import traceback
+        traceback.print_exc()
+        return False

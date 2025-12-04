@@ -1295,6 +1295,67 @@ def setup_alertas_financeiros():
         return f"<pre>Erro ao configurar Alertas Financeiros:\n\n{traceback.format_exc()}</pre>", 500
 
 
+@admin_bp.route('/setup-api-keys-tables', methods=['POST'])
+def setup_api_keys_tables():
+    """
+    Endpoint administrativo para criar tabelas de API Keys (SaaS).
+    Protegido por API_SECRET_KEY.
+
+    Cria 7 tabelas:
+    - ChavesApiUsuario: Chaves do usuário (criptografadas)
+    - PreferenciasChaveApi: Escolha explícita (chave própria ou sistema)
+    - LogAcessoChaveApi: Auditoria de segurança
+    - RastreamentoUsoApi: Tracking para billing
+    - ConsentimentoUsuario: LGPD compliance
+    - Planos: Sistema de planos (Bronze, Prata, Ouro)
+    - AssinaturasUsuario: Assinaturas dos usuários
+
+    Exemplo:
+    POST http://localhost:8000/admin/setup-api-keys-tables
+    Headers: X-API-KEY: {API_SECRET_KEY}
+    """
+    # Verificar autenticação
+    secret_key_recebida = request.headers.get('x-api-key')
+    if secret_key_recebida != API_SECRET_KEY:
+        return jsonify({"status": "erro", "mensagem": "Não autorizado"}), 401
+
+    try:
+        # Importar e executar função
+        from app.services.finance_service import criar_tabelas_chaves_api
+
+        sucesso = criar_tabelas_chaves_api()
+
+        if sucesso:
+            return jsonify({
+                "status": "sucesso",
+                "mensagem": "Tabelas de API Keys criadas com sucesso!",
+                "tabelas_criadas": [
+                    "ChavesApiUsuario",
+                    "PreferenciasChaveApi",
+                    "LogAcessoChaveApi",
+                    "RastreamentoUsoApi",
+                    "ConsentimentoUsuario",
+                    "Planos",
+                    "AssinaturasUsuario"
+                ],
+                "planos_inseridos": ["Bronze (gratuito)", "Prata (R$ 29,90)", "Ouro (R$ 79,90)"]
+            }), 200
+        else:
+            return jsonify({
+                "status": "erro",
+                "mensagem": "Erro ao criar tabelas. Veja logs do servidor."
+            }), 500
+
+    except Exception as e:
+        print(f"[SETUP-API-KEYS] Erro: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "erro",
+            "mensagem": f"Erro ao criar tabelas: {str(e)}"
+        }), 500
+
+
 @admin_bp.route('/cleanup-deprecated-notification-fields', methods=['GET'])
 def cleanup_deprecated_notification_fields():
     """
