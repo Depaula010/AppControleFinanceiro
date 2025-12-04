@@ -2,6 +2,45 @@
 import json
 from app import gemini_model # Importa o "Singleton" do Gemini
 
+
+def _obter_modelo_gemini_para_usuario(usuario_id: int = None):
+    """
+    Retorna modelo Gemini configurado com chave apropriada.
+    Respeita escolha do usuário (chave própria ou sistema).
+
+    Args:
+        usuario_id: ID do usuário (opcional, usa chave do sistema se None)
+
+    Returns:
+        GenerativeModel configurado
+
+    Raises:
+        Exception: Se usuário não configurou preferência ou chave indisponível
+    """
+    from app.services.gerenciador_chaves_api import GerenciadorChavesApi
+    import google.generativeai as genai
+
+    # Se não tem usuario_id, usa modelo global
+    if usuario_id is None:
+        return gemini_model
+
+    try:
+        # Buscar chave (usuário ou sistema)
+        chave, tipo_chave = GerenciadorChavesApi.obter_chave_api(usuario_id, 'gemini')
+
+        # Se for chave do sistema, usar modelo global
+        if tipo_chave == 'sistema':
+            return gemini_model
+
+        # Se for chave própria, criar modelo específico
+        genai.configure(api_key=chave)
+        return genai.GenerativeModel('models/gemini-flash-latest')
+
+    except Exception as e:
+        print(f"[GEMINI] Erro ao obter chave para usuario {usuario_id}: {e}")
+        raise  # Re-lançar exceção para usuário ver mensagem
+
+
 def get_gemini_text_response(response):
     """ 
     Helper interno para extrair 'response.text' com segurança.
@@ -18,17 +57,22 @@ def get_gemini_text_response(response):
         print(f"[GEMINI-ERRO] Erro inesperado ao extrair texto: {e}")
         raise e
 
-def extract_from_notification(texto_notificacao):
+def extract_from_notification(texto_notificacao, usuario_id=None):
     """
     Usa o Gemini para extrair dados brutos de uma notificação (Automate).
+
+    Args:
+        texto_notificacao: Texto da notificação
+        usuario_id: ID do usuário (opcional)
     """
-    if not gemini_model: raise Exception("Modelo Gemini não configurado.")
-    
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model: raise Exception("Modelo Gemini não configurado.")
+
     prompt = f"""
     Analise a notificação: "{texto_notificacao}"
     Retorne APENAS JSON com: "valor_decimal" (sempre positivo), "descricao_bruta", "tipo_fluxo" ("Renda" ou "Despesa").
-    """; 
-    response = gemini_model.generate_content(prompt)
+    """;
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     
     if not response_text:
@@ -38,19 +82,27 @@ def extract_from_notification(texto_notificacao):
     print(f"[GEMINI-1] Extração: {json_response_text}")
     return json.loads(json_response_text)
 
-def categorize_transaction(categories_json_list, transacao_descricao, tipo_transacao, id_outros_fallback):
+def categorize_transaction(categories_json_list, transacao_descricao, tipo_transacao, id_outros_fallback, usuario_id=None):
     """
     Usa o Gemini para escolher o ID de uma categoria com base na descrição.
+
+    Args:
+        categories_json_list: Lista de categorias
+        transacao_descricao: Descrição da transação
+        tipo_transacao: Tipo da transação
+        id_outros_fallback: ID fallback
+        usuario_id: ID do usuário (opcional)
     """
-    if not gemini_model: raise Exception("Modelo Gemini não configurado.")
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model: raise Exception("Modelo Gemini não configurado.")
 
     prompt = f"""
     Minhas subcategorias são: {json.dumps(categories_json_list)}
     A transação teve a descrição: "{transacao_descricao}"; O tipo é: "{tipo_transacao}"
     Qual é o "id" da subcategoria que melhor corresponde? Se for genérico, use o "id" de "Outros" (que é {id_outros_fallback}).
     Responda APENAS com o número do ID.
-    """; 
-    response = gemini_model.generate_content(prompt)
+    """;
+    response = model.generate_content(prompt)
     
     try:
         response_text = get_gemini_text_response(response)
@@ -74,11 +126,16 @@ def categorize_transaction(categories_json_list, transacao_descricao, tipo_trans
         print(f"[GEMINI-CAT] AVISO: Gemini não retornou um número ({response_text}). Usando 'Outros'.")
         return id_outros_fallback
 
-def get_message_intent(texto_msg):
+def get_message_intent(texto_msg, usuario_id=None):
     """
     Usa o Gemini para classificar a intenção principal da mensagem do WhatsApp.
+
+    Args:
+        texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
     """
-    if not gemini_model: 
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
     
     prompt = f'''Analise a mensagem: "{texto_msg}"
@@ -165,99 +222,125 @@ def get_message_intent(texto_msg):
     - "o que você faz?" → {{"intent": "Menu de Ajuda"}}
     - "ajuda secretário" → {{"intent": "Menu de Ajuda"}}
     '''
-    
-    response = gemini_model.generate_content(prompt)
+
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
-    
+
     if not response_text:
         raise Exception("Falha na classificação da intenção: Resposta vazia do Gemini.")
-        
-    response = gemini_model.generate_content(prompt)
-    response_text = get_gemini_text_response(response)
+
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     intent_data = json.loads(json_text)
     print(f"[GEMINI-INTENT] Intenção: {intent_data.get('intent')}")
     return intent_data.get('intent')
 
-def extract_transaction_details(texto_msg, intent):
+def extract_transaction_details(texto_msg, intent, usuario_id=None):
     """
     Extrai Valor e Descrição para Renda/Despesa manual.
+
+    Args:
+        texto_msg: Mensagem do usuário
+        intent: Intenção detectada
+        usuario_id: ID do usuário (opcional)
     """
-    if not gemini_model: raise Exception("Modelo Gemini não configurado.")
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model: raise Exception("Modelo Gemini não configurado.")
     
     prompt = f"""Analise a mensagem: "{texto_msg}"
     O tipo é: "{intent}".
     Extraia "valor_decimal" (sempre positivo) e "descricao_bruta".
     Responda APENAS com JSON.
-    Ex: {{"valor_decimal": 50.00, "descricao_bruta": "Padaria"}}"""; 
-    response = gemini_model.generate_content(prompt)
+    Ex: {{"valor_decimal": 50.00, "descricao_bruta": "Padaria"}}""";
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_extract_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-EXTRACT] Extração (R/D): {json_extract_text}")
     return json.loads(json_extract_text)
 
-def extract_transfer_details(texto_msg, contas_json_list):
+def extract_transfer_details(texto_msg, contas_json_list, usuario_id=None):
     """
     Extrai Valor, Origem e Destino para Transferência.
+
+    Args:
+        texto_msg: Mensagem do usuário
+        contas_json_list: Lista de contas
+        usuario_id: ID do usuário (opcional)
     """
-    if not gemini_model: raise Exception("Modelo Gemini não configurado.")
-    
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model: raise Exception("Modelo Gemini não configurado.")
+
     prompt = f"""Analise a mensagem de transferência: "{texto_msg}"
     Minhas contas são: {json.dumps(contas_json_list)}
-    Extraia "valor_decimal", "conta_origem", e "conta_destino". Responda APENAS com JSON."""; 
-    response = gemini_model.generate_content(prompt)
+    Extraia "valor_decimal", "conta_origem", e "conta_destino". Responda APENAS com JSON.""";
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_extract_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-EXTRACT] Extração (Transf): {json_extract_text}")
     return json.loads(json_extract_text)
 
-def extract_fatura_payment_details(texto_msg, contas_json_list):
+def extract_fatura_payment_details(texto_msg, contas_json_list, usuario_id=None):
     """
     Extrai Valor, Origem e Cartão para Pagamento de Fatura.
+
+    Args:
+        texto_msg: Mensagem do usuário
+        contas_json_list: Lista de contas
+        usuario_id: ID do usuário (opcional)
     """
-    if not gemini_model: raise Exception("Modelo Gemini não configurado.")
-    
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model: raise Exception("Modelo Gemini não configurado.")
+
     prompt = f"""Analise a mensagem de pagamento de fatura: "{texto_msg}"
     Minhas contas são: {json.dumps(contas_json_list)}
-    Extraia "valor_decimal", "conta_origem", e "conta_cartao". Responda APENAS com JSON."""; 
-    response = gemini_model.generate_content(prompt)
+    Extraia "valor_decimal", "conta_origem", e "conta_cartao". Responda APENAS com JSON.""";
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_extract_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-EXTRACT] Extração (Pagto Fatura): {json_extract_text}")
     return json.loads(json_extract_text)
 
-def extract_category_query(texto_msg):
+def extract_category_query(texto_msg, usuario_id=None):
     """
     Extrai o nome da categoria que o usuário deseja consultar.
+
+    Args:
+        texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
     """
-    if not gemini_model: raise Exception("Modelo Gemini não configurado.")
-    
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model: raise Exception("Modelo Gemini não configurado.")
+
     prompt = f"""Analise a pergunta: "{texto_msg}"
     Extraia o nome da categoria ou subcategoria que o usuário quer consultar.
     Responda APENAS com JSON: {{"nome_categoria": "..."}}
     Ex1: "quanto gastei com supermercado" -> {{"nome_categoria": "Supermercado / Mercearia"}}
-    Ex2: "qual foi meu gasto com lazer?" -> {{"nome_categoria": "Lazer e Entretenimento"}}"""; 
-    response = gemini_model.generate_content(prompt)
+    Ex2: "qual foi meu gasto com lazer?" -> {{"nome_categoria": "Lazer e Entretenimento"}}""";
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_extract_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-EXTRACT] Categoria para consulta: {json_extract_text}")
     return json.loads(json_extract_text)
 
-def extract_period_query(texto_msg):
+def extract_period_query(texto_msg, usuario_id=None):
     '''
     Extrai o tipo de período da mensagem do usuário.
-    
+
+    Args:
+        texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
+
     Returns:
         {
             "period_type": "ontem" | "hoje" | "final_de_semana" | etc.,
             "categoria": "supermercado" (opcional)
         }
     '''
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
-    
+
     prompt = f'''Analise a pergunta: "{texto_msg}"
-    
+
     Identifique o período que o usuário quer consultar:
     - "ontem" → {{"period_type": "ontem"}}
     - "hoje" → {{"period_type": "hoje"}}
@@ -267,27 +350,31 @@ def extract_period_query(texto_msg):
     - "últimos 7 dias" → {{"period_type": "ultimos_7_dias"}}
     - "este mês" → {{"period_type": "este_mes"}}
     - "mês passado" → {{"period_type": "mes_passado"}}
-    
+
     Se mencionar uma categoria específica, inclua também:
     {{"period_type": "...", "categoria": "supermercado"}}
-    
+
     Responda APENAS com JSON.
-    
+
     Exemplos:
     - "quanto gastei ontem?" → {{"period_type": "ontem"}}
     - "gastos do final de semana" → {{"period_type": "final_de_semana"}}
     - "quanto gastei com uber esta semana?" → {{"period_type": "esta_semana", "categoria": "uber"}}
     '''
-    
-    response = gemini_model.generate_content(prompt)
+
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-PERIOD] Período extraído: {json_text}")
     return json.loads(json_text)
 
-def extract_chart_type(texto_msg):
+def extract_chart_type(texto_msg, usuario_id=None):
     '''
     Extrai o tipo de gráfico e período desejado pelo usuário.
+
+    Args:
+        texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
 
     Returns:
         {
@@ -296,7 +383,8 @@ def extract_chart_type(texto_msg):
             "num_meses": int (opcional, para gráficos de barras e linha)
         }
     '''
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
 
     prompt = f'''Analise a mensagem: "{texto_msg}"
@@ -325,55 +413,65 @@ def extract_chart_type(texto_msg):
     - "evolução do saldo" → {{"tipo_grafico": "linha", "num_meses": 6}}
     '''
 
-    response = gemini_model.generate_content(prompt)
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-CHART] Tipo de gráfico extraído: {json_text}")
     return json.loads(json_text)
 
-def extract_bill_payment(texto_msg):
+def extract_bill_payment(texto_msg, usuario_id=None):
     '''
     Extrai dados de um pagamento de conta fixa.
-    
+
+    Args:
+        texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
+
     Returns:
         {
             "descricao": "conta de água",
             "valor": 150.50
         }
     '''
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
-    
+
     prompt = f'''Analise: "{texto_msg}"
-    
+
     O usuário pagou uma conta. Extraia:
     - "descricao": nome da conta (ex: "conta de água", "seguro carro")
     - "valor": valor pago
-    
+
     Responda APENAS com JSON.
-    
+
     Exemplos:
     - "paguei 150 da água" → {{"descricao": "conta de água", "valor": 150.00}}
     - "quitei o seguro do carro, 800 reais" → {{"descricao": "seguro carro", "valor": 800.00}}
     '''
-    
-    response = gemini_model.generate_content(prompt)
+
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-BILL] Pagamento extraído: {json_text}")
     return json.loads(json_text)
 
-def extract_calendar_query(texto_msg):
+def extract_calendar_query(texto_msg, usuario_id=None):
     '''
     Extrai o período da consulta de agenda.
     CORREÇÃO: Melhor detecção de "este mês", "esse mês", etc.
-    
+
+    Args:
+        texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
+
     Returns:
         {"period_type": "hoje" | "amanha" | "final_de_semana" | etc.}
     '''
     print(f"[GEMINI-CALENDAR] Extraindo período da mensagem: {texto_msg}")
-    
-    if not gemini_model:
+
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
     
     prompt = f'''Analise a pergunta sobre agenda: "{texto_msg}"
@@ -400,17 +498,21 @@ def extract_calendar_query(texto_msg):
     - "agenda do mês" → {{"period_type": "este_mes"}}
     - "compromissos essa semana" → {{"period_type": "esta_semana"}}
     '''
-    
-    response = gemini_model.generate_content(prompt)
+
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-CALENDAR] Período: {json_text}")
     return json.loads(json_text)
 
-def extract_event_creation_details(texto_msg):
+def extract_event_creation_details(texto_msg, usuario_id=None):
     '''
     Extrai dados para criar um evento.
-    
+
+    Args:
+        texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
+
     Returns:
         {
             "titulo": "Academia",
@@ -421,7 +523,8 @@ def extract_event_creation_details(texto_msg):
             "localizacao": "..." ou null
         }
     '''
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
     
     prompt = f'''Analise a mensagem de criação de evento: "{texto_msg}"
@@ -446,84 +549,98 @@ def extract_event_creation_details(texto_msg):
     - "Marcar aniversário da Maria dia 15 de dezembro" →
       {{"titulo": "Aniversário da Maria", "data": "2025-12-15", "hora_inicio": null, "hora_fim": null, "descricao": null, "localizacao": null}}
     '''
-    
-    response = gemini_model.generate_content(prompt)
+
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-EVENT] Criação extraída: {json_text}")
     return json.loads(json_text)
 
 
-def extract_event_deletion_query(texto_msg):
+def extract_event_deletion_query(texto_msg, usuario_id=None):
     '''
     Extrai termo de busca para deletar evento.
-    
+
+    Args:
+        texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
+
     Returns:
         {"titulo_busca": "academia", "quando": "hoje" ou "amanha" ou null}
     '''
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
-    
+
     prompt = f'''Analise a mensagem de exclusão de evento: "{texto_msg}"
-    
+
     Extraia:
     - titulo_busca: Título/palavra-chave para buscar o evento
     - quando: "hoje", "amanha", ou null (qualquer data)
-    
+
     Responda APENAS com JSON.
-    
+
     Exemplos:
     - "Deletar academia de hoje" → {{"titulo_busca": "academia", "quando": "hoje"}}
     - "Cancelar reunião de amanhã" → {{"titulo_busca": "reunião", "quando": "amanha"}}
     - "Remover aniversário da Maria" → {{"titulo_busca": "aniversário maria", "quando": null}}
     '''
-    
-    response = gemini_model.generate_content(prompt)
+
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-EVENT] Exclusão extraída: {json_text}")
     return json.loads(json_text)
 
 
-def extract_time_filter_query(texto_msg):
+def extract_time_filter_query(texto_msg, usuario_id=None):
     '''
     Extrai filtro de horário da consulta.
-    
+
+    Args:
+        texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
+
     Returns:
         {"time_filter": "tarde" | "manha" | "noite" | "agora" | null}
     '''
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
-    
+
     prompt = f'''Analise a pergunta sobre agenda: "{texto_msg}"
-    
+
     Identifique se há filtro de horário:
     - "manhã" / "de manhã" → {{"time_filter": "manha"}}
     - "tarde" / "à tarde" / "da tarde" → {{"time_filter": "tarde"}}
     - "noite" / "à noite" / "da noite" → {{"time_filter": "noite"}}
     - "agora" / "próximas horas" / "daqui a pouco" → {{"time_filter": "agora"}}
     - Sem filtro específico → {{"time_filter": null}}
-    
+
     Responda APENAS com JSON.
-    
+
     Exemplos:
     - "tenho compromisso agora à tarde?" → {{"time_filter": "tarde"}}
     - "eventos de manhã" → {{"time_filter": "manha"}}
     - "o que tenho agora?" → {{"time_filter": "agora"}}
     - "meus compromissos hoje" → {{"time_filter": null}}
     '''
-    
-    response = gemini_model.generate_content(prompt)
+
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-TIME] Filtro extraído: {json_text}")
     return json.loads(json_text)
 
 
-def extract_notification_config(texto_msg):
+def extract_notification_config(texto_msg, usuario_id=None):
     '''
     Extrai configuração de notificações.
-    
+
+    Args:
+        texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
+
     Returns:
         {
             "tipo": "agenda_diaria" | "contas_vencer",
@@ -532,7 +649,8 @@ def extract_notification_config(texto_msg):
             "dias_antes": 1 ou null (só para contas)
         }
     '''
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
     
     prompt = f'''Analise a mensagem sobre configuração de notificações: "{texto_msg}"
@@ -558,17 +676,21 @@ def extract_notification_config(texto_msg):
     - "Avisar 2 dias antes das contas vencerem, às 9h" →
       {{"tipo": "contas_vencer", "acao": "configurar", "hora": "09:00", "dias_antes": 2}}
     '''
-    
-    response = gemini_model.generate_content(prompt)
+
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-NOTIF] Config extraída: {json_text}")
     return json.loads(json_text)
 
 
-def extract_free_time_query(texto_msg):
+def extract_free_time_query(texto_msg, usuario_id=None):
     '''
     Extrai período e duração desejada para buscar horários livres.
+
+    Args:
+        texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
 
     Returns:
         {
@@ -577,7 +699,8 @@ def extract_free_time_query(texto_msg):
             "contexto": "dentista" ou null (opcional, para IA sugerir melhor horário)
         }
     '''
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
 
     prompt = f'''Analise a pergunta sobre horários livres: "{texto_msg}"
@@ -603,23 +726,29 @@ def extract_free_time_query(texto_msg):
       {{"period_type": "proxima_semana", "duracao_minutos": 60, "contexto": null}}
     '''
 
-    response = gemini_model.generate_content(prompt)
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-FREE-TIME] Query extraída: {json_text}")
     return json.loads(json_text)
 
 
-def extract_fatura_query(texto_msg, contas_json_list):
+def extract_fatura_query(texto_msg, contas_json_list, usuario_id=None):
     '''
     Extrai informações sobre qual fatura o usuário quer consultar.
+
+    Args:
+        texto_msg: Mensagem do usuário
+        contas_json_list: Lista de contas
+        usuario_id: ID do usuário (opcional)
 
     Returns:
         {
             "conta_cartao": "Nubank" ou null (se não especificou, retorna todas)
         }
     '''
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
 
     prompt = f'''Analise a pergunta sobre consulta de fatura: "{texto_msg}"
@@ -637,23 +766,29 @@ def extract_fatura_query(texto_msg, contas_json_list):
     - "valor da fatura do Inter" → {{"conta_cartao": "Inter"}}
     '''
 
-    response = gemini_model.generate_content(prompt)
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-FATURA-QUERY] Query extraída: {json_text}")
     return json.loads(json_text)
 
 
-def extract_saldo_query(texto_msg, contas_json_list):
+def extract_saldo_query(texto_msg, contas_json_list, usuario_id=None):
     '''
     Extrai informações sobre qual(is) conta(s) o usuário quer consultar o saldo.
+
+    Args:
+        texto_msg: Mensagem do usuário
+        contas_json_list: Lista de contas
+        usuario_id: ID do usuário (opcional)
 
     Returns:
         {
             "nome_conta": "Nubank" ou null (se não especificou, retorna todas)
         }
     '''
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
 
     prompt = f'''Analise a pergunta sobre consulta de saldo: "{texto_msg}"
@@ -672,16 +807,20 @@ def extract_saldo_query(texto_msg, contas_json_list):
     - "saldo da carteira" → {{"nome_conta": "Carteira"}}
     '''
 
-    response = gemini_model.generate_content(prompt)
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-SALDO-QUERY] Query extraída: {json_text}")
     return json.loads(json_text)
 
 
-def extract_parcelamento_info(texto_msg):
+def extract_parcelamento_info(texto_msg, usuario_id=None):
     '''
     Detecta se a compra é parcelada e extrai informações de parcelamento.
+
+    Args:
+        texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
 
     Returns:
         {
@@ -690,7 +829,8 @@ def extract_parcelamento_info(texto_msg):
             "descricao_limpa": "suplemento alimentar" (sem info de parcelamento)
         }
     '''
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
 
     prompt = f'''Analise a mensagem de compra: "{texto_msg}"
@@ -721,18 +861,19 @@ def extract_parcelamento_info(texto_msg):
       {{"parcelado": true, "num_parcelas": 10, "descricao_limpa": "celular"}}
     '''
 
-    response = gemini_model.generate_content(prompt)
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-PARCELAMENTO] Info extraída: {json_text}")
     return json.loads(json_text)
 
-def extract_monthly_report_config(texto_msg):
+def extract_monthly_report_config(texto_msg, usuario_id=None):
     """
     Extrai configurações de relatório mensal da mensagem do usuário.
 
     Args:
         texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
 
     Returns:
         dict: {
@@ -741,7 +882,8 @@ def extract_monthly_report_config(texto_msg):
             "hora_envio": "HH:MM" | null
         }
     """
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
 
     prompt = f'''Analise a mensagem sobre configuração de relatório mensal: "{texto_msg}"
@@ -785,13 +927,13 @@ def extract_monthly_report_config(texto_msg):
       {{"acao": "consultar", "momento_envio": null, "hora_envio": null}}
     '''
 
-    response = gemini_model.generate_content(prompt)
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-RELATORIO-CONFIG] Configuração extraída: {json_text}")
     return json.loads(json_text)
 
-def generate_daily_briefing(briefing_data):
+def generate_daily_briefing(briefing_data, usuario_id=None):
     """
     Gera resumo matinal humanizado da agenda usando Gemini AI.
 
@@ -805,11 +947,13 @@ def generate_daily_briefing(briefing_data):
             - eventos_remotos: int
             - eventos_presenciais: int
             - alertas_financeiros: dict com contas e faturas próximas ao vencimento
+        usuario_id: ID do usuário (opcional)
 
     Returns:
         str: Mensagem humanizada formatada para WhatsApp
     """
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
 
     # Formatar eventos para o prompt
@@ -991,7 +1135,7 @@ Gere APENAS o texto da mensagem, sem introduções ou formatação extra.
 """
 
     try:
-        response = gemini_model.generate_content(prompt)
+        response = model.generate_content(prompt)
         response_text = get_gemini_text_response(response)
 
         # Limpar qualquer formatação extra
@@ -1028,12 +1172,13 @@ Gere APENAS o texto da mensagem, sem introduções ou formatação extra.
 
         return msg
 
-def extract_location_config(texto_msg):
+def extract_location_config(texto_msg, usuario_id=None):
     """
     Extrai configuração de localização (cidade e estado) da mensagem do usuário.
 
     Args:
         texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
 
     Returns:
         dict: {
@@ -1041,7 +1186,8 @@ def extract_location_config(texto_msg):
             "estado": "SP"
         }
     """
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
 
     prompt = f'''Analise a mensagem sobre configuração de localização: "{texto_msg}"
@@ -1060,18 +1206,19 @@ def extract_location_config(texto_msg):
     Se não conseguir extrair o estado, retorne null para estado.
     '''
 
-    response = gemini_model.generate_content(prompt)
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-LOCATION] Localização extraída: {json_text}")
     return json.loads(json_text)
 
-def extract_address_config(texto_msg):
+def extract_address_config(texto_msg, usuario_id=None):
     """
     Extrai configuração de endereço favorito.
 
     Args:
         texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
 
     Returns:
         dict: {
@@ -1085,7 +1232,8 @@ def extract_address_config(texto_msg):
     - "meu trabalho fica na Rua X, 456, Centro, Campinas"
       → {"label": "trabalho", "endereco_completo": "Rua X, 456, Centro, Campinas"}
     """
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
 
     prompt = f'''Analise a mensagem sobre configuração de endereço: "{texto_msg}"
@@ -1116,18 +1264,19 @@ def extract_address_config(texto_msg):
       {{"label": "casa", "endereco_completo": "Rua das Flores 10, Belo Horizonte-MG"}}
     '''
 
-    response = gemini_model.generate_content(prompt)
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-ADDRESS] Endereço extraído: {json_text}")
     return json.loads(json_text)
 
-def validate_event_location_completeness(location_text):
+def validate_event_location_completeness(location_text, usuario_id=None):
     """
     Verifica se endereço do evento está completo o suficiente.
 
     Args:
         location_text: Texto da localização do evento
+        usuario_id: ID do usuário (opcional)
 
     Returns:
         dict: {
@@ -1141,7 +1290,8 @@ def validate_event_location_completeness(location_text):
     - "Shopping Iguatemi, Campinas" → complete
     - "Rua X" → incomplete, missing cidade
     """
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
 
     if not location_text or location_text.strip() == "":
@@ -1192,25 +1342,27 @@ def validate_event_location_completeness(location_text):
         "suggested_question": "Qual o endereço completo? (Rua e cidade)"}}
     '''
 
-    response = gemini_model.generate_content(prompt)
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-LOCATION-CHECK] Validação: {json_text}")
     return json.loads(json_text)
 
-def extract_address_label_from_deletion(texto_msg):
+def extract_address_label_from_deletion(texto_msg, usuario_id=None):
     """
     Extrai o label do endereço que o usuário quer deletar.
 
     Args:
         texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
 
     Returns:
         dict: {
             "label": "casa" | "trabalho" | "outro"
         }
     """
-    if not gemini_model:
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
         raise Exception("Modelo Gemini não configurado.")
 
     prompt = f'''Analise a mensagem sobre deletar endereço: "{texto_msg}"
@@ -1229,7 +1381,7 @@ def extract_address_label_from_deletion(texto_msg):
     - "deletar endereço" → {{"label": "outro"}} (padrão se não especificar)
     '''
 
-    response = gemini_model.generate_content(prompt)
+    response = model.generate_content(prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-DELETE-ADDRESS] Label extraído: {json_text}")

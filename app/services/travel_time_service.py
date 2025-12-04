@@ -7,32 +7,61 @@ from datetime import datetime, timedelta, date as date_type
 import pytz
 
 class TravelTimeService:
-    """Calcula tempo de deslocamento usando OpenRouteService"""
+    """
+    Calcula tempo de deslocamento usando OpenRouteService.
+    Suporta chaves de API por usuário (SaaS) ou chave global do sistema.
+    """
 
-    ORS_API_KEY = config.OPENROUTE_API_KEY
     ORS_BASE_URL = config.OPENROUTE_BASE_URL
     TIMEOUT = 15  # segundos (aumentado para evitar timeout)
     MAX_RETRIES = 2  # número de tentativas
     BRAZIL_TZ = pytz.timezone('America/Sao_Paulo')
 
     @staticmethod
-    def geocode_address(address: str):
+    def _obter_chave_openroute(usuario_id: int = None):
+        """
+        Retorna chave OpenRoute apropriada (usuário ou sistema).
+
+        Args:
+            usuario_id: ID do usuário (opcional)
+
+        Returns:
+            str: Chave de API
+        """
+        if usuario_id is not None:
+            try:
+                from app.services.gerenciador_chaves_api import GerenciadorChavesApi
+                chave, tipo_chave = GerenciadorChavesApi.obter_chave_api(usuario_id, 'openroute')
+                print(f"[TRAVEL-TIME] ✅ Usando chave de openroute {tipo_chave} para usuário {usuario_id}")
+                return chave
+            except Exception as e:
+                print(f"[TRAVEL-TIME] ⚠️ Erro ao obter chave para usuário {usuario_id}: {e}")
+                raise
+
+        # Fallback: chave global do sistema
+        return config.OPENROUTE_API_KEY
+
+    @staticmethod
+    def geocode_address(address: str, usuario_id: int = None):
         """
         Converte endereço para lat/lon usando ORS Geocoding.
 
         Args:
             address: Endereço completo
+            usuario_id: ID do usuário (opcional)
 
         Returns:
             tuple: (latitude, longitude, endereco_formatado) ou (None, None, None)
         """
-        if not TravelTimeService.ORS_API_KEY:
+        api_key = TravelTimeService._obter_chave_openroute(usuario_id)
+
+        if not api_key:
             print("[TRAVEL-TIME] ERRO: OPENROUTE_API_KEY não configurada")
             return None, None, None
 
         url = f"{TravelTimeService.ORS_BASE_URL}/geocode/search"
         params = {
-            'api_key': TravelTimeService.ORS_API_KEY,
+            'api_key': api_key,
             'text': address,
             'boundary.country': 'BR',  # Limitar ao Brasil
             'size': 1  # Apenas o melhor resultado
@@ -89,13 +118,14 @@ class TravelTimeService:
         return None, None, None
 
     @staticmethod
-    def calculate_travel_time(origin_lat, origin_lon, dest_lat, dest_lon):
+    def calculate_travel_time(origin_lat, origin_lon, dest_lat, dest_lon, usuario_id: int = None):
         """
         Calcula tempo de viagem de carro.
 
         Args:
             origin_lat, origin_lon: Coordenadas de origem
             dest_lat, dest_lon: Coordenadas de destino
+            usuario_id: ID do usuário (opcional)
 
         Returns:
             dict: {
@@ -104,13 +134,15 @@ class TravelTimeService:
                 'route_summary': 'Via Av. Paulista'
             } ou None em caso de erro
         """
-        if not TravelTimeService.ORS_API_KEY:
+        api_key = TravelTimeService._obter_chave_openroute(usuario_id)
+
+        if not api_key:
             print("[TRAVEL-TIME] ERRO: OPENROUTE_API_KEY não configurada")
             return None
 
         url = f"{TravelTimeService.ORS_BASE_URL}/v2/directions/driving-car"
         headers = {
-            'Authorization': TravelTimeService.ORS_API_KEY,
+            'Authorization': api_key,
             'Content-Type': 'application/json'
         }
         body = {

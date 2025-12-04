@@ -9,7 +9,10 @@ import os
 from typing import Optional, Dict
 
 class WeatherService:
-    """Serviço para obter informações de clima"""
+    """
+    Serviço para obter informações de clima.
+    Suporta chaves de API por usuário (SaaS) ou chave global do sistema.
+    """
 
     # Mapeamento de condições meteorológicas para português e emojis
     WEATHER_TRANSLATIONS = {
@@ -50,13 +53,32 @@ class WeatherService:
         'Moderate or heavy sleet': ('Granizo forte', '🧊'),
     }
 
-    def __init__(self):
-        """Inicializa o serviço de clima"""
-        self.api_key = os.environ.get('WEATHER_API_KEY')
-        self.base_url = "http://api.weatherapi.com/v1"
+    def __init__(self, usuario_id: Optional[int] = None):
+        """
+        Inicializa o serviço de clima.
 
-        if not self.api_key:
-            print("[WEATHER] ⚠️ WEATHER_API_KEY não configurada. Clima desativado.")
+        Args:
+            usuario_id: ID do usuário (opcional). Se fornecido, usa chave do usuário.
+                       Se None, usa chave global do sistema.
+        """
+        self.base_url = "http://api.weatherapi.com/v1"
+        self.usuario_id = usuario_id
+
+        # Se usuario_id fornecido, usar GerenciadorChavesApi
+        if usuario_id is not None:
+            try:
+                from app.services.gerenciador_chaves_api import GerenciadorChavesApi
+                chave, tipo_chave = GerenciadorChavesApi.obter_chave_api(usuario_id, 'weather')
+                self.api_key = chave
+                print(f"[WEATHER] ✅ Usando chave de weather {tipo_chave} para usuário {usuario_id}")
+            except Exception as e:
+                print(f"[WEATHER] ⚠️ Erro ao obter chave para usuário {usuario_id}: {e}")
+                self.api_key = None
+        else:
+            # Fallback: chave global do sistema
+            self.api_key = os.environ.get('WEATHER_API_KEY')
+            if not self.api_key:
+                print("[WEATHER] ⚠️ WEATHER_API_KEY não configurada. Clima desativado.")
 
     def get_weather(self, cidade: str, estado: Optional[str] = None) -> Optional[Dict]:
         """
