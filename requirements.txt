@@ -5,6 +5,7 @@ SQLAlchemy==2.0.30
 psycopg2-binary==2.9.9
 requests==2.32.3
 redis==5.0.1
+rapidfuzz==3.14.3
 
 # Google Calendar OAuth2
 google-auth==2.29.0
