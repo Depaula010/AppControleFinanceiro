@@ -146,6 +146,9 @@ def get_message_intent(texto_msg, usuario_id=None):
     - "Consulta Saldo" (quando o usuário quer saber quanto TEM nas contas)
     - "Listar Contas" (quando o usuário quer saber QUAIS contas tem cadastradas)
     - "Consulta Reserva" (cálculo de reserva de emergência, 6 meses)
+    - "Vencimentos Hoje" (tenho conta que vence hoje, o que vence hoje, vencimentos de hoje, contas de hoje)
+    - "Vencimentos Amanhã" (tenho conta que vence amanhã, o que vence amanhã, vencimentos de amanhã)
+    - "Vencimentos Essa Semana" (contas que vencem essa semana, vencimentos da semana, o que vence nos próximos 7 dias)
     - "Consulta Período"
     - "Consulta Potes"
     - "Consulta Contas Fixas"
@@ -192,6 +195,9 @@ def get_message_intent(texto_msg, usuario_id=None):
     - "visualizar meus gastos" → {{"intent": "Gráfico de Gastos"}}
     - "qual minha api key" → {{"intent": "Solicitar API Key"}}
     - "me dá minha chave de acesso" → {{"intent": "Solicitar API Key"}}
+    - "tenho conta que vence hoje?" → {{"intent": "Vencimentos Hoje"}}
+    - "o que vence amanhã?" → {{"intent": "Vencimentos Amanhã"}}
+    - "contas que vencem essa semana" → {{"intent": "Vencimentos Essa Semana"}}
     - "configurar relatório mensal" → {{"intent": "Configurar Relatório Mensal"}}
     - "quero receber relatório todo dia 1" → {{"intent": "Configurar Relatório Mensal"}}
     - "ativar relatório mensal às 10h" → {{"intent": "Configurar Relatório Mensal"}}

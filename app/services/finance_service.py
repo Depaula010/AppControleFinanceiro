@@ -1071,3 +1071,197 @@ def criar_tabelas_chaves_api():
         import traceback
         traceback.print_exc()
         return False
+
+# ====================================
+# Consultas de Vencimentos
+# ====================================
+
+def get_vencimentos_periodo(conn, usuario_id, data_inicio, data_fim):
+    """
+    Busca contas fixas e faturas que vencem em um período específico.
+
+    Args:
+        conn: Conexão do banco
+        usuario_id: ID do usuário
+        data_inicio: Data inicial (date)
+        data_fim: Data final (date)
+
+    Returns:
+        dict com contas_fixas, faturas e totais
+    """
+    from calendar import monthrange
+
+    # 1. BUSCAR CONTAS FIXAS PENDENTES
+    # Precisa considerar virada de mês
+    dia_inicio = data_inicio.day
+    dia_fim = data_fim.day
+    mes_ref = data_inicio.month
+    ano_ref = data_inicio.year
+
+    # Se período cruza virada de mês, buscar em dois meses
+    if data_inicio.month != data_fim.month:
+        # Buscar do início até fim do primeiro mês
+        sql_contas_mes1 = text("""
+            SELECT a.descricao, a.valor_previsto, a.dia_execucao,
+                   s.nome_sub as categoria, c.nome_conta
+            FROM Agendamentos a
+            JOIN Contas c ON a.conta_id = c.id
+            JOIN SubCategoria s ON a.subcategoria_id = s.id
+            WHERE a.usuario_id = :uid
+              AND a.ativo = TRUE
+              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+              AND a.dia_execucao >= :dia_inicio
+              AND NOT EXISTS (
+                  SELECT 1 FROM Transacoes t
+                  WHERE t.descricao = a.descricao
+                  AND EXTRACT(MONTH FROM t.data_transacao) = :mes_ref
+                  AND EXTRACT(YEAR FROM t.data_transacao) = :ano_ref
+              )
+            ORDER BY a.dia_execucao ASC
+        """)
+
+        contas_mes1 = conn.execute(sql_contas_mes1, {
+            "uid": usuario_id,
+            "dia_inicio": dia_inicio,
+            "mes_ref": data_inicio.month,
+            "ano_ref": data_inicio.year
+        }).fetchall()
+
+        # Buscar do início do mês seguinte até dia_fim
+        sql_contas_mes2 = text("""
+            SELECT a.descricao, a.valor_previsto, a.dia_execucao,
+                   s.nome_sub as categoria, c.nome_conta
+            FROM Agendamentos a
+            JOIN Contas c ON a.conta_id = c.id
+            JOIN SubCategoria s ON a.subcategoria_id = s.id
+            WHERE a.usuario_id = :uid
+              AND a.ativo = TRUE
+              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+              AND a.dia_execucao <= :dia_fim
+              AND NOT EXISTS (
+                  SELECT 1 FROM Transacoes t
+                  WHERE t.descricao = a.descricao
+                  AND EXTRACT(MONTH FROM t.data_transacao) = :mes_ref
+                  AND EXTRACT(YEAR FROM t.data_transacao) = :ano_ref
+              )
+            ORDER BY a.dia_execucao ASC
+        """)
+
+        contas_mes2 = conn.execute(sql_contas_mes2, {
+            "uid": usuario_id,
+            "dia_fim": dia_fim,
+            "mes_ref": data_fim.month,
+            "ano_ref": data_fim.year
+        }).fetchall()
+
+        contas_fixas = list(contas_mes1) + list(contas_mes2)
+    else:
+        # Mesmo mês, busca simples
+        sql_contas = text("""
+            SELECT a.descricao, a.valor_previsto, a.dia_execucao,
+                   s.nome_sub as categoria, c.nome_conta
+            FROM Agendamentos a
+            JOIN Contas c ON a.conta_id = c.id
+            JOIN SubCategoria s ON a.subcategoria_id = s.id
+            WHERE a.usuario_id = :uid
+              AND a.ativo = TRUE
+              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+              AND a.dia_execucao BETWEEN :dia_inicio AND :dia_fim
+              AND NOT EXISTS (
+                  SELECT 1 FROM Transacoes t
+                  WHERE t.descricao = a.descricao
+                  AND EXTRACT(MONTH FROM t.data_transacao) = :mes_ref
+                  AND EXTRACT(YEAR FROM t.data_transacao) = :ano_ref
+              )
+            ORDER BY a.dia_execucao ASC
+        """)
+
+        contas_fixas = conn.execute(sql_contas, {
+            "uid": usuario_id,
+            "dia_inicio": dia_inicio,
+            "dia_fim": dia_fim,
+            "mes_ref": mes_ref,
+            "ano_ref": ano_ref
+        }).fetchall()
+
+    # 2. BUSCAR FATURAS ABERTAS
+    sql_faturas = text("""
+        SELECT c.nome_conta, f.data_vencimento, f.status,
+               COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) as valor_fatura
+        FROM Faturas f
+        JOIN Contas c ON f.conta_id = c.id
+        LEFT JOIN Transacoes t ON f.id = t.fatura_id
+        WHERE c.usuario_id = :uid
+          AND f.status = 'Aberta'
+          AND f.data_vencimento BETWEEN :data_inicio AND :data_fim
+        GROUP BY c.nome_conta, f.data_vencimento, f.status
+        ORDER BY f.data_vencimento ASC
+    """)
+
+    faturas = conn.execute(sql_faturas, {
+        "uid": usuario_id,
+        "data_inicio": data_inicio,
+        "data_fim": data_fim
+    }).fetchall()
+
+    # 3. CALCULAR TOTAIS
+    total_contas = sum(row.valor_previsto or 0 for row in contas_fixas)
+    total_faturas = sum(row.valor_fatura or 0 for row in faturas)
+
+    return {
+        "contas_fixas": contas_fixas,
+        "faturas": faturas,
+        "total_contas": total_contas,
+        "total_faturas": total_faturas,
+        "valor_total": total_contas + total_faturas
+    }
+
+def format_vencimentos_message(vencimentos, periodo, data_referencia):
+    """
+    Formata mensagem de vencimentos para WhatsApp.
+
+    Args:
+        vencimentos: Dict retornado por get_vencimentos_periodo()
+        periodo: String descritiva (ex: "HOJE", "AMANHÃ", "NOS PRÓXIMOS 7 DIAS")
+        data_referencia: Data de referência para exibição
+
+    Returns:
+        String formatada para WhatsApp
+    """
+    from app.utils import formatar_moeda
+
+    contas_fixas = vencimentos["contas_fixas"]
+    faturas = vencimentos["faturas"]
+    valor_total = vencimentos["valor_total"]
+
+    # Se não houver vencimentos
+    if not contas_fixas and not faturas:
+        return f"✅ Nenhuma conta vence {periodo.lower()}!"
+
+    # Montar mensagem
+    msg = f"📋 *CONTAS QUE VENCEM {periodo}* ({data_referencia.strftime('%d/%m')})\n\n"
+
+    # Contas Fixas
+    if contas_fixas:
+        msg += "*💰 Contas Fixas:*\n"
+        for conta in contas_fixas:
+            descricao = conta.descricao
+            valor = formatar_moeda(conta.valor_previsto or 0)
+            dia = conta.dia_execucao
+            msg += f"• {descricao} - {valor} (dia {dia})\n"
+        msg += "\n"
+
+    # Faturas
+    if faturas:
+        msg += "*💳 Faturas:*\n"
+        for fatura in faturas:
+            cartao = fatura.nome_conta
+            valor = formatar_moeda(fatura.valor_fatura or 0)
+            data_venc = fatura.data_vencimento.strftime('%d/%m')
+            msg += f"• {cartao} - {valor} (vence {data_venc})\n"
+        msg += "\n"
+
+    # Total
+    msg += f"*Total:* {formatar_moeda(valor_total)}"
+
+    return msg

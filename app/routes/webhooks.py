@@ -1055,7 +1055,105 @@ def handle_whatsapp_webhook():
             elif intent == 'Consulta Contas Fixas':
                 resposta_para_usuario = FixedBillsService.list_pending_bills_formatted(conn, usuario_id)
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-            
+
+            # ===== INTENÇÃO: Vencimentos Hoje =====
+            elif intent == 'Vencimentos Hoje':
+                from datetime import datetime
+                from zoneinfo import ZoneInfo
+                from app.services.finance_service import get_vencimentos_periodo, format_vencimentos_message
+
+                try:
+                    TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
+                    hoje = datetime.now(TIMEZONE_BR).date()
+
+                    # Buscar vencimentos de hoje
+                    vencimentos = get_vencimentos_periodo(
+                        conn=conn,
+                        usuario_id=usuario_id,
+                        data_inicio=hoje,
+                        data_fim=hoje
+                    )
+
+                    # Formatar resposta
+                    resposta_para_usuario = format_vencimentos_message(
+                        vencimentos=vencimentos,
+                        periodo="HOJE",
+                        data_referencia=hoje
+                    )
+
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                except Exception as e:
+                    print(f"[VENCIMENTOS-HOJE] Erro: {e}")
+                    resposta_para_usuario = "❌ Erro ao consultar vencimentos de hoje."
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+            # ===== INTENÇÃO: Vencimentos Amanhã =====
+            elif intent == 'Vencimentos Amanhã':
+                from datetime import datetime, timedelta
+                from zoneinfo import ZoneInfo
+                from app.services.finance_service import get_vencimentos_periodo, format_vencimentos_message
+
+                try:
+                    TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
+                    hoje = datetime.now(TIMEZONE_BR).date()
+                    amanha = hoje + timedelta(days=1)
+
+                    # Buscar vencimentos de amanhã
+                    vencimentos = get_vencimentos_periodo(
+                        conn=conn,
+                        usuario_id=usuario_id,
+                        data_inicio=amanha,
+                        data_fim=amanha
+                    )
+
+                    # Formatar resposta
+                    resposta_para_usuario = format_vencimentos_message(
+                        vencimentos=vencimentos,
+                        periodo="AMANHÃ",
+                        data_referencia=amanha
+                    )
+
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                except Exception as e:
+                    print(f"[VENCIMENTOS-AMANHÃ] Erro: {e}")
+                    resposta_para_usuario = "❌ Erro ao consultar vencimentos de amanhã."
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+            # ===== INTENÇÃO: Vencimentos Essa Semana =====
+            elif intent == 'Vencimentos Essa Semana':
+                from datetime import datetime, timedelta
+                from zoneinfo import ZoneInfo
+                from app.services.finance_service import get_vencimentos_periodo, format_vencimentos_message
+
+                try:
+                    TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
+                    hoje = datetime.now(TIMEZONE_BR).date()
+                    fim_semana = hoje + timedelta(days=7)
+
+                    # Buscar vencimentos dos próximos 7 dias
+                    vencimentos = get_vencimentos_periodo(
+                        conn=conn,
+                        usuario_id=usuario_id,
+                        data_inicio=hoje,
+                        data_fim=fim_semana
+                    )
+
+                    # Formatar resposta
+                    resposta_para_usuario = format_vencimentos_message(
+                        vencimentos=vencimentos,
+                        periodo="NOS PRÓXIMOS 7 DIAS",
+                        data_referencia=hoje
+                    )
+
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                except Exception as e:
+                    print(f"[VENCIMENTOS-SEMANA] Erro: {e}")
+                    resposta_para_usuario = "❌ Erro ao consultar vencimentos da semana."
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
             # ===== INTENÇÃO: Quitar Conta Fixa Manualmente =====
             elif intent == 'Quitar Conta Fixa':
                 # Extrair dados do pagamento
@@ -1989,6 +2087,9 @@ def handle_whatsapp_webhook():
 • _"quanto gastei com comida?"_ - Gasto por categoria
 • _"quais contas tenho?"_ - Listar contas cadastradas
 • _"quanto de reserva?"_ - Reserva de emergência (6x média)
+• _"tenho conta que vence hoje?"_ - Vencimentos de hoje
+• _"tenho conta que vence amanhã?"_ - Vencimentos de amanhã
+• _"contas que vencem essa semana?"_ - Vencimentos dos próximos 7 dias
 
 *📅 CALENDÁRIO & AGENDA*
 • _"minha agenda amanhã"_ - Ver compromissos
