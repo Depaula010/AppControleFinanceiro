@@ -62,7 +62,7 @@ def handle_automate_webhook():
         print(f"[AUTOMATE] Usuário: {usuario_id}")
 
         # 2. Extrair com IA
-        transacao_gemini = gemini_service.extract_from_notification(texto_notificacao)
+        transacao_gemini = gemini_service.extract_from_notification(texto_notificacao, usuario_id)
         tipo_transacao = transacao_gemini.get('tipo_fluxo', 'Despesa')
         transacao_descricao = transacao_gemini.get('descricao_bruta')
         valor_decimal = float(transacao_gemini.get('valor_decimal', 0))
@@ -83,7 +83,7 @@ def handle_automate_webhook():
 
             # 4. Categorizar
             id_categoria_final = gemini_service.categorize_transaction(
-                categories_json_list, transacao_descricao, tipo_transacao, id_outros_fallback
+                categories_json_list, transacao_descricao, tipo_transacao, id_outros_fallback, usuario_id
             )
             
             # 5. NOVO: Criar transação PENDENTE no Redis
@@ -306,7 +306,8 @@ def handle_api_transacao():
                 categorias,
                 texto_para_ia,
                 'Despesa',
-                id_categoria_outros
+                id_categoria_outros,
+                usuario_id
             )
 
             print(f"[API-TRANSACAO] Categoria IA: {id_categoria}")
@@ -784,7 +785,7 @@ def handle_whatsapp_webhook():
                 }), 200
 
         # 4. Classificar intenção (fluxo normal)
-        intent = gemini_service.get_message_intent(texto_msg)
+        intent = gemini_service.get_message_intent(texto_msg, usuario_id)
         data_hoje = date.today()
 
         with db_engine.connect() as conn:
@@ -792,7 +793,7 @@ def handle_whatsapp_webhook():
 
             # Fluxo de Renda/Despesa com CONFIRMAÇÃO
             if intent == 'Renda' or intent == 'Despesa':
-                trans_data = gemini_service.extract_transaction_details(texto_msg, intent)
+                trans_data = gemini_service.extract_transaction_details(texto_msg, intent, usuario_id)
                 trans_desc = trans_data.get('descricao_bruta')
                 valor_dec = float(trans_data.get('valor_decimal', 0))
 
@@ -802,7 +803,7 @@ def handle_whatsapp_webhook():
                 valor_parcela = valor_dec
 
                 if intent == 'Despesa':
-                    parcelamento_info = gemini_service.extract_parcelamento_info(texto_msg)
+                    parcelamento_info = gemini_service.extract_parcelamento_info(texto_msg, usuario_id)
                     if parcelamento_info.get('parcelado'):
                         num_parcelas = parcelamento_info.get('num_parcelas')
                         if num_parcelas and num_parcelas > 1:
@@ -813,7 +814,7 @@ def handle_whatsapp_webhook():
 
                 cats_list = finance_service.get_user_categories(conn, usuario_id, intent)
                 id_outros = finance_service.get_fallback_category_id(conn, intent)
-                id_categoria = gemini_service.categorize_transaction(cats_list, trans_desc, intent, id_outros)
+                id_categoria = gemini_service.categorize_transaction(cats_list, trans_desc, intent, id_outros, usuario_id)
 
                 # Detectar se mencionou cartão de crédito
                 fatura_id = None
@@ -926,7 +927,7 @@ def handle_whatsapp_webhook():
                 contas_raw = finance_service.get_user_accounts(conn, usuario_id)
                 contas_list = [{"nome": c[1], "tipo": c[2]} for c in contas_raw]
 
-                saldo_query = gemini_service.extract_saldo_query(texto_msg, contas_list)
+                saldo_query = gemini_service.extract_saldo_query(texto_msg, contas_list, usuario_id)
                 nome_conta = saldo_query.get('nome_conta')
 
                 conta_id = None
@@ -994,9 +995,9 @@ def handle_whatsapp_webhook():
 
             # ===== INTENÇÃO: Consulta por Período =====
             elif intent == 'Consulta Período':
-                
+
                 # Extrair período da mensagem
-                period_data = gemini_service.extract_period_query(texto_msg)
+                period_data = gemini_service.extract_period_query(texto_msg, usuario_id)
                 period_type = period_data.get('period_type', 'hoje')
                 categoria_filtro = period_data.get('categoria')
 
@@ -1058,7 +1059,7 @@ def handle_whatsapp_webhook():
             # ===== INTENÇÃO: Quitar Conta Fixa Manualmente =====
             elif intent == 'Quitar Conta Fixa':
                 # Extrair dados do pagamento
-                payment_data = gemini_service.extract_bill_payment(texto_msg)
+                payment_data = gemini_service.extract_bill_payment(texto_msg, usuario_id)
                 descricao_pag = payment_data.get('descricao')
                 valor_pago = float(payment_data.get('valor', 0))
 
@@ -1106,8 +1107,8 @@ def handle_whatsapp_webhook():
             elif intent == 'Transferência':
                 contas_raw = finance_service.get_user_accounts(conn, usuario_id)
                 contas_list = [{"nome": c[1], "tipo": c[2]} for c in contas_raw]
-                
-                transf_data = gemini_service.extract_transfer_details(texto_msg, contas_list)
+
+                transf_data = gemini_service.extract_transfer_details(texto_msg, contas_list, usuario_id)
                 valor_dec = float(transf_data.get('valor_decimal', 0))
                 nome_origem = transf_data.get('conta_origem')
                 nome_destino = transf_data.get('conta_destino')
@@ -1137,7 +1138,7 @@ def handle_whatsapp_webhook():
                 contas_raw = finance_service.get_user_accounts(conn, usuario_id)
                 contas_list = [{"nome": c[1], "tipo": c[2]} for c in contas_raw]
 
-                fatura_data = gemini_service.extract_fatura_payment_details(texto_msg, contas_list)
+                fatura_data = gemini_service.extract_fatura_payment_details(texto_msg, contas_list, usuario_id)
 
                 # Validar se conseguiu extrair os dados necessários
                 valor_decimal_raw = fatura_data.get('valor_decimal')
@@ -1180,7 +1181,7 @@ def handle_whatsapp_webhook():
                 contas_raw = finance_service.get_user_accounts(conn, usuario_id)
                 contas_list = [{"nome": c[1], "tipo": c[2]} for c in contas_raw]
 
-                fatura_query = gemini_service.extract_fatura_query(texto_msg, contas_list)
+                fatura_query = gemini_service.extract_fatura_query(texto_msg, contas_list, usuario_id)
                 nome_cartao = fatura_query.get('conta_cartao')
 
                 conta_id_cartao = None
@@ -1223,7 +1224,7 @@ def handle_whatsapp_webhook():
 
             #=== INTENÇÃO: Consulta Categoria Específica =====
             elif intent == 'Consulta Categoria Específica':
-                cat_data = gemini_service.extract_category_query(texto_msg)
+                cat_data = gemini_service.extract_category_query(texto_msg, usuario_id)
                 nome_categoria_consulta = cat_data.get('nome_categoria')
                 if not nome_categoria_consulta:
                     raise Exception("Gemini não conseguiu extrair o nome da categoria.")
@@ -1238,8 +1239,8 @@ def handle_whatsapp_webhook():
             #==== INTENÇÃO: Criar Evento ====
             elif intent == 'Criar Evento':
                 print(f"[WHATSAPP] Intenção de Criar Evento detectada")
-                
-                event_data = gemini_service.extract_event_creation_details(texto_msg)
+
+                event_data = gemini_service.extract_event_creation_details(texto_msg, usuario_id)
                 
                 titulo = event_data.get('titulo')
                 data_str = event_data.get('data')
@@ -1296,8 +1297,8 @@ def handle_whatsapp_webhook():
             #==== INTENÇÃO: Deletar Evento ====
             elif intent == 'Deletar Evento':
                 print(f"[WHATSAPP] Intenção de Deletar Evento detectada")
-                
-                delete_data = gemini_service.extract_event_deletion_query(texto_msg)
+
+                delete_data = gemini_service.extract_event_deletion_query(texto_msg, usuario_id)
                 
                 titulo_busca = delete_data.get('titulo_busca')
                 quando = delete_data.get('quando')
@@ -1365,11 +1366,11 @@ def handle_whatsapp_webhook():
                 from app.services.calendar_query_service import CalendarQueryService
 
                 # Extrair período
-                calendar_data = gemini_service.extract_calendar_query(texto_msg)
+                calendar_data = gemini_service.extract_calendar_query(texto_msg, usuario_id)
                 period_type = calendar_data.get('period_type', 'hoje')
 
                 # NOVO: Extrair filtro de horário
-                time_data = gemini_service.extract_time_filter_query(texto_msg)
+                time_data = gemini_service.extract_time_filter_query(texto_msg, usuario_id)
                 time_filter = time_data.get('time_filter')
 
                 if time_filter:
@@ -1391,7 +1392,7 @@ def handle_whatsapp_webhook():
                 from app.services.free_time_finder_service import FreeTimeFinderService
 
                 # Extrair período e contexto
-                free_time_data = gemini_service.extract_free_time_query(texto_msg)
+                free_time_data = gemini_service.extract_free_time_query(texto_msg, usuario_id)
                 period_type = free_time_data.get('period_type', 'hoje')
                 duracao_minutos = free_time_data.get('duracao_minutos', 60)
                 contexto = free_time_data.get('contexto')
@@ -1532,7 +1533,7 @@ def handle_whatsapp_webhook():
                     return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
                 # Se NÃO for resumo matinal nem check-in, processar outras notificações (CÓDIGO EXISTENTE)
-                config_data = gemini_service.extract_notification_config(texto_msg)
+                config_data = gemini_service.extract_notification_config(texto_msg, usuario_id)
 
                 tipo = config_data.get('tipo')
                 acao = config_data.get('acao')
@@ -1607,7 +1608,7 @@ def handle_whatsapp_webhook():
 
                 try:
                     # Extrair cidade e estado com Gemini
-                    location_data = extract_location_config(texto_msg)
+                    location_data = extract_location_config(texto_msg, usuario_id)
                     cidade = location_data.get('cidade')
                     estado = location_data.get('estado')
 
@@ -1696,7 +1697,7 @@ def handle_whatsapp_webhook():
 
                 try:
                     # Extrair tipo de gráfico solicitado
-                    chart_info = gemini_service.extract_chart_type(texto_msg)
+                    chart_info = gemini_service.extract_chart_type(texto_msg, usuario_id)
                     tipo_grafico = chart_info.get('tipo_grafico', 'pizza')
 
                     print(f"[CHART] Gerando gráfico tipo: {tipo_grafico}")
@@ -1796,7 +1797,7 @@ def handle_whatsapp_webhook():
 
                 try:
                     # Extrair configurações da mensagem
-                    config_info = gemini_service.extract_monthly_report_config(texto_msg)
+                    config_info = gemini_service.extract_monthly_report_config(texto_msg, usuario_id)
                     acao = config_info.get('acao')
                     momento_envio = config_info.get('momento_envio')
                     hora_envio = config_info.get('hora_envio')
@@ -1905,7 +1906,7 @@ def handle_whatsapp_webhook():
 
                 try:
                     # Extrair dados do endereço
-                    addr_data = gemini_service.extract_address_config(texto_msg)
+                    addr_data = gemini_service.extract_address_config(texto_msg, usuario_id)
                     label = addr_data.get('label')
                     endereco = addr_data.get('endereco_completo')
 
@@ -1958,7 +1959,7 @@ def handle_whatsapp_webhook():
 
                 try:
                     # Extrair label do endereço a deletar
-                    label_data = gemini_service.extract_address_label_from_deletion(texto_msg)
+                    label_data = gemini_service.extract_address_label_from_deletion(texto_msg, usuario_id)
                     label = label_data.get('label', 'outro')
 
                     # Deletar endereço
@@ -2120,14 +2121,15 @@ def handle_sms_payment():
                 # Extrair tipo e categoria com IA
                 trans_data = gemini_service.extract_transaction_details(
                     f"Paguei {valor} de {descricao}",
-                    'Despesa'
+                    'Despesa',
+                    usuario_id
                 )
                 
                 cats = finance_service.get_user_categories(conn, usuario_id, 'Despesa')
                 id_outros = finance_service.get_fallback_category_id(conn, 'Despesa')
                 
                 id_categoria = gemini_service.categorize_transaction(
-                    cats, descricao, 'Despesa', id_outros
+                    cats, descricao, 'Despesa', id_outros, usuario_id
                 )
                 
                 conta_id = finance_service.get_account_by_name(conn, usuario_id, 'Carteira', fallback=True)
