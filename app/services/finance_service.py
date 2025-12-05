@@ -712,6 +712,8 @@ def get_upcoming_bills_and_invoices(conn, usuario_id, target_date=None):
     amanha = target_date + timedelta(days=1)
 
     # Buscar contas fixas pendentes
+    # IMPORTANTE: Executar queries separadas para HOJE e AMANHÃ para corrigir bug de virada de mês
+    # (Ex: 31/12 busca dezembro, 01/01 busca janeiro)
     sql_contas = text("""
         SELECT
             a.id,
@@ -726,7 +728,7 @@ def get_upcoming_bills_and_invoices(conn, usuario_id, target_date=None):
         WHERE a.usuario_id = :uid
           AND a.ativo = TRUE
           AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
-          AND a.dia_execucao IN (:dia_hoje, :dia_amanha)
+          AND a.dia_execucao = :dia
           -- Verificar se ainda não foi executado este mês
           AND NOT EXISTS (
               SELECT 1 FROM Transacoes t
@@ -739,31 +741,43 @@ def get_upcoming_bills_and_invoices(conn, usuario_id, target_date=None):
         ORDER BY a.dia_execucao ASC
     """)
 
-    contas_result = conn.execute(sql_contas, {
+    # Query 1: Contas que vencem HOJE
+    contas_hoje_result = conn.execute(sql_contas, {
         "uid": usuario_id,
-        "dia_hoje": target_date.day,
-        "dia_amanha": amanha.day,
+        "dia": target_date.day,
         "mes_ref": target_date.month,
         "ano_ref": target_date.year
     }).fetchall()
 
-    # Separar contas por dia
+    # Query 2: Contas que vencem AMANHÃ (usa mês/ano de amanhã - corrige virada de mês)
+    contas_amanha_result = conn.execute(sql_contas, {
+        "uid": usuario_id,
+        "dia": amanha.day,
+        "mes_ref": amanha.month,
+        "ano_ref": amanha.year
+    }).fetchall()
+
+    # Processar resultados
     contas_hoje = []
     contas_amanha = []
 
-    for conta in contas_result:
-        conta_dict = {
+    for conta in contas_hoje_result:
+        contas_hoje.append({
             "id": conta.id,
             "descricao": conta.descricao,
             "valor": float(conta.valor_previsto or 0),
             "categoria": conta.categoria,
             "conta": conta.nome_conta
-        }
+        })
 
-        if conta.dia_execucao == target_date.day:
-            contas_hoje.append(conta_dict)
-        elif conta.dia_execucao == amanha.day:
-            contas_amanha.append(conta_dict)
+    for conta in contas_amanha_result:
+        contas_amanha.append({
+            "id": conta.id,
+            "descricao": conta.descricao,
+            "valor": float(conta.valor_previsto or 0),
+            "categoria": conta.categoria,
+            "conta": conta.nome_conta
+        })
 
     # Buscar faturas de cartão de crédito
     sql_faturas = text("""

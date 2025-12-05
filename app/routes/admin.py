@@ -847,8 +847,8 @@ def trigger_daily_briefing():
 
         print(f"[DAILY-BRIEFING] Processando resumos matinais para horario {hora_atual.strftime('%H:%M')}...")
 
-        # Buscar usuários que devem receber neste horário
-        usuarios = NotificationConfigService.get_users_with_resumo_matinal_active(hora_atual)
+        # Buscar usuários que devem receber neste horário (resumo matinal OU alertas financeiros)
+        usuarios = NotificationConfigService.get_users_with_notifications_active(hora_atual)
 
         if not usuarios:
             return jsonify({
