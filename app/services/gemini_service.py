@@ -462,6 +462,72 @@ def extract_bill_payment(texto_msg, usuario_id=None):
     print(f"[GEMINI-BILL] Pagamento extraído: {json_text}")
     return json.loads(json_text)
 
+def extract_payment_items(texto_msg, usuario_id=None):
+    '''
+    Extrai itens de pagamento de uma mensagem (sem classificar intent).
+
+    Esta função é NEUTRA - não tenta adivinhar se é conta fixa ou despesa.
+    Apenas extrai O QUE foi pago e por QUANTO.
+
+    Args:
+        texto_msg: Mensagem do usuário
+        usuario_id: ID do usuário (opcional)
+
+    Returns:
+        {
+            "itens": ["baba", "leite", "internet"],
+            "valor_total": 300.00 ou null,
+            "trigger_word": "paguei" ou "gastei" (para contexto)
+        }
+    '''
+    model = _obter_modelo_gemini_para_usuario(usuario_id)
+    if not model:
+        raise Exception("Modelo Gemini não configurado.")
+
+    prompt = f'''Analise a mensagem: "{texto_msg}"
+
+    Extraia APENAS os itens mencionados que o usuário pagou/gastou.
+
+    IMPORTANTE:
+    - "itens": lista de TUDO que foi pago (ex: ["baba", "leite", "padaria"])
+    - "valor_total": valor total mencionado (ou null se não mencionar)
+    - "trigger_word": verbo usado ("paguei", "gastei", "quitei", "comprei", etc)
+    - Normalizar nomes: "conta de água" → "água", "conta de luz" → "luz"
+    - Conectores "e", "e o", "e a", "," → são múltiplos itens
+
+    NÃO tente classificar se é conta fixa ou despesa. Apenas extraia os dados.
+
+    Responda APENAS com JSON.
+
+    Exemplos:
+    - "paguei a baba" →
+      {{"itens": ["baba"], "valor_total": null, "trigger_word": "paguei"}}
+
+    - "paguei a baba e o leite" →
+      {{"itens": ["baba", "leite"], "valor_total": null, "trigger_word": "paguei"}}
+
+    - "paguei 300 da internet e da água" →
+      {{"itens": ["internet", "água"], "valor_total": 300.00, "trigger_word": "paguei"}}
+
+    - "gastei 50 na padaria" →
+      {{"itens": ["padaria"], "valor_total": 50.00, "trigger_word": "gastei"}}
+
+    - "comprei comida de 80" →
+      {{"itens": ["comida"], "valor_total": 80.00, "trigger_word": "comprei"}}
+
+    - "paguei 150 da água" →
+      {{"itens": ["água"], "valor_total": 150.00, "trigger_word": "paguei"}}
+
+    - "quitei internet, telefone e seguro" →
+      {{"itens": ["internet", "telefone", "seguro"], "valor_total": null, "trigger_word": "quitei"}}
+    '''
+
+    response = model.generate_content(prompt)
+    response_text = get_gemini_text_response(response)
+    json_text = response_text.strip().replace("```json", "").replace("```", "")
+    print(f"[GEMINI-PAYMENT-ITEMS] Extração: {json_text}")
+    return json.loads(json_text)
+
 def extract_calendar_query(texto_msg, usuario_id=None):
     '''
     Extrai o período da consulta de agenda.

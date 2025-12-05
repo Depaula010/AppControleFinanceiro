@@ -1154,50 +1154,223 @@ def handle_whatsapp_webhook():
                     resposta_para_usuario = "❌ Erro ao consultar vencimentos da semana."
                     return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
-            # ===== INTENÇÃO: Quitar Conta Fixa Manualmente =====
-            elif intent == 'Quitar Conta Fixa':
-                # Extrair dados do pagamento
-                payment_data = gemini_service.extract_bill_payment(texto_msg, usuario_id)
-                descricao_pag = payment_data.get('descricao')
-                valor_pago = float(payment_data.get('valor', 0))
+            # ===== HANDLER UNIFICADO: PROCESSAR PAGAMENTO =====
+            # Substituindo "Despesa" e "Quitar Conta Fixa" por lógica única
+            elif intent in ['Despesa', 'Quitar Conta Fixa'] or any(word in texto_msg.lower() for word in ['paguei', 'gastei', 'quitei', 'comprei']):
+                # PASSO 1: Extrair itens e valores (SEM classificar)
+                payment_data = gemini_service.extract_payment_items(texto_msg, usuario_id)
+                itens_lista = payment_data.get('itens', [])
+                valor_total = payment_data.get('valor_total')  # null ou float
+                trigger_word = payment_data.get('trigger_word', 'paguei')
 
-                if not descricao_pag or not valor_pago:
-                    raise Exception("Não consegui identificar qual conta você pagou ou o valor.")
-
-                # Buscar conta correspondente
-                match = FixedBillsService.find_matching_bill(conn, usuario_id, descricao_pag)
-
-                if not match:
-                    resposta_para_usuario = (
-                        f"🤔 Não encontrei uma conta fixa chamada '{descricao_pag}'.\n\n"
-                        f"Você quis dizer:\n"
-                        f"• \"Paguei a conta de água no valor de {formatar_moeda(valor_pago)}\"?\n\n"
-                        f"Ou prefere ver suas contas pendentes? Digite: *minhas contas fixas*"
-                    )
+                if not itens_lista:
+                    resposta_para_usuario = "🤔 Não consegui identificar o que você pagou. Pode reformular?"
                     return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
-                agendamento_id, desc_original, valor_previsto, dia_venc, categoria = match
+                # PASSO 2: Verificar cada item no banco de contas fixas
+                contas_fixas_quitadas = []
+                despesas_criadas = []
+                itens_sem_valor = []  # Itens que não achou no banco E não tem valor
 
-                # Quitar a conta
-                transaction_id = FixedBillsService.settle_fixed_bill(
-                    conn, usuario_id, agendamento_id, valor_pago, date.today(),
-                    observacao="Quitado manualmente"
-                )
+                for item_desc in itens_lista:
+                    # Tentar encontrar conta fixa correspondente
+                    match = FixedBillsService.find_matching_bill(conn, usuario_id, item_desc)
+
+                    if match:
+                        # ENCONTROU CONTA FIXA → Quitar
+                        agendamento_id, desc_original, valor_previsto, dia_venc, tipo_agend, categoria, conta_id_agendamento = match
+
+                        # Determinar valor a usar
+                        if valor_total and len(itens_lista) == 1:
+                            # UMA conta + valor informado → usar valor informado
+                            valor_pagar = valor_total
+                        else:
+                            # Múltiplas contas OU sem valor → usar previsto
+                            valor_pagar = float(valor_previsto) if valor_previsto else None
+
+                        if valor_pagar is None or valor_pagar == 0:
+                            itens_sem_valor.append({
+                                'nome': desc_original,
+                                'tipo': 'conta_fixa'
+                            })
+                            continue
+
+                        # Quitar a conta
+                        try:
+                            # **IMPORTANTE**: Passar conta_id_agendamento para debitar da conta correta
+                            transaction_id = FixedBillsService.settle_fixed_bill(
+                                conn, usuario_id, agendamento_id, valor_pagar,
+                                date.today(),
+                                conta_pagamento_id=conta_id_agendamento,  # Debita da conta do agendamento
+                                observacao="Via WhatsApp"
+                            )
+
+                            contas_fixas_quitadas.append({
+                                'descricao': desc_original,
+                                'valor': valor_pagar,
+                                'valor_previsto': float(valor_previsto) if valor_previsto else 0,
+                                'tipo_agendamento': tipo_agend,
+                                'categoria': categoria,
+                                'transaction_id': transaction_id
+                            })
+
+                        except Exception as e:
+                            print(f"[PROCESSAR-PAGAMENTO] Erro ao quitar {desc_original}: {e}")
+                            # Continua para próximos itens
+
+                    else:
+                        # NÃO ENCONTROU CONTA FIXA → Criar despesa
+
+                        # Determinar valor da despesa
+                        if valor_total and len(itens_lista) == 1:
+                            # UMA despesa + valor informado
+                            valor_despesa = valor_total
+                        elif valor_total and len(itens_lista) > 1:
+                            # Múltiplas despesas + valor total → precisa dividir
+                            # Opção: Pedir valor individual (por ora, ignora)
+                            itens_sem_valor.append({
+                                'nome': item_desc,
+                                'tipo': 'despesa'
+                            })
+                            continue
+                        else:
+                            # Sem valor → não pode criar despesa
+                            itens_sem_valor.append({
+                                'nome': item_desc,
+                                'tipo': 'despesa'
+                            })
+                            continue
+
+                        # Criar despesa avulsa
+                        try:
+                            # Categorizar
+                            cats_list = finance_service.get_user_categories(conn, usuario_id, 'Despesa')
+                            id_outros = finance_service.get_fallback_category_id(conn, 'Despesa')
+                            id_categoria = gemini_service.categorize_transaction(
+                                cats_list, item_desc, 'Despesa', id_outros, usuario_id
+                            )
+
+                            # Conta padrão: Carteira
+                            conta_id = finance_service.get_account_by_name(conn, usuario_id, 'Carteira', fallback=True)
+
+                            # Criar transação
+                            valor_negativo = float(valor_despesa) * -1
+                            transaction_id = finance_service.create_transaction(
+                                conn, usuario_id, conta_id, id_categoria, None,
+                                item_desc, valor_negativo, 'Despesa', date.today()
+                            )
+
+                            # Buscar nome da categoria
+                            categoria_nome = next((c[1] for c in cats_list if c[0] == id_categoria), 'Outros')
+
+                            despesas_criadas.append({
+                                'descricao': item_desc,
+                                'valor': valor_despesa,
+                                'categoria': categoria_nome,
+                                'transaction_id': transaction_id
+                            })
+
+                        except Exception as e:
+                            print(f"[PROCESSAR-PAGAMENTO] Erro ao criar despesa {item_desc}: {e}")
 
                 conn.commit()
 
-                resposta_para_usuario = FixedBillsService.mark_bill_as_paid_response(
-                    desc_original, valor_pago, categoria
-                )
-
-                # Alertar se valor diferente do previsto
-                if abs(float(valor_previsto) - valor_pago) > 1:
-                    diferenca = valor_pago - float(valor_previsto)
-                    resposta_para_usuario += f"\n\n💡 *Atenção:* O valor pago ({formatar_moeda(valor_pago)}) "
-                    if diferenca > 0:
-                        resposta_para_usuario += f"foi *{formatar_moeda(diferenca)}* maior que o previsto."
+                # PASSO 3: Formatar resposta unificada
+                if not contas_fixas_quitadas and not despesas_criadas and itens_sem_valor:
+                    # Nenhuma ação realizada → pedir valores
+                    if len(itens_sem_valor) == 1:
+                        item = itens_sem_valor[0]
+                        resposta_para_usuario = (
+                            f"🤔 Para processar '{item['nome']}', preciso do valor.\n\n"
+                            f"Exemplo: *{trigger_word} {item['nome']} 150*"
+                        )
                     else:
-                        resposta_para_usuario += f"foi *{formatar_moeda(abs(diferenca))}* menor que o previsto."
+                        nomes = "', '".join([i['nome'] for i in itens_sem_valor])
+                        resposta_para_usuario = (
+                            f"🤔 Para processar '{nomes}', preciso dos valores.\n\n"
+                            f"Tente informar um item por vez com o valor."
+                        )
+
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                # Montar resposta com tudo que foi processado
+                resposta_para_usuario = ""
+
+                # Contas fixas quitadas
+                if contas_fixas_quitadas:
+                    if len(contas_fixas_quitadas) == 1:
+                        c = contas_fixas_quitadas[0]
+                        resposta_para_usuario += f"✅ *CONTA QUITADA* ✅\n\n"
+                        resposta_para_usuario += f"📝 {c['descricao']}\n"
+                        resposta_para_usuario += f"💰 {formatar_moeda(c['valor'])}\n"
+                        resposta_para_usuario += f"📊 {c['categoria']}\n\n"
+                        resposta_para_usuario += f"_Esta conta não será cobrada automaticamente este mês._\n"
+
+                        # Alerta para VARIAVEL
+                        if c['tipo_agendamento'] == 'LEMBRETE_VARIAVEL':
+                            resposta_para_usuario += (
+                                f"\n⚠️ *Conta Variável:* Usei o valor previsto de {formatar_moeda(c['valor_previsto'])}.\n"
+                                f"Se o valor real foi diferente, me avise!"
+                            )
+
+                        # Alerta diferença de valor
+                        diferenca = abs(c['valor_previsto'] - c['valor'])
+                        if diferenca > 1:
+                            sinal = "+" if c['valor'] > c['valor_previsto'] else "-"
+                            resposta_para_usuario += (
+                                f"\n\n💡 Valor previsto era {formatar_moeda(c['valor_previsto'])} "
+                                f"({sinal}{formatar_moeda(diferenca)})"
+                            )
+
+                    else:
+                        # Múltiplas contas
+                        resposta_para_usuario += f"✅ *{len(contas_fixas_quitadas)} CONTAS QUITADAS* ✅\n\n"
+                        total = 0
+                        for idx, c in enumerate(contas_fixas_quitadas, 1):
+                            resposta_para_usuario += f"{idx}. *{c['descricao']}*\n"
+                            resposta_para_usuario += f"   💰 {formatar_moeda(c['valor'])}\n"
+                            resposta_para_usuario += f"   📊 {c['categoria']}\n"
+
+                            if c['tipo_agendamento'] == 'LEMBRETE_VARIAVEL':
+                                resposta_para_usuario += f"   ⚠️ Variável (previsto: {formatar_moeda(c['valor_previsto'])})\n"
+
+                            resposta_para_usuario += "\n"
+                            total += c['valor']
+
+                        resposta_para_usuario += "━━━━━━━━━━━━━━━━━━━━\n"
+                        resposta_para_usuario += f"💵 *Total: {formatar_moeda(total)}*\n\n"
+
+                # Despesas criadas
+                if despesas_criadas:
+                    if contas_fixas_quitadas:
+                        resposta_para_usuario += "\n━━━━━━━━━━━━━━━━━━━━\n\n"
+
+                    if len(despesas_criadas) == 1:
+                        d = despesas_criadas[0]
+                        resposta_para_usuario += f"💸 *DESPESA REGISTRADA* 💸\n\n"
+                        resposta_para_usuario += f"📝 {d['descricao']}\n"
+                        resposta_para_usuario += f"💰 {formatar_moeda(d['valor'])}\n"
+                        resposta_para_usuario += f"📊 {d['categoria']}\n"
+                        resposta_para_usuario += f"💳 Carteira\n"
+
+                    else:
+                        # Múltiplas despesas
+                        resposta_para_usuario += f"💸 *{len(despesas_criadas)} DESPESAS REGISTRADAS* 💸\n\n"
+                        total = 0
+                        for idx, d in enumerate(despesas_criadas, 1):
+                            resposta_para_usuario += f"{idx}. *{d['descricao']}*\n"
+                            resposta_para_usuario += f"   💰 {formatar_moeda(d['valor'])}\n"
+                            resposta_para_usuario += f"   📊 {d['categoria']}\n\n"
+                            total += d['valor']
+
+                        resposta_para_usuario += "━━━━━━━━━━━━━━━━━━━━\n"
+                        resposta_para_usuario += f"💵 *Total: {formatar_moeda(total)}*\n"
+
+                # Itens sem valor (se houver e também houve processamentos)
+                if itens_sem_valor and (contas_fixas_quitadas or despesas_criadas):
+                    resposta_para_usuario += f"\n\n⚠️ *Não processado (falta valor):*\n"
+                    for item in itens_sem_valor:
+                        resposta_para_usuario += f"• {item['nome']}\n"
 
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
             
@@ -2081,6 +2254,7 @@ def handle_whatsapp_webhook():
 • _"meus potes"_ - Ver limite e gasto dos potes
 • _"minhas contas fixas"_ - Listar contas recorrentes
 • _"paguei água"_ - Quitar conta fixa
+• _"paguei a internet e comprei pizza de 50"_ - Quitar múltiplas (híbrido)
 • _"transferir 100 da carteira para banco"_ - Transferência
 • _"paguei 500 da fatura do nubank"_ - Pagar fatura
 • _"qual valor da fatura?"_ - Consultar valor da fatura

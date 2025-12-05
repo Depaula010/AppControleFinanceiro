@@ -6,6 +6,7 @@ from sqlalchemy import text
 from datetime import date
 from calendar import monthrange
 from app.utils import formatar_moeda
+from rapidfuzz import fuzz, process
 
 class FixedBillsService:
     """Gerencia contas fixas e suas quitações"""
@@ -69,24 +70,27 @@ class FixedBillsService:
         return pendentes
     
     @staticmethod
-    def find_matching_bill(conn, usuario_id, descricao_pagamento):
+    def find_matching_bill(conn, usuario_id, descricao_pagamento, threshold=65):
         """
-        Busca uma conta fixa que combine com a descrição do pagamento.
-        Usa fuzzy matching para encontrar correspondências.
-        
+        Busca uma conta fixa usando fuzzy matching.
+
         Args:
-            descricao_pagamento: Texto do pagamento (ex: "conta de água", "seguro carro")
-        
+            descricao_pagamento: Texto do pagamento (ex: "água", "net", "baba")
+            threshold: Score mínimo de similaridade (0-100, padrão 65)
+
         Returns:
-            (agendamento_id, descricao_original, valor_previsto) ou None
+            (agendamento_id, descricao_original, valor_previsto, dia_execucao,
+             tipo_agendamento, categoria, conta_id) ou None
         """
         # Buscar todas as contas fixas ativas do usuário
         sql = text("""
-            SELECT 
+            SELECT
                 a.id,
                 a.descricao,
                 a.valor_previsto,
                 a.dia_execucao,
+                a.tipo_agendamento,
+                a.conta_id,
                 s.nome_sub as categoria
             FROM Agendamentos a
             JOIN SubCategoria s ON a.subcategoria_id = s.id
@@ -94,37 +98,45 @@ class FixedBillsService:
               AND a.ativo = TRUE
               AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
         """)
-        
+
         bills = conn.execute(sql, {"uid": usuario_id}).fetchall()
-        
-        # Normalizar descrição do pagamento
-        desc_normalizada = descricao_pagamento.lower().strip()
-        
-        # Palavras-chave comuns
-        palavras_chave_map = {
-            'agua': ['água', 'agua', 'sabesp', 'copasa', 'saneamento'],
-            'luz': ['luz', 'energia', 'eletricidade', 'cemig', 'copel', 'eletropaulo'],
-            'internet': ['internet', 'net', 'wifi', 'fibra'],
-            'seguro': ['seguro', 'porto seguro', 'liberty', 'bradesco seguros'],
-            'condominio': ['condomínio', 'condominio', 'taxa condominial'],
-            'telefone': ['telefone', 'celular', 'vivo', 'claro', 'tim', 'oi'],
-            'gas': ['gás', 'gas', 'ultragaz', 'liquigás']
-        }
-        
-        # Tentar match exato ou parcial
-        for bill in bills:
-            desc_bill = bill.descricao.lower()
-            
-            # Match exato
-            if desc_bill in desc_normalizada or desc_normalizada in desc_bill:
-                return (bill.id, bill.descricao, bill.valor_previsto, bill.dia_execucao, bill.categoria)
-            
-            # Match por palavras-chave
-            for palavra_chave, sinonimos in palavras_chave_map.items():
-                if any(sin in desc_normalizada for sin in sinonimos):
-                    if any(sin in desc_bill for sin in sinonimos):
-                        return (bill.id, bill.descricao, bill.valor_previsto, bill.dia_execucao, bill.categoria)
-        
+
+        if not bills:
+            return None
+
+        # Limpar descrição de pagamento (remover artigos)
+        desc_limpa = descricao_pagamento.lower().strip()
+        artigos = ['a ', 'o ', 'da ', 'do ', 'de ', 'conta de ', 'conta ']
+        for artigo in artigos:
+            if desc_limpa.startswith(artigo):
+                desc_limpa = desc_limpa[len(artigo):].strip()
+
+        # Criar dicionário de descrições para busca
+        descricoes = {bill.descricao: bill for bill in bills}
+
+        # Fuzzy matching com WRatio (melhor para strings curtas)
+        result = process.extractOne(
+            desc_limpa,
+            descricoes.keys(),
+            scorer=fuzz.WRatio,  # Melhor que token_sort_ratio para casos como "net"
+            score_cutoff=threshold
+        )
+
+        if result:
+            melhor_match, score, _ = result
+            bill = descricoes[melhor_match]
+            print(f"[FUZZY-MATCH] '{descricao_pagamento}' → '{melhor_match}' (score: {score})")
+
+            return (
+                bill.id,               # agendamento_id
+                bill.descricao,        # descricao_original
+                bill.valor_previsto,   # valor_previsto
+                bill.dia_execucao,     # dia_execucao
+                bill.tipo_agendamento, # tipo_agendamento (FIXO/LEMBRETE_VARIAVEL)
+                bill.categoria,        # categoria
+                bill.conta_id          # **IMPORTANTE**: conta_id para debitar
+            )
+
         return None
     
     @staticmethod
