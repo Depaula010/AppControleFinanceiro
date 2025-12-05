@@ -30,8 +30,8 @@ USUARIO_ID = 1  # ALTERE AQUI!
 
 # 2. Suas chaves de API (deixe None se não tiver)
 GEMINI_KEY = "AIzaSyCvikcL8QqwsatLNeRGV9urH-jj2tSPCA0"  # Exemplo: "AIzaSyABCD1234567890XYZ"
-WEATHER_KEY = "962aa441abd24e82bb4191942252211"  # Exemplo: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
-OPENROUTE_KEY = "5b3ce3597851110001cf6248e80a7618a4384a46a7d9b194a6f8bf23"  # Exemplo: "5b3ce3597851110001cf6248a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8"
+WEATHER_KEY = None  # Exemplo: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
+OPENROUTE_KEY = None  # Exemplo: "5b3ce3597851110001cf6248a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8"
 
 # ============================================================================
 # VALIDAÇÕES E FUNÇÕES AUXILIARES
