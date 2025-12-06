@@ -1293,3 +1293,163 @@ def format_vencimentos_message(vencimentos, periodo, data_referencia):
     msg += f"*Total:* {formatar_moeda(valor_total)}"
 
     return msg
+
+
+# --- Funções para Detecção de Conta Mencionada e Contas Padrão ---
+
+def extract_mentioned_account(conn, usuario_id, texto_msg):
+    """
+    Detecta se o usuário mencionou uma conta na mensagem usando fuzzy matching.
+
+    Procura por padrões: "com o X", "com a X", "usando X", "pelo X", "pela X", "no X", "na X"
+
+    Args:
+        conn: Conexão do banco de dados
+        usuario_id: ID do usuário
+        texto_msg: Texto da mensagem do WhatsApp
+
+    Returns:
+        (conta_id, nome_conta, tipo_conta) ou None se não encontrar
+    """
+    from rapidfuzz import fuzz, process
+
+    # Palavras-chave que indicam menção de conta
+    palavras_chave = [
+        'com o ', 'com a ', 'usando o ', 'usando a ', 'usando ',
+        'pelo ', 'pela ', 'no ', 'na ', 'do ', 'da ',
+        'paguei com ', 'gastei com ', 'recebi com ', 'entrou no ', 'caiu no '
+    ]
+
+    texto_lower = texto_msg.lower()
+
+    # Tentar extrair nome da conta após palavra-chave
+    conta_mencionada = None
+    for palavra in palavras_chave:
+        if palavra in texto_lower:
+            # Pegar texto após a palavra-chave
+            idx = texto_lower.find(palavra)
+            resto = texto_lower[idx + len(palavra):].strip()
+
+            # Pegar primeiras palavras (até 4) como possível nome da conta
+            palavras = resto.split()[:4]
+            conta_mencionada = ' '.join(palavras)
+            break
+
+    if not conta_mencionada:
+        return None
+
+    # Buscar contas do usuário
+    sql = text("SELECT id, nome_conta, tipo_conta FROM Contas WHERE usuario_id = :uid")
+    contas = conn.execute(sql, {"uid": usuario_id}).fetchall()
+
+    if not contas:
+        return None
+
+    # Fuzzy matching com nomes das contas
+    nomes_contas = {c.nome_conta: c for c in contas}
+
+    result = process.extractOne(
+        conta_mencionada,
+        nomes_contas.keys(),
+        scorer=fuzz.WRatio,
+        score_cutoff=60  # Threshold um pouco mais baixo para nomes de conta
+    )
+
+    if result:
+        melhor_match, score, _ = result
+        conta = nomes_contas[melhor_match]
+        print(f"[CONTA-MENCIONADA] '{conta_mencionada}' → '{melhor_match}' (score: {score})")
+        return (conta.id, conta.nome_conta, conta.tipo_conta)
+
+    return None
+
+
+def get_user_default_accounts(conn, usuario_id):
+    """
+    Retorna as contas padrão configuradas pelo usuário.
+
+    Returns:
+        (conta_renda_id, conta_despesa_id) ou (None, None) se não configurado
+    """
+    sql = text("""
+        SELECT conta_padrao_renda_id, conta_padrao_despesa_id
+        FROM Usuarios
+        WHERE id = :uid
+    """)
+    result = conn.execute(sql, {"uid": usuario_id}).fetchone()
+
+    if result:
+        return (result.conta_padrao_renda_id, result.conta_padrao_despesa_id)
+    return (None, None)
+
+
+def set_user_default_account(conn, usuario_id, tipo, conta_id):
+    """
+    Configura a conta padrão do usuário.
+
+    Args:
+        tipo: 'renda' ou 'despesa'
+        conta_id: ID da conta a ser configurada como padrão
+    """
+    if tipo == 'renda':
+        sql = text("UPDATE Usuarios SET conta_padrao_renda_id = :cid WHERE id = :uid")
+    elif tipo == 'despesa':
+        sql = text("UPDATE Usuarios SET conta_padrao_despesa_id = :cid WHERE id = :uid")
+    else:
+        raise ValueError("Tipo deve ser 'renda' ou 'despesa'")
+
+    conn.execute(sql, {"uid": usuario_id, "cid": conta_id})
+
+
+def choose_account_for_transaction(conn, usuario_id, texto_msg, tipo_transacao):
+    """
+    Escolhe a conta para uma transação seguindo ordem de prioridade:
+    1. Conta mencionada na mensagem (fuzzy matching)
+    2. Conta padrão configurada pelo usuário
+    3. Fallback: primeira conta disponível
+
+    Args:
+        conn: Conexão do banco
+        usuario_id: ID do usuário
+        texto_msg: Mensagem do WhatsApp
+        tipo_transacao: 'Renda' ou 'Despesa'
+
+    Returns:
+        (conta_id, conta_nome, conta_tipo, origem)
+        origem: 'mencionada' | 'padrao' | 'fallback'
+    """
+    # 1. Verificar se mencionou conta na mensagem
+    conta_mencionada = extract_mentioned_account(conn, usuario_id, texto_msg)
+    if conta_mencionada:
+        conta_id, nome, tipo = conta_mencionada
+        print(f"[ESCOLHA-CONTA] Usando conta MENCIONADA: {nome}")
+        return (conta_id, nome, tipo, 'mencionada')
+
+    # 2. Verificar conta padrão configurada
+    conta_renda_id, conta_despesa_id = get_user_default_accounts(conn, usuario_id)
+
+    if tipo_transacao == 'Renda' and conta_renda_id:
+        # Buscar detalhes da conta padrão de renda
+        sql = text("SELECT id, nome_conta, tipo_conta FROM Contas WHERE id = :cid AND usuario_id = :uid")
+        conta = conn.execute(sql, {"cid": conta_renda_id, "uid": usuario_id}).fetchone()
+        if conta:
+            print(f"[ESCOLHA-CONTA] Usando conta padrão RENDA: {conta.nome_conta}")
+            return (conta.id, conta.nome_conta, conta.tipo_conta, 'padrao')
+
+    if tipo_transacao == 'Despesa' and conta_despesa_id:
+        # Buscar detalhes da conta padrão de despesa
+        sql = text("SELECT id, nome_conta, tipo_conta FROM Contas WHERE id = :cid AND usuario_id = :uid")
+        conta = conn.execute(sql, {"cid": conta_despesa_id, "uid": usuario_id}).fetchone()
+        if conta:
+            print(f"[ESCOLHA-CONTA] Usando conta padrão DESPESA: {conta.nome_conta}")
+            return (conta.id, conta.nome_conta, conta.tipo_conta, 'padrao')
+
+    # 3. Fallback: primeira conta disponível
+    sql = text("SELECT id, nome_conta, tipo_conta FROM Contas WHERE usuario_id = :uid LIMIT 1")
+    conta = conn.execute(sql, {"uid": usuario_id}).fetchone()
+    if conta:
+        print(f"[ESCOLHA-CONTA] Usando conta FALLBACK: {conta.nome_conta}")
+        return (conta.id, conta.nome_conta, conta.tipo_conta, 'fallback')
+
+    # Sem contas disponíveis
+    return (None, None, None, None)
