@@ -1305,6 +1305,15 @@ def handle_whatsapp_webhook():
                             # Categorizar
                             cats_list = finance_service.get_user_categories(conn, usuario_id, 'Despesa')
                             id_outros = finance_service.get_fallback_category_id(conn, 'Despesa')
+
+                            if not id_outros:
+                                print(f"[PROCESSAR-PAGAMENTO] ERRO: Categoria fallback 'Outros' não encontrada no banco de dados!")
+                                itens_sem_valor.append({
+                                    'nome': item_desc,
+                                    'tipo': 'erro_categoria'
+                                })
+                                continue
+
                             id_categoria = gemini_service.categorize_transaction(
                                 cats_list, item_desc, 'Despesa', id_outros, usuario_id
                             )
