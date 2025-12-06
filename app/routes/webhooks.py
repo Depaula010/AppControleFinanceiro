@@ -1303,8 +1303,12 @@ def handle_whatsapp_webhook():
                         # Criar despesa avulsa
                         try:
                             # Categorizar
+                            print(f"[PROCESSAR-PAGAMENTO] DEBUG: Iniciando criação de despesa '{item_desc}' com valor {valor_despesa}")
                             cats_list = finance_service.get_user_categories(conn, usuario_id, 'Despesa')
+                            print(f"[PROCESSAR-PAGAMENTO] DEBUG: Categorias obtidas: {len(cats_list)} categorias")
+
                             id_outros = finance_service.get_fallback_category_id(conn, 'Despesa')
+                            print(f"[PROCESSAR-PAGAMENTO] DEBUG: Categoria fallback 'Outros' ID: {id_outros}")
 
                             if not id_outros:
                                 print(f"[PROCESSAR-PAGAMENTO] ERRO: Categoria fallback 'Outros' não encontrada no banco de dados!")
@@ -1317,16 +1321,29 @@ def handle_whatsapp_webhook():
                             id_categoria = gemini_service.categorize_transaction(
                                 cats_list, item_desc, 'Despesa', id_outros, usuario_id
                             )
+                            print(f"[PROCESSAR-PAGAMENTO] DEBUG: Categoria selecionada ID: {id_categoria}")
 
                             # Conta padrão: Carteira
                             conta_id = finance_service.get_account_by_name(conn, usuario_id, 'Carteira', fallback=True)
+                            print(f"[PROCESSAR-PAGAMENTO] DEBUG: Conta ID: {conta_id}")
+
+                            if not conta_id:
+                                print(f"[PROCESSAR-PAGAMENTO] ERRO: Nenhuma conta encontrada para o usuário!")
+                                itens_sem_valor.append({
+                                    'nome': item_desc,
+                                    'tipo': 'erro_conta'
+                                })
+                                continue
 
                             # Criar transação
                             valor_negativo = float(valor_despesa) * -1
+                            print(f"[PROCESSAR-PAGAMENTO] DEBUG: Criando transação - Valor: {valor_negativo}, Categoria: {id_categoria}, Conta: {conta_id}")
+
                             transaction_id = finance_service.create_transaction(
                                 conn, usuario_id, conta_id, id_categoria, None,
                                 item_desc, valor_negativo, 'Despesa', date.today()
                             )
+                            print(f"[PROCESSAR-PAGAMENTO] DEBUG: Transação criada com ID: {transaction_id}")
 
                             # Buscar nome da categoria
                             categoria_nome = next((c[1] for c in cats_list if c[0] == id_categoria), 'Outros')
@@ -1337,9 +1354,15 @@ def handle_whatsapp_webhook():
                                 'categoria': categoria_nome,
                                 'transaction_id': transaction_id
                             })
+                            print(f"[PROCESSAR-PAGAMENTO] ✅ Despesa '{item_desc}' criada com sucesso!")
 
                         except Exception as e:
-                            print(f"[PROCESSAR-PAGAMENTO] Erro ao criar despesa {item_desc}: {e}")
+                            import traceback
+                            print(f"[PROCESSAR-PAGAMENTO] ❌ ERRO ao criar despesa {item_desc}:")
+                            print(f"[PROCESSAR-PAGAMENTO] Tipo do erro: {type(e).__name__}")
+                            print(f"[PROCESSAR-PAGAMENTO] Mensagem: {str(e)}")
+                            print(f"[PROCESSAR-PAGAMENTO] Traceback:")
+                            traceback.print_exc()
 
                 conn.commit()
 
