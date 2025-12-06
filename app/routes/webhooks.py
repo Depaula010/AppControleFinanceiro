@@ -791,26 +791,84 @@ def handle_whatsapp_webhook():
         with db_engine.connect() as conn:
             conn.begin()
 
-            # Fluxo de Renda com CONFIRMAÇÃO
+            # ===== HANDLER 1: Renda com CONFIRMAÇÃO =====
             if intent == 'Renda':
                 trans_data = gemini_service.extract_transaction_details(texto_msg, intent, usuario_id)
                 trans_desc = trans_data.get('descricao_bruta')
                 valor_dec = float(trans_data.get('valor_decimal', 0))
 
-                # Detectar parcelamento (apenas para despesas)
+                cats_list = finance_service.get_user_categories(conn, usuario_id, intent)
+                id_outros = finance_service.get_fallback_category_id(conn, intent)
+                id_categoria = gemini_service.categorize_transaction(cats_list, trans_desc, intent, id_outros, usuario_id)
+
+                # Conta padrão para renda
+                conta_nome = 'Banco Inter'
+                conta_id = finance_service.get_account_by_name(conn, usuario_id, conta_nome, fallback=True)
+                contas_usuario = finance_service.get_user_accounts(conn, usuario_id)
+                conta_info = next((c for c in contas_usuario if c[0] == conta_id), None)
+                if conta_info:
+                    conta_nome = conta_info[1]
+                    conta_tipo = conta_info[2]
+                else:
+                    conta_tipo = 'Conta Corrente'
+
+                valor_db = valor_dec
+
+                # Criar pendente
+                transacao_data = {
+                    'usuario_id': usuario_id,
+                    'conta_id': conta_id,
+                    'conta_nome': conta_nome,
+                    'conta_tipo': conta_tipo,
+                    'categoria_id': id_categoria,
+                    'fatura_id': None,
+                    'descricao': trans_desc,
+                    'valor_db': valor_db,
+                    'valor_original': valor_dec,
+                    'valor_total': None,
+                    'num_parcelas': None,
+                    'tipo_transacao': intent,
+                    'tipo_pagamento': 'debito',
+                    'data_transacao': str(data_hoje),
+                    'origem': 'whatsapp'
+                }
+
+                if redis_service.is_connected():
+                    tx_id = TransactionConfirmationService.create_pending_transaction(numero_limpo, transacao_data)
+                    redis_service.set_with_ttl(f"last_pending:{numero_limpo}", tx_id, 300)
+                    msg_confirm = TransactionConfirmationService.format_confirmation_message(
+                        transacao_data, cats_list, tx_id
+                    )
+                    return jsonify({"status": "sucesso", "resposta": msg_confirm}), 200
+                else:
+                    # Fallback sem Redis
+                    finance_service.create_transaction(
+                        conn, usuario_id, conta_id, id_categoria, None,
+                        trans_desc, valor_db, intent, data_hoje
+                    )
+                    conn.commit()
+                    nome_cat = finance_service.get_category_name_by_id(conn, id_categoria)
+                    resp = f"✅ {intent} salva!\n{trans_desc}\n{formatar_moeda(valor_dec)}\n{nome_cat}"
+                    return jsonify({"status": "sucesso", "resposta": resp}), 200
+
+            # ===== HANDLER 2: Despesa com CONFIRMAÇÃO =====
+            elif intent == 'Despesa':
+                trans_data = gemini_service.extract_transaction_details(texto_msg, intent, usuario_id)
+                trans_desc = trans_data.get('descricao_bruta')
+                valor_dec = float(trans_data.get('valor_decimal', 0))
+
+                # Detectar parcelamento
                 parcelamento_info = None
                 num_parcelas = None
                 valor_parcela = valor_dec
 
-                if intent == 'Despesa':
-                    parcelamento_info = gemini_service.extract_parcelamento_info(texto_msg, usuario_id)
-                    if parcelamento_info.get('parcelado'):
-                        num_parcelas = parcelamento_info.get('num_parcelas')
-                        if num_parcelas and num_parcelas > 1:
-                            valor_parcela = valor_dec / num_parcelas
-                            # Usar descrição limpa (sem info de parcelamento)
-                            trans_desc = parcelamento_info.get('descricao_limpa', trans_desc)
-                            print(f"[PARCELAMENTO] Detectado: {num_parcelas}x de {valor_parcela:.2f}")
+                parcelamento_info = gemini_service.extract_parcelamento_info(texto_msg, usuario_id)
+                if parcelamento_info.get('parcelado'):
+                    num_parcelas = parcelamento_info.get('num_parcelas')
+                    if num_parcelas and num_parcelas > 1:
+                        valor_parcela = valor_dec / num_parcelas
+                        trans_desc = parcelamento_info.get('descricao_limpa', trans_desc)
+                        print(f"[PARCELAMENTO] Detectado: {num_parcelas}x de {valor_parcela:.2f}")
 
                 cats_list = finance_service.get_user_categories(conn, usuario_id, intent)
                 id_outros = finance_service.get_fallback_category_id(conn, intent)
@@ -820,45 +878,20 @@ def handle_whatsapp_webhook():
                 fatura_id = None
                 conta_nome = None
                 conta_tipo = None
+                palavras_cartao = ['cartão', 'cartao', 'crédito', 'credito', 'card']
+                menciona_cartao = any(palavra in texto_msg.lower() for palavra in palavras_cartao)
 
-                if intent == 'Renda':
-                    conta_nome = 'Banco Inter'
-                    conta_id = finance_service.get_account_by_name(conn, usuario_id, conta_nome, fallback=True)
-                    # Buscar tipo da conta
+                if menciona_cartao:
                     contas_usuario = finance_service.get_user_accounts(conn, usuario_id)
-                    conta_info = next((c for c in contas_usuario if c[0] == conta_id), None)
-                    if conta_info:
-                        conta_nome = conta_info[1]
-                        conta_tipo = conta_info[2]
-                else:  # Despesa
-                    # Verificar se mencionou cartão
-                    palavras_cartao = ['cartão', 'cartao', 'crédito', 'credito', 'card']
-                    menciona_cartao = any(palavra in texto_msg.lower() for palavra in palavras_cartao)
+                    conta_cartao = next((c for c in contas_usuario if c[2] == 'Cartão de Crédito'), None)
 
-                    if menciona_cartao:
-                        # Buscar primeiro cartão de crédito do usuário
-                        contas_usuario = finance_service.get_user_accounts(conn, usuario_id)
-                        conta_cartao = next((c for c in contas_usuario if c[2] == 'Cartão de Crédito'), None)
-
-                        if conta_cartao:
-                            conta_id = conta_cartao[0]
-                            conta_nome = conta_cartao[1]
-                            conta_tipo = conta_cartao[2]
-                            # Não criar fatura agora - será criada quando confirmar
-                            # Apenas marcamos que precisa criar
-                            fatura_id = 'PENDING'  # Marcador especial
-                            print(f"[WHATSAPP-DESPESA] Cartão detectado: {conta_nome}, fatura será criada após confirmação")
-                        else:
-                            # Não tem cartão, usar carteira
-                            conta_nome = 'Carteira'
-                            conta_id = finance_service.get_account_by_name(conn, usuario_id, conta_nome, fallback=True)
-                            contas_usuario = finance_service.get_user_accounts(conn, usuario_id)
-                            conta_info = next((c for c in contas_usuario if c[0] == conta_id), None)
-                            if conta_info:
-                                conta_nome = conta_info[1]
-                                conta_tipo = conta_info[2]
+                    if conta_cartao:
+                        conta_id = conta_cartao[0]
+                        conta_nome = conta_cartao[1]
+                        conta_tipo = conta_cartao[2]
+                        fatura_id = 'PENDING'
+                        print(f"[WHATSAPP-DESPESA] Cartão detectado: {conta_nome}, fatura será criada após confirmação")
                     else:
-                        # Não mencionou cartão, usar carteira
                         conta_nome = 'Carteira'
                         conta_id = finance_service.get_account_by_name(conn, usuario_id, conta_nome, fallback=True)
                         contas_usuario = finance_service.get_user_accounts(conn, usuario_id)
@@ -866,12 +899,24 @@ def handle_whatsapp_webhook():
                         if conta_info:
                             conta_nome = conta_info[1]
                             conta_tipo = conta_info[2]
-
-                # Para parcelamento, o valor_db é o valor da parcela (não o total)
-                if num_parcelas and num_parcelas > 1:
-                    valor_db = (valor_parcela * -1) if intent == 'Despesa' else valor_parcela
+                        else:
+                            conta_tipo = 'Carteira'
                 else:
-                    valor_db = (valor_dec * -1) if intent == 'Despesa' else valor_dec
+                    conta_nome = 'Carteira'
+                    conta_id = finance_service.get_account_by_name(conn, usuario_id, conta_nome, fallback=True)
+                    contas_usuario = finance_service.get_user_accounts(conn, usuario_id)
+                    conta_info = next((c for c in contas_usuario if c[0] == conta_id), None)
+                    if conta_info:
+                        conta_nome = conta_info[1]
+                        conta_tipo = conta_info[2]
+                    else:
+                        conta_tipo = 'Carteira'
+
+                # Para parcelamento, o valor_db é o valor da parcela
+                if num_parcelas and num_parcelas > 1:
+                    valor_db = valor_parcela * -1
+                else:
+                    valor_db = valor_dec * -1
 
                 # Criar pendente
                 transacao_data = {
@@ -891,13 +936,10 @@ def handle_whatsapp_webhook():
                     'data_transacao': str(data_hoje),
                     'origem': 'whatsapp'
                 }
-                
+
                 if redis_service.is_connected():
                     tx_id = TransactionConfirmationService.create_pending_transaction(numero_limpo, transacao_data)
-                    
-                    # Salvar como "última pendente"
                     redis_service.set_with_ttl(f"last_pending:{numero_limpo}", tx_id, 300)
-                    
                     msg_confirm = TransactionConfirmationService.format_confirmation_message(
                         transacao_data, cats_list, tx_id
                     )
@@ -1200,9 +1242,9 @@ def handle_whatsapp_webhook():
                     resposta_para_usuario = "❌ Erro ao consultar vencimentos da semana."
                     return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
-            # ===== HANDLER UNIFICADO: PROCESSAR PAGAMENTO =====
-            # Substituindo "Despesa" e "Quitar Conta Fixa" por lógica única
-            elif intent in ['Despesa', 'Quitar Conta Fixa'] or any(word in texto_msg.lower() for word in ['paguei', 'gastei', 'quitei', 'comprei']):
+            # ===== HANDLER 3: PROCESSAR PAGAMENTO (apenas keywords) =====
+            # Handler para "paguei" e "quitei" - verifica banco primeiro (fuzzy matching)
+            elif any(word in texto_msg.lower() for word in ['paguei', 'quitei']):
                 # PASSO 1: Extrair itens e valores (SEM classificar)
                 payment_data = gemini_service.extract_payment_items(texto_msg, usuario_id)
                 itens_lista = payment_data.get('itens', [])
