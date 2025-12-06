@@ -1346,7 +1346,7 @@ def handle_whatsapp_webhook():
                             print(f"[PROCESSAR-PAGAMENTO] DEBUG: Transação criada com ID: {transaction_id}")
 
                             # Buscar nome da categoria
-                            categoria_nome = next((c[1] for c in cats_list if c[0] == id_categoria), 'Outros')
+                            categoria_nome = next((c['nome_sub'] for c in cats_list if c['id'] == id_categoria), 'Outros')
 
                             despesas_criadas.append({
                                 'descricao': item_desc,
