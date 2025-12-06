@@ -801,16 +801,10 @@ def handle_whatsapp_webhook():
                 id_outros = finance_service.get_fallback_category_id(conn, intent)
                 id_categoria = gemini_service.categorize_transaction(cats_list, trans_desc, intent, id_outros, usuario_id)
 
-                # Conta padrão para renda
-                conta_nome = 'Banco Inter'
-                conta_id = finance_service.get_account_by_name(conn, usuario_id, conta_nome, fallback=True)
-                contas_usuario = finance_service.get_user_accounts(conn, usuario_id)
-                conta_info = next((c for c in contas_usuario if c[0] == conta_id), None)
-                if conta_info:
-                    conta_nome = conta_info[1]
-                    conta_tipo = conta_info[2]
-                else:
-                    conta_tipo = 'Conta Corrente'
+                # Escolher conta usando função centralizada (fuzzy matching + conta padrão do usuário)
+                conta_id, conta_nome, conta_tipo, origem = finance_service.choose_account_for_transaction(
+                    conn, usuario_id, texto_msg, intent
+                )
 
                 valor_db = valor_dec
 
@@ -874,43 +868,13 @@ def handle_whatsapp_webhook():
                 id_outros = finance_service.get_fallback_category_id(conn, intent)
                 id_categoria = gemini_service.categorize_transaction(cats_list, trans_desc, intent, id_outros, usuario_id)
 
-                # Detectar se mencionou cartão de crédito
-                fatura_id = None
-                conta_nome = None
-                conta_tipo = None
-                palavras_cartao = ['cartão', 'cartao', 'crédito', 'credito', 'card']
-                menciona_cartao = any(palavra in texto_msg.lower() for palavra in palavras_cartao)
+                # Escolher conta usando função centralizada (fuzzy matching + conta padrão do usuário)
+                conta_id, conta_nome, conta_tipo, origem = finance_service.choose_account_for_transaction(
+                    conn, usuario_id, texto_msg, intent
+                )
 
-                if menciona_cartao:
-                    contas_usuario = finance_service.get_user_accounts(conn, usuario_id)
-                    conta_cartao = next((c for c in contas_usuario if c[2] == 'Cartão de Crédito'), None)
-
-                    if conta_cartao:
-                        conta_id = conta_cartao[0]
-                        conta_nome = conta_cartao[1]
-                        conta_tipo = conta_cartao[2]
-                        fatura_id = 'PENDING'
-                        print(f"[WHATSAPP-DESPESA] Cartão detectado: {conta_nome}, fatura será criada após confirmação")
-                    else:
-                        conta_nome = 'Carteira'
-                        conta_id = finance_service.get_account_by_name(conn, usuario_id, conta_nome, fallback=True)
-                        contas_usuario = finance_service.get_user_accounts(conn, usuario_id)
-                        conta_info = next((c for c in contas_usuario if c[0] == conta_id), None)
-                        if conta_info:
-                            conta_nome = conta_info[1]
-                            conta_tipo = conta_info[2]
-                        else:
-                            conta_tipo = 'Carteira'
-                else:
-                    conta_nome = 'Carteira'
-                    conta_id = finance_service.get_account_by_name(conn, usuario_id, conta_nome, fallback=True)
-                    contas_usuario = finance_service.get_user_accounts(conn, usuario_id)
-                    conta_info = next((c for c in contas_usuario if c[0] == conta_id), None)
-                    if conta_info:
-                        conta_nome = conta_info[1]
-                        conta_tipo = conta_info[2]
-                    else:
-                        conta_tipo = 'Carteira'
+                # Se for cartão de crédito, marcar para criar fatura
+                fatura_id = 'PENDING' if conta_tipo == 'Cartão de Crédito' else None
 
                 # Para parcelamento, o valor_db é o valor da parcela
                 if num_parcelas and num_parcelas > 1:
