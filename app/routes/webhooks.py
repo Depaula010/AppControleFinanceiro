@@ -791,8 +791,8 @@ def handle_whatsapp_webhook():
         with db_engine.connect() as conn:
             conn.begin()
 
-            # Fluxo de Renda/Despesa com CONFIRMAÇÃO
-            if intent == 'Renda' or intent == 'Despesa':
+            # Fluxo de Renda com CONFIRMAÇÃO
+            if intent == 'Renda':
                 trans_data = gemini_service.extract_transaction_details(texto_msg, intent, usuario_id)
                 trans_desc = trans_data.get('descricao_bruta')
                 valor_dec = float(trans_data.get('valor_decimal', 0))
