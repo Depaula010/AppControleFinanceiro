@@ -218,6 +218,17 @@ def generate_line_chart(usuario_id, num_months=6):
             # Busca saldo por dia
             data_inicio = datetime.now().date() - timedelta(days=num_months * 30)
 
+            # Primeiro: buscar saldo inicial total de todas as contas
+            sql_saldo_inicial = text("""
+                SELECT COALESCE(SUM(saldo_inicial), 0) as saldo_inicial_total
+                FROM Contas
+                WHERE usuario_id = :uid
+            """)
+
+            saldo_inicial_total = conn.execute(sql_saldo_inicial, {"uid": usuario_id}).scalar()
+            saldo_inicial_total = float(saldo_inicial_total or 0)
+
+            # Segundo: buscar transações acumuladas
             sql = text("""
                 SELECT
                     data_transacao,
@@ -237,9 +248,9 @@ def generate_line_chart(usuario_id, num_months=6):
             if not result or len(result) == 0:
                 return None
 
-            # Preparar dados
+            # Preparar dados (somando saldo_inicial ao acumulado)
             datas = [row.data_transacao for row in result]
-            saldos = [float(row.saldo_acumulado) for row in result]
+            saldos = [saldo_inicial_total + float(row.saldo_acumulado) for row in result]
 
             # Criar gráfico
             fig, ax = plt.subplots(figsize=(12, 7))

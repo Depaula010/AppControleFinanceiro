@@ -566,6 +566,34 @@ def get_saldo_contas(conn, usuario_id, conta_id=None):
 
     return contas
 
+def update_saldo_inicial(conn, usuario_id, conta_id, novo_saldo_inicial):
+    """
+    Atualiza o saldo_inicial de uma conta.
+
+    Args:
+        conn: Conexão com o banco
+        usuario_id: ID do usuário
+        conta_id: ID da conta
+        novo_saldo_inicial: Novo valor do saldo inicial
+
+    Returns:
+        bool: True se atualizou com sucesso
+    """
+    sql = text("""
+        UPDATE Contas
+        SET saldo_inicial = :novo_saldo
+        WHERE id = :cid AND usuario_id = :uid
+    """)
+
+    result = conn.execute(sql, {
+        "novo_saldo": novo_saldo_inicial,
+        "cid": conta_id,
+        "uid": usuario_id
+    })
+
+    conn.commit()
+    return result.rowcount > 0
+
 def create_parcelamento_agendamento(conn, usuario_id, conta_id, categoria_id, descricao, valor_parcela, num_parcelas, data_primeira_parcela):
     """
     Cria agendamentos para as parcelas futuras de uma compra parcelada.

@@ -993,6 +993,52 @@ def handle_whatsapp_webhook():
 
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
+            # ===== INTENÇÃO: Ajustar Saldo Inicial =====
+            elif intent == 'Ajustar Saldo Inicial':
+                import re
+
+                # Extrair valor da mensagem
+                match_valor = re.search(r'(\d+(?:[.,]\d+)?)', texto_msg.replace('.', '').replace(',', '.'))
+                if not match_valor:
+                    resposta_para_usuario = "🤔 Não consegui identificar o valor. Exemplo: 'ajustar saldo inicial Banco Inter 5000'"
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                valor = float(match_valor.group(1))
+
+                # Tentar identificar a conta na mensagem
+                contas_raw = finance_service.get_user_accounts(conn, usuario_id)
+                conta_encontrada = None
+
+                for conta in contas_raw:
+                    conta_id, nome_conta, tipo_conta = conta[0], conta[1], conta[2]
+                    # Busca case-insensitive
+                    if nome_conta.lower() in texto_msg.lower():
+                        conta_encontrada = (conta_id, nome_conta, tipo_conta)
+                        break
+
+                if not conta_encontrada:
+                    resposta_para_usuario = "🤔 Não consegui identificar qual conta. Contas disponíveis:\n\n"
+                    for conta in contas_raw:
+                        resposta_para_usuario += f"• {conta[1]}\n"
+                    resposta_para_usuario += "\nTente: 'ajustar saldo inicial [nome da conta] [valor]'"
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                conta_id, nome_conta, tipo_conta = conta_encontrada
+
+                # Atualizar saldo inicial
+                sucesso = finance_service.update_saldo_inicial(conn, usuario_id, conta_id, valor)
+
+                if sucesso:
+                    icone = "💳" if tipo_conta == "Cartão de Crédito" else "🏦" if tipo_conta == "Conta Corrente" else "💰"
+                    resposta_para_usuario = f"✅ *SALDO INICIAL ATUALIZADO* ✅\n\n"
+                    resposta_para_usuario += f"{icone} *{nome_conta}*\n"
+                    resposta_para_usuario += f"💵 Novo saldo inicial: *{formatar_moeda(valor)}*\n\n"
+                    resposta_para_usuario += f"_O saldo atual já reflete esta mudança._"
+                else:
+                    resposta_para_usuario = "❌ Erro ao atualizar o saldo inicial. Tente novamente."
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
             # ===== INTENÇÃO: Consulta por Período =====
             elif intent == 'Consulta Período':
 
@@ -1181,12 +1227,25 @@ def handle_whatsapp_webhook():
                         agendamento_id, desc_original, valor_previsto, dia_venc, tipo_agend, categoria, conta_id_agendamento = match
 
                         # Determinar valor a usar
-                        if valor_total and len(itens_lista) == 1:
-                            # UMA conta + valor informado → usar valor informado
-                            valor_pagar = valor_total
+                        if tipo_agend == 'LEMBRETE_VARIAVEL':
+                            # LEMBRETE VARIÁVEL → sempre usar valor do usuário
+                            if valor_total and len(itens_lista) == 1:
+                                valor_pagar = valor_total
+                            else:
+                                # Se múltiplas contas ou sem valor, exige valor específico
+                                itens_sem_valor.append({
+                                    'nome': desc_original,
+                                    'tipo': 'lembrete_variavel'
+                                })
+                                continue
                         else:
-                            # Múltiplas contas OU sem valor → usar previsto
-                            valor_pagar = float(valor_previsto) if valor_previsto else None
+                            # CONTA FIXA (FIXO) → pode usar previsto
+                            if valor_total and len(itens_lista) == 1:
+                                # UMA conta + valor informado → usar valor informado
+                                valor_pagar = valor_total
+                            else:
+                                # Múltiplas contas OU sem valor → usar previsto
+                                valor_pagar = float(valor_previsto) if valor_previsto else None
 
                         if valor_pagar is None or valor_pagar == 0:
                             itens_sem_valor.append({
@@ -1308,19 +1367,22 @@ def handle_whatsapp_webhook():
 
                         # Alerta para VARIAVEL
                         if c['tipo_agendamento'] == 'LEMBRETE_VARIAVEL':
-                            resposta_para_usuario += (
-                                f"\n⚠️ *Conta Variável:* Usei o valor previsto de {formatar_moeda(c['valor_previsto'])}.\n"
-                                f"Se o valor real foi diferente, me avise!"
-                            )
-
-                        # Alerta diferença de valor
-                        diferenca = abs(c['valor_previsto'] - c['valor'])
-                        if diferenca > 1:
-                            sinal = "+" if c['valor'] > c['valor_previsto'] else "-"
-                            resposta_para_usuario += (
-                                f"\n\n💡 Valor previsto era {formatar_moeda(c['valor_previsto'])} "
-                                f"({sinal}{formatar_moeda(diferenca)})"
-                            )
+                            diferenca = abs(c['valor_previsto'] - c['valor'])
+                            if diferenca > 1:
+                                resposta_para_usuario += (
+                                    f"\n📊 *Lembrete Variável*\n"
+                                    f"Valor previsto: {formatar_moeda(c['valor_previsto'])}\n"
+                                    f"Valor pago: {formatar_moeda(c['valor'])}"
+                                )
+                        else:
+                            # Conta FIXA - mostrar diferença se houver
+                            diferenca = abs(c['valor_previsto'] - c['valor'])
+                            if diferenca > 1:
+                                sinal = "+" if c['valor'] > c['valor_previsto'] else "-"
+                                resposta_para_usuario += (
+                                    f"\n💡 Valor previsto era {formatar_moeda(c['valor_previsto'])} "
+                                    f"({sinal}{formatar_moeda(diferenca)})"
+                                )
 
                     else:
                         # Múltiplas contas
