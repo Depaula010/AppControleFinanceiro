@@ -1243,8 +1243,8 @@ def handle_whatsapp_webhook():
                     return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
             # ===== HANDLER 3: PROCESSAR PAGAMENTO (apenas keywords) =====
-            # Handler para "paguei" e "quitei" - verifica banco primeiro (fuzzy matching)
-            elif any(word in texto_msg.lower() for word in ['paguei', 'quitei']):
+            # Handler para pagamentos - verifica banco primeiro (fuzzy matching)
+            elif any(word in texto_msg.lower() for word in ['paguei', 'quitei', 'liquidei', 'saldei', 'zerei']):
                 # PASSO 1: Extrair itens e valores (SEM classificar)
                 payment_data = gemini_service.extract_payment_items(texto_msg, usuario_id)
                 itens_lista = payment_data.get('itens', [])
