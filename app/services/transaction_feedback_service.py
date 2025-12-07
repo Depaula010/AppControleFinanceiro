@@ -183,13 +183,13 @@ def calcular_saldo_conta(conn, usuario_id, conta_id):
     sql = text("""
         SELECT
             c.nome_conta,
-            COALESCE(SUM(t.valor), 0) as saldo_disponivel
+            c.saldo_inicial + COALESCE(SUM(t.valor), 0) as saldo_disponivel
         FROM Contas c
         LEFT JOIN Transacoes t ON t.conta_id = c.id
             AND t.usuario_id = :uid
         WHERE c.id = :conta_id
             AND c.usuario_id = :uid
-        GROUP BY c.id, c.nome_conta
+        GROUP BY c.id, c.nome_conta, c.saldo_inicial
     """)
 
     result = conn.execute(sql, {
