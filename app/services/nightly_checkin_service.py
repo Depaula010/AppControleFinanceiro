@@ -69,6 +69,11 @@ class NightlyCheckinService:
               AND a.ativo = TRUE
               AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
               AND a.dia_execucao <= EXTRACT(DAY FROM :target_date)
+              -- Filtro para agendamentos anuais: incluir apenas se o mês bater
+              AND (
+                  a.periodicidade != 'ANUAL'
+                  OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = EXTRACT(MONTH FROM :target_date))
+              )
               -- Não foi pago este mês
               AND NOT EXISTS (
                   SELECT 1 FROM Transacoes t

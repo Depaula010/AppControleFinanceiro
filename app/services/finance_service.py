@@ -1131,14 +1131,22 @@ def get_vencimentos_periodo(conn, usuario_id, data_inicio, data_fim):
         # Buscar do início até fim do primeiro mês
         sql_contas_mes1 = text("""
             SELECT a.descricao, a.valor_previsto, a.dia_execucao,
-                   s.nome_sub as categoria, c.nome_conta
+                   a.periodicidade, a.mes_execucao,
+                   s.nome_sub as categoria, c.nome_conta, g.nome_grupo
             FROM Agendamentos a
             JOIN Contas c ON a.conta_id = c.id
             JOIN SubCategoria s ON a.subcategoria_id = s.id
+            JOIN MacroCategoria m ON s.macro_id = m.id
+            JOIN GrupoCategoria g ON m.grupo_id = g.id
             WHERE a.usuario_id = :uid
               AND a.ativo = TRUE
               AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
               AND a.dia_execucao >= :dia_inicio
+              -- Filtro para agendamentos anuais: incluir apenas se o mês bater
+              AND (
+                  a.periodicidade != 'ANUAL'
+                  OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = :mes_ref)
+              )
               AND NOT EXISTS (
                   SELECT 1 FROM Transacoes t
                   WHERE t.descricao = a.descricao
@@ -1158,14 +1166,22 @@ def get_vencimentos_periodo(conn, usuario_id, data_inicio, data_fim):
         # Buscar do início do mês seguinte até dia_fim
         sql_contas_mes2 = text("""
             SELECT a.descricao, a.valor_previsto, a.dia_execucao,
-                   s.nome_sub as categoria, c.nome_conta
+                   a.periodicidade, a.mes_execucao,
+                   s.nome_sub as categoria, c.nome_conta, g.nome_grupo
             FROM Agendamentos a
             JOIN Contas c ON a.conta_id = c.id
             JOIN SubCategoria s ON a.subcategoria_id = s.id
+            JOIN MacroCategoria m ON s.macro_id = m.id
+            JOIN GrupoCategoria g ON m.grupo_id = g.id
             WHERE a.usuario_id = :uid
               AND a.ativo = TRUE
               AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
               AND a.dia_execucao <= :dia_fim
+              -- Filtro para agendamentos anuais: incluir apenas se o mês bater
+              AND (
+                  a.periodicidade != 'ANUAL'
+                  OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = :mes_ref)
+              )
               AND NOT EXISTS (
                   SELECT 1 FROM Transacoes t
                   WHERE t.descricao = a.descricao
@@ -1187,14 +1203,22 @@ def get_vencimentos_periodo(conn, usuario_id, data_inicio, data_fim):
         # Mesmo mês, busca simples
         sql_contas = text("""
             SELECT a.descricao, a.valor_previsto, a.dia_execucao,
-                   s.nome_sub as categoria, c.nome_conta
+                   a.periodicidade, a.mes_execucao,
+                   s.nome_sub as categoria, c.nome_conta, g.nome_grupo
             FROM Agendamentos a
             JOIN Contas c ON a.conta_id = c.id
             JOIN SubCategoria s ON a.subcategoria_id = s.id
+            JOIN MacroCategoria m ON s.macro_id = m.id
+            JOIN GrupoCategoria g ON m.grupo_id = g.id
             WHERE a.usuario_id = :uid
               AND a.ativo = TRUE
               AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
               AND a.dia_execucao BETWEEN :dia_inicio AND :dia_fim
+              -- Filtro para agendamentos anuais: incluir apenas se o mês bater
+              AND (
+                  a.periodicidade != 'ANUAL'
+                  OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = :mes_ref)
+              )
               AND NOT EXISTS (
                   SELECT 1 FROM Transacoes t
                   WHERE t.descricao = a.descricao
@@ -1247,6 +1271,7 @@ def get_vencimentos_periodo(conn, usuario_id, data_inicio, data_fim):
 def format_vencimentos_message(vencimentos, periodo, data_referencia):
     """
     Formata mensagem de vencimentos para WhatsApp.
+    Separa receitas de despesas com subtotais.
 
     Args:
         vencimentos: Dict retornado por get_vencimentos_periodo()
@@ -1260,19 +1285,32 @@ def format_vencimentos_message(vencimentos, periodo, data_referencia):
 
     contas_fixas = vencimentos["contas_fixas"]
     faturas = vencimentos["faturas"]
-    valor_total = vencimentos["valor_total"]
 
     # Se não houver vencimentos
     if not contas_fixas and not faturas:
         return f"✅ Nenhuma conta vence {periodo.lower()}!"
 
+    # Separar contas fixas em receitas e despesas
+    receitas = [c for c in contas_fixas if c.nome_grupo == 'Renda']
+    despesas = [c for c in contas_fixas if c.nome_grupo != 'Renda']
+
     # Montar mensagem
     msg = f"📋 *CONTAS QUE VENCEM {periodo}* ({data_referencia.strftime('%d/%m')})\n\n"
 
-    # Contas Fixas
-    if contas_fixas:
-        msg += "*💰 Contas Fixas:*\n"
-        for conta in contas_fixas:
+    # Receitas Previstas
+    if receitas:
+        msg += "*💵 Receitas Previstas:*\n"
+        for conta in receitas:
+            descricao = conta.descricao
+            valor = formatar_moeda(conta.valor_previsto or 0)
+            dia = conta.dia_execucao
+            msg += f"• {descricao} - {valor} (dia {dia})\n"
+        msg += "\n"
+
+    # Despesas Fixas
+    if despesas:
+        msg += "*💰 Despesas Fixas:*\n"
+        for conta in despesas:
             descricao = conta.descricao
             valor = formatar_moeda(conta.valor_previsto or 0)
             dia = conta.dia_execucao
@@ -1289,8 +1327,24 @@ def format_vencimentos_message(vencimentos, periodo, data_referencia):
             msg += f"• {cartao} - {valor} (vence {data_venc})\n"
         msg += "\n"
 
-    # Total
-    msg += f"*Total:* {formatar_moeda(valor_total)}"
+    # Calcular subtotais
+    total_receitas = sum(c.valor_previsto or 0 for c in receitas)
+    total_despesas = sum(c.valor_previsto or 0 for c in despesas)
+    total_faturas = sum(f.valor_fatura or 0 for f in faturas)
+    saldo_previsto = total_receitas - total_despesas - total_faturas
+
+    # Totais com separação
+    if receitas or despesas or faturas:
+        if receitas:
+            msg += f"*Receitas:* {formatar_moeda(total_receitas)}\n"
+        if despesas:
+            msg += f"*Despesas:* {formatar_moeda(total_despesas)}\n"
+        if faturas:
+            msg += f"*Faturas:* {formatar_moeda(total_faturas)}\n"
+
+        # Mostrar saldo previsto apenas se houver receitas OU despesas+faturas
+        if receitas or despesas or faturas:
+            msg += f"*Saldo Previsto:* {formatar_moeda(saldo_previsto)}"
 
     return msg
 

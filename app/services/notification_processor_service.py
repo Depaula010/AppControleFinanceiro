@@ -211,7 +211,7 @@ class NotificationProcessorService:
                 # Buscar contas
                 with db_engine.connect() as conn:
                     sql_contas = text("""
-                        SELECT 
+                        SELECT
                             a.descricao,
                             a.valor_previsto,
                             a.dia_execucao,
@@ -222,6 +222,11 @@ class NotificationProcessorService:
                           AND a.ativo = TRUE
                           AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
                           AND a.dia_execucao = :dia_venc
+                          -- Filtro para agendamentos anuais: incluir apenas se o mês bater
+                          AND (
+                              a.periodicidade != 'ANUAL'
+                              OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = EXTRACT(MONTH FROM :data_alvo_full))
+                          )
                           AND NOT EXISTS (
                               SELECT 1 FROM Transacoes t
                               WHERE t.descricao = a.descricao
@@ -230,10 +235,11 @@ class NotificationProcessorService:
                                 AND t.data_transacao < date_trunc('month', CURRENT_DATE) + interval '1 month'
                           )
                     """)
-                    
+
                     contas = conn.execute(sql_contas, {
                         "uid": usuario_id,
-                        "dia_venc": data_alvo.day
+                        "dia_venc": data_alvo.day,
+                        "data_alvo_full": data_alvo
                     }).fetchall()
                 
                 if contas:

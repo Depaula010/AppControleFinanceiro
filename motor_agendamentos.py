@@ -49,13 +49,14 @@ def processar_agendamentos():
             # 3. Pegar a data de hoje
             hoje = date.today()
             dia_hoje = hoje.day
-            
+            mes_hoje = hoje.month
+
             # 4. Buscar agendamentos e usuários
             sql_get_agendamentos = text("""
                 SELECT
                     a.id as agendamento_id, a.usuario_id, a.conta_id, a.subcategoria_id,
                     a.descricao, a.valor_previsto, a.tipo_agendamento, a.periodicidade,
-                    a.dia_execucao, a.total_parcelas, a.parcelas_executadas,
+                    a.dia_execucao, a.mes_execucao, a.total_parcelas, a.parcelas_executadas,
                     a.notificar_antes_dias,
                     u.numero_whatsapp,
                     c.tipo_conta,
@@ -67,9 +68,18 @@ def processar_agendamentos():
                 JOIN MacroCategoria m ON s.macro_id = m.id
                 JOIN GrupoCategoria g ON m.grupo_id = g.id
                 WHERE a.ativo = TRUE
+                  AND a.dia_execucao = :dia_hoje
+                  -- Filtro CRÍTICO: prevenir execução de anuais todo mês
+                  AND (
+                      a.periodicidade != 'ANUAL'
+                      OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = :mes_hoje)
+                  )
             """)
-            
-            agendamentos = conn.execute(sql_get_agendamentos).fetchall()
+
+            agendamentos = conn.execute(sql_get_agendamentos, {
+                "dia_hoje": dia_hoje,
+                "mes_hoje": mes_hoje
+            }).fetchall()
             print(f"[MOTOR] {len(agendamentos)} agendamentos ativos encontrados.")
 
             # 5. Processar cada agendamento
