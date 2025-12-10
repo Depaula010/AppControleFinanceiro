@@ -1495,6 +1495,65 @@ def config_alertas_financeiros():
         }), 500
 
 
+@admin_bp.route('/gemini-cache-clear', methods=['POST'])
+def gemini_cache_clear():
+    """
+    Limpa cache do Gemini AI por padrão ou tudo
+
+    Body JSON (opcional):
+    {
+        "pattern": "intent:*",  # Limpar apenas intents
+        "usuario_id": 123       # Limpar apenas de um usuário
+    }
+
+    Se não passar nada no body, limpa TUDO.
+
+    Exemplo:
+    POST https://seu-backend.onrender.com/admin/gemini-cache-clear
+    Header: x-api-key: sua_chave_secreta
+    Body: {"pattern": "intent:*"}  # Limpa só intents
+    """
+    # Verificar autenticação
+    api_key = request.headers.get('x-api-key')
+    if api_key != API_SECRET_KEY:
+        return jsonify({"erro": "Chave de API inválida"}), 401
+
+    try:
+        from app.services.gemini_cache_service import gemini_cache_service
+
+        data = request.get_json() or {}
+        pattern = data.get('pattern')
+        usuario_id = data.get('usuario_id')
+
+        if usuario_id:
+            # Limpar cache de usuário específico
+            deleted = gemini_cache_service.invalidate_user_cache(usuario_id, pattern)
+            mensagem = f"{deleted} chaves deletadas para usuário {usuario_id}"
+        elif pattern:
+            # Limpar por padrão
+            deleted = gemini_cache_service.invalidate_pattern(pattern)
+            mensagem = f"{deleted} chaves deletadas (pattern: {pattern})"
+        else:
+            # Limpar TUDO
+            deleted = gemini_cache_service.invalidate_pattern('*')
+            mensagem = f"Cache completo limpo: {deleted} chaves deletadas"
+
+        return jsonify({
+            "status": "sucesso",
+            "mensagem": mensagem,
+            "keys_deleted": deleted
+        }), 200
+
+    except Exception as e:
+        print(f"[GEMINI-CACHE-CLEAR] Erro: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "erro",
+            "mensagem": str(e)
+        }), 500
+
+
 @admin_bp.route('/gemini-cache-stats', methods=['GET'])
 def gemini_cache_stats():
     """

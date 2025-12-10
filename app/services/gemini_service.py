@@ -188,43 +188,78 @@ def get_message_intent(texto_msg, usuario_id=None):
 
     prompt = f'''Analise a mensagem: "{texto_msg}"
 
+    REGRA IMPORTANTE: Diferencie ações de consultas!
+    - Se a mensagem começa com PERGUNTAS (quanto, qual, quais, quanto foi, como está) → É uma CONSULTA
+    - Se a mensagem informa um VALOR ESPECÍFICO (gastei X, paguei Y, comprei Z) → É um REGISTRO
+
     Classifique a intenção principal como:
-    - "Renda"
-    - "Despesa"
-    - "Consulta Saldo" (quando o usuário quer saber quanto TEM nas contas)
-    - "Listar Contas" (quando o usuário quer saber QUAIS contas tem cadastradas)
-    - "Consulta Reserva" (cálculo de reserva de emergência, 6 meses)
-    - "Vencimentos Hoje" (tenho conta que vence hoje, o que vence hoje, vencimentos de hoje, contas de hoje)
-    - "Vencimentos Amanhã" (tenho conta que vence amanhã, o que vence amanhã, vencimentos de amanhã)
-    - "Vencimentos Essa Semana" (contas que vencem essa semana, vencimentos da semana, o que vence nos próximos 7 dias)
-    - "Consulta Período"
-    - "Consulta Potes"
-    - "Consulta Contas Fixas"
-    - "Quitar Conta Fixa"
-    - "Transferência"
-    - "Pagamento Fatura" (quando o usuário PAGOU/vai PAGAR a fatura)
-    - "Consulta Valor Fatura" (quando o usuário quer SABER o valor da fatura)
-    - "Consultar Agenda"
-    - "Horários Livres" (quando estou livre, melhor horário para, quando posso marcar)
-    - "Criar Evento" (criar/agendar/marcar evento)
-    - "Deletar Evento" (deletar/cancelar/remover evento)
-    - "Configurar Notificações" (configurar/ativar/desativar notificações)
-    - "Consulta Categoria Específica"
-    - "Análise Inteligente" (analisar gastos, insights, relatório financeiro, análise financeira, padrões de consumo)
-    - "Comparação Mensal" (comparar mês atual com anterior, evolução mensal)
-    - "Previsão de Gastos" (quanto vou gastar, previsão, projeção, orçamento futuro, estimativa de gastos)
-    - "Gráfico de Gastos" (gráfico, gráficos, visualizar gastos, mostrar gráfico, gerar gráfico)
-    - "Solicitar API Key" (minha api key, qual minha chave, api key, chave de acesso, credenciais)
-    - "Configurar Relatório Mensal" (configurar relatório mensal, ativar relatório, desativar relatório, alterar hora relatório, mudar horário relatório)
-    - "Configurar Localização" (configurar localização, minha cidade, mudar cidade, definir localização, onde estou)
-    - "Configurar Endereço" (configurar endereço casa/trabalho, adicionar endereço, cadastrar endereço favorito)
-    - "Listar Endereços" (quais endereços tenho, meus endereços, endereços cadastrados, ver endereços)
-    - "Deletar Endereço" (remover endereço, apagar endereço, deletar endereço casa/trabalho)
-    - "Menu de Ajuda" (o que você pode fazer, quais funcionalidades, comandos disponíveis, o que você faz, ajuda secretário, funcionalidades do bot)
+
+    📝 REGISTROS (usuário informa algo que aconteceu):
+    - "Renda" → REGISTRAR receita: "recebi 1000", "ganhei 500 de bônus"
+    - "Despesa" → REGISTRAR gasto: "gastei 50 na padaria", "paguei 100 de luz", "comprei X por Y reais"
+    - "Transferência" → Transferir entre contas
+    - "Pagamento Fatura" → PAGOU a fatura: "paguei 500 da fatura"
+
+    ❓ CONSULTAS (usuário pergunta/quer saber):
+    - "Consulta Período" → Pergunta QUANTO gastou em período: "quanto gastei hoje?", "quanto gastei essa semana?", "gastos de ontem?", "total de despesas do mês?"
+    - "Consulta Saldo" → Pergunta quanto TEM: "quanto tenho?", "qual meu saldo?", "saldo da conta"
+    - "Consulta Valor Fatura" → Pergunta VALOR da fatura: "quanto está a fatura?", "valor da fatura do nubank?"
+    - "Consulta Categoria Específica" → Gasto em categoria: "quanto gastei com uber?", "gastos de supermercado"
+    - "Consulta Potes" → Status dos potes de gastos
+    - "Consulta Contas Fixas" → Contas fixas pendentes
+    - "Consulta Reserva" → Reserva de emergência (6 meses)
+    - "Listar Contas" → Quais contas cadastradas
+
+    📅 VENCIMENTOS:
+    - "Vencimentos Hoje" → "tenho conta vencendo hoje?", "o que vence hoje?"
+    - "Vencimentos Amanhã" → "o que vence amanhã?"
+    - "Vencimentos Essa Semana" → "contas da semana", "o que vence nos próximos 7 dias?"
+
+    ✅ AÇÕES:
+    - "Quitar Conta Fixa" → Marcar conta fixa como paga
+    - "Criar Evento" → criar/agendar/marcar evento no calendário
+    - "Deletar Evento" → deletar/cancelar/remover evento
+    - "Consultar Agenda" → Ver compromissos
+    - "Horários Livres" → "quando estou livre?", "melhor horário para X"
+
+    📊 ANÁLISES:
+    - "Análise Inteligente" → "analisar gastos", "insights", "relatório financeiro"
+    - "Comparação Mensal" → "comparar mês atual com anterior"
+    - "Previsão de Gastos" → "quanto vou gastar?", "projeção de gastos"
+    - "Gráfico de Gastos" → "gráfico", "mostrar gráfico", "visualizar gastos"
+
+    ⚙️ CONFIGURAÇÕES:
+    - "Configurar Notificações" → configurar/ativar/desativar notificações
+    - "Configurar Relatório Mensal" → configurar relatório mensal
+    - "Configurar Localização" → definir cidade/estado
+    - "Configurar Endereço" → cadastrar endereço casa/trabalho
+    - "Listar Endereços" → ver endereços salvos
+    - "Deletar Endereço" → remover endereço
+    - "Solicitar API Key" → pedir chave de acesso
+    - "Menu de Ajuda" → "o que você pode fazer?", "funcionalidades"
 
     Responda APENAS com JSON: {{"intent": "..."}}
 
-    Exemplos:
+    ⚠️ EXEMPLOS CRÍTICOS (não confunda!):
+
+    REGISTROS (tem valor específico):
+    - "gastei 50 na padaria" → {{"intent": "Despesa"}}
+    - "paguei 100 de luz" → {{"intent": "Despesa"}}
+    - "comprei café por 5 reais" → {{"intent": "Despesa"}}
+    - "gastei 200 no mercado" → {{"intent": "Despesa"}}
+    - "recebi 3000 de salário" → {{"intent": "Renda"}}
+
+    CONSULTAS (pergunta, quer saber):
+    - "quanto gastei hoje?" → {{"intent": "Consulta Período"}}
+    - "quanto gastei ontem?" → {{"intent": "Consulta Período"}}
+    - "quanto gastei essa semana?" → {{"intent": "Consulta Período"}}
+    - "quanto gastei esse mês?" → {{"intent": "Consulta Período"}}
+    - "gastos de ontem" → {{"intent": "Consulta Período"}}
+    - "gastos do mês passado" → {{"intent": "Consulta Período"}}
+    - "total de despesas hoje" → {{"intent": "Consulta Período"}}
+    - "quanto foi meu gasto ontem?" → {{"intent": "Consulta Período"}}
+
+    Outros exemplos:
     - "criar evento academia amanhã" → {{"intent": "Criar Evento"}}
     - "deletar reunião de hoje" → {{"intent": "Deletar Evento"}}
     - "quero receber minha agenda às 8h" → {{"intent": "Configurar Notificações"}}
