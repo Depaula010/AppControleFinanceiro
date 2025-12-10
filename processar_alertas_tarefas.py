@@ -17,8 +17,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from app.services.calendar_alert_config_service import CalendarAlertConfigService
-from app.services.calendar_alert_service import CalendarAlertService
 
 TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
 
@@ -32,34 +30,44 @@ def processar_alertas_tarefas():
     print("="*60)
 
     try:
-        # Buscar usuários com alertas ativos
-        usuarios = CalendarAlertConfigService.get_users_with_alerts_active()
+        # IMPORTANTE: Criar instância da aplicação para acessar o Banco
+        from app import create_app
+        app = create_app()
 
-        if not usuarios:
-            print("[ALERTAS-TAREFAS] ℹ️  Nenhum usuário com alertas ativos")
-            return
+        # Entrar no contexto da aplicação
+        with app.app_context():
+            # Importar serviços (agora com acesso ao DB garantido)
+            from app.services.calendar_alert_config_service import CalendarAlertConfigService
+            from app.services.calendar_alert_service import CalendarAlertService
 
-        print(f"[ALERTAS-TAREFAS] Processando {len(usuarios)} usuário(s)")
+            # Buscar usuários com alertas ativos
+            usuarios = CalendarAlertConfigService.get_users_with_alerts_active()
 
-        total_alertas = 0
+            if not usuarios:
+                print("[ALERTAS-TAREFAS] ℹ️  Nenhum usuário com alertas ativos")
+                return
 
-        for usuario_id, numero_whatsapp, minutos_antes in usuarios:
-            print(f"\n[ALERTAS-TAREFAS] Processando usuário {usuario_id} ({numero_whatsapp})")
-            print(f"[ALERTAS-TAREFAS] Configuração: {minutos_antes} minuto(s) antes")
+            print(f"[ALERTAS-TAREFAS] Processando {len(usuarios)} usuário(s)")
 
-            # Processar alertas para o usuário
-            alertas_enviados = CalendarAlertService.process_alerts_for_user(
-                usuario_id=usuario_id,
-                numero_whatsapp=numero_whatsapp,
-                minutos_antes=minutos_antes
-            )
+            total_alertas = 0
 
-            total_alertas += alertas_enviados
+            for usuario_id, numero_whatsapp, minutos_antes in usuarios:
+                print(f"\n[ALERTAS-TAREFAS] Processando usuário {usuario_id} ({numero_whatsapp})")
+                print(f"[ALERTAS-TAREFAS] Configuração: {minutos_antes} minuto(s) antes")
 
-        print("\n" + "="*60)
-        print(f"[ALERTAS-TAREFAS] ✅ Processamento concluído")
-        print(f"[ALERTAS-TAREFAS] Total de alertas enviados: {total_alertas}")
-        print("="*60 + "\n")
+                # Processar alertas para o usuário
+                alertas_enviados = CalendarAlertService.process_alerts_for_user(
+                    usuario_id=usuario_id,
+                    numero_whatsapp=numero_whatsapp,
+                    minutos_antes=minutos_antes
+                )
+
+                total_alertas += alertas_enviados
+
+            print("\n" + "="*60)
+            print(f"[ALERTAS-TAREFAS] ✅ Processamento concluído")
+            print(f"[ALERTAS-TAREFAS] Total de alertas enviados: {total_alertas}")
+            print("="*60 + "\n")
 
     except Exception as e:
         print(f"\n[ALERTAS-TAREFAS] ❌ Erro no processamento: {e}")
