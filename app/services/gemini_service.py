@@ -41,10 +41,44 @@ def _obter_modelo_gemini_para_usuario(usuario_id: int = None):
         raise  # Re-lançar exceção para usuário ver mensagem
 
 
+def safe_generate_content(model, prompt):
+    """
+    Wrapper seguro para chamadas ao Gemini com tratamento de erros.
+
+    Args:
+        model: Modelo Gemini
+        prompt: Prompt a ser enviado
+
+    Returns:
+        response object
+
+    Raises:
+        Exception: Com mensagens amigáveis para diferentes tipos de erro
+    """
+    try:
+        return model.generate_content(prompt)
+    except Exception as e:
+        error_str = str(e)
+
+        # Erro 429 - Quota Exceeded
+        if '429' in error_str or 'quota' in error_str.lower() or 'ResourceExhausted' in error_str:
+            print(f"[GEMINI-QUOTA] ❌ Limite de quota excedido: {e}")
+            raise Exception("429 Quota exceeded - Gemini API rate limit reached")
+
+        # Erro 403 - Permission Denied
+        if '403' in error_str or 'permission' in error_str.lower():
+            print(f"[GEMINI-PERMISSION] ❌ Erro de permissão: {e}")
+            raise Exception("403 Permission denied - Invalid API key or permissions")
+
+        # Outros erros
+        print(f"[GEMINI-ERRO] ❌ Erro ao gerar conteúdo: {e}")
+        raise
+
+
 def get_gemini_text_response(response):
-    """ 
+    """
     Helper interno para extrair 'response.text' com segurança.
-    Se falhar (bloqueio), levanta uma exceção. 
+    Se falhar (bloqueio), levanta uma exceção.
     (Movido do app.py)
     """
     try:
@@ -72,7 +106,7 @@ def extract_from_notification(texto_notificacao, usuario_id=None):
     Analise a notificação: "{texto_notificacao}"
     Retorne APENAS JSON com: "valor_decimal" (sempre positivo), "descricao_bruta", "tipo_fluxo" ("Renda" ou "Despesa").
     """;
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     
     if not response_text:
@@ -102,7 +136,7 @@ def categorize_transaction(categories_json_list, transacao_descricao, tipo_trans
     Qual é o "id" da subcategoria que melhor corresponde? Se for genérico, use o "id" de "Outros" (que é {id_outros_fallback}).
     Responda APENAS com o número do ID.
     """;
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     
     try:
         response_text = get_gemini_text_response(response)
@@ -229,7 +263,7 @@ def get_message_intent(texto_msg, usuario_id=None):
     - "ajuda secretário" → {{"intent": "Menu de Ajuda"}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
 
     if not response_text:
@@ -257,7 +291,7 @@ def extract_transaction_details(texto_msg, intent, usuario_id=None):
     Extraia "valor_decimal" (sempre positivo) e "descricao_bruta".
     Responda APENAS com JSON.
     Ex: {{"valor_decimal": 50.00, "descricao_bruta": "Padaria"}}""";
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_extract_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-EXTRACT] Extração (R/D): {json_extract_text}")
@@ -278,7 +312,7 @@ def extract_transfer_details(texto_msg, contas_json_list, usuario_id=None):
     prompt = f"""Analise a mensagem de transferência: "{texto_msg}"
     Minhas contas são: {json.dumps(contas_json_list)}
     Extraia "valor_decimal", "conta_origem", e "conta_destino". Responda APENAS com JSON.""";
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_extract_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-EXTRACT] Extração (Transf): {json_extract_text}")
@@ -299,7 +333,7 @@ def extract_fatura_payment_details(texto_msg, contas_json_list, usuario_id=None)
     prompt = f"""Analise a mensagem de pagamento de fatura: "{texto_msg}"
     Minhas contas são: {json.dumps(contas_json_list)}
     Extraia "valor_decimal", "conta_origem", e "conta_cartao". Responda APENAS com JSON.""";
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_extract_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-EXTRACT] Extração (Pagto Fatura): {json_extract_text}")
@@ -321,7 +355,7 @@ def extract_category_query(texto_msg, usuario_id=None):
     Responda APENAS com JSON: {{"nome_categoria": "..."}}
     Ex1: "quanto gastei com supermercado" -> {{"nome_categoria": "Supermercado / Mercearia"}}
     Ex2: "qual foi meu gasto com lazer?" -> {{"nome_categoria": "Lazer e Entretenimento"}}""";
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_extract_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-EXTRACT] Categoria para consulta: {json_extract_text}")
@@ -368,7 +402,7 @@ def extract_period_query(texto_msg, usuario_id=None):
     - "quanto gastei com uber esta semana?" → {{"period_type": "esta_semana", "categoria": "uber"}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-PERIOD] Período extraído: {json_text}")
@@ -419,7 +453,7 @@ def extract_chart_type(texto_msg, usuario_id=None):
     - "evolução do saldo" → {{"tipo_grafico": "linha", "num_meses": 6}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-CHART] Tipo de gráfico extraído: {json_text}")
@@ -456,7 +490,7 @@ def extract_bill_payment(texto_msg, usuario_id=None):
     - "quitei o seguro do carro, 800 reais" → {{"descricao": "seguro carro", "valor": 800.00}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-BILL] Pagamento extraído: {json_text}")
@@ -522,7 +556,7 @@ def extract_payment_items(texto_msg, usuario_id=None):
       {{"itens": ["internet", "telefone", "seguro"], "valor_total": null, "trigger_word": "quitei"}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-PAYMENT-ITEMS] Extração: {json_text}")
@@ -571,7 +605,7 @@ def extract_calendar_query(texto_msg, usuario_id=None):
     - "compromissos essa semana" → {{"period_type": "esta_semana"}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-CALENDAR] Período: {json_text}")
@@ -622,7 +656,7 @@ def extract_event_creation_details(texto_msg, usuario_id=None):
       {{"titulo": "Aniversário da Maria", "data": "2025-12-15", "hora_inicio": null, "hora_fim": null, "descricao": null, "localizacao": null}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-EVENT] Criação extraída: {json_text}")
@@ -658,7 +692,7 @@ def extract_event_deletion_query(texto_msg, usuario_id=None):
     - "Remover aniversário da Maria" → {{"titulo_busca": "aniversário maria", "quando": null}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-EVENT] Exclusão extraída: {json_text}")
@@ -698,7 +732,7 @@ def extract_time_filter_query(texto_msg, usuario_id=None):
     - "meus compromissos hoje" → {{"time_filter": null}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-TIME] Filtro extraído: {json_text}")
@@ -749,7 +783,7 @@ def extract_notification_config(texto_msg, usuario_id=None):
       {{"tipo": "contas_vencer", "acao": "configurar", "hora": "09:00", "dias_antes": 2}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-NOTIF] Config extraída: {json_text}")
@@ -798,7 +832,7 @@ def extract_free_time_query(texto_msg, usuario_id=None):
       {{"period_type": "proxima_semana", "duracao_minutos": 60, "contexto": null}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-FREE-TIME] Query extraída: {json_text}")
@@ -838,7 +872,7 @@ def extract_fatura_query(texto_msg, contas_json_list, usuario_id=None):
     - "valor da fatura do Inter" → {{"conta_cartao": "Inter"}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-FATURA-QUERY] Query extraída: {json_text}")
@@ -879,7 +913,7 @@ def extract_saldo_query(texto_msg, contas_json_list, usuario_id=None):
     - "saldo da carteira" → {{"nome_conta": "Carteira"}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-SALDO-QUERY] Query extraída: {json_text}")
@@ -933,7 +967,7 @@ def extract_parcelamento_info(texto_msg, usuario_id=None):
       {{"parcelado": true, "num_parcelas": 10, "descricao_limpa": "celular"}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-PARCELAMENTO] Info extraída: {json_text}")
@@ -999,7 +1033,7 @@ def extract_monthly_report_config(texto_msg, usuario_id=None):
       {{"acao": "consultar", "momento_envio": null, "hora_envio": null}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-RELATORIO-CONFIG] Configuração extraída: {json_text}")
@@ -1207,7 +1241,7 @@ Gere APENAS o texto da mensagem, sem introduções ou formatação extra.
 """
 
     try:
-        response = model.generate_content(prompt)
+        response = safe_generate_content(model, prompt)
         response_text = get_gemini_text_response(response)
 
         # Limpar qualquer formatação extra
@@ -1278,7 +1312,7 @@ def extract_location_config(texto_msg, usuario_id=None):
     Se não conseguir extrair o estado, retorne null para estado.
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-LOCATION] Localização extraída: {json_text}")
@@ -1336,7 +1370,7 @@ def extract_address_config(texto_msg, usuario_id=None):
       {{"label": "casa", "endereco_completo": "Rua das Flores 10, Belo Horizonte-MG"}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-ADDRESS] Endereço extraído: {json_text}")
@@ -1414,7 +1448,7 @@ def validate_event_location_completeness(location_text, usuario_id=None):
         "suggested_question": "Qual o endereço completo? (Rua e cidade)"}}
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-LOCATION-CHECK] Validação: {json_text}")
@@ -1453,7 +1487,7 @@ def extract_address_label_from_deletion(texto_msg, usuario_id=None):
     - "deletar endereço" → {{"label": "outro"}} (padrão se não especificar)
     '''
 
-    response = model.generate_content(prompt)
+    response = safe_generate_content(model, prompt)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-DELETE-ADDRESS] Label extraído: {json_text}")

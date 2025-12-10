@@ -2397,6 +2397,23 @@ def handle_whatsapp_webhook():
 
     except Exception as e:
         print(f"[WHATSAPP] Erro: {e}")
+
+        # Verificar se é erro de quota do Gemini (429)
+        error_str = str(e)
+        if '429' in error_str or 'quota' in error_str.lower() or 'rate limit' in error_str.lower():
+            return jsonify({
+                "status": "erro",
+                "resposta": (
+                    "⚠️ *Limite de IA Excedido*\n\n"
+                    "O sistema atingiu o limite diário de processamento de IA.\n\n"
+                    "🔧 *Soluções:*\n"
+                    "• Aguarde alguns minutos e tente novamente\n"
+                    "• Use comandos diretos (ex: 'gastei 50 em comida')\n"
+                    "• Configure sua própria chave de API do Gemini\n\n"
+                    "⏰ O limite é renovado automaticamente."
+                )
+            }), 429
+
         return jsonify({"status": "erro", "resposta": "Erro ao processar."}), 500
     
 
