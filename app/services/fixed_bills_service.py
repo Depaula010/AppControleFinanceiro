@@ -34,7 +34,7 @@ class FixedBillsService:
         ultimo_dia = date(ano, mes, monthrange(ano, mes)[1])
         
         sql = text("""
-            SELECT 
+            SELECT
                 a.id,
                 a.descricao,
                 a.valor_previsto,
@@ -42,26 +42,34 @@ class FixedBillsService:
                 a.tipo_agendamento,
                 s.nome_sub as categoria,
                 c.nome_conta,
+                g.nome_grupo,
                 -- Verificar se já foi executado este mês
-                (SELECT COUNT(*) FROM Transacoes t 
-                 WHERE t.descricao = a.descricao 
+                (SELECT COUNT(*) FROM Transacoes t
+                 WHERE t.descricao = a.descricao
                    AND t.usuario_id = a.usuario_id
                    AND t.data_transacao >= :primeiro_dia
-                   AND t.data_transacao <= :ultimo_dia
-                   AND t.tipo_transacao = 'Despesa') as ja_executado
+                   AND t.data_transacao <= :ultimo_dia) as ja_executado
             FROM Agendamentos a
             JOIN SubCategoria s ON a.subcategoria_id = s.id
+            JOIN MacroCategoria m ON s.macro_id = m.id
+            JOIN GrupoCategoria g ON m.grupo_id = g.id
             JOIN Contas c ON a.conta_id = c.id
             WHERE a.usuario_id = :uid
               AND a.ativo = TRUE
               AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+              -- CRÍTICO: Filtrar agendamentos anuais pelo mês correto
+              AND (
+                  a.periodicidade != 'ANUAL'
+                  OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = :mes)
+              )
             ORDER BY a.dia_execucao ASC
         """)
         
         result = conn.execute(sql, {
             "uid": usuario_id,
             "primeiro_dia": primeiro_dia,
-            "ultimo_dia": ultimo_dia
+            "ultimo_dia": ultimo_dia,
+            "mes": mes
         }).fetchall()
         
         # Filtrar apenas os não executados
@@ -221,47 +229,88 @@ class FixedBillsService:
     def list_pending_bills_formatted(conn, usuario_id):
         """
         Retorna uma lista formatada de contas fixas pendentes para WhatsApp.
+        Separa despesas de receitas para melhor visualização.
         """
         pendentes = FixedBillsService.get_pending_bills_for_month(conn, usuario_id)
-        
+
         if not pendentes:
             return "✅ Você não tem contas fixas pendentes este mês! 🎉"
-        
+
         hoje = date.today()
-        resposta = f"📋 *CONTAS FIXAS PENDENTES - {hoje.strftime('%B/%Y').upper()}* 📋\n\n"
-        
-        total_previsto = 0
-        
-        for idx, conta in enumerate(pendentes, 1):
-            agendamento_id, descricao, valor_previsto, dia_execucao, tipo, categoria, conta_nome, _ = conta
-            
+
+        # Separar despesas de receitas
+        despesas = []
+        receitas = []
+
+        for conta in pendentes:
+            agendamento_id, descricao, valor_previsto, dia_execucao, tipo, categoria, conta_nome, nome_grupo, _ = conta
+
             valor_float = float(valor_previsto or 0)
-            total_previsto += valor_float
-            
+
             # Calcular se está atrasado
             try:
                 data_vencimento = date(hoje.year, hoje.month, dia_execucao)
                 dias_restantes = (data_vencimento - hoje).days
-                
+
                 if dias_restantes < 0:
-                    status = "🔴 *ATRASADO*"
+                    status = "🔴 ATRASADO"
                 elif dias_restantes == 0:
-                    status = "⚠️ *VENCE HOJE*"
+                    status = "⚠️ VENCE HOJE"
                 elif dias_restantes <= 3:
                     status = f"🟡 Vence em {dias_restantes} dias"
                 else:
                     status = f"🟢 Vence dia {dia_execucao}"
             except ValueError:
                 status = f"Vence dia {dia_execucao}"
-            
-            resposta += f"{idx}. *{descricao}*\n"
-            resposta += f"   💰 {formatar_moeda(valor_float)}\n"
-            resposta += f"   📊 {categoria}\n"
-            resposta += f"   {status}\n\n"
-        
+
+            item = {
+                'descricao': descricao,
+                'valor': valor_float,
+                'categoria': categoria,
+                'status': status
+            }
+
+            if nome_grupo == 'Renda':
+                receitas.append(item)
+            else:
+                despesas.append(item)
+
+        # Montar resposta
+        resposta = f"📋 *CONTAS FIXAS PENDENTES - {hoje.strftime('%B/%Y').upper()}* 📋\n\n"
+
+        total_despesas = 0
+        total_receitas = 0
+
+        # Despesas
+        if despesas:
+            resposta += "💸 *DESPESAS:*\n\n"
+            for idx, item in enumerate(despesas, 1):
+                total_despesas += item['valor']
+                resposta += f"{idx}. {item['descricao']}\n"
+                resposta += f"   💰 {formatar_moeda(item['valor'])}\n"
+                resposta += f"   📊 {item['categoria']}\n"
+                resposta += f"   {item['status']}\n\n"
+
+        # Receitas
+        if receitas:
+            resposta += "💰 *RECEITAS:*\n\n"
+            for idx, item in enumerate(receitas, 1):
+                total_receitas += item['valor']
+                resposta += f"{idx}. {item['descricao']}\n"
+                resposta += f"   💵 {formatar_moeda(item['valor'])}\n"
+                resposta += f"   📊 {item['categoria']}\n"
+                resposta += f"   {item['status']}\n\n"
+
+        # Totalizadores
         resposta += "━━━━━━━━━━━━━━━━━━━━\n"
-        resposta += f"💵 *Total Previsto: {formatar_moeda(total_previsto)}*"
-        
+        if despesas:
+            resposta += f"💸 Total Despesas: {formatar_moeda(total_despesas)}\n"
+        if receitas:
+            resposta += f"💰 Total Receitas: {formatar_moeda(total_receitas)}\n"
+        if despesas and receitas:
+            saldo = total_receitas - total_despesas
+            resposta += f"📊 Saldo Líquido: {formatar_moeda(saldo)}"
+
         return resposta
     
     @staticmethod
