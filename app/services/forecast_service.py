@@ -112,12 +112,19 @@ def get_forecast_data(usuario_id, meses_historico=6, meses_projecao=3):
         }).fetchone()
 
         # 5. Contas fixas que ainda não foram executadas este mês
+        # Separando despesas normais de despesas de cartão
         sql_contas_pendentes = text("""
             SELECT
                 a.descricao,
                 a.valor_previsto,
-                a.dia_execucao
+                a.dia_execucao,
+                c.tipo_conta,
+                g.nome_grupo
             FROM Agendamentos a
+            JOIN Contas c ON a.conta_id = c.id
+            JOIN SubCategoria s ON a.subcategoria_id = s.id
+            JOIN MacroCategoria m ON s.macro_id = m.id
+            JOIN GrupoCategoria g ON m.grupo_id = g.id
             WHERE a.usuario_id = :uid
                 AND a.ativo = true
                 AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
@@ -203,7 +210,9 @@ def get_forecast_data(usuario_id, meses_historico=6, meses_projecao=3):
                 {
                     "descricao": row.descricao,
                     "valor": float(row.valor_previsto),
-                    "dia": row.dia_execucao
+                    "dia": row.dia_execucao,
+                    "tipo_conta": row.tipo_conta,
+                    "nome_grupo": row.nome_grupo
                 }
                 for row in contas_pendentes
             ],
@@ -251,8 +260,23 @@ def calculate_simple_forecast(dados):
     else:
         projecao_linear = media_historica
 
-    # Contas pendentes
-    contas_pendentes_total = sum(c["valor"] for c in dados["contas_pendentes"])
+    # Separar contas pendentes por tipo
+    despesas_normais_pendentes = sum(
+        c["valor"] for c in dados["contas_pendentes"]
+        if c["nome_grupo"] != 'Renda' and c["tipo_conta"] != 'Cartão de Crédito'
+    )
+
+    despesas_cartao_pendentes = sum(
+        c["valor"] for c in dados["contas_pendentes"]
+        if c["tipo_conta"] == 'Cartão de Crédito'
+    )
+
+    receitas_pendentes = sum(
+        c["valor"] for c in dados["contas_pendentes"]
+        if c["nome_grupo"] == 'Renda'
+    )
+
+    contas_pendentes_total = despesas_normais_pendentes + despesas_cartao_pendentes
 
     # Projeção final: maior valor entre projeção linear e (gasto até hoje + pendentes)
     projecao_final = max(
@@ -265,6 +289,9 @@ def calculate_simple_forecast(dados):
         "projecao_mes_atual": round(projecao_final, 2),
         "media_historica": round(media_historica, 2),
         "contas_pendentes_total": round(contas_pendentes_total, 2),
+        "despesas_normais_pendentes": round(despesas_normais_pendentes, 2),
+        "despesas_cartao_pendentes": round(despesas_cartao_pendentes, 2),
+        "receitas_pendentes": round(receitas_pendentes, 2),
         "gasto_ate_hoje": round(gasto_ate_hoje, 2),
         "taxa_diaria_atual": round(gasto_ate_hoje / dia_atual, 2) if dia_atual > 0 else 0
     }
@@ -297,11 +324,38 @@ def generate_forecast_insights(usuario_id):
         for g in dados["gastos_mensais"][:6]
     ])
 
-    # Formatar contas pendentes
-    pendentes_formatado = "\n".join([
-        f"- {c['descricao']}: R$ {c['valor']:,.2f} (dia {c['dia']})"
-        for c in dados["contas_pendentes"]
-    ]) if dados["contas_pendentes"] else "- Nenhuma conta pendente"
+    # Formatar contas pendentes separadas por tipo
+    despesas_normais_pendentes = [c for c in dados["contas_pendentes"]
+                                   if c["nome_grupo"] != 'Renda' and c["tipo_conta"] != 'Cartão de Crédito']
+    despesas_cartao_pendentes = [c for c in dados["contas_pendentes"]
+                                  if c["tipo_conta"] == 'Cartão de Crédito']
+    receitas_pendentes = [c for c in dados["contas_pendentes"]
+                          if c["nome_grupo"] == 'Renda']
+
+    pendentes_formatado = ""
+    if despesas_normais_pendentes:
+        pendentes_formatado += "💸 Despesas:\n"
+        pendentes_formatado += "\n".join([
+            f"- {c['descricao']}: R$ {c['valor']:,.2f} (dia {c['dia']})"
+            for c in despesas_normais_pendentes
+        ]) + "\n"
+
+    if despesas_cartao_pendentes:
+        pendentes_formatado += "💳 Cartão (na fatura):\n"
+        pendentes_formatado += "\n".join([
+            f"- {c['descricao']}: R$ {c['valor']:,.2f} (dia {c['dia']})"
+            for c in despesas_cartao_pendentes
+        ]) + "\n"
+
+    if receitas_pendentes:
+        pendentes_formatado += "💰 Receitas:\n"
+        pendentes_formatado += "\n".join([
+            f"- {c['descricao']}: R$ {c['valor']:,.2f} (dia {c['dia']})"
+            for c in receitas_pendentes
+        ])
+
+    if not pendentes_formatado:
+        pendentes_formatado = "- Nenhuma conta pendente"
 
     # Formatar contas fixas principais
     fixas_formatado = "\n".join([
@@ -321,7 +375,9 @@ Você é um assistente financeiro. Analise os dados e gere uma PROJEÇÃO DE GAS
 💰 **Situação Atual:**
 - Gastos até hoje: R$ {projecao['gasto_ate_hoje']:,.2f}
 - Taxa média diária: R$ {projecao['taxa_diaria_atual']:,.2f}
-- Contas pendentes: R$ {projecao['contas_pendentes_total']:,.2f}
+- Despesas pendentes: R$ {projecao['despesas_normais_pendentes']:,.2f}
+- Cartão pendente: R$ {projecao['despesas_cartao_pendentes']:,.2f}
+- Receitas pendentes: R$ {projecao['receitas_pendentes']:,.2f}
 
 📊 **Histórico (últimos {dados['meses_historico']} meses):**
 {historico_formatado}
@@ -344,9 +400,12 @@ Gere um relatório de PROJEÇÃO DE GASTOS com as seguintes seções:
 
 1. **📈 Projeção {mes_nome}** (3-4 linhas):
    - Gastos até agora (dia {dados['dia_atual']})
-   - Projeção final do mês
-   - Liste contas pendentes principais
+   - Projeção final do mês (separar despesas normais e cartão se relevante)
+   - Liste contas pendentes principais (IMPORTANTE: diferenciar despesas normais de cartão)
+   - Se houver receitas pendentes, calcular o saldo líquido previsto
    - Base de cálculo (média + padrão)
+
+   NOTA IMPORTANTE: Despesas de cartão já estão debitadas na fatura, são lembretes informativos.
 
 2. **🔍 Análise de Tendências** (2-3 pontos):
    - Compare com média histórica
@@ -405,12 +464,33 @@ def generate_simple_forecast_text(usuario_id):
     texto += f"💰 Gastos até agora: R$ {projecao['gasto_ate_hoje']:,.2f} (dia {dados['dia_atual']})\n"
     texto += f"📊 Projeção final: ~R$ {projecao['projecao_mes_atual']:,.2f}\n\n"
 
-    if dados["contas_pendentes"]:
-        texto += "📋 **Faltam contas:**\n"
-        for conta in dados["contas_pendentes"][:3]:
-            texto += f"• {conta['descricao']}: R$ {conta['valor']:,.2f}\n"
+    # Separar contas pendentes por tipo
+    despesas_normais = [c for c in dados["contas_pendentes"]
+                        if c["nome_grupo"] != 'Renda' and c["tipo_conta"] != 'Cartão de Crédito']
+    despesas_cartao = [c for c in dados["contas_pendentes"]
+                       if c["tipo_conta"] == 'Cartão de Crédito']
+    receitas = [c for c in dados["contas_pendentes"]
+                if c["nome_grupo"] == 'Renda']
 
-    texto += f"\n📈 Baseado em: média últimos {dados['meses_historico']} meses "
+    if despesas_normais:
+        texto += "📋 **Despesas pendentes:**\n"
+        for conta in despesas_normais[:3]:
+            texto += f"• {conta['descricao']}: R$ {conta['valor']:,.2f}\n"
+        texto += "\n"
+
+    if despesas_cartao:
+        texto += "💳 **Cartão (na fatura):**\n"
+        for conta in despesas_cartao[:3]:
+            texto += f"• {conta['descricao']}: R$ {conta['valor']:,.2f}\n"
+        texto += "\n"
+
+    if receitas:
+        texto += "💰 **Receitas pendentes:**\n"
+        for conta in receitas[:3]:
+            texto += f"• {conta['descricao']}: R$ {conta['valor']:,.2f}\n"
+        texto += "\n"
+
+    texto += f"📈 Baseado em: média últimos {dados['meses_historico']} meses "
     texto += f"(R$ {projecao['media_historica']:,.2f})"
 
     return texto
