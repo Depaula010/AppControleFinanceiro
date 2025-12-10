@@ -149,7 +149,7 @@ def create_app():
         
     if GEMINI_API_KEY:
         genai.configure(api_key=GEMINI_API_KEY)
-        gemini_model = genai.GenerativeModel('models/gemini-flash-latest')
+        gemini_model = genai.GenerativeModel('gemini-1.5-flash')
     else: 
         print("AVISO CRÍTICO: Chave do Gemini (GEMINI_API_KEY) não configurada.")
         

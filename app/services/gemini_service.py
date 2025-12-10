@@ -34,7 +34,7 @@ def _obter_modelo_gemini_para_usuario(usuario_id: int = None):
 
         # Se for chave própria, criar modelo específico
         genai.configure(api_key=chave)
-        return genai.GenerativeModel('models/gemini-flash-latest')
+        return genai.GenerativeModel('gemini-1.5-flash')
 
     except Exception as e:
         print(f"[GEMINI] Erro ao obter chave para usuario {usuario_id}: {e}")
