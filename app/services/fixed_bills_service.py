@@ -42,6 +42,7 @@ class FixedBillsService:
                 a.tipo_agendamento,
                 s.nome_sub as categoria,
                 c.nome_conta,
+                c.tipo_conta,
                 g.nome_grupo,
                 -- Verificar se já foi executado este mês
                 (SELECT COUNT(*) FROM Transacoes t
@@ -229,7 +230,7 @@ class FixedBillsService:
     def list_pending_bills_formatted(conn, usuario_id):
         """
         Retorna uma lista formatada de contas fixas pendentes para WhatsApp.
-        Separa despesas de receitas para melhor visualização.
+        Separa despesas de receitas e identifica despesas do cartão de crédito.
         """
         pendentes = FixedBillsService.get_pending_bills_for_month(conn, usuario_id)
 
@@ -238,58 +239,78 @@ class FixedBillsService:
 
         hoje = date.today()
 
-        # Separar despesas de receitas
-        despesas = []
+        # Separar despesas normais, despesas de cartão e receitas
+        despesas_normais = []
+        despesas_cartao = []
         receitas = []
 
         for conta in pendentes:
-            agendamento_id, descricao, valor_previsto, dia_execucao, tipo, categoria, conta_nome, nome_grupo, _ = conta
+            agendamento_id, descricao, valor_previsto, dia_execucao, tipo, categoria, conta_nome, tipo_conta, nome_grupo, _ = conta
 
             valor_float = float(valor_previsto or 0)
 
-            # Calcular se está atrasado
+            # Calcular status
             try:
                 data_vencimento = date(hoje.year, hoje.month, dia_execucao)
                 dias_restantes = (data_vencimento - hoje).days
 
                 if dias_restantes < 0:
                     status = "🔴 ATRASADO"
+                    status_neutro = f"Debitado dia {dia_execucao}"
                 elif dias_restantes == 0:
                     status = "⚠️ VENCE HOJE"
+                    status_neutro = "Debitado hoje"
                 elif dias_restantes <= 3:
                     status = f"🟡 Vence em {dias_restantes} dias"
+                    status_neutro = f"Será debitado em {dias_restantes} dias"
                 else:
                     status = f"🟢 Vence dia {dia_execucao}"
+                    status_neutro = f"Será debitado dia {dia_execucao}"
             except ValueError:
                 status = f"Vence dia {dia_execucao}"
+                status_neutro = f"Debitado dia {dia_execucao}"
 
             item = {
                 'descricao': descricao,
                 'valor': valor_float,
                 'categoria': categoria,
-                'status': status
+                'status': status,
+                'status_neutro': status_neutro
             }
 
             if nome_grupo == 'Renda':
                 receitas.append(item)
+            elif tipo_conta == 'Cartão de Crédito':
+                despesas_cartao.append(item)
             else:
-                despesas.append(item)
+                despesas_normais.append(item)
 
         # Montar resposta
         resposta = f"📋 *CONTAS FIXAS PENDENTES - {hoje.strftime('%B/%Y').upper()}* 📋\n\n"
 
-        total_despesas = 0
+        total_despesas_normais = 0
+        total_despesas_cartao = 0
         total_receitas = 0
 
-        # Despesas
-        if despesas:
+        # Despesas Normais
+        if despesas_normais:
             resposta += "💸 *DESPESAS:*\n\n"
-            for idx, item in enumerate(despesas, 1):
-                total_despesas += item['valor']
+            for idx, item in enumerate(despesas_normais, 1):
+                total_despesas_normais += item['valor']
                 resposta += f"{idx}. {item['descricao']}\n"
                 resposta += f"   💰 {formatar_moeda(item['valor'])}\n"
                 resposta += f"   📊 {item['categoria']}\n"
                 resposta += f"   {item['status']}\n\n"
+
+        # Despesas do Cartão (Lembretes Informativos)
+        if despesas_cartao:
+            resposta += "💳 *CARTÃO DE CRÉDITO (na fatura):*\n\n"
+            for idx, item in enumerate(despesas_cartao, 1):
+                total_despesas_cartao += item['valor']
+                resposta += f"{idx}. {item['descricao']}\n"
+                resposta += f"   💰 {formatar_moeda(item['valor'])}\n"
+                resposta += f"   📊 {item['categoria']}\n"
+                resposta += f"   ℹ️ {item['status_neutro']}\n\n"
 
         # Receitas
         if receitas:
@@ -303,12 +324,15 @@ class FixedBillsService:
 
         # Totalizadores
         resposta += "━━━━━━━━━━━━━━━━━━━━\n"
-        if despesas:
-            resposta += f"💸 Total Despesas: {formatar_moeda(total_despesas)}\n"
+        if despesas_normais:
+            resposta += f"💸 Total Despesas: {formatar_moeda(total_despesas_normais)}\n"
+        if despesas_cartao:
+            resposta += f"💳 Total Cartão: {formatar_moeda(total_despesas_cartao)}\n"
         if receitas:
             resposta += f"💰 Total Receitas: {formatar_moeda(total_receitas)}\n"
-        if despesas and receitas:
-            saldo = total_receitas - total_despesas
+        if despesas_normais or despesas_cartao or receitas:
+            total_geral_despesas = total_despesas_normais + total_despesas_cartao
+            saldo = total_receitas - total_geral_despesas
             resposta += f"📊 Saldo Líquido: {formatar_moeda(saldo)}"
 
         return resposta

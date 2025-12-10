@@ -215,9 +215,14 @@ class NotificationProcessorService:
                             a.descricao,
                             a.valor_previsto,
                             a.dia_execucao,
-                            s.nome_sub as categoria
+                            s.nome_sub as categoria,
+                            c.tipo_conta,
+                            g.nome_grupo
                         FROM Agendamentos a
                         JOIN SubCategoria s ON a.subcategoria_id = s.id
+                        JOIN MacroCategoria m ON s.macro_id = m.id
+                        JOIN GrupoCategoria g ON m.grupo_id = g.id
+                        JOIN Contas c ON a.conta_id = c.id
                         WHERE a.usuario_id = :uid
                           AND a.ativo = TRUE
                           AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
@@ -243,29 +248,88 @@ class NotificationProcessorService:
                     }).fetchall()
                 
                 if contas:
+                    # Separar contas por tipo
+                    despesas_normais = []
+                    despesas_cartao = []
+                    receitas = []
+
+                    for conta in contas:
+                        desc, valor, dia_venc, categoria, tipo_conta, nome_grupo = conta
+                        if nome_grupo == 'Renda':
+                            receitas.append(conta)
+                        elif tipo_conta == 'Cartão de Crédito':
+                            despesas_cartao.append(conta)
+                        else:
+                            despesas_normais.append(conta)
+
                     # Montar mensagem
                     mensagem = f"🔔 *Lembrete de Contas, {nome}!*\n\n"
-                    
+
+                    total_contas = len(despesas_normais) + len(receitas)
+                    total_cartao = len(despesas_cartao)
+
                     if dias_antes == 1:
-                        mensagem += f"📅 Você tem *{len(contas)} conta(s)* que vencem *amanhã* ({data_alvo.strftime('%d/%m')}):\n\n"
+                        periodo_texto = f"*amanhã* ({data_alvo.strftime('%d/%m')})"
                     elif dias_antes == 0:
-                        mensagem += f"📅 Você tem *{len(contas)} conta(s)* que vencem *hoje* ({data_alvo.strftime('%d/%m')}):\n\n"
+                        periodo_texto = f"*hoje* ({data_alvo.strftime('%d/%m')})"
                     else:
-                        mensagem += f"📅 Você tem *{len(contas)} conta(s)* que vencem em *{dias_antes} dias* ({data_alvo.strftime('%d/%m')}):\n\n"
-                    
-                    total = 0
-                    for idx, conta in enumerate(contas, 1):
-                        desc, valor, dia_venc, categoria = conta
-                        valor_float = float(valor or 0)
-                        total += valor_float
-                        
-                        mensagem += f"{idx}. *{desc}*\n"
-                        mensagem += f"   💰 {formatar_moeda(valor_float)}\n"
-                        mensagem += f"   📊 {categoria}\n\n"
-                    
+                        periodo_texto = f"em *{dias_antes} dias* ({data_alvo.strftime('%d/%m')})"
+
+                    if total_contas > 0:
+                        mensagem += f"📅 Você tem *{total_contas} conta(s)* que vencem {periodo_texto}:\n\n"
+
+                    # Despesas Normais
+                    total_despesas = 0
+                    if despesas_normais:
+                        mensagem += "💸 *DESPESAS:*\n"
+                        for idx, conta in enumerate(despesas_normais, 1):
+                            desc, valor, dia_venc, categoria, tipo_conta, nome_grupo = conta
+                            valor_float = float(valor or 0)
+                            total_despesas += valor_float
+
+                            mensagem += f"{idx}. *{desc}*\n"
+                            mensagem += f"   💰 {formatar_moeda(valor_float)}\n"
+                            mensagem += f"   📊 {categoria}\n\n"
+
+                    # Receitas
+                    total_receitas = 0
+                    if receitas:
+                        mensagem += "💰 *RECEITAS:*\n"
+                        for idx, conta in enumerate(receitas, 1):
+                            desc, valor, dia_venc, categoria, tipo_conta, nome_grupo = conta
+                            valor_float = float(valor or 0)
+                            total_receitas += valor_float
+
+                            mensagem += f"{idx}. *{desc}*\n"
+                            mensagem += f"   💵 {formatar_moeda(valor_float)}\n"
+                            mensagem += f"   📊 {categoria}\n\n"
+
+                    # Despesas do Cartão (Lembretes)
+                    total_cartao_valor = 0
+                    if despesas_cartao:
+                        mensagem += "💳 *CARTÃO (na fatura):*\n"
+                        for idx, conta in enumerate(despesas_cartao, 1):
+                            desc, valor, dia_venc, categoria, tipo_conta, nome_grupo = conta
+                            valor_float = float(valor or 0)
+                            total_cartao_valor += valor_float
+
+                            mensagem += f"ℹ️ {desc}\n"
+                            mensagem += f"   💰 {formatar_moeda(valor_float)}\n"
+                            mensagem += f"   📊 {categoria}\n\n"
+
+                    # Totalizadores
                     mensagem += "━━━━━━━━━━━━━━━━\n"
-                    mensagem += f"💵 *Total: {formatar_moeda(total)}*\n\n"
-                    mensagem += "_Não esqueça de pagar! 😊_"
+                    if total_despesas > 0:
+                        mensagem += f"💸 Total Despesas: {formatar_moeda(total_despesas)}\n"
+                    if total_receitas > 0:
+                        mensagem += f"💰 Total Receitas: {formatar_moeda(total_receitas)}\n"
+                    if total_cartao_valor > 0:
+                        mensagem += f"💳 Total Cartão: {formatar_moeda(total_cartao_valor)}\n"
+
+                    if despesas_cartao:
+                        mensagem += "\n_💳 Despesas do cartão são apenas lembretes (já debitadas na fatura)_"
+                    else:
+                        mensagem += "\n_Não esqueça de pagar! 😊_"
                     
                     # Enviar
                     sucesso = enviar_notificacao_whatsapp(
