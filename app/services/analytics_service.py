@@ -11,6 +11,7 @@ from calendar import monthrange
 from zoneinfo import ZoneInfo
 
 from app import db_engine, gemini_model
+from app.utils import formatar_mes_pt, formatar_mes_ano_pt
 
 
 def get_spending_analysis(usuario_id, meses_analise=3):
@@ -324,17 +325,17 @@ Você é um assistente financeiro pessoal. Analise os dados abaixo e gere insigh
 
 Gere um relatório com as seguintes seções (use emojis e formatação clara):
 
-1. **📊 Resumo do Mês**: Resumo geral dos gastos (2-3 linhas)
-2. **🔍 Principais Insights** (3-5 pontos):
+1. 📊 Resumo do Mês: Resumo geral dos gastos (2-3 linhas)
+2. 🔍 Principais Insights (3-5 pontos):
    - Identifique padrões importantes
    - Compare com meses anteriores
    - Destaque categorias que chamam atenção
    - Analise dias da semana com mais gastos
-3. **⚠️ Alertas** (se aplicável):
+3. ⚠️ Alertas (se aplicável):
    - Potes próximos ou acima do limite
    - Categorias com aumento significativo
    - Gastos atípicos
-4. **💡 Sugestões de Economia** (2-4 sugestões práticas e acionáveis):
+4. 💡 Sugestões de Economia (2-4 sugestões práticas e acionáveis):
    - Baseie-se nos dados reais
    - Seja específico com valores
    - Priorize as oportunidades mais relevantes
@@ -345,6 +346,7 @@ Gere um relatório com as seguintes seções (use emojis e formatação clara):
 - Evite frases genéricas
 - Foque em insights acionáveis
 - Máximo de 15 linhas no total
+- NÃO use asteriscos ** para negrito nos títulos das seções, apenas os emojis e texto simples
 """
 
     try:
@@ -495,8 +497,10 @@ def get_monthly_comparison(usuario_id, mes_referencia=None):
         total_ant = sum(gastos_ant.values())
 
         # Montar relatório
-        mes_ref_nome = datetime.strptime(mes_referencia, '%Y-%m').strftime('%B/%Y')
-        mes_ant_nome = datetime.strptime(mes_anterior, '%Y-%m').strftime('%B/%Y')
+        mes_ref_date = datetime.strptime(mes_referencia, '%Y-%m').date()
+        mes_ant_date = datetime.strptime(mes_anterior, '%Y-%m').date()
+        mes_ref_nome = formatar_mes_ano_pt(mes_ref_date)
+        mes_ant_nome = formatar_mes_ano_pt(mes_ant_date)
 
         relatorio = f"📊 **Comparação: {mes_ref_nome} vs {mes_ant_nome}**\n\n"
 

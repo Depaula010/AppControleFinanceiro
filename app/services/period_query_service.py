@@ -4,7 +4,7 @@ Serviço para consultas de gastos por período (ontem, hoje, final de semana, et
 """
 from sqlalchemy import text
 from datetime import date, datetime, timedelta
-from app.utils import formatar_moeda
+from app.utils import formatar_moeda, formatar_mes_ano_pt
 
 class PeriodQueryService:
     """Gerencia consultas de gastos por períodos específicos"""
@@ -68,14 +68,14 @@ class PeriodQueryService:
         
         elif period_type == 'este_mes':
             primeiro_dia = hoje.replace(day=1)
-            return primeiro_dia, hoje, f"este mês ({hoje.strftime('%B/%Y')})"
+            return primeiro_dia, hoje, f"este mês ({formatar_mes_ano_pt(hoje)})"
         
         elif period_type == 'mes_passado':
             primeiro_dia_este_mes = hoje.replace(day=1)
             ultimo_dia_mes_passado = primeiro_dia_este_mes - timedelta(days=1)
             primeiro_dia_mes_passado = ultimo_dia_mes_passado.replace(day=1)
             return primeiro_dia_mes_passado, ultimo_dia_mes_passado, \
-                   f"no mês passado ({ultimo_dia_mes_passado.strftime('%B/%Y')})"
+                   f"no mês passado ({formatar_mes_ano_pt(ultimo_dia_mes_passado)})"
         
         else:
             # Padrão: hoje

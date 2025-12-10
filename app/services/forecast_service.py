@@ -11,6 +11,7 @@ from calendar import monthrange
 from zoneinfo import ZoneInfo
 
 from app import db_engine, gemini_model
+from app.utils import formatar_mes_pt, formatar_mes_ano_pt
 
 
 def get_forecast_data(usuario_id, meses_historico=6, meses_projecao=3):
@@ -316,7 +317,7 @@ def generate_forecast_insights(usuario_id):
 
     # Preparar prompt para o Gemini
     hoje = date.today()
-    mes_nome = hoje.strftime('%B')
+    mes_nome = formatar_mes_pt(hoje)
 
     # Formatar histórico mensal
     historico_formatado = "\n".join([
@@ -398,7 +399,7 @@ Você é um assistente financeiro. Analise os dados e gere uma PROJEÇÃO DE GAS
 
 Gere um relatório de PROJEÇÃO DE GASTOS com as seguintes seções:
 
-1. **📈 Projeção {mes_nome}** (3-4 linhas):
+1. 📈 Projeção {mes_nome} (3-4 linhas):
    - Gastos até agora (dia {dados['dia_atual']})
    - Projeção final do mês (separar despesas normais e cartão se relevante)
    - Liste contas pendentes principais (IMPORTANTE: diferenciar despesas normais de cartão)
@@ -407,17 +408,17 @@ Gere um relatório de PROJEÇÃO DE GASTOS com as seguintes seções:
 
    NOTA IMPORTANTE: Despesas de cartão já estão debitadas na fatura, são lembretes informativos.
 
-2. **🔍 Análise de Tendências** (2-3 pontos):
+2. 🔍 Análise de Tendências (2-3 pontos):
    - Compare com média histórica
    - Identifique se está acima/abaixo do esperado
    - Destaque mudanças de padrão
 
-3. **⚠️ Alertas** (se aplicável):
+3. ⚠️ Alertas (se aplicável):
    - Se projeção está muito acima da média
    - Contas grandes pendentes
    - Padrão de gastos preocupante
 
-4. **💡 Recomendações** (2-3 sugestões):
+4. 💡 Recomendações (2-3 sugestões):
    - Baseado na projeção
    - Categorias para controlar
    - Meta de gastos até fim do mês
@@ -427,6 +428,7 @@ Gere um relatório de PROJEÇÃO DE GASTOS com as seguintes seções:
 - Seja objetivo (máximo 12 linhas)
 - Use valores reais dos dados
 - Foque em insights acionáveis
+- NÃO use asteriscos ** para negrito nos títulos das seções, apenas os emojis e texto simples
 """
 
     try:
@@ -458,7 +460,7 @@ def generate_simple_forecast_text(usuario_id):
     projecao = calculate_simple_forecast(dados)
 
     hoje = date.today()
-    mes_nome = hoje.strftime('%B')
+    mes_nome = formatar_mes_pt(hoje)
 
     texto = f"📈 **Projeção {mes_nome}**\n\n"
     texto += f"💰 Gastos até agora: R$ {projecao['gasto_ate_hoje']:,.2f} (dia {dados['dia_atual']})\n"

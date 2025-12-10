@@ -5,7 +5,7 @@ Serviço para gerenciar contas fixas/agendamentos e quitação antecipada
 from sqlalchemy import text
 from datetime import date
 from calendar import monthrange
-from app.utils import formatar_moeda
+from app.utils import formatar_moeda, formatar_mes_ano_pt
 from rapidfuzz import fuzz, process
 
 class FixedBillsService:
@@ -286,7 +286,7 @@ class FixedBillsService:
                 despesas_normais.append(item)
 
         # Montar resposta
-        resposta = f"📋 *CONTAS FIXAS PENDENTES - {hoje.strftime('%B/%Y').upper()}* 📋\n\n"
+        resposta = f"📋 *CONTAS FIXAS PENDENTES - {formatar_mes_ano_pt(hoje).upper()}* 📋\n\n"
 
         total_despesas_normais = 0
         total_despesas_cartao = 0

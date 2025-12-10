@@ -5,6 +5,7 @@ from zoneinfo import ZoneInfo
 from app.services.google_calendar_service import GoogleCalendarService
 from app.services.google_calendar_oauth_service import GoogleCalendarOAuthService
 from app.config import GOOGLE_REDIRECT_URI
+from app.utils import formatar_mes_ano_pt
 
 # Singleton
 google_calendar_service = GoogleCalendarService()
@@ -208,7 +209,7 @@ class CalendarQueryService:
             else:
                 ultimo_dia = date(hoje.year, hoje.month + 1, 1) - timedelta(days=1)
             
-            return primeiro_dia, ultimo_dia, f"este mês ({hoje.strftime('%B/%Y')})"
+            return primeiro_dia, ultimo_dia, f"este mês ({formatar_mes_ano_pt(hoje)})"
         
         elif period_type == 'mes_passado':
             primeiro_dia_este_mes = hoje.replace(day=1)
@@ -216,7 +217,7 @@ class CalendarQueryService:
             primeiro_dia_mes_passado = ultimo_dia_mes_passado.replace(day=1)
             
             return primeiro_dia_mes_passado, ultimo_dia_mes_passado, \
-                   f"no mês passado ({ultimo_dia_mes_passado.strftime('%B/%Y')})"
+                   f"no mês passado ({formatar_mes_ano_pt(ultimo_dia_mes_passado)})"
         
         elif period_type == 'proximo_mes':
             if hoje.month == 12:
@@ -229,7 +230,7 @@ class CalendarQueryService:
             else:
                 ultimo_dia = date(primeiro_dia.year, primeiro_dia.month + 1, 1) - timedelta(days=1)
             
-            return primeiro_dia, ultimo_dia, f"no próximo mês ({primeiro_dia.strftime('%B/%Y')})"
+            return primeiro_dia, ultimo_dia, f"no próximo mês ({formatar_mes_ano_pt(primeiro_dia)})"
         
         else:
             return hoje, hoje, "hoje"
