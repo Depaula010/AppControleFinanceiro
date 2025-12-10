@@ -127,6 +127,8 @@ def categorize_transaction(categories_json_list, transacao_descricao, tipo_trans
         id_outros_fallback: ID fallback
         usuario_id: ID do usuário (opcional)
     """
+    from app.services.gemini_cache_service import gemini_cache_service
+
     model = _obter_modelo_gemini_para_usuario(usuario_id)
     if not model: raise Exception("Modelo Gemini não configurado.")
 
@@ -136,7 +138,17 @@ def categorize_transaction(categories_json_list, transacao_descricao, tipo_trans
     Qual é o "id" da subcategoria que melhor corresponde? Se for genérico, use o "id" de "Outros" (que é {id_outros_fallback}).
     Responda APENAS com o número do ID.
     """;
-    response = safe_generate_content(model, prompt)
+
+    # CACHE: Categorização é user-specific (categorias variam por usuário), TTL 30 dias
+    cache_config = {
+        'enabled': True,
+        'ttl': 2592000,  # 30 dias
+        'key_prefix': 'category',
+        'user_specific': True,
+        'usuario_id': usuario_id
+    }
+
+    response = gemini_cache_service.cached_generate_content(model, prompt, cache_config)
     
     try:
         response_text = get_gemini_text_response(response)
@@ -168,10 +180,12 @@ def get_message_intent(texto_msg, usuario_id=None):
         texto_msg: Mensagem do usuário
         usuario_id: ID do usuário (opcional)
     """
+    from app.services.gemini_cache_service import gemini_cache_service
+
     model = _obter_modelo_gemini_para_usuario(usuario_id)
     if not model:
         raise Exception("Modelo Gemini não configurado.")
-    
+
     prompt = f'''Analise a mensagem: "{texto_msg}"
 
     Classifique a intenção principal como:
@@ -263,7 +277,15 @@ def get_message_intent(texto_msg, usuario_id=None):
     - "ajuda secretário" → {{"intent": "Menu de Ajuda"}}
     '''
 
-    response = safe_generate_content(model, prompt)
+    # CACHE: Intent é global (não user-specific), TTL 7 dias
+    cache_config = {
+        'enabled': True,
+        'ttl': 604800,  # 7 dias
+        'key_prefix': 'intent',
+        'user_specific': False  # Intent é global
+    }
+
+    response = gemini_cache_service.cached_generate_content(model, prompt, cache_config)
     response_text = get_gemini_text_response(response)
 
     if not response_text:
@@ -283,15 +305,26 @@ def extract_transaction_details(texto_msg, intent, usuario_id=None):
         intent: Intenção detectada
         usuario_id: ID do usuário (opcional)
     """
+    from app.services.gemini_cache_service import gemini_cache_service
+
     model = _obter_modelo_gemini_para_usuario(usuario_id)
     if not model: raise Exception("Modelo Gemini não configurado.")
-    
+
     prompt = f"""Analise a mensagem: "{texto_msg}"
     O tipo é: "{intent}".
     Extraia "valor_decimal" (sempre positivo) e "descricao_bruta".
     Responda APENAS com JSON.
     Ex: {{"valor_decimal": 50.00, "descricao_bruta": "Padaria"}}""";
-    response = safe_generate_content(model, prompt)
+
+    # CACHE: Extração de transação, TTL 24 horas (pode variar levemente)
+    cache_config = {
+        'enabled': True,
+        'ttl': 86400,  # 24 horas
+        'key_prefix': 'extract_trans',
+        'user_specific': False
+    }
+
+    response = gemini_cache_service.cached_generate_content(model, prompt, cache_config)
     response_text = get_gemini_text_response(response)
     json_extract_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-EXTRACT] Extração (R/D): {json_extract_text}")
@@ -375,6 +408,8 @@ def extract_period_query(texto_msg, usuario_id=None):
             "categoria": "supermercado" (opcional)
         }
     '''
+    from app.services.gemini_cache_service import gemini_cache_service
+
     model = _obter_modelo_gemini_para_usuario(usuario_id)
     if not model:
         raise Exception("Modelo Gemini não configurado.")
@@ -402,7 +437,15 @@ def extract_period_query(texto_msg, usuario_id=None):
     - "quanto gastei com uber esta semana?" → {{"period_type": "esta_semana", "categoria": "uber"}}
     '''
 
-    response = safe_generate_content(model, prompt)
+    # CACHE: Period query é determinístico, TTL 7 dias
+    cache_config = {
+        'enabled': True,
+        'ttl': 604800,  # 7 dias
+        'key_prefix': 'period_query',
+        'user_specific': False
+    }
+
+    response = gemini_cache_service.cached_generate_content(model, prompt, cache_config)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-PERIOD] Período extraído: {json_text}")
@@ -423,6 +466,8 @@ def extract_chart_type(texto_msg, usuario_id=None):
             "num_meses": int (opcional, para gráficos de barras e linha)
         }
     '''
+    from app.services.gemini_cache_service import gemini_cache_service
+
     model = _obter_modelo_gemini_para_usuario(usuario_id)
     if not model:
         raise Exception("Modelo Gemini não configurado.")
@@ -453,7 +498,15 @@ def extract_chart_type(texto_msg, usuario_id=None):
     - "evolução do saldo" → {{"tipo_grafico": "linha", "num_meses": 6}}
     '''
 
-    response = safe_generate_content(model, prompt)
+    # CACHE: Chart type é determinístico, TTL 7 dias
+    cache_config = {
+        'enabled': True,
+        'ttl': 604800,  # 7 dias
+        'key_prefix': 'chart_type',
+        'user_specific': False
+    }
+
+    response = gemini_cache_service.cached_generate_content(model, prompt, cache_config)
     response_text = get_gemini_text_response(response)
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-CHART] Tipo de gráfico extraído: {json_text}")

@@ -1493,3 +1493,75 @@ def config_alertas_financeiros():
             "status": "erro",
             "mensagem": str(e)
         }), 500
+
+
+@admin_bp.route('/gemini-cache-stats', methods=['GET'])
+def gemini_cache_stats():
+    """
+    Retorna estatísticas do cache do Gemini AI
+
+    Mostra:
+    - Total de requisições (hits + misses)
+    - Cache hits e misses
+    - Hit rate geral
+    - Breakdown por tipo de operação (intent, category, extract_trans, etc)
+    - Economia estimada de quota
+
+    Exemplo:
+    GET https://seu-backend.onrender.com/admin/gemini-cache-stats
+    Header: x-api-key: sua_chave_secreta
+
+    Resposta:
+    {
+        "status": "sucesso",
+        "total_requests": 1000,
+        "cache_hits": 650,
+        "cache_misses": 350,
+        "cache_saves": 650,
+        "cache_errors": 0,
+        "hit_rate": "65.0%",
+        "breakdown_by_type": {
+            "intent": {
+                "hits": 400,
+                "misses": 50,
+                "total": 450,
+                "hit_rate": "88.9%"
+            },
+            "category": {
+                "hits": 200,
+                "misses": 100,
+                "total": 300,
+                "hit_rate": "66.7%"
+            },
+            ...
+        },
+        "estimated_savings": {
+            "calls_saved": 650,
+            "quota_saved_pct": "65.0%"
+        }
+    }
+    """
+    # Verificar autenticação
+    api_key = request.headers.get('x-api-key')
+    if api_key != API_SECRET_KEY:
+        return jsonify({"erro": "Chave de API inválida"}), 401
+
+    try:
+        from app.services.gemini_cache_service import gemini_cache_service
+
+        # Obter métricas do serviço de cache
+        metrics = gemini_cache_service.get_metrics()
+
+        return jsonify({
+            "status": "sucesso",
+            **metrics
+        }), 200
+
+    except Exception as e:
+        print(f"[GEMINI-CACHE-STATS] Erro: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "erro",
+            "mensagem": str(e)
+        }), 500
