@@ -36,10 +36,11 @@ def generate_pie_chart(usuario_id, period_days=30):
             data_inicio = datetime.now().date() - timedelta(days=period_days)
 
             # Busca gastos por categoria
+            # Nota: Despesas são armazenadas como valores NEGATIVOS, então usamos ABS() para obter valores positivos
             sql = text("""
                 SELECT
                     COALESCE(mc.nome_macro, 'Outros') as categoria,
-                    SUM(t.valor) as total
+                    SUM(ABS(t.valor)) as total
                 FROM Transacoes t
                 LEFT JOIN SubCategoria sc ON t.subcategoria_id = sc.id
                 LEFT JOIN MacroCategoria mc ON sc.macro_id = mc.id
@@ -50,12 +51,20 @@ def generate_pie_chart(usuario_id, period_days=30):
                 ORDER BY total DESC
             """)
 
+            print(f"[CHART - PIE] Buscando transações de {data_inicio} até hoje para usuário {usuario_id}")
+
             result = conn.execute(sql, {
                 "uid": usuario_id,
                 "data_inicio": data_inicio
             }).fetchall()
 
+            print(f"[CHART - PIE] Encontradas {len(result) if result else 0} categorias com gastos")
+            if result:
+                for row in result:
+                    print(f"[CHART - PIE]   - {row.categoria}: R$ {row.total}")
+
             if not result or len(result) == 0:
+                print(f"[CHART - PIE] NENHUMA transação encontrada no período!")
                 return None
 
             # Preparar dados (filtrar apenas valores positivos)
@@ -132,10 +141,13 @@ def generate_bar_chart(usuario_id, num_months=6):
             # Busca gastos por mês
             data_inicio = datetime.now().date() - timedelta(days=num_months * 30)
 
+            print(f"[CHART - BAR] Buscando transações de {data_inicio} até hoje para usuário {usuario_id}")
+
+            # Nota: Despesas são armazenadas como valores NEGATIVOS, então usamos ABS() para obter valores positivos
             sql = text("""
                 SELECT
                     DATE_TRUNC('month', data_transacao) as mes,
-                    SUM(CASE WHEN tipo_transacao = 'Despesa' THEN valor ELSE 0 END) as despesas,
+                    SUM(CASE WHEN tipo_transacao = 'Despesa' THEN ABS(valor) ELSE 0 END) as despesas,
                     SUM(CASE WHEN tipo_transacao = 'Renda' THEN valor ELSE 0 END) as rendas
                 FROM Transacoes
                 WHERE usuario_id = :uid
@@ -149,7 +161,13 @@ def generate_bar_chart(usuario_id, num_months=6):
                 "data_inicio": data_inicio
             }).fetchall()
 
+            print(f"[CHART - BAR] Encontrados {len(result) if result else 0} meses com dados")
+            if result:
+                for row in result:
+                    print(f"[CHART - BAR]   - {row.mes.strftime('%b/%y')}: Despesas R$ {row.despesas}, Rendas R$ {row.rendas}")
+
             if not result or len(result) == 0:
+                print(f"[CHART - BAR] NENHUMA transação encontrada no período!")
                 return None
 
             # Preparar dados
@@ -218,6 +236,8 @@ def generate_line_chart(usuario_id, num_months=6):
             # Busca saldo por dia
             data_inicio = datetime.now().date() - timedelta(days=num_months * 30)
 
+            print(f"[CHART - LINE] Buscando transações de {data_inicio} até hoje para usuário {usuario_id}")
+
             # Primeiro: buscar saldo inicial total de todas as contas
             sql_saldo_inicial = text("""
                 SELECT COALESCE(SUM(saldo_inicial), 0) as saldo_inicial_total
@@ -228,12 +248,14 @@ def generate_line_chart(usuario_id, num_months=6):
             saldo_inicial_total = conn.execute(sql_saldo_inicial, {"uid": usuario_id}).scalar()
             saldo_inicial_total = float(saldo_inicial_total or 0)
 
+            print(f"[CHART - LINE] Saldo inicial total: R$ {saldo_inicial_total}")
+
             # Segundo: buscar transações acumuladas
+            # Nota: Rendas são positivas e Despesas são negativas no banco, então só precisamos somar
             sql = text("""
                 SELECT
                     data_transacao,
-                    SUM(CASE WHEN tipo_transacao = 'Renda' THEN valor ELSE -valor END)
-                        OVER (ORDER BY data_transacao) as saldo_acumulado
+                    SUM(valor) OVER (ORDER BY data_transacao) as saldo_acumulado
                 FROM Transacoes
                 WHERE usuario_id = :uid
                     AND data_transacao >= :data_inicio
@@ -245,7 +267,10 @@ def generate_line_chart(usuario_id, num_months=6):
                 "data_inicio": data_inicio
             }).fetchall()
 
+            print(f"[CHART - LINE] Encontradas {len(result) if result else 0} transações")
+
             if not result or len(result) == 0:
+                print(f"[CHART - LINE] NENHUMA transação encontrada no período!")
                 return None
 
             # Preparar dados (somando saldo_inicial ao acumulado)
