@@ -72,6 +72,10 @@ services:
       ofelia.job-exec.checkin-noturno.schedule: "0 18-23 * * *"
       ofelia.job-exec.checkin-noturno.command: "python /app/processar_checkin_noturno.py"
 
+      # 5. Alertas de Tarefas do Google Calendar (Roda a cada minuto)
+      ofelia.job-exec.alertas-tarefas.schedule: "@every 1m"
+      ofelia.job-exec.alertas-tarefas.command: "python /app/processar_alertas_tarefas.py"
+
   # ============================================
   # REDIS
   # ============================================

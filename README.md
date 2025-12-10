@@ -123,6 +123,14 @@ A mágica acontece de forma simples e direta, diretamente no seu WhatsApp:
 *   ✅ **Horário Personalizável:** Configure o melhor horário para receber notificações
 *   ✅ **Múltiplos Calendários:** Sincronize com todos os seus calendários
 
+#### 🆕 Alertas de Tarefas em Tempo Real
+*   ✅ **Notificações Antecipadas:** Receba alertas antes dos seus compromissos
+*   ✅ **Configuração Personalizável:** Escolha quantos minutos antes quer ser alertado (1-60 minutos)
+*   ✅ **Ativação/Desativação Simples:** Ligue ou desligue os alertas a qualquer momento via WhatsApp
+*   ✅ **Processamento Automático:** Sistema verifica eventos a cada minuto
+*   ✅ **Informações Completas:** Receba título, horário, local e descrição do evento
+*   ✅ **Múltiplos Calendários:** Alertas funcionam para todos os calendários conectados
+
 ---
 
 ### 🕒 Finder de Horários Livres

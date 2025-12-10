@@ -116,8 +116,8 @@ def setup_calendar_table():
         return "✅ Tabela GoogleCalendarTokens criada!", 200
     except Exception as e:
         return f"❌ Erro: {str(e)}", 500
-    
-    
+
+
 @admin_bp.route('/debug-calendar', methods=['GET'])
 def debug_calendar():
     """Rota temporária para debug do Calendar"""
