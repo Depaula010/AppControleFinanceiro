@@ -122,6 +122,7 @@ VALID_ENDPOINTS = {
     '/admin/security-stats',
     '/admin/security-blacklist-add',
     '/admin/security-blacklist-remove',
+    '/admin/gemini-cache-stats',
 
     # Admin - Utilidades
     '/admin/clear-bot-session',
