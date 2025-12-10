@@ -34,15 +34,21 @@ class CalendarAlertService:
             # Horário atual no Brasil
             agora = datetime.now(TIMEZONE_BR)
 
-            # Janela de tempo: de (agora + minutos_antes - 1 min) até (agora + minutos_antes + 1 min)
-            # Isso garante que o evento seja capturado mesmo com pequenas variações de tempo
-            inicio_janela = agora + timedelta(minutes=minutos_antes - 1)
-            fim_janela = agora + timedelta(minutes=minutos_antes + 1)
+            print(f"[CALENDAR-ALERT] Horário atual: {agora.strftime('%H:%M:%S')}")
+
+            # LÓGICA CORRETA: Se quero alerta X minutos ANTES, buscar eventos que começam em (agora + X minutos)
+            # Exemplo: Se agora é 17:59 e minutos_antes=1, buscar eventos que começam às 18:00
+            # Janela de ±30 segundos para garantir que o cronjob (que roda a cada minuto) pega o evento apenas UMA vez
+            horario_alvo = agora + timedelta(minutes=minutos_antes)
+
+            inicio_janela = horario_alvo - timedelta(seconds=30)
+            fim_janela = horario_alvo + timedelta(seconds=30)
 
             inicio_iso = inicio_janela.isoformat()
             fim_iso = fim_janela.isoformat()
 
-            print(f"[CALENDAR-ALERT] Buscando eventos entre {inicio_iso} e {fim_iso}")
+            print(f"[CALENDAR-ALERT] Buscando eventos que começam às {horario_alvo.strftime('%H:%M')} (±30s)")
+            print(f"[CALENDAR-ALERT] Janela: {inicio_janela.strftime('%H:%M:%S')} até {fim_janela.strftime('%H:%M:%S')}")
 
             # Buscar todos os calendários
             calendars_result = service.calendarList().list().execute()
@@ -83,21 +89,29 @@ class CalendarAlertService:
 
             print(f"[CALENDAR-ALERT] Total de {len(all_events)} eventos encontrados")
 
-            # Filtrar eventos que não são de dia inteiro (eventos de dia inteiro não têm hora específica)
+            # Filtrar apenas eventos com horário específico (não eventos de dia inteiro) e que são FUTUROS
             eventos_com_hora = []
             for event in all_events:
                 start = event.get('start', {})
 
                 # Apenas eventos com dateTime (não date)
                 if 'dateTime' in start:
-                    eventos_com_hora.append({
-                        'id': event.get('id'),
-                        'summary': event.get('summary', 'Sem título'),
-                        'start': start.get('dateTime'),
-                        'location': event.get('location', ''),
-                        'description': event.get('description', ''),
-                        'calendar_name': event.get('_calendar_name', '')
-                    })
+                    start_datetime_str = start.get('dateTime')
+                    start_datetime = datetime.fromisoformat(start_datetime_str)
+
+                    # IMPORTANTE: Verificar se o evento é FUTURO (ainda não começou)
+                    if start_datetime > agora:
+                        eventos_com_hora.append({
+                            'id': event.get('id'),
+                            'summary': event.get('summary', 'Sem título'),
+                            'start': start_datetime_str,
+                            'location': event.get('location', ''),
+                            'description': event.get('description', ''),
+                            'calendar_name': event.get('_calendar_name', '')
+                        })
+                        print(f"[CALENDAR-ALERT] ✅ Evento válido: '{event.get('summary')}' às {start_datetime.strftime('%H:%M')}")
+                    else:
+                        print(f"[CALENDAR-ALERT] ⏭️ Evento já passou, ignorando: '{event.get('summary')}' às {start_datetime.strftime('%H:%M')}")
 
             return eventos_com_hora
 
