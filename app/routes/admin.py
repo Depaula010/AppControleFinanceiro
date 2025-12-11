@@ -1755,12 +1755,12 @@ def setup_reserva_emergencia():
         with db_engine.connect() as conn:
             gasto_mensal_equiv, reserva_ideal, meses = finance_service.get_reserva_status(conn, 1)
 
-        output.append(f"\n  Gasto mensal equivalente: {formatar_moeda(gasto_mensal_equiv)}")
+        output.append(f"\n  Gasto mensal essencial: {formatar_moeda(gasto_mensal_equiv)}")
         output.append(f"  Reserva ideal ({meses} meses): {formatar_moeda(reserva_ideal)}")
         output.append(f"\n  Breakdown por periodicidade ({meses} meses):")
         output.append(f"    - MENSAL: valor × {meses} meses")
         output.append("    - ANUAL: valor INTEGRAL (ex: IPTU R$ 1200/ano → R$ 1200 - mais conservador)")
-        output.append(f"    - SEMANAL: valor × {int(meses * 4.33)} semanas ({meses} × 4.33)")
+        output.append(f"    - SEMANAL: valor × {round(meses * 4.33)} semanas ({meses} × 4.33 arredondado)")
         output.append(f"    - QUINZENAL: valor × {meses * 2} quinzenas ({meses} × 2)")
         output.append(f"    - DIARIA: valor × {meses * 30} dias ({meses} × 30)")
 
@@ -1781,7 +1781,7 @@ def setup_reserva_emergencia():
         output.append(f"\nExemplos práticos ({meses} meses):")
         output.append("  - IPTU R$ 1200/ano incluído → soma R$ 1200 (valor integral - mais conservador)")
         output.append("  - IPVA R$ 1500/ano incluído → soma R$ 1500 (valor integral)")
-        output.append(f"  - Feira R$ 100/semana incluída → soma R$ {int(100 * meses * 4.33)} ({int(meses * 4.33)} semanas)")
+        output.append(f"  - Feira R$ 100/semana incluída → soma R$ {100 * round(meses * 4.33)} ({round(meses * 4.33)} semanas)")
         output.append(f"  - Aluguel R$ 1500/mês incluído → soma R$ {1500 * meses} ({meses} meses)")
 
         return "<pre>" + "\n".join(output) + "</pre>", 200

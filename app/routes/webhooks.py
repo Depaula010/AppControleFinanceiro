@@ -1207,7 +1207,7 @@ def handle_whatsapp_webhook():
             elif intent == 'Consulta Reserva':
                 media_mensal, reserva_ideal, meses = finance_service.get_reserva_status(conn, usuario_id)
                 resposta_para_usuario = "🆘 *Cálculo da Reserva de Emergência* 🆘\n\n"
-                resposta_para_usuario += f"💰 Gasto mensal equivalente: *{formatar_moeda(media_mensal)}*\n"
+                resposta_para_usuario += f"💰 Gasto mensal essencial: *{formatar_moeda(media_mensal)}*\n"
                 resposta_para_usuario += f"🎯 Reserva ideal ({meses} meses): *{formatar_moeda(reserva_ideal)}*\n\n"
                 resposta_para_usuario += "💡 _Digite *'detalhes da reserva'* para ver quais contas estão incluídas no cálculo_"
 
@@ -1228,7 +1228,7 @@ def handle_whatsapp_webhook():
                         CASE
                             WHEN a.periodicidade = 'MENSAL' THEN a.valor_previsto * :meses
                             WHEN a.periodicidade = 'ANUAL' THEN a.valor_previsto * 1
-                            WHEN a.periodicidade = 'SEMANAL' THEN a.valor_previsto * (:meses * 4.33)
+                            WHEN a.periodicidade = 'SEMANAL' THEN a.valor_previsto * ROUND(:meses * 4.33)
                             WHEN a.periodicidade = 'QUINZENAL' THEN a.valor_previsto * (:meses * 2)
                             WHEN a.periodicidade = 'DIARIA' THEN a.valor_previsto * (:meses * 30)
                         END AS impacto_n_meses
@@ -1251,7 +1251,7 @@ def handle_whatsapp_webhook():
 
                 resposta_para_usuario = "🆘 *Detalhes da Reserva de Emergência*\n\n"
                 resposta_para_usuario += f"📊 *Resumo:*\n"
-                resposta_para_usuario += f"• Gasto mensal: *{formatar_moeda(media_mensal)}*\n"
+                resposta_para_usuario += f"• Gasto mensal essencial: *{formatar_moeda(media_mensal)}*\n"
                 resposta_para_usuario += f"• Reserva {meses} meses: *{formatar_moeda(reserva_ideal)}*\n\n"
 
                 resposta_para_usuario += "📋 *Contas incluídas:*\n\n"
@@ -1280,7 +1280,7 @@ def handle_whatsapp_webhook():
                     elif periodicidade == 'ANUAL':
                         resposta_para_usuario += f" → {formatar_moeda(impacto)} (integral)\n"
                     elif periodicidade == 'SEMANAL':
-                        semanas = int(meses * 4.33)
+                        semanas = round(meses * 4.33)
                         resposta_para_usuario += f" → {formatar_moeda(impacto)} (×{semanas})\n"
                     elif periodicidade == 'QUINZENAL':
                         quinzenas = meses * 2

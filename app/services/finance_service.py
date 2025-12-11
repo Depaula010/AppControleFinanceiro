@@ -679,7 +679,7 @@ def get_reserva_status(conn, usuario_id):
     Lógica de normalização DINÂMICA:
     - MENSAL: valor × N meses
     - ANUAL: valor INTEGRAL (ex: IPTU R$ 1200/ano → R$ 1200 - mais conservador)
-    - SEMANAL: valor × (N meses × 4.33 semanas/mês)
+    - SEMANAL: valor × round(N meses × 4.33 semanas/mês) - arredondado para semanas inteiras
     - QUINZENAL: valor × (N meses × 2 quinzenas/mês)
     - DIARIA: valor × (N meses × 30 dias/mês)
 
@@ -725,8 +725,8 @@ def get_reserva_status(conn, usuario_id):
             reserva_total_n_meses += valor_periodo
 
         elif periodicidade == 'SEMANAL':
-            # Valor semanal × (N meses × 4.33 semanas/mês)
-            semanas = meses * 4.33
+            # Valor semanal × (N meses × 4.33 semanas/mês) - arredondado para semanas inteiras
+            semanas = round(meses * 4.33)
             reserva_total_n_meses += valor_periodo * semanas
 
         elif periodicidade == 'QUINZENAL':
