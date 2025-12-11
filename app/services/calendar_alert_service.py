@@ -7,12 +7,71 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from app.services.google_calendar_oauth_service import GoogleCalendarOAuthService
 from app.services.notification_service import enviar_notificacao_whatsapp
+from app.services.redis_service import redis_service
 from app.config import BOT_WHATSAPP_URL, API_SECRET_KEY
+import hashlib
 
 TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
 
 class CalendarAlertService:
     """Processa alertas de tarefas do Google Calendar"""
+
+    @staticmethod
+    def _generate_alert_key(usuario_id, event_id, event_start):
+        """
+        Gera chave única para rastrear alertas enviados (anti-duplicação).
+
+        Args:
+            usuario_id: ID do usuário
+            event_id: ID do evento no Google Calendar
+            event_start: Horário de início do evento (ISO format)
+
+        Returns:
+            str: Chave única para o Redis
+        """
+        # Criar hash único: usuario + evento + data/hora
+        # Isso garante que o mesmo evento no mesmo horário só será alertado uma vez
+        data = f"{usuario_id}:{event_id}:{event_start}"
+        hash_id = hashlib.md5(data.encode()).hexdigest()
+        return f"calendar_alert:{hash_id}"
+
+    @staticmethod
+    def _is_alert_already_sent(usuario_id, event_id, event_start):
+        """
+        Verifica se alerta já foi enviado (usando Redis para escala SaaS).
+
+        Returns:
+            bool: True se já foi enviado, False caso contrário
+        """
+        if not redis_service.is_connected():
+            # Se Redis não está disponível, não bloquear (enviar o alerta)
+            print("[CALENDAR-ALERT] ⚠️ Redis não disponível, pulando verificação de duplicatas")
+            return False
+
+        key = CalendarAlertService._generate_alert_key(usuario_id, event_id, event_start)
+        exists = redis_service.get(key)
+
+        if exists:
+            print(f"[CALENDAR-ALERT] 🔄 Alerta já enviado (key: {key})")
+            return True
+
+        return False
+
+    @staticmethod
+    def _mark_alert_as_sent(usuario_id, event_id, event_start):
+        """
+        Marca alerta como enviado no Redis (TTL de 2 horas).
+        Isso evita duplicatas mesmo com múltiplas instâncias do servidor (escalável para SaaS).
+        """
+        if not redis_service.is_connected():
+            return
+
+        key = CalendarAlertService._generate_alert_key(usuario_id, event_id, event_start)
+
+        # TTL de 2 horas (7200 segundos)
+        # Tempo suficiente para garantir que não vai duplicar, mas não muito longo
+        redis_service.setex(key, 7200, "1")
+        print(f"[CALENDAR-ALERT] ✅ Alerta marcado como enviado (key: {key}, TTL: 2h)")
 
     @staticmethod
     def get_upcoming_events(usuario_id, minutos_antes):
@@ -221,9 +280,18 @@ class CalendarAlertService:
                 print(f"[CALENDAR-ALERT] Nenhum evento próximo para usuário {usuario_id}")
                 return 0
 
-            # Enviar alerta para cada evento
+            # Enviar alerta para cada evento (com proteção anti-duplicação)
             alertas_enviados = 0
             for evento in eventos:
+                event_id = evento.get('id')
+                event_start = evento.get('start')
+
+                # PROTEÇÃO ANTI-DUPLICAÇÃO: Verificar se já foi enviado (usando Redis)
+                if CalendarAlertService._is_alert_already_sent(usuario_id, event_id, event_start):
+                    print(f"[CALENDAR-ALERT] ⏭️ Pulando evento '{evento.get('summary')}' - alerta já enviado")
+                    continue
+
+                # Enviar alerta
                 sucesso = CalendarAlertService.send_event_alert(
                     numero_whatsapp=numero_whatsapp,
                     event=evento,
@@ -231,6 +299,8 @@ class CalendarAlertService:
                 )
 
                 if sucesso:
+                    # Marcar como enviado no Redis (escalável para SaaS)
+                    CalendarAlertService._mark_alert_as_sent(usuario_id, event_id, event_start)
                     alertas_enviados += 1
 
             print(f"[CALENDAR-ALERT] ✅ {alertas_enviados} alertas enviados para usuário {usuario_id}")
