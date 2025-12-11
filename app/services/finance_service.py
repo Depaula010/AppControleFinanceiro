@@ -670,24 +670,34 @@ def get_pote_status(conn, usuario_id):
     return conn.execute(sql, {"uid": usuario_id}).fetchall()
 
 def get_reserva_status(conn, usuario_id):
-    """ Calcula a média de gastos essenciais dos últimos 3 meses. (Requer conexão). """
+    """
+    Calcula a reserva de emergência com base nos agendamentos fixos mensais.
+
+    Versão 2.0: Usa agendamentos recorrentes com flag incluir_na_reserva ao invés de transações históricas.
+
+    Lógica:
+    - Soma todos os agendamentos MENSAIS ativos marcados como incluir_na_reserva=TRUE
+    - Multiplica por 6 para obter a reserva ideal (6 meses de gastos essenciais)
+
+    Returns:
+        (gasto_mensal_essencial, reserva_ideal_6_meses)
+    """
     sql = text("""
-        SELECT 
-            COALESCE(SUM(t.valor), 0) AS total_essencial_negativo
-        FROM Transacoes t
-        JOIN SubCategoria s ON t.subcategoria_id = s.id 
-        JOIN MacroCategoria m ON s.macro_id = m.id 
-        JOIN GrupoCategoria g ON m.grupo_id = g.id
-        WHERE t.usuario_id = :uid
-          AND g.nome_grupo = 'Despesa Essencial'
-          AND t.tipo_transacao = 'Despesa'
-          AND t.data_transacao >= date_trunc('month', CURRENT_DATE) - interval '3 month'
-          AND t.data_transacao < date_trunc('month', CURRENT_DATE)
+        SELECT
+            COALESCE(SUM(a.valor_previsto), 0) AS total_mensal_essencial
+        FROM Agendamentos a
+        WHERE a.usuario_id = :uid
+          AND a.ativo = TRUE
+          AND a.incluir_na_reserva = TRUE
+          AND a.periodicidade = 'MENSAL'
+          AND (a.tipo_agendamento = 'FIXO' OR a.tipo_agendamento = 'LEMBRETE_VARIAVEL')
     """)
-    total_negativo = conn.execute(sql, {"uid": usuario_id}).scalar()
-    media_mensal = (float(total_negativo or 0) * -1) / 3
-    reserva_ideal = media_mensal * 6
-    return media_mensal, reserva_ideal
+
+    total_mensal = conn.execute(sql, {"uid": usuario_id}).scalar()
+    gasto_mensal_essencial = float(total_mensal or 0)
+    reserva_ideal = gasto_mensal_essencial * 6
+
+    return gasto_mensal_essencial, reserva_ideal
 
 def get_category_spending(conn, usuario_id, nome_categoria_consulta):
     """ Consulta o gasto total em uma categoria/macro-categoria no mês atual. (Requer conexão). """

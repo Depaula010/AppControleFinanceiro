@@ -1624,3 +1624,169 @@ def gemini_cache_stats():
             "status": "erro",
             "mensagem": str(e)
         }), 500
+
+
+@admin_bp.route('/setup-reserva-emergencia', methods=['GET'])
+def setup_reserva_emergencia():
+    """
+    Adiciona coluna incluir_na_reserva na tabela AGENDAMENTOS para controle granular
+    de quais contas fixas devem ser incluídas no cálculo da reserva de emergência.
+
+    LÓGICA CORRETA:
+    - Reserva de emergência = soma de gastos essenciais MENSAIS × 6 meses
+    - Gastos essenciais = agendamentos fixos recorrentes (água, luz, aluguel, etc.)
+    - Usuário marca quais agendamentos incluir (ex: pode incluir Netflix se quiser)
+
+    Este endpoint executa a migração do banco de dados:
+    - Adiciona coluna incluir_na_reserva na tabela Agendamentos (BOOLEAN DEFAULT TRUE)
+    - Cria índice para otimizar queries
+    - Migra dados existentes (Despesa Essencial = TRUE, resto = FALSE)
+
+    Exemplo:
+    GET https://seu-backend.onrender.com/admin/setup-reserva-emergencia
+    """
+    try:
+        output = []
+        output.append("="*60)
+        output.append("SETUP: Reserva de Emergência (Baseada em Agendamentos)")
+        output.append("="*60)
+
+        # Migration 1: Adicionar coluna
+        output.append("\n[1/4] Adicionando coluna incluir_na_reserva na tabela Agendamentos...")
+
+        sql_add_column = text("""
+            ALTER TABLE Agendamentos
+            ADD COLUMN IF NOT EXISTS incluir_na_reserva BOOLEAN DEFAULT TRUE;
+        """)
+
+        with db_engine.connect() as conn:
+            conn.begin()
+            conn.execute(sql_add_column)
+            conn.commit()
+
+        output.append("OK - Coluna 'incluir_na_reserva' adicionada!")
+
+        # Migration 2: Adicionar comentário
+        output.append("\n[2/4] Adicionando documentação...")
+
+        sql_comment = text("""
+            COMMENT ON COLUMN Agendamentos.incluir_na_reserva IS
+            'Define se este agendamento deve ser incluído no cálculo da reserva de emergência. TRUE = incluir (padrão para gastos essenciais mensais)';
+        """)
+
+        with db_engine.connect() as conn:
+            conn.begin()
+            conn.execute(sql_comment)
+            conn.commit()
+
+        output.append("OK - Comentário adicionado!")
+
+        # Migration 3: Criar índice
+        output.append("\n[3/4] Criando índice para otimizar queries...")
+
+        sql_create_index = text("""
+            CREATE INDEX IF NOT EXISTS idx_agendamentos_reserva
+            ON Agendamentos(usuario_id, incluir_na_reserva, periodicidade)
+            WHERE ativo = TRUE;
+        """)
+
+        with db_engine.connect() as conn:
+            conn.begin()
+            conn.execute(sql_create_index)
+            conn.commit()
+
+        output.append("OK - Índice criado!")
+
+        # Migration 4: Migrar dados existentes
+        output.append("\n[4/4] Migrando dados existentes...")
+        output.append("    (Despesa Essencial = TRUE, demais = FALSE)")
+
+        sql_migrate_data = text("""
+            UPDATE Agendamentos a
+            SET incluir_na_reserva = CASE
+                WHEN g.nome_grupo = 'Despesa Essencial' THEN TRUE
+                ELSE FALSE
+            END
+            FROM SubCategoria s
+            JOIN MacroCategoria m ON s.macro_id = m.id
+            JOIN GrupoCategoria g ON m.grupo_id = g.id
+            WHERE a.subcategoria_id = s.id;
+        """)
+
+        with db_engine.connect() as conn:
+            conn.begin()
+            result = conn.execute(sql_migrate_data)
+            conn.commit()
+            rows_updated = result.rowcount
+
+        output.append(f"OK - {rows_updated} agendamento(s) atualizado(s)!")
+
+        # Estatísticas da migração
+        output.append("\n[ESTATÍSTICAS] Verificando resultados...")
+
+        sql_stats = text("""
+            SELECT
+                g.nome_grupo,
+                a.periodicidade,
+                COUNT(*) as total_agendamentos,
+                SUM(CASE WHEN a.incluir_na_reserva = TRUE THEN 1 ELSE 0 END) as incluidos_reserva,
+                SUM(CASE WHEN a.incluir_na_reserva = TRUE THEN a.valor_previsto ELSE 0 END) as valor_total_reserva
+            FROM Agendamentos a
+            JOIN SubCategoria s ON a.subcategoria_id = s.id
+            JOIN MacroCategoria m ON s.macro_id = m.id
+            JOIN GrupoCategoria g ON m.grupo_id = g.id
+            WHERE a.ativo = TRUE
+            GROUP BY g.nome_grupo, a.periodicidade
+            ORDER BY g.nome_grupo, a.periodicidade;
+        """)
+
+        with db_engine.connect() as conn:
+            stats = conn.execute(sql_stats).fetchall()
+
+        output.append("\nDistribuição por grupo e periodicidade:")
+        for stat in stats:
+            grupo, periodo, total, incluidos, valor_total = stat
+            output.append(f"  - {grupo} ({periodo}): {incluidos}/{total} incluídos (Total: {formatar_moeda(float(valor_total or 0))})")
+
+        # Calcular reserva ideal
+        output.append("\n[CÁLCULO] Reserva de emergência estimada...")
+
+        sql_reserva = text("""
+            SELECT
+                COALESCE(SUM(a.valor_previsto), 0) AS total_mensal
+            FROM Agendamentos a
+            WHERE a.ativo = TRUE
+              AND a.incluir_na_reserva = TRUE
+              AND a.periodicidade = 'MENSAL'
+              AND (a.tipo_agendamento = 'FIXO' OR a.tipo_agendamento = 'LEMBRETE_VARIAVEL')
+        """)
+
+        with db_engine.connect() as conn:
+            total_mensal = conn.execute(sql_reserva).scalar()
+            gasto_mensal = float(total_mensal or 0)
+            reserva_ideal = gasto_mensal * 6
+
+        output.append(f"  Gastos essenciais mensais: {formatar_moeda(gasto_mensal)}")
+        output.append(f"  Reserva ideal (6 meses): {formatar_moeda(reserva_ideal)}")
+
+        output.append("\n" + "="*60)
+        output.append("SUCESSO! Reserva de Emergência configurada")
+        output.append("="*60)
+        output.append("\nO que foi feito:")
+        output.append("1. Coluna incluir_na_reserva adicionada à tabela Agendamentos")
+        output.append("2. Índice criado para otimizar consultas")
+        output.append("3. Dados migrados (Despesa Essencial marcada como TRUE)")
+        output.append("4. Função get_reserva_status() atualizada para somar agendamentos mensais")
+        output.append("\nPróximos passos:")
+        output.append("1. Use os endpoints da API para gerenciar quais agendamentos incluir")
+        output.append("2. GET /api/agendamentos/reserva - listar agendamentos com filtros")
+        output.append("3. PATCH /api/agendamento/{id}/reserva - alterar flag individual")
+        output.append("4. A aplicação web futura vai usar esses endpoints")
+
+        return "<pre>" + "\n".join(output) + "</pre>", 200
+
+    except Exception as e:
+        print(f"[RESERVA-SETUP] Erro: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"<pre>Erro ao configurar Reserva de Emergência:\n\n{traceback.format_exc()}</pre>", 500
