@@ -673,19 +673,28 @@ def get_reserva_status(conn, usuario_id):
     """
     Calcula a reserva de emergência com base em agendamentos de TODAS as periodicidades.
 
-    Versão 3.1: Normaliza todas as periodicidades para cálculo correto da reserva de 6 meses.
+    Versão 4.0: Quantidade de meses CONFIGURÁVEL por usuário (coluna meses_reserva_emergencia).
     ANUAIS são incluídos com valor INTEGRAL (mais conservador).
 
-    Lógica de normalização para 6 MESES:
-    - MENSAL: valor × 6 meses
+    Lógica de normalização DINÂMICA:
+    - MENSAL: valor × N meses
     - ANUAL: valor INTEGRAL (ex: IPTU R$ 1200/ano → R$ 1200 - mais conservador)
-    - SEMANAL: valor × 26 semanas (6 meses × 4.33 semanas/mês)
-    - QUINZENAL: valor × 12 quinzenas (6 meses × 2 quinzenas/mês)
-    - DIARIA: valor × 180 dias (6 meses × 30 dias/mês)
+    - SEMANAL: valor × (N meses × 4.33 semanas/mês)
+    - QUINZENAL: valor × (N meses × 2 quinzenas/mês)
+    - DIARIA: valor × (N meses × 30 dias/mês)
 
     Returns:
-        (gasto_mensal_equivalente, reserva_ideal_6_meses)
+        (gasto_mensal_equivalente, reserva_ideal_N_meses, quantidade_meses_configurada)
     """
+    # Buscar quantos meses o usuário configurou (padrão: 6 meses)
+    sql_meses = text("""
+        SELECT COALESCE(meses_reserva_emergencia, 6) as meses
+        FROM Usuarios
+        WHERE id = :uid
+    """)
+    meses_row = conn.execute(sql_meses, {"uid": usuario_id}).fetchone()
+    meses = int(meses_row.meses) if meses_row else 6
+
     sql = text("""
         SELECT
             a.periodicidade,
@@ -700,37 +709,40 @@ def get_reserva_status(conn, usuario_id):
 
     results = conn.execute(sql, {"uid": usuario_id}).fetchall()
 
-    # Normalizar cada periodicidade para 6 meses
-    reserva_total_6_meses = 0.0
+    # Normalizar cada periodicidade para N meses (configurado pelo usuário)
+    reserva_total_n_meses = 0.0
 
     for row in results:
         periodicidade = row.periodicidade
         valor_periodo = float(row.total_periodo or 0)
 
         if periodicidade == 'MENSAL':
-            # Valor mensal × 6 meses
-            reserva_total_6_meses += valor_periodo * 6
+            # Valor mensal × N meses
+            reserva_total_n_meses += valor_periodo * meses
 
         elif periodicidade == 'ANUAL':
-            # Valor anual INTEGRAL (mais conservador - IPTU/IPVA podem ter parcelas nos 6 meses)
-            reserva_total_6_meses += valor_periodo
+            # Valor anual INTEGRAL (mais conservador - IPTU/IPVA podem ter parcelas nos N meses)
+            reserva_total_n_meses += valor_periodo
 
         elif periodicidade == 'SEMANAL':
-            # Valor semanal × 26 semanas (6 meses × 4.33 semanas/mês)
-            reserva_total_6_meses += valor_periodo * 26
+            # Valor semanal × (N meses × 4.33 semanas/mês)
+            semanas = meses * 4.33
+            reserva_total_n_meses += valor_periodo * semanas
 
         elif periodicidade == 'QUINZENAL':
-            # Valor quinzenal × 12 quinzenas (6 meses × 2 quinzenas/mês)
-            reserva_total_6_meses += valor_periodo * 12
+            # Valor quinzenal × (N meses × 2 quinzenas/mês)
+            quinzenas = meses * 2
+            reserva_total_n_meses += valor_periodo * quinzenas
 
         elif periodicidade == 'DIARIA':
-            # Valor diário × 180 dias (6 meses × 30 dias/mês)
-            reserva_total_6_meses += valor_periodo * 180
+            # Valor diário × (N meses × 30 dias/mês)
+            dias = meses * 30
+            reserva_total_n_meses += valor_periodo * dias
 
-    # Calcular equivalente mensal (reserva / 6)
-    gasto_mensal_equivalente = reserva_total_6_meses / 6
+    # Calcular equivalente mensal (reserva / N)
+    gasto_mensal_equivalente = reserva_total_n_meses / meses if meses > 0 else 0
 
-    return gasto_mensal_equivalente, reserva_total_6_meses
+    return gasto_mensal_equivalente, reserva_total_n_meses, meses
 
 def get_category_spending(conn, usuario_id, nome_categoria_consulta):
     """ Consulta o gasto total em uma categoria/macro-categoria no mês atual. (Requer conexão). """

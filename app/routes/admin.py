@@ -1750,19 +1750,19 @@ def setup_reserva_emergencia():
 
         # Calcular reserva ideal usando a função atualizada
         output.append("\n[CÁLCULO] Reserva de emergência estimada...")
-        output.append("  (Normalizando todas as periodicidades para 6 meses)")
+        output.append("  (Normalizando todas as periodicidades)")
 
         with db_engine.connect() as conn:
-            gasto_mensal_equiv, reserva_ideal = finance_service.get_reserva_status(conn, 1)
+            gasto_mensal_equiv, reserva_ideal, meses = finance_service.get_reserva_status(conn, 1)
 
         output.append(f"\n  Gasto mensal equivalente: {formatar_moeda(gasto_mensal_equiv)}")
-        output.append(f"  Reserva ideal (6 meses): {formatar_moeda(reserva_ideal)}")
-        output.append("\n  Breakdown por periodicidade:")
-        output.append("    - MENSAL: valor × 6 meses")
+        output.append(f"  Reserva ideal ({meses} meses): {formatar_moeda(reserva_ideal)}")
+        output.append(f"\n  Breakdown por periodicidade ({meses} meses):")
+        output.append(f"    - MENSAL: valor × {meses} meses")
         output.append("    - ANUAL: valor INTEGRAL (ex: IPTU R$ 1200/ano → R$ 1200 - mais conservador)")
-        output.append("    - SEMANAL: valor × 26 semanas")
-        output.append("    - QUINZENAL: valor × 12 quinzenas")
-        output.append("    - DIARIA: valor × 180 dias")
+        output.append(f"    - SEMANAL: valor × {int(meses * 4.33)} semanas ({meses} × 4.33)")
+        output.append(f"    - QUINZENAL: valor × {meses * 2} quinzenas ({meses} × 2)")
+        output.append(f"    - DIARIA: valor × {meses * 30} dias ({meses} × 30)")
 
         output.append("\n" + "="*60)
         output.append("SUCESSO! Reserva de Emergência configurada")
@@ -1778,11 +1778,11 @@ def setup_reserva_emergencia():
         output.append("2. GET /api/agendamentos/reserva - listar agendamentos com filtros")
         output.append("3. PATCH /api/agendamento/{id}/reserva - alterar flag individual")
         output.append("4. A aplicação web futura vai usar esses endpoints")
-        output.append("\nExemplos práticos:")
+        output.append(f"\nExemplos práticos ({meses} meses):")
         output.append("  - IPTU R$ 1200/ano incluído → soma R$ 1200 (valor integral - mais conservador)")
         output.append("  - IPVA R$ 1500/ano incluído → soma R$ 1500 (valor integral)")
-        output.append("  - Feira R$ 100/semana incluída → soma R$ 2600 (26 semanas)")
-        output.append("  - Aluguel R$ 1500/mês incluído → soma R$ 9000 (6 meses)")
+        output.append(f"  - Feira R$ 100/semana incluída → soma R$ {int(100 * meses * 4.33)} ({int(meses * 4.33)} semanas)")
+        output.append(f"  - Aluguel R$ 1500/mês incluído → soma R$ {1500 * meses} ({meses} meses)")
 
         return "<pre>" + "\n".join(output) + "</pre>", 200
 

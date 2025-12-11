@@ -1205,10 +1205,95 @@ def handle_whatsapp_webhook():
                 
             # ===== INTENÇÃO: Consulta Reserva =====
             elif intent == 'Consulta Reserva':
-                media_mensal, reserva_ideal = finance_service.get_reserva_status(conn, usuario_id)
+                media_mensal, reserva_ideal, meses = finance_service.get_reserva_status(conn, usuario_id)
                 resposta_para_usuario = "🆘 *Cálculo da Reserva de Emergência* 🆘\n\n"
-                resposta_para_usuario += f"Média de gastos essenciais: *{formatar_moeda(media_mensal)}* / mês\n"
-                resposta_para_usuario += f"Reserva ideal (6x): *{formatar_moeda(reserva_ideal)}*"
+                resposta_para_usuario += f"💰 Gasto mensal equivalente: *{formatar_moeda(media_mensal)}*\n"
+                resposta_para_usuario += f"🎯 Reserva ideal ({meses} meses): *{formatar_moeda(reserva_ideal)}*\n\n"
+                resposta_para_usuario += "💡 _Digite *'detalhes da reserva'* para ver quais contas estão incluídas no cálculo_"
+
+                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+            # ===== INTENÇÃO: Consulta Detalhes Reserva =====
+            elif intent == 'Consulta Detalhes Reserva':
+                # Primeiro, buscar quantos meses o usuário configurou
+                media_mensal, reserva_ideal, meses = finance_service.get_reserva_status(conn, usuario_id)
+
+                # Buscar todos os agendamentos incluídos na reserva com cálculo dinâmico
+                sql_detalhes = text("""
+                    SELECT
+                        a.descricao,
+                        a.valor_previsto,
+                        a.periodicidade,
+                        s.nome_sub as categoria,
+                        CASE
+                            WHEN a.periodicidade = 'MENSAL' THEN a.valor_previsto * :meses
+                            WHEN a.periodicidade = 'ANUAL' THEN a.valor_previsto * 1
+                            WHEN a.periodicidade = 'SEMANAL' THEN a.valor_previsto * (:meses * 4.33)
+                            WHEN a.periodicidade = 'QUINZENAL' THEN a.valor_previsto * (:meses * 2)
+                            WHEN a.periodicidade = 'DIARIA' THEN a.valor_previsto * (:meses * 30)
+                        END AS impacto_n_meses
+                    FROM Agendamentos a
+                    JOIN SubCategoria s ON a.subcategoria_id = s.id
+                    WHERE a.usuario_id = :uid
+                      AND a.ativo = TRUE
+                      AND a.incluir_na_reserva = TRUE
+                      AND (a.tipo_agendamento = 'FIXO' OR a.tipo_agendamento = 'LEMBRETE_VARIAVEL')
+                    ORDER BY impacto_n_meses DESC
+                """)
+
+                agendamentos = conn.execute(sql_detalhes, {"uid": usuario_id, "meses": meses}).fetchall()
+
+                if not agendamentos:
+                    resposta_para_usuario = "🆘 *Detalhes da Reserva de Emergência*\n\n"
+                    resposta_para_usuario += "⚠️ Nenhum agendamento está incluído no cálculo da reserva.\n\n"
+                    resposta_para_usuario += "💡 _Configure seus agendamentos fixos (água, luz, aluguel, etc.)_"
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                resposta_para_usuario = "🆘 *Detalhes da Reserva de Emergência*\n\n"
+                resposta_para_usuario += f"📊 *Resumo:*\n"
+                resposta_para_usuario += f"• Gasto mensal: *{formatar_moeda(media_mensal)}*\n"
+                resposta_para_usuario += f"• Reserva {meses} meses: *{formatar_moeda(reserva_ideal)}*\n\n"
+
+                resposta_para_usuario += "📋 *Contas incluídas:*\n\n"
+
+                for agend in agendamentos:
+                    descricao = agend.descricao
+                    valor_previsto = float(agend.valor_previsto or 0)
+                    periodicidade = agend.periodicidade
+                    impacto = float(agend.impacto_n_meses or 0)
+
+                    # Emoji por periodicidade
+                    emoji_periodo = {
+                        'MENSAL': '📅',
+                        'ANUAL': '🗓️',
+                        'SEMANAL': '📆',
+                        'QUINZENAL': '📋',
+                        'DIARIA': '⏰'
+                    }.get(periodicidade, '📌')
+
+                    resposta_para_usuario += f"{emoji_periodo} *{descricao}*\n"
+                    resposta_para_usuario += f"   └ {formatar_moeda(valor_previsto)}/{periodicidade.lower()}"
+
+                    # Mostrar cálculo normalizado
+                    if periodicidade == 'MENSAL':
+                        resposta_para_usuario += f" → {formatar_moeda(impacto)} (×{meses})\n"
+                    elif periodicidade == 'ANUAL':
+                        resposta_para_usuario += f" → {formatar_moeda(impacto)} (integral)\n"
+                    elif periodicidade == 'SEMANAL':
+                        semanas = int(meses * 4.33)
+                        resposta_para_usuario += f" → {formatar_moeda(impacto)} (×{semanas})\n"
+                    elif periodicidade == 'QUINZENAL':
+                        quinzenas = meses * 2
+                        resposta_para_usuario += f" → {formatar_moeda(impacto)} (×{quinzenas})\n"
+                    elif periodicidade == 'DIARIA':
+                        dias = meses * 30
+                        resposta_para_usuario += f" → {formatar_moeda(impacto)} (×{dias})\n"
+                    else:
+                        resposta_para_usuario += f" → {formatar_moeda(impacto)}\n"
+
+                resposta_para_usuario += f"\n━━━━━━━━━━━━━━━━━━\n"
+                resposta_para_usuario += f"💰 *Total: {formatar_moeda(reserva_ideal)}*\n\n"
+                resposta_para_usuario += "💡 _Use a aplicação web para editar quais contas incluir_"
 
                 return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
@@ -2956,7 +3041,7 @@ def toggle_incluir_reserva_agendamento(agendamento_id):
             conn.begin()
 
             # Calcular reserva ANTES da mudança
-            gasto_anterior, reserva_anterior = finance_service.get_reserva_status(conn, usuario_id)
+            gasto_anterior, reserva_anterior, _ = finance_service.get_reserva_status(conn, usuario_id)
 
             # Verificar se agendamento pertence ao usuário
             sql_check = text("""
@@ -2991,7 +3076,7 @@ def toggle_incluir_reserva_agendamento(agendamento_id):
             conn.commit()
 
             # Calcular reserva DEPOIS da mudança
-            gasto_novo, reserva_nova = finance_service.get_reserva_status(conn, usuario_id)
+            gasto_novo, reserva_nova, _ = finance_service.get_reserva_status(conn, usuario_id)
 
             status_text = "incluído" if incluir else "excluído"
             return jsonify({
@@ -3197,7 +3282,7 @@ def listar_agendamentos_reserva():
                 })
 
             # Calcular resumo da reserva
-            gasto_mensal, reserva_ideal = finance_service.get_reserva_status(conn, usuario_id)
+            gasto_mensal, reserva_ideal, meses = finance_service.get_reserva_status(conn, usuario_id)
 
             return jsonify({
                 "status": "sucesso",
@@ -3207,7 +3292,8 @@ def listar_agendamentos_reserva():
                 "agendamentos": agendamentos,
                 "resumo_reserva": {
                     "gasto_mensal_essencial": gasto_mensal,
-                    "reserva_ideal_6_meses": reserva_ideal
+                    "reserva_ideal": reserva_ideal,
+                    "meses_configurados": meses
                 }
             }), 200
 

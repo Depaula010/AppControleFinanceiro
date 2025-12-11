@@ -208,6 +208,7 @@ def get_message_intent(texto_msg, usuario_id=None):
     - "Consulta Potes" → Status dos potes de gastos
     - "Consulta Contas Fixas" → Contas fixas pendentes
     - "Consulta Reserva" → Reserva de emergência (6 meses)
+    - "Consulta Detalhes Reserva" → Ver QUAIS contas estão incluídas na reserva: "detalhes da reserva", "quais contas na reserva", "mostrar contas da reserva", "listar reserva"
     - "Listar Contas" → Quais contas cadastradas
 
     📅 VENCIMENTOS:
@@ -281,6 +282,11 @@ def get_message_intent(texto_msg, usuario_id=None):
     - "tenho conta que vence hoje?" → {{"intent": "Vencimentos Hoje"}}
     - "o que vence amanhã?" → {{"intent": "Vencimentos Amanhã"}}
     - "contas que vencem essa semana" → {{"intent": "Vencimentos Essa Semana"}}
+    - "detalhes da reserva" → {{"intent": "Consulta Detalhes Reserva"}}
+    - "quais contas estão na reserva" → {{"intent": "Consulta Detalhes Reserva"}}
+    - "mostrar contas da reserva de emergência" → {{"intent": "Consulta Detalhes Reserva"}}
+    - "listar agendamentos da reserva" → {{"intent": "Consulta Detalhes Reserva"}}
+    - "ver o que compõe minha reserva" → {{"intent": "Consulta Detalhes Reserva"}}
     - "configurar relatório mensal" → {{"intent": "Configurar Relatório Mensal"}}
     - "quero receber relatório todo dia 1" → {{"intent": "Configurar Relatório Mensal"}}
     - "ativar relatório mensal às 10h" → {{"intent": "Configurar Relatório Mensal"}}
