@@ -671,33 +671,66 @@ def get_pote_status(conn, usuario_id):
 
 def get_reserva_status(conn, usuario_id):
     """
-    Calcula a reserva de emergência com base nos agendamentos fixos mensais.
+    Calcula a reserva de emergência com base em agendamentos de TODAS as periodicidades.
 
-    Versão 2.0: Usa agendamentos recorrentes com flag incluir_na_reserva ao invés de transações históricas.
+    Versão 3.1: Normaliza todas as periodicidades para cálculo correto da reserva de 6 meses.
+    ANUAIS são incluídos com valor INTEGRAL (mais conservador).
 
-    Lógica:
-    - Soma todos os agendamentos MENSAIS ativos marcados como incluir_na_reserva=TRUE
-    - Multiplica por 6 para obter a reserva ideal (6 meses de gastos essenciais)
+    Lógica de normalização para 6 MESES:
+    - MENSAL: valor × 6 meses
+    - ANUAL: valor INTEGRAL (ex: IPTU R$ 1200/ano → R$ 1200 - mais conservador)
+    - SEMANAL: valor × 26 semanas (6 meses × 4.33 semanas/mês)
+    - QUINZENAL: valor × 12 quinzenas (6 meses × 2 quinzenas/mês)
+    - DIARIA: valor × 180 dias (6 meses × 30 dias/mês)
 
     Returns:
-        (gasto_mensal_essencial, reserva_ideal_6_meses)
+        (gasto_mensal_equivalente, reserva_ideal_6_meses)
     """
     sql = text("""
         SELECT
-            COALESCE(SUM(a.valor_previsto), 0) AS total_mensal_essencial
+            a.periodicidade,
+            COALESCE(SUM(a.valor_previsto), 0) AS total_periodo
         FROM Agendamentos a
         WHERE a.usuario_id = :uid
           AND a.ativo = TRUE
           AND a.incluir_na_reserva = TRUE
-          AND a.periodicidade = 'MENSAL'
           AND (a.tipo_agendamento = 'FIXO' OR a.tipo_agendamento = 'LEMBRETE_VARIAVEL')
+        GROUP BY a.periodicidade
     """)
 
-    total_mensal = conn.execute(sql, {"uid": usuario_id}).scalar()
-    gasto_mensal_essencial = float(total_mensal or 0)
-    reserva_ideal = gasto_mensal_essencial * 6
+    results = conn.execute(sql, {"uid": usuario_id}).fetchall()
 
-    return gasto_mensal_essencial, reserva_ideal
+    # Normalizar cada periodicidade para 6 meses
+    reserva_total_6_meses = 0.0
+
+    for row in results:
+        periodicidade = row.periodicidade
+        valor_periodo = float(row.total_periodo or 0)
+
+        if periodicidade == 'MENSAL':
+            # Valor mensal × 6 meses
+            reserva_total_6_meses += valor_periodo * 6
+
+        elif periodicidade == 'ANUAL':
+            # Valor anual INTEGRAL (mais conservador - IPTU/IPVA podem ter parcelas nos 6 meses)
+            reserva_total_6_meses += valor_periodo
+
+        elif periodicidade == 'SEMANAL':
+            # Valor semanal × 26 semanas (6 meses × 4.33 semanas/mês)
+            reserva_total_6_meses += valor_periodo * 26
+
+        elif periodicidade == 'QUINZENAL':
+            # Valor quinzenal × 12 quinzenas (6 meses × 2 quinzenas/mês)
+            reserva_total_6_meses += valor_periodo * 12
+
+        elif periodicidade == 'DIARIA':
+            # Valor diário × 180 dias (6 meses × 30 dias/mês)
+            reserva_total_6_meses += valor_periodo * 180
+
+    # Calcular equivalente mensal (reserva / 6)
+    gasto_mensal_equivalente = reserva_total_6_meses / 6
+
+    return gasto_mensal_equivalente, reserva_total_6_meses
 
 def get_category_spending(conn, usuario_id, nome_categoria_consulta):
     """ Consulta o gasto total em uma categoria/macro-categoria no mês atual. (Requer conexão). """

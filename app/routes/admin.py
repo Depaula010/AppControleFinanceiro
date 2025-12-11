@@ -1671,7 +1671,7 @@ def setup_reserva_emergencia():
 
         sql_comment = text("""
             COMMENT ON COLUMN Agendamentos.incluir_na_reserva IS
-            'Define se este agendamento deve ser incluído no cálculo da reserva de emergência. TRUE = incluir (padrão para gastos essenciais mensais)';
+            'Define se este agendamento deve ser incluído no cálculo da reserva de emergência. Normalizado: MENSAL×6, ANUAL×1 (integral), SEMANAL×26, QUINZENAL×12, DIARIA×180';
         """)
 
         with db_engine.connect() as conn:
@@ -1748,26 +1748,21 @@ def setup_reserva_emergencia():
             grupo, periodo, total, incluidos, valor_total = stat
             output.append(f"  - {grupo} ({periodo}): {incluidos}/{total} incluídos (Total: {formatar_moeda(float(valor_total or 0))})")
 
-        # Calcular reserva ideal
+        # Calcular reserva ideal usando a função atualizada
         output.append("\n[CÁLCULO] Reserva de emergência estimada...")
-
-        sql_reserva = text("""
-            SELECT
-                COALESCE(SUM(a.valor_previsto), 0) AS total_mensal
-            FROM Agendamentos a
-            WHERE a.ativo = TRUE
-              AND a.incluir_na_reserva = TRUE
-              AND a.periodicidade = 'MENSAL'
-              AND (a.tipo_agendamento = 'FIXO' OR a.tipo_agendamento = 'LEMBRETE_VARIAVEL')
-        """)
+        output.append("  (Normalizando todas as periodicidades para 6 meses)")
 
         with db_engine.connect() as conn:
-            total_mensal = conn.execute(sql_reserva).scalar()
-            gasto_mensal = float(total_mensal or 0)
-            reserva_ideal = gasto_mensal * 6
+            gasto_mensal_equiv, reserva_ideal = finance_service.get_reserva_status(conn, 1)
 
-        output.append(f"  Gastos essenciais mensais: {formatar_moeda(gasto_mensal)}")
+        output.append(f"\n  Gasto mensal equivalente: {formatar_moeda(gasto_mensal_equiv)}")
         output.append(f"  Reserva ideal (6 meses): {formatar_moeda(reserva_ideal)}")
+        output.append("\n  Breakdown por periodicidade:")
+        output.append("    - MENSAL: valor × 6 meses")
+        output.append("    - ANUAL: valor INTEGRAL (ex: IPTU R$ 1200/ano → R$ 1200 - mais conservador)")
+        output.append("    - SEMANAL: valor × 26 semanas")
+        output.append("    - QUINZENAL: valor × 12 quinzenas")
+        output.append("    - DIARIA: valor × 180 dias")
 
         output.append("\n" + "="*60)
         output.append("SUCESSO! Reserva de Emergência configurada")
@@ -1776,12 +1771,18 @@ def setup_reserva_emergencia():
         output.append("1. Coluna incluir_na_reserva adicionada à tabela Agendamentos")
         output.append("2. Índice criado para otimizar consultas")
         output.append("3. Dados migrados (Despesa Essencial marcada como TRUE)")
-        output.append("4. Função get_reserva_status() atualizada para somar agendamentos mensais")
+        output.append("4. Função get_reserva_status() atualizada para normalizar TODAS as periodicidades:")
+        output.append("   - MENSAL, ANUAL, SEMANAL, QUINZENAL, DIARIA")
         output.append("\nPróximos passos:")
         output.append("1. Use os endpoints da API para gerenciar quais agendamentos incluir")
         output.append("2. GET /api/agendamentos/reserva - listar agendamentos com filtros")
         output.append("3. PATCH /api/agendamento/{id}/reserva - alterar flag individual")
         output.append("4. A aplicação web futura vai usar esses endpoints")
+        output.append("\nExemplos práticos:")
+        output.append("  - IPTU R$ 1200/ano incluído → soma R$ 1200 (valor integral - mais conservador)")
+        output.append("  - IPVA R$ 1500/ano incluído → soma R$ 1500 (valor integral)")
+        output.append("  - Feira R$ 100/semana incluída → soma R$ 2600 (26 semanas)")
+        output.append("  - Aluguel R$ 1500/mês incluído → soma R$ 9000 (6 meses)")
 
         return "<pre>" + "\n".join(output) + "</pre>", 200
 
