@@ -1,59 +1,54 @@
 import sys
 from sqlalchemy import text
 from werkzeug.security import generate_password_hash
-from app import create_app, db
+import app as app_module # Importa o módulo, não o objeto direto
 
 def configurar_senha_usuario():
-    app = create_app()
-    
-    with app.app_context():
-        # 1. Garante que a coluna password_hash existe (Migration manual)
-        print("🔍 Verificando estrutura do banco de dados...")
-        try:
-            with db.engine.connect() as conn:
-                conn.execute(text("ALTER TABLE public.Usuarios ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255)"))
-                conn.commit()
-            print("✅ Coluna 'password_hash' verificada/criada.")
-        except Exception as e:
-            print(f"⚠️ Aviso ao verificar coluna (pode já existir): {e}")
+    # Cria a app para inicializar as configs e o db_engine
+    flask_app = app_module.create_app()
 
-        # 2. Solicita dados
-        print("\n--- Definir Senha de Administrador ---")
-        whatsapp = input("Digite o número do WhatsApp do usuário (apenas números): ").strip()
-        nova_senha = input("Digite a nova senha para este usuário: ").strip()
+    with flask_app.app_context():
+        # Acessa o db_engine do módulo após a inicialização
+        engine = app_module.db_engine
 
-        if not whatsapp or not nova_senha:
-            print("❌ Erro: WhatsApp e Senha são obrigatórios.")
+        if not engine:
+            print("❌ Erro: Banco de dados não inicializado.")
             return
 
-        # 3. Busca e Atualiza
-        whatsapp_limpo = "".join(filter(str.isdigit, whatsapp))
-        hashed_password = generate_password_hash(nova_senha)
-
+        print("🔍 Conectando ao banco de dados...")
         try:
-            # Verifica se usuário existe
-            usuario = db.session.execute(
-                text("SELECT id, nome FROM Usuarios WHERE numero_whatsapp = :w"), 
-                {'w': whatsapp_limpo}
-            ).fetchone()
+            with engine.connect() as conn:
+                # 1. Garante coluna senha
+                try:
+                    conn.execute(text("ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(255)"))
+                    conn.commit()
+                except Exception:
+                    conn.rollback()
 
-            if not usuario:
-                print(f"❌ Usuário com WhatsApp {whatsapp_limpo} não encontrado no banco.")
-                return
+                # 2. Inputs
+                whatsapp = input("WhatsApp (apenas números): ").strip()
+                nova_senha = input("Nova Senha: ").strip()
 
-            # Atualiza a senha
-            db.session.execute(
-                text("UPDATE Usuarios SET password_hash = :p WHERE id = :id"),
-                {'p': hashed_password, 'id': usuario.id}
-            )
-            db.session.commit()
-            
-            print(f"\n🎉 SUCESSO! Senha definida para o usuário: {usuario.nome}")
-            print("Agora você pode logar no Frontend com este WhatsApp e senha.")
-            
+                if not whatsapp or not nova_senha:
+                    return
+
+                # 3. Atualiza
+                wpp_limpo = "".join(filter(str.isdigit, whatsapp))
+                senha_hash = generate_password_hash(nova_senha)
+
+                res = conn.execute(
+                    text("UPDATE Usuarios SET senha_hash = :p WHERE numero_whatsapp = :w"),
+                    {'p': senha_hash, 'w': wpp_limpo}
+                )
+                conn.commit()
+
+                if res.rowcount > 0:
+                    print("🎉 Senha definida com sucesso!")
+                else:
+                    print("❌ Usuário não encontrado.")
+
         except Exception as e:
-            db.session.rollback()
-            print(f"❌ Erro ao atualizar banco: {e}")
+            print(f"❌ Erro: {e}")
 
 if __name__ == "__main__":
     configurar_senha_usuario()
