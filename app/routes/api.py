@@ -529,3 +529,143 @@ def health_check():
         "message": "API está funcionando",
         "version": "1.0.0"
     }), 200
+
+
+# ============================================================
+# ENDPOINTS EM PORTUGUÊS (Aliases para compatibilidade)
+# ============================================================
+
+@api_bp.route('/dashboard/resumo', methods=['GET'])
+@token_required
+def get_dashboard_resumo(user_id):
+    """
+    GET /api/dashboard/resumo
+
+    Alias em português para /api/dashboard/summary.
+    Retorna resumo do dashboard: saldo total, receitas e despesas do mês.
+
+    Headers:
+        Authorization: Bearer <jwt_token>
+
+    Response:
+        {
+            "status": "success",
+            "data": {
+                "saldo_total": 5430.50,
+                "receitas_mes": 8000.00,
+                "despesas_mes": 3245.30,
+                "saldo_mes": 4754.70,
+                "mes_referencia": "Dezembro/2025"
+            }
+        }
+    """
+    # Reutilizar a lógica do endpoint principal
+    return get_dashboard_summary(user_id)
+
+
+@api_bp.route('/transacoes/recentes', methods=['GET'])
+@token_required
+def get_transacoes_recentes(user_id):
+    """
+    GET /api/transacoes/recentes
+
+    Lista as últimas 10 transações do usuário (mais recentes primeiro).
+
+    Headers:
+        Authorization: Bearer <jwt_token>
+
+    Response:
+        {
+            "status": "success",
+            "data": [
+                {
+                    "id": 1234,
+                    "descricao": "Supermercado",
+                    "valor": -150.50,
+                    "tipo": "Despesa",
+                    "data": "2025-12-11",
+                    "categoria": "Alimentação",
+                    "conta": "Nubank"
+                }
+            ]
+        }
+    """
+    if not db_engine:
+        return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
+
+    try:
+        with db_engine.connect() as conn:
+            sql = text("""
+                SELECT
+                    t.id,
+                    t.descricao,
+                    t.valor,
+                    t.tipo_transacao,
+                    t.data_transacao,
+                    m.nome_macro as categoria,
+                    c.nome_conta
+                FROM Transacoes t
+                JOIN SubCategoria s ON t.subcategoria_id = s.id
+                JOIN MacroCategoria m ON s.macro_id = m.id
+                JOIN Contas c ON t.conta_id = c.id
+                WHERE t.usuario_id = :uid
+                ORDER BY t.data_transacao DESC, t.created_at DESC
+                LIMIT 10
+            """)
+
+            result = conn.execute(sql, {"uid": user_id}).fetchall()
+
+            transacoes = []
+            for row in result:
+                transacoes.append({
+                    "id": row.id,
+                    "descricao": row.descricao,
+                    "valor": float(row.valor),
+                    "tipo": row.tipo_transacao,
+                    "data": row.data_transacao.isoformat() if row.data_transacao else None,
+                    "categoria": row.categoria,
+                    "conta": row.nome_conta
+                })
+
+            return jsonify({
+                "status": "success",
+                "data": transacoes
+            }), 200
+
+    except Exception as e:
+        print(f"[API] ❌ Erro ao buscar transações recentes: {e}")
+        import traceback
+        traceback.print_exc()
+
+        return jsonify({
+            "status": "error",
+            "message": "Erro ao carregar transações recentes"
+        }), 500
+
+
+@api_bp.route('/contas', methods=['GET'])
+@token_required
+def get_contas(user_id):
+    """
+    GET /api/contas
+
+    Alias em português para /api/accounts.
+    Lista todas as contas do usuário com saldos.
+
+    Headers:
+        Authorization: Bearer <jwt_token>
+
+    Response:
+        {
+            "status": "success",
+            "data": [
+                {
+                    "nome_conta": "Nubank",
+                    "tipo_conta": "Conta Corrente",
+                    "saldo": 2345.50
+                }
+            ]
+        }
+    """
+    # Reutilizar a lógica do endpoint principal
+    return get_accounts(user_id)

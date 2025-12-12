@@ -101,7 +101,7 @@ VALID_ENDPOINTS = {
     '/admin/cleanup-deprecated-notification-fields',
     '/admin/setup-api-keys-tables',
     '/admin/gemini-cache-clear',
-    
+
     # Admin - Auth
     '/auth/login',
     '/auth/register',
@@ -132,6 +132,16 @@ VALID_ENDPOINTS = {
 
     # Admin - Utilidades
     '/admin/clear-bot-session',
+
+    # API REST - Dashboard (protegidas por JWT)
+    '/api/health',
+    '/api/dashboard/summary',
+    '/api/dashboard/resumo',
+    '/api/dashboard/charts',
+    '/api/accounts',
+    '/api/contas',
+    '/api/transactions',
+    '/api/transacoes/recentes',
 }
 
 def is_trusted_ip(ip):
