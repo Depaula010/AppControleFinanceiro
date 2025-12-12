@@ -163,11 +163,13 @@ def create_app():
         from .routes import webhooks
         from .routes import api_keys
         from .routes import calendar_alerts
+        from .routes import auth
 
         app.register_blueprint(admin.admin_bp)
         app.register_blueprint(webhooks.webhooks_bp)
         app.register_blueprint(api_keys.api_keys_bp)
         app.register_blueprint(calendar_alerts.calendar_alerts_bp)
+        app.register_blueprint(auth.auth_bp)
 
     
     # Rota de verificação (movida do app.py)

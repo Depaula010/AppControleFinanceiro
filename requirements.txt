@@ -6,6 +6,7 @@ psycopg2-binary==2.9.9
 requests==2.32.3
 redis==5.0.1
 rapidfuzz==3.14.3
+PyJWT==2.8.0
 
 # Google Calendar OAuth2
 google-auth==2.29.0

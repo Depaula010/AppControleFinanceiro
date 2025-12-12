@@ -485,10 +485,14 @@ def handle_whatsapp_webhook():
             resposta, completo = user_service.process_registration_step(numero_limpo, texto_msg)
             return jsonify({"status": "sucesso", "resposta": resposta}), 200
         
-        # 2.2. Usuário não cadastrado
+        # 2.2. Usuário não cadastrado - Redirecionar para cadastro web
         if not user_info:
-            user_service.start_registration(numero_limpo)
-            msg = "👋 Bem-vindo! Vamos fazer um cadastro rápido.\n\n*Como você gostaria de ser chamado?*"
+            msg = (
+                "Olá! 👋 Parece que você ainda não tem cadastro no Meu Secretário.\n\n"
+                "Para começar a usar, crie sua conta em nosso site:\n"
+                "https://app.meusecretario.com/register\n\n"
+                "Após criar sua conta, volte aqui e eu estarei pronto para ajudar! 😊"
+            )
             return jsonify({"status": "sucesso", "resposta": msg}), 200
         
         usuario_id = user_info[0]
