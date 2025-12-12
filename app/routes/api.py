@@ -229,33 +229,36 @@ def get_dashboard_charts(user_id):
                 "message": "Parâmetro 'meses' deve estar entre 1 e 12"
             }), 400
 
-        # Buscar dados do serviço de analytics
+        # Buscar dados do serviço de analytics (já retorna estruturado)
         dados = analytics_service.get_spending_analysis(user_id, meses_analise=meses_analise)
 
-        # Formatar dados para o frontend
-        gastos_mensais = []
-        for row in dados.get('gastos_mensais', []):
-            gastos_mensais.append({
-                "mes": row[0],  # YYYY-MM
-                "total": abs(float(row[1] or 0))
-            })
+        # Formatar dados para o frontend (ajustar valores negativos para positivos)
+        gastos_mensais = [
+            {
+                "mes": item["mes"],
+                "total": abs(item["total"])
+            }
+            for item in dados.get('gastos_mensais', [])
+        ]
 
-        gastos_categoria = []
-        for row in dados.get('gastos_categoria', []):
-            gastos_categoria.append({
-                "macro_categoria": row[0],
-                "subcategoria": row[1],
-                "total": abs(float(row[2] or 0)),
-                "quantidade": int(row[3])
-            })
+        gastos_categoria = [
+            {
+                "macro_categoria": item["categoria"],
+                "subcategoria": item["subcategoria"],
+                "total": abs(item["total"]),
+                "quantidade": item["quantidade"]
+            }
+            for item in dados.get('gastos_por_categoria', [])
+        ]
 
-        gastos_dia_semana = []
-        for row in dados.get('gastos_dia_semana', []):
-            gastos_dia_semana.append({
-                "dia": row[0].strip(),
-                "total": abs(float(row[1] or 0)),
-                "quantidade": int(row[2])
-            })
+        gastos_dia_semana = [
+            {
+                "dia": item["dia"],
+                "total": abs(item["total"]),
+                "quantidade": item["quantidade"]
+            }
+            for item in dados.get('gastos_por_dia_semana', [])
+        ]
 
         return jsonify({
             "status": "success",
@@ -732,4 +735,36 @@ def get_transactions_recent(user_id):
         }
     """
     # Reutilizar a lógica do endpoint em português
+    return get_transacoes_recentes(user_id)
+
+
+@api_bp.route('/dashboard/recent', methods=['GET'])
+@token_required
+def get_dashboard_recent(user_id):
+    """
+    GET /api/dashboard/recent
+
+    Alias alternativo para /api/transactions/recent.
+    Lista as últimas 10 transações para o dashboard.
+
+    Headers:
+        Authorization: Bearer <jwt_token>
+
+    Response:
+        {
+            "status": "success",
+            "data": [
+                {
+                    "id": 1234,
+                    "descricao": "Supermercado",
+                    "valor": -150.50,
+                    "tipo": "Despesa",
+                    "data": "2025-12-11",
+                    "categoria": "Alimentação",
+                    "conta": "Nubank"
+                }
+            ]
+        }
+    """
+    # Reutilizar a lógica do endpoint de transações recentes
     return get_transacoes_recentes(user_id)

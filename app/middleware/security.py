@@ -139,6 +139,7 @@ VALID_ENDPOINTS = {
     '/api/dashboard/resumo',
     '/api/dashboard/stats',  # Alias em inglês para /summary
     '/api/dashboard/charts',
+    '/api/dashboard/recent',  # Transações recentes para dashboard
     '/api/accounts',
     '/api/contas',
     '/api/transactions',
