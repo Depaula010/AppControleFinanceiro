@@ -137,10 +137,12 @@ VALID_ENDPOINTS = {
     '/api/health',
     '/api/dashboard/summary',
     '/api/dashboard/resumo',
+    '/api/dashboard/stats',  # Alias em inglês para /summary
     '/api/dashboard/charts',
     '/api/accounts',
     '/api/contas',
     '/api/transactions',
+    '/api/transactions/recent',  # Alias em inglês para /transacoes/recentes
     '/api/transacoes/recentes',
 }
 

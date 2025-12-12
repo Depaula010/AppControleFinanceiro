@@ -669,3 +669,67 @@ def get_contas(user_id):
     """
     # Reutilizar a lógica do endpoint principal
     return get_accounts(user_id)
+
+
+# ============================================================
+# ENDPOINTS EM INGLÊS (Aliases para compatibilidade com Frontend Angular)
+# ============================================================
+
+@api_bp.route('/dashboard/stats', methods=['GET'])
+@token_required
+def get_dashboard_stats(user_id):
+    """
+    GET /api/dashboard/stats
+
+    Alias em inglês para /api/dashboard/summary.
+    Retorna resumo do dashboard: saldo total, receitas e despesas do mês.
+
+    Headers:
+        Authorization: Bearer <jwt_token>
+
+    Response:
+        {
+            "status": "success",
+            "data": {
+                "saldo_total": 5430.50,
+                "receitas_mes": 8000.00,
+                "despesas_mes": 3245.30,
+                "saldo_mes": 4754.70,
+                "mes_referencia": "Dezembro/2025"
+            }
+        }
+    """
+    # Reutilizar a lógica do endpoint principal
+    return get_dashboard_summary(user_id)
+
+
+@api_bp.route('/transactions/recent', methods=['GET'])
+@token_required
+def get_transactions_recent(user_id):
+    """
+    GET /api/transactions/recent
+
+    Alias em inglês para /api/transacoes/recentes.
+    Lista as últimas 10 transações do usuário (mais recentes primeiro).
+
+    Headers:
+        Authorization: Bearer <jwt_token>
+
+    Response:
+        {
+            "status": "success",
+            "data": [
+                {
+                    "id": 1234,
+                    "descricao": "Supermercado",
+                    "valor": -150.50,
+                    "tipo": "Despesa",
+                    "data": "2025-12-11",
+                    "categoria": "Alimentação",
+                    "conta": "Nubank"
+                }
+            ]
+        }
+    """
+    # Reutilizar a lógica do endpoint em português
+    return get_transacoes_recentes(user_id)
