@@ -101,6 +101,11 @@ VALID_ENDPOINTS = {
     '/admin/cleanup-deprecated-notification-fields',
     '/admin/setup-api-keys-tables',
     '/admin/gemini-cache-clear',
+    
+    # Admin - Auth
+    '/auth/login',
+    '/auth/register',
+    '/auth/verify',
 
     # Admin - Triggers
     '/admin/run-motor-agendamentos',
