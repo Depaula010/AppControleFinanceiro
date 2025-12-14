@@ -90,6 +90,9 @@ def handle_automate_webhook():
             fatura_id_transacao = None
             conta_tipo_result = next((c[2] for c in contas_usuario if c[0] == conta_id_transacao), None)
             if conta_tipo_result == 'Cartão de Crédito':
+                # Garantir que existe fatura para o período atual
+                finance_service.ensure_current_invoice_exists(conn, usuario_id, conta_id_transacao)
+
                 fatura_id_transacao = finance_service.get_or_create_fatura(conn, conta_id_transacao, data_hoje, usuario_id)
             
             valor_para_db = valor_decimal if tipo_transacao == 'Renda' else (valor_decimal * -1)
@@ -317,6 +320,10 @@ def handle_api_transacao():
             if tipo_pagamento == 'credito':
                 # Vincular à fatura
                 data_hoje = date.today()
+
+                # Garantir que existe fatura para o período atual
+                finance_service.ensure_current_invoice_exists(conn, usuario_id, conta_id)
+
                 fatura_id = finance_service.get_or_create_fatura(conn, conta_id, data_hoje, usuario_id)
                 print(f"[API-TRANSACAO] Fatura ID: {fatura_id}")
 
@@ -700,6 +707,10 @@ def handle_whatsapp_webhook():
                             conta_id = dados['conta_id']
                             usuario_id_tx = dados['usuario_id']
                             data_tx = date.fromisoformat(dados['data_transacao'])
+
+                            # Garantir que existe fatura para o período atual
+                            finance_service.ensure_current_invoice_exists(conn, usuario_id_tx, conta_id)
+
                             fatura_id_final = finance_service.get_or_create_fatura(conn, conta_id, data_tx, usuario_id_tx)
                             print(f"[CONFIRM-SAVE] Fatura criada/encontrada: {fatura_id_final}")
 

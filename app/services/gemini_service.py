@@ -1253,39 +1253,53 @@ def generate_daily_briefing(briefing_data, usuario_id=None):
     if tem_alertas:
         alertas_partes = []
 
-        # Contas que vencem hoje
-        if contas_hoje:
-            alertas_partes.append("VENCE HOJE:")
-            for conta in contas_hoje:
+        # Separar receitas e despesas para HOJE
+        despesas_hoje = [c for c in contas_hoje if c.get('tipo') == 'Despesa']
+        receitas_hoje = [c for c in contas_hoje if c.get('tipo') == 'Receita']
+
+        # Despesas que vencem hoje
+        if despesas_hoje or faturas_hoje:
+            alertas_partes.append("VENCE HOJE (Despesas):")
+            for conta in despesas_hoje:
                 valor_formatado = f"{conta['valor']:.2f}".replace('.', ',')
                 alertas_partes.append(f"• {conta['descricao']} - R$ {valor_formatado}")
-
-        # Faturas que vencem hoje
-        if faturas_hoje:
-            if not contas_hoje:
-                alertas_partes.append("VENCE HOJE:")
             for fatura in faturas_hoje:
                 valor_formatado = f"{fatura['valor']:.2f}".replace('.', ',')
                 alertas_partes.append(f"• Fatura {fatura['cartao']} - R$ {valor_formatado}")
 
-        # Contas que vencem amanhã
-        if contas_amanha:
-            if contas_hoje or faturas_hoje:
+        # Receitas que vencem hoje
+        if receitas_hoje:
+            if despesas_hoje or faturas_hoje:
                 alertas_partes.append("")
-            alertas_partes.append("VENCE AMANHÃ:")
-            for conta in contas_amanha:
+            alertas_partes.append("VENCE HOJE (Receitas):")
+            for conta in receitas_hoje:
                 valor_formatado = f"{conta['valor']:.2f}".replace('.', ',')
                 alertas_partes.append(f"• {conta['descricao']} - R$ {valor_formatado}")
 
-        # Faturas que vencem amanhã
-        if faturas_amanha:
-            if not contas_amanha:
-                if contas_hoje or faturas_hoje:
-                    alertas_partes.append("")
-                alertas_partes.append("VENCE AMANHÃ:")
+        # Separar receitas e despesas para AMANHÃ
+        despesas_amanha = [c for c in contas_amanha if c.get('tipo') == 'Despesa']
+        receitas_amanha = [c for c in contas_amanha if c.get('tipo') == 'Receita']
+
+        # Despesas que vencem amanhã
+        if despesas_amanha or faturas_amanha:
+            if despesas_hoje or faturas_hoje or receitas_hoje:
+                alertas_partes.append("")
+            alertas_partes.append("VENCE AMANHÃ (Despesas):")
+            for conta in despesas_amanha:
+                valor_formatado = f"{conta['valor']:.2f}".replace('.', ',')
+                alertas_partes.append(f"• {conta['descricao']} - R$ {valor_formatado}")
             for fatura in faturas_amanha:
                 valor_formatado = f"{fatura['valor']:.2f}".replace('.', ',')
                 alertas_partes.append(f"• Fatura {fatura['cartao']} - R$ {valor_formatado}")
+
+        # Receitas que vencem amanhã
+        if receitas_amanha:
+            if despesas_hoje or faturas_hoje or receitas_hoje or despesas_amanha or faturas_amanha:
+                alertas_partes.append("")
+            alertas_partes.append("VENCE AMANHÃ (Receitas):")
+            for conta in receitas_amanha:
+                valor_formatado = f"{conta['valor']:.2f}".replace('.', ',')
+                alertas_partes.append(f"• {conta['descricao']} - R$ {valor_formatado}")
 
         alertas_texto = "\n\nALERTAS FINANCEIROS:\n" + "\n".join(alertas_partes)
 

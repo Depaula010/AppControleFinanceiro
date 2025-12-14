@@ -444,9 +444,129 @@ def create_fatura_payment(conn, usuario_id, conta_id_origem, conta_id_cartao, va
     
     return nome_cartao
 
+def ensure_current_invoice_exists(conn, usuario_id, conta_id_cartao=None):
+    """
+    Garante que exista uma fatura aberta para o período atual de cada cartão.
+    Se a fatura do período já passou, cria automaticamente a próxima.
+
+    Args:
+        conn: Conexão com o banco
+        usuario_id: ID do usuário
+        conta_id_cartao: ID do cartão específico (opcional)
+    """
+    from datetime import date
+    from calendar import monthrange
+
+    # Buscar cartões do usuário
+    if conta_id_cartao:
+        sql_cartoes = text("""
+            SELECT id, dia_fechamento, dia_vencimento
+            FROM Contas
+            WHERE id = :cid AND usuario_id = :uid AND tipo_conta = 'Cartão de Crédito'
+        """)
+        cartoes = conn.execute(sql_cartoes, {"cid": conta_id_cartao, "uid": usuario_id}).fetchall()
+    else:
+        sql_cartoes = text("""
+            SELECT id, dia_fechamento, dia_vencimento
+            FROM Contas
+            WHERE usuario_id = :uid AND tipo_conta = 'Cartão de Crédito'
+        """)
+        cartoes = conn.execute(sql_cartoes, {"uid": usuario_id}).fetchall()
+
+    hoje = date.today()
+
+    for cartao in cartoes:
+        conta_id = cartao.id
+        dia_fechamento = cartao.dia_fechamento
+        dia_vencimento = cartao.dia_vencimento
+
+        if not dia_fechamento or not dia_vencimento:
+            continue
+
+        # Calcular qual deveria ser a data da fatura atual
+        # Se hoje é depois do fechamento, a fatura atual é do próximo mês
+        try:
+            data_fechamento_atual = date(hoje.year, hoje.month, dia_fechamento)
+        except ValueError:
+            _, ultimo_dia = monthrange(hoje.year, hoje.month)
+            data_fechamento_atual = date(hoje.year, hoje.month, ultimo_dia)
+
+        if hoje > data_fechamento_atual:
+            # Já passou do fechamento, calcular próximo mês
+            if hoje.month == 12:
+                ano_venc = hoje.year + 1
+                mes_venc = 1
+            else:
+                ano_venc = hoje.year
+                mes_venc = hoje.month + 1
+        else:
+            # Ainda não fechou este mês
+            ano_venc = hoje.year
+            mes_venc = hoje.month
+
+        # Calcular data de vencimento
+        try:
+            data_venc_esperada = date(ano_venc, mes_venc, dia_vencimento)
+        except ValueError:
+            _, ultimo_dia = monthrange(ano_venc, mes_venc)
+            data_venc_esperada = date(ano_venc, mes_venc, ultimo_dia)
+
+        # Ajustar se vencimento < fechamento
+        if dia_vencimento < dia_fechamento and hoje <= data_fechamento_atual:
+            # Vencimento é no mês seguinte ao fechamento
+            if mes_venc == 12:
+                ano_venc = ano_venc + 1
+                mes_venc = 1
+            else:
+                mes_venc = mes_venc + 1
+            try:
+                data_venc_esperada = date(ano_venc, mes_venc, dia_vencimento)
+            except ValueError:
+                _, ultimo_dia = monthrange(ano_venc, mes_venc)
+                data_venc_esperada = date(ano_venc, mes_venc, ultimo_dia)
+
+        # Verificar se já existe fatura com essa data de vencimento
+        sql_check = text("SELECT id FROM Faturas WHERE conta_id = :cid AND data_vencimento = :dv AND status = 'Aberta'")
+        fatura_existe = conn.execute(sql_check, {"cid": conta_id, "dv": data_venc_esperada}).fetchone()
+
+        if not fatura_existe:
+            # Criar fatura automaticamente
+            # Recalcular data de fechamento para a fatura
+            if dia_vencimento < dia_fechamento:
+                # Fechamento é no mês anterior ao vencimento
+                if mes_venc == 1:
+                    ano_fech = ano_venc - 1
+                    mes_fech = 12
+                else:
+                    ano_fech = ano_venc
+                    mes_fech = mes_venc - 1
+            else:
+                # Fechamento é no mesmo mês do vencimento
+                ano_fech = ano_venc
+                mes_fech = mes_venc
+
+            try:
+                data_fech_esperada = date(ano_fech, mes_fech, dia_fechamento)
+            except ValueError:
+                _, ultimo_dia = monthrange(ano_fech, mes_fech)
+                data_fech_esperada = date(ano_fech, mes_fech, ultimo_dia)
+
+            sql_create = text("""
+                INSERT INTO Faturas (conta_id, data_vencimento, data_fechamento, status)
+                VALUES (:cid, :dv, :df, 'Aberta')
+                ON CONFLICT (conta_id, data_vencimento) DO NOTHING
+            """)
+            conn.execute(sql_create, {
+                "cid": conta_id,
+                "dv": data_venc_esperada,
+                "df": data_fech_esperada
+            })
+            print(f"[AUTO-FATURA] Fatura criada automaticamente para cartão ID {conta_id}, vencimento {data_venc_esperada}")
+
 def get_fatura_valor(conn, usuario_id, conta_id_cartao=None):
     """
     Consulta o valor atual da(s) fatura(s) em aberto.
+    Garante que sempre exista uma fatura para o período atual.
 
     Args:
         conn: Conexão com o banco
@@ -462,6 +582,9 @@ def get_fatura_valor(conn, usuario_id, conta_id_cartao=None):
             "status": "Aberta"
         }]
     """
+    # Garantir que existe fatura para o período atual
+    ensure_current_invoice_exists(conn, usuario_id, conta_id_cartao)
+
     if conta_id_cartao:
         # Consultar fatura específica de um cartão
         sql = text("""
@@ -803,23 +926,32 @@ def get_upcoming_bills_and_invoices(conn, usuario_id, target_date=None):
             a.descricao,
             a.valor_previsto,
             a.dia_execucao,
+            a.periodicidade,
+            a.data_inicio,
             s.nome_sub as categoria,
-            c.nome_conta
+            c.nome_conta,
+            g.nome_grupo
         FROM Agendamentos a
         JOIN SubCategoria s ON a.subcategoria_id = s.id
+        JOIN MacroCategoria m ON s.macro_id = m.id
+        JOIN GrupoCategoria g ON m.grupo_id = g.id
         JOIN Contas c ON a.conta_id = c.id
         WHERE a.usuario_id = :uid
           AND a.ativo = TRUE
           AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
           AND a.dia_execucao = :dia
-          -- Verificar se ainda não foi executado este mês
+          -- Filtrar por periodicidade: se ANUAL, verificar se estamos no mês correto
+          AND (
+              a.periodicidade != 'ANUAL'
+              OR EXTRACT(MONTH FROM a.data_inicio) = :mes_ref
+          )
+          -- Verificar se ainda não foi executado este mês/ano
           AND NOT EXISTS (
               SELECT 1 FROM Transacoes t
               WHERE t.descricao = a.descricao
                 AND t.usuario_id = a.usuario_id
                 AND EXTRACT(MONTH FROM t.data_transacao) = :mes_ref
                 AND EXTRACT(YEAR FROM t.data_transacao) = :ano_ref
-                AND t.tipo_transacao = 'Despesa'
           )
         ORDER BY a.dia_execucao ASC
     """)
@@ -845,21 +977,27 @@ def get_upcoming_bills_and_invoices(conn, usuario_id, target_date=None):
     contas_amanha = []
 
     for conta in contas_hoje_result:
+        # Determinar se é receita ou despesa baseado no grupo
+        tipo = "Receita" if conta.nome_grupo == "Renda" else "Despesa"
         contas_hoje.append({
             "id": conta.id,
             "descricao": conta.descricao,
             "valor": float(conta.valor_previsto or 0),
             "categoria": conta.categoria,
-            "conta": conta.nome_conta
+            "conta": conta.nome_conta,
+            "tipo": tipo
         })
 
     for conta in contas_amanha_result:
+        # Determinar se é receita ou despesa baseado no grupo
+        tipo = "Receita" if conta.nome_grupo == "Renda" else "Despesa"
         contas_amanha.append({
             "id": conta.id,
             "descricao": conta.descricao,
             "valor": float(conta.valor_previsto or 0),
             "categoria": conta.categoria,
-            "conta": conta.nome_conta
+            "conta": conta.nome_conta,
+            "tipo": tipo
         })
 
     # Buscar faturas de cartão de crédito
