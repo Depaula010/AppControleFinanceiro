@@ -55,7 +55,7 @@ services:
       
       # 1. Resumo Matinal (Roda toda hora, o script verifica se deve enviar)
       ofelia.job-exec.resumo-matinal.schedule: "@hourly"
-      ofelia.job-exec.resumo-matinal.command: "python /app/processar_resumo_matinal.py"
+      ofelia.job-exec.resumo-matinal.command: "python /app/app/jobs/daily_briefing.py"
       
       # 2. Relatório Mensal - Início do Mês (Dia 1 às 08:00)
       # Usa curl interno para disparar o endpoint localmente
@@ -70,11 +70,11 @@ services:
 
       # 4. Check-in Noturno (Roda a cada hora entre 18h-23h, o script verifica configuração do usuário)
       ofelia.job-exec.checkin-noturno.schedule: "0 18-23 * * *"
-      ofelia.job-exec.checkin-noturno.command: "python /app/processar_checkin_noturno.py"
+      ofelia.job-exec.checkin-noturno.command: "python /app/app/jobs/nightly_checkin.py"
 
       # 5. Alertas de Tarefas do Google Calendar (Roda a cada minuto)
       ofelia.job-exec.alertas-tarefas.schedule: "@every 1m"
-      ofelia.job-exec.alertas-tarefas.command: "python /app/processar_alertas_tarefas.py"
+      ofelia.job-exec.alertas-tarefas.command: "python /app/app/jobs/task_alerts.py"
 
   # ============================================
   # REDIS
