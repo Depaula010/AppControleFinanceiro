@@ -82,14 +82,19 @@ class Container(containers.DeclarativeContainer):
     )
 
     # ========================================================================
-    # SERVIÇOS (a serem implementados)
+    # SERVIÇOS
     # ========================================================================
 
-    # user_service = providers.Factory(
-    #     UserService,
-    #     user_repository=user_repository,
-    # )
+    # Import lazy para evitar imports circulares
+    from app.application.services.user_service import UserService
 
+    user_service = providers.Factory(
+        UserService,
+        user_repository=user_repository,
+        account_repository=account_repository,
+    )
+
+    # Outros serviços a serem implementados:
     # finance_service = providers.Factory(
     #     FinanceService,
     #     user_repository=user_repository,
