@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 @webhooks_bp.route('/whatsapp', methods=['POST'])
 @handle_errors(tag="WHATSAPP")
-@require_hmac_validation(header_name='X-Twilio-Signature')
+@require_hmac_validation
 def handle_whatsapp_webhook():
     """
     Webhook principal do WhatsApp com Intent Routing.
