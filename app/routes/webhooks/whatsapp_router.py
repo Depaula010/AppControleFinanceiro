@@ -23,7 +23,8 @@ from sqlalchemy import text
 import logging
 
 from app import db_engine
-from app.services import gemini_service, whatsapp_service
+from app.services import gemini_service
+from app.services import whatsapp_service
 from app.services.transaction_confirmation_service import TransactionConfirmationService
 
 # Utilitários Fase A
