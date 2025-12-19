@@ -271,16 +271,67 @@ Estamos sempre trabalhando para tornar o "Meu Secretário" ainda mais poderoso:
     python run.py
     ```
 
-**Estrutura do Projeto**
+**Estrutura do Projeto (Clean Architecture)**
 
-O projeto segue uma estrutura modular para facilitar a manutenção e o desenvolvimento:
+O projeto segue Clean Architecture para facilitar manutenção e testes:
 
 ```
-├── app/                  # Contém o núcleo da aplicação
-│   ├── routes/           # Blueprints do Flask (Controllers)
-│   ├── services/         # Lógica de negócio e integrações
-│   ├── __init__.py       # Fábrica da aplicação Flask (criação do app)
-│   └── config.py         # Configurações e chaves de API
-├── requirements.txt      # Dependências do Python
-└── run.py                # Ponto de entrada para a aplicação
+├── app/
+│   ├── domain/              # Entidades de negócio
+│   ├── application/         # Use Cases e DTOs
+│   │   └── use_cases/       # 9 use cases implementados
+│   │       ├── transactions/    # Criar transação, transferência, histórico
+│   │       ├── accounts/        # Consultar e atualizar saldos
+│   │       ├── invoices/        # Faturas de cartão
+│   │       └── reports/         # Relatórios mensais e por categoria
+│   ├── infrastructure/      # Database e serviços externos
+│   │   ├── database/        # ORM Models, Repositories, Adapters
+│   │   └── external_services/   # Integrações (WhatsApp, Google)
+│   ├── presentation/        # API Routes (Blueprints Flask)
+│   ├── services/            # Lógica de negócio
+│   │   └── finance/         # Transações, faturas, contas
+│   ├── jobs/                # Cron jobs (resumo matinal, check-in)
+│   ├── shared/              # Utilitários compartilhados
+│   │   ├── formatters/      # Moeda, data, alertas financeiros
+│   │   ├── validators/      # Validação e sanitização
+│   │   ├── security/        # HMAC, autenticação
+│   │   └── database/        # Retry patterns, conexões
+│   ├── __init__.py          # Factory da aplicação Flask
+│   └── config.py            # Configurações via variáveis de ambiente
+├── tests/                   # Testes automatizados
+│   ├── conftest.py          # Fixtures globais
+│   └── unit/                # 66 testes unitários
+├── docs/                    # Documentação técnica
+├── nginx/                   # Configuração do Nginx
+├── requirements.txt         # Dependências Python
+├── Dockerfile               # Build da imagem Docker
+├── docker-compose.yml       # Orquestração (API, Redis, Nginx, Cron)
+├── pytest.ini               # Configuração de testes
+└── run.py                   # Ponto de entrada
 ```
+
+---
+
+### 🧪 Testes Automatizados
+
+O projeto possui 66 testes unitários cobrindo:
+
+- **Formatters**: Formatação de alertas financeiros e moeda
+- **Use Cases**: DTOs e validações de transações, contas, faturas e relatórios
+- **Sintaxe**: Verificação de imports de todos os módulos
+
+```bash
+# Executar testes
+python -m pytest tests/unit/ -v
+
+# Resultado esperado: 66 passed
+```
+
+---
+
+### 📚 Documentação Adicional
+
+Para informações detalhadas sobre a refatoração do projeto, consulte:
+
+- [`docs/MASTER_REFACTORING_STATUS.md`](docs/MASTER_REFACTORING_STATUS.md) - Status completo da refatoração (8 fases)
+
