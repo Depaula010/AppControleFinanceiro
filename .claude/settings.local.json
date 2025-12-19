@@ -23,7 +23,8 @@
       "Bash(test:*)",
       "Bash(\"e:\\Projetos\\Projetos\\AppControleFinanceiro\\app\\presentation\\admin\\__init__.py\" <<'EOF'\n\"\"\"\nMódulo Admin - Rotas administrativas.\n\nOrganizado em sub-módulos por responsabilidade:\n- cache_management: Gerenciamento de cache Gemini\n- security: Blacklist e estatísticas de segurança\n- notification_config: Configurações de notificações\n\nMantém compatibilidade com importações antigas via admin_bp principal.\n\"\"\"\n\nfrom flask import Blueprint\n\n# Criar blueprint principal do admin\nadmin_bp = Blueprint('admin', __name__, url_prefix='/admin')\n\n# Importar e registrar sub-blueprints\nfrom .cache_management import cache_bp\nfrom .security import security_bp\nfrom .notification_config import notification_config_bp\n\n# Registrar todos os sub-blueprints no blueprint principal\nadmin_bp.register_blueprint(cache_bp)\nadmin_bp.register_blueprint(security_bp)\nadmin_bp.register_blueprint(notification_config_bp)\n\n# Exportar para manter compatibilidade\n__all__ = ['admin_bp']\nEOF)",
       "Bash(python3:*)",
-      "Bash(python test_phase_b2.py:*)"
+      "Bash(python test_phase_b2.py:*)",
+      "Bash(python -m py_compile:*)"
     ],
     "deny": [],
     "ask": []

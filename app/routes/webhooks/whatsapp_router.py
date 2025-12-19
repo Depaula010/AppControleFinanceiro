@@ -26,6 +26,9 @@ from app import db_engine
 from app.services import gemini_service, whatsapp_service
 from app.services.transaction_confirmation_service import TransactionConfirmationService
 
+# Utilitários Fase A
+from app.shared.decorators import handle_errors
+
 from . import webhooks_bp
 from .base import require_hmac_validation
 from .intents import route_intent
@@ -38,6 +41,7 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 @webhooks_bp.route('/whatsapp', methods=['POST'])
+@handle_errors(tag="WHATSAPP")
 @require_hmac_validation(header_name='X-Twilio-Signature')
 def handle_whatsapp_webhook():
     """
@@ -45,6 +49,10 @@ def handle_whatsapp_webhook():
 
     Recebe mensagens do WhatsApp via Twilio, classifica intent usando Gemini AI,
     e roteia para o handler apropriado.
+
+    Fase A: Refatorado com decorators (economia: ~6 linhas)
+    - @handle_errors: Tratamento de exceções automático
+    - @require_hmac_validation: Validação HMAC do Twilio (já existente)
 
     Segurança:
         - Validação de HMAC signature via @require_hmac_validation
@@ -66,160 +74,135 @@ def handle_whatsapp_webhook():
         → Handler: ConsultaSaldoIntent
         → Resposta: "💰 Saldo Nubank: R$ 1.234,56"
     """
-    try:
-        # 1. Extrair dados da mensagem
-        from_number = request.form.get('From', '').replace('whatsapp:', '')
-        message_body = request.form.get('Body', '').strip()
+    # 1. Extrair dados da mensagem
+    from_number = request.form.get('From', '').replace('whatsapp:', '')
+    message_body = request.form.get('Body', '').strip()
 
-        logger.info(
-            f"[WHATSAPP] Mensagem recebida de {from_number}: '{message_body[:50]}...'"
-        )
+    logger.info(
+        f"[WHATSAPP] Mensagem recebida de {from_number}: '{message_body[:50]}...'"
+    )
 
-        # Validação básica
-        if not from_number or not message_body:
-            logger.warning("[WHATSAPP] Mensagem sem número ou corpo")
-            return jsonify({"status": "erro", "mensagem": "Dados inválidos"}), 400
+    # Validação básica
+    if not from_number or not message_body:
+        logger.warning("[WHATSAPP] Mensagem sem número ou corpo")
+        return jsonify({"status": "erro", "mensagem": "Dados inválidos"}), 400
 
-        # 2. Identificar usuário pelo número WhatsApp
-        with db_engine.connect() as conn:
-            sql_user = text("""
-                SELECT id, nome_usuario
-                FROM Usuarios
-                WHERE numero_whatsapp = :numero AND ativo = TRUE
-            """)
-            user_row = conn.execute(sql_user, {"numero": from_number}).fetchone()
+    # 2. Identificar usuário pelo número WhatsApp
+    with db_engine.connect() as conn:
+        sql_user = text("""
+            SELECT id, nome_usuario
+            FROM Usuarios
+            WHERE numero_whatsapp = :numero AND ativo = TRUE
+        """)
+        user_row = conn.execute(sql_user, {"numero": from_number}).fetchone()
 
-            if not user_row:
-                logger.warning(
-                    f"[WHATSAPP] Usuário não encontrado para número {from_number}"
-                )
-                whatsapp_service.send_message(
-                    to_number=from_number,
-                    message=(
-                        "❌ Número não cadastrado.\n\n"
-                        "Por favor, cadastre-se primeiro no sistema ou "
-                        "atualize seu número WhatsApp nas configurações."
-                    )
-                )
-                return jsonify({"status": "usuario_nao_encontrado"}), 401
-
-            usuario_id, nome_usuario = user_row
-            logger.info(
-                f"[WHATSAPP] Usuário identificado: {nome_usuario} (ID: {usuario_id})"
+        if not user_row:
+            logger.warning(
+                f"[WHATSAPP] Usuário não encontrado para número {from_number}"
             )
-
-        # 3. Verificar se é confirmação de transação pendente
-        confirmation_service = TransactionConfirmationService()
-
-        if message_body.lower() in ['confirmar', 'sim', 's', 'ok']:
-            # Tentar confirmar transação pendente
-            result = confirmation_service.confirm_pending_transaction(usuario_id)
-
-            if result['success']:
-                whatsapp_service.send_message(
-                    to_number=from_number,
-                    message=result['message']
-                )
-                return jsonify({"status": "sucesso", "acao": "confirmacao"}), 200
-
-        elif message_body.lower() in ['cancelar', 'nao', 'n']:
-            # Tentar cancelar transação pendente
-            result = confirmation_service.cancel_pending_transaction(usuario_id)
-
-            if result['success']:
-                whatsapp_service.send_message(
-                    to_number=from_number,
-                    message=result['message']
-                )
-                return jsonify({"status": "sucesso", "acao": "cancelamento"}), 200
-
-        # 4. Classificar intent usando Gemini AI
-        try:
-            intent_name = gemini_service.classify_intent(message_body, usuario_id)
-            logger.info(
-                f"[WHATSAPP] Intent classificado: '{intent_name}' "
-                f"para mensagem '{message_body[:30]}...'"
-            )
-        except Exception as e:
-            logger.error(f"[WHATSAPP] Erro ao classificar intent: {e}", exc_info=True)
-            intent_name = None
-
-        # Se classificação falhar, enviar mensagem padrão
-        if not intent_name:
-            logger.warning("[WHATSAPP] Falha na classificação de intent")
             whatsapp_service.send_message(
                 to_number=from_number,
                 message=(
-                    "❓ Desculpe, não entendi sua mensagem.\n\n"
-                    "Você pode tentar:\n"
-                    "• Consultar seu saldo\n"
-                    "• Registrar uma despesa ou renda\n"
-                    "• Ver sua agenda\n"
-                    "• Configurar notificações\n\n"
-                    "Exemplo: 'quanto tenho no nubank?'"
+                    "❌ Número não cadastrado.\n\n"
+                    "Por favor, cadastre-se primeiro no sistema ou "
+                    "atualize seu número WhatsApp nas configurações."
                 )
             )
-            return jsonify({"status": "intent_nao_classificado"}), 200
+            return jsonify({"status": "usuario_nao_encontrado"}), 401
 
-        # 5. Rotear para intent handler apropriado
-        with db_engine.connect() as conn:
-            result = route_intent(
-                intent_name=intent_name,
-                usuario_id=usuario_id,
-                mensagem=message_body,
-                conn=conn,
-                numero_whatsapp=from_number
-            )
+        usuario_id, nome_usuario = user_row
+        logger.info(
+            f"[WHATSAPP] Usuário identificado: {nome_usuario} (ID: {usuario_id})"
+        )
 
-        # 6. Processar resultado e enviar resposta
+    # 3. Verificar se é confirmação de transação pendente
+    confirmation_service = TransactionConfirmationService()
+
+    if message_body.lower() in ['confirmar', 'sim', 's', 'ok']:
+        # Tentar confirmar transação pendente
+        result = confirmation_service.confirm_pending_transaction(usuario_id)
+
         if result['success']:
-            response_message = result['message']
-            logger.info(
-                f"[WHATSAPP] Intent '{intent_name}' processado com sucesso"
+            whatsapp_service.send_message(
+                to_number=from_number,
+                message=result['message']
             )
-        else:
-            response_message = result['message']
-            logger.warning(
-                f"[WHATSAPP] Intent '{intent_name}' falhou: {response_message[:50]}"
-            )
+            return jsonify({"status": "sucesso", "acao": "confirmacao"}), 200
 
-        # 7. Enviar resposta via WhatsApp
+    elif message_body.lower() in ['cancelar', 'nao', 'n']:
+        # Tentar cancelar transação pendente
+        result = confirmation_service.cancel_pending_transaction(usuario_id)
+
+        if result['success']:
+            whatsapp_service.send_message(
+                to_number=from_number,
+                message=result['message']
+            )
+            return jsonify({"status": "sucesso", "acao": "cancelamento"}), 200
+
+    # 4. Classificar intent usando Gemini AI
+    try:
+        intent_name = gemini_service.classify_intent(message_body, usuario_id)
+        logger.info(
+            f"[WHATSAPP] Intent classificado: '{intent_name}' "
+            f"para mensagem '{message_body[:30]}...'"
+        )
+    except Exception as e:
+        logger.error(f"[WHATSAPP] Erro ao classificar intent: {e}", exc_info=True)
+        intent_name = None
+
+    # Se classificação falhar, enviar mensagem padrão
+    if not intent_name:
+        logger.warning("[WHATSAPP] Falha na classificação de intent")
         whatsapp_service.send_message(
             to_number=from_number,
-            message=response_message
+            message=(
+                "❓ Desculpe, não entendi sua mensagem.\n\n"
+                "Você pode tentar:\n"
+                "• Consultar seu saldo\n"
+                "• Registrar uma despesa ou renda\n"
+                "• Ver sua agenda\n"
+                "• Configurar notificações\n\n"
+                "Exemplo: 'quanto tenho no nubank?'"
+            )
+        )
+        return jsonify({"status": "intent_nao_classificado"}), 200
+
+    # 5. Rotear para intent handler apropriado
+    with db_engine.connect() as conn:
+        result = route_intent(
+            intent_name=intent_name,
+            usuario_id=usuario_id,
+            mensagem=message_body,
+            conn=conn,
+            numero_whatsapp=from_number
         )
 
-        logger.info(f"[WHATSAPP] Resposta enviada para {from_number}")
-
-        return jsonify({
-            "status": "sucesso",
-            "intent": intent_name,
-            "usuario_id": usuario_id
-        }), 200
-
-    except Exception as e:
-        logger.error(
-            f"[WHATSAPP] Erro no processamento do webhook: {e}",
-            exc_info=True
+    # 6. Processar resultado e enviar resposta
+    if result['success']:
+        response_message = result['message']
+        logger.info(
+            f"[WHATSAPP] Intent '{intent_name}' processado com sucesso"
+        )
+    else:
+        response_message = result['message']
+        logger.warning(
+            f"[WHATSAPP] Intent '{intent_name}' falhou: {response_message[:50]}"
         )
 
-        # Tentar enviar mensagem de erro ao usuário
-        try:
-            if from_number:
-                whatsapp_service.send_message(
-                    to_number=from_number,
-                    message=(
-                        "❌ Desculpe, ocorreu um erro ao processar sua mensagem.\n\n"
-                        "Por favor, tente novamente em alguns instantes."
-                    )
-                )
-        except:
-            pass  # Se falhar ao enviar erro, não propagar exceção
+    # 7. Enviar resposta via WhatsApp
+    whatsapp_service.send_message(
+        to_number=from_number,
+        message=response_message
+    )
 
-        return jsonify({
-            "status": "erro",
-            "mensagem": "Erro interno ao processar mensagem"
-        }), 500
+    logger.info(f"[WHATSAPP] Resposta enviada para {from_number}")
+
+    return jsonify({
+        "status": "sucesso",
+        "intent": intent_name,
+        "usuario_id": usuario_id
+    }), 200
 
 
 # =============================================================================

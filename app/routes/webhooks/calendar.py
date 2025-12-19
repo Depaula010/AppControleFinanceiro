@@ -13,40 +13,40 @@ from sqlalchemy import text
 
 from app import db_engine
 from app.config import API_SECRET_KEY, BOT_WHATSAPP_URL
-from app.utils import ensure_db_connection
 from app.services import notification_service
 from app.services.google_calendar_oauth_service import GoogleCalendarOAuthService
+
+# Utilitários Fase A
+from app.shared.decorators import handle_errors
 
 from . import webhooks_bp
 
 
 
 @webhooks_bp.route('/connect-calendar/<int:usuario_id>', methods=['GET'])
+@handle_errors(tag="OAUTH_CONNECT")
 def connect_calendar(usuario_id):
     """
     Endpoint para iniciar processo de conexão OAuth2.
     Usuário acessa via link enviado pelo WhatsApp.
+
+    Fase A: Refatorado com decorators (economia: ~8 linhas)
+    - @handle_errors: Tratamento de exceções automático
     """
-    try:
-        ensure_db_connection()
-    except Exception as e:
-        return jsonify({
-            "status": "erro",
-            "resposta": "Banco de dados temporariamente indisponível"
-        }), 503
-        
-    try:
-        # Verificar se usuário existe
-        with db_engine.connect() as conn:
-            sql = text("SELECT nome FROM Usuarios WHERE id = :uid")
-            usuario = conn.execute(sql, {"uid": usuario_id}).fetchone()
-        
-        if not usuario:
-            return "❌ Usuário não encontrado", 404
-        
-        # Verificar se já está conectado
-        if GoogleCalendarOAuthService.is_user_connected(usuario_id):
-            return """
+    if not db_engine:
+        return jsonify({"status": "erro", "mensagem": "Serviço não configurado"}), 503
+
+    # Verificar se usuário existe
+    with db_engine.connect() as conn:
+        sql = text("SELECT nome FROM Usuarios WHERE id = :uid")
+        usuario = conn.execute(sql, {"uid": usuario_id}).fetchone()
+
+    if not usuario:
+        return "❌ Usuário não encontrado", 404
+
+    # Verificar se já está conectado
+    if GoogleCalendarOAuthService.is_user_connected(usuario_id):
+        return """
             <!DOCTYPE html>
             <html>
             <head>
@@ -95,33 +95,32 @@ def connect_calendar(usuario_id):
             </body>
             </html>
             """, 200
-        
-        # Gerar URL de autorização
-        auth_url = GoogleCalendarOAuthService.get_authorization_url(usuario_id)
-        
-        # Redirecionar para Google
-        return redirect(auth_url)
-    
-    except Exception as e:
-        print(f"[OAUTH] Erro ao conectar: {e}")
-        return f"❌ Erro ao conectar: {str(e)}", 500
+
+    # Gerar URL de autorização
+    auth_url = GoogleCalendarOAuthService.get_authorization_url(usuario_id)
+
+    # Redirecionar para Google
+    return redirect(auth_url)
 
 
 @webhooks_bp.route('/oauth2callback', methods=['GET'])
+@handle_errors(tag="OAUTH_CALLBACK")
 def oauth2callback():
     """
     Callback do Google após autorização.
     Google redireciona usuário para cá com código de autorização.
+
+    Fase A: Refatorado com decorators (economia: ~5 linhas)
+    - @handle_errors: Tratamento de exceções automático
     """
-    try:
-        # Pegar parâmetros
-        code = request.args.get('code')
-        state = request.args.get('state')
-        error = request.args.get('error')
-        
-        # Verificar se usuário negou
-        if error:
-            return """
+    # Pegar parâmetros
+    code = request.args.get('code')
+    state = request.args.get('state')
+    error = request.args.get('error')
+
+    # Verificar se usuário negou
+    if error:
+        return """
             <!DOCTYPE html>
             <html>
             <head>
@@ -289,50 +288,24 @@ def oauth2callback():
         </body>
         </html>
         """, 200
-    
-    except Exception as e:
-        print(f"[OAUTH] Erro no callback: {e}")
-        return f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Erro</title>
-            <meta charset="utf-8">
-            <style>
-                body {{ text-align: center; padding: 50px; font-family: Arial; }}
-                .error {{ color: red; }}
-            </style>
-        </head>
-        <body>
-            <h1 class="error">❌ Erro</h1>
-            <p>Ocorreu um erro ao processar a autorização:</p>
-            <p><code>{str(e)}</code></p>
-            <p>Tente novamente ou contate o suporte.</p>
-        </body>
-        </html>
-        """, 500
 
 
 @webhooks_bp.route('/disconnect-calendar/<int:usuario_id>', methods=['POST'])
+@handle_errors(tag="OAUTH_DISCONNECT")
 def disconnect_calendar(usuario_id):
     """
     Permite usuário desconectar Google Calendar.
     Pode ser chamado via WhatsApp ou interface web.
+
+    Fase A: Refatorado com decorators (economia: ~5 linhas)
+    - @handle_errors: Tratamento de exceções automático
     """
-    try:
-        # Autenticar (verificar se é o próprio usuário)
-        # ... adicionar autenticação se necessário ...
+    # Autenticar (verificar se é o próprio usuário)
+    # ... adicionar autenticação se necessário ...
 
-        GoogleCalendarOAuthService.revoke_access(usuario_id)
+    GoogleCalendarOAuthService.revoke_access(usuario_id)
 
-        return jsonify({
-            "status": "sucesso",
-            "mensagem": "Google Calendar desconectado com sucesso"
-        }), 200
-
-    except Exception as e:
-        print(f"[OAUTH] Erro ao desconectar: {e}")
-        return jsonify({
-            "status": "erro",
-            "mensagem": str(e)
-        }), 500
+    return jsonify({
+        "status": "sucesso",
+        "mensagem": "Google Calendar desconectado com sucesso"
+    }), 200
