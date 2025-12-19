@@ -2535,8 +2535,7 @@ def handle_whatsapp_webhook():
         return jsonify({"status": "erro", "resposta": "Erro ao processar."}), 500
     
 
-@webhooks_bp.route('/webhook-sms-payment', methods=['POST'])
-def handle_sms_payment():
+def legacy_handle_sms_payment():
     '''
     Endpoint específico para pagamentos via Sms (iPhone Automation).
     
@@ -2672,9 +2671,15 @@ def handle_sms_payment():
     except Exception as e:
         print(f"[{conta_pagamento}] Erro: {e}")
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
-    
-@webhooks_bp.route('/connect-calendar/<int:usuario_id>', methods=['GET'])
-def connect_calendar(usuario_id):
+
+
+# ================================================================
+# NOTA: As funcoes abaixo sao LEGACY (nao sao mais usadas).
+# As rotas foram migradas para webhooks/handlers/
+# Este codigo foi mantido apenas como referencia historica.
+# ================================================================
+
+def legacy_connect_calendar(usuario_id):
     """
     Endpoint para iniciar processo de conexão OAuth2.
     Usuário acessa via link enviado pelo WhatsApp.
@@ -2759,8 +2764,7 @@ def connect_calendar(usuario_id):
         return f"❌ Erro ao conectar: {str(e)}", 500
 
 
-@webhooks_bp.route('/oauth2callback', methods=['GET'])
-def oauth2callback():
+def legacy_oauth2callback():
     """
     Callback do Google após autorização.
     Google redireciona usuário para cá com código de autorização.
@@ -2965,8 +2969,7 @@ def oauth2callback():
         """, 500
 
 
-@webhooks_bp.route('/disconnect-calendar/<int:usuario_id>', methods=['POST'])
-def disconnect_calendar(usuario_id):
+def legacy_disconnect_calendar(usuario_id):
     """
     Permite usuário desconectar Google Calendar.
     Pode ser chamado via WhatsApp ou interface web.
@@ -2994,8 +2997,7 @@ def disconnect_calendar(usuario_id):
 # ENDPOINTS DE RESERVA DE EMERGÊNCIA (Baseados em Agendamentos)
 # ================================================================
 
-@webhooks_bp.route('/api/agendamento/<int:agendamento_id>/reserva', methods=['PATCH'])
-def toggle_incluir_reserva_agendamento(agendamento_id):
+def legacy_toggle_incluir_reserva_agendamento(agendamento_id):
     """
     Altera o flag incluir_na_reserva de um agendamento específico.
 
@@ -3125,8 +3127,7 @@ def toggle_incluir_reserva_agendamento(agendamento_id):
         }), 500
 
 
-@webhooks_bp.route('/api/agendamentos/reserva', methods=['GET'])
-def listar_agendamentos_reserva():
+def legacy_listar_agendamentos_reserva():
     """
     Lista agendamentos do usuário com filtros para gerenciar a reserva de emergência.
 

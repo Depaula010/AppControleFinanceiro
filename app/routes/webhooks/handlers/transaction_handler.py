@@ -25,18 +25,18 @@ class TransactionHandler:
     
     def handle_automate(self) -> Tuple[Any, int]:
         """Processa webhook do Automate (Android)."""
-        from app.routes.webhooks_logic import handle_automate_webhook as legacy
-        return legacy()
-    
+        from app.routes.webhooks.logic import handle_automate_webhook
+        return handle_automate_webhook()
+
     def handle_api_transacao(self) -> Tuple[Any, int]:
         """Processa API de transacao direta."""
-        from app.routes.webhooks_logic import handle_api_transacao as legacy
-        return legacy()
-    
+        from app.routes.webhooks.logic import handle_api_transacao
+        return handle_api_transacao()
+
     def handle_sms_payment(self) -> Tuple[Any, int]:
         """Processa pagamento via SMS."""
-        from app.routes.webhooks_logic import handle_sms_payment as legacy
-        return legacy()
+        from app.routes.webhooks.logic import legacy_handle_sms_payment
+        return legacy_handle_sms_payment()
 
 
 # Instancia singleton

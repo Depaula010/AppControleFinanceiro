@@ -16,18 +16,18 @@ class CalendarHandler:
     
     def handle_connect(self, usuario_id: int) -> Tuple[Any, int]:
         """Inicia processo de conexao OAuth2."""
-        from app.routes.webhooks_logic import connect_calendar as legacy
-        return legacy(usuario_id)
-    
+        from app.routes.webhooks.logic import legacy_connect_calendar
+        return legacy_connect_calendar(usuario_id)
+
     def handle_oauth2callback(self) -> Tuple[Any, int]:
         """Callback do Google apos autorizacao."""
-        from app.routes.webhooks_logic import oauth2callback as legacy
-        return legacy()
-    
+        from app.routes.webhooks.logic import legacy_oauth2callback
+        return legacy_oauth2callback()
+
     def handle_disconnect(self, usuario_id: int) -> Tuple[Any, int]:
         """Desconecta Google Calendar."""
-        from app.routes.webhooks_logic import disconnect_calendar as legacy
-        return legacy(usuario_id)
+        from app.routes.webhooks.logic import legacy_disconnect_calendar
+        return legacy_disconnect_calendar(usuario_id)
 
 
 # Instancia singleton

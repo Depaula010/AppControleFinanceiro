@@ -15,13 +15,13 @@ class ReserveHandler:
     
     def handle_toggle_reserva(self, agendamento_id: int) -> Tuple[Any, int]:
         """Altera flag incluir_na_reserva."""
-        from app.routes.webhooks_logic import toggle_incluir_reserva_agendamento as legacy
-        return legacy(agendamento_id)
-    
+        from app.routes.webhooks.logic import legacy_toggle_incluir_reserva_agendamento
+        return legacy_toggle_incluir_reserva_agendamento(agendamento_id)
+
     def handle_listar_reserva(self) -> Tuple[Any, int]:
         """Lista agendamentos para reserva."""
-        from app.routes.webhooks_logic import listar_agendamentos_reserva as legacy
-        return legacy()
+        from app.routes.webhooks.logic import legacy_listar_agendamentos_reserva
+        return legacy_listar_agendamentos_reserva()
 
 
 # Instancia singleton
