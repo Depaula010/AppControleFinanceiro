@@ -17,7 +17,7 @@ from flask import jsonify, request
 from app.presentation.admin import admin_bp
 
 # Imports necessários para rotas legadas
-from motor_agendamentos import processar_agendamentos
+from app.jobs.schedule_processor import processar_agendamentos
 from app.config import API_SECRET_KEY
 
 
