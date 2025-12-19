@@ -33,10 +33,12 @@ from app.services.event_confirmation_service import EventConfirmationService
 from datetime import date, timedelta, datetime
 from zoneinfo import ZoneInfo
 
-webhooks_bp = Blueprint('webhooks', __name__)
+# NOTA: Este arquivo agora contem apenas LOGICA, sem registro de rotas.
+# As rotas sao registradas em webhooks/__init__.py
+# webhooks_bp foi movido para webhooks/__init__.py
 
 
-@webhooks_bp.route('/webhook-automate', methods=['POST'])
+# Funcao de logica (sem decorator)
 def handle_automate_webhook():
     """Rota do Gatilho Android com CONFIRMAÇÃO"""
     
@@ -170,7 +172,7 @@ def handle_automate_webhook():
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
 
 
-@webhooks_bp.route('/api/transacao', methods=['POST'])
+# Funcao de logica (sem decorator)
 def handle_api_transacao():
     """
     Endpoint direto para registro de transações via iPhone/automações.
@@ -433,7 +435,7 @@ def handle_api_transacao():
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
 
 
-@webhooks_bp.route('/webhook-whatsapp', methods=['POST'])
+# Funcao de logica (sem decorator)
 def handle_whatsapp_webhook():
     """Webhook WhatsApp com CONFIRMAÇÃO e suporte a cadastro"""
     
