@@ -1,16 +1,21 @@
 # app/shared/__init__.py
 """
-Módulo compartilhado de utilitários
+Modulo shared - Utilitarios reutilizaveis organizados por funcao.
 
-Este módulo centraliza funções reutilizáveis organizadas por responsabilidade:
-- formatters: Formatação de moedas, datas, etc.
-- validators: Validação e sanitização de inputs
-- security: Utilitários de segurança (HMAC, comparação segura, etc.)
-- database: Utilitários de conexão e retry de banco de dados
+Submodulos:
+- formatters: Formatacao de moedas, datas, etc.
+- validators: Validacao e sanitizacao de inputs
+- security: HMAC, assinaturas, etc.
+- database: Retry patterns para banco de dados
 """
 
-# Importar e re-exportar para facilitar uso
-from .formatters import formatar_moeda, formatar_mes_pt, formatar_mes_ano_pt, formatar_dia_semana_pt
+from .formatters import (
+    formatar_moeda,
+    formatar_mes_pt,
+    formatar_mes_ano_pt,
+    formatar_dia_semana_pt,
+    FinancialAlertFormatter
+)
 from .validators import sanitize_for_log, sanitize_input
 from .security import verify_hmac_signature, generate_hmac_signature, compare_keys_safe
 from .database import with_db_retry, check_db_connection, ensure_db_connection
@@ -21,6 +26,7 @@ __all__ = [
     'formatar_mes_pt',
     'formatar_mes_ano_pt',
     'formatar_dia_semana_pt',
+    'FinancialAlertFormatter',
     # Validators
     'sanitize_for_log',
     'sanitize_input',
