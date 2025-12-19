@@ -267,9 +267,43 @@ def get_fatura_valor(conn, usuario_id, conta_id_cartao=None):
     return faturas
 
 
+def get_fatura_id_if_credit_card(
+    conn,
+    conta_id: int,
+    conta_tipo: str,
+    data_transacao,
+    usuario_id: int
+) -> Optional[int]:
+    """
+    Retorna fatura_id se conta for cartão de crédito, None caso contrário.
+    Centraliza lógica de ensure_current_invoice_exists + get_or_create_fatura.
+
+    Este helper elimina código duplicado nos webhooks onde o padrão abaixo
+    era repetido:
+        if conta_tipo == 'Cartão de Crédito':
+            ensure_current_invoice_exists(conn, usuario_id, conta_id)
+            fatura_id = get_or_create_fatura(conn, conta_id, data, usuario_id)
+
+    Args:
+        conn: Conexão do banco
+        conta_id: ID da conta
+        conta_tipo: Tipo da conta ('Conta Corrente', 'Cartão de Crédito', etc.)
+        data_transacao: Data da transação
+        usuario_id: ID do usuário
+
+    Returns:
+        ID da fatura se for cartão de crédito, None caso contrário
+    """
+    if conta_tipo != 'Cartão de Crédito':
+        return None
+
+    ensure_current_invoice_exists(conn, usuario_id, conta_id)
+    return get_or_create_fatura(conn, conta_id, data_transacao, usuario_id)
+
 
 __all__ = [
     'get_or_create_fatura',
     'ensure_current_invoice_exists',
     'get_fatura_valor',
+    'get_fatura_id_if_credit_card',
 ]

@@ -70,6 +70,7 @@ from .invoice_service import (
     get_or_create_fatura,
     ensure_current_invoice_exists,
     get_fatura_valor,
+    get_fatura_id_if_credit_card,
 )
 
 from .bills_service import (
@@ -122,6 +123,7 @@ __all__ = [
     'get_or_create_fatura',
     'ensure_current_invoice_exists',
     'get_fatura_valor',
+    'get_fatura_id_if_credit_card',
     # Bills
     'get_upcoming_bills_and_invoices',
     'get_vencimentos_periodo',

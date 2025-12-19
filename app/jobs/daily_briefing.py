@@ -23,61 +23,8 @@ def format_financial_alerts_standalone(alertas_data):
     Returns:
         str: Mensagem formatada ou None
     """
-    contas_hoje = alertas_data.get('contas_hoje', [])
-    contas_amanha = alertas_data.get('contas_amanha', [])
-    faturas_hoje = alertas_data.get('faturas_hoje', [])
-    faturas_amanha = alertas_data.get('faturas_amanha', [])
-
-    tem_alertas = any([contas_hoje, contas_amanha, faturas_hoje, faturas_amanha])
-
-    if not tem_alertas:
-        return None
-
-    msg_parts = ["🌅 *Bom dia!*\n", "💰 *ALERTAS FINANCEIROS*\n"]
-
-    # Contas/faturas que vencem HOJE
-    if contas_hoje or faturas_hoje:
-        # Separar receitas e despesas
-        despesas_hoje = [c for c in contas_hoje if c.get('tipo') == 'Despesa']
-        receitas_hoje = [c for c in contas_hoje if c.get('tipo') == 'Receita']
-
-        if despesas_hoje or faturas_hoje:
-            msg_parts.append("⚠️ *VENCE HOJE (Despesas):*")
-            for conta in despesas_hoje:
-                valor_formatado = f"{conta['valor']:.2f}".replace('.', ',')
-                msg_parts.append(f"• {conta['descricao']} - R$ {valor_formatado}")
-            for fatura in faturas_hoje:
-                valor_formatado = f"{fatura['valor']:.2f}".replace('.', ',')
-                msg_parts.append(f"• Fatura {fatura['cartao']} - R$ {valor_formatado}")
-
-        if receitas_hoje:
-            msg_parts.append("\n💵 *VENCE HOJE (Receitas):*")
-            for conta in receitas_hoje:
-                valor_formatado = f"{conta['valor']:.2f}".replace('.', ',')
-                msg_parts.append(f"• {conta['descricao']} - R$ {valor_formatado}")
-
-    # Contas/faturas que vencem AMANHÃ
-    if contas_amanha or faturas_amanha:
-        # Separar receitas e despesas
-        despesas_amanha = [c for c in contas_amanha if c.get('tipo') == 'Despesa']
-        receitas_amanha = [c for c in contas_amanha if c.get('tipo') == 'Receita']
-
-        if despesas_amanha or faturas_amanha:
-            msg_parts.append("\n🔔 *VENCE AMANHÃ (Despesas):*")
-            for conta in despesas_amanha:
-                valor_formatado = f"{conta['valor']:.2f}".replace('.', ',')
-                msg_parts.append(f"• {conta['descricao']} - R$ {valor_formatado}")
-            for fatura in faturas_amanha:
-                valor_formatado = f"{fatura['valor']:.2f}".replace('.', ',')
-                msg_parts.append(f"• Fatura {fatura['cartao']} - R$ {valor_formatado}")
-
-        if receitas_amanha:
-            msg_parts.append("\n💰 *VENCE AMANHÃ (Receitas):*")
-            for conta in receitas_amanha:
-                valor_formatado = f"{conta['valor']:.2f}".replace('.', ',')
-                msg_parts.append(f"• {conta['descricao']} - R$ {valor_formatado}")
-
-    return "\n".join(msg_parts)
+    from app.shared.formatters.financial_alert_formatter import FinancialAlertFormatter
+    return FinancialAlertFormatter.format(alertas_data, include_greeting=True)
 
 
 def montar_mensagem_unificada(resumo_componente, alertas_componente, config):
