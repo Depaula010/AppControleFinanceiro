@@ -42,6 +42,7 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 @webhooks_bp.route('/whatsapp', methods=['POST'])
+@webhooks_bp.route('/webhook-whatsapp', methods=['POST'])  # Alias para compatibilidade
 @handle_errors(tag="WHATSAPP")
 @require_hmac_validation
 def handle_whatsapp_webhook():
