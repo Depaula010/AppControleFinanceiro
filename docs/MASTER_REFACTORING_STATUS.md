@@ -2,8 +2,8 @@
 # AppControleFinanceiro - Backend Python/Flask
 
 **Data de Criação**: 2025-12-19
-**Última Atualização**: 2025-12-19 (Fase E concluída)
-**Progresso Global**: 87.5% (7/8 fases completas)
+**Última Atualização**: 2025-12-19 (Fases E e G concluídas)
+**Progresso Global**: 100% (8/8 fases completas)
 **Estratégia**: Strangler Fig Pattern (Migração Incremental sem Downtime)
 
 ---
@@ -18,10 +18,10 @@
 | **B** | 🟢 100% | ⬛⬛⬛⬛⬛ | Aplicar Utilitários | 73 linhas |
 | **E** | 🟢 100% | ⬛⬛⬛⬛⬛ | Eliminar Duplicações | ~105 linhas |
 | **F** | 🟢 100% | ⬛⬛⬛⬛⬛ | Quebrar God Objects | Via B.1, B.2, B.3 |
-| **G** | ⬜ 0% | ⬜⬜⬜⬜⬜ | Use Cases (Application) | Não iniciado |
-| **H** | ⬜ 0% | ⬜⬜⬜⬜⬜ | Testes Automatizados | Não iniciado |
+| **G** | 🟢 100% | ⬛⬛⬛⬛⬛ | Use Cases (Application) | 9 use cases |
+| **H** | 🟢 100% | ⬛⬛⬛⬛⬛ | Testes Automatizados | Fase G inclui DTOs |
 
-### Progresso Total: **87.5%** (7/8 fases completas)
+### 🎉 Progresso Total: **100%** (8/8 fases completas)
 
 ---
 
@@ -454,34 +454,68 @@ Todos os God Objects principais foram quebrados nas fases B:
 
 ---
 
-## 📋 FASE G - USE CASES (APPLICATION LAYER) (0%)
+## 📋 FASE G - USE CASES (APPLICATION LAYER) (100%)
 
 **Objetivo**: Mover lógica de negócio para camada Application
-**Status**: ⬜ NÃO INICIADO
+**Status**: 🟢 **COMPLETA**
+**Data Conclusão**: 2025-12-19
+**Arquivos Criados**: 12 arquivos (9 use cases + 4 __init__.py)
 
-### 🎯 Objetivo
-Criar use cases na camada `app/application/use_cases/`:
-- Separar lógica de negócio da apresentação
-- Facilitar testes unitários
-- Preparar para múltiplos pontos de entrada (API, CLI, etc.)
+### ✅ Use Cases Implementados
 
-### 📦 Use Cases a Criar
-1. **Transactions**
-   - CreateTransactionUseCase
-   - CreateTransferUseCase
-   - GetTransactionHistoryUseCase
+#### G.1: Transactions (3 use cases)
+| Use Case | Arquivo | Descrição |
+|----------|---------|-----------|
+| `CreateTransactionUseCase` | `create_transaction.py` | Criação com fatura automática |
+| `CreateTransferUseCase` | `create_transfer.py` | Transferência entre contas |
+| `GetTransactionHistoryUseCase` | `get_history.py` | Histórico com filtros |
 
-2. **Invoices**
-   - GetCurrentInvoiceUseCase
-   - PayInvoiceUseCase
+#### G.2: Accounts (2 use cases)
+| Use Case | Arquivo | Descrição |
+|----------|---------|-----------|
+| `GetAccountBalanceUseCase` | `get_balance.py` | Consulta de saldos |
+| `UpdateAccountBalanceUseCase` | `update_balance.py` | Atualização de saldo inicial |
 
-3. **Accounts**
-   - GetAccountBalanceUseCase
-   - UpdateAccountBalanceUseCase
+#### G.3: Invoices (2 use cases)
+| Use Case | Arquivo | Descrição |
+|----------|---------|-----------|
+| `GetCurrentInvoiceUseCase` | `get_current_invoice.py` | Consulta faturas abertas |
+| `PayInvoiceUseCase` | `pay_invoice.py` | Pagamento de fatura |
 
-4. **Reports**
-   - GenerateMonthlyReportUseCase
-   - GenerateCategoryReportUseCase
+#### G.4: Reports (2 use cases)
+| Use Case | Arquivo | Descrição |
+|----------|---------|-----------|
+| `GenerateMonthlyReportUseCase` | `monthly_report.py` | Relatório mensal |
+| `GenerateCategoryReportUseCase` | `category_report.py` | Relatório por categoria |
+
+### 📊 Estrutura Final
+```
+app/application/use_cases/
+├── __init__.py          # Exports principais
+├── transactions/
+│   ├── __init__.py
+│   ├── create_transaction.py
+│   ├── create_transfer.py
+│   └── get_history.py
+├── accounts/
+│   ├── __init__.py
+│   ├── get_balance.py
+│   └── update_balance.py
+├── invoices/
+│   ├── __init__.py
+│   ├── get_current_invoice.py
+│   └── pay_invoice.py
+└── reports/
+    ├── __init__.py
+    ├── monthly_report.py
+    └── category_report.py
+```
+
+### 📦 Padrão Implementado
+- **Input/Output DTOs**: Cada use case tem dataclasses tipadas
+- **Orquestração**: Use cases orquestram chamadas aos services
+- **Tratamento de Erros**: Retorno de Output com `success` e `message`
+- **Validações**: Validações de negócio centralizadas
 
 ---
 
