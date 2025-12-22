@@ -11,6 +11,7 @@ from .date_formatter import (
     DIAS_SEMANA_PT_BR
 )
 from .financial_alert_formatter import FinancialAlertFormatter
+from .invoice_notification_formatter import InvoiceNotificationFormatter
 
 __all__ = [
     'formatar_moeda',
@@ -20,5 +21,6 @@ __all__ = [
     'MESES_PT_BR',
     'DIAS_SEMANA_PT_BR',
     'FinancialAlertFormatter',
+    'InvoiceNotificationFormatter',
 ]
 

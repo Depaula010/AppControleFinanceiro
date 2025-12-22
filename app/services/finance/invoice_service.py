@@ -301,9 +301,185 @@ def get_fatura_id_if_credit_card(
     return get_or_create_fatura(conn, conta_id, data_transacao, usuario_id)
 
 
+def close_expired_invoices(conn, dry_run=False):
+    """
+    Fecha faturas cujo data_fechamento já passou.
+
+    Regra de Negócio: Faturas fecham às 23:59:59 do dia de fechamento.
+    Portanto, fechamos todas as faturas cuja data_fechamento < hoje.
+
+    Args:
+        conn: Database connection
+        dry_run: If True, only returns what would be closed without updating
+
+    Returns:
+        List of dicts: [{
+            'id': int,
+            'conta_id': int,
+            'nome_conta': str,
+            'data_fechamento': date,
+            'data_vencimento': date,
+            'valor_total': float,
+            'usuario_id': int,
+            'numero_whatsapp': str
+        }]
+    """
+    # Query invoices to close
+    sql_find = text("""
+        SELECT
+            f.id,
+            f.conta_id,
+            f.data_fechamento,
+            f.data_vencimento,
+            c.nome_conta,
+            c.usuario_id,
+            u.numero_whatsapp,
+            COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) as valor_total
+        FROM Faturas f
+        JOIN Contas c ON f.conta_id = c.id
+        JOIN Usuarios u ON c.usuario_id = u.id
+        LEFT JOIN Transacoes t ON f.id = t.fatura_id
+        WHERE f.status = 'Aberta'
+          AND f.data_fechamento < CURRENT_DATE
+        GROUP BY f.id, f.conta_id, f.data_fechamento, f.data_vencimento,
+                 c.nome_conta, c.usuario_id, u.numero_whatsapp
+        ORDER BY f.data_fechamento ASC
+    """)
+
+    result = conn.execute(sql_find).fetchall()
+
+    invoices_to_close = []
+    for row in result:
+        invoices_to_close.append({
+            'id': row.id,
+            'conta_id': row.conta_id,
+            'nome_conta': row.nome_conta,
+            'data_fechamento': row.data_fechamento,
+            'data_vencimento': row.data_vencimento,
+            'valor_total': float(row.valor_total),
+            'usuario_id': row.usuario_id,
+            'numero_whatsapp': row.numero_whatsapp
+        })
+
+    if dry_run:
+        return invoices_to_close
+
+    # Actually close the invoices
+    if invoices_to_close:
+        invoice_ids = [inv['id'] for inv in invoices_to_close]
+        sql_update = text("""
+            UPDATE Faturas
+            SET status = 'Fechada', updated_at = CURRENT_TIMESTAMP
+            WHERE id = ANY(:ids)
+        """)
+        conn.execute(sql_update, {"ids": invoice_ids})
+        conn.commit()
+
+    return invoices_to_close
+
+
+def get_invoices_due_soon(conn, days_before=3):
+    """
+    Busca faturas fechadas que vencerão em N dias.
+
+    Args:
+        conn: Database connection
+        days_before: Alertar X dias antes do vencimento
+
+    Returns:
+        List of dicts with invoice details
+    """
+    from datetime import timedelta
+
+    target_date = date.today() + timedelta(days=days_before)
+
+    sql = text("""
+        SELECT
+            f.id,
+            f.conta_id,
+            f.data_vencimento,
+            c.nome_conta,
+            c.usuario_id,
+            u.numero_whatsapp,
+            COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) as valor_total
+        FROM Faturas f
+        JOIN Contas c ON f.conta_id = c.id
+        JOIN Usuarios u ON c.usuario_id = u.id
+        LEFT JOIN Transacoes t ON f.id = t.fatura_id
+        WHERE f.status = 'Fechada'
+          AND f.data_vencimento = :target_date
+        GROUP BY f.id, f.conta_id, f.data_vencimento, c.nome_conta, c.usuario_id, u.numero_whatsapp
+    """)
+
+    result = conn.execute(sql, {"target_date": target_date}).fetchall()
+
+    invoices = []
+    for row in result:
+        invoices.append({
+            'id': row.id,
+            'conta_id': row.conta_id,
+            'nome_conta': row.nome_conta,
+            'data_vencimento': row.data_vencimento,
+            'valor_total': float(row.valor_total),
+            'usuario_id': row.usuario_id,
+            'numero_whatsapp': row.numero_whatsapp,
+            'dias_ate_vencimento': days_before
+        })
+
+    return invoices
+
+
+def get_overdue_invoices(conn):
+    """
+    Busca faturas vencidas e não pagas.
+
+    Returns:
+        List of dicts with overdue invoice details
+    """
+    sql = text("""
+        SELECT
+            f.id,
+            f.conta_id,
+            f.data_vencimento,
+            c.nome_conta,
+            c.usuario_id,
+            u.numero_whatsapp,
+            COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) as valor_total,
+            CURRENT_DATE - f.data_vencimento as dias_atrasado
+        FROM Faturas f
+        JOIN Contas c ON f.conta_id = c.id
+        JOIN Usuarios u ON c.usuario_id = u.id
+        LEFT JOIN Transacoes t ON f.id = t.fatura_id
+        WHERE f.status IN ('Aberta', 'Fechada')
+          AND f.data_vencimento < CURRENT_DATE
+        GROUP BY f.id, f.conta_id, f.data_vencimento, c.nome_conta, c.usuario_id, u.numero_whatsapp
+        ORDER BY f.data_vencimento ASC
+    """)
+
+    result = conn.execute(sql).fetchall()
+
+    invoices = []
+    for row in result:
+        invoices.append({
+            'id': row.id,
+            'conta_id': row.conta_id,
+            'nome_conta': row.nome_conta,
+            'data_vencimento': row.data_vencimento,
+            'valor_total': float(row.valor_total),
+            'usuario_id': row.usuario_id,
+            'numero_whatsapp': row.numero_whatsapp,
+            'dias_atrasado': row.dias_atrasado
+        })
+
+    return invoices
+
+
 __all__ = [
     'get_or_create_fatura',
     'ensure_current_invoice_exists',
     'get_fatura_valor',
     'get_fatura_id_if_credit_card',
+    'close_expired_invoices',
+    'get_invoices_due_soon',
+    'get_overdue_invoices',
 ]
