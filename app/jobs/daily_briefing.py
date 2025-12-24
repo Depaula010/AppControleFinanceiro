@@ -8,8 +8,13 @@ import os
 import sys
 from datetime import datetime, time, date
 
-# Adicionar diretório raiz ao path para encontrar o módulo 'app'
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Adicionar diretório raiz ao path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(current_dir))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from app.jobs.base_job import BaseJob
 
 
 def format_financial_alerts_standalone(alertas_data):
@@ -62,129 +67,122 @@ def montar_mensagem_unificada(resumo_componente, alertas_componente, config):
     return None
 
 
-def processar_resumo_matinal():
-    """
-    Função principal que o Cron Job vai rodar.
-    Envia resumo matinal e/ou alertas financeiros para usuários configurados.
-    """
-    print(f"[RESUMO-MATINAL] Início do processamento - {datetime.now()}")
+class DailyBriefingJob(BaseJob):
+    """Job para processar resumo matinal e alertas financeiros."""
 
-    try:
-        # 1. IMPORTANTE: Criar instância da aplicação para acessar o Banco
-        from app import create_app
-        app = create_app()
+    def get_job_name(self) -> str:
+        return "RESUMO-MATINAL"
 
-        # 2. Entrar no contexto da aplicação
-        with app.app_context():
+    def execute(self):
+        """
+        Envia resumo matinal e/ou alertas financeiros para usuários configurados.
+        Executado dentro do Flask app context.
+        """
+        from app.services.notification_config_service import NotificationConfigService
+        from app.services.daily_briefing_service import DailyBriefingService
+        from app.services.gemini_service import generate_daily_briefing
+        from app.services.finance_service import get_upcoming_bills_and_invoices
+        from app.services.notification_service import enviar_notificacao_whatsapp
+        from app import db_engine
+        from app.config import BOT_WHATSAPP_URL, API_SECRET_KEY
 
-            # Importar serviços (agora com acesso ao DB garantido)
-            from app.services.notification_config_service import NotificationConfigService
-            from app.services.daily_briefing_service import DailyBriefingService
-            from app.services.gemini_service import generate_daily_briefing
-            from app.services.finance_service import get_upcoming_bills_and_invoices
-            from app.services.notification_service import enviar_notificacao_whatsapp
-            from app import db_engine
+        # Obter hora atual (zerando segundos para bater com o banco)
+        hora_atual = datetime.now().time().replace(second=0, microsecond=0)
 
-            # Obter hora atual (zerando segundos para bater com o banco)
-            hora_atual = datetime.now().time().replace(second=0, microsecond=0)
+        self._log(f"Buscando usuários para notificar às {hora_atual.strftime('%H:%M')}")
 
-            print(f"[RESUMO-MATINAL] Buscando usuários para notificar às {hora_atual.strftime('%H:%M')}")
+        # Buscar usuários com resumo matinal OU alertas financeiros ativos
+        usuarios = NotificationConfigService.get_users_with_notifications_active(hora_atual)
 
-            # Buscar usuários com resumo matinal OU alertas financeiros ativos
-            usuarios = NotificationConfigService.get_users_with_notifications_active(hora_atual)
+        if not usuarios:
+            self._log(f"Nenhum usuário configurado para este horário ({hora_atual})")
+            return
 
-            if not usuarios:
-                print(f"[RESUMO-MATINAL] Nenhum usuário configurado para este horário ({hora_atual})")
-                return
+        self._log(f"{len(usuarios)} usuário(s) encontrado(s)")
 
-            print(f"[RESUMO-MATINAL] {len(usuarios)} usuário(s) encontrado(s)")
+        # Inicializar serviço
+        briefing_service = DailyBriefingService()
 
-            # Inicializar serviço
-            briefing_service = DailyBriefingService()
+        # Processar cada usuário
+        for usuario_id, numero_whatsapp in usuarios:
+            try:
+                self._log(f"Processando usuário {usuario_id}...")
 
-            # Processar cada usuário
-            for usuario_id, numero_whatsapp in usuarios:
-                try:
-                    print(f"[RESUMO-MATINAL] Processando usuário {usuario_id}...")
+                # Obter configurações do usuário
+                config = NotificationConfigService.get_or_create_config(usuario_id)
 
-                    # Obter configurações do usuário
-                    config = NotificationConfigService.get_or_create_config(usuario_id)
+                # Preparar componentes da mensagem
+                resumo_componente = None
+                alertas_componente = None
 
-                    # Preparar componentes da mensagem
-                    resumo_componente = None
-                    alertas_componente = None
+                # 1. Buscar resumo matinal (se ativo)
+                if config['resumo_matinal_ativo']:
+                    self._log(f"Preparando resumo matinal para usuário {usuario_id}...")
+                    briefing_data = briefing_service.prepare_briefing_data(usuario_id, date.today())
 
-                    # 1. Buscar resumo matinal (se ativo)
-                    if config['resumo_matinal_ativo']:
-                        print(f"[RESUMO-MATINAL] Preparando resumo matinal para usuário {usuario_id}...")
-                        briefing_data = briefing_service.prepare_briefing_data(usuario_id, date.today())
+                    if not briefing_data:
+                        self._log(f"Erro ao preparar dados para usuário {usuario_id}", level="ERROR")
+                    elif briefing_data.get('total_eventos', 0) > 0:
+                        # Gerar resumo completo com IA
+                        self._log(f"Gerando resumo com IA para usuário {usuario_id}...")
+                        resumo_componente = generate_daily_briefing(briefing_data)
+                    else:
+                        # Mensagem simples sem eventos (mas pode incluir alertas se config ativa)
+                        self._log(f"Sem eventos para usuário {usuario_id}. Gerando mensagem básica.")
+                        resumo_componente = briefing_service.generate_briefing_message(usuario_id, date.today())
 
-                        if not briefing_data:
-                            print(f"[RESUMO-MATINAL] Erro ao preparar dados para usuário {usuario_id}")
-                        elif briefing_data.get('total_eventos', 0) > 0:
-                            # Gerar resumo completo com IA
-                            print(f"[RESUMO-MATINAL] Gerando resumo com IA para usuário {usuario_id}...")
-                            resumo_componente = generate_daily_briefing(briefing_data)
-                        else:
-                            # Mensagem simples sem eventos (mas pode incluir alertas se config ativa)
-                            print(f"[RESUMO-MATINAL] Sem eventos para usuário {usuario_id}. Gerando mensagem básica.")
-                            resumo_componente = briefing_service.generate_briefing_message(usuario_id, date.today())
+                # 2. Buscar alertas financeiros (se ativo E resumo não está ativo)
+                # Se resumo está ativo, alertas já estão incluídos no resumo
+                if config['alertas_financeiros_ativos'] and not config['resumo_matinal_ativo']:
+                    self._log(f"Buscando alertas financeiros para usuário {usuario_id}...")
 
-                    # 2. Buscar alertas financeiros (se ativo E resumo não está ativo)
-                    # Se resumo está ativo, alertas já estão incluídos no resumo
-                    if config['alertas_financeiros_ativos'] and not config['resumo_matinal_ativo']:
-                        print(f"[RESUMO-MATINAL] Buscando alertas financeiros para usuário {usuario_id}...")
+                    with db_engine.connect() as conn:
+                        alertas_data = get_upcoming_bills_and_invoices(conn, usuario_id, date.today())
 
-                        with db_engine.connect() as conn:
-                            alertas_data = get_upcoming_bills_and_invoices(conn, usuario_id, date.today())
+                    # Verificar se há alertas (hoje ou amanhã)
+                    tem_alertas = any([
+                        alertas_data['contas_hoje'],
+                        alertas_data['contas_amanha'],
+                        alertas_data['faturas_hoje'],
+                        alertas_data['faturas_amanha']
+                    ])
 
-                        # Verificar se há alertas (hoje ou amanhã)
-                        tem_alertas = any([
-                            alertas_data['contas_hoje'],
-                            alertas_data['contas_amanha'],
-                            alertas_data['faturas_hoje'],
-                            alertas_data['faturas_amanha']
-                        ])
+                    if tem_alertas:
+                        alertas_componente = format_financial_alerts_standalone(alertas_data)
+                    else:
+                        self._log(f"Sem alertas financeiros para usuário {usuario_id}")
 
-                        if tem_alertas:
-                            alertas_componente = format_financial_alerts_standalone(alertas_data)
-                        else:
-                            print(f"[RESUMO-MATINAL] Sem alertas financeiros para usuário {usuario_id}")
+                # 3. Montar mensagem final
+                mensagem = montar_mensagem_unificada(
+                    resumo_componente,
+                    alertas_componente,
+                    config
+                )
 
-                    # 3. Montar mensagem final
-                    mensagem = montar_mensagem_unificada(
-                        resumo_componente,
-                        alertas_componente,
-                        config
-                    )
-
-                    if not mensagem:
-                        print(f"[RESUMO-MATINAL] Nenhuma mensagem para enviar ao usuário {usuario_id}")
-                        continue
-
-                    # Enviar via WhatsApp
-                    enviar_notificacao_whatsapp(
-                        numero_whatsapp,
-                        mensagem,
-                        app.config.get('BOT_WHATSAPP_URL'),
-                        app.config.get('API_SECRET_KEY')
-                    )
-
-                    print(f"[RESUMO-MATINAL] ✅ Mensagem enviada para usuário {usuario_id}")
-
-                except Exception as e_user:
-                    print(f"[RESUMO-MATINAL] ❌ Erro ao processar usuário {usuario_id}: {e_user}")
-                    import traceback
-                    traceback.print_exc()
+                if not mensagem:
+                    self._log(f"Nenhuma mensagem para enviar ao usuário {usuario_id}")
                     continue
 
-            print(f"[RESUMO-MATINAL] Processamento finalizado - {datetime.now()}")
+                # Enviar via WhatsApp
+                enviar_notificacao_whatsapp(
+                    numero_whatsapp,
+                    mensagem,
+                    BOT_WHATSAPP_URL,
+                    API_SECRET_KEY
+                )
 
-    except Exception as e:
-        print(f"[RESUMO-MATINAL] ❌ ERRO CRÍTICO: {e}")
-        import traceback
-        traceback.print_exc()
+                self._log(f"Mensagem enviada para usuário {usuario_id}")
+
+            except Exception as e_user:
+                self._log(f"Erro ao processar usuário {usuario_id}: {e_user}", level="ERROR")
+                import traceback
+                traceback.print_exc()
+                continue
+
+        self._log("Processamento finalizado")
 
 
 if __name__ == "__main__":
-    processar_resumo_matinal()
+    job = DailyBriefingJob()
+    exit_code = job.run()
+    sys.exit(exit_code)

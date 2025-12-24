@@ -123,42 +123,6 @@ class InvoiceProcessorJob(BaseJob):
             else:
                 self._log("Nenhuma fatura vence em 3 dias")
 
-            # ============================================================
-            # TAREFA 3: Alertar faturas vencidas
-            # ============================================================
-            self._log("Buscando faturas vencidas...")
-
-            overdue_invoices = get_overdue_invoices(conn)
-
-            if overdue_invoices:
-                self._log(f"Encontradas {len(overdue_invoices)} fatura(s) vencida(s)")
-
-                today_str = date.today().strftime('%Y%m%d')
-
-                for invoice in overdue_invoices:
-                    # Enviar 1 alerta por dia (não spammar)
-                    redis_key = f"invoice_overdue:{invoice['id']}:{today_str}"
-
-                    if not redis_service.exists(redis_key):
-                        msg = InvoiceNotificationFormatter.format_overdue_alert(invoice)
-
-                        success = enviar_notificacao_whatsapp(
-                            invoice['numero_whatsapp'],
-                            msg,
-                            BOT_WHATSAPP_URL,
-                            API_SECRET_KEY
-                        )
-
-                        if success:
-                            redis_service.set_with_ttl(redis_key, True, ttl_seconds=30*24*60*60)
-                            self._log(f"✅ Alerta de atraso enviado - Fatura #{invoice['id']}")
-                        else:
-                            self._log(f"❌ Falha ao enviar alerta de atraso - Fatura #{invoice['id']}", level="WARNING")
-                    else:
-                        self._log(f"⏭️ Alerta de atraso já enviado hoje - Fatura #{invoice['id']}")
-            else:
-                self._log("Nenhuma fatura vencida")
-
             self._log("Processamento de faturas concluído!")
 
 

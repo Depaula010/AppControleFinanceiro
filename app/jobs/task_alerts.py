@@ -11,69 +11,62 @@ Fluxo:
 
 import sys
 import os
-
-# Adicionar diretório raiz ao path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+# Adicionar diretório raiz ao path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(current_dir))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from app.jobs.base_job import BaseJob
+
 TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
 
-def processar_alertas_tarefas():
-    """
-    Processa alertas de tarefas do Google Calendar para todos os usuários ativos.
-    """
-    print("\n" + "="*60)
-    print("INICIANDO PROCESSAMENTO DE ALERTAS DE TAREFAS")
-    print(f"Data/Hora: {datetime.now(TIMEZONE_BR).strftime('%d/%m/%Y %H:%M:%S')}")
-    print("="*60)
 
-    try:
-        # IMPORTANTE: Criar instância da aplicação para acessar o Banco
-        from app import create_app
-        app = create_app()
+class TaskAlertsJob(BaseJob):
+    """Job para processar alertas de tarefas do Google Calendar."""
 
-        # Entrar no contexto da aplicação
-        with app.app_context():
-            # Importar serviços (agora com acesso ao DB garantido)
-            from app.services.calendar_alert_config_service import CalendarAlertConfigService
-            from app.services.calendar_alert_service import CalendarAlertService
+    def get_job_name(self) -> str:
+        return "ALERTAS-TAREFAS"
 
-            # Buscar usuários com alertas ativos
-            usuarios = CalendarAlertConfigService.get_users_with_alerts_active()
+    def execute(self):
+        """
+        Processa alertas de tarefas do Google Calendar para todos os usuários ativos.
+        Executado dentro do Flask app context.
+        """
+        from app.services.calendar_alert_config_service import CalendarAlertConfigService
+        from app.services.calendar_alert_service import CalendarAlertService
 
-            if not usuarios:
-                print("[ALERTAS-TAREFAS] ℹ️  Nenhum usuário com alertas ativos")
-                return
+        # Buscar usuários com alertas ativos
+        usuarios = CalendarAlertConfigService.get_users_with_alerts_active()
 
-            print(f"[ALERTAS-TAREFAS] Processando {len(usuarios)} usuário(s)")
+        if not usuarios:
+            self._log("Nenhum usuário com alertas ativos")
+            return
 
-            total_alertas = 0
+        self._log(f"Processando {len(usuarios)} usuário(s)")
 
-            for usuario_id, numero_whatsapp, minutos_antes in usuarios:
-                print(f"\n[ALERTAS-TAREFAS] Processando usuário {usuario_id} ({numero_whatsapp})")
-                print(f"[ALERTAS-TAREFAS] Configuração: {minutos_antes} minuto(s) antes")
+        total_alertas = 0
 
-                # Processar alertas para o usuário
-                alertas_enviados = CalendarAlertService.process_alerts_for_user(
-                    usuario_id=usuario_id,
-                    numero_whatsapp=numero_whatsapp,
-                    minutos_antes=minutos_antes
-                )
+        for usuario_id, numero_whatsapp, minutos_antes in usuarios:
+            self._log(f"Processando usuário {usuario_id} ({numero_whatsapp})")
+            self._log(f"Configuração: {minutos_antes} minuto(s) antes")
 
-                total_alertas += alertas_enviados
+            # Processar alertas para o usuário
+            alertas_enviados = CalendarAlertService.process_alerts_for_user(
+                usuario_id=usuario_id,
+                numero_whatsapp=numero_whatsapp,
+                minutos_antes=minutos_antes
+            )
 
-            print("\n" + "="*60)
-            print(f"[ALERTAS-TAREFAS] ✅ Processamento concluído")
-            print(f"[ALERTAS-TAREFAS] Total de alertas enviados: {total_alertas}")
-            print("="*60 + "\n")
+            total_alertas += alertas_enviados
 
-    except Exception as e:
-        print(f"\n[ALERTAS-TAREFAS] ❌ Erro no processamento: {e}")
-        import traceback
-        traceback.print_exc()
-        sys.exit(1)
+        self._log(f"Total de alertas enviados: {total_alertas}")
+
 
 if __name__ == "__main__":
-    processar_alertas_tarefas()
+    job = TaskAlertsJob()
+    exit_code = job.run()
+    sys.exit(exit_code)
