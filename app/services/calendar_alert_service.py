@@ -307,7 +307,66 @@ class CalendarAlertService:
             return alertas_enviados
 
         except Exception as e:
-            print(f"[CALENDAR-ALERT] ❌ Erro ao processar alertas para usuário {usuario_id}: {e}")
-            import traceback
-            traceback.print_exc()
-            return 0
+            error_message = str(e)
+
+            # Verificar se é erro de Calendar desconectado
+            if "não conectou Google Calendar" in error_message or "credentials" in error_message.lower():
+                print(f"[CALENDAR-ALERT] ⚠️ Google Calendar desconectado para usuário {usuario_id}")
+
+                # Notificar usuário via WhatsApp (1x por semana usando Redis)
+                CalendarAlertService._notify_calendar_disconnected(usuario_id, numero_whatsapp)
+
+                return 0
+            else:
+                # Outros erros: apenas logar
+                print(f"[CALENDAR-ALERT] ❌ Erro ao processar alertas para usuário {usuario_id}: {e}")
+                import traceback
+                traceback.print_exc()
+                return 0
+
+    @staticmethod
+    def _notify_calendar_disconnected(usuario_id, numero_whatsapp):
+        """
+        Notifica usuário que o Google Calendar está desconectado.
+        Usa Redis para enviar apenas 1x por semana.
+
+        Args:
+            usuario_id: ID do usuário
+            numero_whatsapp: Número do WhatsApp
+        """
+        from app.services.redis_service import redis_service
+        from app.services.notification_service import enviar_notificacao_whatsapp
+        from app.config import BOT_WHATSAPP_URL, API_SECRET_KEY
+
+        # Verificar se já foi notificado recentemente (Redis)
+        redis_key = f"calendar_disconnected_alert:{usuario_id}"
+
+        if redis_service.exists(redis_key):
+            print(f"[CALENDAR-ALERT] ℹ️ Usuário {usuario_id} já foi notificado esta semana sobre Calendar desconectado")
+            return
+
+        # Preparar mensagem
+        mensagem = """⚠️ *Google Calendar Desconectado*
+
+Seus alertas de tarefas estão ativos, mas o Google Calendar não está conectado.
+
+Para continuar recebendo alertas:
+1. Acesse as configurações do app
+2. Reconecte sua conta do Google Calendar
+
+_Esta notificação é enviada 1x por semana enquanto o Calendar estiver desconectado._"""
+
+        # Enviar notificação
+        sucesso = enviar_notificacao_whatsapp(
+            numero=numero_whatsapp,
+            mensagem=mensagem,
+            bot_url=BOT_WHATSAPP_URL,
+            api_key=API_SECRET_KEY
+        )
+
+        if sucesso:
+            # Marcar como notificado (TTL: 7 dias = 1 semana)
+            redis_service.set_with_ttl(redis_key, "1", ttl_seconds=7*24*60*60)
+            print(f"[CALENDAR-ALERT] ✅ Notificação de Calendar desconectado enviada para usuário {usuario_id}")
+        else:
+            print(f"[CALENDAR-ALERT] ❌ Falha ao enviar notificação para usuário {usuario_id}")
