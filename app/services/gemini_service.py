@@ -212,9 +212,10 @@ def get_message_intent(texto_msg, usuario_id=None):
     - "Listar Contas" → Quais contas cadastradas
 
     📅 VENCIMENTOS:
-    - "Vencimentos Hoje" → "tenho conta vencendo hoje?", "o que vence hoje?"
-    - "Vencimentos Amanhã" → "o que vence amanhã?"
-    - "Vencimentos Essa Semana" → "contas da semana", "o que vence nos próximos 7 dias?"
+    - "Vencimentos Hoje" → "tenho conta VENCENDO hoje?", "o que VENCE hoje?" (DIA ATUAL)
+    - "Vencimentos Amanhã" → "o que vence amanhã?" (FUTURO PRÓXIMO)
+    - "Vencimentos Essa Semana" → "contas da semana", "o que vence nos próximos 7 dias?" (FUTURO)
+    - "Contas Atrasadas" → "tenho conta ATRASADA?", "CONTAS VENCIDAS", "o que JÁ VENCEU?", "contas pendentes", "o que não paguei?" (PASSADO)
 
     ✅ AÇÕES:
     - "Quitar Conta Fixa" → Marcar conta fixa como paga
@@ -282,6 +283,27 @@ def get_message_intent(texto_msg, usuario_id=None):
     - "tenho conta que vence hoje?" → {{"intent": "Vencimentos Hoje"}}
     - "o que vence amanhã?" → {{"intent": "Vencimentos Amanhã"}}
     - "contas que vencem essa semana" → {{"intent": "Vencimentos Essa Semana"}}
+
+    ⚠️ VENCIMENTOS: DIFERENCIE PASSADO DE PRESENTE/FUTURO:
+
+    PASSADO (contas já vencidas/atrasadas):
+    - "tenho alguma conta atrasada?" → {{"intent": "Contas Atrasadas"}}
+    - "tenho conta vencida?" → {{"intent": "Contas Atrasadas"}}
+    - "contas atrasadas" → {{"intent": "Contas Atrasadas"}}
+    - "o que já venceu?" → {{"intent": "Contas Atrasadas"}}
+    - "o que passou do vencimento?" → {{"intent": "Contas Atrasadas"}}
+    - "tem algo vencido?" → {{"intent": "Contas Atrasadas"}}
+    - "o que não paguei?" → {{"intent": "Contas Atrasadas"}}
+    - "contas pendentes" → {{"intent": "Contas Atrasadas"}}
+
+    PRESENTE/FUTURO (contas que vencem hoje ou depois):
+    - "tenho conta vencendo hoje?" → {{"intent": "Vencimentos Hoje"}}
+    - "o que vence hoje?" → {{"intent": "Vencimentos Hoje"}}
+    - "contas de hoje" → {{"intent": "Vencimentos Hoje"}}
+    - "o que vence amanhã?" → {{"intent": "Vencimentos Amanhã"}}
+    - "o que vence essa semana?" → {{"intent": "Vencimentos Essa Semana"}}
+    - "vencimentos dos próximos dias" → {{"intent": "Vencimentos Essa Semana"}}
+
     - "detalhes da reserva" → {{"intent": "Consulta Detalhes Reserva"}}
     - "quais contas estão na reserva" → {{"intent": "Consulta Detalhes Reserva"}}
     - "mostrar contas da reserva de emergência" → {{"intent": "Consulta Detalhes Reserva"}}

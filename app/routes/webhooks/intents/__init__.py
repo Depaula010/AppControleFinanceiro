@@ -65,6 +65,7 @@ from .notification_intents import (
     VencimentosHojeIntent,
     VencimentosAmanhaIntent,
     VencimentosSemanaIntent,
+    ContasAtrasadasIntent,
 )
 from .analytics_intents import (
     AnaliseInteligenteIntent,
@@ -113,6 +114,7 @@ INTENT_REGISTRY: Dict[str, Type[BaseIntent]] = {
     'Vencimentos Hoje': VencimentosHojeIntent,
     'Vencimentos Amanhã': VencimentosAmanhaIntent,
     'Vencimentos Essa Semana': VencimentosSemanaIntent,
+    'Contas Atrasadas': ContasAtrasadasIntent,
 
     # Analytics Intents (Implementados como placeholders)
     'Análise Inteligente': AnaliseInteligenteIntent,

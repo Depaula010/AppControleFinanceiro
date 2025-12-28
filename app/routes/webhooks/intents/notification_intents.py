@@ -213,9 +213,202 @@ class VencimentosSemanaIntent(BaseIntent):
         return msg
 
 
+class ContasAtrasadasIntent(BaseIntent):
+    """
+    Handler para intent 'Contas Atrasadas'.
+
+    Consulta agendamentos e faturas pendentes que já passaram do vencimento.
+    Considera apenas os últimos 30 dias para evitar débitos muito antigos.
+
+    Exemplo de mensagem:
+    - "Tenho alguma conta atrasada?"
+    - "Contas vencidas"
+    - "O que já passou do vencimento?"
+    """
+
+    def extract_params(self) -> Dict[str, Any]:
+        """Não requer parâmetros."""
+        return {}
+
+    def validate(self) -> str | None:
+        """Sem validação necessária."""
+        return None
+
+    def execute(self) -> Dict[str, Any]:
+        """Busca contas e faturas atrasadas."""
+        from app.services.nightly_checkin_service import NightlyCheckinService
+        from datetime import date, timedelta
+        from sqlalchemy import text
+        import calendar
+
+        hoje = date.today()
+
+        # Buscar agendamentos pendentes dos últimos 30 dias
+        data_minima = hoje - timedelta(days=30)
+        dia_minimo = data_minima.day
+
+        # Query modificada do NightlyCheckinService para buscar contas atrasadas
+        sql_contas = text("""
+            SELECT
+                a.id, a.descricao, a.valor_previsto, a.dia_execucao,
+                a.conta_id, a.subcategoria_id, a.usuario_id,
+                c.nome_conta, c.tipo_conta,
+                s.nome_sub as categoria,
+                m.nome_macro,
+                g.nome_grupo
+            FROM Agendamentos a
+            JOIN Contas c ON a.conta_id = c.id
+            JOIN SubCategoria s ON a.subcategoria_id = s.id
+            JOIN MacroCategoria m ON s.macro_id = m.id
+            JOIN GrupoCategoria g ON m.grupo_id = g.id
+            WHERE a.usuario_id = :uid
+              AND a.ativo = TRUE
+              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+              AND a.dia_execucao < EXTRACT(DAY FROM :hoje)
+              -- Filtro para agendamentos anuais: incluir apenas se o mês bater
+              AND (
+                  a.periodicidade != 'ANUAL'
+                  OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = EXTRACT(MONTH FROM :hoje))
+              )
+              -- Não foi pago este mês
+              AND NOT EXISTS (
+                  SELECT 1 FROM Transacoes t
+                  WHERE t.descricao = a.descricao
+                    AND t.usuario_id = a.usuario_id
+                    AND EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM :hoje)
+                    AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM :hoje)
+              )
+              -- Limitar aos últimos 30 dias
+              AND a.dia_execucao >= :dia_minimo
+            ORDER BY a.dia_execucao DESC, g.nome_grupo, a.descricao
+        """)
+
+        contas_result = self.conn.execute(sql_contas, {
+            "uid": self.usuario_id,
+            "hoje": hoje,
+            "dia_minimo": dia_minimo
+        }).fetchall()
+
+        contas_atrasadas = [dict(row._mapping) for row in contas_result]
+
+        # Buscar faturas vencidas
+        sql_faturas = text("""
+            SELECT
+                c.nome_conta as cartao,
+                f.data_vencimento,
+                f.status,
+                COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) as valor_fatura
+            FROM Faturas f
+            JOIN Contas c ON f.conta_id = c.id
+            LEFT JOIN Transacoes t ON f.id = t.fatura_id
+            WHERE c.usuario_id = :uid
+              AND f.status = 'Aberta'
+              AND f.data_vencimento < :hoje
+              AND f.data_vencimento >= :limite_inferior
+            GROUP BY c.nome_conta, f.data_vencimento, f.status
+            ORDER BY f.data_vencimento DESC
+        """)
+
+        limite_inferior = hoje - timedelta(days=30)
+
+        faturas_result = self.conn.execute(sql_faturas, {
+            "uid": self.usuario_id,
+            "hoje": hoje,
+            "limite_inferior": limite_inferior
+        }).fetchall()
+
+        faturas_atrasadas = [dict(row._mapping) for row in faturas_result]
+
+        return {
+            "contas_atrasadas": contas_atrasadas,
+            "faturas_atrasadas": faturas_atrasadas,
+            "hoje": hoje
+        }
+
+    def format_response(self, data: Dict[str, Any]) -> str:
+        """Formata lista de contas atrasadas para WhatsApp."""
+        from app.utils import formatar_moeda
+        from app.services.nightly_checkin_service import NightlyCheckinService
+
+        contas = data["contas_atrasadas"]
+        faturas = data["faturas_atrasadas"]
+        hoje = data["hoje"]
+
+        # Se não há nada atrasado
+        if not contas and not faturas:
+            return "✅ Você não tem contas atrasadas! Tudo em dia! 🎉"
+
+        msg = "🔴 *CONTAS ATRASADAS*\n\n"
+
+        # Agrupar contas por dia de vencimento
+        contas_por_dia = {}
+        for conta in contas:
+            dia = conta['dia_execucao']
+            if dia not in contas_por_dia:
+                contas_por_dia[dia] = []
+            contas_por_dia[dia].append(conta)
+
+        # Listar contas agrupadas
+        total_contas = 0
+        for dia in sorted(contas_por_dia.keys(), reverse=True):
+            # Calcular dias de atraso
+            dias_atraso = NightlyCheckinService.calculate_days_overdue(dia, hoje)
+
+            if dias_atraso == 1:
+                msg += "*Venceu ontem*\n"
+            elif dias_atraso <= 7:
+                msg += f"*Venceu dia {dia:02d}* ({dias_atraso} dias atrás)\n"
+            else:
+                msg += f"*Venceu dia {dia:02d}* ({dias_atraso} dias atrás) ⚠️\n"
+
+            for conta in contas_por_dia[dia]:
+                valor = conta['valor_previsto'] or 0
+                total_contas += valor
+
+                # Emoji baseado no tipo/grupo
+                tipo_emoji = "💰"
+                if conta.get('nome_grupo'):
+                    if 'Renda' in conta['nome_grupo']:
+                        tipo_emoji = "💵"
+                    elif 'Despesa' in conta['nome_grupo']:
+                        tipo_emoji = "💸"
+
+                msg += f"{tipo_emoji} {conta['descricao']} - {formatar_moeda(valor)}\n"
+
+            msg += "\n"
+
+        # Faturas atrasadas
+        total_faturas = 0
+        if faturas:
+            msg += "*💳 Faturas Vencidas:*\n"
+            for fatura in faturas:
+                valor = fatura['valor_fatura'] or 0
+                total_faturas += valor
+                data_venc = fatura['data_vencimento']
+                dias_atraso = (hoje - data_venc).days
+
+                msg += f"• {fatura['cartao']} - {formatar_moeda(valor)}\n"
+                msg += f"  Venceu em {data_venc.strftime('%d/%m')} ({dias_atraso} dias)\n"
+            msg += "\n"
+
+        # Totais
+        msg += "━━━━━━━━━━━━━━\n"
+        total_geral = total_contas + total_faturas
+        msg += f"💰 *Total:* {formatar_moeda(total_geral)}\n"
+
+        num_contas = len(contas)
+        num_faturas = len(faturas)
+        total_items = num_contas + num_faturas
+
+        msg += f"⚠️ *{total_items} {'conta' if total_items == 1 else 'contas'} pendente{'s' if total_items != 1 else ''}*"
+
+        return msg
+
+
 __all__ = [
     'ConfigurarNotificacoesIntent',
     'VencimentosHojeIntent',
     'VencimentosAmanhaIntent',
     'VencimentosSemanaIntent',
+    'ContasAtrasadasIntent',
 ]
