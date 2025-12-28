@@ -1603,15 +1603,16 @@ def handle_whatsapp_webhook():
                     if not intent_class:
                         raise Exception("Intent 'Contas Atrasadas' não encontrada no registry")
 
-                    # Instanciar e processar a intent
+                    # Instanciar a intent com parâmetros corretos
                     intent_instance = intent_class(
-                        conn=conn,
                         usuario_id=usuario_id,
-                        texto=texto_msg
+                        mensagem=texto_msg,
+                        conn=conn
                     )
 
-                    # Processar a intent usando o método process() da BaseIntent
-                    resposta_para_usuario = intent_instance.process()
+                    # Executar usando handle() e extrair message
+                    result = intent_instance.handle()
+                    resposta_para_usuario = result["message"]
 
                     return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 

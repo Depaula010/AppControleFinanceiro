@@ -2,8 +2,8 @@
 # AppControleFinanceiro - Backend Python/Flask
 
 **Data de Criação**: 2025-12-19
-**Última Atualização**: 2025-12-19 (Fases E e G concluídas)
-**Progresso Global**: 100% (8/8 fases completas)
+**Última Atualização**: 2025-12-28 (Auditoria de integração ORM)
+**Progresso Global**: 93.75% (7.5/8 fases completas)
 **Estratégia**: Strangler Fig Pattern (Migração Incremental sem Downtime)
 
 ---
@@ -14,14 +14,16 @@
 |------|--------|----------|-----------|----------|
 | **C** | 🟢 100% | ⬛⬛⬛⬛⬛ | Reorganização de Estrutura | 43 arquivos |
 | **A** | 🟢 100% | ⬛⬛⬛⬛⬛ | Utilitários Compartilhados | 8 módulos |
-| **D** | 🟢 100% | ⬛⬛⬛⬛⬛ | Fundação (ORM, DI, Repos) | 40+ arquivos |
+| **D** | 🟡 50% | ⬛⬛⬛⬜⬜ | Fundação (ORM, DI, Repos) | Infra: 100%, Integração: 0% |
 | **B** | 🟢 100% | ⬛⬛⬛⬛⬛ | Aplicar Utilitários | 73 linhas |
 | **E** | 🟢 100% | ⬛⬛⬛⬛⬛ | Eliminar Duplicações | ~105 linhas |
 | **F** | 🟢 100% | ⬛⬛⬛⬛⬛ | Quebrar God Objects | Via B.1, B.2, B.3 |
 | **G** | 🟢 100% | ⬛⬛⬛⬛⬛ | Use Cases (Application) | 9 use cases |
-| **H** | 🟢 100% | ⬛⬛⬛⬛⬛ | Testes Automatizados | Fase G inclui DTOs |
+| **H** | 🟢 100% | ⬛⬛⬛⬛⬛ | Testes Automatizados | 66 testes |
 
-### 🎉 Progresso Total: **100%** (8/8 fases completas)
+### 🎉 Progresso Total: **93.75%** (7.5/8 fases completas)
+
+> **⚠️ Nota sobre Fase D:** A infraestrutura do ORM está 100% implementada (16 modelos, 4 repositórios, DI, feature flags), porém **0% do código produtivo a utiliza**. Todo código atual continua usando SQL direto via `text()`. A fase está marcada como 50% pois falta a integração real (~4.460 linhas de código aguardando uso).
 
 ---
 
@@ -172,23 +174,24 @@ Serviço de categorização com IA Gemini:
 
 ---
 
-## 📋 FASE D - FUNDAÇÃO ARQUITETURAL (100%)
+## 📋 FASE D - FUNDAÇÃO ARQUITETURAL (50%)
 
 **Objetivo**: Implementar ORM, Repositories, DI, Feature Flags
-**Status**: 🟢 COMPLETA
-**Data de Conclusão**: 2025-12-16
+**Status**: 🟡 50% COMPLETA (Infraestrutura: 100%, Integração: 0%)
+**Data de Conclusão da Infraestrutura**: 2025-12-16
+**Integração com código produtivo**: Pendente
 
-### ✅ Completo (100%)
+### ✅ Infraestrutura Implementada (100%)
 
 #### D.1: Dependências ✅
 - ✅ `alembic==1.13.1` - Migrations
 - ✅ `dependency-injector==4.41.0` - DI Container
 
-#### D.2: Modelos ORM (15 modelos) ✅
+#### D.2: Modelos ORM (16 modelos) ✅
 **Diretório**: `app/infrastructure/database/models/`
 
 - ✅ SQLAlchemy 2.0+ com `Mapped[T]`
-- ✅ 15 modelos completos (User, Account, Transaction, etc.)
+- ✅ 16 modelos completos (User, Account, Transaction, Invoice, Budget, Categories, etc.)
 - ✅ 50+ propriedades helper
 - ✅ Constraints e índices
 
@@ -226,12 +229,44 @@ Serviço de categorização com IA Gemini:
 - ✅ 9 adaptadores SQL/ORM
 - ✅ Guia de rollout completo
 
+### ⚠️ Estado de Integração
+
+**Infraestrutura:** ✅ 100% implementada
+**Uso no Código:** ❌ 0% integrado
+
+#### O que está implementado:
+- ✅ 16 modelos ORM em `app/infrastructure/database/models/`
+- ✅ 4 repositórios em `app/infrastructure/database/repositories/`
+- ✅ Feature flags em `app/core/feature_flags.py`
+- ✅ Adaptadores em `app/infrastructure/database/adapters.py`
+- ✅ Dependency Injection configurado
+
+#### ❌ O que NÃO está sendo usado:
+- **Repositórios nunca são instanciados** no código produtivo
+- **Services usam 100% SQL direto** via `text()` do SQLAlchemy
+- **Todas as feature flags desabilitadas** por padrão no `.env.example`
+- **ORM existe como infraestrutura preparada**, mas não consumida
+
+#### 📍 Exemplos de código atual usando SQL direto:
+- [app/services/analytics_service.py:165](../app/services/analytics_service.py#L165) - `sql_categoria_especifica = text(...)`
+- `app/services/finance/invoice_service.py` - Todas queries com `text()`
+- `app/services/finance/account_service.py` - Todas queries com `text()`
+- `app/services/finance/transaction_service.py` - Todas queries com `text()`
+- `app/services/finance/bills_service.py` - Todas queries com `text()`
+- `app/services/finance/category_service.py` - Todas queries com `text()`
+
+#### 🎯 Próximo Passo Real:
+**Migrar pelo menos 1 service para usar repositórios antes de marcar como "em produção"**
+
+Sugestão: Começar por `user_service.py` (mais simples) ou `account_service.py`, habilitar a feature flag correspondente (`USE_ORM_FOR_USERS=true` ou `USE_ORM_FOR_ACCOUNTS=true`), e validar que funciona corretamente antes de continuar.
+
 ### 📊 Estatísticas
 - **Arquivos criados**: 40+ arquivos
-- **Linhas de código**: ~5.000 linhas
-- **Modelos ORM**: 15
-- **Repositórios**: 3 + Base
+- **Linhas de código**: ~5.000 linhas (infraestrutura pronta, aguardando integração)
+- **Modelos ORM**: 16
+- **Repositórios**: 4 (Base + User + Account + Transaction)
 - **Métodos**: 45+
+- **Código não integrado**: ~4.460 linhas aguardando uso
 
 ### 🚀 Como Usar
 ```bash
@@ -593,6 +628,33 @@ python -m pytest tests/unit/test_use_cases_transactions.py -v
 
 ## 🎯 PRÓXIMOS PASSOS RECOMENDADOS
 
+### ⚠️ Prioridade CRÍTICA (Antes de qualquer outra coisa)
+
+#### 0. Integrar ORM em pelo menos 1 módulo (PROVA DE CONCEITO)
+**Tempo estimado**: 2-3 dias
+**Situação**: ORM implementado mas 0% usado no código real
+
+**Objetivo:** Validar que a arquitetura ORM funciona na prática antes de continuar outras tarefas.
+
+**Checklist:**
+- [ ] Escolher 1 service simples para migrar (sugestão: `user_service.py` ou `account_service.py`)
+- [ ] Refatorar service escolhido para usar repositório correspondente (`SQLAlchemyUserRepository` ou `SQLAlchemyAccountRepository`)
+- [ ] Atualizar rotas/webhooks que usam o service para aceitar repositório via DI
+- [ ] Habilitar feature flag correspondente (`USE_ORM_FOR_USERS=true` ou `USE_ORM_FOR_ACCOUNTS=true`)
+- [ ] Testar em ambiente de desenvolvimento
+- [ ] Validar que todas as operações funcionam corretamente
+- [ ] Comparar performance SQL vs ORM
+- [ ] Documentar aprendizados e ajustes necessários
+
+**Por quê**: Sem isso, Fase D é apenas código morto (~4.460 linhas de infraestrutura não utilizada). Precisamos validar que a arquitetura funciona na prática antes de investir mais tempo em outras fases.
+
+**Bloqueadores identificados:**
+- Sem esta validação, não sabemos se o ORM resolve os problemas reais
+- Risk de continuar construindo sobre fundação não testada
+- Código de infraestrutura pode estar desatualizado ou incompatível
+
+---
+
 ### Prioridade ALTA (Curto Prazo - 1-2 semanas)
 
 #### 1. Completar Fase C (40% restante)
@@ -674,10 +736,10 @@ python -m pytest tests/unit/test_use_cases_transactions.py -v
 - [FEATURE_FLAGS_GUIDE.md](FEATURE_FLAGS_GUIDE.md) - Como usar feature flags
 
 ### Progresso por Fase
-- [REFACTORING_PROGRESS.md](REFACTORING_PROGRESS.md) - Fase C (60%)
+- [REFACTORING_PROGRESS.md](REFACTORING_PROGRESS.md) - Fase C (100%)
 - [PHASE_A_PROGRESS.md](PHASE_A_PROGRESS.md) - Fase A (100%)
-- [PHASE_B_UTILITIES_APPLICATION.md](PHASE_B_UTILITIES_APPLICATION.md) - Fase B (95%)
-- [PHASE_D_COMPLETION_SUMMARY.md](PHASE_D_COMPLETION_SUMMARY.md) - Fase D (100%)
+- [PHASE_B_UTILITIES_APPLICATION.md](PHASE_B_UTILITIES_APPLICATION.md) - Fase B (100%)
+- [PHASE_D_COMPLETION_SUMMARY.md](PHASE_D_COMPLETION_SUMMARY.md) - Fase D (50% - Infra implementada, integração pendente)
 
 ### Documentação Detalhada
 - [PHASE_B1_ADMIN_REFACTORING.md](PHASE_B1_ADMIN_REFACTORING.md) - Admin refactoring
@@ -700,7 +762,7 @@ python -m pytest tests/unit/test_use_cases_transactions.py -v
 ✅ **8 decoradores** criados (eliminam 485+ linhas)
 ✅ **73 linhas** de duplicação já eliminadas na Fase B.3
 ✅ **100% backward compatible** - Zero breaking changes
-✅ **15 modelos ORM** SQLAlchemy 2.0+ implementados
+✅ **16 modelos ORM** SQLAlchemy 2.0+ implementados
 ✅ **25 intent handlers** com Factory Pattern
 
 ### Processos
@@ -708,6 +770,55 @@ python -m pytest tests/unit/test_use_cases_transactions.py -v
 ✅ **Docker** configurado e funcional
 ✅ **Cron jobs** organizados e documentados
 ✅ **Strangler Fig Pattern** em uso (migração gradual)
+
+---
+
+## ⚠️ CÓDIGO IMPLEMENTADO MAS NÃO INTEGRADO
+
+### ORM e Repositories (Fase D)
+
+**Situação:** Infraestrutura completa mas não consumida pelo código produtivo
+
+**Arquivos implementados mas não usados:**
+- `app/infrastructure/database/models/` - 16 modelos ORM (~2.500 linhas)
+  - `user_model.py`, `account_model.py`, `transaction_model.py`, `invoice_model.py`
+  - `budget_pot_model.py`, `category_group_model.py`, `sub_category_model.py`
+  - `schedule_model.py`, `consent_model.py`, `google_calendar_token_model.py`
+  - `baileys_auth_model.py`, `monthly_report_config_model.py`
+  - `notification_config_model.py`, `macro_category_model.py`, `base.py`
+
+- `app/infrastructure/database/repositories/` - 4 repositórios (~1.200 linhas)
+  - `sqlalchemy_base_repository.py` - CRUD genérico
+  - `sqlalchemy_user_repository.py` - Operações de usuário
+  - `sqlalchemy_account_repository.py` - Operações de conta
+  - `sqlalchemy_transaction_repository.py` - Operações de transação
+
+- `app/infrastructure/database/adapters.py` - 9 adaptadores (~600 linhas)
+  - Funções que alternam entre SQL/ORM baseado em feature flags
+
+- `app/core/feature_flags.py` - Sistema de flags (~160 linhas)
+  - 8 feature flags configuráveis
+  - Todas desabilitadas por padrão
+
+**Total de código "preparado mas não integrado":** ~4.460 linhas
+
+**Impacto:**
+- ❌ Código mantido sem uso consome tempo de manutenção
+- ❌ Pode ficar desatualizado sem perceber
+- ❌ Investimento de desenvolvimento sem retorno
+- ❌ Impossível saber se arquitetura funciona sem testar na prática
+
+**Como ativar (Prioridade CRÍTICA):**
+1. ✅ Escolher 1 service para migrar (ex: `user_service.py`)
+2. ✅ Refatorar service para usar repositório ao invés de SQL direto
+3. ✅ Atualizar rotas/webhooks que usam o service
+4. ✅ Habilitar feature flag correspondente (ex: `USE_ORM_FOR_USERS=true`)
+5. ✅ Testar em desenvolvimento
+6. ✅ Validar performance e funcionalidade
+7. ✅ Rollout gradual em produção se validado
+8. ✅ Repetir para outros módulos
+
+**Prioridade:** ⚠️ **CRÍTICA** - Validar que a arquitetura funciona antes de continuar outras fases
 
 ---
 
@@ -722,8 +833,9 @@ python -m pytest tests/unit/test_use_cases_transactions.py -v
 ✅ Fase A (100%) ──────────────────────────────────────────► ✅ COMPLETA
    - 8 decoradores, Response Builder, Date Utils
 
-✅ Fase D (100%) ──────────────────────────────────────────► ✅ COMPLETA
-   - 15 ORM models, Repositories, DI, Feature Flags
+🟡 Fase D (50%) ───────────────────────────────────────────► ⚠️ PARCIAL
+   - 16 ORM models, 4 Repositories, DI, Feature Flags
+   - Infraestrutura: 100%, Integração: 0% (código não usado)
 
 ✅ Fase B (100%) ──────────────────────────────────────────► ✅ COMPLETA
    - 73 linhas economizadas em rotas HTTP
@@ -731,17 +843,19 @@ python -m pytest tests/unit/test_use_cases_transactions.py -v
    - Finance: 1.701 → 12 módulos
    - Webhooks: 3.322 → 14 arquivos
 
+✅ Fase E (100%) ──────────────────────────────────────────► ✅ COMPLETA
+   - ~105 linhas eliminadas (FinancialAlertFormatter)
+
 ✅ Fase F (100%) ──────────────────────────────────────────► ✅ COMPLETA
    - 6.815 linhas de God Objects → 33 módulos
 
-⬜ Fase E (0%) ──────► [ Eliminar Duplicações ] ──────────► ⬜ Pendente
-                      ~500 linhas (2-3 semanas)
+✅ Fase G (100%) ──────────────────────────────────────────► ✅ COMPLETA
+   - 9 use cases implementados (~1.120 linhas)
+   - DTOs e Application Layer funcionais
 
-⬜ Fase G (0%) ──────► [ Criar Use Cases ] ───────────────► ⬜ Pendente
-                      Application Layer (3-4 semanas)
-
-⬜ Fase H (0%) ──────► [ Testes Automatizados ] ──────────► ⬜ Pendente
-                      80% coverage (4-6 semanas)
+✅ Fase H (100%) ──────────────────────────────────────────► ✅ COMPLETA
+   - 66 testes implementados (~1.067 linhas)
+   - pytest configurado, conftest robusto
 ```
 
 ---
@@ -759,6 +873,6 @@ python -m pytest tests/unit/test_use_cases_transactions.py -v
 
 ---
 
-**Última Atualização**: 2025-12-19 por Claude Sonnet 4.5
-**Status Geral**: 75% Completo (6/8 fases completas)
-**Próximo Marco**: Fase E - Eliminar Duplicações (~500 linhas, 2-3 semanas)
+**Última Atualização**: 2025-12-28 por Claude Sonnet 4.5 (Auditoria de integração ORM)
+**Status Geral**: 93.75% Completo (7.5/8 fases - Fase D parcial)
+**Próximo Marco CRÍTICO**: Integrar ORM em pelo menos 1 módulo (2-3 dias) - Validar arquitetura antes de avançar
