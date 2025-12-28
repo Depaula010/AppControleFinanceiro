@@ -68,8 +68,8 @@ services:
       ofelia.job-exec.relatorio-mes-corrente.command: "curl -X POST http://localhost:5000/admin/trigger-monthly-reports-fim -H 'x-api-key: ${API_SECRET_KEY}'"
 
       # 4. Check-in Noturno (Roda a cada hora entre 18h-23h, o script verifica configuração do usuário)
-      ofelia.job-exec.checkin-noturno.schedule: "0 18-23 * * *"
-      ofelia.job-exec.checkin-noturno.command: "python /app/app/jobs/nightly_checkin.py"
+      ofelia.job-exec.checkin-noturno.schedule: "0 18,19,20,21,22,23 * * *"
+      ofelia.job-exec.checkin-noturno.command: "sh -c 'echo \"[OFELIA] Starting checkin-noturno at $(date +\"%Y-%m-%d %H:%M:%S\")\" && python /app/app/jobs/nightly_checkin.py'"
 
       # 5. Alertas de Tarefas do Google Calendar (Roda a cada minuto)
       ofelia.job-exec.alertas-tarefas.schedule: "@every 1m"

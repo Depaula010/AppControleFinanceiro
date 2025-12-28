@@ -28,7 +28,9 @@
       "Bash(grep:*)",
       "Bash(dir:*)",
       "Bash(findstr:*)",
-      "Bash(move webhooks_logic.py webhooks_legacy.py)"
+      "Bash(move webhooks_logic.py webhooks_legacy.py)",
+      "Bash(docker logs:*)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": []

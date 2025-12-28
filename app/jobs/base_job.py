@@ -98,6 +98,7 @@ class BaseJob(ABC):
     def _log(self, message: str, level: str = "INFO"):
         """
         Log padronizado com timestamp e nome do job.
+        Loga tanto no stdout quanto em arquivo.
 
         Args:
             message: Mensagem a ser logada
@@ -105,7 +106,22 @@ class BaseJob(ABC):
         """
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         job_name = self.get_job_name()
-        print(f"[{timestamp}] [{job_name}] {level}: {message}")
+        log_message = f"[{timestamp}] [{job_name}] {level}: {message}"
+
+        # Log to stdout (captured by Ofelia) - FLUSH IMEDIATO
+        print(log_message, flush=True)
+
+        # Log to file (persistent record)
+        try:
+            import os
+            log_dir = "/app/logs"
+            os.makedirs(log_dir, exist_ok=True)
+            log_file = os.path.join(log_dir, f"{job_name.lower()}.log")
+
+            with open(log_file, "a", encoding="utf-8") as f:
+                f.write(log_message + "\n")
+        except Exception as e:
+            print(f"[WARNING] Failed to write to log file: {e}", flush=True)
 
     def _log_separator(self):
         """Imprime separador visual para facilitar leitura dos logs."""

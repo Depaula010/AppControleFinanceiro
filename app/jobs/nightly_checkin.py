@@ -29,6 +29,16 @@ class NightlyCheckinJob(BaseJob):
         Envia check-in noturno e alertas de fatura vencida para usuários configurados.
         Executado dentro do Flask app context.
         """
+        # NOVO: Validar horário de execução (detectar misconfigurações)
+        current_hour = datetime.now().hour
+        if current_hour < 18 or current_hour > 23:
+            self._log(
+                f"⚠️ Job executado fora da janela permitida (18h-23h). Hora atual: {current_hour}h",
+                level="WARNING"
+            )
+            self._log("Isso indica problema na configuração do cron do Ofelia", level="WARNING")
+            self._log("Job continuará, mas alertas podem ser enviados em horário errado", level="WARNING")
+
         from app.services.notification_config_service import NotificationConfigService
         from app.services.nightly_checkin_service import NightlyCheckinService
         from app.services.notification_service import enviar_notificacao_whatsapp
