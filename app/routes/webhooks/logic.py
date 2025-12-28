@@ -1592,6 +1592,36 @@ def handle_whatsapp_webhook():
                     resposta_para_usuario = "❌ Erro ao consultar vencimentos da semana."
                     return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
+            # ===== INTENÇÃO: Contas Atrasadas =====
+            elif intent == 'Contas Atrasadas':
+                from app.routes.webhooks.intents import INTENT_REGISTRY
+
+                try:
+                    # Usar a classe ContasAtrasadasIntent registrada
+                    intent_class = INTENT_REGISTRY.get('Contas Atrasadas')
+
+                    if not intent_class:
+                        raise Exception("Intent 'Contas Atrasadas' não encontrada no registry")
+
+                    # Instanciar e processar a intent
+                    intent_instance = intent_class(
+                        conn=conn,
+                        usuario_id=usuario_id,
+                        texto=texto_msg
+                    )
+
+                    # Processar a intent usando o método process() da BaseIntent
+                    resposta_para_usuario = intent_instance.process()
+
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                except Exception as e:
+                    print(f"[CONTAS-ATRASADAS] Erro: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    resposta_para_usuario = "❌ Erro ao consultar contas atrasadas."
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
             #==== INTENÇÃO: Transferência =====
             elif intent == 'Transferência':
                 contas_raw = finance_service.get_user_accounts(conn, usuario_id)
