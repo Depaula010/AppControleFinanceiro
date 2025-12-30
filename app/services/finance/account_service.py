@@ -58,20 +58,28 @@ def get_account_by_name(
 
     # Busca parcial (fuzzy matching)
     params["nome_like"] = f"%{nome_conta}%"
-    sql_like = text(f"SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta ILIKE :nome_like {tipo_filter}")
+    sql_like = text(f"SELECT id, nome_conta FROM Contas WHERE usuario_id = :uid AND nome_conta ILIKE :nome_like {tipo_filter}")
     result = conn.execute(sql_like, params).fetchall()
 
-    # Só retorna se houver EXATAMENTE uma correspondência (evita matches ambíguos)
     if len(result) == 1:
+        # Correspondência única - retorna
+        return result[0][0]
+    elif len(result) > 1:
+        # Múltiplos matches - retorna o primeiro e loga aviso
+        print(f"[FUZZY-MATCH] Múltiplos matches para '{nome_conta}': {[r[1] for r in result]}. Usando: {result[0][1]}")
         return result[0][0]
 
-    # Fallback com filtro de tipo
-    if fallback and tipo_conta:
-        sql_fallback = text(f"SELECT id FROM Contas WHERE usuario_id = :uid AND tipo_conta = :tipo LIMIT 1")
-        return conn.execute(sql_fallback, params).scalar_one()
-    elif fallback:
-        sql_fallback = text("SELECT id FROM Contas WHERE usuario_id = :uid LIMIT 1")
-        return conn.execute(sql_fallback, params).scalar_one()
+    # Nenhum match encontrado - tenta fallback
+    if fallback:
+        if tipo_conta:
+            sql_fallback = text(f"SELECT id FROM Contas WHERE usuario_id = :uid AND tipo_conta = :tipo LIMIT 1")
+            result_fallback = conn.execute(sql_fallback, params).fetchone()
+        else:
+            sql_fallback = text("SELECT id FROM Contas WHERE usuario_id = :uid LIMIT 1")
+            result_fallback = conn.execute(sql_fallback, {"uid": params["uid"]}).fetchone()
+
+        if result_fallback:
+            return result_fallback[0]
 
     return None
 

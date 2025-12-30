@@ -279,6 +279,8 @@ class ContasAtrasadasIntent(BaseIntent):
                 WHERE a.usuario_id = :uid
                   AND a.ativo = TRUE
                   AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+                  -- Exclui débitos recorrentes de cartão (assinaturas) pois vão para a fatura
+                  AND NOT (a.tipo_agendamento = 'FIXO' AND g.nome_grupo = 'Despesa' AND c.tipo_conta = 'Cartão de Crédito')
             )
             SELECT
                 ed.id, ed.descricao, ed.valor_previsto, ed.dia_execucao,
@@ -368,73 +370,97 @@ class ContasAtrasadasIntent(BaseIntent):
         faturas = data["faturas_atrasadas"]
         hoje = data["hoje"]
 
+        # Separar receitas de despesas
+        despesas = [c for c in contas if c.get('nome_grupo') == 'Despesa']
+        receitas = [c for c in contas if c.get('nome_grupo') == 'Renda']
+
         # Se não há nada atrasado
-        if not contas and not faturas:
+        if not despesas and not faturas and not receitas:
             return "✅ Você não tem contas atrasadas! Tudo em dia! 🎉"
 
-        msg = "🔴 *CONTAS ATRASADAS*\n\n"
+        msg = ""
 
-        # Agrupar contas por dia de vencimento
-        contas_por_dia = {}
-        for conta in contas:
-            dia = conta['dia_execucao']
-            if dia not in contas_por_dia:
-                contas_por_dia[dia] = []
-            contas_por_dia[dia].append(conta)
+        # Seção 1: DESPESAS ATRASADAS (contas a pagar)
+        if despesas or faturas:
+            msg += "🔴 *CONTAS ATRASADAS*\n\n"
 
-        # Listar contas agrupadas
-        total_contas = 0
-        for dia in sorted(contas_por_dia.keys(), reverse=True):
-            # Calcular dias de atraso
-            dias_atraso = NightlyCheckinService.calculate_days_overdue(dia, hoje)
+            # Agrupar despesas por dia de vencimento
+            contas_por_dia = {}
+            for conta in despesas:
+                dia = conta['dia_execucao']
+                if dia not in contas_por_dia:
+                    contas_por_dia[dia] = []
+                contas_por_dia[dia].append(conta)
 
-            if dias_atraso == 1:
-                msg += "*Venceu ontem*\n"
-            elif dias_atraso <= 7:
-                msg += f"*Venceu dia {dia:02d}* ({dias_atraso} dias atrás)\n"
-            else:
-                msg += f"*Venceu dia {dia:02d}* ({dias_atraso} dias atrás) ⚠️\n"
+            # Listar despesas agrupadas
+            total_despesas = 0
+            for dia in sorted(contas_por_dia.keys(), reverse=True):
+                # Calcular dias de atraso
+                dias_atraso = NightlyCheckinService.calculate_days_overdue(dia, hoje)
 
-            for conta in contas_por_dia[dia]:
-                valor = conta['valor_previsto'] or 0
-                total_contas += valor
+                if dias_atraso == 1:
+                    msg += "*Venceu ontem*\n"
+                elif dias_atraso <= 7:
+                    msg += f"*Venceu dia {dia:02d}* ({dias_atraso} dias atrás)\n"
+                else:
+                    msg += f"*Venceu dia {dia:02d}* ({dias_atraso} dias atrás) ⚠️\n"
 
-                # Emoji baseado no tipo/grupo
-                tipo_emoji = "💰"
-                if conta.get('nome_grupo'):
-                    if 'Renda' in conta['nome_grupo']:
-                        tipo_emoji = "💵"
-                    elif 'Despesa' in conta['nome_grupo']:
-                        tipo_emoji = "💸"
-
-                msg += f"{tipo_emoji} {conta['descricao']} - {formatar_moeda(valor)}\n"
+                for conta in contas_por_dia[dia]:
+                    valor = conta['valor_previsto'] or 0
+                    total_despesas += valor
+                    msg += f"💸 {conta['descricao']} - {formatar_moeda(valor)}\n"
 
             msg += "\n"
 
-        # Faturas atrasadas
-        total_faturas = 0
-        if faturas:
-            msg += "*💳 Faturas Vencidas:*\n"
-            for fatura in faturas:
-                valor = fatura['valor_fatura'] or 0
-                total_faturas += valor
-                data_venc = fatura['data_vencimento']
-                dias_atraso = (hoje - data_venc).days
+            # Faturas atrasadas
+            total_faturas = 0
+            if faturas:
+                msg += "*💳 Faturas Vencidas:*\n"
+                for fatura in faturas:
+                    valor = fatura['valor_fatura'] or 0
+                    total_faturas += valor
+                    data_venc = fatura['data_vencimento']
+                    dias_atraso = (hoje - data_venc).days
 
-                msg += f"• {fatura['cartao']} - {formatar_moeda(valor)}\n"
-                msg += f"  Venceu em {data_venc.strftime('%d/%m')} ({dias_atraso} dias)\n"
-            msg += "\n"
+                    msg += f"• {fatura['cartao']} - {formatar_moeda(valor)}\n"
+                    msg += f"  Venceu em {data_venc.strftime('%d/%m')} ({dias_atraso} dias)\n"
+                msg += "\n"
 
-        # Totais
-        msg += "━━━━━━━━━━━━━━\n"
-        total_geral = total_contas + total_faturas
-        msg += f"💰 *Total:* {formatar_moeda(total_geral)}\n"
+            # Totais de despesas
+            msg += "━━━━━━━━━━━━━━\n"
+            total_despesas_geral = total_despesas + total_faturas
+            msg += f"💸 *Total Despesas:* {formatar_moeda(total_despesas_geral)}\n"
+            msg += f"⚠️ *{len(despesas) + len(faturas)} {'conta' if len(despesas) + len(faturas) == 1 else 'contas'} atrasada{'s' if len(despesas) + len(faturas) != 1 else ''}*\n\n"
 
-        num_contas = len(contas)
-        num_faturas = len(faturas)
-        total_items = num_contas + num_faturas
+        # Seção 2: RECEITAS PENDENTES (dinheiro que você ainda não recebeu)
+        if receitas:
+            msg += "💵 *RECEITAS PENDENTES*\n"
+            msg += "_Valores previstos que ainda não foram recebidos_\n\n"
 
-        msg += f"⚠️ *{total_items} {'conta' if total_items == 1 else 'contas'} pendente{'s' if total_items != 1 else ''}*"
+            # Agrupar receitas por dia de vencimento
+            receitas_por_dia = {}
+            for conta in receitas:
+                dia = conta['dia_execucao']
+                if dia not in receitas_por_dia:
+                    receitas_por_dia[dia] = []
+                receitas_por_dia[dia].append(conta)
+
+            # Listar receitas agrupadas
+            total_receitas = 0
+            for dia in sorted(receitas_por_dia.keys(), reverse=True):
+                dias_atraso = NightlyCheckinService.calculate_days_overdue(dia, hoje)
+                msg += f"*Previsto dia {dia:02d}* (há {dias_atraso} dias)\n"
+
+                for conta in receitas_por_dia[dia]:
+                    valor = conta['valor_previsto'] or 0
+                    total_receitas += valor
+                    msg += f"💵 {conta['descricao']} - {formatar_moeda(valor)}\n"
+
+                msg += "\n"
+
+            msg += "━━━━━━━━━━━━━━\n"
+            msg += f"💰 *Total Receitas Pendentes:* {formatar_moeda(total_receitas)}\n"
+            msg += f"ℹ️ *{len(receitas)} receita{'s' if len(receitas) != 1 else ''} aguardando confirmação*"
 
         return msg
 
