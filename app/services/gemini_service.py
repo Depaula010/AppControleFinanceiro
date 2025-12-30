@@ -435,6 +435,78 @@ def extract_fatura_payment_details(texto_msg, contas_json_list, usuario_id=None)
     print(f"[GEMINI-EXTRACT] Extração (Pagto Fatura): {json_extract_text}")
     return json.loads(json_extract_text)
 
+def extract_transfer_params(mensagem, usuario_id, conn):
+    """
+    Função wrapper para extrair parâmetros de transferência.
+
+    Esta função foi criada para conectar os intent handlers com a função de extração
+    de baixo nível que já existia. Os handlers esperam um formato específico de retorno.
+
+    Args:
+        mensagem: Mensagem do usuário
+        usuario_id: ID do usuário
+        conn: Conexão com o banco de dados
+
+    Returns:
+        Dict com: valor, conta_origem, conta_destino, descricao, data
+    """
+    from app.services.finance_service import get_user_accounts
+
+    # Busca as contas do usuário para passar como contexto ao Gemini
+    contas = get_user_accounts(conn, usuario_id)
+    contas_json_list = [
+        {"id": c["id"], "nome": c["nome_conta"], "tipo": c["tipo_conta"]}
+        for c in contas
+    ]
+
+    # Chama a função de extração de baixo nível que já existia
+    raw_result = extract_transfer_details(mensagem, contas_json_list, usuario_id)
+
+    # Retorna no formato esperado pelos intent handlers
+    return {
+        "valor": raw_result.get("valor_decimal"),
+        "conta_origem": raw_result.get("conta_origem"),
+        "conta_destino": raw_result.get("conta_destino"),
+        "descricao": raw_result.get("descricao", "Transferência"),
+        "data": raw_result.get("data")  # Será processado pelo handler se necessário
+    }
+
+def extract_invoice_payment_params(mensagem, usuario_id, conn):
+    """
+    Função wrapper para extrair parâmetros de pagamento de fatura.
+
+    Esta função foi criada para conectar os intent handlers com a função de extração
+    de baixo nível que já existia. Os handlers esperam um formato específico de retorno.
+
+    Args:
+        mensagem: Mensagem do usuário
+        usuario_id: ID do usuário
+        conn: Conexão com o banco de dados
+
+    Returns:
+        Dict com: valor, cartao, conta_pagamento, descricao, data
+    """
+    from app.services.finance_service import get_user_accounts
+
+    # Busca as contas do usuário para passar como contexto ao Gemini
+    contas = get_user_accounts(conn, usuario_id)
+    contas_json_list = [
+        {"id": c["id"], "nome": c["nome_conta"], "tipo": c["tipo_conta"]}
+        for c in contas
+    ]
+
+    # Chama a função de extração de baixo nível que já existia
+    raw_result = extract_fatura_payment_details(mensagem, contas_json_list, usuario_id)
+
+    # Retorna no formato esperado pelos intent handlers
+    return {
+        "valor": raw_result.get("valor_decimal"),
+        "cartao": raw_result.get("conta_cartao"),
+        "conta_pagamento": raw_result.get("conta_origem"),
+        "descricao": raw_result.get("descricao", "Pagamento de fatura"),
+        "data": raw_result.get("data")  # Será processado pelo handler se necessário
+    }
+
 def extract_category_query(texto_msg, usuario_id=None):
     """
     Extrai o nome da categoria que o usuário deseja consultar.

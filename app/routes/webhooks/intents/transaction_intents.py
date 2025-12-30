@@ -239,7 +239,8 @@ class TransferenciaIntent(ConfirmationRequiredIntent):
         """Extrai parâmetros da transferência usando Gemini."""
         params = gemini_service.extract_transfer_params(
             self.mensagem,
-            self.usuario_id
+            self.usuario_id,
+            self.conn
         )
 
         return {
@@ -261,10 +262,7 @@ class TransferenciaIntent(ConfirmationRequiredIntent):
         if not self.params.get("conta_destino"):
             return "❌ Não consegui identificar a conta de destino. Especifique para qual conta transferir."
 
-        # Validar que origem != destino
-        if self.params.get("conta_origem") == self.params.get("conta_destino"):
-            return "❌ A conta de origem deve ser diferente da conta de destino."
-
+        # Nota: Validação de conta igual movida para execute() após resolver os IDs
         return None
 
     def execute(self) -> Dict[str, Any]:
@@ -287,6 +285,22 @@ class TransferenciaIntent(ConfirmationRequiredIntent):
         if not conta_origem_id or not conta_destino_id:
             return {
                 "error": "❌ Uma ou ambas as contas não foram encontradas."
+            }
+
+        # Correção Bug #2: Valida se é a mesma conta APÓS resolver os IDs
+        # Antes comparava strings ("Inter" != "Banco Inter"), agora compara IDs
+        if conta_origem_id == conta_destino_id:
+            return {
+                "error": "❌ As contas de origem e destino devem ser diferentes."
+            }
+
+        # Correção Bug #1: Verifica saldo antes de criar a transferência
+        saldos = finance_service.get_saldo_contas(self.conn, self.usuario_id, conta_origem_id)
+        saldo_origem = saldos[0]["saldo_atual"] if saldos else 0
+
+        if saldo_origem < self.params["valor"]:
+            return {
+                "error": "❌ Saldo insuficiente na conta de origem."
             }
 
         # Criar transferência pendente
@@ -347,7 +361,8 @@ class PagamentoFaturaIntent(ConfirmationRequiredIntent):
         """Extrai parâmetros do pagamento usando Gemini."""
         params = gemini_service.extract_invoice_payment_params(
             self.mensagem,
-            self.usuario_id
+            self.usuario_id,
+            self.conn
         )
 
         return {
@@ -360,8 +375,17 @@ class PagamentoFaturaIntent(ConfirmationRequiredIntent):
 
     def validate(self) -> str | None:
         """Valida parâmetros extraídos."""
-        if not self.params.get("valor") or self.params["valor"] <= 0:
-            return "❌ Não consegui identificar o valor do pagamento."
+        # Correção Bug #3: Permite valor None (usará valor total da fatura)
+        valor = self.params.get("valor")
+
+        if valor is not None:
+            try:
+                valor_float = float(valor)
+                if valor_float <= 0:
+                    return "❌ Valor deve ser positivo."
+                self.params["valor"] = valor_float  # Normaliza o valor
+            except (ValueError, TypeError):
+                return "❌ Valor inválido."
 
         if not self.params.get("cartao"):
             return "❌ Não consegui identificar qual cartão. Especifique o cartão de crédito."
@@ -371,11 +395,13 @@ class PagamentoFaturaIntent(ConfirmationRequiredIntent):
     def execute(self) -> Dict[str, Any]:
         """Cria pagamento pendente de confirmação."""
         # Buscar ID do cartão (conta tipo crédito)
+        # Correção Bug #4: Remove fallback=True para falhar explicitamente se cartão não encontrado
+        # Antes retornava qualquer conta, agora só retorna se for cartão de crédito específico
         cartao_id = finance_service.get_account_by_name(
             self.conn,
             self.usuario_id,
             self.params["cartao"],
-            fallback=True,
+            fallback=False,
             tipo_conta="Cartão de Crédito"
         )
 

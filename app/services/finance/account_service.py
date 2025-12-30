@@ -28,7 +28,8 @@ def get_account_by_name(
     conn: Connection,
     usuario_id: int,
     nome_conta: str,
-    fallback: bool = False
+    fallback: bool = False,
+    tipo_conta: Optional[str] = None
 ) -> Optional[int]:
     """
     Busca um ID de conta pelo nome (exato ou ILIKE).
@@ -38,28 +39,39 @@ def get_account_by_name(
         usuario_id: ID do usuário
         nome_conta: Nome da conta
         fallback: Se True, retorna primeira conta caso não encontre
+        tipo_conta: Filtrar por tipo (ex: "Cartão de Crédito", "Conta Corrente")
 
     Returns:
         ID da conta ou None
     """
-    # Tentar busca exata
-    sql_exact = text("SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta = :nome")
-    conta_id = conn.execute(sql_exact, {"uid": usuario_id, "nome": nome_conta}).scalar_one_or_none()
+    tipo_filter = "AND tipo_conta = :tipo" if tipo_conta else ""
+    params = {"uid": usuario_id, "nome": nome_conta}
+    if tipo_conta:
+        params["tipo"] = tipo_conta
+
+    # Busca exata pelo nome
+    sql_exact = text(f"SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta = :nome {tipo_filter}")
+    conta_id = conn.execute(sql_exact, params).scalar_one_or_none()
 
     if conta_id:
         return conta_id
 
-    # Tentar busca parcial (ILIKE)
-    sql_like = text("SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta ILIKE :nome_like")
-    conta_id = conn.execute(sql_like, {"uid": usuario_id, "nome_like": f"%{nome_conta}%"}).scalar_one_or_none()
+    # Busca parcial (fuzzy matching)
+    params["nome_like"] = f"%{nome_conta}%"
+    sql_like = text(f"SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta ILIKE :nome_like {tipo_filter}")
+    result = conn.execute(sql_like, params).fetchall()
 
-    if conta_id:
-        return conta_id
+    # Só retorna se houver EXATAMENTE uma correspondência (evita matches ambíguos)
+    if len(result) == 1:
+        return result[0][0]
 
-    # Fallback: primeira conta disponível
-    if fallback:
+    # Fallback com filtro de tipo
+    if fallback and tipo_conta:
+        sql_fallback = text(f"SELECT id FROM Contas WHERE usuario_id = :uid AND tipo_conta = :tipo LIMIT 1")
+        return conn.execute(sql_fallback, params).scalar_one()
+    elif fallback:
         sql_fallback = text("SELECT id FROM Contas WHERE usuario_id = :uid LIMIT 1")
-        return conn.execute(sql_fallback, {"uid": usuario_id}).scalar_one()
+        return conn.execute(sql_fallback, params).scalar_one()
 
     return None
 

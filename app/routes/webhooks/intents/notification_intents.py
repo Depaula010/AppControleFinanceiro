@@ -245,48 +245,82 @@ class ContasAtrasadasIntent(BaseIntent):
 
         # Buscar agendamentos pendentes dos últimos 30 dias
         data_minima = hoje - timedelta(days=30)
-        dia_minimo = data_minima.day
 
-        # Query modificada do NightlyCheckinService para buscar contas atrasadas
+        # Correção Bug #9: Reescreve SQL com comparação de datas adequada usando CTE
+        # Problema: A query antiga comparava apenas números de dias (1-31), não datas completas
+        # Exemplo do erro: Conta com vencimento dia 25 de novembro não aparecia como atrasada
+        # no dia 30 de dezembro porque comparava 25 < 30 (só os dias, sem considerar o mês)
+        # Solução: Construir datas completas (ano-mês-dia) para comparação correta
         sql_contas = text("""
+            WITH ExpectedDates AS (
+                SELECT
+                    a.*,
+                    c.nome_conta, c.tipo_conta,
+                    s.nome_sub as categoria,
+                    m.nome_macro,
+                    g.nome_grupo,
+                    -- Constrói a data esperada completa para o mês atual
+                    CASE
+                        WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :hoje) + INTERVAL '1 month - 1 day'))
+                        THEN (DATE_TRUNC('month', :hoje) + INTERVAL '1 day' * (a.dia_execucao - 1))::date
+                        ELSE (DATE_TRUNC('month', :hoje) + INTERVAL '1 month - 1 day')::date
+                    END as data_esperada_mes_atual,
+                    -- Constrói a data esperada completa para o mês anterior
+                    CASE
+                        WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 month - 1 day'))
+                        THEN (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 day' * (a.dia_execucao - 1))::date
+                        ELSE (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 month - 1 day')::date
+                    END as data_esperada_mes_anterior
+                FROM Agendamentos a
+                JOIN Contas c ON a.conta_id = c.id
+                JOIN SubCategoria s ON a.subcategoria_id = s.id
+                JOIN MacroCategoria m ON s.macro_id = m.id
+                JOIN GrupoCategoria g ON m.grupo_id = g.id
+                WHERE a.usuario_id = :uid
+                  AND a.ativo = TRUE
+                  AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+            )
             SELECT
-                a.id, a.descricao, a.valor_previsto, a.dia_execucao,
-                a.conta_id, a.subcategoria_id, a.usuario_id,
-                c.nome_conta, c.tipo_conta,
-                s.nome_sub as categoria,
-                m.nome_macro,
-                g.nome_grupo
-            FROM Agendamentos a
-            JOIN Contas c ON a.conta_id = c.id
-            JOIN SubCategoria s ON a.subcategoria_id = s.id
-            JOIN MacroCategoria m ON s.macro_id = m.id
-            JOIN GrupoCategoria g ON m.grupo_id = g.id
-            WHERE a.usuario_id = :uid
-              AND a.ativo = TRUE
-              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
-              AND a.dia_execucao < EXTRACT(DAY FROM :hoje)
-              -- Filtro para agendamentos anuais: incluir apenas se o mês bater
-              AND (
-                  a.periodicidade != 'ANUAL'
-                  OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = EXTRACT(MONTH FROM :hoje))
-              )
-              -- Não foi pago este mês
-              AND NOT EXISTS (
-                  SELECT 1 FROM Transacoes t
-                  WHERE t.descricao = a.descricao
-                    AND t.usuario_id = a.usuario_id
-                    AND EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM :hoje)
-                    AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM :hoje)
-              )
-              -- Limitar aos últimos 30 dias
-              AND a.dia_execucao >= :dia_minimo
-            ORDER BY a.dia_execucao DESC, g.nome_grupo, a.descricao
+                ed.id, ed.descricao, ed.valor_previsto, ed.dia_execucao,
+                ed.conta_id, ed.subcategoria_id, ed.usuario_id,
+                ed.nome_conta, ed.tipo_conta, ed.categoria,
+                ed.nome_macro, ed.nome_grupo,
+                COALESCE(ed.data_esperada_mes_atual, ed.data_esperada_mes_anterior) as data_vencimento_real
+            FROM ExpectedDates ed
+            WHERE (
+                -- Mês atual está atrasado
+                (ed.data_esperada_mes_atual < :hoje
+                 AND NOT EXISTS (
+                     SELECT 1 FROM Transacoes t
+                     WHERE t.descricao = ed.descricao
+                       AND t.usuario_id = ed.usuario_id
+                       AND DATE_TRUNC('month', t.data_transacao) = DATE_TRUNC('month', :hoje)
+                       AND DATE_TRUNC('year', t.data_transacao) = DATE_TRUNC('year', :hoje)
+                 ))
+                OR
+                -- Mês anterior está atrasado
+                (ed.data_esperada_mes_anterior < :hoje
+                 AND ed.data_esperada_mes_anterior >= :data_minima
+                 AND NOT EXISTS (
+                     SELECT 1 FROM Transacoes t
+                     WHERE t.descricao = ed.descricao
+                       AND t.usuario_id = ed.usuario_id
+                       AND DATE_TRUNC('month', t.data_transacao) = DATE_TRUNC('month', ed.data_esperada_mes_anterior)
+                       AND DATE_TRUNC('year', t.data_transacao) = DATE_TRUNC('year', ed.data_esperada_mes_anterior)
+                 ))
+            )
+            -- Aplica filtro para agendamentos anuais se necessário
+            AND (
+                ed.periodicidade != 'ANUAL'
+                OR (ed.periodicidade = 'ANUAL' AND ed.mes_execucao = EXTRACT(MONTH FROM :hoje))
+            )
+            ORDER BY data_vencimento_real DESC, ed.nome_grupo, ed.descricao
         """)
 
         contas_result = self.conn.execute(sql_contas, {
             "uid": self.usuario_id,
             "hoje": hoje,
-            "dia_minimo": dia_minimo
+            "data_minima": data_minima
         }).fetchall()
 
         contas_atrasadas = [dict(row._mapping) for row in contas_result]
