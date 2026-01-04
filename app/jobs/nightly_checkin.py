@@ -79,73 +79,122 @@ class NightlyCheckinJob(BaseJob):
                         conn, usuario_id, date.today()
                     )
 
-                if not pending_bills:
-                    self._log(f"Sem contas pendentes - usuário {usuario_id}")
-                    continue
+                # Enviar check-in apenas se houver contas pendentes
+                if pending_bills:
+                    self._log(f"{len(pending_bills)} conta(s) pendente(s)")
 
-                self._log(f"{len(pending_bills)} conta(s) pendente(s)")
+                    # Criar sessão de check-in no Redis
+                    checkin_id = NightlyCheckinService.create_checkin_session(
+                        numero_whatsapp, pending_bills
+                    )
 
-                # Criar sessão de check-in no Redis
-                checkin_id = NightlyCheckinService.create_checkin_session(
-                    numero_whatsapp, pending_bills
-                )
+                    if not checkin_id:
+                        self._log(f"Erro ao criar sessão - usuário {usuario_id}", level="ERROR")
+                        continue
 
-                if not checkin_id:
-                    self._log(f"Erro ao criar sessão - usuário {usuario_id}", level="ERROR")
-                    continue
+                    # Formatar mensagem
+                    mensagem = NightlyCheckinService.format_checkin_message(
+                        pending_bills, checkin_id
+                    )
 
-                # Formatar mensagem
-                mensagem = NightlyCheckinService.format_checkin_message(
-                    pending_bills, checkin_id
-                )
-
-                if not mensagem:
-                    self._log(f"Sem mensagem para enviar - usuário {usuario_id}")
-                    continue
-
-                # Enviar via WhatsApp
-                enviar_notificacao_whatsapp(
-                    numero_whatsapp,
-                    mensagem,
-                    BOT_WHATSAPP_URL,
-                    API_SECRET_KEY
-                )
-
-                self._log(f"Mensagem enviada para usuário {usuario_id}")
+                    if mensagem:
+                        # Enviar via WhatsApp
+                        enviar_notificacao_whatsapp(
+                            numero_whatsapp,
+                            mensagem,
+                            BOT_WHATSAPP_URL,
+                            API_SECRET_KEY
+                        )
+                        self._log(f"Check-in enviado para usuário {usuario_id}")
+                    else:
+                        self._log(f"Sem mensagem de check-in para enviar - usuário {usuario_id}")
+                else:
+                    self._log(f"Sem contas pendentes para check-in - usuário {usuario_id}")
 
             except Exception as e_user:
-                self._log(f"Erro ao processar usuário {usuario_id}: {e_user}", level="ERROR")
+                self._log(f"Erro ao processar check-in do usuário {usuario_id}: {e_user}", level="ERROR")
                 import traceback
                 traceback.print_exc()
                 continue
 
-        # Processar alertas de fatura vencida (todos os usuários)
-        self._process_overdue_invoices()
+        # NOVOS ALERTAS: Processar alertas para usuários com check-in noturno ativo
+        # Os alertas seguem o mesmo horário do check-in noturno (checkin_noturno_hora)
+        self._log("Processando alertas de contas atrasadas e vencimentos...")
+
+        # Buscar todos os usuários com check-in noturno ativo neste horário
+        from app.services.notification_config_service import NotificationConfigService
+
+        # Usar o mesmo horário do check-in noturno para os alertas
+        usuarios_alertas = NotificationConfigService.get_users_with_checkin_noturno_active(hora_atual)
+
+        if usuarios_alertas:
+            self._log(f"{len(usuarios_alertas)} usuário(s) com alertas ativos")
+            for usuario_id, numero_whatsapp in usuarios_alertas:
+                try:
+                    # Processar alertas de faturas vencidas
+                    self._process_overdue_invoices_for_user(usuario_id, numero_whatsapp)
+
+                    # Processar alertas de contas atrasadas
+                    self._process_overdue_bills_for_user(usuario_id, numero_whatsapp)
+
+                    # Processar alertas de contas que vencem hoje
+                    self._process_bills_due_today_for_user(usuario_id, numero_whatsapp)
+
+                except Exception as e:
+                    self._log(f"Erro ao processar alertas para usuário {usuario_id}: {e}", level="ERROR")
+                    import traceback
+                    traceback.print_exc()
+        else:
+            self._log("Nenhum usuário com alertas ativos neste horário")
 
         self._log("Processamento finalizado")
 
-    def _process_overdue_invoices(self):
+    def _process_overdue_invoices_for_user(self, usuario_id, numero_whatsapp):
         """
-        NOVA FUNCIONALIDADE: Alertar sobre faturas vencidas.
-        Movido de invoice_processor.py (linhas 126-160).
+        Alertar sobre faturas vencidas de um usuário específico.
         """
         from app import db_engine
-        from app.services.finance.invoice_service import get_overdue_invoices
         from app.services.notification_service import enviar_notificacao_whatsapp
         from app.shared.formatters.invoice_notification_formatter import InvoiceNotificationFormatter
         from app.services.redis_service import redis_service
         from app.config import BOT_WHATSAPP_URL, API_SECRET_KEY
 
-        self._log("Buscando faturas vencidas...")
+        with db_engine.connect() as conn:
+            # Buscar faturas vencidas do usuário
+            from sqlalchemy import text
+            from datetime import timedelta
 
-        with db_engine.begin() as conn:
-            overdue_invoices = get_overdue_invoices(conn)
+            hoje = date.today()
+            limite_inferior = hoje - timedelta(days=30)
+
+            sql = text("""
+                SELECT
+                    f.id,
+                    c.nome_conta as cartao,
+                    f.data_vencimento,
+                    f.status,
+                    COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) as valor_total
+                FROM Faturas f
+                JOIN Contas c ON f.conta_id = c.id
+                LEFT JOIN Transacoes t ON f.id = t.fatura_id
+                WHERE c.usuario_id = :uid
+                  AND f.status = 'Aberta'
+                  AND f.data_vencimento < :hoje
+                  AND f.data_vencimento >= :limite_inferior
+                GROUP BY f.id, c.nome_conta, f.data_vencimento, f.status
+                ORDER BY f.data_vencimento DESC
+            """)
+
+            result = conn.execute(sql, {
+                "uid": usuario_id,
+                "hoje": hoje,
+                "limite_inferior": limite_inferior
+            }).fetchall()
+
+            overdue_invoices = [dict(row._mapping) for row in result]
 
         if not overdue_invoices:
-            self._log("Nenhuma fatura vencida")
             return
-
-        self._log(f"Encontradas {len(overdue_invoices)} fatura(s) vencida(s)")
 
         today_str = date.today().strftime('%Y%m%d')
 
@@ -157,7 +206,7 @@ class NightlyCheckinJob(BaseJob):
                 msg = InvoiceNotificationFormatter.format_overdue_alert(invoice)
 
                 success = enviar_notificacao_whatsapp(
-                    invoice['numero_whatsapp'],
+                    numero_whatsapp,
                     msg,
                     BOT_WHATSAPP_URL,
                     API_SECRET_KEY
@@ -165,11 +214,272 @@ class NightlyCheckinJob(BaseJob):
 
                 if success:
                     redis_service.set_with_ttl(redis_key, True, ttl_seconds=30*24*60*60)
-                    self._log(f"Alerta de atraso enviado - Fatura #{invoice['id']}")
+                    self._log(f"Alerta de fatura vencida enviado - Usuário {usuario_id}, Fatura #{invoice['id']}")
                 else:
-                    self._log(f"Falha ao enviar alerta de atraso - Fatura #{invoice['id']}", level="WARNING")
+                    self._log(f"Falha ao enviar alerta de fatura - Usuário {usuario_id}, Fatura #{invoice['id']}", level="WARNING")
             else:
-                self._log(f"Alerta de atraso já enviado hoje - Fatura #{invoice['id']}")
+                self._log(f"Alerta de fatura já enviado hoje - Usuário {usuario_id}, Fatura #{invoice['id']}")
+
+    def _process_overdue_bills_for_user(self, usuario_id, numero_whatsapp):
+        """
+        Alertar sobre contas atrasadas (agendamentos não pagos) de um usuário específico.
+        Considera apenas contas atrasadas há mais de 7 dias (as recentes vão no check-in).
+        """
+        from app import db_engine
+        from app.services.notification_service import enviar_notificacao_whatsapp
+        from app.services.redis_service import redis_service
+        from app.config import BOT_WHATSAPP_URL, API_SECRET_KEY
+        from app.utils import formatar_moeda
+        from sqlalchemy import text
+        from datetime import timedelta
+
+        hoje = date.today()
+        data_minima = hoje - timedelta(days=30)  # Últimos 30 dias
+        data_maxima = hoje - timedelta(days=8)   # Atrasadas há mais de 7 dias
+
+        with db_engine.connect() as conn:
+            # Query para buscar contas atrasadas (mesmo SQL do ContasAtrasadasIntent)
+            sql = text("""
+                WITH ExpectedDates AS (
+                    SELECT
+                        a.*,
+                        c.nome_conta, c.tipo_conta,
+                        s.nome_sub as categoria,
+                        m.nome_macro,
+                        g.nome_grupo,
+                        CASE
+                            WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :hoje) + INTERVAL '1 month - 1 day'))
+                            THEN (DATE_TRUNC('month', :hoje) + INTERVAL '1 day' * (a.dia_execucao - 1))::date
+                            ELSE (DATE_TRUNC('month', :hoje) + INTERVAL '1 month - 1 day')::date
+                        END as data_esperada_mes_atual,
+                        CASE
+                            WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 month - 1 day'))
+                            THEN (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 day' * (a.dia_execucao - 1))::date
+                            ELSE (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 month - 1 day')::date
+                        END as data_esperada_mes_anterior
+                    FROM Agendamentos a
+                    JOIN Contas c ON a.conta_id = c.id
+                    JOIN SubCategoria s ON a.subcategoria_id = s.id
+                    JOIN MacroCategoria m ON s.macro_id = m.id
+                    JOIN GrupoCategoria g ON m.grupo_id = g.id
+                    WHERE a.usuario_id = :uid
+                      AND a.ativo = TRUE
+                      AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+                      AND NOT (a.tipo_agendamento = 'FIXO' AND g.nome_grupo = 'Despesa' AND c.tipo_conta = 'Cartão de Crédito')
+                )
+                SELECT
+                    ed.id, ed.descricao, ed.valor_previsto, ed.dia_execucao,
+                    ed.nome_conta, ed.tipo_conta, ed.categoria,
+                    ed.nome_macro, ed.nome_grupo,
+                    COALESCE(ed.data_esperada_mes_atual, ed.data_esperada_mes_anterior) as data_vencimento_real
+                FROM ExpectedDates ed
+                WHERE (
+                    (ed.data_esperada_mes_atual < :hoje
+                     AND ed.data_esperada_mes_atual <= :data_maxima
+                     AND NOT EXISTS (
+                         SELECT 1 FROM Transacoes t
+                         WHERE t.descricao = ed.descricao
+                           AND t.usuario_id = ed.usuario_id
+                           AND DATE_TRUNC('month', t.data_transacao) = DATE_TRUNC('month', :hoje)
+                           AND DATE_TRUNC('year', t.data_transacao) = DATE_TRUNC('year', :hoje)
+                     ))
+                    OR
+                    (ed.data_esperada_mes_anterior < :hoje
+                     AND ed.data_esperada_mes_anterior >= :data_minima
+                     AND ed.data_esperada_mes_anterior <= :data_maxima
+                     AND NOT EXISTS (
+                         SELECT 1 FROM Transacoes t
+                         WHERE t.descricao = ed.descricao
+                           AND t.usuario_id = ed.usuario_id
+                           AND DATE_TRUNC('month', t.data_transacao) = DATE_TRUNC('month', ed.data_esperada_mes_anterior)
+                           AND DATE_TRUNC('year', t.data_transacao) = DATE_TRUNC('year', ed.data_esperada_mes_anterior)
+                     ))
+                )
+                AND (
+                    ed.periodicidade != 'ANUAL'
+                    OR (ed.periodicidade = 'ANUAL' AND ed.mes_execucao = EXTRACT(MONTH FROM :hoje))
+                )
+                ORDER BY data_vencimento_real DESC, ed.nome_grupo, ed.descricao
+            """)
+
+            result = conn.execute(sql, {
+                "uid": usuario_id,
+                "hoje": hoje,
+                "data_minima": data_minima,
+                "data_maxima": data_maxima
+            }).fetchall()
+
+            contas_atrasadas = [dict(row._mapping) for row in result]
+
+        if not contas_atrasadas:
+            return
+
+        # Enviar 1 alerta por dia
+        today_str = date.today().strftime('%Y%m%d')
+        redis_key = f"bills_overdue:{usuario_id}:{today_str}"
+
+        if redis_service.exists(redis_key):
+            self._log(f"Alerta de contas atrasadas já enviado hoje - Usuário {usuario_id}")
+            return
+
+        # Formatar mensagem
+        despesas = [c for c in contas_atrasadas if c['nome_grupo'] == 'Despesa']
+        receitas = [c for c in contas_atrasadas if c['nome_grupo'] == 'Renda']
+
+        if not despesas and not receitas:
+            return
+
+        msg = "🔴 *ALERTA DE CONTAS ATRASADAS*\n\n"
+
+        if despesas:
+            msg += "💸 *DESPESAS VENCIDAS (há mais de 7 dias):*\n\n"
+            total = 0
+            for conta in despesas:
+                valor = conta['valor_previsto'] or 0
+                total += valor
+                dias_atraso = (hoje - conta['data_vencimento_real']).days
+                msg += f"• {conta['descricao']} - {formatar_moeda(valor)}\n"
+                msg += f"  Venceu em {conta['data_vencimento_real'].strftime('%d/%m')} ({dias_atraso} dias) ⚠️\n"
+
+            msg += f"\n💸 *Total:* {formatar_moeda(total)}\n"
+            msg += f"⚠️ *{len(despesas)} conta{'s' if len(despesas) != 1 else ''} atrasada{'s' if len(despesas) != 1 else ''}*\n\n"
+
+        if receitas:
+            msg += "💵 *RECEITAS PENDENTES:*\n"
+            msg += "_Valores previstos que ainda não foram recebidos_\n\n"
+            total_receitas = 0
+            for conta in receitas:
+                valor = conta['valor_previsto'] or 0
+                total_receitas += valor
+                msg += f"• {conta['descricao']} - {formatar_moeda(valor)}\n"
+                msg += f"  Previsto em {conta['data_vencimento_real'].strftime('%d/%m')}\n"
+
+            msg += f"\n💰 *Total:* {formatar_moeda(total_receitas)}\n"
+
+        msg += "\n_Digite 'Pendencias' para ver todos os detalhes._"
+
+        success = enviar_notificacao_whatsapp(
+            numero_whatsapp,
+            msg,
+            BOT_WHATSAPP_URL,
+            API_SECRET_KEY
+        )
+
+        if success:
+            redis_service.set_with_ttl(redis_key, True, ttl_seconds=24*60*60)
+            self._log(f"Alerta de contas atrasadas enviado - Usuário {usuario_id} ({len(contas_atrasadas)} contas)")
+        else:
+            self._log(f"Falha ao enviar alerta de contas atrasadas - Usuário {usuario_id}", level="WARNING")
+
+    def _process_bills_due_today_for_user(self, usuario_id, numero_whatsapp):
+        """
+        Alertar sobre contas que vencem hoje.
+        """
+        from app import db_engine
+        from app.services.notification_service import enviar_notificacao_whatsapp
+        from app.services.redis_service import redis_service
+        from app.config import BOT_WHATSAPP_URL, API_SECRET_KEY
+        from app.utils import formatar_moeda
+        from sqlalchemy import text
+
+        hoje = date.today()
+
+        with db_engine.connect() as conn:
+            # Buscar contas que vencem hoje
+            sql = text("""
+                SELECT
+                    a.id, a.descricao, a.valor_previsto,
+                    c.nome_conta, c.tipo_conta,
+                    s.nome_sub as categoria,
+                    g.nome_grupo
+                FROM Agendamentos a
+                JOIN Contas c ON a.conta_id = c.id
+                JOIN SubCategoria s ON a.subcategoria_id = s.id
+                JOIN MacroCategoria m ON s.macro_id = m.id
+                JOIN GrupoCategoria g ON m.grupo_id = g.id
+                WHERE a.usuario_id = :uid
+                  AND a.ativo = TRUE
+                  AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+                  AND a.dia_execucao = EXTRACT(DAY FROM :hoje)
+                  AND (
+                      a.periodicidade != 'ANUAL'
+                      OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = EXTRACT(MONTH FROM :hoje))
+                  )
+                  AND NOT EXISTS (
+                      SELECT 1 FROM Transacoes t
+                      WHERE t.descricao = a.descricao
+                        AND t.usuario_id = a.usuario_id
+                        AND EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM :hoje)
+                        AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM :hoje)
+                  )
+                  -- Exclui débitos recorrentes de cartão (vão para a fatura)
+                  AND NOT (a.tipo_agendamento = 'FIXO' AND g.nome_grupo = 'Despesa' AND c.tipo_conta = 'Cartão de Crédito')
+                ORDER BY g.nome_grupo, a.descricao
+            """)
+
+            result = conn.execute(sql, {
+                "uid": usuario_id,
+                "hoje": hoje
+            }).fetchall()
+
+            contas_hoje = [dict(row._mapping) for row in result]
+
+        if not contas_hoje:
+            return
+
+        # Enviar 1 alerta por dia
+        today_str = date.today().strftime('%Y%m%d')
+        redis_key = f"bills_due_today:{usuario_id}:{today_str}"
+
+        if redis_service.exists(redis_key):
+            self._log(f"Alerta de vencimentos de hoje já enviado - Usuário {usuario_id}")
+            return
+
+        # Formatar mensagem
+        despesas = [c for c in contas_hoje if c['nome_grupo'] == 'Despesa']
+        receitas = [c for c in contas_hoje if c['nome_grupo'] == 'Renda']
+
+        if not despesas and not receitas:
+            return
+
+        msg = "📅 *VENCIMENTOS DE HOJE*\n\n"
+
+        if despesas:
+            msg += "💸 *CONTAS A PAGAR:*\n"
+            total = 0
+            for conta in despesas:
+                valor = conta['valor_previsto'] or 0
+                total += valor
+                msg += f"• {conta['descricao']} - {formatar_moeda(valor)}\n"
+                msg += f"  {conta['nome_conta']}\n"
+
+            msg += f"\n💸 *Total:* {formatar_moeda(total)}\n\n"
+
+        if receitas:
+            msg += "💰 *RECEITAS PREVISTAS:*\n"
+            total_receitas = 0
+            for conta in receitas:
+                valor = conta['valor_previsto'] or 0
+                total_receitas += valor
+                msg += f"• {conta['descricao']} - {formatar_moeda(valor)}\n"
+                msg += f"  {conta['nome_conta']}\n"
+
+            msg += f"\n💰 *Total:* {formatar_moeda(total_receitas)}\n\n"
+
+        msg += "_Não esqueça de registrar os pagamentos/recebimentos!_"
+
+        success = enviar_notificacao_whatsapp(
+            numero_whatsapp,
+            msg,
+            BOT_WHATSAPP_URL,
+            API_SECRET_KEY
+        )
+
+        if success:
+            redis_service.set_with_ttl(redis_key, True, ttl_seconds=24*60*60)
+            self._log(f"Alerta de vencimentos de hoje enviado - Usuário {usuario_id} ({len(contas_hoje)} contas)")
+        else:
+            self._log(f"Falha ao enviar alerta de vencimentos - Usuário {usuario_id}", level="WARNING")
 
 
 if __name__ == "__main__":
