@@ -1709,7 +1709,7 @@ def extract_address_label_from_deletion(texto_msg, usuario_id=None):
 
 def extract_income_params(mensagem, usuario_id, conn=None):
     """
-    Extrai parâmetros de renda da mensagem do usuário.
+    Extrai parâmetros de renda da mensagem do usuário
 
     REGRA IMPORTANTE: Se o usuário não informar o valor mas mencionar uma
     descrição que corresponde a um agendamento recorrente (FIXO ou LEMBRETE_VARIAVEL),
