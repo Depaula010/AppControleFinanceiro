@@ -79,6 +79,84 @@ class FaturasQueries:
         """)
 
     @staticmethod
+    def get_invoice_by_due_date() -> text:
+        """
+        Busca fatura de um cartão por data de vencimento.
+
+        Usado em:
+        - Verificar se fatura já existe para um período
+        - Evitar duplicação de faturas
+        - get_or_create_fatura()
+
+        Parâmetros necessários:
+            :cid (int) - ID da conta (cartão)
+            :dv (date) - Data de vencimento
+
+        Retorna: ID da fatura ou NULL
+        """
+        return text("""
+            SELECT id
+            FROM Faturas
+            WHERE conta_id = :cid
+              AND data_vencimento = :dv
+            LIMIT 1
+        """)
+
+    @staticmethod
+    def get_open_invoices_by_account() -> text:
+        """
+        Busca faturas abertas de uma conta específica.
+
+        Usado em:
+        - Listar faturas pendentes de um cartão
+        - Dashboard de faturas
+
+        Parâmetros necessários:
+            :conta_id (int) - ID da conta (cartão)
+
+        Retorna: Lista de faturas abertas com valor total
+        """
+        return text("""
+            SELECT
+                f.id,
+                f.data_vencimento,
+                f.data_fechamento,
+                f.status,
+                COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) as valor_total
+            FROM Faturas f
+            LEFT JOIN Transacoes t ON f.id = t.fatura_id
+            WHERE f.conta_id = :conta_id
+              AND f.status = 'Aberta'
+            GROUP BY f.id, f.data_vencimento, f.data_fechamento, f.status
+            ORDER BY f.data_vencimento
+        """)
+
+    @staticmethod
+    def get_current_month_invoice() -> text:
+        """
+        Busca fatura do mês atual para um cartão.
+
+        Usado em:
+        - Registrar despesa no cartão (buscar fatura corrente)
+        - Exibir fatura atual
+
+        Parâmetros necessários:
+            :conta_id (int) - ID da conta (cartão)
+            :mes_ref (int) - Mês de referência (1-12)
+            :ano_ref (int) - Ano de referência
+
+        Retorna: ID da fatura ou NULL
+        """
+        return text("""
+            SELECT id
+            FROM Faturas
+            WHERE conta_id = :conta_id
+              AND EXTRACT(MONTH FROM data_vencimento) = :mes_ref
+              AND EXTRACT(YEAR FROM data_vencimento) = :ano_ref
+            LIMIT 1
+        """)
+
+    @staticmethod
     def get_parametros_padrao(usuario_id: int, hoje) -> Dict[str, Any]:
         """
         Retorna parâmetros padrão usados na maioria das queries de faturas.
@@ -96,4 +174,21 @@ class FaturasQueries:
             "uid": usuario_id,
             "hoje": hoje,
             "limite_inferior": hoje - timedelta(days=30),  # Últimas 30 dias
+        }
+
+    @staticmethod
+    def get_parametros_fatura_por_vencimento(conta_id: int, data_vencimento) -> Dict[str, Any]:
+        """
+        Retorna parâmetros para buscar fatura por vencimento.
+
+        Args:
+            conta_id: ID da conta (cartão)
+            data_vencimento: Data de vencimento da fatura
+
+        Returns:
+            Dict com parâmetros
+        """
+        return {
+            "cid": conta_id,
+            "dv": data_vencimento
         }
