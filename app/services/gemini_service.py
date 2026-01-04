@@ -375,9 +375,21 @@ def extract_transaction_details(texto_msg, intent, usuario_id=None):
 
     prompt = f"""Analise a mensagem: "{texto_msg}"
     O tipo é: "{intent}".
-    Extraia "valor_decimal" (sempre positivo) e "descricao_bruta".
+
+    Extraia:
+    - "valor_decimal": Valor numérico mencionado (ou null se não mencionar)
+    - "descricao_bruta": APENAS o nome/item principal (não a frase completa)
+
+    IMPORTANTE para descrição:
+    - "recebi meu salário" → "salário"
+    - "recebi o swile" → "swile"
+    - "paguei a conta de luz" → "luz" ou "conta de luz"
+    - "gastei 50 na padaria" → "padaria"
+    - "recebi 500 de freelance" → "freelance"
+
     Responda APENAS com JSON.
-    Ex: {{"valor_decimal": 50.00, "descricao_bruta": "Padaria"}}""";
+    Ex: {{"valor_decimal": 50.00, "descricao_bruta": "Padaria"}}
+    Ex: {{"valor_decimal": null, "descricao_bruta": "salário"}}""";
 
     # CACHE: Extração de transação, TTL 24 horas (pode variar levemente)
     cache_config = {
@@ -1700,8 +1712,8 @@ def extract_income_params(mensagem, usuario_id, conn=None):
     Extrai parâmetros de renda da mensagem do usuário.
 
     REGRA IMPORTANTE: Se o usuário não informar o valor mas mencionar uma
-    descrição que corresponde a um LEMBRETE_VARIAVEL, busca o valor previsto
-    no agendamento.
+    descrição que corresponde a um agendamento recorrente (FIXO ou LEMBRETE_VARIAVEL),
+    busca o valor previsto no agendamento.
 
     Args:
         mensagem: Mensagem do usuário (ex: "recebi meu salário")
@@ -1730,9 +1742,9 @@ def extract_income_params(mensagem, usuario_id, conn=None):
     valor = extracted.get("valor_decimal")
     descricao = extracted.get("descricao_bruta", "Renda")
 
-    # Se não informou valor, tenta buscar em agendamento LEMBRETE_VARIAVEL
+    # Se não informou valor, tenta buscar em agendamento recorrente
     if valor is None and descricao:
-        print(f"[INCOME-PARAMS] Valor não informado. Buscando agendamento LEMBRETE_VARIAVEL: '{descricao}'")
+        print(f"[INCOME-PARAMS] Valor não informado. Buscando agendamento recorrente: '{descricao}'")
 
         # Se não tem conexão, cria uma
         if conn is None and db_engine:
@@ -1761,8 +1773,8 @@ def extract_expense_params(mensagem, usuario_id, conn=None):
     Extrai parâmetros de despesa da mensagem do usuário.
 
     REGRA IMPORTANTE: Se o usuário não informar o valor mas mencionar uma
-    descrição que corresponde a um LEMBRETE_VARIAVEL, busca o valor previsto
-    no agendamento.
+    descrição que corresponde a um agendamento recorrente (FIXO ou LEMBRETE_VARIAVEL),
+    busca o valor previsto no agendamento.
 
     Args:
         mensagem: Mensagem do usuário (ex: "paguei a conta de luz")
@@ -1792,9 +1804,9 @@ def extract_expense_params(mensagem, usuario_id, conn=None):
     valor = extracted.get("valor_decimal")
     descricao = extracted.get("descricao_bruta", "Despesa")
 
-    # Se não informou valor, tenta buscar em agendamento LEMBRETE_VARIAVEL
+    # Se não informou valor, tenta buscar em agendamento recorrente
     if valor is None and descricao:
-        print(f"[EXPENSE-PARAMS] Valor não informado. Buscando agendamento LEMBRETE_VARIAVEL: '{descricao}'")
+        print(f"[EXPENSE-PARAMS] Valor não informado. Buscando agendamento recorrente: '{descricao}'")
 
         # Se não tem conexão, cria uma
         if conn is None and db_engine:
@@ -1822,7 +1834,7 @@ def extract_expense_params(mensagem, usuario_id, conn=None):
 
 def _buscar_valor_lembrete_variavel(conn, usuario_id, descricao):
     """
-    Função auxiliar interna para buscar agendamento LEMBRETE_VARIAVEL.
+    Função auxiliar interna para buscar agendamento recorrente (FIXO ou LEMBRETE_VARIAVEL).
 
     Args:
         conn: Conexão com o banco

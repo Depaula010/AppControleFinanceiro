@@ -214,15 +214,18 @@ class AgendamentosQueries:
     @staticmethod
     def get_lembrete_variavel_by_description() -> text:
         """
-        Busca um agendamento LEMBRETE_VARIAVEL por descrição (busca fuzzy).
+        Busca um agendamento (FIXO ou LEMBRETE_VARIAVEL) por descrição (busca fuzzy).
 
         Usado em: Extract income/expense params (quando valor não é informado)
+
+        REGRA: Quando o usuário diz "recebi X" ou "paguei X" sem valor, busca
+        qualquer agendamento recorrente (FIXO ou LEMBRETE_VARIAVEL) e usa o valor_previsto.
 
         Parâmetros necessários:
             :uid (int) - ID do usuário
             :descricao (str) - Descrição para buscar (usa ILIKE para busca parcial)
 
-        Retorna: Agendamento LEMBRETE_VARIAVEL que corresponde à descrição
+        Retorna: Agendamento que corresponde à descrição
         """
         return text("""
             SELECT
@@ -238,11 +241,13 @@ class AgendamentosQueries:
             JOIN GrupoCategoria g ON m.grupo_id = g.id
             WHERE a.usuario_id = :uid
               AND a.ativo = TRUE
-              AND a.tipo_agendamento = 'LEMBRETE_VARIAVEL'
+              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
               AND a.descricao ILIKE :descricao
             ORDER BY
               -- Priorizar matches exatos
               CASE WHEN LOWER(a.descricao) = LOWER(:descricao_exact) THEN 0 ELSE 1 END,
+              -- Priorizar LEMBRETE_VARIAVEL sobre FIXO (mais flexível)
+              CASE WHEN a.tipo_agendamento = 'LEMBRETE_VARIAVEL' THEN 0 ELSE 1 END,
               a.descricao
             LIMIT 1
         """)
