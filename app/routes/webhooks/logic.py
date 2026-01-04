@@ -2520,7 +2520,7 @@ def legacy_handle_sms_payment():
                 agendamento_id, desc_original, valor_previsto, dia_venc, categoria = match
                 
                 # Buscar conta "Swile" (ou criar se não existir)
-                sql_conta_pagamento = text("SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta ILIKE '%{conta}%' LIMIT 1")
+                sql_conta_pagamento = text(f"SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta ILIKE '%{conta_pagamento}%' LIMIT 1")
                 conta_id = conn.execute(sql_conta_pagamento, {"uid": usuario_id}).scalar_one_or_none()
                 
                 if not conta_id:
@@ -2531,7 +2531,7 @@ def legacy_handle_sms_payment():
                 transaction_id = FixedBillsService.settle_fixed_bill(
                     conn, usuario_id, agendamento_id, valor, data_pagamento,
                     conta_pagamento_id=conta_id,
-                    observacao="Pago via {conta}"
+                    observacao=f"Pago via {conta_pagamento}"
                 )
                 
                 conn.commit()
