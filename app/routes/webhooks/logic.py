@@ -785,7 +785,24 @@ def handle_whatsapp_webhook():
             else:
                 # Palavra-chave de confirmação detectada, mas sem transação pendente
                 print(f"[CONFIRM-CHECK] Palavra de confirmação detectada, mas nenhuma transação pendente encontrada")
-                # Continuar para fluxo normal (pode ser uma pergunta normal que contém "ok")
+                print(f"[TX-CONFIRM-DEBUG] Número limpo: {numero_limpo}")
+                print(f"[TX-CONFIRM-DEBUG] Chave Redis: {last_tx_key}")
+                print(f"[TX-CONFIRM-DEBUG] Mensagem original: '{texto_msg}'")
+                print(f"[TX-CONFIRM-DEBUG] Mensagem upper: '{msg_upper}'")
+                
+                # Se for palavra EXATA de confirmação/cancelamento, dar feedback claro
+                # Isso evita que "ok" ou "cancelar" sejam classificados como outras intenções
+                if msg_upper in ['OK', 'CONFIRMAR', 'SIM', 'CONFIRMA']:
+                    return jsonify({
+                        "status": "sucesso",
+                        "resposta": "✅ Não encontrei nada pendente para confirmar.\n\nSe quer registrar algo, diga:\nExemplo: 'gastei 50 em comida'"
+                    }), 200
+                elif msg_upper in ['CANCELAR', 'CANCELA', 'NÃO', 'NAO']:
+                    return jsonify({
+                        "status": "sucesso", 
+                        "resposta": "❌ Não encontrei nada pendente para cancelar.\n\nSe quer deletar um evento específico, diga qual:\nExemplo: 'Deletar academia de hoje'"
+                    }), 200
+                # Se for "TROCAR" ou número, continuar para classificação normal
 
         # Safety check para "cancelar" sem contexto
         if msg_lower in ['cancelar', 'cancela'] and len(texto_msg.strip().split()) == 1:
@@ -2517,21 +2534,15 @@ def legacy_handle_sms_payment():
             
             if match:
                 # Encontrou conta fixa correspondente
-                agendamento_id, desc_original, valor_previsto, dia_venc, categoria = match
+                agendamento_id, desc_original, valor_previsto, dia_venc, tipo_agend, categoria, conta_id_agendamento = match
                 
-                # Buscar conta "Swile" (ou criar se não existir)
-                sql_conta_pagamento = text(f"SELECT id FROM Contas WHERE usuario_id = :uid AND nome_conta ILIKE '%{conta_pagamento}%' LIMIT 1")
-                conta_id = conn.execute(sql_conta_pagamento, {"uid": usuario_id}).scalar_one_or_none()
-                
-                if not conta_id:
-                    # Usar conta padrão
-                    conta_id = None
+                # Usar a conta_id do agendamento (não buscar outra conta)
+                # A conta correta já está configurada no agendamento
                 
                 # Quitar a conta fixa
                 transaction_id = FixedBillsService.settle_fixed_bill(
                     conn, usuario_id, agendamento_id, valor, data_pagamento,
-                    conta_pagamento_id=conta_id,
-                    observacao=f"Pago via {conta_pagamento}"
+                    conta_pagamento_id=conta_id_agendamento
                 )
                 
                 conn.commit()

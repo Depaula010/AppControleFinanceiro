@@ -159,7 +159,7 @@ class FixedBillsService:
             valor_pago: Valor efetivamente pago
             data_pagamento: Data em que foi pago
             conta_pagamento_id: Conta usada para pagar (opcional)
-            observacao: Observação adicional (ex: "Pago via Swile")
+            observacao: Observação adicional (opcional)
         
         Returns:
             transaction_id: ID da transação criada
