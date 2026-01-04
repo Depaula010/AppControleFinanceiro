@@ -1074,151 +1074,49 @@ def handle_whatsapp_webhook():
 
             # ===== HANDLER 1: Renda com CONFIRMAÇÃO =====
             if intent == 'Renda':
-                trans_data = gemini_service.extract_transaction_details(texto_msg, intent, usuario_id)
-                trans_desc = trans_data.get('descricao_bruta')
-                valor_decimal_raw = trans_data.get('valor_decimal')
+                from app.routes.webhooks.intents import route_intent
 
-                # Validar se o valor foi extraído
-                if valor_decimal_raw is None or valor_decimal_raw == 0:
-                    resposta_para_usuario = (
-                        f"🤔 Para registrar esta renda, preciso do valor.\n\n"
-                        f"Exemplo: *recebi 500 de {trans_desc or 'salário'}*"
+                try:
+                    result = route_intent(
+                        intent_name='Renda',
+                        usuario_id=usuario_id,
+                        mensagem=texto_msg,
+                        conn=conn,
+                        numero_whatsapp=numero_limpo
                     )
+
+                    resposta_para_usuario = result["message"]
                     return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
-                valor_dec = float(valor_decimal_raw)
-
-                cats_list = finance_service.get_user_categories(conn, usuario_id, intent)
-                id_outros = finance_service.get_fallback_category_id(conn, intent)
-                id_categoria = gemini_service.categorize_transaction(cats_list, trans_desc, intent, id_outros, usuario_id)
-
-                # Escolher conta usando função centralizada (fuzzy matching + conta padrão do usuário)
-                conta_id, conta_nome, conta_tipo, origem = finance_service.choose_account_for_transaction(
-                    conn, usuario_id, texto_msg, intent
-                )
-
-                valor_db = valor_dec
-
-                # Criar pendente
-                transacao_data = {
-                    'usuario_id': usuario_id,
-                    'conta_id': conta_id,
-                    'conta_nome': conta_nome,
-                    'conta_tipo': conta_tipo,
-                    'categoria_id': id_categoria,
-                    'fatura_id': None,
-                    'descricao': trans_desc,
-                    'valor_db': valor_db,
-                    'valor_original': valor_dec,
-                    'valor_total': None,
-                    'num_parcelas': None,
-                    'tipo_transacao': intent,
-                    'tipo_pagamento': 'debito',
-                    'data_transacao': str(data_hoje),
-                    'origem': 'whatsapp'
-                }
-
-                if redis_service.is_connected():
-                    tx_id = TransactionConfirmationService.create_pending_transaction(numero_limpo, transacao_data)
-                    redis_service.set_with_ttl(f"last_pending:{numero_limpo}", tx_id, 300)
-                    msg_confirm = TransactionConfirmationService.format_confirmation_message(
-                        transacao_data, cats_list, tx_id
-                    )
-                    return jsonify({"status": "sucesso", "resposta": msg_confirm}), 200
-                else:
-                    # Fallback sem Redis
-                    finance_service.create_transaction(
-                        conn, usuario_id, conta_id, id_categoria, None,
-                        trans_desc, valor_db, intent, data_hoje
-                    )
-                    conn.commit()
-                    nome_cat = finance_service.get_category_name_by_id(conn, id_categoria)
-                    resp = f"✅ {intent} salva!\n{trans_desc}\n{formatar_moeda(valor_dec)}\n{nome_cat}"
-                    return jsonify({"status": "sucesso", "resposta": resp}), 200
+                except Exception as e:
+                    print(f"[RENDA-INTENT] Erro: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    resposta_para_usuario = "❌ Erro ao processar renda."
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
             # ===== HANDLER 2: Despesa com CONFIRMAÇÃO =====
             elif intent == 'Despesa':
-                trans_data = gemini_service.extract_transaction_details(texto_msg, intent, usuario_id)
-                trans_desc = trans_data.get('descricao_bruta')
-                valor_decimal_raw = trans_data.get('valor_decimal')
+                from app.routes.webhooks.intents import route_intent
 
-                # Validar se o valor foi extraído
-                if valor_decimal_raw is None or valor_decimal_raw == 0:
-                    resposta_para_usuario = (
-                        f"🤔 Para registrar esta despesa, preciso do valor.\n\n"
-                        f"Exemplo: *gastei 50 com {trans_desc or 'café'}*"
+                try:
+                    result = route_intent(
+                        intent_name='Despesa',
+                        usuario_id=usuario_id,
+                        mensagem=texto_msg,
+                        conn=conn,
+                        numero_whatsapp=numero_limpo
                     )
+
+                    resposta_para_usuario = result["message"]
                     return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
-                valor_dec = float(valor_decimal_raw)
-
-                # Detectar parcelamento
-                parcelamento_info = None
-                num_parcelas = None
-                valor_parcela = valor_dec
-
-                parcelamento_info = gemini_service.extract_parcelamento_info(texto_msg, usuario_id)
-                if parcelamento_info.get('parcelado'):
-                    num_parcelas = parcelamento_info.get('num_parcelas')
-                    if num_parcelas and num_parcelas > 1:
-                        valor_parcela = valor_dec / num_parcelas
-                        trans_desc = parcelamento_info.get('descricao_limpa', trans_desc)
-                        print(f"[PARCELAMENTO] Detectado: {num_parcelas}x de {valor_parcela:.2f}")
-
-                cats_list = finance_service.get_user_categories(conn, usuario_id, intent)
-                id_outros = finance_service.get_fallback_category_id(conn, intent)
-                id_categoria = gemini_service.categorize_transaction(cats_list, trans_desc, intent, id_outros, usuario_id)
-
-                # Escolher conta usando função centralizada (fuzzy matching + conta padrão do usuário)
-                conta_id, conta_nome, conta_tipo, origem = finance_service.choose_account_for_transaction(
-                    conn, usuario_id, texto_msg, intent
-                )
-
-                # Se for cartão de crédito, marcar para criar fatura
-                fatura_id = 'PENDING' if conta_tipo == 'Cartão de Crédito' else None
-
-                # Para parcelamento, o valor_db é o valor da parcela
-                if num_parcelas and num_parcelas > 1:
-                    valor_db = valor_parcela * -1
-                else:
-                    valor_db = valor_dec * -1
-
-                # Criar pendente
-                transacao_data = {
-                    'usuario_id': usuario_id,
-                    'conta_id': conta_id,
-                    'conta_nome': conta_nome,
-                    'conta_tipo': conta_tipo,
-                    'categoria_id': id_categoria,
-                    'fatura_id': fatura_id,
-                    'descricao': trans_desc,
-                    'valor_db': valor_db,
-                    'valor_original': valor_parcela if (num_parcelas and num_parcelas > 1) else valor_dec,
-                    'valor_total': valor_dec if (num_parcelas and num_parcelas > 1) else None,
-                    'num_parcelas': num_parcelas,
-                    'tipo_transacao': intent,
-                    'tipo_pagamento': 'credito' if fatura_id else 'debito',
-                    'data_transacao': str(data_hoje),
-                    'origem': 'whatsapp'
-                }
-
-                if redis_service.is_connected():
-                    tx_id = TransactionConfirmationService.create_pending_transaction(numero_limpo, transacao_data)
-                    redis_service.set_with_ttl(f"last_pending:{numero_limpo}", tx_id, 300)
-                    msg_confirm = TransactionConfirmationService.format_confirmation_message(
-                        transacao_data, cats_list, tx_id
-                    )
-                    return jsonify({"status": "sucesso", "resposta": msg_confirm}), 200
-                else:
-                    # Fallback sem Redis
-                    finance_service.create_transaction(
-                        conn, usuario_id, conta_id, id_categoria, None,
-                        trans_desc, valor_db, intent, data_hoje
-                    )
-                    conn.commit()
-                    nome_cat = finance_service.get_category_name_by_id(conn, id_categoria)
-                    resp = f"✅ {intent} salva!\n{trans_desc}\n{formatar_moeda(valor_dec)}\n{nome_cat}"
-                    return jsonify({"status": "sucesso", "resposta": resp}), 200
+                except Exception as e:
+                    print(f"[DESPESA-INTENT] Erro: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    resposta_para_usuario = "❌ Erro ao processar despesa."
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
                 
             # ===== INTENÇÃO: Consulta Reserva =====
             elif intent == 'Consulta Reserva':

@@ -54,45 +54,70 @@ class RendaIntent(ConfirmationRequiredIntent):
 
     def execute(self) -> Dict[str, Any]:
         """Cria transação pendente de confirmação."""
+        from datetime import date
+
         # Buscar ou escolher conta
-        conta_nome = self.params.get("conta")
-        if conta_nome:
-            conta_id = finance_service.get_account_by_name(
-                self.conn,
-                self.usuario_id,
-                conta_nome,
-                fallback=True
+        conta_nome_param = self.params.get("conta")
+        if conta_nome_param:
+            conta_id, conta_nome, conta_tipo, _ = finance_service.choose_account_for_transaction(
+                self.conn, self.usuario_id, conta_nome_param, 'Renda'
             )
         else:
             # Escolher conta padrão para renda
-            conta_id_renda, _ = finance_service.get_user_default_accounts(
-                self.conn,
-                self.usuario_id
+            conta_id, conta_nome, conta_tipo, _ = finance_service.choose_account_for_transaction(
+                self.conn, self.usuario_id, self.mensagem, 'Renda'
             )
-            conta_id = conta_id_renda
 
         if not conta_id:
             return {
                 "error": "❌ Conta não encontrada. Por favor, especifique a conta."
             }
 
-        # Criar transação pendente
-        confirmation_service = TransactionConfirmationService()
-
-        pending_id = confirmation_service.create_pending_transaction(
-            usuario_id=self.usuario_id,
-            tipo="renda",
-            valor=self.params["valor"],
-            descricao=self.params["descricao"],
-            data=self.params.get("data"),
-            conta_id=conta_id
+        # Buscar categoria
+        cats_list = finance_service.get_user_categories(self.conn, self.usuario_id, 'Renda')
+        id_outros = finance_service.get_fallback_category_id(self.conn, 'Renda')
+        id_categoria = gemini_service.categorize_transaction(
+            cats_list, self.params["descricao"], 'Renda', id_outros, self.usuario_id
         )
 
+        # Preparar estrutura de dados que TransactionConfirmationService espera
+        data_transacao = self.params.get("data") or date.today()
+
+        transacao_data = {
+            'usuario_id': self.usuario_id,
+            'conta_id': conta_id,
+            'conta_nome': conta_nome,
+            'conta_tipo': conta_tipo,
+            'categoria_id': id_categoria,
+            'fatura_id': None,
+            'descricao': self.params["descricao"],
+            'valor_db': self.params["valor"],  # Renda é positivo
+            'valor_original': self.params["valor"],
+            'valor_total': None,
+            'num_parcelas': None,
+            'tipo_transacao': 'Renda',
+            'tipo_pagamento': 'debito',
+            'data_transacao': str(data_transacao),
+            'origem': 'whatsapp'
+        }
+
+        # Validar que temos numero_whatsapp
+        if not self.numero_whatsapp:
+            return {"error": "❌ Erro interno: número WhatsApp não disponível"}
+
+        # Criar transação pendente no Redis
+        tx_id = TransactionConfirmationService.create_pending_transaction(
+            self.numero_whatsapp,
+            transacao_data
+        )
+
+        if not tx_id:
+            return {"error": "❌ Erro ao criar transação pendente"}
+
         return {
-            "pending_id": pending_id,
-            "valor": self.params["valor"],
-            "descricao": self.params["descricao"],
-            "conta_id": conta_id,
+            "tx_id": tx_id,
+            "transacao_data": transacao_data,
+            "cats_list": cats_list,
             "needs_confirmation": True
         }
 
@@ -101,20 +126,14 @@ class RendaIntent(ConfirmationRequiredIntent):
         if "error" in data:
             return data["error"]
 
-        # Buscar nome da conta
-        contas = finance_service.get_user_accounts(self.conn, self.usuario_id)
-        conta = next((c for c in contas if c["id"] == data["conta_id"]), None)
-        conta_nome = conta["nome_conta"] if conta else "Desconhecida"
+        # Usar o serviço existente para formatar
+        msg_confirm = TransactionConfirmationService.format_confirmation_message(
+            data["transacao_data"],
+            data["cats_list"],
+            data["tx_id"]
+        )
 
-        msg = "💰 *Renda a confirmar:*\n\n"
-        msg += f"📝 Descrição: {data['descricao']}\n"
-        msg += f"💵 Valor: {formatar_moeda(data['valor'])}\n"
-        msg += f"🏦 Conta: {conta_nome}\n\n"
-        msg += "Responda:\n"
-        msg += "• *confirmar* - para registrar\n"
-        msg += "• *cancelar* - para descartar"
-
-        return msg
+        return msg_confirm
 
 
 class DespesaIntent(ConfirmationRequiredIntent):
@@ -159,48 +178,93 @@ class DespesaIntent(ConfirmationRequiredIntent):
 
     def execute(self) -> Dict[str, Any]:
         """Cria transação pendente de confirmação."""
+        from datetime import date
+
         # Buscar ou escolher conta
-        conta_nome = self.params.get("conta")
-        if conta_nome:
-            conta_id = finance_service.get_account_by_name(
-                self.conn,
-                self.usuario_id,
-                conta_nome,
-                fallback=True
+        conta_nome_param = self.params.get("conta")
+        if conta_nome_param:
+            conta_id, conta_nome, conta_tipo, _ = finance_service.choose_account_for_transaction(
+                self.conn, self.usuario_id, conta_nome_param, 'Despesa'
             )
         else:
-            # Escolher conta padrão para despesa
-            _, conta_id_despesa = finance_service.get_user_default_accounts(
-                self.conn,
-                self.usuario_id
+            # Escolher conta padrão
+            conta_id, conta_nome, conta_tipo, _ = finance_service.choose_account_for_transaction(
+                self.conn, self.usuario_id, self.mensagem, 'Despesa'
             )
-            conta_id = conta_id_despesa
 
         if not conta_id:
             return {
                 "error": "❌ Conta não encontrada. Por favor, especifique a conta."
             }
 
-        # Criar transação pendente
-        confirmation_service = TransactionConfirmationService()
-
-        pending_id = confirmation_service.create_pending_transaction(
-            usuario_id=self.usuario_id,
-            tipo="despesa",
-            valor=self.params["valor"],
-            descricao=self.params["descricao"],
-            data=self.params.get("data"),
-            conta_id=conta_id,
-            categoria=self.params.get("categoria"),
-            parcelamento=self.params.get("parcelamento")
+        # Buscar categoria
+        cats_list = finance_service.get_user_categories(self.conn, self.usuario_id, 'Despesa')
+        id_outros = finance_service.get_fallback_category_id(self.conn, 'Despesa')
+        id_categoria = gemini_service.categorize_transaction(
+            cats_list, self.params["descricao"], 'Despesa', id_outros, self.usuario_id
         )
 
+        # Preparar estrutura de dados
+        data_transacao = self.params.get("data") or date.today()
+        valor_original = self.params["valor"]
+
+        # Detectar parcelamento
+        num_parcelas = self.params.get("parcelamento")
+        valor_total = None
+        valor_db = -abs(valor_original)  # Despesa é negativo no banco
+
+        if num_parcelas and num_parcelas > 1:
+            valor_total = valor_original
+            valor_original = valor_original / num_parcelas  # Valor da parcela
+            valor_db = -abs(valor_original)
+
+        # Determinar tipo de pagamento e fatura
+        tipo_pagamento = 'debito'
+        fatura_id = None
+
+        # Se a conta é cartão de crédito, usar crédito
+        if conta_tipo and 'crédito' in conta_tipo.lower():
+            tipo_pagamento = 'credito'
+            # Buscar fatura em aberto para esta conta
+            fatura_id = finance_service.get_or_create_invoice(
+                self.conn, self.usuario_id, conta_id, data_transacao
+            )
+
+        transacao_data = {
+            'usuario_id': self.usuario_id,
+            'conta_id': conta_id,
+            'conta_nome': conta_nome,
+            'conta_tipo': conta_tipo,
+            'categoria_id': id_categoria,
+            'fatura_id': fatura_id,
+            'descricao': self.params["descricao"],
+            'valor_db': valor_db,
+            'valor_original': valor_original,
+            'valor_total': valor_total,
+            'num_parcelas': num_parcelas,
+            'tipo_transacao': 'Despesa',
+            'tipo_pagamento': tipo_pagamento,
+            'data_transacao': str(data_transacao),
+            'origem': 'whatsapp'
+        }
+
+        # Validar que temos numero_whatsapp
+        if not self.numero_whatsapp:
+            return {"error": "❌ Erro interno: número WhatsApp não disponível"}
+
+        # Criar transação pendente no Redis
+        tx_id = TransactionConfirmationService.create_pending_transaction(
+            self.numero_whatsapp,
+            transacao_data
+        )
+
+        if not tx_id:
+            return {"error": "❌ Erro ao criar transação pendente"}
+
         return {
-            "pending_id": pending_id,
-            "valor": self.params["valor"],
-            "descricao": self.params["descricao"],
-            "conta_id": conta_id,
-            "parcelamento": self.params.get("parcelamento"),
+            "tx_id": tx_id,
+            "transacao_data": transacao_data,
+            "cats_list": cats_list,
             "needs_confirmation": True
         }
 
@@ -209,25 +273,14 @@ class DespesaIntent(ConfirmationRequiredIntent):
         if "error" in data:
             return data["error"]
 
-        # Buscar nome da conta
-        contas = finance_service.get_user_accounts(self.conn, self.usuario_id)
-        conta = next((c for c in contas if c["id"] == data["conta_id"]), None)
-        conta_nome = conta["nome_conta"] if conta else "Desconhecida"
+        # Usar o serviço existente para formatar
+        msg_confirm = TransactionConfirmationService.format_confirmation_message(
+            data["transacao_data"],
+            data["cats_list"],
+            data["tx_id"]
+        )
 
-        msg = "💸 *Despesa a confirmar:*\n\n"
-        msg += f"📝 Descrição: {data['descricao']}\n"
-        msg += f"💵 Valor: {formatar_moeda(data['valor'])}\n"
-        msg += f"🏦 Conta: {conta_nome}\n"
-
-        # Parcelamento se presente
-        if data.get("parcelamento"):
-            msg += f"📊 Parcelas: {data['parcelamento']}x de {formatar_moeda(data['valor'] / data['parcelamento'])}\n"
-
-        msg += "\nResponda:\n"
-        msg += "• *confirmar* - para registrar\n"
-        msg += "• *cancelar* - para descartar"
-
-        return msg
+        return msg_confirm
 
 
 class TransferenciaIntent(ConfirmationRequiredIntent):
