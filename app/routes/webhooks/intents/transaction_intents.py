@@ -39,6 +39,7 @@ class RendaIntent(ConfirmationRequiredIntent):
             "descricao": params.get("descricao", "Renda"),
             "data": params.get("data"),  # date object ou None (hoje)
             "conta": params.get("conta"),  # nome da conta
+            "conta_id_agendamento": params.get("conta_id_agendamento"),  # ID da conta do agendamento (se encontrado)
         }
 
     def validate(self) -> str | None:
@@ -56,17 +57,15 @@ class RendaIntent(ConfirmationRequiredIntent):
         """Cria transação pendente de confirmação."""
         from datetime import date
 
-        # Buscar ou escolher conta
-        conta_nome_param = self.params.get("conta")
-        if conta_nome_param:
-            conta_id, conta_nome, conta_tipo, _ = finance_service.choose_account_for_transaction(
-                self.conn, self.usuario_id, conta_nome_param, 'Renda'
-            )
-        else:
-            # Escolher conta padrão para renda
-            conta_id, conta_nome, conta_tipo, _ = finance_service.choose_account_for_transaction(
-                self.conn, self.usuario_id, self.mensagem, 'Renda'
-            )
+        # Buscar ou escolher conta usando função centralizada
+        conta_id, conta_nome, conta_tipo, _ = finance_service.resolve_account_for_transaction(
+            conn=self.conn,
+            usuario_id=self.usuario_id,
+            tipo_transacao='Renda',
+            mensagem=self.mensagem,
+            conta_nome_param=self.params.get("conta"),
+            conta_id_agendamento=self.params.get("conta_id_agendamento")
+        )
 
         if not conta_id:
             return {
@@ -158,6 +157,7 @@ class DespesaIntent(ConfirmationRequiredIntent):
             "conta": params.get("conta"),
             "categoria": params.get("categoria"),  # Pode ser None
             "parcelamento": params.get("parcelamento"),  # Núm. parcelas ou None
+            "conta_id_agendamento": params.get("conta_id_agendamento"),  # ID da conta do agendamento
         }
 
     def validate(self) -> str | None:
@@ -180,17 +180,15 @@ class DespesaIntent(ConfirmationRequiredIntent):
         """Cria transação pendente de confirmação."""
         from datetime import date
 
-        # Buscar ou escolher conta
-        conta_nome_param = self.params.get("conta")
-        if conta_nome_param:
-            conta_id, conta_nome, conta_tipo, _ = finance_service.choose_account_for_transaction(
-                self.conn, self.usuario_id, conta_nome_param, 'Despesa'
-            )
-        else:
-            # Escolher conta padrão
-            conta_id, conta_nome, conta_tipo, _ = finance_service.choose_account_for_transaction(
-                self.conn, self.usuario_id, self.mensagem, 'Despesa'
-            )
+        # Buscar ou escolher conta usando função centralizada
+        conta_id, conta_nome, conta_tipo, _ = finance_service.resolve_account_for_transaction(
+            conn=self.conn,
+            usuario_id=self.usuario_id,
+            tipo_transacao='Despesa',
+            mensagem=self.mensagem,
+            conta_nome_param=self.params.get("conta"),
+            conta_id_agendamento=self.params.get("conta_id_agendamento")
+        )
 
         if not conta_id:
             return {

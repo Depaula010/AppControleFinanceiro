@@ -1732,5 +1732,116 @@ def choose_account_for_transaction(conn, usuario_id, texto_msg, tipo_transacao):
         print(f"[ESCOLHA-CONTA] Usando conta FALLBACK: {conta.nome_conta}")
         return (conta.id, conta.nome_conta, conta.tipo_conta, 'fallback')
 
+
     # Sem contas disponíveis
+    return (None, None, None, None)
+
+
+def resolve_account_for_transaction(
+    conn, 
+    usuario_id, 
+    tipo_transacao,
+    mensagem=None,
+    conta_nome_param=None,
+    conta_id_agendamento=None
+):
+    """
+    Resolve qual conta usar para uma transação seguindo ordem de prioridade COMPLETA.
+    
+    Esta função centraliza TODA a lógica de escolha de conta, eliminando duplicação
+    entre RendaIntent, DespesaIntent e outros handlers.
+    
+    Ordem de Prioridade:
+    1. **Conta do agendamento** (se encontrou agendamento recorrente)
+    2. **Conta mencionada** na mensagem (fuzzy matching)
+    3. **Conta padrão** configurada pelo usuário
+    4. **Fallback** (primeira conta disponível)
+    
+    Args:
+        conn: Conexão do banco
+        usuario_id: ID do usuário
+        tipo_transacao: 'Renda' ou 'Despesa'
+        mensagem: Mensagem do usuário (para detectar menção de conta)
+        conta_nome_param: Nome da conta fornecido explicitamente
+        conta_id_agendamento: ID da conta do agendamento (PRIORIDADE MÁXIMA)
+    
+    Returns:
+        (conta_id, conta_nome, conta_tipo, origem)
+        origem: 'agendamento' | 'mencionada' | 'padrao' | 'fallback'
+    
+    Examples:
+        >>> # Caso 1: Agendamento encontrado (prioridade máxima)
+        >>> resolve_account_for_transaction(
+        ...     conn, 1, 'Renda', 
+        ...     conta_id_agendamento=5
+        ... )
+        (5, 'Swile', 'Conta Corrente', 'agendamento')
+        
+        >>> # Caso 2: Conta mencionada na mensagem
+        >>> resolve_account_for_transaction(
+        ...     conn, 1, 'Renda',
+        ...     mensagem="recebi 100 no nubank"
+        ... )
+        (3, 'Nubank', 'Conta Corrente', 'mencionada')
+        
+        >>> # Caso 3: Conta padrão
+        >>> resolve_account_for_transaction(
+        ...     conn, 1, 'Renda',
+        ...     mensagem="recebi 100"
+        ... )
+        (2, 'Mercado pago', 'Conta Corrente', 'padrao')
+    """
+    # 1. PRIORIDADE MÁXIMA: Conta do agendamento
+    if conta_id_agendamento:
+        sql = text("SELECT id, nome_conta, tipo_conta FROM Contas WHERE id = :cid AND usuario_id = :uid")
+        conta = conn.execute(sql, {"cid": conta_id_agendamento, "uid": usuario_id}).fetchone()
+        
+        if conta:
+            print(f"[RESOLVE-CONTA] Usando conta do AGENDAMENTO: {conta.nome_conta} (ID: {conta.id})")
+            return (conta.id, conta.nome_conta, conta.tipo_conta, 'agendamento')
+        else:
+            # Conta do agendamento não existe mais - continuar para próxima prioridade
+            print(f"[RESOLVE-CONTA] AVISO: Conta do agendamento (ID: {conta_id_agendamento}) não encontrada. Usando próxima prioridade.")
+    
+    # 2. Conta mencionada explicitamente ou na mensagem
+    if conta_nome_param:
+        # Usuário forneceu nome da conta explicitamente
+        conta_mencionada = extract_mentioned_account(conn, usuario_id, conta_nome_param)
+    elif mensagem:
+        # Tentar detectar menção na mensagem
+        conta_mencionada = extract_mentioned_account(conn, usuario_id, mensagem)
+    else:
+        conta_mencionada = None
+    
+    if conta_mencionada:
+        conta_id, nome, tipo = conta_mencionada
+        print(f"[RESOLVE-CONTA] Usando conta MENCIONADA: {nome}")
+        return (conta_id, nome, tipo, 'mencionada')
+    
+    # 3. Conta padrão configurada pelo usuário
+    conta_renda_id, conta_despesa_id = get_user_default_accounts(conn, usuario_id)
+    
+    if tipo_transacao == 'Renda' and conta_renda_id:
+        sql = text("SELECT id, nome_conta, tipo_conta FROM Contas WHERE id = :cid AND usuario_id = :uid")
+        conta = conn.execute(sql, {"cid": conta_renda_id, "uid": usuario_id}).fetchone()
+        if conta:
+            print(f"[RESOLVE-CONTA] Usando conta padrão RENDA: {conta.nome_conta}")
+            return (conta.id, conta.nome_conta, conta.tipo_conta, 'padrao')
+    
+    if tipo_transacao == 'Despesa' and conta_despesa_id:
+        sql = text("SELECT id, nome_conta, tipo_conta FROM Contas WHERE id = :cid AND usuario_id = :uid")
+        conta = conn.execute(sql, {"cid": conta_despesa_id, "uid": usuario_id}).fetchone()
+        if conta:
+            print(f"[RESOLVE-CONTA] Usando conta padrão DESPESA: {conta.nome_conta}")
+            return (conta.id, conta.nome_conta, conta.tipo_conta, 'padrao')
+    
+    # 4. Fallback: primeira conta disponível
+    sql = text("SELECT id, nome_conta, tipo_conta FROM Contas WHERE usuario_id = :uid LIMIT 1")
+    conta = conn.execute(sql, {"uid": usuario_id}).fetchone()
+    if conta:
+        print(f"[RESOLVE-CONTA] Usando conta FALLBACK: {conta.nome_conta}")
+        return (conta.id, conta.nome_conta, conta.tipo_conta, 'fallback')
+    
+    # Sem contas disponíveis
+    print(f"[RESOLVE-CONTA] ERRO: Nenhuma conta disponível para usuário {usuario_id}")
     return (None, None, None, None)

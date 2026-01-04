@@ -1741,6 +1741,7 @@ def extract_income_params(mensagem, usuario_id, conn=None):
 
     valor = extracted.get("valor_decimal")
     descricao = extracted.get("descricao_bruta", "Renda")
+    conta_id_agendamento = None  # Novo: armazena conta_id do agendamento
 
     # Se não informou valor, tenta buscar em agendamento recorrente
     if valor is None and descricao:
@@ -1757,7 +1758,8 @@ def extract_income_params(mensagem, usuario_id, conn=None):
 
         if agendamento and agendamento.valor_previsto:
             valor = float(agendamento.valor_previsto)
-            print(f"[INCOME-PARAMS] Encontrado agendamento '{agendamento.descricao}' com valor R$ {valor:.2f}")
+            conta_id_agendamento = agendamento.conta_id  # Novo: captura conta_id do agendamento
+            print(f"[INCOME-PARAMS] Encontrado agendamento '{agendamento.descricao}' com valor R$ {valor:.2f} e conta_id {conta_id_agendamento}")
         else:
             print(f"[INCOME-PARAMS] Nenhum agendamento encontrado para '{descricao}'")
 
@@ -1765,7 +1767,8 @@ def extract_income_params(mensagem, usuario_id, conn=None):
         "valor": valor,
         "descricao": descricao,
         "data": extracted.get("data"),
-        "conta": extracted.get("conta")
+        "conta": extracted.get("conta"),
+        "conta_id_agendamento": conta_id_agendamento  # Novo: retorna conta_id do agendamento
     }
 
 def extract_expense_params(mensagem, usuario_id, conn=None):
@@ -1803,6 +1806,7 @@ def extract_expense_params(mensagem, usuario_id, conn=None):
 
     valor = extracted.get("valor_decimal")
     descricao = extracted.get("descricao_bruta", "Despesa")
+    conta_id_agendamento = None  # Novo: armazena conta_id do agendamento
 
     # Se não informou valor, tenta buscar em agendamento recorrente
     if valor is None and descricao:
@@ -1819,7 +1823,8 @@ def extract_expense_params(mensagem, usuario_id, conn=None):
 
         if agendamento and agendamento.valor_previsto:
             valor = float(agendamento.valor_previsto)
-            print(f"[EXPENSE-PARAMS] Encontrado agendamento '{agendamento.descricao}' com valor R$ {valor:.2f}")
+            conta_id_agendamento = agendamento.conta_id  # Novo: captura conta_id do agendamento
+            print(f"[EXPENSE-PARAMS] Encontrado agendamento '{agendamento.descricao}' com valor R$ {valor:.2f} e conta_id {conta_id_agendamento}")
         else:
             print(f"[EXPENSE-PARAMS] Nenhum agendamento encontrado para '{descricao}'")
 
@@ -1829,7 +1834,8 @@ def extract_expense_params(mensagem, usuario_id, conn=None):
         "data": extracted.get("data"),
         "conta": extracted.get("conta"),
         "categoria": extracted.get("categoria"),
-        "parcelamento": extracted.get("parcelamento")
+        "parcelamento": extracted.get("parcelamento"),
+        "conta_id_agendamento": conta_id_agendamento  # Novo: retorna conta_id do agendamento
     }
 
 def _buscar_valor_lembrete_variavel(conn, usuario_id, descricao):
