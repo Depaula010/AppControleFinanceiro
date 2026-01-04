@@ -212,6 +212,42 @@ class AgendamentosQueries:
         """)
 
     @staticmethod
+    def get_lembrete_variavel_by_description() -> text:
+        """
+        Busca um agendamento LEMBRETE_VARIAVEL por descrição (busca fuzzy).
+
+        Usado em: Extract income/expense params (quando valor não é informado)
+
+        Parâmetros necessários:
+            :uid (int) - ID do usuário
+            :descricao (str) - Descrição para buscar (usa ILIKE para busca parcial)
+
+        Retorna: Agendamento LEMBRETE_VARIAVEL que corresponde à descrição
+        """
+        return text("""
+            SELECT
+                a.id, a.descricao, a.valor_previsto,
+                a.conta_id, a.subcategoria_id,
+                c.nome_conta, c.tipo_conta,
+                s.nome_sub as categoria,
+                g.nome_grupo
+            FROM Agendamentos a
+            JOIN Contas c ON a.conta_id = c.id
+            JOIN SubCategoria s ON a.subcategoria_id = s.id
+            JOIN MacroCategoria m ON s.macro_id = m.id
+            JOIN GrupoCategoria g ON m.grupo_id = g.id
+            WHERE a.usuario_id = :uid
+              AND a.ativo = TRUE
+              AND a.tipo_agendamento = 'LEMBRETE_VARIAVEL'
+              AND a.descricao ILIKE :descricao
+            ORDER BY
+              -- Priorizar matches exatos
+              CASE WHEN LOWER(a.descricao) = LOWER(:descricao_exact) THEN 0 ELSE 1 END,
+              a.descricao
+            LIMIT 1
+        """)
+
+    @staticmethod
     def get_parametros_padrao(usuario_id: int, hoje) -> Dict[str, Any]:
         """
         Retorna parâmetros padrão usados na maioria das queries.
@@ -233,4 +269,22 @@ class AgendamentosQueries:
             "data_limite_transacao": hoje - timedelta(days=60),  # Aceita pagamentos dos últimos 60 dias
             "data_minima": hoje - timedelta(days=30),  # Últimos 30 dias
             "data_maxima": hoje - timedelta(days=8),   # Atrasadas há mais de 7 dias
+        }
+
+    @staticmethod
+    def get_parametros_busca_lembrete(usuario_id: int, descricao: str) -> Dict[str, Any]:
+        """
+        Retorna parâmetros para busca de lembrete variável por descrição.
+
+        Args:
+            usuario_id: ID do usuário
+            descricao: Descrição do agendamento (ex: "salário", "meu salário")
+
+        Returns:
+            Dict com parâmetros para busca
+        """
+        return {
+            "uid": usuario_id,
+            "descricao": f"%{descricao}%",  # Busca parcial com ILIKE
+            "descricao_exact": descricao  # Para priorizar match exato
         }

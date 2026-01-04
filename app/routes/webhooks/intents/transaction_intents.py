@@ -30,7 +30,8 @@ class RendaIntent(ConfirmationRequiredIntent):
         """Extrai parâmetros da renda usando Gemini."""
         params = gemini_service.extract_income_params(
             self.mensagem,
-            self.usuario_id
+            self.usuario_id,
+            self.conn  # Passa conexão para buscar agendamentos LEMBRETE_VARIAVEL
         )
 
         return {
@@ -127,7 +128,8 @@ class DespesaIntent(ConfirmationRequiredIntent):
         """Extrai parâmetros da despesa usando Gemini."""
         params = gemini_service.extract_expense_params(
             self.mensagem,
-            self.usuario_id
+            self.usuario_id,
+            self.conn  # Passa conexão para buscar agendamentos LEMBRETE_VARIAVEL
         )
 
         return {

@@ -1694,3 +1694,152 @@ def extract_address_label_from_deletion(texto_msg, usuario_id=None):
     json_text = response_text.strip().replace("```json", "").replace("```", "")
     print(f"[GEMINI-DELETE-ADDRESS] Label extraído: {json_text}")
     return json.loads(json_text)
+
+def extract_income_params(mensagem, usuario_id, conn=None):
+    """
+    Extrai parâmetros de renda da mensagem do usuário.
+
+    REGRA IMPORTANTE: Se o usuário não informar o valor mas mencionar uma
+    descrição que corresponde a um LEMBRETE_VARIAVEL, busca o valor previsto
+    no agendamento.
+
+    Args:
+        mensagem: Mensagem do usuário (ex: "recebi meu salário")
+        usuario_id: ID do usuário
+        conn: Conexão com banco de dados (opcional, mas necessária para buscar agendamentos)
+
+    Returns:
+        dict: {
+            "valor": float ou None,
+            "descricao": str,
+            "data": date ou None,
+            "conta": str ou None
+        }
+
+    Exemplos:
+        - "recebi 500 de salário" → valor=500, descricao="salário"
+        - "recebi meu salário" → busca agendamento "salário", usa valor_previsto
+        - "ganhei 100 de freelance" → valor=100, descricao="freelance"
+    """
+    from app import db_engine
+    from app.services.queries.agendamentos_queries import AgendamentosQueries
+
+    # Primeiro, extrai o que o Gemini consegue identificar
+    extracted = extract_transaction_details(mensagem, "Renda", usuario_id)
+
+    valor = extracted.get("valor_decimal")
+    descricao = extracted.get("descricao_bruta", "Renda")
+
+    # Se não informou valor, tenta buscar em agendamento LEMBRETE_VARIAVEL
+    if valor is None and descricao:
+        print(f"[INCOME-PARAMS] Valor não informado. Buscando agendamento LEMBRETE_VARIAVEL: '{descricao}'")
+
+        # Se não tem conexão, cria uma
+        if conn is None and db_engine:
+            with db_engine.connect() as temp_conn:
+                agendamento = _buscar_valor_lembrete_variavel(temp_conn, usuario_id, descricao)
+        elif conn:
+            agendamento = _buscar_valor_lembrete_variavel(conn, usuario_id, descricao)
+        else:
+            agendamento = None
+
+        if agendamento and agendamento.valor_previsto:
+            valor = float(agendamento.valor_previsto)
+            print(f"[INCOME-PARAMS] Encontrado agendamento '{agendamento.descricao}' com valor R$ {valor:.2f}")
+        else:
+            print(f"[INCOME-PARAMS] Nenhum agendamento encontrado para '{descricao}'")
+
+    return {
+        "valor": valor,
+        "descricao": descricao,
+        "data": extracted.get("data"),
+        "conta": extracted.get("conta")
+    }
+
+def extract_expense_params(mensagem, usuario_id, conn=None):
+    """
+    Extrai parâmetros de despesa da mensagem do usuário.
+
+    REGRA IMPORTANTE: Se o usuário não informar o valor mas mencionar uma
+    descrição que corresponde a um LEMBRETE_VARIAVEL, busca o valor previsto
+    no agendamento.
+
+    Args:
+        mensagem: Mensagem do usuário (ex: "paguei a conta de luz")
+        usuario_id: ID do usuário
+        conn: Conexão com banco de dados (opcional, mas necessária para buscar agendamentos)
+
+    Returns:
+        dict: {
+            "valor": float ou None,
+            "descricao": str,
+            "data": date ou None,
+            "conta": str ou None,
+            "categoria": str ou None,
+            "parcelamento": int ou None
+        }
+
+    Exemplos:
+        - "gastei 50 na padaria" → valor=50, descricao="padaria"
+        - "paguei a conta de luz" → busca agendamento "luz", usa valor_previsto
+    """
+    from app import db_engine
+    from app.services.queries.agendamentos_queries import AgendamentosQueries
+
+    # Primeiro, extrai o que o Gemini consegue identificar
+    extracted = extract_transaction_details(mensagem, "Despesa", usuario_id)
+
+    valor = extracted.get("valor_decimal")
+    descricao = extracted.get("descricao_bruta", "Despesa")
+
+    # Se não informou valor, tenta buscar em agendamento LEMBRETE_VARIAVEL
+    if valor is None and descricao:
+        print(f"[EXPENSE-PARAMS] Valor não informado. Buscando agendamento LEMBRETE_VARIAVEL: '{descricao}'")
+
+        # Se não tem conexão, cria uma
+        if conn is None and db_engine:
+            with db_engine.connect() as temp_conn:
+                agendamento = _buscar_valor_lembrete_variavel(temp_conn, usuario_id, descricao)
+        elif conn:
+            agendamento = _buscar_valor_lembrete_variavel(conn, usuario_id, descricao)
+        else:
+            agendamento = None
+
+        if agendamento and agendamento.valor_previsto:
+            valor = float(agendamento.valor_previsto)
+            print(f"[EXPENSE-PARAMS] Encontrado agendamento '{agendamento.descricao}' com valor R$ {valor:.2f}")
+        else:
+            print(f"[EXPENSE-PARAMS] Nenhum agendamento encontrado para '{descricao}'")
+
+    return {
+        "valor": valor,
+        "descricao": descricao,
+        "data": extracted.get("data"),
+        "conta": extracted.get("conta"),
+        "categoria": extracted.get("categoria"),
+        "parcelamento": extracted.get("parcelamento")
+    }
+
+def _buscar_valor_lembrete_variavel(conn, usuario_id, descricao):
+    """
+    Função auxiliar interna para buscar agendamento LEMBRETE_VARIAVEL.
+
+    Args:
+        conn: Conexão com o banco
+        usuario_id: ID do usuário
+        descricao: Descrição para buscar
+
+    Returns:
+        Row object com agendamento ou None
+    """
+    from app.services.queries.agendamentos_queries import AgendamentosQueries
+
+    sql = AgendamentosQueries.get_lembrete_variavel_by_description()
+    params = AgendamentosQueries.get_parametros_busca_lembrete(usuario_id, descricao)
+
+    try:
+        result = conn.execute(sql, params).fetchone()
+        return result
+    except Exception as e:
+        print(f"[LEMBRETE-SEARCH] Erro ao buscar agendamento: {e}")
+        return None
