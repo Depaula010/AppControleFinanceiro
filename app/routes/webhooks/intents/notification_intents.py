@@ -237,122 +237,26 @@ class ContasAtrasadasIntent(BaseIntent):
     def execute(self) -> Dict[str, Any]:
         """Busca contas e faturas atrasadas."""
         from app.services.nightly_checkin_service import NightlyCheckinService
-        from datetime import date, timedelta
-        from sqlalchemy import text
-        import calendar
+        from app.services.queries import AgendamentosQueries, FaturasQueries
+        from datetime import date
 
         hoje = date.today()
 
-        # Buscar agendamentos pendentes dos últimos 30 dias
-        data_minima = hoje - timedelta(days=30)
+        # Buscar agendamentos atrasados usando query centralizada
+        # Ajustar parâmetros para buscar TODAS as contas atrasadas (não só +7 dias)
+        sql_contas = AgendamentosQueries.get_contas_atrasadas_com_data_real()
+        params_contas = AgendamentosQueries.get_parametros_padrao(self.usuario_id, hoje)
+        # Ajustar data_maxima para buscar TODAS as contas atrasadas (não filtrar por dias)
+        params_contas["data_maxima"] = hoje  # Inclui todas até hoje
 
-        # Correção Bug #9: Reescreve SQL com comparação de datas adequada usando CTE
-        # Problema: A query antiga comparava apenas números de dias (1-31), não datas completas
-        # Exemplo do erro: Conta com vencimento dia 25 de novembro não aparecia como atrasada
-        # no dia 30 de dezembro porque comparava 25 < 30 (só os dias, sem considerar o mês)
-        # Solução: Construir datas completas (ano-mês-dia) para comparação correta
-        sql_contas = text("""
-            WITH ExpectedDates AS (
-                SELECT
-                    a.*,
-                    c.nome_conta, c.tipo_conta,
-                    s.nome_sub as categoria,
-                    m.nome_macro,
-                    g.nome_grupo,
-                    -- Constrói a data esperada completa para o mês atual
-                    CASE
-                        WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :hoje) + INTERVAL '1 month - 1 day'))
-                        THEN (DATE_TRUNC('month', :hoje) + INTERVAL '1 day' * (a.dia_execucao - 1))::date
-                        ELSE (DATE_TRUNC('month', :hoje) + INTERVAL '1 month - 1 day')::date
-                    END as data_esperada_mes_atual,
-                    -- Constrói a data esperada completa para o mês anterior
-                    CASE
-                        WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 month - 1 day'))
-                        THEN (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 day' * (a.dia_execucao - 1))::date
-                        ELSE (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 month - 1 day')::date
-                    END as data_esperada_mes_anterior
-                FROM Agendamentos a
-                JOIN Contas c ON a.conta_id = c.id
-                JOIN SubCategoria s ON a.subcategoria_id = s.id
-                JOIN MacroCategoria m ON s.macro_id = m.id
-                JOIN GrupoCategoria g ON m.grupo_id = g.id
-                WHERE a.usuario_id = :uid
-                  AND a.ativo = TRUE
-                  AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
-                  -- Exclui débitos recorrentes de cartão (assinaturas) pois vão para a fatura
-                  AND NOT (a.tipo_agendamento = 'FIXO' AND g.nome_grupo = 'Despesa' AND c.tipo_conta = 'Cartão de Crédito')
-            )
-            SELECT
-                ed.id, ed.descricao, ed.valor_previsto, ed.dia_execucao,
-                ed.conta_id, ed.subcategoria_id, ed.usuario_id,
-                ed.nome_conta, ed.tipo_conta, ed.categoria,
-                ed.nome_macro, ed.nome_grupo,
-                COALESCE(ed.data_esperada_mes_atual, ed.data_esperada_mes_anterior) as data_vencimento_real
-            FROM ExpectedDates ed
-            WHERE (
-                -- Mês atual está atrasado
-                (ed.data_esperada_mes_atual < :hoje
-                 AND NOT EXISTS (
-                     SELECT 1 FROM Transacoes t
-                     WHERE t.descricao = ed.descricao
-                       AND t.usuario_id = ed.usuario_id
-                       AND DATE_TRUNC('month', t.data_transacao) = DATE_TRUNC('month', :hoje)
-                       AND DATE_TRUNC('year', t.data_transacao) = DATE_TRUNC('year', :hoje)
-                 ))
-                OR
-                -- Mês anterior está atrasado
-                (ed.data_esperada_mes_anterior < :hoje
-                 AND ed.data_esperada_mes_anterior >= :data_minima
-                 AND NOT EXISTS (
-                     SELECT 1 FROM Transacoes t
-                     WHERE t.descricao = ed.descricao
-                       AND t.usuario_id = ed.usuario_id
-                       AND DATE_TRUNC('month', t.data_transacao) = DATE_TRUNC('month', ed.data_esperada_mes_anterior)
-                       AND DATE_TRUNC('year', t.data_transacao) = DATE_TRUNC('year', ed.data_esperada_mes_anterior)
-                 ))
-            )
-            -- Aplica filtro para agendamentos anuais se necessário
-            AND (
-                ed.periodicidade != 'ANUAL'
-                OR (ed.periodicidade = 'ANUAL' AND ed.mes_execucao = EXTRACT(MONTH FROM :hoje))
-            )
-            ORDER BY data_vencimento_real DESC, ed.nome_grupo, ed.descricao
-        """)
-
-        contas_result = self.conn.execute(sql_contas, {
-            "uid": self.usuario_id,
-            "hoje": hoje,
-            "data_minima": data_minima
-        }).fetchall()
-
+        contas_result = self.conn.execute(sql_contas, params_contas).fetchall()
         contas_atrasadas = [dict(row._mapping) for row in contas_result]
 
-        # Buscar faturas vencidas
-        sql_faturas = text("""
-            SELECT
-                c.nome_conta as cartao,
-                f.data_vencimento,
-                f.status,
-                COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) as valor_fatura
-            FROM Faturas f
-            JOIN Contas c ON f.conta_id = c.id
-            LEFT JOIN Transacoes t ON f.id = t.fatura_id
-            WHERE c.usuario_id = :uid
-              AND f.status = 'Aberta'
-              AND f.data_vencimento < :hoje
-              AND f.data_vencimento >= :limite_inferior
-            GROUP BY c.nome_conta, f.data_vencimento, f.status
-            ORDER BY f.data_vencimento DESC
-        """)
+        # Buscar faturas vencidas usando query centralizada
+        sql_faturas = FaturasQueries.get_faturas_vencidas()
+        params_faturas = FaturasQueries.get_parametros_padrao(self.usuario_id, hoje)
 
-        limite_inferior = hoje - timedelta(days=30)
-
-        faturas_result = self.conn.execute(sql_faturas, {
-            "uid": self.usuario_id,
-            "hoje": hoje,
-            "limite_inferior": limite_inferior
-        }).fetchall()
-
+        faturas_result = self.conn.execute(sql_faturas, params_faturas).fetchall()
         faturas_atrasadas = [dict(row._mapping) for row in faturas_result]
 
         return {

@@ -5,9 +5,9 @@ Gerencia o fluxo de confirmação em lote de contas pendentes (Agendamentos)
 
 from app.services.redis_service import redis_service
 from app.services import finance_service
+from app.services.queries import AgendamentosQueries
 from app.utils import formatar_moeda
 from datetime import date, timedelta
-from sqlalchemy import text
 import uuid
 import re
 import calendar
@@ -34,7 +34,7 @@ class NightlyCheckinService:
     @staticmethod
     def get_pending_bills(conn, usuario_id, target_date=None):
         """
-        Busca contas pendentes (Agendamentos não pagos este mês).
+        Busca contas pendentes (Agendamentos não pagos nos últimos 60 dias).
         Limita aos últimos 7 dias para evitar lixo antigo.
 
         Args:
@@ -48,50 +48,14 @@ class NightlyCheckinService:
         if target_date is None:
             target_date = date.today()
 
-        # Calcular dia mínimo (7 dias atrás)
-        data_minima = target_date - timedelta(days=7)
-        dia_minimo = data_minima.day
+        # Usar query centralizada
+        sql = AgendamentosQueries.get_contas_pendentes_ultimos_7_dias()
 
-        sql = text("""
-            SELECT
-                a.id, a.descricao, a.valor_previsto, a.dia_execucao,
-                a.conta_id, a.subcategoria_id, a.usuario_id,
-                c.nome_conta, c.tipo_conta,
-                s.nome_sub as categoria,
-                m.nome_macro,
-                g.nome_grupo
-            FROM Agendamentos a
-            JOIN Contas c ON a.conta_id = c.id
-            JOIN SubCategoria s ON a.subcategoria_id = s.id
-            JOIN MacroCategoria m ON s.macro_id = m.id
-            JOIN GrupoCategoria g ON m.grupo_id = g.id
-            WHERE a.usuario_id = :uid
-              AND a.ativo = TRUE
-              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
-              AND a.dia_execucao <= EXTRACT(DAY FROM :target_date)
-              -- Filtro para agendamentos anuais: incluir apenas se o mês bater
-              AND (
-                  a.periodicidade != 'ANUAL'
-                  OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = EXTRACT(MONTH FROM :target_date))
-              )
-              -- Não foi pago este mês
-              AND NOT EXISTS (
-                  SELECT 1 FROM Transacoes t
-                  WHERE t.descricao = a.descricao
-                    AND t.usuario_id = a.usuario_id
-                    AND EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM :target_date)
-                    AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM :target_date)
-              )
-              -- Limitar aos últimos 7 dias
-              AND a.dia_execucao >= :dia_minimo
-            ORDER BY a.dia_execucao DESC, g.nome_grupo, a.descricao
-        """)
+        # Obter parâmetros padrão e ajustar target_date
+        params = AgendamentosQueries.get_parametros_padrao(usuario_id, target_date)
+        params["target_date"] = target_date  # Garantir que usa a data passada
 
-        result = conn.execute(sql, {
-            "uid": usuario_id,
-            "target_date": target_date,
-            "dia_minimo": dia_minimo
-        }).fetchall()
+        result = conn.execute(sql, params).fetchall()
 
         return [dict(row._mapping) for row in result]
 

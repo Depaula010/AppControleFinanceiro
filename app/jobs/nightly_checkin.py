@@ -157,40 +157,17 @@ class NightlyCheckinJob(BaseJob):
         from app.services.notification_service import enviar_notificacao_whatsapp
         from app.shared.formatters.invoice_notification_formatter import InvoiceNotificationFormatter
         from app.services.redis_service import redis_service
+        from app.services.queries import FaturasQueries
         from app.config import BOT_WHATSAPP_URL, API_SECRET_KEY
 
         with db_engine.connect() as conn:
-            # Buscar faturas vencidas do usuário
-            from sqlalchemy import text
-            from datetime import timedelta
-
+            # Buscar faturas vencidas do usuário usando query centralizada
             hoje = date.today()
-            limite_inferior = hoje - timedelta(days=30)
 
-            sql = text("""
-                SELECT
-                    f.id,
-                    c.nome_conta as cartao,
-                    f.data_vencimento,
-                    f.status,
-                    COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) as valor_total
-                FROM Faturas f
-                JOIN Contas c ON f.conta_id = c.id
-                LEFT JOIN Transacoes t ON f.id = t.fatura_id
-                WHERE c.usuario_id = :uid
-                  AND f.status = 'Aberta'
-                  AND f.data_vencimento < :hoje
-                  AND f.data_vencimento >= :limite_inferior
-                GROUP BY f.id, c.nome_conta, f.data_vencimento, f.status
-                ORDER BY f.data_vencimento DESC
-            """)
+            sql = FaturasQueries.get_faturas_vencidas()
+            params = FaturasQueries.get_parametros_padrao(usuario_id, hoje)
 
-            result = conn.execute(sql, {
-                "uid": usuario_id,
-                "hoje": hoje,
-                "limite_inferior": limite_inferior
-            }).fetchall()
-
+            result = conn.execute(sql, params).fetchall()
             overdue_invoices = [dict(row._mapping) for row in result]
 
         if not overdue_invoices:
@@ -228,87 +205,18 @@ class NightlyCheckinJob(BaseJob):
         from app import db_engine
         from app.services.notification_service import enviar_notificacao_whatsapp
         from app.services.redis_service import redis_service
+        from app.services.queries import AgendamentosQueries
         from app.config import BOT_WHATSAPP_URL, API_SECRET_KEY
         from app.utils import formatar_moeda
-        from sqlalchemy import text
-        from datetime import timedelta
 
         hoje = date.today()
-        data_minima = hoje - timedelta(days=30)  # Últimos 30 dias
-        data_maxima = hoje - timedelta(days=8)   # Atrasadas há mais de 7 dias
 
         with db_engine.connect() as conn:
-            # Query para buscar contas atrasadas (mesmo SQL do ContasAtrasadasIntent)
-            sql = text("""
-                WITH ExpectedDates AS (
-                    SELECT
-                        a.*,
-                        c.nome_conta, c.tipo_conta,
-                        s.nome_sub as categoria,
-                        m.nome_macro,
-                        g.nome_grupo,
-                        CASE
-                            WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :hoje) + INTERVAL '1 month - 1 day'))
-                            THEN (DATE_TRUNC('month', :hoje) + INTERVAL '1 day' * (a.dia_execucao - 1))::date
-                            ELSE (DATE_TRUNC('month', :hoje) + INTERVAL '1 month - 1 day')::date
-                        END as data_esperada_mes_atual,
-                        CASE
-                            WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 month - 1 day'))
-                            THEN (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 day' * (a.dia_execucao - 1))::date
-                            ELSE (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 month - 1 day')::date
-                        END as data_esperada_mes_anterior
-                    FROM Agendamentos a
-                    JOIN Contas c ON a.conta_id = c.id
-                    JOIN SubCategoria s ON a.subcategoria_id = s.id
-                    JOIN MacroCategoria m ON s.macro_id = m.id
-                    JOIN GrupoCategoria g ON m.grupo_id = g.id
-                    WHERE a.usuario_id = :uid
-                      AND a.ativo = TRUE
-                      AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
-                      AND NOT (a.tipo_agendamento = 'FIXO' AND g.nome_grupo = 'Despesa' AND c.tipo_conta = 'Cartão de Crédito')
-                )
-                SELECT
-                    ed.id, ed.descricao, ed.valor_previsto, ed.dia_execucao,
-                    ed.nome_conta, ed.tipo_conta, ed.categoria,
-                    ed.nome_macro, ed.nome_grupo,
-                    COALESCE(ed.data_esperada_mes_atual, ed.data_esperada_mes_anterior) as data_vencimento_real
-                FROM ExpectedDates ed
-                WHERE (
-                    (ed.data_esperada_mes_atual < :hoje
-                     AND ed.data_esperada_mes_atual <= :data_maxima
-                     AND NOT EXISTS (
-                         SELECT 1 FROM Transacoes t
-                         WHERE t.descricao = ed.descricao
-                           AND t.usuario_id = ed.usuario_id
-                           AND DATE_TRUNC('month', t.data_transacao) = DATE_TRUNC('month', :hoje)
-                           AND DATE_TRUNC('year', t.data_transacao) = DATE_TRUNC('year', :hoje)
-                     ))
-                    OR
-                    (ed.data_esperada_mes_anterior < :hoje
-                     AND ed.data_esperada_mes_anterior >= :data_minima
-                     AND ed.data_esperada_mes_anterior <= :data_maxima
-                     AND NOT EXISTS (
-                         SELECT 1 FROM Transacoes t
-                         WHERE t.descricao = ed.descricao
-                           AND t.usuario_id = ed.usuario_id
-                           AND DATE_TRUNC('month', t.data_transacao) = DATE_TRUNC('month', ed.data_esperada_mes_anterior)
-                           AND DATE_TRUNC('year', t.data_transacao) = DATE_TRUNC('year', ed.data_esperada_mes_anterior)
-                     ))
-                )
-                AND (
-                    ed.periodicidade != 'ANUAL'
-                    OR (ed.periodicidade = 'ANUAL' AND ed.mes_execucao = EXTRACT(MONTH FROM :hoje))
-                )
-                ORDER BY data_vencimento_real DESC, ed.nome_grupo, ed.descricao
-            """)
+            # Usar query centralizada para buscar contas atrasadas
+            sql = AgendamentosQueries.get_contas_atrasadas_com_data_real()
+            params = AgendamentosQueries.get_parametros_padrao(usuario_id, hoje)
 
-            result = conn.execute(sql, {
-                "uid": usuario_id,
-                "hoje": hoje,
-                "data_minima": data_minima,
-                "data_maxima": data_maxima
-            }).fetchall()
-
+            result = conn.execute(sql, params).fetchall()
             contas_atrasadas = [dict(row._mapping) for row in result]
 
         if not contas_atrasadas:
@@ -378,50 +286,18 @@ class NightlyCheckinJob(BaseJob):
         from app import db_engine
         from app.services.notification_service import enviar_notificacao_whatsapp
         from app.services.redis_service import redis_service
+        from app.services.queries import AgendamentosQueries
         from app.config import BOT_WHATSAPP_URL, API_SECRET_KEY
         from app.utils import formatar_moeda
-        from sqlalchemy import text
 
         hoje = date.today()
 
         with db_engine.connect() as conn:
-            # Buscar contas que vencem hoje
-            sql = text("""
-                SELECT
-                    a.id, a.descricao, a.valor_previsto,
-                    c.nome_conta, c.tipo_conta,
-                    s.nome_sub as categoria,
-                    g.nome_grupo
-                FROM Agendamentos a
-                JOIN Contas c ON a.conta_id = c.id
-                JOIN SubCategoria s ON a.subcategoria_id = s.id
-                JOIN MacroCategoria m ON s.macro_id = m.id
-                JOIN GrupoCategoria g ON m.grupo_id = g.id
-                WHERE a.usuario_id = :uid
-                  AND a.ativo = TRUE
-                  AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
-                  AND a.dia_execucao = EXTRACT(DAY FROM :hoje)
-                  AND (
-                      a.periodicidade != 'ANUAL'
-                      OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = EXTRACT(MONTH FROM :hoje))
-                  )
-                  AND NOT EXISTS (
-                      SELECT 1 FROM Transacoes t
-                      WHERE t.descricao = a.descricao
-                        AND t.usuario_id = a.usuario_id
-                        AND EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM :hoje)
-                        AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM :hoje)
-                  )
-                  -- Exclui débitos recorrentes de cartão (vão para a fatura)
-                  AND NOT (a.tipo_agendamento = 'FIXO' AND g.nome_grupo = 'Despesa' AND c.tipo_conta = 'Cartão de Crédito')
-                ORDER BY g.nome_grupo, a.descricao
-            """)
+            # Usar query centralizada para buscar contas que vencem hoje
+            sql = AgendamentosQueries.get_contas_vencendo_hoje()
+            params = AgendamentosQueries.get_parametros_padrao(usuario_id, hoje)
 
-            result = conn.execute(sql, {
-                "uid": usuario_id,
-                "hoje": hoje
-            }).fetchall()
-
+            result = conn.execute(sql, params).fetchall()
             contas_hoje = [dict(row._mapping) for row in result]
 
         if not contas_hoje:
