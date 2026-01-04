@@ -32,7 +32,16 @@ class TransactionConfirmationService:
         )
         
         if success:
+            # CRÍTICO: Salvar referência para última transação pendente
+            # Isso permite que o usuário responda "ok" sem precisar do ID
+            last_pending_key = f"last_pending:{numero_whatsapp}"
+            redis_service.set_with_ttl(
+                last_pending_key,
+                transaction_id,
+                ttl_seconds=300  # Mesmo TTL da transação
+            )
             print(f"[CONFIRM] Transação pendente criada: {transaction_id}")
+            print(f"[CONFIRM] Chave last_pending salva: {last_pending_key} -> {transaction_id}")
             return transaction_id
         else:
             print(f"[CONFIRM] ERRO ao criar transação pendente")
@@ -46,9 +55,16 @@ class TransactionConfirmationService:
     
     @staticmethod
     def delete_pending_transaction(numero_whatsapp, transaction_id):
-        """Remove uma transação pendente"""
+        """Remove uma transação pendente e sua referência last_pending"""
         redis_key = f"pending_tx:{numero_whatsapp}:{transaction_id}"
-        return redis_service.delete(redis_key)
+        last_pending_key = f"last_pending:{numero_whatsapp}"
+        
+        # Deletar ambas as chaves
+        redis_service.delete(redis_key)
+        redis_service.delete(last_pending_key)
+        
+        print(f"[CONFIRM] Transação {transaction_id} e last_pending deletadas")
+        return True
     
     @staticmethod
     def format_confirmation_message(transacao_data, categorias_disponiveis, transaction_id):
