@@ -1538,35 +1538,39 @@ def handle_whatsapp_webhook():
                     resposta_para_usuario = "❌ Erro ao consultar contas atrasadas."
                     return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
-            #==== INTENÇÃO: Transferência =====
-            elif intent == 'Transferência':
-                contas_raw = finance_service.get_user_accounts(conn, usuario_id)
-                contas_list = [{"nome": c[1], "tipo": c[2]} for c in contas_raw]
-
-                transf_data = gemini_service.extract_transfer_details(texto_msg, contas_list, usuario_id)
-                valor_dec = float(transf_data.get('valor_decimal', 0))
-                nome_origem = transf_data.get('conta_origem')
-                nome_destino = transf_data.get('conta_destino')
-                
-                if not valor_dec or not nome_origem or not nome_destino:
-                    raise Exception("Gemini não conseguiu extrair os dados da transferência (valor, origem, destino).")
-
-                conta_id_origem = finance_service.get_account_by_name(conn, usuario_id, nome_origem)
-                conta_id_destino = finance_service.get_account_by_name(conn, usuario_id, nome_destino)
-                
-                if not conta_id_origem or not conta_id_destino:
-                    raise Exception(f"Não foi possível encontrar as contas ({nome_origem} -> {nome_destino}).")
-                
-                nome_orig, nome_dest = finance_service.create_transfer_pair(
-                    conn, usuario_id, conta_id_origem, conta_id_destino, valor_dec, data_hoje
-                )
-
-                conn.commit()
-
-                valor_fmt = formatar_moeda(valor_dec)
-                resposta_para_usuario = f"✅ Transferência salva!\n\nValor: {valor_fmt}\nDe: {nome_orig}\nPara: {nome_dest}"
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+            # ==== INTENÇÃO: Transferência =====
+            # CÓDIGO LEGADO REMOVIDO - Agora usa TransferenciaIntent que valida saldo!
+            # O código abaixo estava interceptando transferências ANTES do novo sistema de intents,
+            # impedindo a validação de saldo implementada em TransferenciaIntent.execute()
+            #
+            # elif intent == 'Transferência':
+            #     contas_raw = finance_service.get_user_accounts(conn, usuario_id)
+            #     contas_list = [{"nome": c[1], "tipo": c[2]} for c in contas_raw]
+            #
+            #     transf_data = gemini_service.extract_transfer_details(texto_msg, contas_list, usuario_id)
+            #     valor_dec = float(transf_data.get('valor_decimal', 0))
+            #     nome_origem = transf_data.get('conta_origem')
+            #     nome_destino = transf_data.get('conta_destino')
+            #
+            #     if not valor_dec or not nome_origem or not nome_destino:
+            #         raise Exception("Gemini não conseguiu extrair os dados da transferência (valor, origem, destino).")
+            #
+            #     conta_id_origem = finance_service.get_account_by_name(conn, usuario_id, nome_origem)
+            #     conta_id_destino = finance_service.get_account_by_name(conn, usuario_id, nome_destino)
+            #
+            #     if not conta_id_origem or not conta_id_destino:
+            #         raise Exception(f"Não foi possível encontrar as contas ({nome_origem} -> {nome_destino}).")
+            #
+            #     nome_orig, nome_dest = finance_service.create_transfer_pair(
+            #         conn, usuario_id, conta_id_origem, conta_id_destino, valor_dec, data_hoje
+            #     )
+            #
+            #     conn.commit()
+            #
+            #     valor_fmt = formatar_moeda(valor_dec)
+            #     resposta_para_usuario = f"✅ Transferência salva!\n\nValor: {valor_fmt}\nDe: {nome_orig}\nPara: {nome_dest}"
+            #
+            #     return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
             #==== INTENÇÃO: Pagamento Fatura =====
             elif intent == 'Pagamento Fatura':
