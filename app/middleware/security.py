@@ -185,6 +185,7 @@ def is_suspicious_request(path, user_agent):
         '/admin/test-monthly-report/',
         '/connect-calendar/',
         '/disconnect-calendar/',
+        '/api/fatura/',  # Permite /api/fatura/<id>/reprocessar
     ]
 
     is_dynamic = any(path.startswith(prefix) for prefix in dynamic_endpoints)
