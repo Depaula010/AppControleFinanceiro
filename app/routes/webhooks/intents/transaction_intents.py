@@ -375,11 +375,13 @@ class TransferenciaIntent(ConfirmationRequiredIntent):
 
         # Correção Bug #1: Verifica saldo antes de criar a transferência
         saldos = finance_service.get_saldo_contas(self.conn, self.usuario_id, conta_origem_id)
-        saldo_origem = saldos[0]["saldo_atual"] if saldos else 0
+        saldo_origem = saldos[0]["saldo"] if saldos else 0  # Corrigido: usar "saldo" ao invés de "saldo_atual"
 
         if saldo_origem < self.params["valor"]:
+            saldo_fmt = f"R$ {saldo_origem:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            valor_fmt = f"R$ {self.params['valor']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
             return {
-                "error": "❌ Saldo insuficiente na conta de origem."
+                "error": f"❌ Saldo insuficiente na conta de origem.\n\n💰 Saldo disponível: {saldo_fmt}\n💸 Valor solicitado: {valor_fmt}"
             }
 
         # Criar transferência pendente
