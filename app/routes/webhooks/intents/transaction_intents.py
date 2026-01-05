@@ -41,6 +41,7 @@ class RendaIntent(ConfirmationRequiredIntent):
             "conta": params.get("conta"),  # nome da conta
             "conta_id_agendamento": params.get("conta_id_agendamento"),  # ID da conta do agendamento
             "subcategoria_id_agendamento": params.get("subcategoria_id_agendamento"),  # ID da subcategoria do agendamento
+            "descricao_agendamento": params.get("descricao_agendamento"),  # Descrição do agendamento
         }
 
     def validate(self) -> str | None:
@@ -101,6 +102,7 @@ class RendaIntent(ConfirmationRequiredIntent):
             'categoria_id': id_categoria,
             'fatura_id': None,
             'descricao': self.params["descricao"],
+            'descricao_final': self.params.get("descricao_agendamento"),  # Usar descrição do agendamento se disponível
             'valor_db': self.params["valor"],  # Renda é positivo
             'valor_original': self.params["valor"],
             'valor_total': None,
@@ -170,6 +172,7 @@ class DespesaIntent(ConfirmationRequiredIntent):
             "parcelamento": params.get("parcelamento"),  # Núm. parcelas ou None
             "conta_id_agendamento": params.get("conta_id_agendamento"),  # ID da conta do agendamento
             "subcategoria_id_agendamento": params.get("subcategoria_id_agendamento"),  # ID da subcategoria do agendamento
+            "descricao_agendamento": params.get("descricao_agendamento"),  # Descrição do agendamento
         }
 
     def validate(self) -> str | None:
@@ -258,6 +261,7 @@ class DespesaIntent(ConfirmationRequiredIntent):
             'categoria_id': id_categoria,
             'fatura_id': fatura_id,
             'descricao': self.params["descricao"],
+            'descricao_final': self.params.get("descricao_agendamento"),  # Usar descrição do agendamento se disponível
             'valor_db': valor_db,
             'valor_original': valor_original,
             'valor_total': valor_total,

@@ -1743,6 +1743,7 @@ def extract_income_params(mensagem, usuario_id, conn=None):
     descricao = extracted.get("descricao_bruta", "Renda")
     conta_id_agendamento = None  # Novo: armazena conta_id do agendamento
     subcategoria_id_agendamento = None  # Novo: armazena subcategoria_id do agendamento
+    descricao_agendamento = None  # Novo: armazena descrição do agendamento
 
     # Se não informou valor, tenta buscar em agendamento recorrente
     if valor is None and descricao:
@@ -1761,6 +1762,7 @@ def extract_income_params(mensagem, usuario_id, conn=None):
             valor = float(agendamento.valor_previsto)
             conta_id_agendamento = agendamento.conta_id  # Captura conta_id do agendamento
             subcategoria_id_agendamento = agendamento.subcategoria_id  # Captura subcategoria_id do agendamento
+            descricao_agendamento = agendamento.descricao  # Captura descrição do agendamento
             print(f"[INCOME-PARAMS] Encontrado agendamento '{agendamento.descricao}' com valor R$ {valor:.2f}, conta_id {conta_id_agendamento}, subcategoria_id {subcategoria_id_agendamento}")
         else:
             print(f"[INCOME-PARAMS] Nenhum agendamento encontrado para '{descricao}'")
@@ -1771,7 +1773,8 @@ def extract_income_params(mensagem, usuario_id, conn=None):
         "data": extracted.get("data"),
         "conta": extracted.get("conta"),
         "conta_id_agendamento": conta_id_agendamento,  # Retorna conta_id do agendamento
-        "subcategoria_id_agendamento": subcategoria_id_agendamento  # Novo: retorna subcategoria_id do agendamento
+        "subcategoria_id_agendamento": subcategoria_id_agendamento,  # Retorna subcategoria_id do agendamento
+        "descricao_agendamento": descricao_agendamento  # Novo: retorna descrição do agendamento
     }
 
 def extract_expense_params(mensagem, usuario_id, conn=None):
@@ -1811,6 +1814,7 @@ def extract_expense_params(mensagem, usuario_id, conn=None):
     descricao = extracted.get("descricao_bruta", "Despesa")
     conta_id_agendamento = None  # Novo: armazena conta_id do agendamento
     subcategoria_id_agendamento = None  # Novo: armazena subcategoria_id do agendamento
+    descricao_agendamento = None  # Novo: armazena descrição do agendamento
 
     # Se não informou valor, tenta buscar em agendamento recorrente
     if valor is None and descricao:
@@ -1829,6 +1833,7 @@ def extract_expense_params(mensagem, usuario_id, conn=None):
             valor = float(agendamento.valor_previsto)
             conta_id_agendamento = agendamento.conta_id  # Captura conta_id do agendamento
             subcategoria_id_agendamento = agendamento.subcategoria_id  # Captura subcategoria_id do agendamento
+            descricao_agendamento = agendamento.descricao  # Captura descrição do agendamento
             print(f"[EXPENSE-PARAMS] Encontrado agendamento '{agendamento.descricao}' com valor R$ {valor:.2f}, conta_id {conta_id_agendamento}, subcategoria_id {subcategoria_id_agendamento}")
         else:
             print(f"[EXPENSE-PARAMS] Nenhum agendamento encontrado para '{descricao}'")
@@ -1841,7 +1846,8 @@ def extract_expense_params(mensagem, usuario_id, conn=None):
         "categoria": extracted.get("categoria"),
         "parcelamento": extracted.get("parcelamento"),
         "conta_id_agendamento": conta_id_agendamento,  # Retorna conta_id do agendamento
-        "subcategoria_id_agendamento": subcategoria_id_agendamento  # Novo: retorna subcategoria_id do agendamento
+        "subcategoria_id_agendamento": subcategoria_id_agendamento,  # Novo: retorna subcategoria_id do agendamento
+        "descricao_agendamento": descricao_agendamento  # Novo: retorna descrição do agendamento
     }
 
 def _buscar_valor_lembrete_variavel(conn, usuario_id, descricao):
