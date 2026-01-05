@@ -346,6 +346,8 @@ class TransferenciaIntent(ConfirmationRequiredIntent):
 
     def execute(self) -> Dict[str, Any]:
         """Cria transferência pendente de confirmação."""
+        print(f"[TRANSFER-EXECUTE] Iniciando execute() com params: {self.params}")
+        
         # Buscar IDs das contas
         conta_origem_id = finance_service.get_account_by_name(
             self.conn,
