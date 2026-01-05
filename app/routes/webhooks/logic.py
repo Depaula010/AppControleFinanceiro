@@ -1572,6 +1572,36 @@ def handle_whatsapp_webhook():
             #
             #     return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
+            # NOVO: Usar TransferenciaIntent com validação de saldo
+            elif intent == 'Transferência':
+                from app.routes.webhooks.intents import INTENT_REGISTRY
+
+                try:
+                    # Usar a classe TransferenciaIntent registrada
+                    intent_class = INTENT_REGISTRY.get('Transferência')
+
+                    if not intent_class:
+                        raise Exception("Intent 'Transferência' não encontrada no registry")
+
+                    # Instanciar a intent com parâmetros corretos
+                    intent_instance = intent_class(
+                        usuario_id=usuario_id,
+                        mensagem=texto_msg,
+                        conn=conn,
+                        numero_whatsapp=numero_whatsapp  # Necessário para confirmação
+                    )
+
+                    # Executar usando handle() e extrair message
+                    result = intent_instance.handle()
+                    resposta_para_usuario = result["message"]
+
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                except Exception as e:
+                    print(f"[TRANSFER-INTENT] Erro ao processar transferência: {e}")
+                    resposta_para_usuario = f"❌ Erro ao processar transferência: {str(e)}"
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
             #==== INTENÇÃO: Pagamento Fatura =====
             elif intent == 'Pagamento Fatura':
                 contas_raw = finance_service.get_user_accounts(conn, usuario_id)
