@@ -73,6 +73,9 @@ class RendaIntent(ConfirmationRequiredIntent):
                 "error": "❌ Conta não encontrada. Por favor, especifique a conta."
             }
 
+        # Buscar lista de categorias (sempre necessária para formatar mensagem)
+        cats_list = finance_service.get_user_categories(self.conn, self.usuario_id, 'Renda')
+        
         # Buscar categoria
         # PRIORIDADE: Se encontrou agendamento, usar categoria do agendamento
         subcategoria_id_agendamento = self.params.get("subcategoria_id_agendamento")
@@ -82,7 +85,6 @@ class RendaIntent(ConfirmationRequiredIntent):
             print(f"[RENDA-INTENT] Usando categoria do agendamento: {id_categoria}")
         else:
             # Não tem agendamento, deixar Gemini categorizar
-            cats_list = finance_service.get_user_categories(self.conn, self.usuario_id, 'Renda')
             id_outros = finance_service.get_fallback_category_id(self.conn, 'Renda')
             id_categoria = gemini_service.categorize_transaction(
                 cats_list, self.params["descricao"], 'Renda', id_outros, self.usuario_id
@@ -205,6 +207,9 @@ class DespesaIntent(ConfirmationRequiredIntent):
                 "error": "❌ Conta não encontrada. Por favor, especifique a conta."
             }
 
+        # Buscar lista de categorias (sempre necessária para formatar mensagem)
+        cats_list = finance_service.get_user_categories(self.conn, self.usuario_id, 'Despesa')
+        
         # Buscar categoria
         # PRIORIDADE: Se encontrou agendamento, usar categoria do agendamento
         subcategoria_id_agendamento = self.params.get("subcategoria_id_agendamento")
@@ -214,7 +219,6 @@ class DespesaIntent(ConfirmationRequiredIntent):
             print(f"[DESPESA-INTENT] Usando categoria do agendamento: {id_categoria}")
         else:
             # Não tem agendamento, deixar Gemini categorizar
-            cats_list = finance_service.get_user_categories(self.conn, self.usuario_id, 'Despesa')
             id_outros = finance_service.get_fallback_category_id(self.conn, 'Despesa')
             id_categoria = gemini_service.categorize_transaction(
                 cats_list, self.params["descricao"], 'Despesa', id_outros, self.usuario_id
