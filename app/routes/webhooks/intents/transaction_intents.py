@@ -249,8 +249,8 @@ class DespesaIntent(ConfirmationRequiredIntent):
         if conta_tipo and 'crédito' in conta_tipo.lower():
             tipo_pagamento = 'credito'
             # Buscar fatura em aberto para esta conta
-            fatura_id = finance_service.get_or_create_invoice(
-                self.conn, self.usuario_id, conta_id, data_transacao
+            fatura_id = finance_service.get_or_create_fatura(
+                self.conn, conta_id, data_transacao, self.usuario_id
             )
 
         transacao_data = {
