@@ -1660,7 +1660,69 @@ def handle_whatsapp_webhook():
                         resposta_para_usuario = f"🤔 Não encontrei um cartão chamado '{nome_cartao}'."
                         return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
-                # Buscar valor(es) da(s) fatura(s)
+                # Verificar se o usuário quer detalhes da fatura
+                texto_lower = texto_msg.lower()
+                quer_detalhes = any(palavra in texto_lower for palavra in ['detalhe', 'detalhar', 'detalhada', 'itens', 'lista', 'transações', 'transacoes', 'compras'])
+
+                if quer_detalhes and conta_id_cartao:
+                    # Buscar fatura detalhada
+                    fatura_detalhada = finance_service.get_fatura_detalhada(conn, usuario_id, conta_id_cartao)
+
+                    if not fatura_detalhada:
+                        resposta_para_usuario = f"✅ Você não tem faturas em aberto no cartão '{nome_cartao}'! 🎉"
+                        return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                    # Formatar resposta detalhada
+                    data_venc = fatura_detalhada['data_vencimento'].strftime('%d/%m/%Y')
+                    resposta_para_usuario = f"💳 *Fatura {fatura_detalhada['nome_cartao']}*\n\n"
+                    resposta_para_usuario += f"💰 Valor atual: *{formatar_moeda(fatura_detalhada['valor_total'])}*\n"
+                    resposta_para_usuario += f"📅 Vencimento: {data_venc}\n"
+                    resposta_para_usuario += f"📊 Status: {fatura_detalhada['status']}\n\n"
+
+                    if fatura_detalhada['transacoes']:
+                        # Agrupar transações por data
+                        from collections import defaultdict
+                        transacoes_por_data = defaultdict(list)
+
+                        for t in fatura_detalhada['transacoes']:
+                            transacoes_por_data[t['data']].append(t)
+
+                        # Ordenar datas (mais recente primeiro)
+                        datas_ordenadas = sorted(transacoes_por_data.keys(), reverse=True)
+
+                        resposta_para_usuario += "📅 *Transações por Data:*\n\n"
+
+                        for data in datas_ordenadas:
+                            # Cabeçalho da data
+                            data_formatada = data.strftime('%d/%m/%Y')
+                            transacoes_do_dia = transacoes_por_data[data]
+                            total_dia = sum(t['valor'] for t in transacoes_do_dia)
+
+                            resposta_para_usuario += f"*{data_formatada}* - {formatar_moeda(total_dia)}\n"
+
+                            # Listar transações do dia
+                            for t in transacoes_do_dia:
+                                # Adicionar emoji de acordo com o tipo
+                                emoji = ""
+                                if t['tipo_agendamento'] == 'FIXO':
+                                    emoji = "🔁 "
+                                elif t['tipo_agendamento'] == 'PARCELADO':
+                                    emoji = "📊 "
+
+                                # Info adicional (parcela se for parcelado)
+                                info_extra = ""
+                                if t['parcela_info']:
+                                    info_extra = f" ({t['parcela_info']})"
+
+                                resposta_para_usuario += f"  {emoji}{t['descricao']}{info_extra}: {formatar_moeda(t['valor'])}\n"
+
+                            resposta_para_usuario += "\n"
+                    else:
+                        resposta_para_usuario += "✅ Nenhuma transação registrada nesta fatura."
+
+                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                # Buscar valor(es) da(s) fatura(s) - modo resumido
                 faturas = finance_service.get_fatura_valor(conn, usuario_id, conta_id_cartao)
 
                 if not faturas:
@@ -1670,7 +1732,7 @@ def handle_whatsapp_webhook():
                         resposta_para_usuario = "✅ Você não tem nenhuma fatura em aberto! 🎉"
                     return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
 
-                # Formatar resposta
+                # Formatar resposta resumida
                 if len(faturas) == 1:
                     fatura = faturas[0]
                     data_venc = fatura['data_vencimento'].strftime('%d/%m/%Y')

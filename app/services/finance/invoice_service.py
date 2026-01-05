@@ -267,6 +267,106 @@ def get_fatura_valor(conn, usuario_id, conta_id_cartao=None):
     return faturas
 
 
+def get_fatura_detalhada(conn, usuario_id, conta_id_cartao):
+    """
+    Consulta os detalhes completos de uma fatura aberta, incluindo todas as transações.
+
+    Args:
+        conn: Conexão com o banco
+        usuario_id: ID do usuário
+        conta_id_cartao: ID do cartão
+
+    Returns:
+        Dict com informações detalhadas da fatura:
+        {
+            "nome_cartao": "Nubank",
+            "valor_total": 1500.50,
+            "data_vencimento": date(2026, 01, 20),
+            "status": "Aberta",
+            "transacoes": [
+                {
+                    "descricao": "Netflix",
+                    "valor": 49.90,
+                    "data": date(2026, 01, 05),
+                    "tipo_agendamento": "FIXO",  # ou "PARCELADO", ou None
+                    "parcela_info": None  # ou "3/12" para parcelados
+                },
+                ...
+            ]
+        }
+    """
+    # Garantir que existe fatura para o período atual
+    ensure_current_invoice_exists(conn, usuario_id, conta_id_cartao)
+
+    # Buscar informações gerais da fatura
+    sql_fatura = text("""
+        SELECT
+            c.nome_conta,
+            f.id as fatura_id,
+            f.data_vencimento,
+            f.status,
+            COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) as valor_total
+        FROM Faturas f
+        JOIN Contas c ON f.conta_id = c.id
+        LEFT JOIN Transacoes t ON f.id = t.fatura_id
+        WHERE c.usuario_id = :uid
+            AND c.id = :cid
+            AND f.status = 'Aberta'
+        GROUP BY c.nome_conta, f.id, f.data_vencimento, f.status
+        ORDER BY f.data_vencimento ASC
+        LIMIT 1
+    """)
+
+    fatura_info = conn.execute(sql_fatura, {"uid": usuario_id, "cid": conta_id_cartao}).fetchone()
+
+    if not fatura_info:
+        return None
+
+    # Buscar todas as transações da fatura com informações de agendamento
+    sql_transacoes = text("""
+        SELECT
+            t.descricao,
+            t.valor,
+            t.data_transacao,
+            t.agendamento_id,
+            a.tipo_agendamento,
+            a.parcelas_executadas,
+            a.total_parcelas
+        FROM Transacoes t
+        LEFT JOIN Agendamentos a ON t.agendamento_id = a.id
+        WHERE t.fatura_id = :fid
+            AND t.valor < 0
+        ORDER BY t.data_transacao DESC, t.descricao
+    """)
+
+    transacoes_rows = conn.execute(sql_transacoes, {"fid": fatura_info.fatura_id}).fetchall()
+
+    transacoes = []
+    for row in transacoes_rows:
+        parcela_info = None
+        tipo_agendamento = row.tipo_agendamento
+
+        # Se é parcelado, formatar info da parcela
+        if tipo_agendamento == 'PARCELADO' and row.total_parcelas:
+            parcela_info = f"{row.parcelas_executadas}/{row.total_parcelas}"
+
+        transacoes.append({
+            "descricao": row.descricao,
+            "valor": abs(float(row.valor)),
+            "data": row.data_transacao,
+            "tipo_agendamento": tipo_agendamento,
+            "parcela_info": parcela_info
+        })
+
+    return {
+        "nome_cartao": fatura_info.nome_conta,
+        "valor_total": float(fatura_info.valor_total),
+        "data_vencimento": fatura_info.data_vencimento,
+        "status": fatura_info.status,
+        "transacoes": transacoes
+    }
+
+
 def get_fatura_id_if_credit_card(
     conn,
     conta_id: int,
