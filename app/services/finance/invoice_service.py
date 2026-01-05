@@ -188,13 +188,26 @@ def ensure_current_invoice_exists(conn, usuario_id, conta_id_cartao=None):
                 INSERT INTO Faturas (conta_id, data_vencimento, data_fechamento, status)
                 VALUES (:cid, :dv, :df, 'Aberta')
                 ON CONFLICT (conta_id, data_vencimento) DO NOTHING
+                RETURNING id
             """)
-            conn.execute(sql_create, {
+            result = conn.execute(sql_create, {
                 "cid": conta_id,
                 "dv": data_venc_esperada,
                 "df": data_fech_esperada
             })
-            print(f"[AUTO-FATURA] Fatura criada automaticamente para cartão ID {conta_id}, vencimento {data_venc_esperada}")
+            fatura_criada_id = result.scalar_one_or_none()
+
+            if fatura_criada_id:
+                print(f"[AUTO-FATURA] Fatura {fatura_criada_id} criada para cartão ID {conta_id}, vencimento {data_venc_esperada}")
+
+                # Popular fatura com agendamentos (FIXO, PARCELADO, LEMBRETE_VARIAVEL)
+                try:
+                    stats = process_invoice_schedules(conn, fatura_criada_id, conta_id, data_venc_esperada)
+                    print(f"[AUTO-FATURA] Fatura {fatura_criada_id} populada: {stats['total_processados']} agendamentos")
+                except Exception as e:
+                    print(f"[AUTO-FATURA] Erro ao popular fatura {fatura_criada_id}: {e}")
+            else:
+                print(f"[AUTO-FATURA] Fatura já existia para cartão ID {conta_id}, vencimento {data_venc_esperada}")
 
 def get_fatura_valor(conn, usuario_id, conta_id_cartao=None):
     """
@@ -574,12 +587,207 @@ def get_overdue_invoices(conn):
     return invoices
 
 
+def process_invoice_schedules(conn, fatura_id, conta_id, data_referencia):
+    """
+    Popula uma fatura com agendamentos (FIXO, PARCELADO, LEMBRETE_VARIAVEL) do cartão.
+
+    Chamado automaticamente ao criar nova fatura.
+    IDEMPOTENTE: Não duplica se agendamento já foi processado na fatura.
+
+    Args:
+        conn: Conexão com o banco
+        fatura_id: ID da fatura a ser populada
+        conta_id: ID do cartão de crédito
+        data_referencia: Data de referência para calcular dia_execucao
+
+    Returns:
+        Dict com estatísticas do processamento:
+        {
+            "total_processados": 3,
+            "fixos": 2,
+            "parcelados": 1,
+            "lembretes": 0,
+            "detalhes": [...]
+        }
+    """
+    from datetime import date
+
+    # Se data_referencia for date object, usar direto. Se for string, converter
+    if isinstance(data_referencia, str):
+        from datetime import datetime
+        data_ref = datetime.strptime(data_referencia, '%Y-%m-%d').date()
+    else:
+        data_ref = data_referencia if isinstance(data_referencia, date) else date.today()
+
+    mes_ref = data_ref.month
+
+    # Buscar todos agendamentos ativos do cartão (FIXO, PARCELADO, LEMBRETE_VARIAVEL)
+    sql_agendamentos = text("""
+        SELECT
+            a.id as agendamento_id,
+            a.tipo_agendamento,
+            a.descricao,
+            a.valor_previsto,
+            a.dia_execucao,
+            a.mes_execucao,
+            a.periodicidade,
+            a.total_parcelas,
+            a.parcelas_executadas,
+            a.subcategoria_id,
+            a.usuario_id,
+            g.nome_grupo
+        FROM Agendamentos a
+        JOIN SubCategoria s ON a.subcategoria_id = s.id
+        JOIN MacroCategoria m ON s.macro_id = m.id
+        JOIN GrupoCategoria g ON m.grupo_id = g.id
+        WHERE a.conta_id = :conta_id
+          AND a.ativo = TRUE
+          AND a.tipo_agendamento IN ('FIXO', 'PARCELADO', 'LEMBRETE_VARIAVEL')
+          -- Filtro para anuais: só incluir se o mês bater
+          AND (
+              a.periodicidade != 'ANUAL'
+              OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = :mes_ref)
+          )
+        ORDER BY a.dia_execucao, a.descricao
+    """)
+
+    agendamentos = conn.execute(sql_agendamentos, {
+        "conta_id": conta_id,
+        "mes_ref": mes_ref
+    }).fetchall()
+
+    stats = {
+        "total_processados": 0,
+        "fixos": 0,
+        "parcelados": 0,
+        "lembretes": 0,
+        "detalhes": []
+    }
+
+    for ag in agendamentos:
+        try:
+            # Verificar se já existe transação deste agendamento nesta fatura (IDEMPOTÊNCIA)
+            sql_check = text("""
+                SELECT id FROM Transacoes
+                WHERE fatura_id = :fid
+                  AND agendamento_id = :agid
+                LIMIT 1
+            """)
+            existe = conn.execute(sql_check, {
+                "fid": fatura_id,
+                "agid": ag.agendamento_id
+            }).fetchone()
+
+            if existe:
+                # Já processado, pular
+                continue
+
+            # Determinar tipo de transação baseado no grupo
+            tipo_transacao = 'Renda' if ag.nome_grupo == 'Renda' else 'Despesa'
+
+            # Calcular valor (Receitas: positivo, Despesas: negativo)
+            valor_previsto = ag.valor_previsto or 0
+            valor_para_db = valor_previsto if tipo_transacao == 'Renda' else valor_previsto * -1
+
+            # Montar descrição
+            descricao = ag.descricao
+            if ag.tipo_agendamento == 'PARCELADO':
+                parcela_atual = ag.parcelas_executadas + 1
+                descricao = f"{ag.descricao} ({parcela_atual}/{ag.total_parcelas})"
+
+            # Calcular data da transação (dia_execucao no mês da fatura)
+            from calendar import monthrange
+            ano_ref = data_ref.year
+            dia_exec = ag.dia_execucao
+
+            # Ajustar se dia não existe no mês (ex: dia 31 em fevereiro)
+            try:
+                data_transacao = date(ano_ref, mes_ref, dia_exec)
+            except ValueError:
+                _, ultimo_dia = monthrange(ano_ref, mes_ref)
+                data_transacao = date(ano_ref, mes_ref, ultimo_dia)
+
+            # Criar transação vinculada ao agendamento
+            sql_insert = text("""
+                INSERT INTO Transacoes (
+                    usuario_id,
+                    conta_id,
+                    subcategoria_id,
+                    fatura_id,
+                    agendamento_id,
+                    descricao,
+                    valor,
+                    tipo_transacao,
+                    data_transacao,
+                    consolidada
+                ) VALUES (
+                    :uid, :cid, :scid, :fid, :agid, :desc, :val, :tipo, :data, TRUE
+                )
+            """)
+
+            conn.execute(sql_insert, {
+                "uid": ag.usuario_id,
+                "cid": conta_id,
+                "scid": ag.subcategoria_id,
+                "fid": fatura_id,
+                "agid": ag.agendamento_id,
+                "desc": descricao,
+                "val": valor_para_db,
+                "tipo": tipo_transacao,
+                "data": data_transacao
+            })
+
+            # Se PARCELADO, atualizar parcelas_executadas
+            if ag.tipo_agendamento == 'PARCELADO':
+                nova_parcela = ag.parcelas_executadas + 1
+                desativar = (ag.total_parcelas and nova_parcela >= ag.total_parcelas)
+
+                sql_update = text("""
+                    UPDATE Agendamentos
+                    SET parcelas_executadas = :nova_parcela,
+                        ativo = :ativo
+                    WHERE id = :agid
+                """)
+
+                conn.execute(sql_update, {
+                    "nova_parcela": nova_parcela,
+                    "ativo": not desativar,
+                    "agid": ag.agendamento_id
+                })
+
+            # Registrar estatísticas
+            stats["total_processados"] += 1
+            if ag.tipo_agendamento == 'FIXO':
+                stats["fixos"] += 1
+            elif ag.tipo_agendamento == 'PARCELADO':
+                stats["parcelados"] += 1
+            elif ag.tipo_agendamento == 'LEMBRETE_VARIAVEL':
+                stats["lembretes"] += 1
+
+            stats["detalhes"].append({
+                "tipo": ag.tipo_agendamento,
+                "descricao": descricao,
+                "valor": abs(valor_previsto)
+            })
+
+        except Exception as e:
+            print(f"[INVOICE-SCHEDULES] Erro ao processar agendamento {ag.agendamento_id}: {e}")
+            continue
+
+    print(f"[INVOICE-SCHEDULES] Fatura {fatura_id}: {stats['total_processados']} agendamentos processados "
+          f"(Fixos: {stats['fixos']}, Parcelados: {stats['parcelados']}, Lembretes: {stats['lembretes']})")
+
+    return stats
+
+
 __all__ = [
     'get_or_create_fatura',
     'ensure_current_invoice_exists',
     'get_fatura_valor',
+    'get_fatura_detalhada',
     'get_fatura_id_if_credit_card',
     'close_expired_invoices',
     'get_invoices_due_soon',
     'get_overdue_invoices',
+    'process_invoice_schedules',
 ]

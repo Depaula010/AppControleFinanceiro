@@ -91,7 +91,53 @@ class InvoiceProcessorJob(BaseJob):
                 self._log("Nenhuma fatura para fechar hoje")
 
             # ============================================================
-            # TAREFA 2: Alertar vencimentos próximos (3 dias antes)
+            # TAREFA 2: Popular faturas abertas com agendamentos
+            # ============================================================
+            self._log("Verificando faturas abertas sem agendamentos...")
+
+            from app.services.finance.invoice_service import process_invoice_schedules
+            from sqlalchemy import text
+
+            sql_faturas_abertas = text("""
+                SELECT f.id, f.conta_id, f.data_vencimento, c.nome_conta
+                FROM Faturas f
+                JOIN Contas c ON f.conta_id = c.id
+                WHERE f.status = 'Aberta'
+                ORDER BY f.data_vencimento
+            """)
+
+            faturas_abertas = conn.execute(sql_faturas_abertas).fetchall()
+
+            if faturas_abertas:
+                self._log(f"Encontradas {len(faturas_abertas)} fatura(s) aberta(s)")
+
+                for fatura in faturas_abertas:
+                    try:
+                        stats = process_invoice_schedules(
+                            conn,
+                            fatura.id,
+                            fatura.conta_id,
+                            fatura.data_vencimento
+                        )
+
+                        if stats['total_processados'] > 0:
+                            self._log(
+                                f"✅ Fatura #{fatura.id} ({fatura.nome_conta}): "
+                                f"{stats['total_processados']} agendamentos processados "
+                                f"(Fixos: {stats['fixos']}, Parcelados: {stats['parcelados']}, Lembretes: {stats['lembretes']})"
+                            )
+                        else:
+                            self._log(f"⏭️ Fatura #{fatura.id} ({fatura.nome_conta}): já processada")
+
+                    except Exception as e:
+                        self._log(f"❌ Erro ao processar fatura #{fatura.id}: {e}", level="ERROR")
+
+                conn.commit()
+            else:
+                self._log("Nenhuma fatura aberta encontrada")
+
+            # ============================================================
+            # TAREFA 3: Alertar vencimentos próximos (3 dias antes)
             # ============================================================
             self._log("Buscando faturas com vencimento próximo (3 dias)...")
 

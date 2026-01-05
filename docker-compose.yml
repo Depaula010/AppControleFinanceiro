@@ -75,8 +75,8 @@ services:
       ofelia.job-exec.alertas-tarefas.schedule: "@every 1m"
       ofelia.job-exec.alertas-tarefas.command: "python /app/app/jobs/task_alerts.py"
 
-      # 6. Processador de Faturas (Roda diariamente às 02:00 AM)
-      ofelia.job-exec.processador-faturas.schedule: "0 2 * * *"
+      # 6. Processador de Faturas (Roda diariamente às 00:00:01 - meia-noite e 1 segundo)
+      ofelia.job-exec.processador-faturas.schedule: "1 0 * * *"
       ofelia.job-exec.processador-faturas.command: "python /app/app/jobs/invoice_processor.py"
 
   # ============================================

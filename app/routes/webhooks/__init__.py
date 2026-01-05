@@ -112,4 +112,80 @@ def route_listar_reserva():
     return listar_agendamentos_reserva()
 
 
+@webhooks_bp.route('/api/fatura/<int:fatura_id>/reprocessar', methods=['POST'])
+def route_reprocessar_fatura(fatura_id):
+    """
+    Endpoint manual para reprocessar agendamentos de uma fatura.
+
+    Útil para:
+    - Faturas criadas antes da feature de populamento automático
+    - Correção de faturas com lançamentos faltantes
+    - Debugging
+
+    POST /api/fatura/123/reprocessar
+
+    Retorna:
+        {
+            "status": "sucesso",
+            "fatura_id": 123,
+            "stats": {
+                "total_processados": 3,
+                "fixos": 2,
+                "parcelados": 1,
+                "lembretes": 0,
+                "detalhes": [...]
+            }
+        }
+    """
+    from flask import jsonify
+    from app import db_engine
+    from app.services.finance.invoice_service import process_invoice_schedules
+    from sqlalchemy import text
+
+    try:
+        with db_engine.connect() as conn:
+            conn.begin()
+
+            # Buscar informações da fatura
+            sql_fatura = text("""
+                SELECT f.id, f.conta_id, f.data_vencimento, f.status, c.nome_conta
+                FROM Faturas f
+                JOIN Contas c ON f.conta_id = c.id
+                WHERE f.id = :fid
+            """)
+
+            fatura = conn.execute(sql_fatura, {"fid": fatura_id}).fetchone()
+
+            if not fatura:
+                return jsonify({
+                    "status": "erro",
+                    "mensagem": f"Fatura ID {fatura_id} não encontrada"
+                }), 404
+
+            # Reprocessar agendamentos
+            stats = process_invoice_schedules(
+                conn,
+                fatura.id,
+                fatura.conta_id,
+                fatura.data_vencimento
+            )
+
+            conn.commit()
+
+            return jsonify({
+                "status": "sucesso",
+                "fatura_id": fatura.id,
+                "cartao": fatura.nome_conta,
+                "vencimento": fatura.data_vencimento.strftime('%d/%m/%Y'),
+                "status_fatura": fatura.status,
+                "stats": stats
+            }), 200
+
+    except Exception as e:
+        return jsonify({
+            "status": "erro",
+            "mensagem": str(e)
+        }), 500
+
+
 __all__ = ['webhooks_bp']
