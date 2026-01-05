@@ -109,7 +109,9 @@ class TransactionConfirmationService:
                 break
 
         valor_fmt = formatar_moeda(valor)
-        emoji = "💰" if tipo == "Renda" else "💸"
+        
+        # Emoji para tipo de transação
+        emoji_tipo = "💰" if tipo == "Renda" else "💸"
 
         # Emoji para tipo de pagamento
         if tipo_pagamento == 'credito':
@@ -123,49 +125,50 @@ class TransactionConfirmationService:
         else:
             emoji_pagamento = "💸"
 
-        mensagem = f"{emoji_pagamento} *CONFIRME SUA TRANSAÇÃO* {emoji_pagamento}\n\n"
+        # TÍTULO mais limpo (sem emoji duplicado)
+        mensagem = f"💰 *CONFIRME SUA TRANSAÇÃO*\n\n"
 
-        # Mostrar Local e Itens separados
-        mensagem += f"📍 Local: *{local}*\n"
+        # INFORMAÇÕES PRINCIPAIS (ordem de prioridade)
+        mensagem += f"📍 *{local}*\n"
+        
         if descricao:
-            mensagem += f"📝 Itens: {descricao}\n"
+            mensagem += f"📝 {descricao}\n"
 
         # Mostrar valor (com informação de parcelamento se houver)
         if num_parcelas and num_parcelas > 1:
             valor_total_fmt = formatar_moeda(valor_total)
-            mensagem += f"💵 Valor Total: *{valor_total_fmt}*\n"
-            mensagem += f"💳 Parcelas: *{num_parcelas}x de {valor_fmt}*\n"
+            mensagem += f"💵 *{valor_total_fmt}* ({num_parcelas}x de {valor_fmt})\n"
         else:
-            mensagem += f"💵 Valor: *{valor_fmt}*\n"
+            mensagem += f"💵 *{valor_fmt}*\n"
 
-        mensagem += f"📊 Tipo: *{tipo}*\n"
+        mensagem += f"{emoji_tipo} {tipo}\n"
 
-        # Mostrar informações da conta
+        # Informações da conta (mais conciso)
         if conta_nome:
             if tipo_pagamento == 'credito' and fatura_id:
-                # É cartão de crédito, mostrar fatura
-                mensagem += f"💳 Conta: *{conta_nome}* ({conta_tipo})\n"
+                # É cartão de crédito
                 if num_parcelas and num_parcelas > 1:
-                    mensagem += f"🔴 *CRÉDITO* → Primeira parcela irá para fatura atual\n"
+                    mensagem += f"� {conta_nome} (1ª parcela na fatura atual)\n"
                 else:
-                    mensagem += f"🔴 *CRÉDITO* → Irá para fatura\n"
+                    mensagem += f"� {conta_nome} (na fatura)\n"
             else:
                 # Outras formas de pagamento
                 tipo_pag_label = {
-                    'debito': 'Débito - desconto imediato',
-                    'pix': 'PIX - desconto imediato',
+                    'debito': 'Débito',
+                    'pix': 'PIX',
                     'dinheiro': 'Dinheiro'
                 }.get(tipo_pagamento, tipo_pagamento)
+                
+                mensagem += f"🏦 {conta_nome} ({tipo_pag_label})\n"
 
-                mensagem += f"🏦 Conta: *{conta_nome}* ({tipo_pag_label})\n"
+        mensagem += f"📂 {categoria_sugerida_nome}\n\n"
 
-        mensagem += f"📂 Categoria: *{categoria_sugerida_nome}*\n\n"
-
+        # OPÇÕES (mais direto e claro)
         mensagem += "━━━━━━━━━━━━━━━━━━━━\n"
         mensagem += "🔹 *OPÇÕES:*\n\n"
-        mensagem += f"✅ *OK* para confirmar\n"
-        mensagem += f"✏️ *TROCAR* para mudar categoria\n"
-        mensagem += f"❌ *CANCELAR* para descartar\n\n"
+        mensagem += "✅ *OK* para confirmar\n"
+        mensagem += "✏️ *TROCAR* para mudar categoria\n"
+        mensagem += "❌ *CANCELAR* para descartar\n\n"
         mensagem += f"_ID: {transaction_id} | Expira em 5 min_"
 
         return mensagem

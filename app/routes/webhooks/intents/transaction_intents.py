@@ -39,7 +39,8 @@ class RendaIntent(ConfirmationRequiredIntent):
             "descricao": params.get("descricao", "Renda"),
             "data": params.get("data"),  # date object ou None (hoje)
             "conta": params.get("conta"),  # nome da conta
-            "conta_id_agendamento": params.get("conta_id_agendamento"),  # ID da conta do agendamento (se encontrado)
+            "conta_id_agendamento": params.get("conta_id_agendamento"),  # ID da conta do agendamento
+            "subcategoria_id_agendamento": params.get("subcategoria_id_agendamento"),  # ID da subcategoria do agendamento
         }
 
     def validate(self) -> str | None:
@@ -73,11 +74,19 @@ class RendaIntent(ConfirmationRequiredIntent):
             }
 
         # Buscar categoria
-        cats_list = finance_service.get_user_categories(self.conn, self.usuario_id, 'Renda')
-        id_outros = finance_service.get_fallback_category_id(self.conn, 'Renda')
-        id_categoria = gemini_service.categorize_transaction(
-            cats_list, self.params["descricao"], 'Renda', id_outros, self.usuario_id
-        )
+        # PRIORIDADE: Se encontrou agendamento, usar categoria do agendamento
+        subcategoria_id_agendamento = self.params.get("subcategoria_id_agendamento")
+        
+        if subcategoria_id_agendamento:
+            id_categoria = subcategoria_id_agendamento
+            print(f"[RENDA-INTENT] Usando categoria do agendamento: {id_categoria}")
+        else:
+            # Não tem agendamento, deixar Gemini categorizar
+            cats_list = finance_service.get_user_categories(self.conn, self.usuario_id, 'Renda')
+            id_outros = finance_service.get_fallback_category_id(self.conn, 'Renda')
+            id_categoria = gemini_service.categorize_transaction(
+                cats_list, self.params["descricao"], 'Renda', id_outros, self.usuario_id
+            )
 
         # Preparar estrutura de dados que TransactionConfirmationService espera
         data_transacao = self.params.get("data") or date.today()
@@ -158,6 +167,7 @@ class DespesaIntent(ConfirmationRequiredIntent):
             "categoria": params.get("categoria"),  # Pode ser None
             "parcelamento": params.get("parcelamento"),  # Núm. parcelas ou None
             "conta_id_agendamento": params.get("conta_id_agendamento"),  # ID da conta do agendamento
+            "subcategoria_id_agendamento": params.get("subcategoria_id_agendamento"),  # ID da subcategoria do agendamento
         }
 
     def validate(self) -> str | None:
@@ -196,11 +206,19 @@ class DespesaIntent(ConfirmationRequiredIntent):
             }
 
         # Buscar categoria
-        cats_list = finance_service.get_user_categories(self.conn, self.usuario_id, 'Despesa')
-        id_outros = finance_service.get_fallback_category_id(self.conn, 'Despesa')
-        id_categoria = gemini_service.categorize_transaction(
-            cats_list, self.params["descricao"], 'Despesa', id_outros, self.usuario_id
-        )
+        # PRIORIDADE: Se encontrou agendamento, usar categoria do agendamento
+        subcategoria_id_agendamento = self.params.get("subcategoria_id_agendamento")
+        
+        if subcategoria_id_agendamento:
+            id_categoria = subcategoria_id_agendamento
+            print(f"[DESPESA-INTENT] Usando categoria do agendamento: {id_categoria}")
+        else:
+            # Não tem agendamento, deixar Gemini categorizar
+            cats_list = finance_service.get_user_categories(self.conn, self.usuario_id, 'Despesa')
+            id_outros = finance_service.get_fallback_category_id(self.conn, 'Despesa')
+            id_categoria = gemini_service.categorize_transaction(
+                cats_list, self.params["descricao"], 'Despesa', id_outros, self.usuario_id
+            )
 
         # Preparar estrutura de dados
         data_transacao = self.params.get("data") or date.today()
