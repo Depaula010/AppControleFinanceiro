@@ -502,17 +502,17 @@ def get_monthly_comparison(usuario_id, mes_referencia=None):
         mes_ref_nome = formatar_mes_ano_pt(mes_ref_date)
         mes_ant_nome = formatar_mes_ano_pt(mes_ant_date)
 
-        relatorio = f"📊 **Comparação: {mes_ref_nome} vs {mes_ant_nome}**\n\n"
+        relatorio = f"📊 *Comparação: {mes_ref_nome} vs {mes_ant_nome}*\n\n"
 
-        variacao_total = ((total_ref - total_ant) / total_ant * 100) if total_ant > 0 else 0
+        variacao_total = ((total_ref - total_ant) / total_ant * 100) if total_ant != 0 else 0
         emoji_total = "📈" if variacao_total > 0 else "📉"
 
-        relatorio += f"💰 **{mes_ref_nome}:** R$ {total_ref:,.2f}\n"
-        relatorio += f"💰 **{mes_ant_nome}:** R$ {total_ant:,.2f}\n"
-        relatorio += f"{emoji_total} **Variação:** {variacao_total:+.1f}%\n\n"
+        relatorio += f"💰 *{mes_ref_nome}:* R$ {total_ref:,.2f}\n"
+        relatorio += f"💰 *{mes_ant_nome}:* R$ {total_ant:,.2f}\n"
+        relatorio += f"{emoji_total} *Variação:* {variacao_total:+.1f}%\n\n"
 
         # Top 5 categorias com maiores variações
-        relatorio += "**Maiores mudanças por categoria:**\n"
+        relatorio += "*Maiores mudanças por categoria:*\n"
 
         todas_categorias = set(gastos_ref.keys()) | set(gastos_ant.keys())
         variacoes = []
@@ -521,9 +521,9 @@ def get_monthly_comparison(usuario_id, mes_referencia=None):
             val_ref = gastos_ref.get(cat, 0)
             val_ant = gastos_ant.get(cat, 0)
 
-            if val_ant > 0:
+            if val_ant != 0:
                 var_perc = ((val_ref - val_ant) / val_ant) * 100
-            elif val_ref > 0:
+            elif val_ref != 0:
                 var_perc = 100
             else:
                 var_perc = 0
@@ -540,6 +540,6 @@ def get_monthly_comparison(usuario_id, mes_referencia=None):
 
         for var in variacoes[:5]:
             emoji = "🔴" if var["variacao"] > 10 else "🟢" if var["variacao"] < -10 else "⚪"
-            relatorio += f"{emoji} **{var['categoria']}:** R$ {var['ref']:,.2f} ({var['variacao']:+.1f}%)\n"
+            relatorio += f"{emoji} *{var['categoria']}:* R$ {var['ref']:,.2f} ({var['variacao']:+.1f}%)\n"
 
         return relatorio
