@@ -1588,7 +1588,7 @@ def handle_whatsapp_webhook():
                         usuario_id=usuario_id,
                         mensagem=texto_msg,
                         conn=conn,
-                        numero_whatsapp=numero_whatsapp  # Necessário para confirmação
+                        numero_whatsapp=numero_limpo  # Corrigido: usar numero_limpo
                     )
 
                     # Executar usando handle() e extrair message
