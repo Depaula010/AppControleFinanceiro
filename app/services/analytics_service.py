@@ -290,38 +290,38 @@ def generate_ai_insights(usuario_id):
     mes_anterior = meses_anteriores[0] if meses_anteriores else 0
 
     variacao_percentual = 0
-    if mes_anterior > 0:
+    if mes_anterior != 0:
         variacao_percentual = round(((mes_atual - mes_anterior) / mes_anterior) * 100, 1)
 
     # Preparar prompt para o Gemini
     prompt = f"""
 Você é um assistente financeiro pessoal. Analise os dados abaixo e gere insights personalizados e acionáveis.
 
-**DADOS DO USUÁRIO:**
+*DADOS DO USUÁRIO:*
 
-📊 **Resumo Mensal:**
+📊 *Resumo Mensal:*
 - Total gasto este mês: R$ {mes_atual:,.2f}
 - Mês anterior: R$ {mes_anterior:,.2f}
 - Variação: {variacao_percentual:+.1f}%
 
-💰 **Gastos por Categoria (Top 5):**
+💰 *Gastos por Categoria (Top 5):*
 {chr(10).join([f"- {cat['categoria']} / {cat['subcategoria']}: R$ {cat['total']:,.2f} ({cat['quantidade']} transações)" for cat in dados['gastos_por_categoria'][:5]])}
 
-📅 **Padrão Semanal:**
+📅 *Padrão Semanal:*
 {chr(10).join([f"- {dia['dia']}: R$ {dia['total']:,.2f} ({dia['quantidade']} transações)" for dia in dados['gastos_por_dia_semana']])}
 
-🎯 **Status dos Potes:**
+🎯 *Status dos Potes:*
 {chr(10).join([f"- {pote['nome']}: R$ {pote['gasto_atual']:,.2f} / R$ {pote['limite']:,.2f} ({pote['percentual_uso']}%)" for pote in dados['potes']]) if dados['potes'] else "- Nenhum pote configurado"}
 
-💳 **Maiores Gastos:**
+💳 *Maiores Gastos:*
 {chr(10).join([f"- {gasto['data']} - {gasto['descricao']}: R$ {gasto['valor']:,.2f}" for gasto in dados['maiores_gastos']])}
 
-🔧 **Contas Fixas:**
+🔧 *Contas Fixas:*
 {chr(10).join([f"- {conta['descricao']}: R$ {conta['valor']:,.2f} ({conta['periodicidade']})" for conta in dados['contas_fixas'][:5]]) if dados['contas_fixas'] else "- Nenhuma conta fixa cadastrada"}
 
 ---
 
-**INSTRUÇÕES:**
+*INSTRUÇÕES:*
 
 Gere um relatório com as seguintes seções (use emojis e formatação clara):
 
@@ -340,13 +340,13 @@ Gere um relatório com as seguintes seções (use emojis e formatação clara):
    - Seja específico com valores
    - Priorize as oportunidades mais relevantes
 
-**FORMATO DE RESPOSTA:**
+*FORMATO DE RESPOSTA:*
 - Seja direto e objetivo
 - Use valores reais dos dados
 - Evite frases genéricas
 - Foque em insights acionáveis
 - Máximo de 15 linhas no total
-- NÃO use asteriscos ** para negrito nos títulos das seções, apenas os emojis e texto simples
+- Use asteriscos simples * para negrito (ex: *texto*), NÃO use asteriscos duplos **
 """
 
     try:
@@ -413,14 +413,14 @@ def get_category_comparison(usuario_id, categoria_nome, meses=3):
             return f"❌ Não encontrei gastos com '{categoria_nome}' nos últimos {meses} meses."
 
         # Montar relatório
-        relatorio = f"📊 **Análise: {resultados[0].nome_subcategoria}**\n\n"
+        relatorio = f"📊 *Análise: {resultados[0].nome_subcategoria}*\n\n"
 
         total_geral = sum(float(r.total) for r in resultados)
         media_mensal = total_geral / len(set(r.mes for r in resultados))
 
-        relatorio += f"💰 **Total em {meses} meses:** R$ {total_geral:,.2f}\n"
-        relatorio += f"📈 **Média mensal:** R$ {media_mensal:,.2f}\n\n"
-        relatorio += "**Detalhamento:**\n"
+        relatorio += f"💰 *Total em {meses} meses:* R$ {total_geral:,.2f}\n"
+        relatorio += f"📈 *Média mensal:* R$ {media_mensal:,.2f}\n\n"
+        relatorio += "*Detalhamento:*\n"
 
         for row in resultados:
             mes_formatado = datetime.strptime(row.mes, '%Y-%m').strftime('%b/%Y')
@@ -430,10 +430,10 @@ def get_category_comparison(usuario_id, categoria_nome, meses=3):
         if len(resultados) >= 2:
             primeiro = float(resultados[-1].total)
             ultimo = float(resultados[0].total)
-            variacao = ((ultimo - primeiro) / primeiro) * 100 if primeiro > 0 else 0
+            variacao = ((ultimo - primeiro) / primeiro) * 100 if primeiro != 0 else 0
 
             emoji = "📈" if variacao > 0 else "📉"
-            relatorio += f"\n{emoji} **Variação:** {variacao:+.1f}% (primeiro vs último mês)"
+            relatorio += f"\n{emoji} *Variação:* {variacao:+.1f}% (primeiro vs último mês)"
 
         return relatorio
 

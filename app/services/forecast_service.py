@@ -367,35 +367,35 @@ def generate_forecast_insights(usuario_id):
     prompt = f"""
 Você é um assistente financeiro. Analise os dados e gere uma PROJEÇÃO DE GASTOS FUTUROS.
 
-**DADOS DO USUÁRIO:**
+*DADOS DO USUÁRIO:*
 
-📅 **Contexto Temporal:**
+📅 *Contexto Temporal:*
 - Data atual: {dados['data_atual']} (dia {dados['dia_atual']} de {dados['dias_no_mes']})
 - Mês atual: {mes_nome}
 
-💰 **Situação Atual:**
+💰 *Situação Atual:*
 - Gastos até hoje: R$ {projecao['gasto_ate_hoje']:,.2f}
 - Taxa média diária: R$ {projecao['taxa_diaria_atual']:,.2f}
 - Despesas pendentes: R$ {projecao['despesas_normais_pendentes']:,.2f}
 - Cartão pendente: R$ {projecao['despesas_cartao_pendentes']:,.2f}
 - Receitas pendentes: R$ {projecao['receitas_pendentes']:,.2f}
 
-📊 **Histórico (últimos {dados['meses_historico']} meses):**
+📊 *Histórico (últimos {dados['meses_historico']} meses):*
 {historico_formatado}
 - Média mensal: R$ {projecao['media_historica']:,.2f}
 
-📋 **Contas Pendentes Este Mês:**
+📋 *Contas Pendentes Este Mês:*
 {pendentes_formatado}
 
-🔧 **Contas Fixas Mensais:**
+🔧 *Contas Fixas Mensais:*
 {fixas_formatado}
 
-📈 **Projeção Calculada:**
+📈 *Projeção Calculada:*
 - Projeção final {mes_nome}: R$ {projecao['projecao_mes_atual']:,.2f}
 
 ---
 
-**INSTRUÇÕES:**
+*INSTRUÇÕES:*
 
 Gere um relatório de PROJEÇÃO DE GASTOS com as seguintes seções:
 
@@ -423,12 +423,12 @@ Gere um relatório de PROJEÇÃO DE GASTOS com as seguintes seções:
    - Categorias para controlar
    - Meta de gastos até fim do mês
 
-**FORMATO:**
+*FORMATO:*
 - Use emojis e formatação clara
 - Seja objetivo (máximo 12 linhas)
 - Use valores reais dos dados
 - Foque em insights acionáveis
-- NÃO use asteriscos ** para negrito nos títulos das seções, apenas os emojis e texto simples
+- Use asteriscos simples * para negrito (ex: *texto*), NÃO use asteriscos duplos **
 """
 
     try:
@@ -462,7 +462,7 @@ def generate_simple_forecast_text(usuario_id):
     hoje = date.today()
     mes_nome = formatar_mes_pt(hoje)
 
-    texto = f"📈 **Projeção {mes_nome}**\n\n"
+    texto = f"📈 *Projeção {mes_nome}*\n\n"
     texto += f"💰 Gastos até agora: R$ {projecao['gasto_ate_hoje']:,.2f} (dia {dados['dia_atual']})\n"
     texto += f"📊 Projeção final: ~R$ {projecao['projecao_mes_atual']:,.2f}\n\n"
 
@@ -475,19 +475,19 @@ def generate_simple_forecast_text(usuario_id):
                 if c["nome_grupo"] == 'Renda']
 
     if despesas_normais:
-        texto += "📋 **Despesas pendentes:**\n"
+        texto += "📋 *Despesas pendentes:*\n"
         for conta in despesas_normais[:3]:
             texto += f"• {conta['descricao']}: R$ {conta['valor']:,.2f}\n"
         texto += "\n"
 
     if despesas_cartao:
-        texto += "💳 **Cartão (na fatura):**\n"
+        texto += "💳 *Cartão (na fatura):*\n"
         for conta in despesas_cartao[:3]:
             texto += f"• {conta['descricao']}: R$ {conta['valor']:,.2f}\n"
         texto += "\n"
 
     if receitas:
-        texto += "💰 **Receitas pendentes:**\n"
+        texto += "💰 *Receitas pendentes:*\n"
         for conta in receitas[:3]:
             texto += f"• {conta['descricao']}: R$ {conta['valor']:,.2f}\n"
         texto += "\n"
@@ -532,10 +532,10 @@ def get_category_forecast(usuario_id, categoria_nome, meses=3):
 
     nome_categoria = historico_cat[0]["subcategoria"]
 
-    texto = f"📈 **Projeção: {nome_categoria}**\n\n"
+    texto = f"📈 *Projeção: {nome_categoria}*\n\n"
     texto += f"💰 Média mensal: R$ {media_mensal:,.2f}\n"
     texto += f"📊 Projeção {meses} meses: R$ {projecao_futura:,.2f}\n\n"
-    texto += "**Histórico recente:**\n"
+    texto += "*Histórico recente:*\n"
 
     for h in sorted(historico_cat, key=lambda x: x["mes"], reverse=True)[:3]:
         mes_formatado = datetime.strptime(h["mes"], '%Y-%m').strftime('%b/%Y')
