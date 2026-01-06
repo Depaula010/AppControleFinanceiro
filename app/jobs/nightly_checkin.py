@@ -62,8 +62,6 @@ class NightlyCheckinJob(BaseJob):
 
         if not usuarios:
             self._log(f"Nenhum usuário configurado para {hora_atual}")
-            # Mesmo sem check-in, processar alertas de fatura
-            self._process_overdue_invoices()
             return
 
         self._log(f"{len(usuarios)} usuário(s) encontrado(s)")
