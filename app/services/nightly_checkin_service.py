@@ -197,7 +197,37 @@ class NightlyCheckinService:
         # Processar contas pendentes (últimos 7 dias) - com numeração para resposta interativa
         idx = 1
         for bill in pending_bills:
-            status, dias_atraso = NightlyCheckinService.categorize_by_delay(bill, hoje)
+            # NOVO (2026-01-06): Usar data_vencimento_real retornada pela query
+            # em vez de calcular por dia_execucao
+            data_vencimento = bill.get('data_vencimento_real')
+
+            if data_vencimento:
+                # Calcular dias de atraso usando data real
+                dias_atraso = (hoje - data_vencimento).days
+
+                # Determinar status baseado em dias de atraso
+                if dias_atraso == 0:
+                    status = "Vence hoje"
+                elif dias_atraso == 1:
+                    status = "Venceu ontem"
+                elif dias_atraso <= 3:
+                    status = f"Venceu em {data_vencimento.strftime('%d/%m')}"
+                else:
+                    # Vai para seção de atrasados (>3 dias)
+                    status = None
+            else:
+                # Fallback: se data_vencimento_real não vier na query, usar lógica antiga
+                status, dias_atraso = NightlyCheckinService.categorize_by_delay(bill, hoje)
+
+            # NOVO (2026-01-06): Filtrar despesas fixas de cartão
+            # Só aparecem se vencem HOJE (informativo, não confirmável)
+            if bill['tipo_conta'] == 'Cartão de Crédito' and bill['nome_grupo'] == 'Despesa':
+                # Despesas fixas de cartão só aparecem se vencem HOJE
+                if dias_atraso == 0:
+                    # TODO: Adicionar à seção de lembretes de cartão (não confirmável)
+                    # Por enquanto, pula para não aparecer na lista de confirmação
+                    pass
+                continue  # Não adiciona às listas de confirmação
 
             item = {
                 'numero': idx,
@@ -205,7 +235,8 @@ class NightlyCheckinService:
                 'valor': bill['valor_previsto'] or 0,
                 'conta': bill['nome_conta'],
                 'status': status or f"Atrasado {dias_atraso} dias",
-                'dia_execucao': bill['dia_execucao']
+                'dia_execucao': bill['dia_execucao'],
+                'data_vencimento': data_vencimento
             }
 
             if bill['nome_grupo'] == 'Renda':

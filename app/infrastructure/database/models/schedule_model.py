@@ -49,6 +49,7 @@ class ScheduleModel(Base, TimestampMixin):
         periodicidade: Frequência de execução
         data_inicio: Data de início do agendamento
         dia_execucao: Dia do mês para execução (1-31)
+        mes_execucao: Mês de execução (1-12) para agendamentos anuais (NULL para não anuais)
         total_parcelas: Total de parcelas (apenas para PARCELADO)
         parcelas_executadas: Quantidade de parcelas já executadas
         notificar_antes_dias: Dias de antecedência para notificar (padrão: 3)
@@ -135,6 +136,12 @@ class ScheduleModel(Base, TimestampMixin):
         Integer,
         nullable=False,
         comment="Dia do mês para execução (1-31)"
+    )
+
+    mes_execucao: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        nullable=True,
+        comment="Mês de execução (1-12) para agendamentos anuais"
     )
 
     total_parcelas: Mapped[Optional[int]] = mapped_column(

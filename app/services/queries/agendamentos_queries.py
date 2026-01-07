@@ -24,53 +24,90 @@ class AgendamentosQueries:
     @staticmethod
     def get_contas_pendentes_ultimos_7_dias() -> text:
         """
-        Busca contas pendentes (não pagas) dos últimos 7 dias.
+        Busca contas pendentes que vencem hoje ou estão atrasadas nos últimos 7 dias.
+
+        CORREÇÃO DE BUG (2026-01-06):
+        Agora usa CTE para calcular data real de vencimento, em vez de filtrar
+        apenas por dia do mês. Isso corrige problemas de:
+        - Virada de mês (conta de 28/12 aparece em 06/01)
+        - Contas futuras sendo incluídas incorretamente
+        - Cálculo incorreto de atraso
 
         Usado em: Check-in noturno
 
         Parâmetros necessários:
             :uid (int) - ID do usuário
             :target_date (date) - Data de referência (normalmente hoje)
-            :dia_minimo (int) - Dia mínimo para filtrar (hoje - 7 dias)
             :data_limite_transacao (date) - Data limite para verificar transações (hoje - 60 dias)
 
-        Retorna: Agendamentos não pagos nos últimos 7 dias
+        Retorna: Agendamentos não pagos que vencem hoje ou estão atrasados (últimos 7 dias)
+                 INCLUI campo data_vencimento_real para cálculo preciso de atraso
         """
         return text("""
+            WITH ExpectedDates AS (
+                SELECT
+                    a.*,
+                    c.nome_conta, c.tipo_conta,
+                    s.nome_sub as categoria,
+                    m.nome_macro,
+                    g.nome_grupo,
+                    -- Calcula data esperada para mês atual
+                    CASE
+                        WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :target_date) + INTERVAL '1 month - 1 day'))
+                        THEN (DATE_TRUNC('month', :target_date) + INTERVAL '1 day' * (a.dia_execucao - 1))::date
+                        ELSE (DATE_TRUNC('month', :target_date) + INTERVAL '1 month - 1 day')::date
+                    END as data_esperada_mes_atual,
+                    -- Calcula data esperada para mês anterior
+                    CASE
+                        WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :target_date - INTERVAL '1 month') + INTERVAL '1 month - 1 day'))
+                        THEN (DATE_TRUNC('month', :target_date - INTERVAL '1 month') + INTERVAL '1 day' * (a.dia_execucao - 1))::date
+                        ELSE (DATE_TRUNC('month', :target_date - INTERVAL '1 month') + INTERVAL '1 month - 1 day')::date
+                    END as data_esperada_mes_anterior
+                FROM Agendamentos a
+                JOIN Contas c ON a.conta_id = c.id
+                JOIN SubCategoria s ON a.subcategoria_id = s.id
+                JOIN MacroCategoria m ON s.macro_id = m.id
+                JOIN GrupoCategoria g ON m.grupo_id = g.id
+                WHERE a.usuario_id = :uid
+                  AND a.ativo = TRUE
+                  AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+            )
             SELECT
-                a.id, a.descricao, a.valor_previsto, a.dia_execucao,
-                a.conta_id, a.subcategoria_id, a.usuario_id,
-                c.nome_conta, c.tipo_conta,
-                s.nome_sub as categoria,
-                m.nome_macro,
-                g.nome_grupo
-            FROM Agendamentos a
-            JOIN Contas c ON a.conta_id = c.id
-            JOIN SubCategoria s ON a.subcategoria_id = s.id
-            JOIN MacroCategoria m ON s.macro_id = m.id
-            JOIN GrupoCategoria g ON m.grupo_id = g.id
-            WHERE a.usuario_id = :uid
-              AND a.ativo = TRUE
-              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
-              AND a.dia_execucao <= EXTRACT(DAY FROM :target_date)
-              -- Filtro para agendamentos anuais: incluir apenas se o mês bater
-              AND (
-                  a.periodicidade != 'ANUAL'
-                  OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = EXTRACT(MONTH FROM :target_date))
-              )
-              -- CORREÇÃO BUG: Aceita pagamentos em qualquer mês (últimos 60 dias)
-              -- Problema antigo: só aceitava pagamento no mesmo mês do vencimento
-              -- Exemplo: conta vencida em 19/12/2025, paga em 04/01/2026 → não era reconhecida
-              AND NOT EXISTS (
-                  SELECT 1 FROM Transacoes t
-                  WHERE t.descricao = a.descricao
-                    AND t.usuario_id = a.usuario_id
-                    AND t.data_transacao >= :data_limite_transacao
-                    AND t.data_transacao <= :target_date
-              )
-              -- Limitar aos últimos 7 dias
-              AND a.dia_execucao >= :dia_minimo
-            ORDER BY a.dia_execucao DESC, g.nome_grupo, a.descricao
+                ed.id, ed.descricao, ed.valor_previsto, ed.dia_execucao,
+                ed.conta_id, ed.subcategoria_id, ed.usuario_id,
+                ed.nome_conta, ed.tipo_conta, ed.categoria,
+                ed.nome_macro, ed.nome_grupo,
+                COALESCE(ed.data_esperada_mes_atual, ed.data_esperada_mes_anterior) as data_vencimento_real
+            FROM ExpectedDates ed
+            WHERE (
+                -- Mês atual: vence hoje ou atrasado nos últimos 7 dias
+                (ed.data_esperada_mes_atual <= :target_date
+                 AND ed.data_esperada_mes_atual >= :target_date - INTERVAL '7 days'
+                 AND NOT EXISTS (
+                     SELECT 1 FROM Transacoes t
+                     WHERE t.descricao = ed.descricao
+                       AND t.usuario_id = ed.usuario_id
+                       AND t.data_transacao >= :data_limite_transacao
+                       AND t.data_transacao <= :target_date
+                 ))
+                OR
+                -- Mês anterior: atrasado nos últimos 7 dias
+                (ed.data_esperada_mes_anterior <= :target_date
+                 AND ed.data_esperada_mes_anterior >= :target_date - INTERVAL '7 days'
+                 AND NOT EXISTS (
+                     SELECT 1 FROM Transacoes t
+                     WHERE t.descricao = ed.descricao
+                       AND t.usuario_id = ed.usuario_id
+                       AND t.data_transacao >= :data_limite_transacao
+                       AND t.data_transacao <= :target_date
+                 ))
+            )
+            -- Filtro para agendamentos anuais: incluir apenas se o mês bater
+            AND (
+                ed.periodicidade != 'ANUAL'
+                OR (ed.periodicidade = 'ANUAL' AND ed.mes_execucao = EXTRACT(MONTH FROM :target_date))
+            )
+            ORDER BY data_vencimento_real DESC, ed.nome_grupo, ed.descricao
         """)
 
     @staticmethod
@@ -133,9 +170,9 @@ class AgendamentosQueries:
                 COALESCE(ed.data_esperada_mes_atual, ed.data_esperada_mes_anterior) as data_vencimento_real
             FROM ExpectedDates ed
             WHERE (
-                -- Mês atual está atrasado
+                -- Mês atual está atrasado (mais de 7 dias)
                 (ed.data_esperada_mes_atual < :hoje
-                 AND ed.data_esperada_mes_atual <= :data_maxima
+                 AND ed.data_esperada_mes_atual < :hoje - INTERVAL '7 days'
                  AND NOT EXISTS (
                      SELECT 1 FROM Transacoes t
                      WHERE t.descricao = ed.descricao
@@ -144,10 +181,10 @@ class AgendamentosQueries:
                        AND t.data_transacao <= :hoje
                  ))
                 OR
-                -- Mês anterior está atrasado
+                -- Mês anterior está atrasado (mais de 7 dias)
                 (ed.data_esperada_mes_anterior < :hoje
                  AND ed.data_esperada_mes_anterior >= :data_minima
-                 AND ed.data_esperada_mes_anterior <= :data_maxima
+                 AND ed.data_esperada_mes_anterior < :hoje - INTERVAL '7 days'
                  AND NOT EXISTS (
                      SELECT 1 FROM Transacoes t
                      WHERE t.descricao = ed.descricao
@@ -270,10 +307,10 @@ class AgendamentosQueries:
             "uid": usuario_id,
             "hoje": hoje,
             "target_date": hoje,
-            "dia_minimo": max(1, hoje.day - 7),  # Últimos 7 dias
+            # dia_minimo removido - não mais necessário com nova query usando CTE
             "data_limite_transacao": hoje - timedelta(days=60),  # Aceita pagamentos dos últimos 60 dias
-            "data_minima": hoje - timedelta(days=30),  # Últimos 30 dias
-            "data_maxima": hoje - timedelta(days=8),   # Atrasadas há mais de 7 dias
+            "data_minima": hoje - timedelta(days=30),  # Últimos 30 dias (para query de atrasadas)
+            "data_maxima": hoje - timedelta(days=7),   # CORRIGIDO: era days=8, agora days=7 (atrasadas há mais de 7 dias)
         }
 
     @staticmethod
