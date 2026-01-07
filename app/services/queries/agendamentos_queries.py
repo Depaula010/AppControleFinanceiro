@@ -318,7 +318,7 @@ class AgendamentosQueries:
             WITH ExpectedDates AS (
                 SELECT
                     a.*,
-                    c.nome_conta, c.tipo_conta,
+                    c.nome_conta, c.tipo_conta, c.dia_vencimento, c.dia_fechamento,
                     s.nome_sub as categoria,
                     m.nome_macro,
                     g.nome_grupo,
@@ -342,8 +342,14 @@ class AgendamentosQueries:
                 WHERE a.usuario_id = :uid
                   AND a.ativo = TRUE
                   AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
-                  -- Exclui débitos recorrentes de cartão (assinaturas) pois vão para a fatura
-                  AND NOT (a.tipo_agendamento = 'FIXO' AND g.nome_grupo = 'Despesa' AND c.tipo_conta = 'Cartão de Crédito')
+                  -- CORRIGIDO (2026-01-07): Exclui débitos recorrentes de cartão com fatura configurada
+                  AND NOT (
+                      a.tipo_agendamento = 'FIXO'
+                      AND g.nome_grupo = 'Despesa'
+                      AND c.tipo_conta = 'Cartão de Crédito'
+                      AND c.dia_vencimento IS NOT NULL
+                      AND c.dia_fechamento IS NOT NULL
+                  )
             )
             SELECT
                 ed.id, ed.descricao, ed.valor_previsto, ed.dia_execucao,

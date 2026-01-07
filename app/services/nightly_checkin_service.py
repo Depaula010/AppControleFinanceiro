@@ -283,10 +283,21 @@ class NightlyCheckinService:
         # Construir mensagem consolidada
         msg = "🌙 *CHECK-IN NOTURNO* 🌙\n\n"
 
-        # 1. RECEITAS PENDENTES (informativo - não precisa confirmar)
+        # 0. DÉBITO CARTÃO DE CRÉDITO (informativo - não numerado)
+        if lembretes_cartao:
+            msg += "💳 *DÉBITO CARTÃO DE CRÉDITO*\n"
+            for item in lembretes_cartao:
+                valor_fmt = formatar_moeda(item['valor'])
+                msg += f" * {item['descricao']} - {valor_fmt} - Será debitado hoje\n"
+            msg += "\n"
+
+        # Numeração contínua para todas as outras seções
+        numero_global = 1
+
+        # 1. RECEITAS PENDENTES (informativo - numerado)
         if receitas_pendentes or receitas_atrasadas:
             msg += "💵 *RECEITAS PENDENTES:*\n"
-            msg += "_Valores previstos que ainda não foram recebidos 2222_\n\n"
+            msg += "_Valores previstos que ainda não foram recebidos_\n\n"
 
             total_receitas = 0
 
@@ -294,65 +305,59 @@ class NightlyCheckinService:
             for item in receitas_pendentes:
                 valor_fmt = formatar_moeda(item['valor'])
                 total_receitas += item['valor']
-                msg += f"• {item['descricao']} - {valor_fmt}\n"
-                msg += f"  Previsto em {item['dia_execucao']:02d}/{hoje.month:02d}\n"
+                msg += f"{numero_global} * {item['descricao']} - {valor_fmt} - Previsto em {item['dia_execucao']:02d}/{hoje.month:02d}\n"
+                numero_global += 1
 
             # Receitas atrasadas (>7 dias)
             for item in receitas_atrasadas:
                 valor_fmt = formatar_moeda(item['valor'])
                 total_receitas += item['valor']
-                msg += f"• {item['descricao']} - {valor_fmt}\n"
                 if item['data_vencimento']:
-                    msg += f"  Previsto em {item['data_vencimento'].strftime('%d/%m/%Y')}\n"
+                    msg += f"{numero_global} * {item['descricao']} - {valor_fmt} - Previsto em {item['data_vencimento'].strftime('%d/%m/%Y')}\n"
+                else:
+                    msg += f"{numero_global} * {item['descricao']} - {valor_fmt}\n"
+                numero_global += 1
 
-            msg += f"\n💰 *Total:* {formatar_moeda(total_receitas)}\n\n"
+            msg += f"💰 *Total:* {formatar_moeda(total_receitas)}\n\n"
 
-        # NOVO (2026-01-07): LEMBRETES DE CARTÃO (informativo - não precisa confirmar)
-        if lembretes_cartao:
-            msg += "💳 *CARTÃO (na fatura):*\n"
-            msg += "_Débitos recorrentes que serão cobrados na fatura do cartão_\n\n"
-
-            for item in lembretes_cartao:
-                valor_fmt = formatar_moeda(item['valor'])
-                msg += f"ℹ️ {item['descricao']} - {valor_fmt} [{item['conta']}] [Debitado hoje]\n"
-
-            msg += "\n"
-
-        # 2. DESPESAS PENDENTES (interativo - precisa confirmar)
+        # 2. DESPESAS PENDENTES (interativo - continua numeração)
         if despesas_pendentes:
             msg += "💸 *DESPESAS PENDENTES:*\n"
             for item in despesas_pendentes:
                 valor_fmt = formatar_moeda(item['valor'])
-                msg += f"{item['numero']}. {item['descricao']} - {valor_fmt} ({item['conta']}) [{item['status']}]\n"
+                msg += f"{numero_global}. {item['descricao']} - {valor_fmt} ({item['conta']}) - {item['status']}\n"
+                numero_global += 1
             msg += "\n"
 
-        # 3. DESPESAS ATRASADAS (>7 dias) - apenas alerta
+        # 3. DESPESAS ATRASADAS (>7 dias) - continua numeração
         if despesas_atrasadas:
             msg += "🔴 *DESPESAS ATRASADAS (há mais de 7 dias):*\n"
             total_atrasado = 0
             for item in despesas_atrasadas:
                 valor_fmt = formatar_moeda(item['valor'])
                 total_atrasado += item['valor']
-                msg += f"• {item['descricao']} - {valor_fmt}\n"
                 if item['data_vencimento']:
                     dias_atraso = (hoje - item['data_vencimento']).days
                     # Validação: só mostra se realmente está atrasado (dias > 0)
                     if dias_atraso > 0:
-                        msg += f"  Venceu em {item['data_vencimento'].strftime('%d/%m/%Y')} ({dias_atraso} dias) ⚠️\n"
+                        msg += f"{numero_global} * {item['descricao']} - {valor_fmt} - Venceu em {item['data_vencimento'].strftime('%d/%m/%Y')} ({dias_atraso} dias) ⚠️\n"
                     else:
                         # Sanity check: data futura não deveria estar aqui (bug na query)
-                        msg += f"  Previsto para {item['data_vencimento'].strftime('%d/%m/%Y')}\n"
+                        msg += f"{numero_global} * {item['descricao']} - {valor_fmt} - Previsto para {item['data_vencimento'].strftime('%d/%m/%Y')}\n"
+                else:
+                    msg += f"{numero_global} * {item['descricao']} - {valor_fmt}\n"
+                numero_global += 1
 
             msg += f"\n💸 *Total atrasado:* {formatar_moeda(total_atrasado)}\n"
             msg += "_Digite 'Pendencias' para ver todos os detalhes._\n\n"
 
-        # 4. FATURAS VENCIDAS (se houver)
+        # 4. FATURAS VENCIDAS (se houver) - continua numeração
         if overdue_invoices:
             msg += "🔴 *FATURAS VENCIDAS:*\n"
             for fatura in overdue_invoices:
                 valor_fmt = formatar_moeda(fatura.get('valor_total', 0))
-                msg += f"• {fatura['nome_conta']} - {valor_fmt}\n"
-                msg += f"  Venceu em {fatura['data_vencimento'].strftime('%d/%m/%Y')}\n"
+                msg += f"{numero_global} * {fatura['nome_conta']} - {valor_fmt} - Venceu em {fatura['data_vencimento'].strftime('%d/%m/%Y')}\n"
+                numero_global += 1
             msg += "\n"
 
         # 5. INSTRUÇÕES (apenas se houver despesas pendentes para confirmar)
