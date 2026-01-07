@@ -308,6 +308,8 @@ class NotificationConfigService:
         Retorna usuários que devem receber QUALQUER tipo de notificação neste horário.
         Inclui tanto resumo matinal quanto alertas financeiros.
 
+        IMPORTANTE: Compara apenas a HORA (ignora minutos/segundos).
+
         Args:
             target_hour: time object da hora atual
 
@@ -466,6 +468,11 @@ class NotificationConfigService:
         if not db_engine:
             raise Exception("Banco não configurado")
 
+        # DEBUG: Log detalhado para investigar problema de matching
+        print(f"[DEBUG-CHECKIN] target_hour recebido: {target_hour}", flush=True)
+        print(f"[DEBUG-CHECKIN] Tipo: {type(target_hour)}", flush=True)
+        print(f"[DEBUG-CHECKIN] Formato string: {target_hour}", flush=True)
+
         sql = text("""
             SELECT u.id, u.numero_whatsapp
             FROM NotificationConfigs nc
@@ -475,4 +482,24 @@ class NotificationConfigService:
         """)
 
         with db_engine.connect() as conn:
-            return conn.execute(sql, {"hora": target_hour}).fetchall()
+            # DEBUG: Log da query antes de executar
+            print(f"[DEBUG-CHECKIN] Executando query com hora = {target_hour}", flush=True)
+
+            result = conn.execute(sql, {"hora": target_hour}).fetchall()
+
+            # DEBUG: Log do resultado
+            print(f"[DEBUG-CHECKIN] Resultado: {len(result)} usuário(s) encontrado(s)", flush=True)
+            if result:
+                print(f"[DEBUG-CHECKIN] Usuários: {result}", flush=True)
+
+            # DEBUG: Verificar o que tem no banco
+            debug_sql = text("""
+                SELECT u.id, u.numero_whatsapp, nc.checkin_noturno_hora, nc.checkin_noturno_ativo
+                FROM NotificationConfigs nc
+                JOIN Usuarios u ON nc.usuario_id = u.id
+                WHERE nc.checkin_noturno_ativo = TRUE
+            """)
+            all_active = conn.execute(debug_sql).fetchall()
+            print(f"[DEBUG-CHECKIN] Todos os usuários com checkin ativo: {all_active}", flush=True)
+
+            return result

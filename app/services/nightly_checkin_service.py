@@ -169,16 +169,148 @@ class NightlyCheckinService:
         return checkin_id
 
     @staticmethod
-    def format_checkin_message(pending_bills, checkin_id):
+    def format_consolidated_checkin_message(pending_bills, overdue_bills, bills_due_today, overdue_invoices, checkin_id):
         """
-        Formata mensagem de check-in com visual separado por tipo.
+        Formata mensagem consolidada de check-in com TODAS as informações em uma única mensagem.
+        Melhora UX evitando múltiplas notificações fragmentadas.
 
         Args:
-            pending_bills: Lista de contas pendentes (completa)
+            pending_bills: Lista de contas pendentes (últimos 7 dias)
+            overdue_bills: Lista de contas atrasadas (>7 dias)
+            bills_due_today: Lista de contas que vencem hoje
+            overdue_invoices: Lista de faturas vencidas
             checkin_id: ID da sessão
 
         Returns:
-            str: Mensagem formatada ou None se vazio
+            str: Mensagem consolidada formatada ou None se vazio
+        """
+        hoje = date.today()
+
+        # Separar contas pendentes por tipo
+        despesas_pendentes = []
+        receitas_pendentes = []
+
+        # Separar contas atrasadas por tipo
+        despesas_atrasadas = []
+        receitas_atrasadas = []
+
+        # Processar contas pendentes (últimos 7 dias) - com numeração para resposta interativa
+        idx = 1
+        for bill in pending_bills:
+            status, dias_atraso = NightlyCheckinService.categorize_by_delay(bill, hoje)
+
+            item = {
+                'numero': idx,
+                'descricao': bill['descricao'],
+                'valor': bill['valor_previsto'] or 0,
+                'conta': bill['nome_conta'],
+                'status': status or f"Atrasado {dias_atraso} dias",
+                'dia_execucao': bill['dia_execucao']
+            }
+
+            if bill['nome_grupo'] == 'Renda':
+                receitas_pendentes.append(item)
+            else:
+                despesas_pendentes.append(item)
+
+            idx += 1
+
+        # Processar contas atrasadas (>7 dias) - sem numeração, apenas informativo
+        for bill in overdue_bills:
+            item = {
+                'descricao': bill['descricao'],
+                'valor': bill['valor_previsto'] or 0,
+                'data_vencimento': bill.get('data_vencimento_real')
+            }
+
+            if bill['nome_grupo'] == 'Renda':
+                receitas_atrasadas.append(item)
+            else:
+                despesas_atrasadas.append(item)
+
+        # Se não há nada para mostrar, retornar None
+        if not despesas_pendentes and not receitas_pendentes and not despesas_atrasadas and not receitas_atrasadas and not overdue_invoices:
+            return None
+
+        # Construir mensagem consolidada
+        msg = "🌙 *CHECK-IN NOTURNO* 🌙\n\n"
+
+        # 1. RECEITAS PENDENTES (informativo - não precisa confirmar)
+        if receitas_pendentes or receitas_atrasadas:
+            msg += "💵 *RECEITAS PENDENTES:*\n"
+            msg += "_Valores previstos que ainda não foram recebidos_\n\n"
+
+            total_receitas = 0
+
+            # Receitas recentes (últimos 7 dias)
+            for item in receitas_pendentes:
+                valor_fmt = formatar_moeda(item['valor'])
+                total_receitas += item['valor']
+                msg += f"• {item['descricao']} - {valor_fmt}\n"
+                msg += f"  Previsto em {item['dia_execucao']:02d}/{hoje.month:02d}\n"
+
+            # Receitas atrasadas (>7 dias)
+            for item in receitas_atrasadas:
+                valor_fmt = formatar_moeda(item['valor'])
+                total_receitas += item['valor']
+                msg += f"• {item['descricao']} - {valor_fmt}\n"
+                if item['data_vencimento']:
+                    msg += f"  Previsto em {item['data_vencimento'].strftime('%d/%m')}\n"
+
+            msg += f"\n💰 *Total:* {formatar_moeda(total_receitas)}\n\n"
+
+        # 2. DESPESAS PENDENTES (interativo - precisa confirmar)
+        if despesas_pendentes:
+            msg += "💸 *DESPESAS PENDENTES:*\n"
+            for item in despesas_pendentes:
+                valor_fmt = formatar_moeda(item['valor'])
+                msg += f"{item['numero']}. {item['descricao']} - {valor_fmt} ({item['conta']}) [{item['status']}]\n"
+            msg += "\n"
+
+        # 3. DESPESAS ATRASADAS (>7 dias) - apenas alerta
+        if despesas_atrasadas:
+            msg += "🔴 *DESPESAS ATRASADAS (há mais de 7 dias):*\n"
+            total_atrasado = 0
+            for item in despesas_atrasadas:
+                valor_fmt = formatar_moeda(item['valor'])
+                total_atrasado += item['valor']
+                msg += f"• {item['descricao']} - {valor_fmt}\n"
+                if item['data_vencimento']:
+                    dias_atraso = (hoje - item['data_vencimento']).days
+                    msg += f"  Venceu em {item['data_vencimento'].strftime('%d/%m')} ({dias_atraso} dias) ⚠️\n"
+
+            msg += f"\n💸 *Total atrasado:* {formatar_moeda(total_atrasado)}\n"
+            msg += "_Digite 'Pendencias' para ver todos os detalhes._\n\n"
+
+        # 4. FATURAS VENCIDAS (se houver)
+        if overdue_invoices:
+            msg += "🔴 *FATURAS VENCIDAS:*\n"
+            for fatura in overdue_invoices:
+                valor_fmt = formatar_moeda(fatura.get('valor_total', 0))
+                msg += f"• {fatura['nome_conta']} - {valor_fmt}\n"
+                msg += f"  Venceu em {fatura['data_vencimento'].strftime('%d/%m/%Y')}\n"
+            msg += "\n"
+
+        # 5. INSTRUÇÕES (apenas se houver despesas pendentes para confirmar)
+        if despesas_pendentes:
+            msg += "━━━━━━━━━━━━━━━━━━━━\n"
+            msg += "🔹 *COMO RESPONDER:*\n\n"
+            msg += "✅ Tudo pago:\n"
+            msg += "👍 ou \"Ok\"\n\n"
+            msg += "📝 Pagamento parcial:\n"
+            msg += "\"1\" / \"1 e 3\" / \"1, 2, 4\"\n\n"
+            msg += "⏸️ Não paguei ainda:\n"
+            msg += "\"Depois\" / \"Não\"\n\n"
+            msg += f"_ID: {checkin_id} | Expira em 1h_"
+
+        return msg
+
+    @staticmethod
+    def format_checkin_message(pending_bills, checkin_id):
+        """
+        DEPRECATED: Use format_consolidated_checkin_message() para melhor UX.
+
+        Mantido para compatibilidade retroativa.
         """
         if not pending_bills:
             return None
