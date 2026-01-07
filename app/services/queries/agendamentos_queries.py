@@ -85,8 +85,7 @@ class AgendamentosQueries:
                  AND ed.data_esperada_mes_atual >= :target_date - INTERVAL '7 days'
                  AND NOT EXISTS (
                      SELECT 1 FROM Transacoes t
-                     WHERE t.descricao = ed.descricao
-                       AND t.usuario_id = ed.usuario_id
+                     WHERE t.agendamento_id = ed.id
                        AND t.data_transacao >= :data_limite_transacao
                        AND t.data_transacao <= :target_date
                  ))
@@ -96,8 +95,7 @@ class AgendamentosQueries:
                  AND ed.data_esperada_mes_anterior >= :target_date - INTERVAL '7 days'
                  AND NOT EXISTS (
                      SELECT 1 FROM Transacoes t
-                     WHERE t.descricao = ed.descricao
-                       AND t.usuario_id = ed.usuario_id
+                     WHERE t.agendamento_id = ed.id
                        AND t.data_transacao >= :data_limite_transacao
                        AND t.data_transacao <= :target_date
                  ))
@@ -178,8 +176,7 @@ class AgendamentosQueries:
                  AND ed.data_esperada_mes_atual >= :target_date - INTERVAL '7 days'
                  AND NOT EXISTS (
                      SELECT 1 FROM Transacoes t
-                     WHERE t.descricao = ed.descricao
-                       AND t.usuario_id = ed.usuario_id
+                     WHERE t.agendamento_id = ed.id
                        AND t.data_transacao >= :data_limite_transacao
                        AND t.data_transacao <= :target_date
                  ))
@@ -189,8 +186,7 @@ class AgendamentosQueries:
                  AND ed.data_esperada_mes_anterior >= :target_date - INTERVAL '7 days'
                  AND NOT EXISTS (
                      SELECT 1 FROM Transacoes t
-                     WHERE t.descricao = ed.descricao
-                       AND t.usuario_id = ed.usuario_id
+                     WHERE t.agendamento_id = ed.id
                        AND t.data_transacao >= :data_limite_transacao
                        AND t.data_transacao <= :target_date
                  ))
@@ -268,8 +264,7 @@ class AgendamentosQueries:
                  AND ed.data_esperada_mes_atual < :hoje - INTERVAL '7 days'
                  AND NOT EXISTS (
                      SELECT 1 FROM Transacoes t
-                     WHERE t.descricao = ed.descricao
-                       AND t.usuario_id = ed.usuario_id
+                     WHERE t.agendamento_id = ed.id
                        AND t.data_transacao >= :data_limite_transacao
                        AND t.data_transacao <= :hoje
                  ))
@@ -280,8 +275,7 @@ class AgendamentosQueries:
                  AND ed.data_esperada_mes_anterior < :hoje - INTERVAL '7 days'
                  AND NOT EXISTS (
                      SELECT 1 FROM Transacoes t
-                     WHERE t.descricao = ed.descricao
-                       AND t.usuario_id = ed.usuario_id
+                     WHERE t.agendamento_id = ed.id
                        AND t.data_transacao >= :data_limite_transacao
                        AND t.data_transacao <= :hoje
                  ))
@@ -371,8 +365,7 @@ class AgendamentosQueries:
                  AND ed.data_esperada_mes_atual < :hoje - INTERVAL '7 days'
                  AND NOT EXISTS (
                      SELECT 1 FROM Transacoes t
-                     WHERE t.descricao = ed.descricao
-                       AND t.usuario_id = ed.usuario_id
+                     WHERE t.agendamento_id = ed.id
                        AND t.data_transacao >= :data_limite_transacao
                        AND t.data_transacao <= :hoje
                  ))
@@ -383,8 +376,7 @@ class AgendamentosQueries:
                  AND ed.data_esperada_mes_anterior < :hoje - INTERVAL '7 days'
                  AND NOT EXISTS (
                      SELECT 1 FROM Transacoes t
-                     WHERE t.descricao = ed.descricao
-                       AND t.usuario_id = ed.usuario_id
+                     WHERE t.agendamento_id = ed.id
                        AND t.data_transacao >= :data_limite_transacao
                        AND t.data_transacao <= :hoje
                  ))

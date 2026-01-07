@@ -305,7 +305,7 @@ class NightlyCheckinService:
             for item in receitas_pendentes:
                 valor_fmt = formatar_moeda(item['valor'])
                 total_receitas += item['valor']
-                msg += f"{numero_global} * {item['descricao']} - {valor_fmt} - Previsto em {item['dia_execucao']:02d}/{hoje.month:02d}\n"
+                msg += f"{numero_global}. {item['descricao']} - {valor_fmt} - Previsto em {item['dia_execucao']:02d}/{hoje.month:02d}\n"
                 numero_global += 1
 
             # Receitas atrasadas (>7 dias)
@@ -313,9 +313,9 @@ class NightlyCheckinService:
                 valor_fmt = formatar_moeda(item['valor'])
                 total_receitas += item['valor']
                 if item['data_vencimento']:
-                    msg += f"{numero_global} * {item['descricao']} - {valor_fmt} - Previsto em {item['data_vencimento'].strftime('%d/%m/%Y')}\n"
+                    msg += f"{numero_global}. {item['descricao']} - {valor_fmt} - Previsto em {item['data_vencimento'].strftime('%d/%m/%Y')}\n"
                 else:
-                    msg += f"{numero_global} * {item['descricao']} - {valor_fmt}\n"
+                    msg += f"{numero_global}. {item['descricao']} - {valor_fmt}\n"
                 numero_global += 1
 
             msg += f"💰 *Total:* {formatar_moeda(total_receitas)}\n\n"
@@ -340,12 +340,12 @@ class NightlyCheckinService:
                     dias_atraso = (hoje - item['data_vencimento']).days
                     # Validação: só mostra se realmente está atrasado (dias > 0)
                     if dias_atraso > 0:
-                        msg += f"{numero_global} * {item['descricao']} - {valor_fmt} - Venceu em {item['data_vencimento'].strftime('%d/%m/%Y')} ({dias_atraso} dias) ⚠️\n"
+                        msg += f"{numero_global}. {item['descricao']} - {valor_fmt} - Venceu em {item['data_vencimento'].strftime('%d/%m/%Y')} ({dias_atraso} dias) ⚠️\n"
                     else:
                         # Sanity check: data futura não deveria estar aqui (bug na query)
-                        msg += f"{numero_global} * {item['descricao']} - {valor_fmt} - Previsto para {item['data_vencimento'].strftime('%d/%m/%Y')}\n"
+                        msg += f"{numero_global}. {item['descricao']} - {valor_fmt} - Previsto para {item['data_vencimento'].strftime('%d/%m/%Y')}\n"
                 else:
-                    msg += f"{numero_global} * {item['descricao']} - {valor_fmt}\n"
+                    msg += f"{numero_global}. {item['descricao']} - {valor_fmt}\n"
                 numero_global += 1
 
             msg += f"\n💸 *Total atrasado:* {formatar_moeda(total_atrasado)}\n"
@@ -356,7 +356,7 @@ class NightlyCheckinService:
             msg += "🔴 *FATURAS VENCIDAS:*\n"
             for fatura in overdue_invoices:
                 valor_fmt = formatar_moeda(fatura.get('valor_total', 0))
-                msg += f"{numero_global} * {fatura['nome_conta']} - {valor_fmt} - Venceu em {fatura['data_vencimento'].strftime('%d/%m/%Y')}\n"
+                msg += f"{numero_global}. {fatura['nome_conta']} - {valor_fmt} - Venceu em {fatura['data_vencimento'].strftime('%d/%m/%Y')}\n"
                 numero_global += 1
             msg += "\n"
 
