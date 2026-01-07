@@ -255,7 +255,7 @@ class NightlyCheckinService:
                 total_receitas += item['valor']
                 msg += f"• {item['descricao']} - {valor_fmt}\n"
                 if item['data_vencimento']:
-                    msg += f"  Previsto em {item['data_vencimento'].strftime('%d/%m')}\n"
+                    msg += f"  Previsto em {item['data_vencimento'].strftime('%d/%m/%Y')}\n"
 
             msg += f"\n💰 *Total:* {formatar_moeda(total_receitas)}\n\n"
 
@@ -277,7 +277,12 @@ class NightlyCheckinService:
                 msg += f"• {item['descricao']} - {valor_fmt}\n"
                 if item['data_vencimento']:
                     dias_atraso = (hoje - item['data_vencimento']).days
-                    msg += f"  Venceu em {item['data_vencimento'].strftime('%d/%m')} ({dias_atraso} dias) ⚠️\n"
+                    # Validação: só mostra se realmente está atrasado (dias > 0)
+                    if dias_atraso > 0:
+                        msg += f"  Venceu em {item['data_vencimento'].strftime('%d/%m/%Y')} ({dias_atraso} dias) ⚠️\n"
+                    else:
+                        # Sanity check: data futura não deveria estar aqui (bug na query)
+                        msg += f"  Previsto para {item['data_vencimento'].strftime('%d/%m/%Y')}\n"
 
             msg += f"\n💸 *Total atrasado:* {formatar_moeda(total_atrasado)}\n"
             msg += "_Digite 'Pendencias' para ver todos os detalhes._\n\n"

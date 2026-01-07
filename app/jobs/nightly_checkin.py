@@ -90,8 +90,18 @@ class NightlyCheckinJob(BaseJob):
                     from app.services.queries import AgendamentosQueries
                     sql_overdue = AgendamentosQueries.get_contas_atrasadas_com_data_real()
                     params_overdue = AgendamentosQueries.get_parametros_padrao(usuario_id, hoje)
+
+                    # DEBUG: Log dos parâmetros
+                    self._log(f"DEBUG - Parâmetros overdue_bills: {params_overdue}")
+
                     result_overdue = conn.execute(sql_overdue, params_overdue).fetchall()
                     overdue_bills = [dict(row._mapping) for row in result_overdue]
+
+                    # DEBUG: Log das contas atrasadas retornadas
+                    if overdue_bills:
+                        self._log(f"DEBUG - {len(overdue_bills)} contas atrasadas encontradas:")
+                        for bill in overdue_bills[:3]:  # Primeiras 3 para não lotar o log
+                            self._log(f"  - {bill['descricao']}: vencimento_real={bill.get('data_vencimento_real')}, tipo_conta={bill.get('tipo_conta')}")
 
                     # 3. Contas vencendo hoje (já incluídas em pending_bills, mas podemos passar vazio)
                     bills_due_today = []  # Já incluídas em pending_bills
