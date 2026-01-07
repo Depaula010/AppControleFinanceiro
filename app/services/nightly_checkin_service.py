@@ -48,8 +48,8 @@ class NightlyCheckinService:
         if target_date is None:
             target_date = date.today()
 
-        # Usar query centralizada
-        sql = AgendamentosQueries.get_contas_pendentes_ultimos_7_dias()
+        # Usar query centralizada específica para check-in (com COALESCE corrigido - 2026-01-07)
+        sql = AgendamentosQueries.get_contas_pendentes_checkin_noturno()
 
         # Obter parâmetros padrão e ajustar target_date
         params = AgendamentosQueries.get_parametros_padrao(usuario_id, target_date)
@@ -194,6 +194,9 @@ class NightlyCheckinService:
         despesas_atrasadas = []
         receitas_atrasadas = []
 
+        # NOVO (2026-01-07): Coletar lembretes de cartão (despesas fixas que vencem hoje)
+        lembretes_cartao = []
+
         # Processar contas pendentes (últimos 7 dias) - com numeração para resposta interativa
         idx = 1
         for bill in pending_bills:
@@ -219,14 +222,16 @@ class NightlyCheckinService:
                 # Fallback: se data_vencimento_real não vier na query, usar lógica antiga
                 status, dias_atraso = NightlyCheckinService.categorize_by_delay(bill, hoje)
 
-            # NOVO (2026-01-06): Filtrar despesas fixas de cartão
+            # NOVO (2026-01-07): Filtrar despesas fixas de cartão
             # Só aparecem se vencem HOJE (informativo, não confirmável)
             if bill['tipo_conta'] == 'Cartão de Crédito' and bill['nome_grupo'] == 'Despesa':
-                # Despesas fixas de cartão só aparecem se vencem HOJE
                 if dias_atraso == 0:
-                    # TODO: Adicionar à seção de lembretes de cartão (não confirmável)
-                    # Por enquanto, pula para não aparecer na lista de confirmação
-                    pass
+                    # Adicionar à seção de lembretes de cartão (não confirmável)
+                    lembretes_cartao.append({
+                        'descricao': bill['descricao'],
+                        'valor': bill['valor_previsto'] or 0,
+                        'conta': bill['nome_conta']
+                    })
                 continue  # Não adiciona às listas de confirmação
 
             item = {
@@ -260,7 +265,7 @@ class NightlyCheckinService:
                 despesas_atrasadas.append(item)
 
         # Se não há nada para mostrar, retornar None
-        if not despesas_pendentes and not receitas_pendentes and not despesas_atrasadas and not receitas_atrasadas and not overdue_invoices:
+        if not despesas_pendentes and not receitas_pendentes and not despesas_atrasadas and not receitas_atrasadas and not overdue_invoices and not lembretes_cartao:
             return None
 
         # Construir mensagem consolidada
@@ -289,6 +294,17 @@ class NightlyCheckinService:
                     msg += f"  Previsto em {item['data_vencimento'].strftime('%d/%m/%Y')}\n"
 
             msg += f"\n💰 *Total:* {formatar_moeda(total_receitas)}\n\n"
+
+        # NOVO (2026-01-07): LEMBRETES DE CARTÃO (informativo - não precisa confirmar)
+        if lembretes_cartao:
+            msg += "💳 *CARTÃO (na fatura):*\n"
+            msg += "_Débitos recorrentes que serão cobrados na fatura do cartão_\n\n"
+
+            for item in lembretes_cartao:
+                valor_fmt = formatar_moeda(item['valor'])
+                msg += f"ℹ️ {item['descricao']} - {valor_fmt} [{item['conta']}] [Debitado hoje]\n"
+
+            msg += "\n"
 
         # 2. DESPESAS PENDENTES (interativo - precisa confirmar)
         if despesas_pendentes:

@@ -86,9 +86,9 @@ class NightlyCheckinJob(BaseJob):
                         conn, usuario_id, hoje
                     )
 
-                    # 2. Contas atrasadas (>7 dias)
+                    # 2. Contas atrasadas (>7 dias) - usar query específica para check-in (com COALESCE corrigido - 2026-01-07)
                     from app.services.queries import AgendamentosQueries
-                    sql_overdue = AgendamentosQueries.get_contas_atrasadas_com_data_real()
+                    sql_overdue = AgendamentosQueries.get_contas_atrasadas_checkin_noturno()
                     params_overdue = AgendamentosQueries.get_parametros_padrao(usuario_id, hoje)
 
                     # DEBUG: Log dos parâmetros

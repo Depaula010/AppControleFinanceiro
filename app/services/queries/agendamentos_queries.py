@@ -111,6 +111,98 @@ class AgendamentosQueries:
         """)
 
     @staticmethod
+    def get_contas_pendentes_checkin_noturno() -> text:
+        """
+        Busca contas pendentes para o check-in noturno (versão corrigida).
+
+        DIFERENÇA DA QUERY ORIGINAL (get_contas_pendentes_ultimos_7_dias):
+        - Usa CASE em vez de COALESCE para retornar a data que REALMENTE correspondeu ao WHERE
+        - Corrige bug onde datas futuras apareciam como atrasadas
+
+        Usado em: Check-in noturno (nightly_checkin_service.py)
+
+        Parâmetros necessários:
+            :uid (int) - ID do usuário
+            :target_date (date) - Data de referência (normalmente hoje)
+            :data_limite_transacao (date) - Data limite para verificar transações (hoje - 60 dias)
+
+        Retorna: Agendamentos não pagos que vencem hoje ou estão atrasados (últimos 7 dias)
+                 INCLUI campo data_vencimento_real calculado CORRETAMENTE
+        """
+        return text("""
+            WITH ExpectedDates AS (
+                SELECT
+                    a.*,
+                    c.nome_conta, c.tipo_conta,
+                    s.nome_sub as categoria,
+                    m.nome_macro,
+                    g.nome_grupo,
+                    -- Calcula data esperada para mês atual
+                    CASE
+                        WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :target_date) + INTERVAL '1 month - 1 day'))
+                        THEN (DATE_TRUNC('month', :target_date) + INTERVAL '1 day' * (a.dia_execucao - 1))::date
+                        ELSE (DATE_TRUNC('month', :target_date) + INTERVAL '1 month - 1 day')::date
+                    END as data_esperada_mes_atual,
+                    -- Calcula data esperada para mês anterior
+                    CASE
+                        WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :target_date - INTERVAL '1 month') + INTERVAL '1 month - 1 day'))
+                        THEN (DATE_TRUNC('month', :target_date - INTERVAL '1 month') + INTERVAL '1 day' * (a.dia_execucao - 1))::date
+                        ELSE (DATE_TRUNC('month', :target_date - INTERVAL '1 month') + INTERVAL '1 month - 1 day')::date
+                    END as data_esperada_mes_anterior
+                FROM Agendamentos a
+                JOIN Contas c ON a.conta_id = c.id
+                JOIN SubCategoria s ON a.subcategoria_id = s.id
+                JOIN MacroCategoria m ON s.macro_id = m.id
+                JOIN GrupoCategoria g ON m.grupo_id = g.id
+                WHERE a.usuario_id = :uid
+                  AND a.ativo = TRUE
+                  AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+            )
+            SELECT
+                ed.id, ed.descricao, ed.valor_previsto, ed.dia_execucao,
+                ed.conta_id, ed.subcategoria_id, ed.usuario_id,
+                ed.nome_conta, ed.tipo_conta, ed.categoria,
+                ed.nome_macro, ed.nome_grupo,
+                -- CORRIGIDO (2026-01-07): Usa CASE em vez de COALESCE para retornar a data que corresponde ao WHERE
+                CASE
+                    WHEN ed.data_esperada_mes_atual <= :target_date
+                         AND ed.data_esperada_mes_atual >= :target_date - INTERVAL '7 days'
+                    THEN ed.data_esperada_mes_atual
+                    ELSE ed.data_esperada_mes_anterior
+                END as data_vencimento_real
+            FROM ExpectedDates ed
+            WHERE (
+                -- Mês atual: vence hoje ou atrasado nos últimos 7 dias
+                (ed.data_esperada_mes_atual <= :target_date
+                 AND ed.data_esperada_mes_atual >= :target_date - INTERVAL '7 days'
+                 AND NOT EXISTS (
+                     SELECT 1 FROM Transacoes t
+                     WHERE t.descricao = ed.descricao
+                       AND t.usuario_id = ed.usuario_id
+                       AND t.data_transacao >= :data_limite_transacao
+                       AND t.data_transacao <= :target_date
+                 ))
+                OR
+                -- Mês anterior: atrasado nos últimos 7 dias
+                (ed.data_esperada_mes_anterior <= :target_date
+                 AND ed.data_esperada_mes_anterior >= :target_date - INTERVAL '7 days'
+                 AND NOT EXISTS (
+                     SELECT 1 FROM Transacoes t
+                     WHERE t.descricao = ed.descricao
+                       AND t.usuario_id = ed.usuario_id
+                       AND t.data_transacao >= :data_limite_transacao
+                       AND t.data_transacao <= :target_date
+                 ))
+            )
+            -- Filtro para agendamentos anuais: incluir apenas se o mês bater
+            AND (
+                ed.periodicidade != 'ANUAL'
+                OR (ed.periodicidade = 'ANUAL' AND ed.mes_execucao = EXTRACT(MONTH FROM :target_date))
+            )
+            ORDER BY data_vencimento_real DESC, ed.nome_grupo, ed.descricao
+        """)
+
+    @staticmethod
     def get_contas_atrasadas_com_data_real() -> text:
         """
         Busca contas atrasadas com data de vencimento real calculada.
@@ -168,6 +260,102 @@ class AgendamentosQueries:
                 ed.nome_conta, ed.tipo_conta, ed.categoria,
                 ed.nome_macro, ed.nome_grupo,
                 COALESCE(ed.data_esperada_mes_atual, ed.data_esperada_mes_anterior) as data_vencimento_real
+            FROM ExpectedDates ed
+            WHERE (
+                -- Mês atual está atrasado (mais de 7 dias)
+                (ed.data_esperada_mes_atual < :hoje
+                 AND ed.data_esperada_mes_atual < :hoje - INTERVAL '7 days'
+                 AND NOT EXISTS (
+                     SELECT 1 FROM Transacoes t
+                     WHERE t.descricao = ed.descricao
+                       AND t.usuario_id = ed.usuario_id
+                       AND t.data_transacao >= :data_limite_transacao
+                       AND t.data_transacao <= :hoje
+                 ))
+                OR
+                -- Mês anterior está atrasado (mais de 7 dias)
+                (ed.data_esperada_mes_anterior < :hoje
+                 AND ed.data_esperada_mes_anterior >= :data_minima
+                 AND ed.data_esperada_mes_anterior < :hoje - INTERVAL '7 days'
+                 AND NOT EXISTS (
+                     SELECT 1 FROM Transacoes t
+                     WHERE t.descricao = ed.descricao
+                       AND t.usuario_id = ed.usuario_id
+                       AND t.data_transacao >= :data_limite_transacao
+                       AND t.data_transacao <= :hoje
+                 ))
+            )
+            -- Filtro para agendamentos anuais
+            AND (
+                ed.periodicidade != 'ANUAL'
+                OR (ed.periodicidade = 'ANUAL' AND ed.mes_execucao = EXTRACT(MONTH FROM :hoje))
+            )
+            ORDER BY data_vencimento_real DESC, ed.nome_grupo, ed.descricao
+        """)
+
+    @staticmethod
+    def get_contas_atrasadas_checkin_noturno() -> text:
+        """
+        Busca contas atrasadas para o check-in noturno (versão corrigida).
+
+        DIFERENÇA DA QUERY ORIGINAL (get_contas_atrasadas_com_data_real):
+        - Usa CASE em vez de COALESCE para retornar a data que REALMENTE correspondeu ao WHERE
+        - Corrige bug onde datas futuras apareciam como atrasadas
+
+        Usado em: Check-in noturno (nightly_checkin.py)
+
+        Parâmetros necessários:
+            :uid (int) - ID do usuário
+            :hoje (date) - Data atual
+            :data_minima (date) - Data mínima para buscar (ex: hoje - 30 dias)
+            :data_maxima (date) - Data máxima de atraso (ex: hoje - 8 dias para >7 dias)
+            :data_limite_transacao (date) - Data limite para verificar transações (hoje - 60 dias)
+
+        Retorna: Agendamentos atrasados com data_vencimento_real calculada CORRETAMENTE
+        """
+        return text("""
+            WITH ExpectedDates AS (
+                SELECT
+                    a.*,
+                    c.nome_conta, c.tipo_conta,
+                    s.nome_sub as categoria,
+                    m.nome_macro,
+                    g.nome_grupo,
+                    -- Constrói a data esperada completa para o mês atual
+                    CASE
+                        WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :hoje) + INTERVAL '1 month - 1 day'))
+                        THEN (DATE_TRUNC('month', :hoje) + INTERVAL '1 day' * (a.dia_execucao - 1))::date
+                        ELSE (DATE_TRUNC('month', :hoje) + INTERVAL '1 month - 1 day')::date
+                    END as data_esperada_mes_atual,
+                    -- Constrói a data esperada completa para o mês anterior
+                    CASE
+                        WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 month - 1 day'))
+                        THEN (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 day' * (a.dia_execucao - 1))::date
+                        ELSE (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 month - 1 day')::date
+                    END as data_esperada_mes_anterior
+                FROM Agendamentos a
+                JOIN Contas c ON a.conta_id = c.id
+                JOIN SubCategoria s ON a.subcategoria_id = s.id
+                JOIN MacroCategoria m ON s.macro_id = m.id
+                JOIN GrupoCategoria g ON m.grupo_id = g.id
+                WHERE a.usuario_id = :uid
+                  AND a.ativo = TRUE
+                  AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+                  -- Exclui débitos recorrentes de cartão (assinaturas) pois vão para a fatura
+                  AND NOT (a.tipo_agendamento = 'FIXO' AND g.nome_grupo = 'Despesa' AND c.tipo_conta = 'Cartão de Crédito')
+            )
+            SELECT
+                ed.id, ed.descricao, ed.valor_previsto, ed.dia_execucao,
+                ed.conta_id, ed.subcategoria_id, ed.usuario_id,
+                ed.nome_conta, ed.tipo_conta, ed.categoria,
+                ed.nome_macro, ed.nome_grupo,
+                -- CORRIGIDO (2026-01-07): Usa CASE em vez de COALESCE para retornar a data que corresponde ao WHERE
+                CASE
+                    WHEN ed.data_esperada_mes_atual < :hoje
+                         AND ed.data_esperada_mes_atual < :hoje - INTERVAL '7 days'
+                    THEN ed.data_esperada_mes_atual
+                    ELSE ed.data_esperada_mes_anterior
+                END as data_vencimento_real
             FROM ExpectedDates ed
             WHERE (
                 -- Mês atual está atrasado (mais de 7 dias)
