@@ -600,13 +600,17 @@ class NightlyCheckinService:
         session_data = redis_service.get(session_key)
 
         if not session_data:
+            # CORRIGIDO (2026-01-07): Remover flag ativa para evitar loop infinito
+            redis_service.delete(f"nightly_checkin_active:{numero_whatsapp}")
             return ('error', "⏱️ Esta sessão expirou. Aguarde o próximo check-in ou registre manualmente.")
 
         items_map = session_data['items']
         total_items = session_data['total_items']
 
         if total_items == 0:
-            # Só tinha itens atrasados
+            # Só tinha itens atrasados - remover flag para evitar loop
+            redis_service.delete(session_key)
+            redis_service.delete(f"nightly_checkin_active:{numero_whatsapp}")
             return ('error', "Não há itens recentes para confirmar. Use 'Pendencias' para ver contas antigas.")
 
         # Fazer parsing da resposta
