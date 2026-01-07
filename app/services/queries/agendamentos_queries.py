@@ -163,6 +163,7 @@ class AgendamentosQueries:
                 ed.conta_id, ed.subcategoria_id, ed.usuario_id,
                 ed.nome_conta, ed.tipo_conta, ed.categoria,
                 ed.nome_macro, ed.nome_grupo,
+                ed.tipo_agendamento, ed.parcelas_executadas, ed.total_parcelas,
                 -- CORRIGIDO (2026-01-07): Usa CASE em vez de COALESCE para retornar a data que corresponde ao WHERE
                 CASE
                     WHEN ed.data_esperada_mes_atual <= :target_date
@@ -349,6 +350,7 @@ class AgendamentosQueries:
                 ed.conta_id, ed.subcategoria_id, ed.usuario_id,
                 ed.nome_conta, ed.tipo_conta, ed.categoria,
                 ed.nome_macro, ed.nome_grupo,
+                ed.tipo_agendamento, ed.parcelas_executadas, ed.total_parcelas,
                 -- CORRIGIDO (2026-01-07): Usa CASE em vez de COALESCE para retornar a data que corresponde ao WHERE
                 CASE
                     WHEN ed.data_esperada_mes_atual < :hoje

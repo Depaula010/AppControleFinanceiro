@@ -234,9 +234,15 @@ class NightlyCheckinService:
                     })
                 continue  # Não adiciona às listas de confirmação
 
+            # NOVO (2026-01-07): Mostrar número da parcela para agendamentos parcelados
+            descricao = bill['descricao']
+            if bill.get('tipo_agendamento') == 'PARCELADO' and bill.get('total_parcelas'):
+                parcela_atual = bill.get('parcelas_executadas', 0) + 1
+                descricao = f"{descricao} ({parcela_atual}/{bill['total_parcelas']})"
+
             item = {
                 'numero': idx,
-                'descricao': bill['descricao'],
+                'descricao': descricao,
                 'valor': bill['valor_previsto'] or 0,
                 'conta': bill['nome_conta'],
                 'status': status or f"Atrasado {dias_atraso} dias",
@@ -253,8 +259,14 @@ class NightlyCheckinService:
 
         # Processar contas atrasadas (>7 dias) - sem numeração, apenas informativo
         for bill in overdue_bills:
+            # NOVO (2026-01-07): Mostrar número da parcela para agendamentos parcelados
+            descricao = bill['descricao']
+            if bill.get('tipo_agendamento') == 'PARCELADO' and bill.get('total_parcelas'):
+                parcela_atual = bill.get('parcelas_executadas', 0) + 1
+                descricao = f"{descricao} ({parcela_atual}/{bill['total_parcelas']})"
+
             item = {
-                'descricao': bill['descricao'],
+                'descricao': descricao,
                 'valor': bill['valor_previsto'] or 0,
                 'data_vencimento': bill.get('data_vencimento_real')
             }
