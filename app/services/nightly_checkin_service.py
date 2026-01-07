@@ -286,7 +286,7 @@ class NightlyCheckinService:
         # 1. RECEITAS PENDENTES (informativo - não precisa confirmar)
         if receitas_pendentes or receitas_atrasadas:
             msg += "💵 *RECEITAS PENDENTES:*\n"
-            msg += "_Valores previstos que ainda não foram recebidos_\n\n"
+            msg += "_Valores previstos que ainda não foram recebidos 2222_\n\n"
 
             total_receitas = 0
 
