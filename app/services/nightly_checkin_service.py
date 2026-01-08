@@ -116,9 +116,12 @@ class NightlyCheckinService:
         """
         Cria uma sessão de check-in no Redis.
 
+        CORRIGIDO (2026-01-08): Todas as contas (receitas + despesas) são confirmáveis,
+        independente de quantos dias de atraso. Antes, apenas contas com <=3 dias eram salvas.
+
         Args:
             numero_whatsapp: Número do usuário
-            pending_bills: Lista de contas pendentes
+            pending_bills: Lista de contas pendentes (receitas + despesas)
 
         Returns:
             str: checkin_id (UUID)
@@ -126,31 +129,23 @@ class NightlyCheckinService:
         checkin_id = str(uuid.uuid4())[:8]
         hoje = date.today()
 
-        # Separar recentes (<=3 dias) de atrasados (+3 dias)
+        # CORRIGIDO: Todas as contas são confirmáveis (não separar por dias de atraso)
         itens_recentes = {}
-        itens_atrasados = []
 
         idx = 1
         for bill in pending_bills:
             status, dias_atraso = NightlyCheckinService.categorize_by_delay(bill, hoje)
 
-            if status is None:
-                # Item atrasado (+3 dias)
-                itens_atrasados.append({
-                    'descricao': bill['descricao'],
-                    'valor': bill['valor_previsto'],
-                    'dias_atraso': dias_atraso
-                })
-            else:
-                # Item recente
-                bill['status_text'] = status
-                bill['dias_atraso'] = dias_atraso
-                itens_recentes[str(idx)] = bill
-                idx += 1
+            # Salvar status para formatação visual
+            bill['status_text'] = status if status else f"Atrasado {dias_atraso} dias"
+            bill['dias_atraso'] = dias_atraso
+
+            # TODAS as contas são salvas na sessão (receitas + despesas)
+            itens_recentes[str(idx)] = bill
+            idx += 1
 
         session_data = {
             'items': itens_recentes,
-            'itens_atrasados': itens_atrasados,
             'created_at': str(hoje),
             'total_items': len(itens_recentes)
         }
@@ -164,7 +159,7 @@ class NightlyCheckinService:
         redis_service.set_with_ttl(active_key, checkin_id, ttl_seconds=3600)
 
         print(f"[CHECKIN-SESSION] Criada sessão {checkin_id} para {numero_whatsapp}")
-        print(f"[CHECKIN-SESSION] {len(itens_recentes)} itens recentes, {len(itens_atrasados)} atrasados")
+        print(f"[CHECKIN-SESSION] {len(itens_recentes)} conta(s) confirmável(eis) (receitas + despesas)")
 
         return checkin_id
 
@@ -174,8 +169,10 @@ class NightlyCheckinService:
         Formata mensagem consolidada de check-in com TODAS as informações em uma única mensagem.
         Melhora UX evitando múltiplas notificações fragmentadas.
 
+        CORRIGIDO (2026-01-08): Receitas agora são confirmáveis via check-in (antes eram apenas informativas).
+
         Args:
-            pending_bills: Lista de contas pendentes (últimos 7 dias)
+            pending_bills: Lista de contas pendentes (últimos 7 dias) - receitas + despesas
             overdue_bills: Lista de contas atrasadas (>7 dias)
             bills_due_today: Lista de contas que vencem hoje
             overdue_invoices: Lista de faturas vencidas (passado)
@@ -292,13 +289,14 @@ class NightlyCheckinService:
                 msg += f" * {item['descricao']} - {valor_fmt} - Será debitado hoje\n"
             msg += "\n"
 
-        # Numeração contínua para todas as outras seções
+        # Numeração contínua para todas as seções (RECEITAS E DESPESAS são confirmáveis)
         numero_global = 1
 
-        # 1. RECEITAS PENDENTES (informativo - numerado)
+        # 1. RECEITAS PENDENTES (CONFIRMÁVEL - numerado)
+        # CORRIGIDO (2026-01-08): Receitas agora são confirmáveis, não apenas informativas
         if receitas_pendentes or receitas_atrasadas:
             msg += "💵 *RECEITAS PENDENTES:*\n"
-            msg += "_Valores previstos que ainda não foram recebidos_\n\n"
+            msg += "_Valores previstos que ainda não foram recebidos - confirmáveis via check-in_\n\n"
 
             total_receitas = 0
 

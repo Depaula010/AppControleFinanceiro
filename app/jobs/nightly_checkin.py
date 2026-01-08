@@ -86,6 +86,11 @@ class NightlyCheckinJob(BaseJob):
                         conn, usuario_id, hoje
                     )
 
+                    # DEBUG (2026-01-08): Separar receitas e despesas para log
+                    receitas = [b for b in pending_bills if b['nome_grupo'] == 'Renda']
+                    despesas = [b for b in pending_bills if b['nome_grupo'] == 'Despesa']
+                    self._log(f"DEBUG - Pending bills: {len(receitas)} receita(s), {len(despesas)} despesa(s)")
+
                     # 2. Contas atrasadas (>7 dias) - usar query específica para check-in (com COALESCE corrigido - 2026-01-07)
                     from app.services.queries import AgendamentosQueries
                     sql_overdue = AgendamentosQueries.get_contas_atrasadas_checkin_noturno()

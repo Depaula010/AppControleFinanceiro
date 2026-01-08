@@ -33,6 +33,8 @@ class AgendamentosQueries:
         - Contas futuras sendo incluídas incorretamente
         - Cálculo incorreto de atraso
 
+        CORREÇÃO (2026-01-08): Agendamentos ANUAIS não calculam mês anterior
+
         Usado em: Check-in noturno
 
         Parâmetros necessários:
@@ -58,7 +60,9 @@ class AgendamentosQueries:
                         ELSE (DATE_TRUNC('month', :target_date) + INTERVAL '1 month - 1 day')::date
                     END as data_esperada_mes_atual,
                     -- Calcula data esperada para mês anterior
+                    -- CORRIGIDO (2026-01-08): Para agendamentos ANUAIS, não calcular mês anterior
                     CASE
+                        WHEN a.periodicidade = 'ANUAL' THEN NULL
                         WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :target_date - INTERVAL '1 month') + INTERVAL '1 month - 1 day'))
                         THEN (DATE_TRUNC('month', :target_date - INTERVAL '1 month') + INTERVAL '1 day' * (a.dia_execucao - 1))::date
                         ELSE (DATE_TRUNC('month', :target_date - INTERVAL '1 month') + INTERVAL '1 month - 1 day')::date
@@ -117,6 +121,8 @@ class AgendamentosQueries:
         - Usa CASE em vez de COALESCE para retornar a data que REALMENTE correspondeu ao WHERE
         - Corrige bug onde datas futuras apareciam como atrasadas
 
+        CORREÇÃO (2026-01-08): Agendamentos ANUAIS não calculam mês anterior
+
         Usado em: Check-in noturno (nightly_checkin_service.py)
 
         Parâmetros necessários:
@@ -142,7 +148,9 @@ class AgendamentosQueries:
                         ELSE (DATE_TRUNC('month', :target_date) + INTERVAL '1 month - 1 day')::date
                     END as data_esperada_mes_atual,
                     -- Calcula data esperada para mês anterior
+                    -- CORRIGIDO (2026-01-08): Para agendamentos ANUAIS, não calcular mês anterior
                     CASE
+                        WHEN a.periodicidade = 'ANUAL' THEN NULL
                         WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :target_date - INTERVAL '1 month') + INTERVAL '1 month - 1 day'))
                         THEN (DATE_TRUNC('month', :target_date - INTERVAL '1 month') + INTERVAL '1 day' * (a.dia_execucao - 1))::date
                         ELSE (DATE_TRUNC('month', :target_date - INTERVAL '1 month') + INTERVAL '1 month - 1 day')::date
@@ -211,6 +219,8 @@ class AgendamentosQueries:
         Usa CTE (Common Table Expression) para calcular a data real de vencimento
         considerando virada de mês.
 
+        CORREÇÃO (2026-01-08): Agendamentos ANUAIS não calculam mês anterior
+
         Parâmetros necessários:
             :uid (int) - ID do usuário
             :hoje (date) - Data atual
@@ -235,7 +245,9 @@ class AgendamentosQueries:
                         ELSE (DATE_TRUNC('month', :hoje) + INTERVAL '1 month - 1 day')::date
                     END as data_esperada_mes_atual,
                     -- Constrói a data esperada completa para o mês anterior
+                    -- CORRIGIDO (2026-01-08): Para agendamentos ANUAIS, não calcular mês anterior
                     CASE
+                        WHEN a.periodicidade = 'ANUAL' THEN NULL
                         WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 month - 1 day'))
                         THEN (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 day' * (a.dia_execucao - 1))::date
                         ELSE (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 month - 1 day')::date
@@ -297,6 +309,8 @@ class AgendamentosQueries:
         - Usa CASE em vez de COALESCE para retornar a data que REALMENTE correspondeu ao WHERE
         - Corrige bug onde datas futuras apareciam como atrasadas
 
+        CORREÇÃO (2026-01-08): Agendamentos ANUAIS não calculam mês anterior
+
         Usado em: Check-in noturno (nightly_checkin.py)
 
         Parâmetros necessários:
@@ -323,7 +337,9 @@ class AgendamentosQueries:
                         ELSE (DATE_TRUNC('month', :hoje) + INTERVAL '1 month - 1 day')::date
                     END as data_esperada_mes_atual,
                     -- Constrói a data esperada completa para o mês anterior
+                    -- CORRIGIDO (2026-01-08): Para agendamentos ANUAIS, não calcular mês anterior
                     CASE
+                        WHEN a.periodicidade = 'ANUAL' THEN NULL
                         WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 month - 1 day'))
                         THEN (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 day' * (a.dia_execucao - 1))::date
                         ELSE (DATE_TRUNC('month', :hoje - INTERVAL '1 month') + INTERVAL '1 month - 1 day')::date
