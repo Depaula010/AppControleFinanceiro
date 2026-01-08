@@ -136,26 +136,30 @@ class NightlyCheckinService:
         for bill in pending_bills:
             status, dias_atraso = NightlyCheckinService.categorize_by_delay(bill, hoje)
 
+            # IMPORTANTE: Criar cópia para não modificar o dicionário original
+            # (o original ainda será usado em format_consolidated_checkin_message)
+            bill_copy = bill.copy()
+
             # Salvar status para formatação visual
-            bill['status_text'] = status if status else f"Atrasado {dias_atraso} dias"
-            bill['dias_atraso'] = dias_atraso
+            bill_copy['status_text'] = status if status else f"Atrasado {dias_atraso} dias"
+            bill_copy['dias_atraso'] = dias_atraso
 
             # CORRIGIDO (2026-01-08): Converter tipos não-serializáveis para JSON
             # - date -> string (ISO format)
             # - Decimal -> float
-            if 'data_vencimento_real' in bill and bill['data_vencimento_real']:
+            if 'data_vencimento_real' in bill_copy and bill_copy['data_vencimento_real']:
                 from datetime import date as date_type
-                if isinstance(bill['data_vencimento_real'], date_type):
-                    bill['data_vencimento_real'] = bill['data_vencimento_real'].isoformat()
+                if isinstance(bill_copy['data_vencimento_real'], date_type):
+                    bill_copy['data_vencimento_real'] = bill_copy['data_vencimento_real'].isoformat()
 
             # Converter Decimal para float
             from decimal import Decimal
-            for key, value in bill.items():
+            for key, value in bill_copy.items():
                 if isinstance(value, Decimal):
-                    bill[key] = float(value)
+                    bill_copy[key] = float(value)
 
             # TODAS as contas são salvas na sessão (receitas + despesas)
-            itens_recentes[str(idx)] = bill
+            itens_recentes[str(idx)] = bill_copy
             idx += 1
 
         session_data = {
