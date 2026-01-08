@@ -129,11 +129,17 @@ class NightlyCheckinService:
         checkin_id = str(uuid.uuid4())[:8]
         hoje = date.today()
 
-        # CORRIGIDO: Todas as contas são confirmáveis (não separar por dias de atraso)
-        itens_recentes = {}
+        # CORRIGIDO (2026-01-08): Separar receitas e despesas para salvar NA MESMA ORDEM da mensagem
+        # (mensagem mostra: receitas primeiro, depois despesas)
+        receitas = [b for b in pending_bills if b.get('nome_grupo') == 'Renda']
+        despesas = [b for b in pending_bills if b.get('nome_grupo') != 'Renda']
 
+        # IMPORTANTE: Concatenar na ordem correta (receitas → despesas)
+        bills_ordenadas = receitas + despesas
+
+        itens_recentes = {}
         idx = 1
-        for bill in pending_bills:
+        for bill in bills_ordenadas:
             status, dias_atraso = NightlyCheckinService.categorize_by_delay(bill, hoje)
 
             # IMPORTANTE: Criar cópia para não modificar o dicionário original
@@ -177,7 +183,8 @@ class NightlyCheckinService:
         redis_service.set_with_ttl(active_key, checkin_id, ttl_seconds=3600)
 
         print(f"[CHECKIN-SESSION] Criada sessão {checkin_id} para {numero_whatsapp}")
-        print(f"[CHECKIN-SESSION] {len(itens_recentes)} conta(s) confirmável(eis) (receitas + despesas)")
+        print(f"[CHECKIN-SESSION] {len(receitas)} receita(s) + {len(despesas)} despesa(s) = {len(itens_recentes)} total")
+        print(f"[CHECKIN-SESSION] Ordem: receitas (1-{len(receitas)}), despesas ({len(receitas)+1}-{len(itens_recentes)})")
 
         return checkin_id
 

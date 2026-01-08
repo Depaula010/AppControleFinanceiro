@@ -326,6 +326,7 @@ class TestReceitasConfirmaveis:
 
         for call in calls:
             args = call[0]
+            kwargs = call[1]
             # Argumentos: conn, usuario_id, conta_id, subcategoria_id, fatura_id, descricao, valor, tipo, data
             descricao = args[5]  # 6º argumento é a descrição
             valor = args[6]      # 7º argumento é o valor
@@ -333,6 +334,10 @@ class TestReceitasConfirmaveis:
 
             assert tipo == 'Renda', f"Tipo deveria ser 'Renda', obteve '{tipo}' para '{descricao}'"
             assert valor > 0, f"Receita deve ter valor positivo, obteve {valor}"
+
+            # NOVO (2026-01-08): Verificar que agendamento_id está sendo passado
+            assert 'agendamento_id' in kwargs, f"agendamento_id deveria estar em kwargs para '{descricao}'"
+            assert kwargs['agendamento_id'] is not None, f"agendamento_id não deveria ser None para '{descricao}'"
 
         # Verificar resposta
         assert "confirmada" in resposta.lower(), "Resposta deve indicar confirmação"
