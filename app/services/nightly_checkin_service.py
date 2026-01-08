@@ -491,7 +491,8 @@ class NightlyCheckinService:
                 valor_db = (bill['valor_previsto'] or 0) * -1
                 tipo_tx = 'Despesa'
 
-            # Criar transação
+            # Criar transação vinculada ao agendamento
+            # CORRIGIDO (2026-01-08): Passar agendamento_id para vincular transação ao agendamento original
             finance_service.create_transaction(
                 conn,
                 usuario_id,
@@ -501,11 +502,12 @@ class NightlyCheckinService:
                 bill['descricao'],
                 valor_db,
                 tipo_tx,
-                data_tx
+                data_tx,
+                agendamento_id=bill.get('id')  # Vincular ao agendamento
             )
 
             confirmadas.append(bill['descricao'])
-            print(f"[CHECKIN-MARK] Criada transação: {bill['descricao']} - {valor_db}")
+            print(f"[CHECKIN-MARK] Criada transação: {bill['descricao']} - {valor_db} (agendamento_id={bill.get('id')})")
 
             # NOVO (2026-01-08): Atualizar parcelas para agendamentos PARCELADO
             if bill.get('tipo_agendamento') == 'PARCELADO':
@@ -597,6 +599,10 @@ class NightlyCheckinService:
         # Caso 3: Confirmação (full ou partial)
         indices_confirmar = resultado
 
+        # DEBUG (2026-01-08): Log detalhado dos índices a confirmar
+        print(f"[CHECKIN-RESPONSE] Índices a confirmar: {indices_confirmar}")
+        print(f"[CHECKIN-RESPONSE] Items disponíveis na sessão: {list(items_map.keys())}")
+
         # Buscar bills correspondentes
         from app import db_engine
 
@@ -604,7 +610,10 @@ class NightlyCheckinService:
         for idx in indices_confirmar:
             bill = items_map.get(str(idx))
             if bill:
+                print(f"[CHECKIN-RESPONSE] Índice {idx} -> {bill.get('descricao')} ({bill.get('nome_grupo')})")
                 bills_to_confirm.append(bill)
+            else:
+                print(f"[CHECKIN-RESPONSE] AVISO: Índice {idx} não encontrado na sessão!")
 
         if not bills_to_confirm:
             return ('error', "Nenhum item válido para confirmar.")

@@ -399,17 +399,21 @@ def get_category_name_by_id(conn, subcategoria_id):
     info = conn.execute(sql, {"scid": subcategoria_id}).fetchone()
     return f"{info[1]} -> {info[0]}" if info else "Categoria Desconhecida"
 
-def create_transaction(conn, usuario_id, conta_id, subcategoria_id, fatura_id, descricao, valor, tipo_transacao, data_transacao):
-    """ Insere uma transação simples (Renda/Despesa). (Requer conexão). Retorna o ID da transação criada. """
+def create_transaction(conn, usuario_id, conta_id, subcategoria_id, fatura_id, descricao, valor, tipo_transacao, data_transacao, agendamento_id=None):
+    """
+    Insere uma transação simples (Renda/Despesa). (Requer conexão). Retorna o ID da transação criada.
+
+    CORRIGIDO (2026-01-08): Adicionado parâmetro opcional agendamento_id para vincular transação ao agendamento.
+    """
     sql = text("""
         INSERT INTO Transacoes
-        (usuario_id, conta_id, subcategoria_id, fatura_id, transferencia_par_id, descricao, valor, tipo_transacao, data_transacao)
-        VALUES (:uid, :cid, :scid, :fid, NULL, :desc, :val, :tipo, :data)
+        (usuario_id, conta_id, subcategoria_id, fatura_id, transferencia_par_id, descricao, valor, tipo_transacao, data_transacao, agendamento_id)
+        VALUES (:uid, :cid, :scid, :fid, NULL, :desc, :val, :tipo, :data, :agid)
         RETURNING id
     """)
     result = conn.execute(sql, {
         "uid": usuario_id, "cid": conta_id, "scid": subcategoria_id, "fid": fatura_id,
-        "desc": descricao, "val": valor, "tipo": tipo_transacao, "data": data_transacao
+        "desc": descricao, "val": valor, "tipo": tipo_transacao, "data": data_transacao, "agid": agendamento_id
     })
     return result.scalar_one()
 
