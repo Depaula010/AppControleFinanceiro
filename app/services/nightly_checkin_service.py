@@ -140,6 +140,20 @@ class NightlyCheckinService:
             bill['status_text'] = status if status else f"Atrasado {dias_atraso} dias"
             bill['dias_atraso'] = dias_atraso
 
+            # CORRIGIDO (2026-01-08): Converter tipos não-serializáveis para JSON
+            # - date -> string (ISO format)
+            # - Decimal -> float
+            if 'data_vencimento_real' in bill and bill['data_vencimento_real']:
+                from datetime import date as date_type
+                if isinstance(bill['data_vencimento_real'], date_type):
+                    bill['data_vencimento_real'] = bill['data_vencimento_real'].isoformat()
+
+            # Converter Decimal para float
+            from decimal import Decimal
+            for key, value in bill.items():
+                if isinstance(value, Decimal):
+                    bill[key] = float(value)
+
             # TODAS as contas são salvas na sessão (receitas + despesas)
             itens_recentes[str(idx)] = bill
             idx += 1
@@ -530,11 +544,20 @@ class NightlyCheckinService:
         """
         # Buscar sessão
         session_key = f"nightly_checkin:{numero_whatsapp}:{checkin_id}"
+
+        # DEBUG (2026-01-08): Adicionar log detalhado
+        print(f"[CHECKIN-RESPONSE] Buscando sessão: {session_key}")
         session_data = redis_service.get(session_key)
+        print(f"[CHECKIN-RESPONSE] Sessão encontrada: {session_data is not None}")
+
+        if session_data:
+            print(f"[CHECKIN-RESPONSE] Total items na sessão: {session_data.get('total_items', 0)}")
+            print(f"[CHECKIN-RESPONSE] Items keys: {list(session_data.get('items', {}).keys())}")
 
         if not session_data:
             # CORRIGIDO (2026-01-07): Remover flag ativa para evitar loop infinito
             redis_service.delete(f"nightly_checkin_active:{numero_whatsapp}")
+            print(f"[CHECKIN-RESPONSE] ERRO: Sessão não encontrada no Redis")
             return ('error', "⏱️ Esta sessão expirou. Aguarde o próximo check-in ou registre manualmente.")
 
         items_map = session_data['items']
