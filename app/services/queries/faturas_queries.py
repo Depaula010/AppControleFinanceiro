@@ -79,6 +79,41 @@ class FaturasQueries:
         """)
 
     @staticmethod
+    def get_faturas_vencendo_hoje() -> text:
+        """
+        Busca faturas que vencem HOJE (data_vencimento = hoje).
+
+        DIFERENÇA:
+        - get_faturas_vencidas(): data_vencimento < hoje (passado)
+        - get_faturas_vencendo_hoje(): data_vencimento = hoje (alerta preventivo)
+
+        Usado em: Check-in noturno (alerta preventivo)
+
+        Parâmetros necessários:
+            :uid (int) - ID do usuário
+            :hoje (date) - Data atual
+
+        Returns:
+            text: Query SQL compilada
+        """
+        return text("""
+            SELECT
+                f.id,
+                c.nome_conta as nome_conta,
+                f.data_vencimento,
+                f.status,
+                COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) as valor_total
+            FROM Faturas f
+            JOIN Contas c ON f.conta_id = c.id
+            LEFT JOIN Transacoes t ON f.id = t.fatura_id
+            WHERE c.usuario_id = :uid
+              AND f.status = 'Aberta'
+              AND f.data_vencimento = :hoje
+            GROUP BY f.id, c.nome_conta, f.data_vencimento, f.status
+            ORDER BY c.nome_conta
+        """)
+
+    @staticmethod
     def get_invoice_by_due_date() -> text:
         """
         Busca fatura de um cartão por data de vencimento.

@@ -123,3 +123,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 migrations/schema.sql
+AI_RULES.md

@@ -169,7 +169,7 @@ class NightlyCheckinService:
         return checkin_id
 
     @staticmethod
-    def format_consolidated_checkin_message(pending_bills, overdue_bills, bills_due_today, overdue_invoices, checkin_id):
+    def format_consolidated_checkin_message(pending_bills, overdue_bills, bills_due_today, overdue_invoices, faturas_vencendo_hoje, checkin_id):
         """
         Formata mensagem consolidada de check-in com TODAS as informações em uma única mensagem.
         Melhora UX evitando múltiplas notificações fragmentadas.
@@ -178,7 +178,8 @@ class NightlyCheckinService:
             pending_bills: Lista de contas pendentes (últimos 7 dias)
             overdue_bills: Lista de contas atrasadas (>7 dias)
             bills_due_today: Lista de contas que vencem hoje
-            overdue_invoices: Lista de faturas vencidas
+            overdue_invoices: Lista de faturas vencidas (passado)
+            faturas_vencendo_hoje: Lista de faturas que vencem HOJE
             checkin_id: ID da sessão
 
         Returns:
@@ -277,7 +278,7 @@ class NightlyCheckinService:
                 despesas_atrasadas.append(item)
 
         # Se não há nada para mostrar, retornar None
-        if not despesas_pendentes and not receitas_pendentes and not despesas_atrasadas and not receitas_atrasadas and not overdue_invoices and not lembretes_cartao:
+        if not despesas_pendentes and not receitas_pendentes and not despesas_atrasadas and not receitas_atrasadas and not overdue_invoices and not lembretes_cartao and not faturas_vencendo_hoje:
             return None
 
         # Construir mensagem consolidada
@@ -358,6 +359,16 @@ class NightlyCheckinService:
                 valor_fmt = formatar_moeda(fatura.get('valor_total', 0))
                 msg += f"{numero_global}. {fatura['nome_conta']} - {valor_fmt} - Venceu em {fatura['data_vencimento'].strftime('%d/%m/%Y')}\n"
                 numero_global += 1
+            msg += "\n"
+
+        # 4.5. FATURAS QUE VENCEM HOJE (alerta preventivo - não numerado)
+        if faturas_vencendo_hoje:
+            msg += "⏰ *FATURAS QUE VENCEM HOJE:*\n"
+            msg += "_Atenção! Estas faturas devem ser pagas hoje para evitar juros._\n\n"
+            for fatura in faturas_vencendo_hoje:
+                valor_fmt = formatar_moeda(fatura.get('valor_total', 0))
+                nome_cartao = fatura['nome_conta']
+                msg += f"💳 {nome_cartao} - {valor_fmt} - Vence HOJE\n"
             msg += "\n"
 
         # 5. INSTRUÇÕES (apenas se houver despesas pendentes para confirmar)
@@ -479,6 +490,29 @@ class NightlyCheckinService:
 
             confirmadas.append(bill['descricao'])
             print(f"[CHECKIN-MARK] Criada transação: {bill['descricao']} - {valor_db}")
+
+            # NOVO (2026-01-08): Atualizar parcelas para agendamentos PARCELADO
+            if bill.get('tipo_agendamento') == 'PARCELADO':
+                nova_parcela = bill.get('parcelas_executadas', 0) + 1
+                total = bill.get('total_parcelas')
+
+                # Desativar se completou todas as parcelas
+                desativar = (total is not None and nova_parcela >= total)
+
+                sql_update_ag = text("""
+                    UPDATE Agendamentos
+                    SET parcelas_executadas = :nova_parcela,
+                        ativo = :novo_ativo,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = :ag_id
+                """)
+                conn.execute(sql_update_ag, {
+                    "nova_parcela": nova_parcela,
+                    "novo_ativo": not desativar,
+                    "ag_id": bill['id']
+                })
+
+                print(f"[CHECKIN-PARCELADO] Parcela {nova_parcela}/{total} confirmada. Desativado: {desativar}")
 
         return confirmadas
 

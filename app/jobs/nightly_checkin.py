@@ -113,8 +113,14 @@ class NightlyCheckinJob(BaseJob):
                     result_invoices = conn.execute(sql_invoices, params_invoices).fetchall()
                     overdue_invoices = [dict(row._mapping) for row in result_invoices]
 
+                    # 5. Faturas que vencem HOJE (alerta preventivo)
+                    sql_faturas_hoje = FaturasQueries.get_faturas_vencendo_hoje()
+                    params_faturas_hoje = {"uid": usuario_id, "hoje": hoje}
+                    result_faturas_hoje = conn.execute(sql_faturas_hoje, params_faturas_hoje).fetchall()
+                    faturas_vencendo_hoje = [dict(row._mapping) for row in result_faturas_hoje]
+
                 # Se não há nada para mostrar, pular este usuário
-                if not pending_bills and not overdue_bills and not overdue_invoices:
+                if not pending_bills and not overdue_bills and not overdue_invoices and not faturas_vencendo_hoje:
                     self._log(f"Nenhuma pendência para usuário {usuario_id}")
                     continue
 
@@ -133,6 +139,7 @@ class NightlyCheckinJob(BaseJob):
                     overdue_bills,
                     bills_due_today,
                     overdue_invoices,
+                    faturas_vencendo_hoje,
                     checkin_id
                 )
 

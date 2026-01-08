@@ -70,7 +70,7 @@ class AgendamentosQueries:
                 JOIN GrupoCategoria g ON m.grupo_id = g.id
                 WHERE a.usuario_id = :uid
                   AND a.ativo = TRUE
-                  AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+                  AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL', 'PARCELADO')
             )
             SELECT
                 ed.id, ed.descricao, ed.valor_previsto, ed.dia_execucao,
@@ -154,7 +154,7 @@ class AgendamentosQueries:
                 JOIN GrupoCategoria g ON m.grupo_id = g.id
                 WHERE a.usuario_id = :uid
                   AND a.ativo = TRUE
-                  AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+                  AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL', 'PARCELADO')
             )
             SELECT
                 ed.id, ed.descricao, ed.valor_previsto, ed.dia_execucao,
@@ -247,7 +247,7 @@ class AgendamentosQueries:
                 JOIN GrupoCategoria g ON m.grupo_id = g.id
                 WHERE a.usuario_id = :uid
                   AND a.ativo = TRUE
-                  AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+                  AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL', 'PARCELADO')
                   -- Exclui débitos recorrentes de cartão (assinaturas) pois vão para a fatura
                   AND NOT (a.tipo_agendamento = 'FIXO' AND g.nome_grupo = 'Despesa' AND c.tipo_conta = 'Cartão de Crédito')
             )
@@ -335,7 +335,7 @@ class AgendamentosQueries:
                 JOIN GrupoCategoria g ON m.grupo_id = g.id
                 WHERE a.usuario_id = :uid
                   AND a.ativo = TRUE
-                  AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+                  AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL', 'PARCELADO')
                   -- CORRIGIDO (2026-01-07): Exclui débitos recorrentes de cartão com fatura configurada
                   AND NOT (
                       a.tipo_agendamento = 'FIXO'
