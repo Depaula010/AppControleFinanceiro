@@ -8,6 +8,7 @@ from app.services import finance_service
 from app.services.queries import AgendamentosQueries
 from app.utils import formatar_moeda
 from datetime import date, timedelta
+from sqlalchemy import text
 import uuid
 import re
 import calendar
