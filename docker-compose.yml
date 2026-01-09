@@ -102,6 +102,8 @@ services:
     depends_on:
       - web
     command: daemon --docker
+    environment:
+      - TZ=America/Sao_Paulo
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
