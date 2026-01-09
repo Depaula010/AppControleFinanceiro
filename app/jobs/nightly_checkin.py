@@ -129,9 +129,13 @@ class NightlyCheckinJob(BaseJob):
                     self._log(f"Nenhuma pendência para usuário {usuario_id}")
                     continue
 
-                # Criar sessão de check-in no Redis (apenas para despesas pendentes)
+                # CORRIGIDO (2026-01-09): Incluir TODAS as contas (pending + overdue) na sessão
+                # para que os índices correspondam à mensagem formatada
+                all_bills_for_session = pending_bills + overdue_bills
+
+                # Criar sessão de check-in no Redis
                 checkin_id = NightlyCheckinService.create_checkin_session(
-                    numero_whatsapp, pending_bills
+                    numero_whatsapp, all_bills_for_session
                 )
 
                 if not checkin_id:
