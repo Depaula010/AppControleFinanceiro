@@ -2,9 +2,46 @@
 # AppControleFinanceiro - Backend Python/Flask
 
 **Data de Criação**: 2025-12-19
-**Última Atualização**: 2025-12-28 (Auditoria de integração ORM)
+**Última Atualização**: 2026-01-11 (Harmonização Job x Intenção - Check-in Financeiro)
 **Progresso Global**: 93.75% (7.5/8 fases completas)
 **Estratégia**: Strangler Fig Pattern (Migração Incremental sem Downtime)
+
+---
+
+## 🎉 REFATORAÇÃO MAIS RECENTE
+
+### [2026-01-11] Harmonização Job x Intenção (Check-in Financeiro)
+
+**Problema Resolvido:**
+- Job noturno e intenção WhatsApp retornavam dados financeiros divergentes
+- Queries diferentes (COALESCE vs CASE) causavam inconsistências
+- Lógica de formatação duplicada em múltiplos lugares
+- Intenção não buscava faturas vencendo hoje (informação incompleta)
+
+**Solução Implementada:**
+- ✅ Criado `NightlyCheckinService.collect_financial_snapshot()` como fonte única de dados
+- ✅ Job noturno refatorado para usar método centralizado
+- ✅ `ContasAtrasadasIntent` refatorado para reutilizar lógica do serviço
+- ✅ Método `format_consolidated_checkin_message()` agora suporta modo read-only (`checkin_id=None`)
+- ✅ Query `get_contas_atrasadas_com_data_real()` depreciada (bug corrigido)
+
+**Arquivos Modificados:**
+- `app/services/nightly_checkin_service.py` - Adicionado `collect_financial_snapshot()` + modo read-only
+- `app/jobs/nightly_checkin.py` - Refatorado para usar método centralizado
+- `app/routes/webhooks/intents/notification_intents.py` - `ContasAtrasadasIntent` usa serviço
+- `app/services/queries/agendamentos_queries.py` - Query antiga depreciada
+- `app/services/queries/README.md` - Documentação atualizada
+
+**Impacto:**
+- 🎯 **Single Source of Truth**: Job e Intenções usam exatamente a mesma lógica
+- 🔒 **Consistência Garantida**: Dados sempre idênticos entre job automático e consulta manual
+- 🧹 **DRY Aplicado**: Eliminou ~100 linhas de código duplicado
+- 📚 **Manutenibilidade**: Mudanças futuras em um único lugar
+
+**Princípios Aplicados:**
+- Clean Architecture: Application Layer (`NightlyCheckinService`) centraliza lógica
+- DRY: Elimina duplicação de queries e formatação
+- Single Responsibility: Serviço tem responsabilidade clara de coleta de dados
 
 ---
 

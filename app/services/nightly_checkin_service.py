@@ -1,11 +1,31 @@
 """
-Serviço de Check-in Noturno
-Gerencia o fluxo de confirmação em lote de contas pendentes (Agendamentos)
+Serviço de Check-in Noturno - FONTE DA VERDADE para Dados Financeiros
+
+Este serviço centraliza TODA a lógica de coleta e formatação de dados financeiros:
+- Receitas/despesas pendentes (últimos 7 dias)
+- Contas atrasadas (>7 dias)
+- Faturas vencidas
+- Faturas vencendo hoje
+
+USOS:
+1. Job Noturno (nightly_checkin.py): Envia notificação automática às 22h
+2. Intenções WhatsApp (notification_intents.py): Responde queries manuais ("Contas atrasadas")
+3. APIs futuras: Dashboard web, relatórios, etc.
+
+IMPORTANTE: Nunca busque dados financeiros diretamente nas queries.
+SEMPRE use collect_financial_snapshot() para garantir consistência entre Job e Intenções.
+
+Gerencia também o fluxo de confirmação em lote de contas pendentes (Agendamentos).
+
+REFATORAÇÃO (2026-01-11):
+- Criado collect_financial_snapshot() como método centralizado de coleta
+- format_consolidated_checkin_message() agora suporta modo read-only (checkin_id=None)
+- Job e Intenções usam a mesma fonte de dados
 """
 
 from app.services.redis_service import redis_service
 from app.services import finance_service
-from app.services.queries import AgendamentosQueries
+from app.services.queries import AgendamentosQueries, FaturasQueries
 from app.utils import formatar_moeda
 from datetime import date, timedelta
 from sqlalchemy import text
@@ -15,7 +35,17 @@ import calendar
 
 
 class NightlyCheckinService:
-    """Gerencia o fluxo de check-in noturno para contas pendentes"""
+    """
+    Gerencia o fluxo de check-in noturno para contas pendentes.
+
+    FONTE DA VERDADE para dados financeiros do sistema.
+
+    Métodos principais:
+    - collect_financial_snapshot(): Coleta snapshot completo (Job + Intenções)
+    - format_consolidated_checkin_message(): Formata mensagem (com/sem interatividade)
+    - process_response(): Processa confirmações do usuário
+    - mark_bills_as_paid(): Cria transações para contas confirmadas
+    """
 
     # Keywords que interrompem o check-in (Escape Hatch)
     ESCAPE_KEYWORDS = [
@@ -59,6 +89,67 @@ class NightlyCheckinService:
         result = conn.execute(sql, params).fetchall()
 
         return [dict(row._mapping) for row in result]
+
+    @staticmethod
+    def collect_financial_snapshot(conn, usuario_id, target_date=None):
+        """
+        Coleta snapshot completo das finanças do usuário.
+        FONTE DA VERDADE para Job Noturno e Intenções WhatsApp.
+
+        Este método centraliza TODA a lógica de busca de dados financeiros,
+        garantindo que Job e Intenções retornem exatamente os mesmos dados.
+
+        Args:
+            conn: Conexão do banco
+            usuario_id: ID do usuário
+            target_date: Data alvo (padrão: hoje)
+
+        Returns:
+            dict: {
+                'pending_bills': list,      # Contas pendentes (últimos 7 dias)
+                'overdue_bills': list,      # Contas atrasadas (>7 dias)
+                'overdue_invoices': list,   # Faturas vencidas
+                'invoices_due_today': list  # Faturas vencendo hoje (alerta)
+            }
+        """
+        if target_date is None:
+            target_date = date.today()
+
+        hoje = target_date
+
+        # 1. Receitas/despesas pendentes (últimos 7 dias)
+        pending_bills = NightlyCheckinService.get_pending_bills(conn, usuario_id, hoje)
+
+        # 2. Contas atrasadas (>7 dias) - USA A MESMA QUERY DO JOB
+        sql_overdue = AgendamentosQueries.get_contas_atrasadas_checkin_noturno()
+        params_overdue = AgendamentosQueries.get_parametros_padrao(usuario_id, hoje)
+        params_overdue["hoje"] = hoje
+        params_overdue["data_minima"] = hoje - timedelta(days=30)
+        params_overdue["data_maxima"] = hoje - timedelta(days=7)
+
+        result_overdue = conn.execute(sql_overdue, params_overdue).fetchall()
+        overdue_bills = [dict(row._mapping) for row in result_overdue]
+
+        # 3. Faturas vencidas
+        sql_invoices = FaturasQueries.get_faturas_vencidas()
+        params_invoices = FaturasQueries.get_parametros_padrao(usuario_id, hoje)
+
+        result_invoices = conn.execute(sql_invoices, params_invoices).fetchall()
+        overdue_invoices = [dict(row._mapping) for row in result_invoices]
+
+        # 4. Faturas vencendo hoje (alerta preventivo)
+        sql_faturas_hoje = FaturasQueries.get_faturas_vencendo_hoje()
+        params_faturas_hoje = FaturasQueries.get_parametros_padrao(usuario_id, hoje)
+
+        result_faturas_hoje = conn.execute(sql_faturas_hoje, params_faturas_hoje).fetchall()
+        invoices_due_today = [dict(row._mapping) for row in result_faturas_hoje]
+
+        return {
+            'pending_bills': pending_bills,
+            'overdue_bills': overdue_bills,
+            'overdue_invoices': overdue_invoices,
+            'invoices_due_today': invoices_due_today
+        }
 
     @staticmethod
     def calculate_days_overdue(dia_execucao, hoje):
@@ -196,6 +287,7 @@ class NightlyCheckinService:
         Melhora UX evitando múltiplas notificações fragmentadas.
 
         CORRIGIDO (2026-01-08): Receitas agora são confirmáveis via check-in (antes eram apenas informativas).
+        CORRIGIDO (2026-01-11): Suporta modo read-only quando checkin_id=None (usado por intenções WhatsApp).
 
         Args:
             pending_bills: Lista de contas pendentes (últimos 7 dias) - receitas + despesas
@@ -203,7 +295,7 @@ class NightlyCheckinService:
             bills_due_today: Lista de contas que vencem hoje
             overdue_invoices: Lista de faturas vencidas (passado)
             faturas_vencendo_hoje: Lista de faturas que vencem HOJE
-            checkin_id: ID da sessão
+            checkin_id: ID da sessão Redis (se None, modo read-only sem instruções de confirmação)
 
         Returns:
             str: Mensagem consolidada formatada ou None se vazio
@@ -396,16 +488,23 @@ class NightlyCheckinService:
             msg += "\n"
 
         # 5. INSTRUÇÕES (apenas se houver despesas pendentes para confirmar)
+        # CORRIGIDO (2026-01-11): Modo condicional baseado em checkin_id
         if despesas_pendentes:
-            msg += "━━━━━━━━━━━━━━━━━━━━\n"
-            msg += "🔹 *COMO RESPONDER:*\n\n"
-            msg += "✅ Tudo pago:\n"
-            msg += "👍 ou \"Ok\"\n\n"
-            msg += "📝 Pagamento parcial:\n"
-            msg += "\"1\" / \"1 e 3\" / \"1, 2, 4\"\n\n"
-            msg += "⏸️ Não paguei ainda:\n"
-            msg += "\"Depois\" / \"Não\"\n\n"
-            msg += f"_ID: {checkin_id} | Expira em 1h_"
+            if checkin_id:
+                # Modo interativo (job noturno): instruções de confirmação
+                msg += "━━━━━━━━━━━━━━━━━━━━\n"
+                msg += "🔹 *COMO RESPONDER:*\n\n"
+                msg += "✅ Tudo pago:\n"
+                msg += "👍 ou \"Ok\"\n\n"
+                msg += "📝 Pagamento parcial:\n"
+                msg += "\"1\" / \"1 e 3\" / \"1, 2, 4\"\n\n"
+                msg += "⏸️ Não paguei ainda:\n"
+                msg += "\"Depois\" / \"Não\"\n\n"
+                msg += f"_ID: {checkin_id} | Expira em 1h_"
+            else:
+                # Modo read-only (intenção manual): sem interatividade
+                msg += "\n━━━━━━━━━━━━━━━━━━━━\n"
+                msg += "_💡 Para confirmar pagamentos, aguarde o check-in noturno automático._"
 
         return msg
 

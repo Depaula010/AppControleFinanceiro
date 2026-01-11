@@ -67,13 +67,19 @@ conta_id = AccountQueries.executar_busca_completa(
 ```python
 from app.services.queries import AgendamentosQueries
 
-# Contas pendentes (últimos 7 dias)
-sql = AgendamentosQueries.get_contas_pendentes_ultimos_7_dias()
+# Contas pendentes (últimos 7 dias) - para check-in noturno
+sql = AgendamentosQueries.get_contas_pendentes_checkin_noturno()
 params = AgendamentosQueries.get_parametros_padrao(usuario_id, date.today())
 pendentes = conn.execute(sql, params).fetchall()
 
-# Contas atrasadas (com data real calculada)
-sql = AgendamentosQueries.get_contas_atrasadas_com_data_real()
+# Contas atrasadas (>7 dias) - para check-in noturno
+# IMPORTANTE: Use get_contas_atrasadas_checkin_noturno() em vez de get_contas_atrasadas_com_data_real()
+# A versão _checkin_noturno usa CASE correto e evita bugs com datas futuras
+sql = AgendamentosQueries.get_contas_atrasadas_checkin_noturno()
+params = AgendamentosQueries.get_parametros_padrao(usuario_id, date.today())
+params["hoje"] = date.today()
+params["data_minima"] = date.today() - timedelta(days=30)
+params["data_maxima"] = date.today() - timedelta(days=7)
 atrasadas = conn.execute(sql, params).fetchall()
 
 # Contas que vencem hoje
@@ -186,10 +192,12 @@ Todos os lugares que usam essas queries foram corrigidos automaticamente! 🎉
 
 ## 📋 Lista Completa de Queries
 
-### AgendamentosQueries (3 queries)
-- `get_contas_pendentes_ultimos_7_dias()` - Check-in noturno
-- `get_contas_atrasadas_com_data_real()` - Alertas de atraso
-- `get_contas_vencendo_hoje()` - Alertas de vencimento
+### AgendamentosQueries (5 queries)
+- `get_contas_pendentes_checkin_noturno()` - Contas pendentes (últimos 7 dias) ✅ RECOMENDADO
+- `get_contas_atrasadas_checkin_noturno()` - Contas atrasadas (>7 dias) ✅ RECOMENDADO
+- ~~`get_contas_atrasadas_com_data_real()`~~ - ⚠️ DEPRECATED (use `get_contas_atrasadas_checkin_noturno()`)
+- `get_contas_pendentes_ultimos_7_dias()` - Versão antiga (ainda em uso)
+- `get_contas_vencendo_hoje()` - Contas que vencem hoje
 
 ### FaturasQueries (6 queries)
 - `get_faturas_vencidas()` - Faturas vencidas

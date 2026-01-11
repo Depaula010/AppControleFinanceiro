@@ -79,50 +79,31 @@ class NightlyCheckinJob(BaseJob):
 
                 hoje = date.today()
 
-                # Buscar TODAS as informações de uma vez
+                # REFATORADO (2026-01-11): Usar método centralizado para coletar dados
+                # Garante que Job e Intenções usam a mesma fonte de dados
                 with db_engine.connect() as conn:
-                    # 1. Contas pendentes (últimos 7 dias)
-                    pending_bills = NightlyCheckinService.get_pending_bills(
+                    # Coletar snapshot completo de dados financeiros
+                    snapshot = NightlyCheckinService.collect_financial_snapshot(
                         conn, usuario_id, hoje
                     )
+
+                    # Extrair dados do snapshot
+                    pending_bills = snapshot['pending_bills']
+                    overdue_bills = snapshot['overdue_bills']
+                    overdue_invoices = snapshot['overdue_invoices']
+                    faturas_vencendo_hoje = snapshot['invoices_due_today']
+                    bills_due_today = []  # Já incluídas em pending_bills
 
                     # DEBUG (2026-01-08): Separar receitas e despesas para log
                     receitas = [b for b in pending_bills if b['nome_grupo'] == 'Renda']
                     despesas = [b for b in pending_bills if b['nome_grupo'] == 'Despesa']
                     self._log(f"DEBUG - Pending bills: {len(receitas)} receita(s), {len(despesas)} despesa(s)")
 
-                    # 2. Contas atrasadas (>7 dias) - usar query específica para check-in (com COALESCE corrigido - 2026-01-07)
-                    from app.services.queries import AgendamentosQueries
-                    sql_overdue = AgendamentosQueries.get_contas_atrasadas_checkin_noturno()
-                    params_overdue = AgendamentosQueries.get_parametros_padrao(usuario_id, hoje)
-
-                    # DEBUG: Log dos parâmetros
-                    self._log(f"DEBUG - Parâmetros overdue_bills: {params_overdue}")
-
-                    result_overdue = conn.execute(sql_overdue, params_overdue).fetchall()
-                    overdue_bills = [dict(row._mapping) for row in result_overdue]
-
                     # DEBUG: Log das contas atrasadas retornadas
                     if overdue_bills:
                         self._log(f"DEBUG - {len(overdue_bills)} contas atrasadas encontradas:")
                         for bill in overdue_bills[:3]:  # Primeiras 3 para não lotar o log
                             self._log(f"  - {bill['descricao']}: vencimento_real={bill.get('data_vencimento_real')}, tipo_conta={bill.get('tipo_conta')}")
-
-                    # 3. Contas vencendo hoje (já incluídas em pending_bills, mas podemos passar vazio)
-                    bills_due_today = []  # Já incluídas em pending_bills
-
-                    # 4. Faturas vencidas
-                    from app.services.queries import FaturasQueries
-                    sql_invoices = FaturasQueries.get_faturas_vencidas()
-                    params_invoices = FaturasQueries.get_parametros_padrao(usuario_id, hoje)
-                    result_invoices = conn.execute(sql_invoices, params_invoices).fetchall()
-                    overdue_invoices = [dict(row._mapping) for row in result_invoices]
-
-                    # 5. Faturas que vencem HOJE (alerta preventivo)
-                    sql_faturas_hoje = FaturasQueries.get_faturas_vencendo_hoje()
-                    params_faturas_hoje = {"uid": usuario_id, "hoje": hoje}
-                    result_faturas_hoje = conn.execute(sql_faturas_hoje, params_faturas_hoje).fetchall()
-                    faturas_vencendo_hoje = [dict(row._mapping) for row in result_faturas_hoje]
 
                 # Se não há nada para mostrar, pular este usuário
                 if not pending_bills and not overdue_bills and not overdue_invoices and not faturas_vencendo_hoje:

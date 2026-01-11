@@ -212,9 +212,22 @@ class AgendamentosQueries:
         """
         Busca contas atrasadas com data de vencimento real calculada.
 
+        @deprecated desde 2026-01-11
+        Esta query foi substituída por get_contas_atrasadas_checkin_noturno()
+        que usa CASE em vez de COALESCE, corrigindo bug onde datas futuras
+        apareciam como atrasadas.
+
+        MIGRAÇÃO:
+        - Job Noturno: já migrado (2026-01-11)
+        - ContasAtrasadasIntent: já migrado (2026-01-11)
+        - Esta query será removida em versão futura
+
+        USO RECOMENDADO:
+        Use get_contas_atrasadas_checkin_noturno() para garantir consistência.
+
         Usado em:
-        - Alerta de contas atrasadas (job noturno)
-        - Intent "Contas Atrasadas" (chatbot)
+        - ❌ Alerta de contas atrasadas (job noturno) - MIGRADO
+        - ❌ Intent "Contas Atrasadas" (chatbot) - MIGRADO
 
         Usa CTE (Common Table Expression) para calcular a data real de vencimento
         considerando virada de mês.

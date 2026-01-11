@@ -235,138 +235,60 @@ class ContasAtrasadasIntent(BaseIntent):
         return None
 
     def execute(self) -> Dict[str, Any]:
-        """Busca contas e faturas atrasadas."""
+        """
+        Busca contas e faturas atrasadas.
+
+        REFATORADO (2026-01-11): Usa NightlyCheckinService.collect_financial_snapshot()
+        para garantir consistência com o job noturno.
+        """
         from app.services.nightly_checkin_service import NightlyCheckinService
-        from app.services.queries import AgendamentosQueries, FaturasQueries
         from datetime import date
 
         hoje = date.today()
 
-        # Buscar agendamentos atrasados usando query centralizada
-        # Ajustar parâmetros para buscar TODAS as contas atrasadas (não só +7 dias)
-        sql_contas = AgendamentosQueries.get_contas_atrasadas_com_data_real()
-        params_contas = AgendamentosQueries.get_parametros_padrao(self.usuario_id, hoje)
-        # Ajustar data_maxima para buscar TODAS as contas atrasadas (não filtrar por dias)
-        params_contas["data_maxima"] = hoje  # Inclui todas até hoje
-
-        contas_result = self.conn.execute(sql_contas, params_contas).fetchall()
-        contas_atrasadas = [dict(row._mapping) for row in contas_result]
-
-        # Buscar faturas vencidas usando query centralizada
-        sql_faturas = FaturasQueries.get_faturas_vencidas()
-        params_faturas = FaturasQueries.get_parametros_padrao(self.usuario_id, hoje)
-
-        faturas_result = self.conn.execute(sql_faturas, params_faturas).fetchall()
-        faturas_atrasadas = [dict(row._mapping) for row in faturas_result]
+        # Usar método centralizado (mesma fonte de dados do job noturno)
+        snapshot = NightlyCheckinService.collect_financial_snapshot(
+            self.conn, self.usuario_id, hoje
+        )
 
         return {
-            "contas_atrasadas": contas_atrasadas,
-            "faturas_atrasadas": faturas_atrasadas,
+            "snapshot": snapshot,
             "hoje": hoje
         }
 
     def format_response(self, data: Dict[str, Any]) -> str:
-        """Formata lista de contas atrasadas para WhatsApp."""
-        from app.utils import formatar_moeda
+        """
+        Formata lista de contas atrasadas para WhatsApp.
+
+        REFATORADO (2026-01-11): Usa NightlyCheckinService.format_consolidated_checkin_message()
+        com checkin_id=None (modo read-only) para garantir formatação idêntica ao job noturno.
+        """
         from app.services.nightly_checkin_service import NightlyCheckinService
 
-        contas = data["contas_atrasadas"]
-        faturas = data["faturas_atrasadas"]
-        hoje = data["hoje"]
+        snapshot = data["snapshot"]
 
-        # Separar receitas de despesas
-        despesas = [c for c in contas if c.get('nome_grupo') == 'Despesa']
-        receitas = [c for c in contas if c.get('nome_grupo') == 'Renda']
-
-        # Se não há nada atrasado
-        if not despesas and not faturas and not receitas:
+        # Verificar se há dados para mostrar
+        if (not snapshot['pending_bills'] and
+            not snapshot['overdue_bills'] and
+            not snapshot['overdue_invoices'] and
+            not snapshot['invoices_due_today']):
             return "✅ Você não tem contas atrasadas! Tudo em dia! 🎉"
 
-        msg = ""
+        # Usar método centralizado de formatação (modo read-only: checkin_id=None)
+        mensagem = NightlyCheckinService.format_consolidated_checkin_message(
+            pending_bills=snapshot['pending_bills'],
+            overdue_bills=snapshot['overdue_bills'],
+            bills_due_today=[],  # Intent não usa isso
+            overdue_invoices=snapshot['overdue_invoices'],
+            faturas_vencendo_hoje=snapshot['invoices_due_today'],
+            checkin_id=None  # Modo read-only: sem sessão Redis
+        )
 
-        # Seção 1: DESPESAS ATRASADAS (contas a pagar)
-        if despesas or faturas:
-            msg += "🔴 *CONTAS ATRASADAS*\n\n"
+        # Se format_consolidated_checkin_message retornar None (sem dados), retornar mensagem positiva
+        if not mensagem:
+            return "✅ Você não tem contas atrasadas! Tudo em dia! 🎉"
 
-            # Agrupar despesas por dia de vencimento
-            contas_por_dia = {}
-            for conta in despesas:
-                dia = conta['dia_execucao']
-                if dia not in contas_por_dia:
-                    contas_por_dia[dia] = []
-                contas_por_dia[dia].append(conta)
-
-            # Listar despesas agrupadas
-            total_despesas = 0
-            for dia in sorted(contas_por_dia.keys(), reverse=True):
-                # Calcular dias de atraso
-                dias_atraso = NightlyCheckinService.calculate_days_overdue(dia, hoje)
-
-                if dias_atraso == 1:
-                    msg += "*Venceu ontem*\n"
-                elif dias_atraso <= 7:
-                    msg += f"*Venceu dia {dia:02d}* ({dias_atraso} dias atrás)\n"
-                else:
-                    msg += f"*Venceu dia {dia:02d}* ({dias_atraso} dias atrás) ⚠️\n"
-
-                for conta in contas_por_dia[dia]:
-                    valor = conta['valor_previsto'] or 0
-                    total_despesas += valor
-                    msg += f"💸 {conta['descricao']} - {formatar_moeda(valor)}\n"
-
-            msg += "\n"
-
-            # Faturas atrasadas
-            total_faturas = 0
-            if faturas:
-                msg += "*💳 Faturas Vencidas:*\n"
-                for fatura in faturas:
-                    valor = fatura['valor_fatura'] or 0
-                    total_faturas += valor
-                    data_venc = fatura['data_vencimento']
-                    dias_atraso = (hoje - data_venc).days
-
-                    msg += f"• {fatura['cartao']} - {formatar_moeda(valor)}\n"
-                    msg += f"  Venceu em {data_venc.strftime('%d/%m')} ({dias_atraso} dias)\n"
-                msg += "\n"
-
-            # Totais de despesas
-            msg += "━━━━━━━━━━━━━━\n"
-            total_despesas_geral = total_despesas + total_faturas
-            msg += f"💸 *Total Despesas:* {formatar_moeda(total_despesas_geral)}\n"
-            msg += f"⚠️ *{len(despesas) + len(faturas)} {'conta' if len(despesas) + len(faturas) == 1 else 'contas'} atrasada{'s' if len(despesas) + len(faturas) != 1 else ''}*\n\n"
-
-        # Seção 2: RECEITAS PENDENTES (dinheiro que você ainda não recebeu)
-        if receitas:
-            msg += "💵 *RECEITAS PENDENTES*\n"
-            msg += "_Valores previstos que ainda não foram recebidos_\n\n"
-
-            # Agrupar receitas por dia de vencimento
-            receitas_por_dia = {}
-            for conta in receitas:
-                dia = conta['dia_execucao']
-                if dia not in receitas_por_dia:
-                    receitas_por_dia[dia] = []
-                receitas_por_dia[dia].append(conta)
-
-            # Listar receitas agrupadas
-            total_receitas = 0
-            for dia in sorted(receitas_por_dia.keys(), reverse=True):
-                dias_atraso = NightlyCheckinService.calculate_days_overdue(dia, hoje)
-                msg += f"*Previsto dia {dia:02d}* (há {dias_atraso} dias)\n"
-
-                for conta in receitas_por_dia[dia]:
-                    valor = conta['valor_previsto'] or 0
-                    total_receitas += valor
-                    msg += f"💵 {conta['descricao']} - {formatar_moeda(valor)}\n"
-
-                msg += "\n"
-
-            msg += "━━━━━━━━━━━━━━\n"
-            msg += f"💰 *Total Receitas Pendentes:* {formatar_moeda(total_receitas)}\n"
-            msg += f"ℹ️ *{len(receitas)} receita{'s' if len(receitas) != 1 else ''} aguardando confirmação*"
-
-        return msg
+        return mensagem
 
 
 __all__ = [
