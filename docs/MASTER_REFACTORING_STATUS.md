@@ -873,6 +873,30 @@ python -m pytest tests/unit/test_use_cases_transactions.py -v
 
 ---
 
-**Última Atualização**: 2025-12-28 por Claude Sonnet 4.5 (Auditoria de integração ORM)
+## 🔧 MELHORIAS DE PRODUÇÃO
+
+### Google Calendar Token Resilience (2026-01-09)
+**Problema resolvido:** Tokens revogados/expirados causavam logs de erro repetitivos
+
+**Implementação:**
+- ✅ Campo `needs_reconnect` adicionado ao modelo `GoogleCalendarTokenModel`
+- ✅ Migração Alembic criada e executada
+- ✅ Captura específica de `RefreshError` com `invalid_grant`
+- ✅ Query otimizada para excluir usuários com tokens inválidos
+- ✅ Logging apropriado (Warning para `invalid_grant`, Error para outros)
+- ✅ Job de alertas resiliente (não quebra em caso de token inválido)
+- ✅ Reconexão automática limpa flag `needs_reconnect`
+- ✅ **Notificação WhatsApp proativa** quando token é revogado (throttling 1x/semana via Redis)
+
+**Arquivos modificados:**
+- `app/infrastructure/database/models/google_calendar_token_model.py`
+- `app/services/google_calendar_oauth_service.py` (+ método `_notify_token_revoked`)
+- `app/services/calendar_alert_service.py`
+- `app/services/calendar_alert_config_service.py`
+- `migrations/versions/99422c2605c6_add_needs_reconnect_to_google_calendar_.py`
+
+---
+
+**Última Atualização**: 2026-01-09 por Claude Sonnet 4.5 (Google Calendar Token Resilience)
 **Status Geral**: 93.75% Completo (7.5/8 fases - Fase D parcial)
 **Próximo Marco CRÍTICO**: Integrar ORM em pelo menos 1 módulo (2-3 dias) - Validar arquitetura antes de avançar

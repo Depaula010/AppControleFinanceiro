@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from google.auth.transport.requests import Request
+from google.auth.exceptions import RefreshError
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from sqlalchemy import text
@@ -115,15 +116,16 @@ class GoogleCalendarOAuthService:
                 token_expiry = credentials.expiry
         
         sql = text("""
-            INSERT INTO GoogleCalendarTokens 
-            (usuario_id, access_token, refresh_token, token_expiry, scopes, updated_at)
-            VALUES (:uid, :access, :refresh, :expiry, :scopes, CURRENT_TIMESTAMP)
-            ON CONFLICT (usuario_id) 
-            DO UPDATE SET 
+            INSERT INTO GoogleCalendarTokens
+            (usuario_id, access_token, refresh_token, token_expiry, scopes, needs_reconnect, updated_at)
+            VALUES (:uid, :access, :refresh, :expiry, :scopes, FALSE, CURRENT_TIMESTAMP)
+            ON CONFLICT (usuario_id)
+            DO UPDATE SET
                 access_token = EXCLUDED.access_token,
                 refresh_token = COALESCE(EXCLUDED.refresh_token, GoogleCalendarTokens.refresh_token),
                 token_expiry = EXCLUDED.token_expiry,
                 scopes = EXCLUDED.scopes,
+                needs_reconnect = FALSE,
                 updated_at = CURRENT_TIMESTAMP
         """)
         
@@ -139,7 +141,107 @@ class GoogleCalendarOAuthService:
             conn.commit()
         
         print(f"[OAUTH] Credenciais salvas. Expiry: {token_expiry}")
-    
+
+    @staticmethod
+    def mark_token_as_invalid(usuario_id, error_message=None):
+        """
+        Marca token do usuário como necessitando reconexão.
+
+        Chamado quando detectamos invalid_grant ou outros erros de autenticação
+        que requerem reconexão manual do usuário.
+        """
+        if not db_engine:
+            raise Exception("Banco não configurado")
+
+        sql = text("""
+            UPDATE GoogleCalendarTokens
+            SET needs_reconnect = TRUE,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE usuario_id = :uid
+        """)
+
+        try:
+            with db_engine.connect() as conn:
+                with conn.begin():
+                    conn.execute(sql, {"uid": usuario_id})
+
+            msg = f"Token marcado como inválido para usuário {usuario_id}"
+            if error_message:
+                msg += f" - Razão: {error_message}"
+            print(f"[OAUTH] ⚠️ {msg}")
+
+            # Enviar notificação WhatsApp (1x por semana via Redis)
+            GoogleCalendarOAuthService._notify_token_revoked(usuario_id)
+
+        except Exception as e:
+            print(f"[OAUTH] ❌ Erro ao marcar token como inválido: {e}")
+
+    @staticmethod
+    def _notify_token_revoked(usuario_id):
+        """
+        Notifica usuário que o token do Google Calendar foi revogado/expirado.
+        Usa Redis para enviar apenas 1x por semana (throttling).
+
+        Args:
+            usuario_id: ID do usuário
+        """
+        try:
+            from app.services.redis_service import redis_service
+            from app.services.notification_service import enviar_notificacao_whatsapp
+            from app.config import BOT_WHATSAPP_URL, API_SECRET_KEY
+
+            # Verificar se já foi notificado recentemente (Redis)
+            redis_key = f"calendar_token_revoked_alert:{usuario_id}"
+
+            if redis_service.exists(redis_key):
+                print(f"[OAUTH] ℹ️ Usuário {usuario_id} já foi notificado esta semana sobre token revogado")
+                return
+
+            # Buscar número de WhatsApp do usuário
+            sql_user = text("SELECT numero_whatsapp FROM Usuarios WHERE id = :uid")
+
+            with db_engine.connect() as conn:
+                user_result = conn.execute(sql_user, {"uid": usuario_id}).fetchone()
+
+            if not user_result or not user_result.numero_whatsapp:
+                print(f"[OAUTH] ⚠️ Usuário {usuario_id} não possui número de WhatsApp cadastrado")
+                return
+
+            numero_whatsapp = user_result.numero_whatsapp
+
+            # Preparar mensagem específica para token revogado
+            mensagem = """⚠️ *Google Calendar - Reconexão Necessária*
+
+Detectamos que sua conexão com o Google Calendar expirou ou foi revogada.
+
+🔴 *Seus alertas de tarefas estão PAUSADOS* até você reconectar.
+
+✅ *Como resolver:*
+1. Acesse as configurações do app
+2. Clique em "Conectar Google Calendar"
+3. Autorize novamente o acesso
+
+_Esta notificação é enviada 1x por semana enquanto a reconexão for necessária._"""
+
+            # Enviar notificação
+            sucesso = enviar_notificacao_whatsapp(
+                numero=numero_whatsapp,
+                mensagem=mensagem,
+                bot_url=BOT_WHATSAPP_URL,
+                api_key=API_SECRET_KEY
+            )
+
+            if sucesso:
+                # Marcar como notificado (TTL: 7 dias = 1 semana)
+                redis_service.set_with_ttl(redis_key, "1", ttl_seconds=7*24*60*60)
+                print(f"[OAUTH] ✅ Notificação de token revogado enviada para usuário {usuario_id}")
+            else:
+                print(f"[OAUTH] ❌ Falha ao enviar notificação para usuário {usuario_id}")
+
+        except Exception as e:
+            # Não propagar erro - notificação é feature adicional, não deve quebrar o fluxo
+            print(f"[OAUTH] ❌ Erro ao enviar notificação de token revogado: {e}")
+
     @staticmethod
     def get_credentials(usuario_id):
         """
@@ -232,30 +334,62 @@ class GoogleCalendarOAuthService:
         )
 
         # Verificar expiração usando a propriedade nativa da biblioteca
-        # Agora funciona porque expiry_dt é naive UTC
         try:
             if credentials.expired:
                 print(f"[OAUTH] ⏰ Token expirado. Renovando...")
                 if credentials.refresh_token:
-                    credentials.refresh(Request())
-                    GoogleCalendarOAuthService.save_credentials(usuario_id, credentials)
-                    print(f"[OAUTH] ✅ Token renovado com sucesso")
+                    try:
+                        credentials.refresh(Request())
+                        GoogleCalendarOAuthService.save_credentials(usuario_id, credentials)
+                        print(f"[OAUTH] ✅ Token renovado com sucesso")
+                    except RefreshError as refresh_err:
+                        error_str = str(refresh_err)
+                        # Detectar especificamente invalid_grant
+                        if 'invalid_grant' in error_str.lower():
+                            print(f"[OAUTH] ⚠️ Token revogado/expirado (invalid_grant) para usuário {usuario_id}")
+                            GoogleCalendarOAuthService.mark_token_as_invalid(usuario_id, "invalid_grant")
+                            return None
+                        else:
+                            # Outro tipo de RefreshError (pode ser temporário)
+                            print(f"[OAUTH] ❌ Erro ao renovar token: {refresh_err}")
+                            return None
                 else:
                     print(f"[OAUTH] ❌ Token expirado sem refresh_token")
+                    GoogleCalendarOAuthService.mark_token_as_invalid(usuario_id, "no_refresh_token")
                     return None
             else:
                 print(f"[OAUTH] ✅ Token ainda válido")
+
+        except RefreshError as refresh_err:
+            error_str = str(refresh_err)
+            if 'invalid_grant' in error_str.lower():
+                print(f"[OAUTH] ⚠️ Token revogado/expirado (invalid_grant) para usuário {usuario_id}")
+                GoogleCalendarOAuthService.mark_token_as_invalid(usuario_id, "invalid_grant")
+                return None
+            else:
+                print(f"[OAUTH] ❌ Erro ao verificar expiração: {refresh_err}")
+                return None
+
         except Exception as e:
-            print(f"[OAUTH] ❌ Erro ao verificar expiração: {e}")
-            # Se falhar, tentar renovar
+            print(f"[OAUTH] ❌ Erro inesperado ao verificar expiração: {e}")
+            # Não marcar como inválido para erros genéricos (podem ser temporários)
             if credentials.refresh_token:
                 try:
                     print(f"[OAUTH] Tentando renovar mesmo assim...")
                     credentials.refresh(Request())
                     GoogleCalendarOAuthService.save_credentials(usuario_id, credentials)
                     print(f"[OAUTH] ✅ Token renovado (fallback)")
+                except RefreshError as refresh_err:
+                    error_str = str(refresh_err)
+                    if 'invalid_grant' in error_str.lower():
+                        print(f"[OAUTH] ⚠️ Token revogado/expirado (invalid_grant) para usuário {usuario_id}")
+                        GoogleCalendarOAuthService.mark_token_as_invalid(usuario_id, "invalid_grant")
+                        return None
+                    else:
+                        print(f"[OAUTH] ❌ Falha ao renovar: {refresh_err}")
+                        return None
                 except Exception as e2:
-                    print(f"[OAUTH] ❌ Falha ao renovar: {e2}")
+                    print(f"[OAUTH] ❌ Falha ao renovar (fallback): {e2}")
                     return None
             else:
                 return None

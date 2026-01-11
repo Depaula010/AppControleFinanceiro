@@ -100,7 +100,24 @@ class CalendarAlertConfigService:
             JOIN Usuarios u ON cac.usuario_id = u.id
             JOIN GoogleCalendarTokens gct ON u.id = gct.usuario_id
             WHERE cac.alertas_tarefas_ativo = TRUE
+              AND (gct.needs_reconnect = FALSE OR gct.needs_reconnect IS NULL)
         """)
 
         with db_engine.connect() as conn:
-            return conn.execute(sql).fetchall()
+            result = conn.execute(sql).fetchall()
+
+            # Logging: contar usuários excluídos por needs_reconnect
+            sql_excluded = text("""
+                SELECT COUNT(*) as total
+                FROM CalendarAlertConfigs cac
+                JOIN Usuarios u ON cac.usuario_id = u.id
+                JOIN GoogleCalendarTokens gct ON u.id = gct.usuario_id
+                WHERE cac.alertas_tarefas_ativo = TRUE
+                  AND gct.needs_reconnect = TRUE
+            """)
+            excluded = conn.execute(sql_excluded).fetchone()
+
+            if excluded and excluded.total > 0:
+                print(f"[CALENDAR-ALERT-CONFIG] ℹ️ {excluded.total} usuário(s) excluído(s) - necessitam reconexão")
+
+            return result

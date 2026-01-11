@@ -90,6 +90,11 @@ class CalendarAlertService:
 
             service = GoogleCalendarOAuthService.get_calendar_service(usuario_id)
 
+            # Se não conseguiu obter service (token inválido), retornar lista vazia
+            if service is None:
+                print(f"[CALENDAR-ALERT] ⚠️ Usuário {usuario_id} não conectou Google Calendar ou token inválido")
+                return []
+
             # Horário atual no Brasil
             agora = datetime.now(TIMEZONE_BR)
 
@@ -175,7 +180,16 @@ class CalendarAlertService:
             return eventos_com_hora
 
         except Exception as e:
-            print(f"[CALENDAR-ALERT] ❌ Erro ao buscar eventos: {e}")
+            error_message = str(e)
+
+            # Erro específico: Usuário não conectou Google Calendar (credentials=None)
+            if "não conectou Google Calendar" in error_message or "credentials" in error_message.lower():
+                print(f"[CALENDAR-ALERT] ⚠️ Google Calendar não conectado ou token inválido para usuário {usuario_id}")
+                # Retornar lista vazia - não é um erro fatal
+                return []
+
+            # Outros erros: logar e retornar lista vazia para não quebrar o job
+            print(f"[CALENDAR-ALERT] ❌ Erro ao buscar eventos para usuário {usuario_id}: {e}")
             import traceback
             traceback.print_exc()
             return []
@@ -307,22 +321,11 @@ class CalendarAlertService:
             return alertas_enviados
 
         except Exception as e:
-            error_message = str(e)
-
-            # Verificar se é erro de Calendar desconectado
-            if "não conectou Google Calendar" in error_message or "credentials" in error_message.lower():
-                print(f"[CALENDAR-ALERT] ⚠️ Google Calendar desconectado para usuário {usuario_id}")
-
-                # Notificar usuário via WhatsApp (1x por semana usando Redis)
-                CalendarAlertService._notify_calendar_disconnected(usuario_id, numero_whatsapp)
-
-                return 0
-            else:
-                # Outros erros: apenas logar
-                print(f"[CALENDAR-ALERT] ❌ Erro ao processar alertas para usuário {usuario_id}: {e}")
-                import traceback
-                traceback.print_exc()
-                return 0
+            # Erros já são tratados em get_upcoming_events - este catch é safety net
+            print(f"[CALENDAR-ALERT] ❌ Erro inesperado ao processar usuário {usuario_id}: {e}")
+            import traceback
+            traceback.print_exc()
+            return 0
 
     @staticmethod
     def _notify_calendar_disconnected(usuario_id, numero_whatsapp):

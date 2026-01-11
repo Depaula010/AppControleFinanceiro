@@ -13,6 +13,7 @@ from sqlalchemy import (
     String,
     Text,
     DateTime,
+    Boolean,
     ForeignKey,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -33,6 +34,7 @@ class GoogleCalendarTokenModel(Base):
         access_token: Token de acesso OAuth2 (criptografado)
         refresh_token: Token de atualização OAuth2 (criptografado)
         token_expiry: Data/hora de expiração do access_token
+        needs_reconnect: Indica se o token foi revogado/expirado e necessita reconexão manual
         created_at: Data/hora de criação do registro
         updated_at: Data/hora da última atualização
 
@@ -81,6 +83,14 @@ class GoogleCalendarTokenModel(Base):
         comment="Data/hora de expiração do access_token"
     )
 
+    needs_reconnect: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="FALSE",
+        comment="Indica se o token foi revogado/expirado e necessita reconexão manual"
+    )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -114,6 +124,11 @@ class GoogleCalendarTokenModel(Base):
     def has_refresh_token(self) -> bool:
         """Retorna True se possui refresh_token."""
         return self.refresh_token is not None
+
+    @property
+    def is_valid(self) -> bool:
+        """Retorna True se o token está válido e não necessita reconexão."""
+        return not self.needs_reconnect and self.has_refresh_token
 
     def __repr__(self) -> str:
         return (
