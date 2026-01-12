@@ -471,7 +471,6 @@ class NightlyCheckinService:
                 numero_global += 1
 
             msg += f"\n💸 *Total atrasado:* {formatar_moeda(total_atrasado)}\n"
-            msg += "_Digite 'Pendencias' para ver todos os detalhes._\n\n"
 
         # 4. FATURAS VENCIDAS (se houver) - continua numeração
         if overdue_invoices:
