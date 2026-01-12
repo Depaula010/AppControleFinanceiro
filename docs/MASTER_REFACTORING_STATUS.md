@@ -23,6 +23,7 @@
 - ✅ Job noturno refatorado para usar método centralizado
 - ✅ `ContasAtrasadasIntent` refatorado para reutilizar lógica do serviço
 - ✅ Método `format_consolidated_checkin_message()` agora suporta modo read-only (`checkin_id=None`)
+- ✅ Título contextual: "CHECK-IN NOTURNO" (job automático) vs "RESUMO FINANCEIRO" (consulta manual)
 - ✅ Query `get_contas_atrasadas_com_data_real()` depreciada (bug corrigido)
 
 **Arquivos Modificados:**
@@ -37,6 +38,7 @@
 - 🔒 **Consistência Garantida**: Dados sempre idênticos entre job automático e consulta manual
 - 🧹 **DRY Aplicado**: Eliminou ~100 linhas de código duplicado
 - 📚 **Manutenibilidade**: Mudanças futuras em um único lugar
+- 🎨 **UX Melhorada**: Título contextual diferencia job automático de consulta manual
 
 **Princípios Aplicados:**
 - Clean Architecture: Application Layer (`NightlyCheckinService`) centraliza lógica

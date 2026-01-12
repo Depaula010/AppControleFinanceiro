@@ -288,6 +288,7 @@ class NightlyCheckinService:
 
         CORRIGIDO (2026-01-08): Receitas agora são confirmáveis via check-in (antes eram apenas informativas).
         CORRIGIDO (2026-01-11): Suporta modo read-only quando checkin_id=None (usado por intenções WhatsApp).
+        CORRIGIDO (2026-01-11): Título contextual - "CHECK-IN NOTURNO" (job) vs "RESUMO FINANCEIRO" (intenção).
 
         Args:
             pending_bills: Lista de contas pendentes (últimos 7 dias) - receitas + despesas
@@ -295,7 +296,7 @@ class NightlyCheckinService:
             bills_due_today: Lista de contas que vencem hoje
             overdue_invoices: Lista de faturas vencidas (passado)
             faturas_vencendo_hoje: Lista de faturas que vencem HOJE
-            checkin_id: ID da sessão Redis (se None, modo read-only sem instruções de confirmação)
+            checkin_id: ID da sessão Redis (se None, modo read-only com título "RESUMO FINANCEIRO")
 
         Returns:
             str: Mensagem consolidada formatada ou None se vazio
@@ -397,7 +398,11 @@ class NightlyCheckinService:
             return None
 
         # Construir mensagem consolidada
-        msg = "🌙 *CHECK-IN NOTURNO* 🌙\n\n"
+        # CORRIGIDO (2026-01-11): Título contextual baseado no modo
+        if checkin_id:
+            msg = "🌙 *CHECK-IN NOTURNO* 🌙\n\n"
+        else:
+            msg = "📊 *RESUMO FINANCEIRO* 📊\n\n"
 
         # 0. DÉBITO CARTÃO DE CRÉDITO (informativo - não numerado)
         if lembretes_cartao:
