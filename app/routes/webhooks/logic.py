@@ -1411,8 +1411,7 @@ def handle_whatsapp_webhook():
 
             # ===== INTENÇÃO: Vencimentos Hoje =====
             elif intent == 'Vencimentos Hoje':
-                from datetime import datetime
-                from zoneinfo import ZoneInfo
+                # Nota: datetime e ZoneInfo já estão importados no topo do arquivo
                 from app.services.finance_service import get_vencimentos_periodo, format_vencimentos_message
 
                 try:
@@ -1443,8 +1442,7 @@ def handle_whatsapp_webhook():
 
             # ===== INTENÇÃO: Vencimentos Amanhã =====
             elif intent == 'Vencimentos Amanhã':
-                from datetime import datetime, timedelta
-                from zoneinfo import ZoneInfo
+                # Nota: datetime, timedelta e ZoneInfo já estão importados no topo do arquivo
                 from app.services.finance_service import get_vencimentos_periodo, format_vencimentos_message
 
                 try:
@@ -1476,8 +1474,7 @@ def handle_whatsapp_webhook():
 
             # ===== INTENÇÃO: Vencimentos Essa Semana =====
             elif intent == 'Vencimentos Essa Semana':
-                from datetime import datetime, timedelta
-                from zoneinfo import ZoneInfo
+                # Nota: datetime, timedelta e ZoneInfo já estão importados no topo do arquivo
                 from app.services.finance_service import get_vencimentos_periodo, format_vencimentos_message
 
                 try:
