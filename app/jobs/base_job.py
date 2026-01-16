@@ -34,6 +34,9 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Optional
 
+# Import do Redis será feito dentro dos métodos para evitar import circular
+# durante a inicialização do path
+
 # Adicionar diretório raiz ao path para encontrar o módulo 'app'
 # Isso permite que os jobs funcionem tanto via cron quanto executados manualmente
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -61,6 +64,66 @@ class BaseJob(ABC):
         """Inicializa o job. Pode ser sobrescrito se necessário."""
         self._start_time: Optional[datetime] = None
         self._end_time: Optional[datetime] = None
+        self._lock_acquired: bool = False
+
+    def _get_redis_service(self):
+        """
+        Obtém o serviço Redis de forma lazy para evitar import circular.
+        O import é feito dentro do Flask app context.
+        """
+        try:
+            from app.services.redis_service import redis_service
+            return redis_service
+        except Exception as e:
+            print(f"[{self.get_job_name()}] Aviso: Redis não disponível: {e}")
+            return None
+
+    def _get_lock_key(self) -> str:
+        """Retorna a chave Redis para o lock deste job."""
+        return f"job_lock:{self.get_job_name()}"
+
+    def _acquire_job_lock(self) -> bool:
+        """
+        Tenta adquirir lock distribuído para o job.
+
+        Usa Redis SET NX para garantir que apenas uma instância do job
+        execute por vez, mesmo em ambiente distribuído.
+
+        Returns:
+            bool: True se adquiriu lock, False se outro processo já está executando
+        """
+        redis_service = self._get_redis_service()
+        if redis_service is None or not redis_service.is_connected():
+            # Se Redis não disponível, permitir execução (fail-open)
+            self._log("Redis indisponível, executando sem lock distribuído", level="WARNING")
+            return True
+
+        lock_key = self._get_lock_key()
+        # TTL de 5 minutos - tempo máximo esperado de execução
+        # Se job travar, lock expira automaticamente
+        acquired = redis_service.set_if_not_exists(lock_key, "running", ttl_seconds=300)
+
+        if not acquired:
+            self._log("Job já em execução por outro processo, pulando...", level="WARNING")
+        else:
+            self._lock_acquired = True
+            self._log(f"Lock adquirido (key: {lock_key}, TTL: 5min)")
+
+        return acquired
+
+    def _release_job_lock(self):
+        """Libera o lock do job após execução."""
+        if not self._lock_acquired:
+            return
+
+        redis_service = self._get_redis_service()
+        if redis_service is None or not redis_service.is_connected():
+            return
+
+        lock_key = self._get_lock_key()
+        redis_service.delete(lock_key)
+        self._lock_acquired = False
+        self._log(f"Lock liberado (key: {lock_key})")
 
     @abstractmethod
     def get_job_name(self) -> str:
@@ -175,9 +238,10 @@ class BaseJob(ABC):
         Este método:
         1. Faz log de início
         2. Cria Flask app context
-        3. Executa a lógica específica (execute())
-        4. Trata erros de forma consistente
-        5. Faz log de fim
+        3. Tenta adquirir lock distribuído (Redis SET NX)
+        4. Executa a lógica específica (execute())
+        5. Trata erros de forma consistente
+        6. Libera lock e faz log de fim
 
         NÃO sobrescreva este método. Sobrescreva execute() ao invés.
         """
@@ -193,7 +257,14 @@ class BaseJob(ABC):
             # 3. Executar dentro do contexto
             with app_context:
                 try:
-                    # Executar lógica específica do job
+                    # 3.1 NOVO: Tentar adquirir lock distribuído
+                    # Isso impede que múltiplas instâncias do job executem simultaneamente
+                    if not self._acquire_job_lock():
+                        # Outro processo já está executando este job
+                        # Retornar sucesso (não é erro, apenas skip)
+                        return 0
+
+                    # 3.2 Executar lógica específica do job
                     self.execute()
                     success = True
 
@@ -207,6 +278,10 @@ class BaseJob(ABC):
                     traceback.print_exc()
 
                     raise  # Re-raise para ser capturado pelo except externo
+
+                finally:
+                    # 3.3 NOVO: Liberar lock dentro do app context
+                    self._release_job_lock()
 
         except KeyboardInterrupt:
             self._log("Job interrompido pelo usuário (Ctrl+C)", level="WARNING")

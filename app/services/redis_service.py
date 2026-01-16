@@ -67,6 +67,28 @@ class RedisService:
             print(f"[REDIS] Erro ao verificar {key}: {e}")
             return False
 
+    def set_if_not_exists(self, key: str, value: str, ttl_seconds: int) -> bool:
+        """
+        Tenta definir a chave apenas se ela NÃO existir (atômico).
+        Usa SET NX EX para garantir atomicidade - ideal para locks distribuídos.
+
+        Args:
+            key: Chave Redis
+            value: Valor a definir
+            ttl_seconds: Tempo de expiração em segundos
+
+        Returns:
+            bool: True se definiu (chave não existia), False se já existia
+        """
+        if not self.is_connected():
+            return False
+        try:
+            result = self.redis_client.set(key, value, ex=ttl_seconds, nx=True)
+            return result is True
+        except Exception as e:
+            print(f"[REDIS] Erro em set_if_not_exists {key}: {e}")
+            return False
+
     def get_keys_by_pattern(self, pattern):
         """
         Busca chaves que correspondem a um padrão.

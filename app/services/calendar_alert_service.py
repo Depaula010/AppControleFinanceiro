@@ -36,42 +36,59 @@ class CalendarAlertService:
         return f"calendar_alert:{hash_id}"
 
     @staticmethod
-    def _is_alert_already_sent(usuario_id, event_id, event_start):
+    def _try_claim_alert(usuario_id, event_id, event_start) -> bool:
         """
-        Verifica se alerta já foi enviado (usando Redis para escala SaaS).
+        Tenta reivindicar o alerta atomicamente usando SET NX.
+
+        Este método resolve a race condition TOCTOU (Time-of-Check-Time-of-Use)
+        ao usar uma operação atômica do Redis para "reservar" o alerta ANTES de enviá-lo.
+
+        Args:
+            usuario_id: ID do usuário
+            event_id: ID do evento no Google Calendar
+            event_start: Horário de início do evento (ISO format)
 
         Returns:
-            bool: True se já foi enviado, False caso contrário
+            bool: True se conseguiu claim (pode enviar), False se outro processo já tem
         """
         if not redis_service.is_connected():
-            # Se Redis não está disponível, não bloquear (enviar o alerta)
-            print("[CALENDAR-ALERT] ⚠️ Redis não disponível, pulando verificação de duplicatas")
-            return False
-
-        key = CalendarAlertService._generate_alert_key(usuario_id, event_id, event_start)
-        exists = redis_service.get(key)
-
-        if exists:
-            print(f"[CALENDAR-ALERT] 🔄 Alerta já enviado (key: {key})")
+            # Se Redis não disponível, prosseguir (fail-open) mas logar warning
+            print("[CALENDAR-ALERT] ⚠️ Redis indisponível, prosseguindo sem lock (fail-open)")
             return True
 
-        return False
+        key = CalendarAlertService._generate_alert_key(usuario_id, event_id, event_start)
+
+        # SET NX EX: Define a chave APENAS se não existir (atômico)
+        # TTL de 2 horas (7200 segundos) - mesmo valor anterior
+        claimed = redis_service.set_if_not_exists(key, "processing", ttl_seconds=7200)
+
+        if not claimed:
+            print(f"[CALENDAR-ALERT] 🔄 Alerta já em processamento por outro processo (key: {key})")
+        else:
+            print(f"[CALENDAR-ALERT] ✅ Claim adquirido (key: {key}, TTL: 2h)")
+
+        return claimed
 
     @staticmethod
-    def _mark_alert_as_sent(usuario_id, event_id, event_start):
+    def _release_claim(usuario_id, event_id, event_start):
         """
-        Marca alerta como enviado no Redis (TTL de 2 horas).
-        Isso evita duplicatas mesmo com múltiplas instâncias do servidor (escalável para SaaS).
+        Libera claim em caso de falha no envio (permite retry no próximo ciclo).
+
+        Chamado quando:
+        - O envio falhou (WhatsApp retornou erro)
+        - Ocorreu uma exceção durante o envio
+
+        Args:
+            usuario_id: ID do usuário
+            event_id: ID do evento no Google Calendar
+            event_start: Horário de início do evento (ISO format)
         """
         if not redis_service.is_connected():
             return
 
         key = CalendarAlertService._generate_alert_key(usuario_id, event_id, event_start)
-
-        # TTL de 2 horas (7200 segundos)
-        # Tempo suficiente para garantir que não vai duplicar, mas não muito longo
-        redis_service.setex(key, 7200, "1")
-        print(f"[CALENDAR-ALERT] ✅ Alerta marcado como enviado (key: {key}, TTL: 2h)")
+        redis_service.delete(key)
+        print(f"[CALENDAR-ALERT] 🔓 Claim liberado para retry (key: {key})")
 
     @staticmethod
     def get_upcoming_events(usuario_id, minutos_antes):
@@ -294,28 +311,38 @@ class CalendarAlertService:
                 print(f"[CALENDAR-ALERT] Nenhum evento próximo para usuário {usuario_id}")
                 return 0
 
-            # Enviar alerta para cada evento (com proteção anti-duplicação)
+            # Enviar alerta para cada evento (com proteção anti-duplicação via CLAIM ATÔMICO)
             alertas_enviados = 0
             for evento in eventos:
                 event_id = evento.get('id')
                 event_start = evento.get('start')
 
-                # PROTEÇÃO ANTI-DUPLICAÇÃO: Verificar se já foi enviado (usando Redis)
-                if CalendarAlertService._is_alert_already_sent(usuario_id, event_id, event_start):
-                    print(f"[CALENDAR-ALERT] ⏭️ Pulando evento '{evento.get('summary')}' - alerta já enviado")
+                # CLAIM ATÔMICO: Reserva o alerta ANTES de enviar (resolve race condition TOCTOU)
+                # Se outro processo já tem o claim, pula este evento
+                if not CalendarAlertService._try_claim_alert(usuario_id, event_id, event_start):
+                    print(f"[CALENDAR-ALERT] ⏭️ Pulando evento '{evento.get('summary')}' - outro processo já processando")
                     continue
 
-                # Enviar alerta
-                sucesso = CalendarAlertService.send_event_alert(
-                    numero_whatsapp=numero_whatsapp,
-                    event=evento,
-                    minutos_antes=minutos_antes
-                )
+                # Enviar alerta com proteção de rollback
+                try:
+                    sucesso = CalendarAlertService.send_event_alert(
+                        numero_whatsapp=numero_whatsapp,
+                        event=evento,
+                        minutos_antes=minutos_antes
+                    )
 
-                if sucesso:
-                    # Marcar como enviado no Redis (escalável para SaaS)
-                    CalendarAlertService._mark_alert_as_sent(usuario_id, event_id, event_start)
-                    alertas_enviados += 1
+                    if sucesso:
+                        # Claim já está no Redis, alerta enviado com sucesso
+                        alertas_enviados += 1
+                    else:
+                        # Envio falhou - liberar claim para permitir retry no próximo ciclo
+                        CalendarAlertService._release_claim(usuario_id, event_id, event_start)
+
+                except Exception as e:
+                    # Erro durante envio - liberar claim para retry
+                    CalendarAlertService._release_claim(usuario_id, event_id, event_start)
+                    print(f"[CALENDAR-ALERT] ❌ Erro ao enviar alerta para evento '{evento.get('summary')}': {e}")
+                    # Continua para o próximo evento ao invés de parar tudo
 
             print(f"[CALENDAR-ALERT] ✅ {alertas_enviados} alertas enviados para usuário {usuario_id}")
             return alertas_enviados
