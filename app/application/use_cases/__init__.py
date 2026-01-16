@@ -59,6 +59,14 @@ from .reports import (
     GenerateCategoryReportUseCase,
 )
 
+# Budget
+from .budget import (
+    ValidateBudgetInput,
+    BudgetValidationDetail,
+    ValidateBudgetOutput,
+    ValidateBudgetUseCase,
+)
+
 
 __all__ = [
     # Transactions
@@ -98,4 +106,9 @@ __all__ = [
     'CategoryDetail',
     'GenerateCategoryReportOutput',
     'GenerateCategoryReportUseCase',
+    # Budget
+    'ValidateBudgetInput',
+    'BudgetValidationDetail',
+    'ValidateBudgetOutput',
+    'ValidateBudgetUseCase',
 ]

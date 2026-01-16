@@ -161,7 +161,17 @@ class TransactionConfirmationService:
                 
                 mensagem += f"🏦 {conta_nome} ({tipo_pag_label})\n"
 
-        mensagem += f"📂 {categoria_sugerida_nome}\n\n"
+        mensagem += f"📂 {categoria_sugerida_nome}\n"
+
+        # AVISO DE LIMITE DE POTE (se houver)
+        budget_warning = transacao_data.get('budget_warning')
+        if budget_warning:
+            mensagem += "\n"
+            mensagem += "━━━━━━━━━━━━━━━━━━━━\n"
+            mensagem += "⚠️ *AVISO DE ORÇAMENTO*\n\n"
+            mensagem += f"{budget_warning}\n"
+
+        mensagem += "\n"
 
         # OPÇÕES (mais direto e claro)
         mensagem += "━━━━━━━━━━━━━━━━━━━━\n"

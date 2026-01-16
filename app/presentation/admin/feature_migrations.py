@@ -605,13 +605,112 @@ def cleanup_deprecated_notification_fields():
     return "<pre>" + "\n".join(output) + "</pre>", 200
 
 
+@feature_migrations_bp.route('/setup-budget-violations', methods=['GET'])
+@handle_errors(tag="SETUP-BUDGET-VIOLATIONS")
+def setup_budget_violations():
+    """
+    Cria a tabela BudgetViolations para auditoria de limites de potes.
+
+    Esta tabela registra quando uma transacao ultrapassa o limite de um pote,
+    permitindo analise posterior do comportamento financeiro do usuario.
+
+    Exemplo:
+    GET http://seu-backend.com/admin/setup-budget-violations
+    """
+    output = []
+    output.append("="*60)
+    output.append("SETUP: Budget Violations (Auditoria de Limites)")
+    output.append("="*60)
+
+    # Migration 1: Criar tabela BudgetViolations
+    output.append("\n[1/2] Criando tabela BudgetViolations...")
+
+    sql_create_table = text("""
+        CREATE TABLE IF NOT EXISTS BudgetViolations (
+            id SERIAL PRIMARY KEY,
+            usuario_id INT NOT NULL REFERENCES Usuarios(id) ON DELETE CASCADE,
+            pote_id INT NOT NULL REFERENCES PotesDeGastos(id) ON DELETE CASCADE,
+            transacao_id INT REFERENCES Transacoes(id) ON DELETE SET NULL,
+
+            valor_transacao NUMERIC(15, 2) NOT NULL,
+            valor_limite NUMERIC(15, 2) NOT NULL,
+            valor_gasto_antes NUMERIC(15, 2) NOT NULL,
+            valor_gasto_depois NUMERIC(15, 2) NOT NULL,
+            percentual_usado NUMERIC(5, 2) NOT NULL,
+
+            acao VARCHAR(20) NOT NULL CHECK (acao IN ('CONFIRMADO', 'CANCELADO')),
+
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+    """)
+
+    with db_engine.connect() as conn:
+        conn.begin()
+        conn.execute(sql_create_table)
+        conn.commit()
+
+    output.append("OK - Tabela BudgetViolations criada!")
+
+    # Migration 2: Criar indices
+    output.append("\n[2/2] Criando indices para otimizar consultas...")
+
+    sql_create_indexes = text("""
+        CREATE INDEX IF NOT EXISTS idx_budget_violations_usuario
+        ON BudgetViolations(usuario_id);
+
+        CREATE INDEX IF NOT EXISTS idx_budget_violations_pote
+        ON BudgetViolations(pote_id);
+
+        CREATE INDEX IF NOT EXISTS idx_budget_violations_data
+        ON BudgetViolations(created_at);
+    """)
+
+    with db_engine.connect() as conn:
+        conn.begin()
+        conn.execute(sql_create_indexes)
+        conn.commit()
+
+    output.append("OK - Indices criados!")
+
+    # Adicionar comentarios
+    sql_comments = text("""
+        COMMENT ON TABLE BudgetViolations IS 'Registra transacoes que ultrapassaram limites de potes para auditoria';
+        COMMENT ON COLUMN BudgetViolations.acao IS 'CONFIRMADO = usuario prosseguiu, CANCELADO = usuario desistiu';
+    """)
+
+    with db_engine.connect() as conn:
+        conn.begin()
+        conn.execute(sql_comments)
+        conn.commit()
+
+    output.append("\n" + "="*60)
+    output.append("SUCESSO! Tabela de auditoria configurada")
+    output.append("="*60)
+    output.append("\nO que foi feito:")
+    output.append("1. Tabela BudgetViolations criada")
+    output.append("2. Indices de performance criados")
+    output.append("\nCampos da tabela:")
+    output.append("- usuario_id: Dono da transacao")
+    output.append("- pote_id: Pote que foi ultrapassado")
+    output.append("- transacao_id: Transacao criada (NULL se cancelada)")
+    output.append("- valor_transacao: Valor da despesa")
+    output.append("- valor_limite: Limite do pote no momento")
+    output.append("- valor_gasto_antes: Total gasto antes")
+    output.append("- valor_gasto_depois: Total apos transacao")
+    output.append("- percentual_usado: % do limite usado")
+    output.append("- acao: CONFIRMADO ou CANCELADO")
+
+    return "<pre>" + "\n".join(output) + "</pre>", 200
+
+
 @feature_migrations_bp.route('/oauth-config-check', methods=['GET'])
 @handle_errors(tag="OAUTH-CONFIG-CHECK")
 def oauth_config_check():
     """
-    Endpoint para verificar configuração OAuth do Google Calendar.
+    Endpoint para verificar configuracao OAuth do Google Calendar.
 
-    Retorna se as configurações estão presentes e um preview dos valores.
+    Retorna se as configuracoes estao presentes e um preview dos valores.
 
     Exemplo:
     GET http://localhost:5000/admin/oauth-config-check
@@ -619,7 +718,7 @@ def oauth_config_check():
     from app.config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI
 
     return ApiResponse.success(
-        "Configuração OAuth verificada",
+        "Configuracao OAuth verificada",
         client_id_configured=bool(GOOGLE_CLIENT_ID),
         client_id_prefix=GOOGLE_CLIENT_ID[:20] + "..." if GOOGLE_CLIENT_ID else None,
         client_secret_configured=bool(GOOGLE_CLIENT_SECRET),

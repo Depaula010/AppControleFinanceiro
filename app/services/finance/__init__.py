@@ -30,6 +30,12 @@ from .pot_service import (
     get_pote_status,
 )
 
+from .budget_validation_service import (
+    BudgetValidationResult,
+    ValidateBudgetOutput,
+    validate_budget,
+)
+
 from .emergency_reserve_service import (
     get_reserva_status,
 )
@@ -95,6 +101,10 @@ __all__ = [
     'get_user_by_whatsapp',
     # Pot
     'get_pote_status',
+    # Budget Validation
+    'BudgetValidationResult',
+    'ValidateBudgetOutput',
+    'validate_budget',
     # Emergency Reserve
     'get_reserva_status',
     # Installment

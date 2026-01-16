@@ -20,6 +20,7 @@ from app.services.transaction_confirmation_service import TransactionConfirmatio
 from app.services.nightly_checkin_service import NightlyCheckinService
 from app.services.redis_service import redis_service
 from app.services.transaction_feedback_service import gerar_feedback_transacao
+from app.services.finance.budget_validation_service import validate_budget
 
 from flask import redirect, request, render_template_string
 from app.services.google_calendar_oauth_service import GoogleCalendarOAuthService
@@ -334,6 +335,19 @@ def handle_api_transacao():
             if descricao:
                 descricao_final = f"{local} - {descricao}"
 
+            # 6.5. Validar limite de pote de gastos
+            budget_warning = None
+            budget_validation = validate_budget(
+                conn=conn,
+                usuario_id=usuario_id,
+                subcategoria_id=id_categoria,
+                valor_transacao=valor,
+                data_transacao=date.today()
+            )
+            if budget_validation.requer_confirmacao:
+                budget_warning = budget_validation.mensagem
+                print(f"[API-TRANSACAO] Aviso de budget: ultrapassaria limite de pote")
+
             # 7. Preparar dados para transação pendente
             valor_db = valor * -1  # Negativo para despesa
 
@@ -352,7 +366,8 @@ def handle_api_transacao():
                 'tipo_transacao': 'Despesa',
                 'tipo_pagamento': tipo_pagamento,
                 'data_transacao': str(date.today()),
-                'origem': 'api_endpoint'
+                'origem': 'api_endpoint',
+                'budget_warning': budget_warning  # Aviso de limite de pote (se houver)
             }
 
             # 8. Verificar se Redis está disponível

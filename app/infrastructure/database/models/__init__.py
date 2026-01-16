@@ -30,6 +30,7 @@ from .sub_category_model import SubCategoryModel
 # Modelos de agendamento e orçamento
 from .schedule_model import ScheduleModel
 from .budget_pot_model import BudgetPotModel, pote_subcategorias
+from .budget_violation_model import BudgetViolationModel
 
 # Modelos de configuração
 from .notification_config_model import NotificationConfigModel
@@ -60,6 +61,7 @@ __all__ = [
     "ScheduleModel",
     "BudgetPotModel",
     "pote_subcategorias",
+    "BudgetViolationModel",
 
     # Modelos de configuração
     "NotificationConfigModel",
