@@ -83,6 +83,12 @@ from .admin_intents import (
     AjustarSaldoIntent,
     ConsultaContasFixasIntent,
     ConsultaFaturaIntent,
+    MenuAjudaIntent,
+)
+from .config_intents import (
+    ConfigurarEnderecoIntent,
+    ListarEnderecosIntent,
+    DeletarEnderecoIntent,
 )
 
 INTENT_REGISTRY: Dict[str, Type[BaseIntent]] = {
@@ -126,6 +132,12 @@ INTENT_REGISTRY: Dict[str, Type[BaseIntent]] = {
     'Solicitar API Key': SolicitarApiKeyIntent,
     'Configurar Localização': ConfigurarLocalizacaoIntent,
     'Configurar Relatório Mensal': ConfigurarRelatorioMensalIntent,
+    'Menu de Ajuda': MenuAjudaIntent,
+
+    # Config Intents - Endereços Favoritos
+    'Configurar Endereço': ConfigurarEnderecoIntent,
+    'Listar Endereços': ListarEnderecosIntent,
+    'Deletar Endereço': DeletarEnderecoIntent,
 }
 
 

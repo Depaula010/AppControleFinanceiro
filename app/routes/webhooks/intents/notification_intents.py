@@ -1,18 +1,18 @@
 # app/routes/webhooks/intents/notification_intents.py
 """
-Intent handlers para configuração de notificações.
+Intent handlers para notificações e vencimentos.
 
-Permite usuários configurarem notificações automáticas via WhatsApp para:
-- Vencimentos de contas
-- Lembretes de reserva de emergência
-- Relatórios mensais
-- Alertas de gastos
-
-TODO: Implementar lógica completa quando notification_service estiver pronto.
+Permite usuários:
+- Configurarem notificações automáticas via WhatsApp
+- Consultarem vencimentos de contas (hoje, amanhã, semana)
+- Verificarem contas atrasadas
 """
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from .base_intent import BaseIntent
+from app.services.finance_service import get_vencimentos_periodo, format_vencimentos_message
 
 
 class ConfigurarNotificacoesIntent(BaseIntent):
@@ -95,46 +95,43 @@ class VencimentosHojeIntent(BaseIntent):
     Exemplo de mensagem:
     - "O que vence hoje?"
     - "Contas de hoje"
+    - "Tenho conta que vence hoje?"
     """
 
+    TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
+
     def extract_params(self) -> Dict[str, Any]:
-        """Extrai parâmetros (nenhum necessário)."""
+        """Sem parâmetros necessários."""
         return {}
 
-    def validate(self) -> str | None:
+    def validate(self) -> Optional[str]:
         """Sem validação necessária."""
         return None
 
     def execute(self) -> Dict[str, Any]:
         """Busca vencimentos de hoje."""
-        # TODO: Implementar via finance_service
-        # vencimentos = finance_service.get_vencimentos_por_periodo(
-        #     conn=self.conn,
-        #     usuario_id=self.usuario_id,
-        #     periodo="hoje"
-        # )
+        hoje = datetime.now(self.TIMEZONE_BR).date()
 
-        raise NotImplementedError(
-            "VencimentosHojeIntent ainda não implementado. "
-            "Aguardando implementação em finance_service."
+        vencimentos = get_vencimentos_periodo(
+            conn=self.conn,
+            usuario_id=self.usuario_id,
+            data_inicio=hoje,
+            data_fim=hoje
         )
 
+        return {
+            "vencimentos": vencimentos,
+            "data_referencia": hoje,
+            "periodo": "HOJE"
+        }
+
     def format_response(self, data: Dict[str, Any]) -> str:
-        """Formata lista de vencimentos."""
-        vencimentos = data.get("vencimentos", [])
-
-        if not vencimentos:
-            return "✅ Você não tem contas vencendo hoje!"
-
-        msg = "📅 *Vencimentos Hoje*\n\n"
-        total = 0
-
-        for v in vencimentos:
-            msg += f"• {v['descricao']}: {v['valor_formatado']}\n"
-            total += v['valor']
-
-        msg += f"\n💰 Total: {total}"
-        return msg
+        """Formata resposta usando função centralizada."""
+        return format_vencimentos_message(
+            vencimentos=data["vencimentos"],
+            periodo=data["periodo"],
+            data_referencia=data["data_referencia"]
+        )
 
 
 class VencimentosAmanhaIntent(BaseIntent):
@@ -142,31 +139,47 @@ class VencimentosAmanhaIntent(BaseIntent):
     Handler para intent 'Vencimentos Amanhã'.
 
     Consulta contas que vencem amanhã.
+
+    Exemplo de mensagem:
+    - "O que vence amanhã?"
+    - "Contas de amanhã"
+    - "Tenho conta que vence amanhã?"
     """
 
+    TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
+
     def extract_params(self) -> Dict[str, Any]:
+        """Sem parâmetros necessários."""
         return {}
 
-    def validate(self) -> str | None:
+    def validate(self) -> Optional[str]:
         return None
 
     def execute(self) -> Dict[str, Any]:
-        # TODO: Implementar via finance_service
-        raise NotImplementedError(
-            "VencimentosAmanhaIntent ainda não implementado."
+        """Busca vencimentos de amanhã."""
+        hoje = datetime.now(self.TIMEZONE_BR).date()
+        amanha = hoje + timedelta(days=1)
+
+        vencimentos = get_vencimentos_periodo(
+            conn=self.conn,
+            usuario_id=self.usuario_id,
+            data_inicio=amanha,
+            data_fim=amanha
         )
 
+        return {
+            "vencimentos": vencimentos,
+            "data_referencia": amanha,
+            "periodo": "AMANHÃ"
+        }
+
     def format_response(self, data: Dict[str, Any]) -> str:
-        vencimentos = data.get("vencimentos", [])
-
-        if not vencimentos:
-            return "✅ Você não tem contas vencendo amanhã!"
-
-        msg = "📅 *Vencimentos Amanhã*\n\n"
-        for v in vencimentos:
-            msg += f"• {v['descricao']}: {v['valor_formatado']}\n"
-
-        return msg
+        """Formata resposta usando função centralizada."""
+        return format_vencimentos_message(
+            vencimentos=data["vencimentos"],
+            periodo=data["periodo"],
+            data_referencia=data["data_referencia"]
+        )
 
 
 class VencimentosSemanaIntent(BaseIntent):
@@ -174,43 +187,47 @@ class VencimentosSemanaIntent(BaseIntent):
     Handler para intent 'Vencimentos Essa Semana'.
 
     Consulta contas que vencem nos próximos 7 dias.
+
+    Exemplo de mensagem:
+    - "O que vence essa semana?"
+    - "Contas que vencem essa semana"
+    - "Vencimentos dos próximos dias"
     """
 
+    TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
+
     def extract_params(self) -> Dict[str, Any]:
+        """Sem parâmetros necessários."""
         return {}
 
-    def validate(self) -> str | None:
+    def validate(self) -> Optional[str]:
         return None
 
     def execute(self) -> Dict[str, Any]:
-        # TODO: Implementar via finance_service
-        raise NotImplementedError(
-            "VencimentosSemanaIntent ainda não implementado."
+        """Busca vencimentos dos próximos 7 dias."""
+        hoje = datetime.now(self.TIMEZONE_BR).date()
+        fim_semana = hoje + timedelta(days=7)
+
+        vencimentos = get_vencimentos_periodo(
+            conn=self.conn,
+            usuario_id=self.usuario_id,
+            data_inicio=hoje,
+            data_fim=fim_semana
         )
 
+        return {
+            "vencimentos": vencimentos,
+            "data_referencia": hoje,
+            "periodo": "NOS PRÓXIMOS 7 DIAS"
+        }
+
     def format_response(self, data: Dict[str, Any]) -> str:
-        vencimentos = data.get("vencimentos", [])
-
-        if not vencimentos:
-            return "✅ Você não tem contas vencendo essa semana!"
-
-        msg = "📅 *Vencimentos - Próximos 7 Dias*\n\n"
-
-        # Agrupar por dia
-        por_dia = {}
-        for v in vencimentos:
-            dia = v['data_vencimento']
-            if dia not in por_dia:
-                por_dia[dia] = []
-            por_dia[dia].append(v)
-
-        for dia, contas in sorted(por_dia.items()):
-            msg += f"*{dia}*\n"
-            for v in contas:
-                msg += f"  • {v['descricao']}: {v['valor_formatado']}\n"
-            msg += "\n"
-
-        return msg
+        """Formata resposta usando função centralizada."""
+        return format_vencimentos_message(
+            vencimentos=data["vencimentos"],
+            periodo=data["periodo"],
+            data_referencia=data["data_referencia"]
+        )
 
 
 class ContasAtrasadasIntent(BaseIntent):

@@ -1287,123 +1287,42 @@ def handle_whatsapp_webhook():
 
             # ===== INTENÇÃO: Listar Contas =====
             elif intent == 'Listar Contas':
-                contas_raw = finance_service.get_user_accounts(conn, usuario_id)
+                from app.routes.webhooks.intents import route_intent
 
-                if not contas_raw:
-                    resposta_para_usuario = "❌ Você não tem contas cadastradas."
-                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-
-                resposta_para_usuario = "📋 *Suas Contas Cadastradas:*\n\n"
-
-                # Agrupar por tipo
-                contas_por_tipo = {}
-                for conta in contas_raw:
-                    conta_id, nome, tipo = conta[0], conta[1], conta[2]
-                    if tipo not in contas_por_tipo:
-                        contas_por_tipo[tipo] = []
-                    contas_por_tipo[tipo].append(nome)
-
-                # Formatar resposta
-                for tipo, nomes in contas_por_tipo.items():
-                    icone = "💳" if tipo == "Cartão de Crédito" else "🏦" if tipo == "Conta Corrente" else "💰"
-                    resposta_para_usuario += f"{icone} *{tipo}*\n"
-                    for nome in nomes:
-                        resposta_para_usuario += f"   • {nome}\n"
-                    resposta_para_usuario += "\n"
-
-                resposta_para_usuario += f"_Total: {len(contas_raw)} conta(s)_"
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Listar Contas',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             # ===== INTENÇÃO: Ajustar Saldo Inicial =====
             elif intent == 'Ajustar Saldo Inicial':
-                import re
+                from app.routes.webhooks.intents import route_intent
 
-                # Extrair valor da mensagem
-                match_valor = re.search(r'(\d+(?:[.,]\d+)?)', texto_msg.replace('.', '').replace(',', '.'))
-                if not match_valor:
-                    resposta_para_usuario = "🤔 Não consegui identificar o valor. Exemplo: 'ajustar saldo inicial Banco Inter 5000'"
-                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-
-                valor = float(match_valor.group(1))
-
-                # Tentar identificar a conta na mensagem
-                contas_raw = finance_service.get_user_accounts(conn, usuario_id)
-                conta_encontrada = None
-
-                for conta in contas_raw:
-                    conta_id, nome_conta, tipo_conta = conta[0], conta[1], conta[2]
-                    # Busca case-insensitive
-                    if nome_conta.lower() in texto_msg.lower():
-                        conta_encontrada = (conta_id, nome_conta, tipo_conta)
-                        break
-
-                if not conta_encontrada:
-                    resposta_para_usuario = "🤔 Não consegui identificar qual conta. Contas disponíveis:\n\n"
-                    for conta in contas_raw:
-                        resposta_para_usuario += f"• {conta[1]}\n"
-                    resposta_para_usuario += "\nTente: 'ajustar saldo inicial [nome da conta] [valor]'"
-                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-
-                conta_id, nome_conta, tipo_conta = conta_encontrada
-
-                # Atualizar saldo inicial
-                sucesso = finance_service.update_saldo_inicial(conn, usuario_id, conta_id, valor)
-
-                if sucesso:
-                    icone = "💳" if tipo_conta == "Cartão de Crédito" else "🏦" if tipo_conta == "Conta Corrente" else "💰"
-                    resposta_para_usuario = f"✅ *SALDO INICIAL ATUALIZADO* ✅\n\n"
-                    resposta_para_usuario += f"{icone} *{nome_conta}*\n"
-                    resposta_para_usuario += f"💵 Novo saldo inicial: *{formatar_moeda(valor)}*\n\n"
-                    resposta_para_usuario += f"_O saldo atual já reflete esta mudança._"
-                else:
-                    resposta_para_usuario = "❌ Erro ao atualizar o saldo inicial. Tente novamente."
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Ajustar Saldo Inicial',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             # ===== INTENÇÃO: Consulta por Período =====
             elif intent == 'Consulta Período':
+                from app.routes.webhooks.intents import route_intent
 
-                # Extrair período da mensagem
-                period_data = gemini_service.extract_period_query(texto_msg, usuario_id)
-                period_type = period_data.get('period_type', 'hoje')
-                categoria_filtro = period_data.get('categoria')
-
-                # Calcular datas
-                data_inicio, data_fim, desc_periodo = PeriodQueryService.get_period_dates(period_type)
-
-                if categoria_filtro:
-                    # Consulta com filtro de categoria
-                    total, transacoes_raw = PeriodQueryService.query_by_category_and_period(
-                        conn, usuario_id, categoria_filtro, data_inicio, data_fim
-                    )
-
-                    if total == 0:
-                        resposta_para_usuario = f"✅ Você não gastou nada com '{categoria_filtro}' {desc_periodo}! 🎉"
-                    else:
-                        resposta_para_usuario = f"💸 *GASTOS COM {categoria_filtro.upper()}* {desc_periodo.upper()}\n\n"
-                        resposta_para_usuario += f"💰 Total: *{formatar_moeda(total)}*\n\n"
-                        resposta_para_usuario += "📋 Transações:\n"
-
-                        for trans in transacoes_raw[:10]:  # Limitar a 10
-                            desc, valor, data_trans = trans
-                            valor_abs = abs(float(valor))
-                            data_fmt = data_trans.strftime('%d/%m')
-                            resposta_para_usuario += f"• {desc}: {formatar_moeda(valor_abs)} ({data_fmt})\n"
-
-                        if len(transacoes_raw) > 10:
-                            resposta_para_usuario += f"\n... e mais {len(transacoes_raw) - 10} transação(ões)"
-                else:
-                    # Consulta geral do período
-                    total, transacoes = PeriodQueryService.query_expenses_by_period(
-                        conn, usuario_id, data_inicio, data_fim
-                    )
-
-                    resposta_para_usuario = PeriodQueryService.format_period_query_response(
-                        total, transacoes, desc_periodo
-                    )
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Consulta Período',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
             
             # ===== INTENÇÃO: Consulta Potes =====
             elif intent == 'Consulta Potes':
@@ -1421,103 +1340,55 @@ def handle_whatsapp_webhook():
                         
             # ===== INTENÇÃO: Consulta Contas Fixas Pendentes =====
             elif intent == 'Consulta Contas Fixas':
-                resposta_para_usuario = FixedBillsService.list_pending_bills_formatted(conn, usuario_id)
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                from app.routes.webhooks.intents import route_intent
+
+                result = route_intent(
+                    intent_name='Consulta Contas Fixas',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             # ===== INTENÇÃO: Vencimentos Hoje =====
             elif intent == 'Vencimentos Hoje':
-                # Nota: datetime e ZoneInfo já estão importados no topo do arquivo
-                from app.services.finance_service import get_vencimentos_periodo, format_vencimentos_message
+                from app.routes.webhooks.intents import route_intent
 
-                try:
-                    TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
-                    hoje = datetime.now(TIMEZONE_BR).date()
-
-                    # Buscar vencimentos de hoje
-                    vencimentos = get_vencimentos_periodo(
-                        conn=conn,
-                        usuario_id=usuario_id,
-                        data_inicio=hoje,
-                        data_fim=hoje
-                    )
-
-                    # Formatar resposta
-                    resposta_para_usuario = format_vencimentos_message(
-                        vencimentos=vencimentos,
-                        periodo="HOJE",
-                        data_referencia=hoje
-                    )
-
-                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-
-                except Exception as e:
-                    print(f"[VENCIMENTOS-HOJE] Erro: {e}")
-                    resposta_para_usuario = "❌ Erro ao consultar vencimentos de hoje."
-                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Vencimentos Hoje',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             # ===== INTENÇÃO: Vencimentos Amanhã =====
             elif intent == 'Vencimentos Amanhã':
-                # Nota: datetime, timedelta e ZoneInfo já estão importados no topo do arquivo
-                from app.services.finance_service import get_vencimentos_periodo, format_vencimentos_message
+                from app.routes.webhooks.intents import route_intent
 
-                try:
-                    TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
-                    hoje = datetime.now(TIMEZONE_BR).date()
-                    amanha = hoje + timedelta(days=1)
-
-                    # Buscar vencimentos de amanhã
-                    vencimentos = get_vencimentos_periodo(
-                        conn=conn,
-                        usuario_id=usuario_id,
-                        data_inicio=amanha,
-                        data_fim=amanha
-                    )
-
-                    # Formatar resposta
-                    resposta_para_usuario = format_vencimentos_message(
-                        vencimentos=vencimentos,
-                        periodo="AMANHÃ",
-                        data_referencia=amanha
-                    )
-
-                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-
-                except Exception as e:
-                    print(f"[VENCIMENTOS-AMANHÃ] Erro: {e}")
-                    resposta_para_usuario = "❌ Erro ao consultar vencimentos de amanhã."
-                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Vencimentos Amanhã',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             # ===== INTENÇÃO: Vencimentos Essa Semana =====
             elif intent == 'Vencimentos Essa Semana':
-                # Nota: datetime, timedelta e ZoneInfo já estão importados no topo do arquivo
-                from app.services.finance_service import get_vencimentos_periodo, format_vencimentos_message
+                from app.routes.webhooks.intents import route_intent
 
-                try:
-                    TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
-                    hoje = datetime.now(TIMEZONE_BR).date()
-                    fim_semana = hoje + timedelta(days=7)
-
-                    # Buscar vencimentos dos próximos 7 dias
-                    vencimentos = get_vencimentos_periodo(
-                        conn=conn,
-                        usuario_id=usuario_id,
-                        data_inicio=hoje,
-                        data_fim=fim_semana
-                    )
-
-                    # Formatar resposta
-                    resposta_para_usuario = format_vencimentos_message(
-                        vencimentos=vencimentos,
-                        periodo="NOS PRÓXIMOS 7 DIAS",
-                        data_referencia=hoje
-                    )
-
-                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-
-                except Exception as e:
-                    print(f"[VENCIMENTOS-SEMANA] Erro: {e}")
-                    resposta_para_usuario = "❌ Erro ao consultar vencimentos da semana."
-                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Vencimentos Essa Semana',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             # ===== INTENÇÃO: Contas Atrasadas =====
             elif intent == 'Contas Atrasadas':
@@ -1659,306 +1530,81 @@ def handle_whatsapp_webhook():
 
             #==== INTENÇÃO: Consulta Valor Fatura =====
             elif intent == 'Consulta Valor Fatura':
-                contas_raw = finance_service.get_user_accounts(conn, usuario_id)
-                contas_list = [{"nome": c[1], "tipo": c[2]} for c in contas_raw]
+                from app.routes.webhooks.intents import route_intent
 
-                fatura_query = gemini_service.extract_fatura_query(texto_msg, contas_list, usuario_id)
-                nome_cartao = fatura_query.get('conta_cartao')
-
-                conta_id_cartao = None
-                if nome_cartao:
-                    conta_id_cartao = finance_service.get_account_by_name(conn, usuario_id, nome_cartao)
-                    if not conta_id_cartao:
-                        resposta_para_usuario = f"🤔 Não encontrei um cartão chamado '{nome_cartao}'."
-                        return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-
-                # Verificar se o usuário quer detalhes da fatura
-                texto_lower = texto_msg.lower()
-                quer_detalhes = any(palavra in texto_lower for palavra in ['detalhe', 'detalhar', 'detalhada', 'itens', 'lista', 'transações', 'transacoes', 'compras'])
-
-                if quer_detalhes and conta_id_cartao:
-                    # Buscar fatura detalhada
-                    fatura_detalhada = finance_service.get_fatura_detalhada(conn, usuario_id, conta_id_cartao)
-
-                    if not fatura_detalhada:
-                        resposta_para_usuario = f"✅ Você não tem faturas em aberto no cartão '{nome_cartao}'! 🎉"
-                        return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-
-                    # Formatar resposta detalhada
-                    data_venc = fatura_detalhada['data_vencimento'].strftime('%d/%m/%Y')
-                    resposta_para_usuario = f"💳 *Fatura {fatura_detalhada['nome_cartao']}*\n\n"
-                    resposta_para_usuario += f"💰 Valor atual: *{formatar_moeda(fatura_detalhada['valor_total'])}*\n"
-                    resposta_para_usuario += f"📅 Vencimento: {data_venc}\n"
-                    resposta_para_usuario += f"📊 Status: {fatura_detalhada['status']}\n\n"
-
-                    if fatura_detalhada['transacoes']:
-                        # Agrupar transações por data
-                        from collections import defaultdict
-                        transacoes_por_data = defaultdict(list)
-
-                        for t in fatura_detalhada['transacoes']:
-                            transacoes_por_data[t['data']].append(t)
-
-                        # Ordenar datas (mais recente primeiro)
-                        datas_ordenadas = sorted(transacoes_por_data.keys(), reverse=True)
-
-                        resposta_para_usuario += "📅 *Transações por Data:*\n\n"
-
-                        for data in datas_ordenadas:
-                            # Cabeçalho da data
-                            data_formatada = data.strftime('%d/%m/%Y')
-                            transacoes_do_dia = transacoes_por_data[data]
-                            total_dia = sum(t['valor'] for t in transacoes_do_dia)
-
-                            resposta_para_usuario += f"*{data_formatada}* - {formatar_moeda(total_dia)}\n"
-
-                            # Listar transações do dia
-                            for t in transacoes_do_dia:
-                                # Adicionar emoji de acordo com o tipo
-                                emoji = ""
-                                if t['tipo_agendamento'] == 'FIXO':
-                                    emoji = "🔁 "
-                                elif t['tipo_agendamento'] == 'PARCELADO':
-                                    emoji = "📊 "
-
-                                # Info adicional (parcela se for parcelado)
-                                info_extra = ""
-                                if t['parcela_info']:
-                                    info_extra = f" ({t['parcela_info']})"
-
-                                resposta_para_usuario += f"  {emoji}{t['descricao']}{info_extra}: {formatar_moeda(t['valor'])}\n"
-
-                            resposta_para_usuario += "\n"
-                    else:
-                        resposta_para_usuario += "✅ Nenhuma transação registrada nesta fatura."
-
-                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-
-                # Buscar valor(es) da(s) fatura(s) - modo resumido
-                faturas = finance_service.get_fatura_valor(conn, usuario_id, conta_id_cartao)
-
-                if not faturas:
-                    if nome_cartao:
-                        resposta_para_usuario = f"✅ Você não tem faturas em aberto no cartão '{nome_cartao}'! 🎉"
-                    else:
-                        resposta_para_usuario = "✅ Você não tem nenhuma fatura em aberto! 🎉"
-                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-
-                # Formatar resposta resumida
-                if len(faturas) == 1:
-                    fatura = faturas[0]
-                    data_venc = fatura['data_vencimento'].strftime('%d/%m/%Y')
-                    resposta_para_usuario = f"💳 *Fatura {fatura['nome_cartao']}*\n\n"
-                    resposta_para_usuario += f"💰 Valor atual: *{formatar_moeda(fatura['valor_fatura'])}*\n"
-                    resposta_para_usuario += f"📅 Vencimento: {data_venc}\n"
-                    resposta_para_usuario += f"📊 Status: {fatura['status']}"
-                else:
-                    resposta_para_usuario = "💳 *Suas Faturas em Aberto:*\n\n"
-                    total_geral = 0
-                    for fatura in faturas:
-                        data_venc = fatura['data_vencimento'].strftime('%d/%m')
-                        resposta_para_usuario += f"🔹 *{fatura['nome_cartao']}*\n"
-                        resposta_para_usuario += f"   💰 {formatar_moeda(fatura['valor_fatura'])} (Venc: {data_venc})\n\n"
-                        total_geral += fatura['valor_fatura']
-
-                    resposta_para_usuario += f"💵 *Total Geral:* {formatar_moeda(total_geral)}"
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Consulta Valor Fatura',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             #=== INTENÇÃO: Consulta Categoria Específica =====
             elif intent == 'Consulta Categoria Específica':
-                cat_data = gemini_service.extract_category_query(texto_msg, usuario_id)
-                nome_categoria_consulta = cat_data.get('nome_categoria')
-                if not nome_categoria_consulta:
-                    raise Exception("Gemini não conseguiu extrair o nome da categoria.")
+                from app.routes.webhooks.intents import route_intent
 
-                valor_gasto = finance_service.get_category_spending(conn, usuario_id, nome_categoria_consulta)
-
-                resposta_para_usuario = f"ℹ️ *Consulta de Categoria (Este Mês)*\n\n"
-                resposta_para_usuario += f"Você gastou *{formatar_moeda(valor_gasto)}* com '{nome_categoria_consulta}'."
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Consulta Categoria Específica',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             #==== INTENÇÃO: Criar Evento ====
             elif intent == 'Criar Evento':
-                print(f"[WHATSAPP] Intenção de Criar Evento detectada")
+                from app.routes.webhooks.intents import route_intent
 
-                event_data = gemini_service.extract_event_creation_details(texto_msg, usuario_id)
-                
-                titulo = event_data.get('titulo')
-                data_str = event_data.get('data')
-                hora_inicio = event_data.get('hora_inicio')
-                hora_fim = event_data.get('hora_fim')
-                descricao = event_data.get('descricao')
-                localizacao = event_data.get('localizacao')
-                
-                if not titulo or not data_str:
-                    return jsonify({
-                        "status": "sucesso",
-                        "resposta": "❌ Não consegui identificar o título ou data do evento. Tente algo como: 'Criar evento Academia amanhã às 7h'"
-                    }), 200
-                
-                # Processar data (usando timezone do Brasil)
-                TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
-                hoje_br = datetime.now(TIMEZONE_BR).date()
-
-                if data_str == 'hoje':
-                    data_evento = hoje_br
-                elif data_str == 'amanha':
-                    data_evento = hoje_br + timedelta(days=1)
-                else:
-                    try:
-                        data_evento = date.fromisoformat(data_str)
-                    except:
-                        return jsonify({
-                            "status": "sucesso",
-                            "resposta": f"❌ Data inválida: {data_str}"
-                        }), 200
-
-                # Preparar dados do evento para confirmação
-                event_data = {
-                    "usuario_id": usuario_id,
-                    "titulo": titulo,
-                    "data_evento": data_evento.isoformat(),  # Salvar como string ISO
-                    "hora_inicio": hora_inicio,
-                    "hora_fim": hora_fim,
-                    "descricao": descricao,
-                    "localizacao": localizacao
-                }
-
-                # Criar evento pendente no Redis
-                event_id = EventConfirmationService.create_pending_event(numero_limpo, event_data)
-
-                if event_id:
-                    # Formatar mensagem de confirmação
-                    resposta_para_usuario = EventConfirmationService.format_confirmation_message(event_data)
-                else:
-                    resposta_para_usuario = "❌ Erro ao processar evento. Tente novamente."
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Criar Evento',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
             
             #==== INTENÇÃO: Deletar Evento ====
             elif intent == 'Deletar Evento':
-                print(f"[WHATSAPP] Intenção de Deletar Evento detectada")
+                from app.routes.webhooks.intents import route_intent
 
-                delete_data = gemini_service.extract_event_deletion_query(texto_msg, usuario_id)
-                
-                titulo_busca = delete_data.get('titulo_busca')
-                quando = delete_data.get('quando')
-                
-                if not titulo_busca:
-                    return jsonify({
-                        "status": "sucesso",
-                        "resposta": "❌ Não consegui identificar qual evento deletar. Tente algo como: 'Deletar academia de hoje'"
-                    }), 200
-                
-                # Buscar eventos
-                eventos_encontrados = CalendarManagementService.find_events_by_title(
-                    usuario_id, titulo_busca, max_results=5
+                result = route_intent(
+                    intent_name='Deletar Evento',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
                 )
-                
-                # Filtrar por quando se fornecido (usando timezone do Brasil)
-                if quando:
-                    TIMEZONE_BR = ZoneInfo("America/Sao_Paulo")
-                    hoje_br = datetime.now(TIMEZONE_BR).date()
-                    data_alvo = hoje_br if quando == 'hoje' else hoje_br + timedelta(days=1)
-                    eventos_encontrados = [
-                        e for e in eventos_encontrados 
-                        if date.fromisoformat(e['start'].split('T')[0]) == data_alvo
-                    ]
-                
-                if not eventos_encontrados:
-                    resposta_para_usuario = f"🤔 Não encontrei eventos com '{titulo_busca}'"
-                    if quando:
-                        resposta_para_usuario += f" para {quando}"
-                    resposta_para_usuario += ".\n\nTente buscar com outras palavras."
-                    
-                    return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-                
-                if len(eventos_encontrados) == 1:
-                    # Deletar automaticamente
-                    evento = eventos_encontrados[0]
-                    sucesso, mensagem = CalendarManagementService.delete_event(
-                        usuario_id,
-                        evento['id'],
-                        evento['calendar_id']
-                    )
-                    
-                    resposta_para_usuario = f"✅ {mensagem}" if sucesso else f"❌ {mensagem}"
-                else:
-                    # Múltiplos eventos encontrados, pedir confirmação
-                    resposta_para_usuario = f"📋 Encontrei {len(eventos_encontrados)} eventos:\n\n"
-                    
-                    for idx, evento in enumerate(eventos_encontrados, 1):
-                        data_evento = datetime.fromisoformat(evento['start']).strftime('%d/%m às %H:%M') if 'T' in evento['start'] else date.fromisoformat(evento['start']).strftime('%d/%m')
-                        resposta_para_usuario += f"{idx}. *{evento['summary']}*\n"
-                        resposta_para_usuario += f"   📅 {data_evento}\n"
-                        resposta_para_usuario += f"   📂 {evento['calendar_name']}\n"
-                        resposta_para_usuario += f"   _ID: {evento['id']}_\n\n"
-                    
-                    resposta_para_usuario += "Para deletar um específico, envie:\n"
-                    resposta_para_usuario += f"'Deletar evento {eventos_encontrados[0]['id']}'"
-                
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-            
-            #==== INTENÇÃO: Consulta Agenda com Filtro de Horário ====
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
+
+            #==== INTENÇÃO: Consultar Agenda ====
             elif intent == 'Consultar Agenda':
-                print(f"[WHATSAPP] Intenção de Consulta Agenda detectada")
+                from app.routes.webhooks.intents import route_intent
 
-                # Importar serviço
-                from app.services.calendar_query_service import CalendarQueryService
-
-                # Extrair período
-                calendar_data = gemini_service.extract_calendar_query(texto_msg, usuario_id)
-                period_type = calendar_data.get('period_type', 'hoje')
-
-                # NOVO: Extrair filtro de horário
-                time_data = gemini_service.extract_time_filter_query(texto_msg, usuario_id)
-                time_filter = time_data.get('time_filter')
-
-                if time_filter:
-                    print(f"[WHATSAPP] Filtro de horário: {time_filter}")
-                    resposta_para_usuario = CalendarQueryService.query_agenda_with_time_filter(
-                        usuario_id, period_type, time_filter
-                    )
-                else:
-                    # Consulta normal sem filtro
-                    resposta_para_usuario = CalendarQueryService.query_agenda(usuario_id, period_type)
-                
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Consultar Agenda',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             #==== INTENÇÃO: Horários Livres ====
             elif intent == 'Horários Livres':
-                print(f"[WHATSAPP] Intenção de Horários Livres detectada")
+                from app.routes.webhooks.intents import route_intent
 
-                # Importar services
-                from app.services.free_time_finder_service import FreeTimeFinderService
-
-                # Extrair período e contexto
-                free_time_data = gemini_service.extract_free_time_query(texto_msg, usuario_id)
-                period_type = free_time_data.get('period_type', 'hoje')
-                duracao_minutos = free_time_data.get('duracao_minutos', 60)
-                contexto = free_time_data.get('contexto')
-
-                print(f"[WHATSAPP] Buscando horários livres: {period_type}, duração: {duracao_minutos}min")
-
-                # Buscar horários livres
-                result = FreeTimeFinderService.find_free_slots(
-                    db_engine, usuario_id, period_type, duracao_minutos
+                result = route_intent(
+                    intent_name='Horários Livres',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
                 )
-
-                # Formatar mensagem
-                resposta_para_usuario = FreeTimeFinderService.format_free_slots_message(result, contexto)
-
-                # BONUS: Sugestão da IA (se houver contexto)
-                if contexto and result.get("slots_livres"):
-                    sugestao_ai = FreeTimeFinderService.suggest_best_slot_with_ai(
-                        result, contexto, result.get("insights_usuario", "")
-                    )
-                    if sugestao_ai:
-                        resposta_para_usuario += f"\n\n{sugestao_ai}"
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             #==== INTENÇÃO: Configurar Notificações ====
             elif intent == 'Configurar Notificações':
@@ -2144,425 +1790,145 @@ def handle_whatsapp_webhook():
 
             #==== INTENÇÃO: Configurar Localização ====
             elif intent == 'Configurar Localização':
-                print(f"[WHATSAPP] Intenção de Configurar Localização detectada")
+                from app.routes.webhooks.intents import route_intent
 
-                from app.services.gemini_service import extract_location_config
-                from app.services.location_service import LocationService
-
-                try:
-                    # Extrair cidade e estado com Gemini
-                    location_data = extract_location_config(texto_msg, usuario_id)
-                    cidade = location_data.get('cidade')
-                    estado = location_data.get('estado')
-
-                    if not cidade:
-                        resposta_para_usuario = ("❌ Não consegui identificar a cidade.\n\n"
-                                                "Por favor, envie no formato:\n"
-                                                '"Configurar localização: São Paulo, SP"')
-                        return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-
-                    # Atualizar no banco
-                    sucesso, mensagem = LocationService.update_user_location(
-                        usuario_id,
-                        cidade,
-                        estado
-                    )
-
-                    if sucesso:
-                        resposta_para_usuario = f"✅ {mensagem}\n\n"
-                        resposta_para_usuario += "Agora você receberá informações de clima nos resumos matinais!"
-                    else:
-                        resposta_para_usuario = f"❌ {mensagem}"
-
-                except Exception as e:
-                    print(f"[WHATSAPP] Erro ao configurar localização: {e}")
-                    resposta_para_usuario = ("❌ Erro ao configurar localização.\n\n"
-                                            "Tente: 'Configurar localização: São Paulo, SP'")
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Configurar Localização',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             #==== INTENÇÃO: Análise Inteligente ====
             elif intent == 'Análise Inteligente':
-                print(f"[WHATSAPP] Intenção de Análise Inteligente detectada")
+                from app.routes.webhooks.intents import route_intent
 
-                from app.services.analytics_service import generate_ai_insights
-
-                try:
-                    # Gerar insights com IA
-                    insights = generate_ai_insights(usuario_id)
-                    resposta_para_usuario = f"📊 *Análise Inteligente de Gastos*\n\n{insights}"
-
-                except Exception as e:
-                    print(f"[ANALYTICS] Erro ao gerar insights: {e}")
-                    resposta_para_usuario = f"❌ Não consegui gerar a análise no momento. Erro: {str(e)}"
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Análise Inteligente',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             #==== INTENÇÃO: Comparação Mensal ====
             elif intent == 'Comparação Mensal':
-                print(f"[WHATSAPP] Intenção de Comparação Mensal detectada")
+                from app.routes.webhooks.intents import route_intent
 
-                from app.services.analytics_service import get_monthly_comparison
-
-                try:
-                    # Comparar mês atual com anterior
-                    comparacao = get_monthly_comparison(usuario_id)
-                    resposta_para_usuario = comparacao
-
-                except Exception as e:
-                    print(f"[ANALYTICS] Erro ao comparar meses: {e}")
-                    resposta_para_usuario = f"❌ Não consegui fazer a comparação. Erro: {str(e)}"
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Comparação Mensal',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             #==== INTENÇÃO: Previsão de Gastos ====
             elif intent == 'Previsão de Gastos':
-                print(f"[WHATSAPP] Intenção de Previsão de Gastos detectada")
+                from app.routes.webhooks.intents import route_intent
 
-                from app.services.forecast_service import generate_forecast_insights
-
-                try:
-                    # Gerar previsão de gastos futuros
-                    previsao = generate_forecast_insights(usuario_id)
-                    resposta_para_usuario = f"📈 *Previsão de Gastos*\n\n{previsao}"
-
-                except Exception as e:
-                    print(f"[FORECAST] Erro ao gerar previsão: {e}")
-                    resposta_para_usuario = f"❌ Não consegui gerar a previsão. Erro: {str(e)}"
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Previsão de Gastos',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             #==== INTENÇÃO: Gráfico de Gastos ====
             elif intent == 'Gráfico de Gastos':
-                print(f"[WHATSAPP] Intenção de Gráfico de Gastos detectada")
+                from app.routes.webhooks.intents import route_intent
 
-                from app.services import chart_service
-
-                try:
-                    # Extrair tipo de gráfico solicitado
-                    chart_info = gemini_service.extract_chart_type(texto_msg, usuario_id)
-                    tipo_grafico = chart_info.get('tipo_grafico', 'pizza')
-
-                    print(f"[CHART] Gerando gráfico tipo: {tipo_grafico}")
-
-                    # Gerar gráfico apropriado
-                    chart_bytes = None
-                    caption = ""
-
-                    if tipo_grafico == 'pizza':
-                        periodo_dias = chart_info.get('periodo_dias', 30)
-                        chart_bytes = chart_service.generate_pie_chart(usuario_id, periodo_dias)
-                        caption = f"📊 Gastos por Categoria - Últimos {periodo_dias} dias"
-
-                    elif tipo_grafico == 'barras':
-                        num_meses = chart_info.get('num_meses', 6)
-                        chart_bytes = chart_service.generate_bar_chart(usuario_id, num_meses)
-                        caption = f"📊 Evolução Mensal - Últimos {num_meses} meses"
-
-                    elif tipo_grafico == 'linha':
-                        num_meses = chart_info.get('num_meses', 6)
-                        chart_bytes = chart_service.generate_line_chart(usuario_id, num_meses)
-                        caption = f"📈 Evolução do Saldo - Últimos {num_meses} meses"
-
-                    # Verificar se gráfico foi gerado
-                    if chart_bytes is None:
-                        resposta_para_usuario = "❌ Não há dados suficientes para gerar o gráfico no período solicitado."
-                        return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
-
-                    # Enviar imagem via WhatsApp
-                    sucesso = notification_service.enviar_imagem_whatsapp_bytes(
-                        numero_remetente,
-                        chart_bytes,
-                        caption,
-                        BOT_WHATSAPP_URL,
-                        API_SECRET_KEY
-                    )
-
-                    if sucesso:
-                        resposta_para_usuario = f"✅ {caption}"
-                    else:
-                        resposta_para_usuario = "❌ Não consegui enviar o gráfico. Tente novamente mais tarde."
-
-                except Exception as e:
-                    print(f"[CHART] Erro ao gerar gráfico: {e}")
-                    import traceback
-                    traceback.print_exc()
-                    resposta_para_usuario = f"❌ Não consegui gerar o gráfico. Erro: {str(e)}"
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Gráfico de Gastos',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             #==== INTENÇÃO: Solicitar API Key ====
             elif intent == 'Solicitar API Key':
-                print(f"[WHATSAPP] Intenção de Solicitar API Key detectada")
+                from app.routes.webhooks.intents import route_intent
 
-                try:
-                    # Buscar API key do usuário
-                    sql_api_key = text("SELECT api_key_automate, nome FROM Usuarios WHERE id = :uid")
-                    result = conn.execute(sql_api_key, {"uid": usuario_id}).fetchone()
-
-                    if result and result[0]:
-                        api_key = result[0]
-                        nome_usuario = result[1]
-
-                        resposta_para_usuario = f"🔑 *Sua API Key*\n\n"
-                        resposta_para_usuario += f"Olá {nome_usuario}!\n\n"
-                        resposta_para_usuario += f"Sua chave de acesso:\n"
-                        resposta_para_usuario += f"`{api_key}`\n\n"
-                        resposta_para_usuario += f"⚠️ *Importante:*\n"
-                        resposta_para_usuario += f"• Não compartilhe esta chave com ninguém\n"
-                        resposta_para_usuario += f"• Use-a para configurar automações no iPhone\n"
-                        resposta_para_usuario += f"• Esta chave dá acesso total à sua conta\n\n"
-                        resposta_para_usuario += f"📱 *Para usar no iPhone:*\n"
-                        resposta_para_usuario += f"1. Copie a chave acima\n"
-                        resposta_para_usuario += f"2. No atalho, cole no campo `user_api_key`\n"
-                        resposta_para_usuario += f"3. Teste enviando um gasto!\n\n"
-                        resposta_para_usuario += f"💡 *Endpoint:*\n"
-                        resposta_para_usuario += f"`POST /api/transacao`"
-                    else:
-                        resposta_para_usuario = "❌ Não encontrei sua API Key. Entre em contato com o suporte."
-
-                except Exception as e:
-                    print(f"[API-KEY] Erro ao buscar API Key: {e}")
-                    resposta_para_usuario = f"❌ Erro ao buscar sua API Key. Tente novamente mais tarde."
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Solicitar API Key',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             #==== INTENÇÃO: Configurar Relatório Mensal ====
             elif intent == 'Configurar Relatório Mensal':
-                print(f"[WHATSAPP] Intenção de Configurar Relatório Mensal detectada")
+                from app.routes.webhooks.intents import route_intent
 
-                from app.services.monthly_report_config_service import (
-                    get_or_create_config,
-                    update_config,
-                    ativar_config,
-                    desativar_config
+                result = route_intent(
+                    intent_name='Configurar Relatório Mensal',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
                 )
-
-                try:
-                    # Extrair configurações da mensagem
-                    config_info = gemini_service.extract_monthly_report_config(texto_msg, usuario_id)
-                    acao = config_info.get('acao')
-                    momento_envio = config_info.get('momento_envio')
-                    hora_envio = config_info.get('hora_envio')
-
-                    print(f"[MONTHLY-REPORT-CONFIG] Ação: {acao}, Momento: {momento_envio}, Hora: {hora_envio}")
-
-                    # Buscar configuração atual
-                    config_atual = get_or_create_config(usuario_id)
-
-                    if acao == 'consultar':
-                        # Mostrar configuração atual
-                        status = "✅ Ativo" if config_atual['ativo'] else "❌ Desativado"
-                        momento = "Início do mês (dia 1)" if config_atual['momento_envio'] == 'INICIO_MES' else "Fim do mês (último dia)"
-                        hora = config_atual['hora_envio'].strftime('%H:%M') if config_atual['hora_envio'] else "08:00"
-
-                        resposta_para_usuario = "📊 *CONFIGURAÇÃO DO RELATÓRIO MENSAL*\n\n"
-                        resposta_para_usuario += f"Status: {status}\n"
-                        resposta_para_usuario += f"Momento: {momento}\n"
-                        resposta_para_usuario += f"Horário: {hora}\n\n"
-                        resposta_para_usuario += "_Para alterar, envie: 'configurar relatório mensal no início do mês às 10h'_"
-
-                    elif acao == 'desativar':
-                        # Desativar relatório
-                        desativar_config(usuario_id)
-                        resposta_para_usuario = "✅ Relatório mensal desativado com sucesso!\n\n"
-                        resposta_para_usuario += "_Para reativar, envie: 'ativar relatório mensal'_"
-
-                    elif acao == 'ativar':
-                        # Ativar relatório (aplicar novas configurações se fornecidas)
-                        params = {'ativo': True}
-                        if momento_envio:
-                            params['momento_envio'] = momento_envio
-                        if hora_envio:
-                            params['hora_envio'] = hora_envio
-
-                        config_nova = update_config(usuario_id, **params)
-
-                        momento_texto = "início do mês (dia 1)" if config_nova['momento_envio'] == 'INICIO_MES' else "fim do mês (último dia)"
-                        hora_texto = config_nova['hora_envio'].strftime('%H:%M')
-
-                        resposta_para_usuario = "✅ *Relatório mensal ativado!*\n\n"
-                        resposta_para_usuario += f"📅 Momento: {momento_texto}\n"
-                        resposta_para_usuario += f"🕐 Horário: {hora_texto}\n\n"
-                        resposta_para_usuario += "📊 *O que você vai receber:*\n"
-                        resposta_para_usuario += "• Gastos totais do mês\n"
-                        resposta_para_usuario += "• Top 5 categorias\n"
-                        resposta_para_usuario += "• Comparação com mês anterior\n"
-                        resposta_para_usuario += "• Status dos potes de gastos\n"
-                        resposta_para_usuario += "• Contas pagas vs pendentes\n"
-                        resposta_para_usuario += "• Gráfico de pizza com categorias\n\n"
-                        resposta_para_usuario += "_Você receberá automaticamente no horário configurado!_"
-
-                    elif acao == 'configurar':
-                        # Atualizar configurações
-                        params = {}
-                        if momento_envio:
-                            params['momento_envio'] = momento_envio
-                        if hora_envio:
-                            params['hora_envio'] = hora_envio
-
-                        if not params:
-                            resposta_para_usuario = "❌ Não entendi o que você quer configurar.\n\n"
-                            resposta_para_usuario += "Exemplos:\n"
-                            resposta_para_usuario += "• 'quero receber no início do mês às 8h'\n"
-                            resposta_para_usuario += "• 'mudar hora do relatório para 14:00'\n"
-                            resposta_para_usuario += "• 'receber no fim do mês'"
-                        else:
-                            config_nova = update_config(usuario_id, **params)
-
-                            momento_texto = "início do mês (dia 1)" if config_nova['momento_envio'] == 'INICIO_MES' else "fim do mês (último dia)"
-                            hora_texto = config_nova['hora_envio'].strftime('%H:%M')
-
-                            resposta_para_usuario = "✅ *Configuração atualizada!*\n\n"
-                            resposta_para_usuario += f"📅 Momento: {momento_texto}\n"
-                            resposta_para_usuario += f"🕐 Horário: {hora_texto}\n\n"
-                            resposta_para_usuario += "O relatório será enviado automaticamente no horário configurado."
-
-                    else:
-                        resposta_para_usuario = "❌ Não entendi a ação desejada.\n\n"
-                        resposta_para_usuario += "Exemplos:\n"
-                        resposta_para_usuario += "• 'ativar relatório mensal'\n"
-                        resposta_para_usuario += "• 'desativar relatório mensal'\n"
-                        resposta_para_usuario += "• 'configurar relatório mensal às 10h'\n"
-                        resposta_para_usuario += "• 'como está configurado meu relatório?'"
-
-                except ValueError as ve:
-                    print(f"[MONTHLY-REPORT-CONFIG] Erro de validação: {ve}")
-                    resposta_para_usuario = f"❌ {str(ve)}\n\n"
-                    resposta_para_usuario += "Exemplos válidos:\n"
-                    resposta_para_usuario += "• Momento: 'início do mês' ou 'fim do mês'\n"
-                    resposta_para_usuario += "• Horário: '08:00' ou '14:30'"
-
-                except Exception as e:
-                    print(f"[MONTHLY-REPORT-CONFIG] Erro: {e}")
-                    import traceback
-                    traceback.print_exc()
-                    resposta_para_usuario = f"❌ Erro ao configurar relatório mensal. Tente novamente mais tarde."
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             #==== INTENÇÃO: Configurar Endereço ====
             elif intent == 'Configurar Endereço':
-                print(f"[WHATSAPP] Intenção de Configurar Endereço detectada")
+                from app.routes.webhooks.intents import route_intent
 
-                from app.services.user_address_service import UserAddressService
-
-                try:
-                    # Extrair dados do endereço
-                    addr_data = gemini_service.extract_address_config(texto_msg, usuario_id)
-                    label = addr_data.get('label')
-                    endereco = addr_data.get('endereco_completo')
-
-                    if not label or not endereco:
-                        resposta_para_usuario = (
-                            "❌ Não entendi o endereço.\n\n"
-                            "Use o formato:\n"
-                            "*'Configurar endereço casa: Rua X, 123, Bairro, Cidade-SP'*\n\n"
-                            "Tipos de endereço:\n"
-                            "• Casa\n"
-                            "• Trabalho\n"
-                            "• Outro"
-                        )
-                    else:
-                        # Salvar endereço
-                        sucesso, mensagem = UserAddressService.save_favorite_address(
-                            usuario_id, label, endereco
-                        )
-                        resposta_para_usuario = mensagem
-
-                except Exception as e:
-                    print(f"[CONFIG-ADDRESS] Erro: {e}")
-                    import traceback
-                    traceback.print_exc()
-                    resposta_para_usuario = "❌ Erro ao configurar endereço. Tente novamente."
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Configurar Endereço',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             #==== INTENÇÃO: Listar Endereços ====
             elif intent == 'Listar Endereços':
-                print(f"[WHATSAPP] Intenção de Listar Endereços detectada")
+                from app.routes.webhooks.intents import route_intent
 
-                from app.services.user_address_service import UserAddressService
-
-                try:
-                    mensagem = UserAddressService.format_address_list_message(usuario_id)
-                    resposta_para_usuario = mensagem
-
-                except Exception as e:
-                    print(f"[LIST-ADDRESS] Erro: {e}")
-                    resposta_para_usuario = "❌ Erro ao listar endereços. Tente novamente."
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Listar Endereços',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             #==== INTENÇÃO: Deletar Endereço ====
             elif intent == 'Deletar Endereço':
-                print(f"[WHATSAPP] Intenção de Deletar Endereço detectada")
+                from app.routes.webhooks.intents import route_intent
 
-                from app.services.user_address_service import UserAddressService
-
-                try:
-                    # Extrair label do endereço a deletar
-                    label_data = gemini_service.extract_address_label_from_deletion(texto_msg, usuario_id)
-                    label = label_data.get('label', 'outro')
-
-                    # Deletar endereço
-                    sucesso, mensagem = UserAddressService.delete_address(usuario_id, label)
-                    resposta_para_usuario = mensagem
-
-                except Exception as e:
-                    print(f"[DELETE-ADDRESS] Erro: {e}")
-                    resposta_para_usuario = "❌ Erro ao deletar endereço. Tente novamente."
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Deletar Endereço',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             elif intent == "Menu de Ajuda":
-                resposta_para_usuario = """📚 *MENU DE FUNCIONALIDADES* 📚
+                from app.routes.webhooks.intents import route_intent
 
-*💰 GESTÃO FINANCEIRA*
-• _"gastei 50 em comida"_ - Registrar despesa
-• _"recebi 500"_ - Registrar renda
-• _"qual meu saldo?"_ - Consultar saldo das contas
-• _"quanto gastei hoje/semana/mês?"_ - Gastos por período
-• _"meus potes"_ - Ver limite e gasto dos potes
-• _"minhas contas fixas"_ - Listar contas recorrentes
-• _"paguei água"_ - Quitar conta fixa
-• _"paguei a internet e comprei pizza de 50"_ - Quitar múltiplas (híbrido)
-• _"transferir 100 da carteira para banco"_ - Transferência
-• _"paguei 500 da fatura do nubank"_ - Pagar fatura
-• _"qual valor da fatura?"_ - Consultar valor da fatura
-• _"quanto gastei com comida?"_ - Gasto por categoria
-• _"quais contas tenho?"_ - Listar contas cadastradas
-• _"quanto de reserva?"_ - Reserva de emergência (6x média)
-• _"tenho conta que vence hoje?"_ - Vencimentos de hoje
-• _"tenho conta que vence amanhã?"_ - Vencimentos de amanhã
-• _"contas que vencem essa semana?"_ - Vencimentos dos próximos 7 dias
-
-*📅 CALENDÁRIO & AGENDA*
-• _"minha agenda amanhã"_ - Ver compromissos
-• _"criar evento academia amanhã 7h"_ - Criar evento
-• _"deletar reunião de hoje"_ - Remover evento
-• _"quando estou livre amanhã?"_ - Horários disponíveis
-
-*📊 ANÁLISES & RELATÓRIOS*
-• _"analisar meus gastos"_ - Análise inteligente com IA
-• _"comparar com mês anterior"_ - Comparação mensal
-• _"quanto vou gastar este mês"_ - Previsão de gastos
-• _"gráfico de gastos"_ - Gerar gráfico visual
-
-*⚙️ CONFIGURAÇÕES*
-• _"ativar resumo matinal"_ - Configurar notificações
-• _"configurar localização São Paulo"_ - Definir cidade
-• _"configurar relatório mensal"_ - Agendar relatório
-• _"configurar endereço casa"_ - Adicionar endereço
-• _"meus endereços"_ - Listar endereços
-• _"remover endereço casa"_ - Deletar endereço
-
-*🔑 ACESSO*
-• _"minha api key"_ - Exibir chave de integração
-
-💡 *Dica:* Use linguagem natural! Eu entendo suas mensagens."""
-
-                return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+                result = route_intent(
+                    intent_name='Menu de Ajuda',
+                    usuario_id=usuario_id,
+                    mensagem=texto_msg,
+                    conn=conn,
+                    numero_whatsapp=numero_limpo
+                )
+                return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
             else:
                 return jsonify({"status": "sucesso", "resposta": "🤔 Não entendi. Tente 'gastei 50' ou 'o que você pode fazer?'."}), 200
