@@ -242,32 +242,18 @@ class CalendarAlertService:
             bool: True se enviou com sucesso
         """
         try:
-            # Formatar mensagem
+            # Extrair dados do evento
             titulo = event.get('summary', 'Sem título')
             horario = CalendarAlertService.format_event_time(event.get('start'))
             localizacao = event.get('location', '')
-            descricao = event.get('description', '')
-            calendario = event.get('calendar_name', '')
 
-            mensagem = f"⏰ *Alerta de Tarefa*\n\n"
-            mensagem += f"📅 *{titulo}*\n"
-            mensagem += f"🕐 Horário: *{horario}*\n"
-
-            if minutos_antes == 1:
-                mensagem += f"⚠️ Começa em *1 minuto*!\n"
-            else:
-                mensagem += f"⚠️ Começa em *{minutos_antes} minutos*!\n"
+            # Formato compacto para wearables (glanceability)
+            # Linha 1: urgência + título | Linha 2: horário | Linha 3: local (opcional)
+            mensagem = f"⚠️ Faltam {minutos_antes} min: {titulo}"
+            mensagem += f"\n🕒 {horario}"
 
             if localizacao:
-                mensagem += f"📍 Local: {localizacao}\n"
-
-            if descricao:
-                # Limitar descrição a 200 caracteres
-                desc_resumida = descricao[:200] + "..." if len(descricao) > 200 else descricao
-                mensagem += f"\n📝 {desc_resumida}\n"
-
-            if calendario:
-                mensagem += f"\n📆 Calendário: {calendario}"
+                mensagem += f"\n📍 {localizacao}"
 
             # Enviar notificação
             sucesso = enviar_notificacao_whatsapp(
