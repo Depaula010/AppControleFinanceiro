@@ -24,6 +24,7 @@ os.environ.setdefault('API_SECRET_KEY', 'test_secret_key_for_testing_minimum_32_
 os.environ.setdefault('WEBHOOK_SIGNATURE_KEY', 'test_webhook_key_for_testing_minimum_32_chars')
 os.environ.setdefault('REDIS_URL', 'redis://localhost:6379')
 os.environ.setdefault('BOT_WHATSAPP_URL', 'https://test.whatsapp.bot')
+os.environ.setdefault('ENCRYPTION_KEY', 'wL7XCLwCYlQpZz-_xQkzXZ8nH3CpKLzQ5d-8Z9K8W0Q=')
 
 # Adicionar diretório raiz ao path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

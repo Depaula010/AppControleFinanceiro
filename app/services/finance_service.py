@@ -270,16 +270,18 @@ def get_user_by_api_key(api_key):
         for row in results:
             stored_key = row.api_key_automate
 
-            try:
-                # Tentar descriptografar
-                decrypted_key = encryption_service.decrypt(stored_key)
-
-                if decrypted_key == api_key:
-                    # Retornar no mesmo formato que antes
-                    return (row.id, row.numero_whatsapp)
-            except:
-                # Chave pode estar em plain text (dados antigos)
-                # Comparação direta como fallback
+            # Verificar se a chave está criptografada antes de tentar descriptografar
+            if encryption_service.is_encrypted(stored_key):
+                try:
+                    decrypted_key = encryption_service.decrypt(stored_key)
+                    if decrypted_key == api_key:
+                        return (row.id, row.numero_whatsapp)
+                except:
+                    # Se falhar descriptografia de chave marcada como criptografada,
+                    # ignora silenciosamente (pode ser dado corrompido)
+                    continue
+            else:
+                # Chave em texto plano (dados antigos) - comparação direta
                 if stored_key == api_key:
                     return (row.id, row.numero_whatsapp)
 
@@ -377,17 +379,22 @@ def get_account_by_name(conn, usuario_id, nome_conta, fallback=False, tipo_conta
     return None
 
 def get_account_details_by_name(conn, usuario_id, nome_conta):
-    """ Busca detalhes completos de uma conta pelo nome (id, nome, tipo). (Requer conexão). """
+    """ Busca detalhes completos de uma conta pelo nome ou tipo (id, nome, tipo). (Requer conexão). """
+    # 1. Busca exata por nome
     sql_exact = text("SELECT id, nome_conta, tipo_conta FROM Contas WHERE usuario_id = :uid AND nome_conta = :nome")
     conta = conn.execute(sql_exact, {"uid": usuario_id, "nome": nome_conta}).fetchone()
-
     if conta:
         return {"id": conta[0], "nome": conta[1], "tipo": conta[2]}
 
-    # Tentar busca parcial (ILIKE)
+    # 2. Busca parcial por nome (ILIKE)
     sql_like = text("SELECT id, nome_conta, tipo_conta FROM Contas WHERE usuario_id = :uid AND nome_conta ILIKE :nome_like")
     conta = conn.execute(sql_like, {"uid": usuario_id, "nome_like": f"%{nome_conta}%"}).fetchone()
+    if conta:
+        return {"id": conta[0], "nome": conta[1], "tipo": conta[2]}
 
+    # 3. Fallback: Busca por tipo_conta (ex: "crédito" -> "Cartão de Crédito")
+    sql_tipo = text("SELECT id, nome_conta, tipo_conta FROM Contas WHERE usuario_id = :uid AND tipo_conta ILIKE :nome_like")
+    conta = conn.execute(sql_tipo, {"uid": usuario_id, "nome_like": f"%{nome_conta}%"}).fetchone()
     if conta:
         return {"id": conta[0], "nome": conta[1], "tipo": conta[2]}
 
