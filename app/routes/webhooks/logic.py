@@ -97,7 +97,10 @@ def handle_automate_webhook():
                 finance_service.ensure_current_invoice_exists(conn, usuario_id, conta_id_transacao)
 
                 fatura_id_transacao = finance_service.get_or_create_fatura(conn, conta_id_transacao, data_hoje, usuario_id)
-            
+
+                # CRÍTICO: Commit para persistir a fatura antes de salvar no Redis
+                conn.commit()
+
             valor_para_db = valor_decimal if tipo_transacao == 'Renda' else (valor_decimal * -1)
             
             # Preparar dados para salvar depois
@@ -329,6 +332,10 @@ def handle_api_transacao():
 
                 fatura_id = finance_service.get_or_create_fatura(conn, conta_id, data_hoje, usuario_id)
                 print(f"[API-TRANSACAO] Fatura ID: {fatura_id}")
+
+                # CRÍTICO: Commit para persistir a fatura antes de salvar no Redis
+                # Sem isso, a fatura é rolada back quando a conexão fecha
+                conn.commit()
 
             # 6. Preparar descrição final para salvar
             descricao_final = local

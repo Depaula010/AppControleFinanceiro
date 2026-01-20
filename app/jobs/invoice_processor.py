@@ -40,7 +40,8 @@ class InvoiceProcessorJob(BaseJob):
         from app.services.finance.invoice_service import (
             close_expired_invoices,
             get_invoices_due_soon,
-            get_overdue_invoices
+            get_overdue_invoices,
+            ensure_current_invoice_exists
         )
         from app.services.notification_service import enviar_notificacao_whatsapp
         from app.shared.formatters.invoice_notification_formatter import InvoiceNotificationFormatter
@@ -87,6 +88,14 @@ class InvoiceProcessorJob(BaseJob):
                             self._log(f"❌ Falha ao enviar notificação - Fatura #{invoice['id']}", level="WARNING")
                     else:
                         self._log(f"⏭️ Notificação já enviada anteriormente - Fatura #{invoice['id']}")
+
+                    # Criar nova fatura para o próximo período
+                    self._log(f"📝 Gerando próxima fatura para {invoice['nome_conta']}...")
+                    try:
+                        ensure_current_invoice_exists(conn, invoice['usuario_id'], invoice['conta_id'])
+                        self._log(f"✅ Nova fatura criada para {invoice['nome_conta']}")
+                    except Exception as e:
+                        self._log(f"❌ Erro ao criar nova fatura para {invoice['nome_conta']}: {e}", level="ERROR")
             else:
                 self._log("Nenhuma fatura para fechar hoje")
 

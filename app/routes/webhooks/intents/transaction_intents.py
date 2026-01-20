@@ -252,6 +252,8 @@ class DespesaIntent(ConfirmationRequiredIntent):
             fatura_id = finance_service.get_or_create_fatura(
                 self.conn, conta_id, data_transacao, self.usuario_id
             )
+            # CRÍTICO: Commit para persistir a fatura antes de salvar no Redis
+            self.conn.commit()
 
         transacao_data = {
             'usuario_id': self.usuario_id,
