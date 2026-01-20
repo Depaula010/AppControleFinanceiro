@@ -139,7 +139,7 @@ def get_top_categorias(usuario_id: int, data_inicio: date, data_fim: date, limit
             {
                 'categoria': row[0],
                 'valor': float(row[1]),
-                'percentual': (float(row[1]) / total_geral * 100) if total_geral > 0 else 0
+                'percentual': (float(row[1]) / total_geral * 100) if total_geral != 0 else 0
             }
             for row in results
         ]
@@ -365,7 +365,7 @@ def generate_monthly_report_chart(report_data: dict) -> bytes:
         return generate_pie_chart({}, 0)
 
     # Preparar dados para o gráfico
-    dados_grafico = {cat['categoria']: cat['valor'] for cat in top_categorias}
+    dados_grafico = {cat['categoria']: abs(cat['valor']) for cat in top_categorias}
     dias = (report_data['periodo']['fim'] - report_data['periodo']['inicio']).days + 1
 
     return generate_pie_chart(dados_grafico, dias)
