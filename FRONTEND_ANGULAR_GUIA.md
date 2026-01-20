@@ -6,15 +6,32 @@ Este guia contém todos os arquivos TypeScript necessários para integrar o Dash
 
 ✅ **Backend 100% Pronto!** Todos os endpoints REST estão implementados e funcionando:
 
-- `POST /auth/login` - Autenticação
-- `POST /auth/register` - Registro
-- `GET /api/dashboard/summary` - Resumo financeiro
+### Autenticação
+- `POST /auth/login` - Autenticação (retorna JWT)
+- `POST /auth/register` - Registro de novo usuário
+- `POST /auth/verify` - Verificar se token é válido
+
+### Dashboard
+- `GET /api/dashboard/summary` - Resumo financeiro (saldo, receitas, despesas)
 - `GET /api/dashboard/stats` - Alias para summary
-- `GET /api/dashboard/charts` - Dados para gráficos
+- `GET /api/dashboard/charts` - Dados para gráficos (gastos mensais, por categoria)
 - `GET /api/dashboard/recent` - Transações recentes (para dashboard)
-- `GET /api/transactions` - Lista de transações com filtros
+
+### Transações (CRUD Completo)
+- `GET /api/transactions` - Lista de transações com filtros e paginação
 - `GET /api/transactions/recent` - Últimas 10 transações
-- `GET /api/accounts` - Contas do usuário
+- `POST /api/transactions` - **NOVO** Criar nova transação
+- `PUT /api/transactions/:id` - **NOVO** Atualizar transação existente
+- `DELETE /api/transactions/:id` - **NOVO** Deletar transação
+
+### Contas
+- `GET /api/accounts` - Contas do usuário com saldos
+
+### Categorias
+- `GET /api/categories` - **NOVO** Lista categorias para forms (filtro: ?tipo=Receita|Despesa)
+
+### Health Check
+- `GET /api/health` - Verificar se API está online
 
 ---
 
@@ -176,6 +193,70 @@ export interface AccountListResponse {
   status: 'success' | 'error';
   data?: Account[];
   message?: string;
+}
+```
+
+#### category.model.ts (NOVO)
+```typescript
+export interface SubCategory {
+  id: number;
+  nome: string;
+}
+
+export interface Category {
+  grupo: string;
+  macro_id: number;
+  macro_categoria: string;
+  subcategorias: SubCategory[];
+}
+
+export interface CategoryListResponse {
+  status: 'success' | 'error';
+  data?: Category[];
+  message?: string;
+}
+
+// Request para criar transação
+export interface CreateTransactionRequest {
+  descricao: string;
+  valor: number;
+  tipo: 'Receita' | 'Despesa';
+  data: string;  // YYYY-MM-DD
+  subcategoria_id: number;
+  conta_id: number;
+  observacoes?: string;
+  consolidada?: boolean;
+}
+
+// Request para atualizar transação (todos campos opcionais)
+export interface UpdateTransactionRequest {
+  descricao?: string;
+  valor?: number;
+  tipo?: 'Receita' | 'Despesa';
+  data?: string;
+  subcategoria_id?: number;
+  conta_id?: number;
+  observacoes?: string;
+  consolidada?: boolean;
+}
+
+// Response de criação/atualização
+export interface TransactionMutationResponse {
+  status: 'success' | 'error';
+  message: string;
+  data?: {
+    id: number;
+    descricao: string;
+    valor: number;
+    tipo: string;
+    data: string;
+  };
+}
+
+// Response de deleção
+export interface DeleteResponse {
+  status: 'success' | 'error';
+  message: string;
 }
 ```
 
@@ -428,15 +509,22 @@ import {
 } from '../../../core/models/dashboard.model';
 import {
   TransactionRecentResponse,
-  TransactionListResponse
+  TransactionListResponse,
+  CreateTransactionRequest,
+  UpdateTransactionRequest,
+  TransactionMutationResponse,
+  DeleteResponse
 } from '../../../core/models/transaction.model';
 import { AccountListResponse } from '../../../core/models/account.model';
+import { CategoryListResponse } from '../../../core/models/category.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardService {
   constructor(private api: ApiService) {}
+
+  // ==================== DASHBOARD ====================
 
   /**
    * Busca resumo do dashboard
@@ -462,6 +550,8 @@ export class DashboardService {
     return this.api.get<ChartDataResponse>('/api/dashboard/charts', { meses });
   }
 
+  // ==================== TRANSAÇÕES (CRUD) ====================
+
   /**
    * Busca lista completa de transações com filtros
    * GET /api/transactions
@@ -477,11 +567,48 @@ export class DashboardService {
   }
 
   /**
+   * Cria uma nova transação
+   * POST /api/transactions
+   */
+  createTransaction(transaction: CreateTransactionRequest): Observable<TransactionMutationResponse> {
+    return this.api.post<TransactionMutationResponse>('/api/transactions', transaction);
+  }
+
+  /**
+   * Atualiza uma transação existente
+   * PUT /api/transactions/:id
+   */
+  updateTransaction(id: number, transaction: UpdateTransactionRequest): Observable<TransactionMutationResponse> {
+    return this.api.put<TransactionMutationResponse>(`/api/transactions/${id}`, transaction);
+  }
+
+  /**
+   * Deleta uma transação
+   * DELETE /api/transactions/:id
+   */
+  deleteTransaction(id: number): Observable<DeleteResponse> {
+    return this.api.delete<DeleteResponse>(`/api/transactions/${id}`);
+  }
+
+  // ==================== CONTAS ====================
+
+  /**
    * Busca contas do usuário
    * GET /api/accounts
    */
   getAccounts(): Observable<AccountListResponse> {
     return this.api.get<AccountListResponse>('/api/accounts');
+  }
+
+  // ==================== CATEGORIAS ====================
+
+  /**
+   * Busca categorias disponíveis
+   * GET /api/categories?tipo=Receita|Despesa
+   */
+  getCategories(tipo?: 'Receita' | 'Despesa'): Observable<CategoryListResponse> {
+    const params = tipo ? { tipo } : undefined;
+    return this.api.get<CategoryListResponse>('/api/categories', params);
   }
 }
 ```

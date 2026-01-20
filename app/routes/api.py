@@ -11,6 +11,7 @@ from datetime import date, datetime, timedelta
 from app import db_engine
 from app.routes.auth import verify_jwt_token
 from app.services import finance_service, analytics_service
+from app.services.finance_service import get_or_create_fatura
 from app.services.period_query_service import PeriodQueryService
 from app.utils import formatar_moeda
 
@@ -768,3 +769,518 @@ def get_dashboard_recent(user_id):
     """
     # Reutilizar a lógica do endpoint de transações recentes
     return get_transacoes_recentes(user_id)
+
+
+# ============================================================
+# CRUD DE TRANSAÇÕES (POST, PUT, DELETE)
+# ============================================================
+
+@api_bp.route('/transactions', methods=['POST'])
+@token_required
+def create_transaction(user_id):
+    """
+    POST /api/transactions
+
+    Cria uma nova transação.
+
+    Headers:
+        Authorization: Bearer <jwt_token>
+
+    Body (JSON):
+        {
+            "descricao": "Supermercado",
+            "valor": 150.50,
+            "tipo": "Despesa",
+            "data": "2025-12-11",
+            "subcategoria_id": 15,
+            "conta_id": 1,
+            "observacoes": "Compras da semana" (opcional),
+            "consolidada": true (opcional, padrão: true)
+        }
+
+    Response:
+        {
+            "status": "success",
+            "message": "Transação criada com sucesso",
+            "data": {
+                "id": 1234,
+                "descricao": "Supermercado",
+                "valor": -150.50,
+                "tipo": "Despesa",
+                "data": "2025-12-11"
+            }
+        }
+    """
+    if not db_engine:
+        return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
+
+    try:
+        data = request.json
+
+        # Validar campos obrigatórios
+        descricao = data.get('descricao', '').strip()
+        valor = data.get('valor')
+        tipo = data.get('tipo')
+        data_transacao = data.get('data')
+        subcategoria_id = data.get('subcategoria_id')
+        conta_id = data.get('conta_id')
+
+        # Campos opcionais
+        observacoes = data.get('observacoes', '').strip() or None
+        consolidada = data.get('consolidada', True)
+
+        # Validações
+        if not descricao:
+            return jsonify({"status": "error", "message": "Campo 'descricao' é obrigatório"}), 400
+
+        if valor is None:
+            return jsonify({"status": "error", "message": "Campo 'valor' é obrigatório"}), 400
+
+        try:
+            valor = float(valor)
+            if valor < 0:
+                return jsonify({"status": "error", "message": "Valor deve ser positivo"}), 400
+        except (ValueError, TypeError):
+            return jsonify({"status": "error", "message": "Valor inválido"}), 400
+
+        if tipo not in ['Receita', 'Despesa']:
+            return jsonify({"status": "error", "message": "Tipo deve ser 'Receita' ou 'Despesa'"}), 400
+
+        if not data_transacao:
+            return jsonify({"status": "error", "message": "Campo 'data' é obrigatório"}), 400
+
+        try:
+            data_parsed = datetime.strptime(data_transacao, '%Y-%m-%d').date()
+        except ValueError:
+            return jsonify({"status": "error", "message": "Data deve estar no formato YYYY-MM-DD"}), 400
+
+        if not subcategoria_id:
+            return jsonify({"status": "error", "message": "Campo 'subcategoria_id' é obrigatório"}), 400
+
+        if not conta_id:
+            return jsonify({"status": "error", "message": "Campo 'conta_id' é obrigatório"}), 400
+
+        with db_engine.connect() as conn:
+            # Verificar se a conta pertence ao usuário
+            sql_check_conta = text("SELECT id, tipo_conta FROM Contas WHERE id = :cid AND usuario_id = :uid")
+            conta = conn.execute(sql_check_conta, {"cid": conta_id, "uid": user_id}).fetchone()
+
+            if not conta:
+                return jsonify({"status": "error", "message": "Conta não encontrada ou não pertence ao usuário"}), 404
+
+            # Verificar se a subcategoria existe
+            sql_check_sub = text("""
+                SELECT id FROM SubCategoria
+                WHERE id = :scid AND (usuario_id IS NULL OR usuario_id = :uid)
+            """)
+            subcategoria = conn.execute(sql_check_sub, {"scid": subcategoria_id, "uid": user_id}).fetchone()
+
+            if not subcategoria:
+                return jsonify({"status": "error", "message": "Subcategoria não encontrada"}), 404
+
+            # Determinar fatura_id se for cartão de crédito
+            fatura_id = None
+            if conta.tipo_conta == 'Cartão de Crédito' and tipo == 'Despesa':
+                fatura_id = get_or_create_fatura(conn, conta_id, data_parsed, user_id)
+
+            # Ajustar valor (despesa = negativo)
+            valor_db = valor if tipo == 'Receita' else -valor
+
+            # Inserir transação
+            with conn.begin():
+                sql_insert = text("""
+                    INSERT INTO Transacoes
+                    (usuario_id, conta_id, subcategoria_id, fatura_id, descricao, valor,
+                     tipo_transacao, data_transacao, observacoes, consolidada, origem)
+                    VALUES (:uid, :cid, :scid, :fid, :desc, :val, :tipo, :data, :obs, :cons, 'api')
+                    RETURNING id
+                """)
+
+                result = conn.execute(sql_insert, {
+                    "uid": user_id,
+                    "cid": conta_id,
+                    "scid": subcategoria_id,
+                    "fid": fatura_id,
+                    "desc": descricao,
+                    "val": valor_db,
+                    "tipo": tipo,
+                    "data": data_parsed,
+                    "obs": observacoes,
+                    "cons": consolidada
+                })
+
+                transaction_id = result.scalar_one()
+
+            print(f"[API] ✅ Transação criada: ID {transaction_id} | {tipo} | R$ {valor} | {descricao}")
+
+            return jsonify({
+                "status": "success",
+                "message": "Transação criada com sucesso",
+                "data": {
+                    "id": transaction_id,
+                    "descricao": descricao,
+                    "valor": valor_db,
+                    "tipo": tipo,
+                    "data": data_transacao
+                }
+            }), 201
+
+    except Exception as e:
+        print(f"[API] ❌ Erro ao criar transação: {e}")
+        import traceback
+        traceback.print_exc()
+
+        return jsonify({
+            "status": "error",
+            "message": "Erro ao criar transação"
+        }), 500
+
+
+@api_bp.route('/transactions/<int:transaction_id>', methods=['PUT'])
+@token_required
+def update_transaction(user_id, transaction_id):
+    """
+    PUT /api/transactions/:id
+
+    Atualiza uma transação existente.
+
+    Headers:
+        Authorization: Bearer <jwt_token>
+
+    Body (JSON - todos os campos são opcionais):
+        {
+            "descricao": "Supermercado Extra",
+            "valor": 180.00,
+            "tipo": "Despesa",
+            "data": "2025-12-12",
+            "subcategoria_id": 16,
+            "conta_id": 2,
+            "observacoes": "Compras atualizadas",
+            "consolidada": true
+        }
+
+    Response:
+        {
+            "status": "success",
+            "message": "Transação atualizada com sucesso",
+            "data": {
+                "id": 1234,
+                "descricao": "Supermercado Extra",
+                "valor": -180.00,
+                "tipo": "Despesa",
+                "data": "2025-12-12"
+            }
+        }
+    """
+    if not db_engine:
+        return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
+
+    try:
+        data = request.json
+
+        if not data:
+            return jsonify({"status": "error", "message": "Nenhum dado fornecido para atualização"}), 400
+
+        with db_engine.connect() as conn:
+            # Verificar se a transação existe e pertence ao usuário
+            sql_check = text("""
+                SELECT id, tipo_transacao, valor, conta_id
+                FROM Transacoes
+                WHERE id = :tid AND usuario_id = :uid
+            """)
+            transacao_atual = conn.execute(sql_check, {"tid": transaction_id, "uid": user_id}).fetchone()
+
+            if not transacao_atual:
+                return jsonify({"status": "error", "message": "Transação não encontrada"}), 404
+
+            # Construir query de atualização dinâmica
+            updates = []
+            params = {"tid": transaction_id, "uid": user_id}
+
+            if 'descricao' in data and data['descricao']:
+                updates.append("descricao = :descricao")
+                params["descricao"] = data['descricao'].strip()
+
+            if 'valor' in data:
+                try:
+                    valor = float(data['valor'])
+                    if valor < 0:
+                        return jsonify({"status": "error", "message": "Valor deve ser positivo"}), 400
+
+                    # Determinar se é receita ou despesa
+                    tipo_atual = data.get('tipo', transacao_atual.tipo_transacao)
+                    valor_db = valor if tipo_atual == 'Receita' else -valor
+
+                    updates.append("valor = :valor")
+                    params["valor"] = valor_db
+                except (ValueError, TypeError):
+                    return jsonify({"status": "error", "message": "Valor inválido"}), 400
+
+            if 'tipo' in data:
+                if data['tipo'] not in ['Receita', 'Despesa']:
+                    return jsonify({"status": "error", "message": "Tipo deve ser 'Receita' ou 'Despesa'"}), 400
+                updates.append("tipo_transacao = :tipo")
+                params["tipo"] = data['tipo']
+
+                # Se mudou o tipo, ajustar o sinal do valor
+                if 'valor' not in data:
+                    valor_atual = abs(float(transacao_atual.valor))
+                    valor_db = valor_atual if data['tipo'] == 'Receita' else -valor_atual
+                    updates.append("valor = :valor")
+                    params["valor"] = valor_db
+
+            if 'data' in data:
+                try:
+                    data_parsed = datetime.strptime(data['data'], '%Y-%m-%d').date()
+                    updates.append("data_transacao = :data")
+                    params["data"] = data_parsed
+                except ValueError:
+                    return jsonify({"status": "error", "message": "Data deve estar no formato YYYY-MM-DD"}), 400
+
+            if 'subcategoria_id' in data:
+                # Verificar se a subcategoria existe
+                sql_check_sub = text("""
+                    SELECT id FROM SubCategoria
+                    WHERE id = :scid AND (usuario_id IS NULL OR usuario_id = :uid)
+                """)
+                subcategoria = conn.execute(sql_check_sub, {"scid": data['subcategoria_id'], "uid": user_id}).fetchone()
+
+                if not subcategoria:
+                    return jsonify({"status": "error", "message": "Subcategoria não encontrada"}), 404
+
+                updates.append("subcategoria_id = :subcategoria_id")
+                params["subcategoria_id"] = data['subcategoria_id']
+
+            if 'conta_id' in data:
+                # Verificar se a conta pertence ao usuário
+                sql_check_conta = text("SELECT id FROM Contas WHERE id = :cid AND usuario_id = :uid")
+                conta = conn.execute(sql_check_conta, {"cid": data['conta_id'], "uid": user_id}).fetchone()
+
+                if not conta:
+                    return jsonify({"status": "error", "message": "Conta não encontrada ou não pertence ao usuário"}), 404
+
+                updates.append("conta_id = :conta_id")
+                params["conta_id"] = data['conta_id']
+
+            if 'observacoes' in data:
+                updates.append("observacoes = :observacoes")
+                params["observacoes"] = data['observacoes'].strip() if data['observacoes'] else None
+
+            if 'consolidada' in data:
+                updates.append("consolidada = :consolidada")
+                params["consolidada"] = bool(data['consolidada'])
+
+            if not updates:
+                return jsonify({"status": "error", "message": "Nenhum campo válido para atualização"}), 400
+
+            # Adicionar updated_at
+            updates.append("updated_at = CURRENT_TIMESTAMP")
+
+            # Executar atualização
+            with conn.begin():
+                sql_update = text(f"""
+                    UPDATE Transacoes
+                    SET {', '.join(updates)}
+                    WHERE id = :tid AND usuario_id = :uid
+                    RETURNING id, descricao, valor, tipo_transacao, data_transacao
+                """)
+
+                result = conn.execute(sql_update, params).fetchone()
+
+            print(f"[API] ✅ Transação atualizada: ID {transaction_id}")
+
+            return jsonify({
+                "status": "success",
+                "message": "Transação atualizada com sucesso",
+                "data": {
+                    "id": result.id,
+                    "descricao": result.descricao,
+                    "valor": float(result.valor),
+                    "tipo": result.tipo_transacao,
+                    "data": result.data_transacao.isoformat() if result.data_transacao else None
+                }
+            }), 200
+
+    except Exception as e:
+        print(f"[API] ❌ Erro ao atualizar transação: {e}")
+        import traceback
+        traceback.print_exc()
+
+        return jsonify({
+            "status": "error",
+            "message": "Erro ao atualizar transação"
+        }), 500
+
+
+@api_bp.route('/transactions/<int:transaction_id>', methods=['DELETE'])
+@token_required
+def delete_transaction(user_id, transaction_id):
+    """
+    DELETE /api/transactions/:id
+
+    Deleta uma transação.
+
+    Headers:
+        Authorization: Bearer <jwt_token>
+
+    Response:
+        {
+            "status": "success",
+            "message": "Transação deletada com sucesso"
+        }
+    """
+    if not db_engine:
+        return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
+
+    try:
+        with db_engine.connect() as conn:
+            # Verificar se a transação existe e pertence ao usuário
+            sql_check = text("""
+                SELECT id, descricao, tipo_transacao, transferencia_par_id
+                FROM Transacoes
+                WHERE id = :tid AND usuario_id = :uid
+            """)
+            transacao = conn.execute(sql_check, {"tid": transaction_id, "uid": user_id}).fetchone()
+
+            if not transacao:
+                return jsonify({"status": "error", "message": "Transação não encontrada"}), 404
+
+            # Se for uma transferência, deletar o par também
+            with conn.begin():
+                if transacao.transferencia_par_id:
+                    sql_delete_par = text("DELETE FROM Transacoes WHERE id = :par_id AND usuario_id = :uid")
+                    conn.execute(sql_delete_par, {"par_id": transacao.transferencia_par_id, "uid": user_id})
+
+                sql_delete = text("DELETE FROM Transacoes WHERE id = :tid AND usuario_id = :uid")
+                conn.execute(sql_delete, {"tid": transaction_id, "uid": user_id})
+
+            print(f"[API] ✅ Transação deletada: ID {transaction_id} | {transacao.tipo_transacao} | {transacao.descricao}")
+
+            return jsonify({
+                "status": "success",
+                "message": "Transação deletada com sucesso"
+            }), 200
+
+    except Exception as e:
+        print(f"[API] ❌ Erro ao deletar transação: {e}")
+        import traceback
+        traceback.print_exc()
+
+        return jsonify({
+            "status": "error",
+            "message": "Erro ao deletar transação"
+        }), 500
+
+
+# ============================================================
+# ENDPOINT DE CATEGORIAS
+# ============================================================
+
+@api_bp.route('/categories', methods=['GET'])
+@token_required
+def get_categories(user_id):
+    """
+    GET /api/categories
+
+    Lista todas as categorias disponíveis para o usuário.
+
+    Headers:
+        Authorization: Bearer <jwt_token>
+
+    Query Parameters:
+        tipo: Filtrar por tipo ('Receita' ou 'Despesa', opcional)
+
+    Response:
+        {
+            "status": "success",
+            "data": [
+                {
+                    "grupo": "Despesa Essencial",
+                    "macro_id": 5,
+                    "macro_categoria": "Alimentação Essencial",
+                    "subcategorias": [
+                        {"id": 15, "nome": "Supermercado / Mercearia"},
+                        {"id": 16, "nome": "Feira / Hortifrúti"}
+                    ]
+                }
+            ]
+        }
+    """
+    if not db_engine:
+        return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
+
+    try:
+        tipo_filtro = request.args.get('tipo')  # 'Receita' ou 'Despesa'
+
+        # Construir filtro de grupo
+        grupo_filter = ""
+        if tipo_filtro == 'Receita':
+            grupo_filter = "AND g.nome_grupo = 'Renda'"
+        elif tipo_filtro == 'Despesa':
+            grupo_filter = "AND g.nome_grupo != 'Renda'"
+
+        with db_engine.connect() as conn:
+            sql = text(f"""
+                SELECT
+                    g.nome_grupo as grupo,
+                    m.id as macro_id,
+                    m.nome_macro as macro_categoria,
+                    s.id as subcategoria_id,
+                    s.nome_sub as subcategoria_nome
+                FROM SubCategoria s
+                JOIN MacroCategoria m ON s.macro_id = m.id
+                JOIN GrupoCategoria g ON m.grupo_id = g.id
+                WHERE (s.usuario_id IS NULL OR s.usuario_id = :uid)
+                    AND (m.usuario_id IS NULL OR m.usuario_id = :uid)
+                    {grupo_filter}
+                ORDER BY g.nome_grupo, m.ordem_macro, m.nome_macro, s.nome_sub
+            """)
+
+            result = conn.execute(sql, {"uid": user_id}).fetchall()
+
+            # Agrupar por macro categoria
+            categorias_dict = {}
+            for row in result:
+                key = (row.grupo, row.macro_id, row.macro_categoria)
+
+                if key not in categorias_dict:
+                    categorias_dict[key] = {
+                        "grupo": row.grupo,
+                        "macro_id": row.macro_id,
+                        "macro_categoria": row.macro_categoria,
+                        "subcategorias": []
+                    }
+
+                categorias_dict[key]["subcategorias"].append({
+                    "id": row.subcategoria_id,
+                    "nome": row.subcategoria_nome
+                })
+
+            categorias = list(categorias_dict.values())
+
+            return jsonify({
+                "status": "success",
+                "data": categorias
+            }), 200
+
+    except Exception as e:
+        print(f"[API] ❌ Erro ao buscar categorias: {e}")
+        import traceback
+        traceback.print_exc()
+
+        return jsonify({
+            "status": "error",
+            "message": "Erro ao carregar categorias"
+        }), 500
+
+
+# Alias em português
+@api_bp.route('/categorias', methods=['GET'])
+@token_required
+def get_categorias(user_id):
+    """
+    GET /api/categorias
+
+    Alias em português para /api/categories.
+    """
+    return get_categories(user_id)
