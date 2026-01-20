@@ -19,106 +19,129 @@ def _format_currency(value):
     return f"R$ {value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 
-def generate_pie_chart(usuario_id, period_days=30):
+def generate_pie_chart(data_or_user_id, days_or_period=30):
     """
     Gera gráfico de pizza com gastos por categoria.
 
     Args:
-        usuario_id: ID do usuário
-        period_days: Período em dias (padrão 30)
+        data_or_user_id: dict com dados {categoria: valor} OU int (usuario_id)
+        days_or_period: int dias para título (modo dict) OU período para query (modo int)
 
     Returns:
         bytes: Imagem PNG em bytes ou None se não houver dados
     """
     try:
-        with db_engine.connect() as conn:
-            # Data de início do período
-            data_inicio = datetime.now().date() - timedelta(days=period_days)
+        # MODO 1: Dados já processados (dict) - para monthly_report_service
+        if isinstance(data_or_user_id, dict):
+            dados = data_or_user_id
+            period_days = days_or_period if isinstance(days_or_period, int) else 30
 
-            # Busca gastos por categoria
-            # Nota: Despesas são armazenadas como valores NEGATIVOS, então usamos ABS() para obter valores positivos
-            sql = text("""
-                SELECT
-                    COALESCE(mc.nome_macro, 'Outros') as categoria,
-                    SUM(ABS(t.valor)) as total
-                FROM Transacoes t
-                LEFT JOIN SubCategoria sc ON t.subcategoria_id = sc.id
-                LEFT JOIN MacroCategoria mc ON sc.macro_id = mc.id
-                WHERE t.usuario_id = :uid
-                    AND t.tipo_transacao = 'Despesa'
-                    AND t.data_transacao >= :data_inicio
-                GROUP BY mc.nome_macro
-                ORDER BY total DESC
-            """)
+            if not dados:
+                print("[CHART - PIE] Dict vazio recebido, retornando None")
+                return None
 
-            print(f"[CHART - PIE] Buscando transações de {data_inicio} até hoje para usuário {usuario_id}")
+            categorias = list(dados.keys())
+            valores = [float(v) for v in dados.values()]
 
-            result = conn.execute(sql, {
-                "uid": usuario_id,
-                "data_inicio": data_inicio
-            }).fetchall()
+            if not categorias or not valores or all(v <= 0 for v in valores):
+                print("[CHART - PIE] Nenhum dado válido no dict")
+                return None
 
-            print(f"[CHART - PIE] Encontradas {len(result) if result else 0} categorias com gastos")
-            if result:
+            print(f"[CHART - PIE] Modo dict: {len(categorias)} categorias recebidas")
+
+        # MODO 2: Query no banco (int usuario_id) - retrocompatibilidade
+        else:
+            usuario_id = data_or_user_id
+            period_days = days_or_period
+
+            with db_engine.connect() as conn:
+                # Data de início do período
+                data_inicio = datetime.now().date() - timedelta(days=period_days)
+
+                # Busca gastos por categoria
+                # Nota: Despesas são armazenadas como valores NEGATIVOS, então usamos ABS() para obter valores positivos
+                sql = text("""
+                    SELECT
+                        COALESCE(mc.nome_macro, 'Outros') as categoria,
+                        SUM(ABS(t.valor)) as total
+                    FROM Transacoes t
+                    LEFT JOIN SubCategoria sc ON t.subcategoria_id = sc.id
+                    LEFT JOIN MacroCategoria mc ON sc.macro_id = mc.id
+                    WHERE t.usuario_id = :uid
+                        AND t.tipo_transacao = 'Despesa'
+                        AND t.data_transacao >= :data_inicio
+                    GROUP BY mc.nome_macro
+                    ORDER BY total DESC
+                """)
+
+                print(f"[CHART - PIE] Buscando transações de {data_inicio} até hoje para usuário {usuario_id}")
+
+                result = conn.execute(sql, {
+                    "uid": usuario_id,
+                    "data_inicio": data_inicio
+                }).fetchall()
+
+                print(f"[CHART - PIE] Encontradas {len(result) if result else 0} categorias com gastos")
+                if result:
+                    for row in result:
+                        print(f"[CHART - PIE]   - {row.categoria}: R$ {row.total}")
+
+                if not result or len(result) == 0:
+                    print(f"[CHART - PIE] NENHUMA transação encontrada no período!")
+                    return None
+
+                # Preparar dados (filtrar apenas valores positivos)
+                categorias = []
+                valores = []
+
                 for row in result:
-                    print(f"[CHART - PIE]   - {row.categoria}: R$ {row.total}")
+                    if row.categoria and row.total and float(row.total) > 0:
+                        categorias.append(row.categoria)
+                        valores.append(float(row.total))
 
-            if not result or len(result) == 0:
-                print(f"[CHART - PIE] NENHUMA transação encontrada no período!")
-                return None
+                # Verificar se há dados válidos
+                if not categorias or not valores:
+                    return None
 
-            # Preparar dados (filtrar apenas valores positivos)
-            categorias = []
-            valores = []
+        # CÓDIGO COMUM: Criação do gráfico (ambos os modos)
+        plt.figure(figsize=(10, 8))
+        colors = plt.cm.Set3.colors
 
-            for row in result:
-                if row.categoria and row.total and float(row.total) > 0:
-                    categorias.append(row.categoria)
-                    valores.append(float(row.total))
+        # Gráfico de pizza
+        wedges, texts, autotexts = plt.pie(
+            valores,
+            labels=categorias,
+            autopct='%1.1f%%',
+            colors=colors,
+            startangle=90
+        )
 
-            # Verificar se há dados válidos
-            if not categorias or not valores:
-                return None
+        # Melhorar visualização
+        for autotext in autotexts:
+            autotext.set_color('white')
+            autotext.set_fontsize(10)
+            autotext.set_weight('bold')
 
-            # Criar gráfico
-            plt.figure(figsize=(10, 8))
-            colors = plt.cm.Set3.colors
+        for text_label in texts:
+            text_label.set_fontsize(11)
 
-            # Gráfico de pizza
-            wedges, texts, autotexts = plt.pie(
-                valores,
-                labels=categorias,
-                autopct='%1.1f%%',
-                colors=colors,
-                startangle=90
-            )
+        plt.title(f'Gastos por Categoria - Últimos {period_days} dias',
+                 fontsize=14, weight='bold', pad=20)
 
-            # Melhorar visualização
-            for autotext in autotexts:
-                autotext.set_color('white')
-                autotext.set_fontsize(10)
-                autotext.set_weight('bold')
+        # Adicionar legenda com valores
+        legend_labels = [f'{cat}: {_format_currency(val)}'
+                       for cat, val in zip(categorias, valores)]
+        plt.legend(legend_labels, loc='center left', bbox_to_anchor=(1, 0, 0.5, 1))
 
-            for text_label in texts:
-                text_label.set_fontsize(11)
+        plt.tight_layout()
 
-            plt.title(f'Gastos por Categoria - Últimos {period_days} dias',
-                     fontsize=14, weight='bold', pad=20)
+        # Salvar em bytes
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', dpi=150, bbox_inches='tight')
+        buf.seek(0)
+        plt.close()
 
-            # Adicionar legenda com valores
-            legend_labels = [f'{cat}: {_format_currency(val)}'
-                           for cat, val in zip(categorias, valores)]
-            plt.legend(legend_labels, loc='center left', bbox_to_anchor=(1, 0, 0.5, 1))
-
-            plt.tight_layout()
-
-            # Salvar em bytes
-            buf = io.BytesIO()
-            plt.savefig(buf, format='png', dpi=150, bbox_inches='tight')
-            buf.seek(0)
-            plt.close()
-
-            return buf.getvalue()
+        return buf.getvalue()
 
     except Exception as e:
         print(f"[CHART] Erro ao gerar gráfico de pizza: {e}")
