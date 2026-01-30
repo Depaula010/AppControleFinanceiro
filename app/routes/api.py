@@ -303,6 +303,387 @@ def get_accounts(user_id):
     return _get_accounts_impl(user_id)
 
 
+# Tipos de conta válidos
+TIPOS_CONTA_VALIDOS = [
+    'Conta Corrente', 'Conta Poupança', 'Investimento',
+    'Cartão de Crédito', 'Dinheiro', 'Outro'
+]
+
+
+def _create_account_impl(user_id):
+    """Lógica interna para criar conta (sem decorator)."""
+    if not db_engine:
+        return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
+
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({"status": "error", "message": "Dados não fornecidos"}), 400
+
+        # Validar campos obrigatórios
+        nome_conta = data.get('nome_conta', '').strip()
+        tipo_conta = data.get('tipo_conta', '').strip()
+
+        if not nome_conta:
+            return jsonify({"status": "error", "message": "Nome da conta é obrigatório"}), 400
+
+        if not tipo_conta:
+            return jsonify({"status": "error", "message": "Tipo da conta é obrigatório"}), 400
+
+        if tipo_conta not in TIPOS_CONTA_VALIDOS:
+            return jsonify({
+                "status": "error",
+                "message": f"Tipo de conta inválido. Valores permitidos: {', '.join(TIPOS_CONTA_VALIDOS)}"
+            }), 400
+
+        # Sanitizar nome (prevenir XSS)
+        nome_conta = nome_conta[:100]  # Limitar tamanho
+
+        # Campos opcionais
+        saldo_inicial = data.get('saldo_inicial', 0.0)
+        cor_hex = data.get('cor_hex', '#3B82F6')
+        icone = data.get('icone', 'wallet')
+        limite_credito = data.get('limite_credito')
+        dia_fechamento = data.get('dia_fechamento')
+        dia_vencimento = data.get('dia_vencimento')
+
+        # Validar campos numéricos
+        try:
+            saldo_inicial = float(saldo_inicial) if saldo_inicial is not None else 0.0
+        except (ValueError, TypeError):
+            return jsonify({"status": "error", "message": "Saldo inicial deve ser um número válido"}), 400
+
+        # Validar campos de cartão de crédito
+        if tipo_conta == 'Cartão de Crédito':
+            if limite_credito is not None:
+                try:
+                    limite_credito = float(limite_credito)
+                except (ValueError, TypeError):
+                    return jsonify({"status": "error", "message": "Limite de crédito deve ser um número válido"}), 400
+
+            if dia_fechamento is not None:
+                try:
+                    dia_fechamento = int(dia_fechamento)
+                    if not 1 <= dia_fechamento <= 31:
+                        raise ValueError()
+                except (ValueError, TypeError):
+                    return jsonify({"status": "error", "message": "Dia de fechamento deve ser entre 1 e 31"}), 400
+
+            if dia_vencimento is not None:
+                try:
+                    dia_vencimento = int(dia_vencimento)
+                    if not 1 <= dia_vencimento <= 31:
+                        raise ValueError()
+                except (ValueError, TypeError):
+                    return jsonify({"status": "error", "message": "Dia de vencimento deve ser entre 1 e 31"}), 400
+
+        with db_engine.connect() as conn:
+            # Verificar se já existe conta com mesmo nome
+            check_sql = text("""
+                SELECT id FROM Contas
+                WHERE usuario_id = :uid AND nome_conta = :nome AND ativa = true
+            """)
+            existing = conn.execute(check_sql, {"uid": user_id, "nome": nome_conta}).fetchone()
+
+            if existing:
+                return jsonify({
+                    "status": "error",
+                    "message": "Já existe uma conta com este nome"
+                }), 400
+
+            # Inserir nova conta
+            insert_sql = text("""
+                INSERT INTO Contas (
+                    usuario_id, nome_conta, tipo_conta, saldo_inicial,
+                    cor_hex, icone, limite_credito, dia_fechamento, dia_vencimento,
+                    ativa, inclui_saldo_total, created_at
+                ) VALUES (
+                    :uid, :nome, :tipo, :saldo,
+                    :cor, :icone, :limite, :fechamento, :vencimento,
+                    true, true, CURRENT_TIMESTAMP
+                )
+            """)
+
+            conn.execute(insert_sql, {
+                "uid": user_id,
+                "nome": nome_conta,
+                "tipo": tipo_conta,
+                "saldo": saldo_inicial,
+                "cor": cor_hex,
+                "icone": icone,
+                "limite": limite_credito,
+                "fechamento": dia_fechamento,
+                "vencimento": dia_vencimento
+            })
+            conn.commit()
+
+            # Buscar conta criada
+            select_sql = text("""
+                SELECT id, nome_conta, tipo_conta, saldo_inicial, cor_hex, icone,
+                       limite_credito, dia_fechamento, dia_vencimento
+                FROM Contas
+                WHERE usuario_id = :uid AND nome_conta = :nome AND ativa = true
+            """)
+            conta = conn.execute(select_sql, {"uid": user_id, "nome": nome_conta}).fetchone()
+
+            return jsonify({
+                "status": "success",
+                "message": "Conta criada com sucesso",
+                "data": {
+                    "id": conta.id,
+                    "nome_conta": conta.nome_conta,
+                    "tipo_conta": conta.tipo_conta,
+                    "saldo_inicial": float(conta.saldo_inicial),
+                    "cor_hex": conta.cor_hex,
+                    "icone": conta.icone,
+                    "limite_credito": float(conta.limite_credito) if conta.limite_credito else None,
+                    "dia_fechamento": conta.dia_fechamento,
+                    "dia_vencimento": conta.dia_vencimento
+                }
+            }), 201
+
+    except Exception as e:
+        print(f"[API] ❌ Erro ao criar conta: {e}")
+        import traceback
+        traceback.print_exc()
+
+        return jsonify({
+            "status": "error",
+            "message": "Erro ao criar conta"
+        }), 500
+
+
+@api_bp.route('/accounts', methods=['POST'])
+@token_required
+def create_account(user_id):
+    """POST /api/accounts - Cria nova conta bancária."""
+    return _create_account_impl(user_id)
+
+
+def _update_account_impl(user_id, account_id):
+    """Lógica interna para atualizar conta (sem decorator)."""
+    if not db_engine:
+        return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
+
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({"status": "error", "message": "Dados não fornecidos"}), 400
+
+        with db_engine.connect() as conn:
+            # Verificar se conta existe e pertence ao usuário
+            check_sql = text("""
+                SELECT id, nome_conta FROM Contas
+                WHERE id = :id AND usuario_id = :uid AND ativa = true
+            """)
+            conta = conn.execute(check_sql, {"id": account_id, "uid": user_id}).fetchone()
+
+            if not conta:
+                return jsonify({
+                    "status": "error",
+                    "message": "Conta não encontrada"
+                }), 404
+
+            # Preparar campos para atualização
+            updates = []
+            params = {"id": account_id, "uid": user_id}
+
+            if 'nome_conta' in data:
+                nome = data['nome_conta'].strip()[:100]
+                if not nome:
+                    return jsonify({"status": "error", "message": "Nome da conta não pode ser vazio"}), 400
+
+                # Verificar duplicidade
+                dup_sql = text("""
+                    SELECT id FROM Contas
+                    WHERE usuario_id = :uid AND nome_conta = :nome AND id != :id AND ativa = true
+                """)
+                dup = conn.execute(dup_sql, {"uid": user_id, "nome": nome, "id": account_id}).fetchone()
+                if dup:
+                    return jsonify({"status": "error", "message": "Já existe outra conta com este nome"}), 400
+
+                updates.append("nome_conta = :nome")
+                params["nome"] = nome
+
+            if 'tipo_conta' in data:
+                tipo = data['tipo_conta'].strip()
+                if tipo not in TIPOS_CONTA_VALIDOS:
+                    return jsonify({
+                        "status": "error",
+                        "message": f"Tipo de conta inválido. Valores permitidos: {', '.join(TIPOS_CONTA_VALIDOS)}"
+                    }), 400
+                updates.append("tipo_conta = :tipo")
+                params["tipo"] = tipo
+
+            if 'saldo_inicial' in data:
+                try:
+                    saldo = float(data['saldo_inicial'])
+                    updates.append("saldo_inicial = :saldo")
+                    params["saldo"] = saldo
+                except (ValueError, TypeError):
+                    return jsonify({"status": "error", "message": "Saldo inicial deve ser um número válido"}), 400
+
+            if 'cor_hex' in data:
+                updates.append("cor_hex = :cor")
+                params["cor"] = data['cor_hex']
+
+            if 'icone' in data:
+                updates.append("icone = :icone")
+                params["icone"] = data['icone']
+
+            if 'limite_credito' in data:
+                limite = data['limite_credito']
+                if limite is not None:
+                    try:
+                        limite = float(limite)
+                    except (ValueError, TypeError):
+                        return jsonify({"status": "error", "message": "Limite de crédito deve ser um número válido"}), 400
+                updates.append("limite_credito = :limite")
+                params["limite"] = limite
+
+            if 'dia_fechamento' in data:
+                dia = data['dia_fechamento']
+                if dia is not None:
+                    try:
+                        dia = int(dia)
+                        if not 1 <= dia <= 31:
+                            raise ValueError()
+                    except (ValueError, TypeError):
+                        return jsonify({"status": "error", "message": "Dia de fechamento deve ser entre 1 e 31"}), 400
+                updates.append("dia_fechamento = :fechamento")
+                params["fechamento"] = dia
+
+            if 'dia_vencimento' in data:
+                dia = data['dia_vencimento']
+                if dia is not None:
+                    try:
+                        dia = int(dia)
+                        if not 1 <= dia <= 31:
+                            raise ValueError()
+                    except (ValueError, TypeError):
+                        return jsonify({"status": "error", "message": "Dia de vencimento deve ser entre 1 e 31"}), 400
+                updates.append("dia_vencimento = :vencimento")
+                params["vencimento"] = dia
+
+            if not updates:
+                return jsonify({"status": "error", "message": "Nenhum campo para atualizar"}), 400
+
+            # Executar atualização
+            update_sql = text(f"""
+                UPDATE Contas SET {', '.join(updates)}
+                WHERE id = :id AND usuario_id = :uid
+            """)
+            conn.execute(update_sql, params)
+            conn.commit()
+
+            # Buscar conta atualizada
+            select_sql = text("""
+                SELECT id, nome_conta, tipo_conta, saldo_inicial, cor_hex, icone,
+                       limite_credito, dia_fechamento, dia_vencimento
+                FROM Contas WHERE id = :id
+            """)
+            conta_atualizada = conn.execute(select_sql, {"id": account_id}).fetchone()
+
+            return jsonify({
+                "status": "success",
+                "message": "Conta atualizada com sucesso",
+                "data": {
+                    "id": conta_atualizada.id,
+                    "nome_conta": conta_atualizada.nome_conta,
+                    "tipo_conta": conta_atualizada.tipo_conta,
+                    "saldo_inicial": float(conta_atualizada.saldo_inicial),
+                    "cor_hex": conta_atualizada.cor_hex,
+                    "icone": conta_atualizada.icone,
+                    "limite_credito": float(conta_atualizada.limite_credito) if conta_atualizada.limite_credito else None,
+                    "dia_fechamento": conta_atualizada.dia_fechamento,
+                    "dia_vencimento": conta_atualizada.dia_vencimento
+                }
+            }), 200
+
+    except Exception as e:
+        print(f"[API] ❌ Erro ao atualizar conta: {e}")
+        import traceback
+        traceback.print_exc()
+
+        return jsonify({
+            "status": "error",
+            "message": "Erro ao atualizar conta"
+        }), 500
+
+
+@api_bp.route('/accounts/<int:account_id>', methods=['PUT'])
+@token_required
+def update_account(user_id, account_id):
+    """PUT /api/accounts/<id> - Atualiza conta bancária."""
+    return _update_account_impl(user_id, account_id)
+
+
+def _delete_account_impl(user_id, account_id):
+    """Lógica interna para remover conta (sem decorator)."""
+    if not db_engine:
+        return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
+
+    try:
+        with db_engine.connect() as conn:
+            # Verificar se conta existe e pertence ao usuário
+            check_sql = text("""
+                SELECT id, nome_conta FROM Contas
+                WHERE id = :id AND usuario_id = :uid AND ativa = true
+            """)
+            conta = conn.execute(check_sql, {"id": account_id, "uid": user_id}).fetchone()
+
+            if not conta:
+                return jsonify({
+                    "status": "error",
+                    "message": "Conta não encontrada"
+                }), 404
+
+            # Verificar se há transações vinculadas
+            trans_sql = text("""
+                SELECT COUNT(*) as total FROM Transacoes
+                WHERE conta_id = :id
+            """)
+            result = conn.execute(trans_sql, {"id": account_id}).fetchone()
+
+            if result.total > 0:
+                return jsonify({
+                    "status": "error",
+                    "message": f"Não é possível excluir esta conta. Existem {result.total} transações vinculadas."
+                }), 400
+
+            # Soft delete: marcar como inativa
+            delete_sql = text("""
+                UPDATE Contas SET ativa = false
+                WHERE id = :id AND usuario_id = :uid
+            """)
+            conn.execute(delete_sql, {"id": account_id, "uid": user_id})
+            conn.commit()
+
+            return jsonify({
+                "status": "success",
+                "message": "Conta removida com sucesso"
+            }), 200
+
+    except Exception as e:
+        print(f"[API] ❌ Erro ao remover conta: {e}")
+        import traceback
+        traceback.print_exc()
+
+        return jsonify({
+            "status": "error",
+            "message": "Erro ao remover conta"
+        }), 500
+
+
+@api_bp.route('/accounts/<int:account_id>', methods=['DELETE'])
+@token_required
+def delete_account(user_id, account_id):
+    """DELETE /api/accounts/<id> - Remove conta bancária (soft delete)."""
+    return _delete_account_impl(user_id, account_id)
+
+
 # ============================================================
 # ENDPOINTS DE TRANSAÇÕES
 # ============================================================
@@ -622,6 +1003,27 @@ def get_contas(user_id):
     """
     # Reutilizar a lógica do endpoint principal
     return _get_accounts_impl(user_id)
+
+
+@api_bp.route('/contas', methods=['POST'])
+@token_required
+def create_conta(user_id):
+    """POST /api/contas - Alias em português para criar conta."""
+    return _create_account_impl(user_id)
+
+
+@api_bp.route('/contas/<int:account_id>', methods=['PUT'])
+@token_required
+def update_conta(user_id, account_id):
+    """PUT /api/contas/<id> - Alias em português para atualizar conta."""
+    return _update_account_impl(user_id, account_id)
+
+
+@api_bp.route('/contas/<int:account_id>', methods=['DELETE'])
+@token_required
+def delete_conta(user_id, account_id):
+    """DELETE /api/contas/<id> - Alias em português para remover conta."""
+    return _delete_account_impl(user_id, account_id)
 
 
 # ============================================================
