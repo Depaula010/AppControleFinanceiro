@@ -145,6 +145,8 @@ VALID_ENDPOINTS = {
     '/api/transactions',
     '/api/transactions/recent',  # Alias em inglês para /transacoes/recentes
     '/api/transacoes/recentes',
+    '/api/categories',
+    '/api-keys/validate',
 }
 
 def is_trusted_ip(ip):
@@ -186,6 +188,10 @@ def is_suspicious_request(path, user_agent):
         '/connect-calendar/',
         '/disconnect-calendar/',
         '/api/fatura/',  # Permite /api/fatura/<id>/reprocessar
+        '/settings/',
+        '/api-keys/preferencias/',
+        '/calendar-alerts/config/',
+        '/addresses/',
     ]
 
     is_dynamic = any(path.startswith(prefix) for prefix in dynamic_endpoints)
