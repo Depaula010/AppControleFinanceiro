@@ -85,29 +85,8 @@ def token_required(f):
 # ENDPOINTS DO DASHBOARD
 # ============================================================
 
-@api_bp.route('/dashboard/summary', methods=['GET'])
-@token_required
-def get_dashboard_summary(user_id):
-    """
-    GET /api/dashboard/summary
-
-    Retorna resumo do dashboard: saldo total, receitas e despesas do mês.
-
-    Headers:
-        Authorization: Bearer <jwt_token>
-
-    Response:
-        {
-            "status": "success",
-            "data": {
-                "saldo_total": 5430.50,
-                "receitas_mes": 8000.00,
-                "despesas_mes": 3245.30,
-                "saldo_mes": 4754.70,
-                "mes_referencia": "Dezembro/2025"
-            }
-        }
-    """
+def _get_dashboard_summary_impl(user_id):
+    """Lógica interna para buscar resumo do dashboard (sem decorator)."""
     if not db_engine:
         return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
 
@@ -181,6 +160,13 @@ def get_dashboard_summary(user_id):
             "status": "error",
             "message": "Erro ao carregar resumo do dashboard"
         }), 500
+
+
+@api_bp.route('/dashboard/summary', methods=['GET'])
+@token_required
+def get_dashboard_summary(user_id):
+    """GET /api/dashboard/summary - Retorna resumo do dashboard."""
+    return _get_dashboard_summary_impl(user_id)
 
 
 @api_bp.route('/dashboard/charts', methods=['GET'])
@@ -285,34 +271,8 @@ def get_dashboard_charts(user_id):
 # ENDPOINTS DE CONTAS
 # ============================================================
 
-@api_bp.route('/accounts', methods=['GET'])
-@token_required
-def get_accounts(user_id):
-    """
-    GET /api/accounts
-
-    Lista todas as contas do usuário com saldos.
-
-    Headers:
-        Authorization: Bearer <jwt_token>
-
-    Response:
-        {
-            "status": "success",
-            "data": [
-                {
-                    "nome_conta": "Nubank",
-                    "tipo_conta": "Conta Corrente",
-                    "saldo": 2345.50
-                },
-                {
-                    "nome_conta": "Cartão Inter",
-                    "tipo_conta": "Cartão de Crédito",
-                    "saldo": -1200.00
-                }
-            ]
-        }
-    """
+def _get_accounts_impl(user_id):
+    """Lógica interna para buscar contas (sem decorator)."""
     if not db_engine:
         return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
 
@@ -334,6 +294,13 @@ def get_accounts(user_id):
             "status": "error",
             "message": "Erro ao carregar contas"
         }), 500
+
+
+@api_bp.route('/accounts', methods=['GET'])
+@token_required
+def get_accounts(user_id):
+    """GET /api/accounts - Lista todas as contas do usuário."""
+    return _get_accounts_impl(user_id)
 
 
 # ============================================================
@@ -564,36 +531,11 @@ def get_dashboard_resumo(user_id):
         }
     """
     # Reutilizar a lógica do endpoint principal
-    return get_dashboard_summary(user_id)
+    return _get_dashboard_summary_impl(user_id)
 
 
-@api_bp.route('/transacoes/recentes', methods=['GET'])
-@token_required
-def get_transacoes_recentes(user_id):
-    """
-    GET /api/transacoes/recentes
-
-    Lista as últimas 10 transações do usuário (mais recentes primeiro).
-
-    Headers:
-        Authorization: Bearer <jwt_token>
-
-    Response:
-        {
-            "status": "success",
-            "data": [
-                {
-                    "id": 1234,
-                    "descricao": "Supermercado",
-                    "valor": -150.50,
-                    "tipo": "Despesa",
-                    "data": "2025-12-11",
-                    "categoria": "Alimentação",
-                    "conta": "Nubank"
-                }
-            ]
-        }
-    """
+def _get_transacoes_recentes_impl(user_id):
+    """Lógica interna para buscar transações recentes (sem decorator)."""
     if not db_engine:
         return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
 
@@ -647,6 +589,13 @@ def get_transacoes_recentes(user_id):
         }), 500
 
 
+@api_bp.route('/transacoes/recentes', methods=['GET'])
+@token_required
+def get_transacoes_recentes(user_id):
+    """GET /api/transacoes/recentes - Lista últimas 10 transações."""
+    return _get_transacoes_recentes_impl(user_id)
+
+
 @api_bp.route('/contas', methods=['GET'])
 @token_required
 def get_contas(user_id):
@@ -672,7 +621,7 @@ def get_contas(user_id):
         }
     """
     # Reutilizar a lógica do endpoint principal
-    return get_accounts(user_id)
+    return _get_accounts_impl(user_id)
 
 
 # ============================================================
@@ -704,7 +653,7 @@ def get_dashboard_stats(user_id):
         }
     """
     # Reutilizar a lógica do endpoint principal
-    return get_dashboard_summary(user_id)
+    return _get_dashboard_summary_impl(user_id)
 
 
 @api_bp.route('/transactions/recent', methods=['GET'])
@@ -736,7 +685,7 @@ def get_transactions_recent(user_id):
         }
     """
     # Reutilizar a lógica do endpoint em português
-    return get_transacoes_recentes(user_id)
+    return _get_transacoes_recentes_impl(user_id)
 
 
 @api_bp.route('/dashboard/recent', methods=['GET'])
@@ -768,7 +717,7 @@ def get_dashboard_recent(user_id):
         }
     """
     # Reutilizar a lógica do endpoint de transações recentes
-    return get_transacoes_recentes(user_id)
+    return _get_transacoes_recentes_impl(user_id)
 
 
 # ============================================================
@@ -1176,36 +1125,8 @@ def delete_transaction(user_id, transaction_id):
 # ENDPOINT DE CATEGORIAS
 # ============================================================
 
-@api_bp.route('/categories', methods=['GET'])
-@token_required
-def get_categories(user_id):
-    """
-    GET /api/categories
-
-    Lista todas as categorias disponíveis para o usuário.
-
-    Headers:
-        Authorization: Bearer <jwt_token>
-
-    Query Parameters:
-        tipo: Filtrar por tipo ('Receita' ou 'Despesa', opcional)
-
-    Response:
-        {
-            "status": "success",
-            "data": [
-                {
-                    "grupo": "Despesa Essencial",
-                    "macro_id": 5,
-                    "macro_categoria": "Alimentação Essencial",
-                    "subcategorias": [
-                        {"id": 15, "nome": "Supermercado / Mercearia"},
-                        {"id": 16, "nome": "Feira / Hortifrúti"}
-                    ]
-                }
-            ]
-        }
-    """
+def _get_categories_impl(user_id):
+    """Lógica interna para buscar categorias (sem decorator)."""
     if not db_engine:
         return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
 
@@ -1274,6 +1195,13 @@ def get_categories(user_id):
         }), 500
 
 
+@api_bp.route('/categories', methods=['GET'])
+@token_required
+def get_categories(user_id):
+    """GET /api/categories - Lista categorias disponíveis."""
+    return _get_categories_impl(user_id)
+
+
 # Alias em português
 @api_bp.route('/categorias', methods=['GET'])
 @token_required
@@ -1283,4 +1211,4 @@ def get_categorias(user_id):
 
     Alias em português para /api/categories.
     """
-    return get_categories(user_id)
+    return _get_categories_impl(user_id)
