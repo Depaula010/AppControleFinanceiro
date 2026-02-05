@@ -15,11 +15,15 @@ from app import db_engine
 from app.config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI
 
 class GoogleCalendarOAuthService:
-    """Gerencia autenticação OAuth2 para múltiplos usuários"""
-    
+    """Gerencia autenticação OAuth2 para múltiplos usuários (Calendar + Drive)"""
+
     SCOPES = [
-        'https://www.googleapis.com/auth/calendar'
+        'https://www.googleapis.com/auth/calendar',
+        'https://www.googleapis.com/auth/drive.file'  # Acesso apenas a arquivos criados pelo app
     ]
+
+    # Escopo específico do Drive para verificação
+    DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
     
     @staticmethod
     def create_flow():
@@ -437,23 +441,95 @@ _Esta notificação é enviada 1x por semana enquanto a reconexão for necessár
     def get_calendar_service(usuario_id):
         """
         Cria serviço do Google Calendar para um usuário.
-        
+
         Returns:
             Google Calendar API Resource
         """
         print(f"[OAUTH] Criando serviço Calendar para usuário {usuario_id}")
-        
+
         credentials = GoogleCalendarOAuthService.get_credentials(usuario_id)
-        
+
         if not credentials:
             raise Exception("Usuário não conectou Google Calendar")
-        
+
         try:
             service = build('calendar', 'v3', credentials=credentials)
             print(f"[OAUTH] ✅ Serviço Calendar criado com sucesso")
             return service
         except Exception as e:
             print(f"[OAUTH] ❌ Erro ao criar serviço: {e}")
+            raise
+
+    @staticmethod
+    def has_drive_scope(usuario_id) -> bool:
+        """
+        Verifica se o usuário tem o escopo do Google Drive autorizado.
+
+        Args:
+            usuario_id: ID do usuário
+
+        Returns:
+            bool: True se tem escopo do Drive, False caso contrário
+        """
+        if not db_engine:
+            return False
+
+        sql = text("""
+            SELECT scopes FROM GoogleCalendarTokens
+            WHERE usuario_id = :uid
+        """)
+
+        try:
+            with db_engine.connect() as conn:
+                result = conn.execute(sql, {"uid": usuario_id}).fetchone()
+
+            if not result or not result.scopes:
+                return False
+
+            scopes = json.loads(result.scopes) if isinstance(result.scopes, str) else result.scopes
+            has_scope = GoogleCalendarOAuthService.DRIVE_SCOPE in scopes
+
+            print(f"[OAUTH] Usuário {usuario_id} tem escopo Drive? {has_scope}")
+            return has_scope
+
+        except Exception as e:
+            print(f"[OAUTH] Erro ao verificar escopo Drive: {e}")
+            return False
+
+    @staticmethod
+    def get_drive_service(usuario_id):
+        """
+        Cria serviço do Google Drive para um usuário.
+
+        Args:
+            usuario_id: ID do usuário
+
+        Returns:
+            Google Drive API Resource
+
+        Raises:
+            Exception: Se usuário não conectou ou não tem escopo do Drive
+        """
+        print(f"[OAUTH] Criando serviço Drive para usuário {usuario_id}")
+
+        # Verificar se tem escopo do Drive
+        if not GoogleCalendarOAuthService.has_drive_scope(usuario_id):
+            raise Exception(
+                "Usuário precisa reconectar a conta Google para autorizar o Google Drive. "
+                "Acesse as configurações e clique em 'Conectar Google'."
+            )
+
+        credentials = GoogleCalendarOAuthService.get_credentials(usuario_id)
+
+        if not credentials:
+            raise Exception("Usuário não conectou conta Google")
+
+        try:
+            service = build('drive', 'v3', credentials=credentials)
+            print(f"[OAUTH] ✅ Serviço Drive criado com sucesso")
+            return service
+        except Exception as e:
+            print(f"[OAUTH] ❌ Erro ao criar serviço Drive: {e}")
             raise
     
     @staticmethod

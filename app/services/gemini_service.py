@@ -240,6 +240,9 @@ def get_message_intent(texto_msg, usuario_id=None):
     - "Solicitar API Key" → pedir chave de acesso
     - "Menu de Ajuda" → "o que você pode fazer?", "funcionalidades"
 
+    ☁️ GOOGLE DRIVE:
+    - "Upload Drive" → salvar/guardar/enviar arquivo para o drive: "salvar no drive", "guardar no drive pasta X", "enviar para o drive"
+
     Responda APENAS com JSON: {{"intent": "..."}}
 
     ⚠️ EXEMPLOS CRÍTICOS (não confunda!):
@@ -338,6 +341,11 @@ def get_message_intent(texto_msg, usuario_id=None):
     - "comandos disponíveis" → {{"intent": "Menu de Ajuda"}}
     - "o que você faz?" → {{"intent": "Menu de Ajuda"}}
     - "ajuda secretário" → {{"intent": "Menu de Ajuda"}}
+    - "salvar no drive" → {{"intent": "Upload Drive"}}
+    - "guardar no drive pasta notas fiscais" → {{"intent": "Upload Drive"}}
+    - "enviar para o drive em documentos" → {{"intent": "Upload Drive"}}
+    - "subir pro drive na pasta comprovantes" → {{"intent": "Upload Drive"}}
+    - "salva isso no drive" → {{"intent": "Upload Drive"}}
     '''
 
     # CACHE: Intent é global (não user-specific), TTL 7 dias

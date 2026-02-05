@@ -90,6 +90,9 @@ from .config_intents import (
     ListarEnderecosIntent,
     DeletarEnderecoIntent,
 )
+from .drive_intents import (
+    UploadDriveIntent,
+)
 
 INTENT_REGISTRY: Dict[str, Type[BaseIntent]] = {
     # Transaction Intents (Implementados)
@@ -138,6 +141,9 @@ INTENT_REGISTRY: Dict[str, Type[BaseIntent]] = {
     'Configurar Endereço': ConfigurarEnderecoIntent,
     'Listar Endereços': ListarEnderecosIntent,
     'Deletar Endereço': DeletarEnderecoIntent,
+
+    # Drive Intents - Upload de arquivos
+    'Upload Drive': UploadDriveIntent,
 }
 
 

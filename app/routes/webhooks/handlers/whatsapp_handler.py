@@ -1494,6 +1494,45 @@ class WhatsAppHandler:
                     )
                     return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
+                #==== INTENCAO: Upload Drive ====
+                elif intent == 'Upload Drive':
+                    from app.routes.webhooks.intents import INTENT_REGISTRY
+
+                    try:
+                        # Verificar se recebemos dados de midia do bot
+                        media_data = data.get('media_data')  # base64 ou bytes
+                        media_type = data.get('media_type')  # ex: image/jpeg
+                        media_filename = data.get('media_filename', 'arquivo')
+
+                        # Usar a classe UploadDriveIntent registrada
+                        intent_class = INTENT_REGISTRY.get('Upload Drive')
+
+                        if not intent_class:
+                            raise Exception("Intent 'Upload Drive' não encontrada no registry")
+
+                        # Instanciar a intent com parametros + dados de midia
+                        intent_instance = intent_class(
+                            usuario_id=usuario_id,
+                            mensagem=texto_msg,
+                            conn=conn,
+                            numero_whatsapp=numero_limpo,
+                            media_data=media_data,
+                            media_type=media_type,
+                            media_filename=media_filename
+                        )
+
+                        # Executar usando handle() e extrair message
+                        result = intent_instance.handle()
+                        resposta_para_usuario = result["message"]
+
+                        return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
+                    except Exception as e:
+                        print(f"[UPLOAD-DRIVE] Erro: {e}")
+                        traceback.print_exc()
+                        resposta_para_usuario = "❌ Erro ao fazer upload para o Google Drive."
+                        return jsonify({"status": "sucesso", "resposta": resposta_para_usuario}), 200
+
                 else:
                     return jsonify({"status": "sucesso", "resposta": "🤔 Não entendi. Tente 'gastei 50' ou 'o que você pode fazer?'."}), 200
 
