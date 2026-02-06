@@ -44,8 +44,12 @@ class CalendarHandler:
             if not usuario:
                 return "Erro: Usuario nao encontrado", 404
 
-            # Verificar se ja esta conectado
-            if GoogleCalendarOAuthService.is_user_connected(usuario_id):
+            # Verificar se ja esta conectado COM TODOS os escopos necessarios
+            is_connected = GoogleCalendarOAuthService.is_user_connected(usuario_id)
+            has_drive = GoogleCalendarOAuthService.has_drive_scope(usuario_id)
+            force = request.args.get('force') == 'true'
+
+            if is_connected and has_drive and not force:
                 return """
             <!DOCTYPE html>
             <html>
@@ -72,29 +76,24 @@ class CalendarHandler:
                     }
                     .icon { font-size: 64px; margin-bottom: 20px; }
                     h1 { color: #667eea; margin-bottom: 20px; }
-                    .btn {
-                        background: #667eea;
-                        color: white;
-                        padding: 15px 30px;
-                        border-radius: 8px;
-                        text-decoration: none;
-                        display: inline-block;
-                        margin-top: 20px;
-                        font-weight: bold;
-                    }
                 </style>
             </head>
             <body>
                 <div class="container">
                     <div class="icon">OK</div>
                     <h1>Voce ja esta conectado!</h1>
-                    <p>Seu Google Calendar ja esta integrado.</p>
-                    <p>Volte para o WhatsApp e pergunte:</p>
+                    <p>Seu Google Calendar e Google Drive ja estao integrados.</p>
+                    <p>Volte para o WhatsApp e use:</p>
                     <p><strong>"Tenho compromisso hoje?"</strong></p>
+                    <p><strong>"Salvar no drive pasta X"</strong> (envie com uma imagem)</p>
                 </div>
             </body>
             </html>
             """, 200
+
+            # Se conectado mas sem escopo Drive, redireciona para re-autorizacao
+            if is_connected and not has_drive:
+                print(f"[OAUTH] Usuario {usuario_id} conectado mas sem escopo Drive. Redirecionando para re-autorizacao.")
 
             # Gerar URL de autorizacao
             auth_url = GoogleCalendarOAuthService.get_authorization_url(usuario_id)
@@ -173,12 +172,14 @@ class CalendarHandler:
             # Enviar notificacao no WhatsApp
             if usuario and usuario.numero_whatsapp:
                 mensagem = (
-                    f"*Google Calendar Conectado!*\n\n"
-                    f"Ola {usuario.nome}! Seu calendario foi conectado com sucesso.\n\n"
-                    f"Agora voce pode perguntar:\n"
+                    f"*Google Calendar + Drive Conectados!*\n\n"
+                    f"Ola {usuario.nome}! Sua conta Google foi conectada com sucesso.\n\n"
+                    f"*Calendario:*\n"
                     f"- Tenho compromisso hoje?\n"
-                    f"- Minha agenda amanha\n"
-                    f"- Compromissos do final de semana\n\n"
+                    f"- Minha agenda amanha\n\n"
+                    f"*Google Drive:*\n"
+                    f"- Envie uma imagem/documento com a legenda:\n"
+                    f"  _salvar no drive pasta Notas Fiscais_\n\n"
                     f"Seus dados estao seguros via OAuth2!"
                 )
 
@@ -263,17 +264,21 @@ class CalendarHandler:
         <body>
             <div class="container">
                 <div class="icon">OK</div>
-                <h1 class="success">Google Calendar Conectado!</h1>
+                <h1 class="success">Google Calendar + Drive Conectados!</h1>
                 <p>Ola <strong>{nome_usuario}</strong>!</p>
-                <p>Seu calendario foi conectado com sucesso.</p>
+                <p>Sua conta Google foi conectada com sucesso.</p>
 
                 <div class="info">
-                    <h3 style="margin-top: 0; color: #667eea;">Agora voce pode:</h3>
+                    <h3 style="margin-top: 0; color: #667eea;">Calendario:</h3>
                     <div class="commands">
                         <div class="command">- "Tenho compromisso hoje?"</div>
                         <div class="command">- "Minha agenda amanha"</div>
                         <div class="command">- "Compromissos do final de semana"</div>
-                        <div class="command">- "Agenda desta semana"</div>
+                    </div>
+                    <h3 style="color: #667eea;">Google Drive:</h3>
+                    <div class="commands">
+                        <div class="command">- Envie uma imagem com: "salvar no drive pasta X"</div>
+                        <div class="command">- Envie um PDF com: "guardar no drive"</div>
                     </div>
                 </div>
 

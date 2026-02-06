@@ -184,13 +184,20 @@ class UploadDriveIntent(BaseIntent):
 
         if not GoogleCalendarOAuthService.has_drive_scope(self.usuario_id):
             logger.warning(f"[UploadDriveIntent] Usuário {self.usuario_id} não tem escopo do Drive")
+
+            # Gerar link direto de conexão/reconexão
+            from app.config import GOOGLE_REDIRECT_URI
+            base_url = GOOGLE_REDIRECT_URI.rsplit('/', 1)[0]
+            connect_url = f"{base_url}/connect-calendar/{self.usuario_id}"
+
             return {
                 "success": False,
                 "error": "drive_not_connected",
                 "message": (
                     "🔗 *Google Drive não conectado*\n\n"
-                    "Para usar esta funcionalidade, você precisa conectar sua conta Google.\n\n"
-                    "Acesse as configurações e clique em *Conectar Google*."
+                    "Para usar esta funcionalidade, conecte sua conta Google:\n"
+                    f"{connect_url}\n\n"
+                    "Após conectar, envie o arquivo novamente."
                 )
             }
 
