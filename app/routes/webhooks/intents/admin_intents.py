@@ -681,6 +681,11 @@ class MenuAjudaIntent(BaseIntent):
 • _"deletar reunião de hoje"_ - Remover evento
 • _"quando estou livre amanhã?"_ - Horários disponíveis
 
+*📁 GOOGLE DRIVE*
+• _[Envie foto/doc] "salvar no drive"_ - Upload para pasta padrão
+• _[Envie foto/doc] "salvar no drive pasta Notas"_ - Upload para pasta específica
+• _Formatos aceitos:_ Imagens, PDFs, Docs, Planilhas, Áudio
+
 *📊 ANÁLISES & RELATÓRIOS*
 • _"analisar meus gastos"_ - Análise inteligente com IA
 • _"comparar com mês anterior"_ - Comparação mensal
