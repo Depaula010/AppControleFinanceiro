@@ -42,6 +42,8 @@ jobs:
           ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
           WEBHOOK_SIGNATURE_KEY: ${{ secrets.WEBHOOK_SIGNATURE_KEY }}
           BOT_WHATSAPP_URL: ${{ secrets.BOT_WHATSAPP_URL }}
+          BOT_SESSION_ID: ${{ secrets.BOT_SESSION_ID }}
+          BOT_API_KEY: ${{ secrets.BOT_API_KEY }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
@@ -69,6 +71,8 @@ jobs:
           ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}
           WEBHOOK_SIGNATURE_KEY=${{ secrets.WEBHOOK_SIGNATURE_KEY }}
           BOT_WHATSAPP_URL=${{ secrets.BOT_WHATSAPP_URL }}
+          BOT_SESSION_ID=${{ secrets.BOT_SESSION_ID }}
+          BOT_API_KEY=${{ secrets.BOT_API_KEY }}
           GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }}

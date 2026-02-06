@@ -124,3 +124,4 @@ dmypy.json
 .pyre/
 migrations/schema.sql
 AI_RULES.md
+app/routes/webhooks/intents/admin_intents.py

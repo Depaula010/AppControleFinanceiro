@@ -21,8 +21,10 @@ if len(API_SECRET_KEY) < 32:
 # Chave separada para assinatura de webhooks (HMAC)
 WEBHOOK_SIGNATURE_KEY = os.environ.get('WEBHOOK_SIGNATURE_KEY', API_SECRET_KEY) 
 
-# URL do serviço do Bot (para enviar notificações)
+# Integração com Bot WhatsApp (API v1 - SaaS)
 BOT_WHATSAPP_URL = os.environ.get('BOT_WHATSAPP_URL', 'https://bot-appfinanceiro-whatsapp.onrender.com')
+BOT_SESSION_ID = os.environ.get('BOT_SESSION_ID', '')
+BOT_API_KEY = os.environ.get('BOT_API_KEY', '')
 
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
 
