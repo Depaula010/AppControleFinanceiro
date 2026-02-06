@@ -82,6 +82,10 @@ class WhatsAppHandler:
         # 2. Autenticar API key (segunda camada de seguranca)
         secret_key_recebida = request.headers.get('x-api-key', '').strip()
         if not secret_key_recebida or not compare_keys_safe(secret_key_recebida, API_SECRET_KEY):
+            # --- DEBUG LOGGING START ---
+            print(f"[AUTH DEBUG] Recebida: '{secret_key_recebida}'")
+            print(f"[AUTH DEBUG] Esperada: '{API_SECRET_KEY[:5]}...{API_SECRET_KEY[-5:]}' (Len: {len(API_SECRET_KEY)})")
+            # --- DEBUG LOGGING END ---
             return jsonify({"status": "erro", "resposta": "Não autorizado"}), 401
 
         try:
