@@ -309,6 +309,10 @@ TIPOS_CONTA_VALIDOS = [
     'Cartão de Crédito', 'Dinheiro', 'Outro'
 ]
 
+# Tipos de agendamento e periodicidades válidos
+TIPOS_AGENDAMENTO = ['FIXO', 'LEMBRETE_VARIAVEL']
+PERIODICIDADES = ['DIARIA', 'SEMANAL', 'QUINZENAL', 'MENSAL', 'ANUAL']
+
 
 def _create_account_impl(user_id):
     """Lógica interna para criar conta (sem decorator)."""
@@ -1614,3 +1618,442 @@ def get_categorias(user_id):
     Alias em português para /api/categories.
     """
     return _get_categories_impl(user_id)
+
+
+# ============================================================
+# CONTAS MENSAIS (AGENDAMENTOS)
+# ============================================================
+
+def _get_bills_impl(user_id):
+    """Lógica interna para buscar contas mensais/agendamentos (sem decorator)."""
+    if not db_engine:
+        return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
+
+    try:
+        with db_engine.connect() as conn:
+            sql = text("""
+                SELECT
+                    a.id,
+                    a.descricao,
+                    a.valor_previsto,
+                    a.tipo_agendamento,
+                    a.periodicidade,
+                    a.dia_execucao,
+                    a.mes_execucao,
+                    a.notificar_antes_dias,
+                    a.subcategoria_id,
+                    s.nome_sub AS subcategoria_nome,
+                    a.conta_id,
+                    c.nome_conta AS conta_nome,
+                    a.data_inicio
+                FROM Agendamentos a
+                LEFT JOIN SubCategoria s ON a.subcategoria_id = s.id
+                LEFT JOIN Contas c ON a.conta_id = c.id
+                WHERE a.usuario_id = :uid AND a.ativo = true
+                ORDER BY a.periodicidade, a.dia_execucao, a.descricao
+            """)
+            rows = conn.execute(sql, {"uid": user_id}).fetchall()
+            contas = [{
+                "id": r.id,
+                "descricao": r.descricao,
+                "valor_previsto": float(r.valor_previsto) if r.valor_previsto is not None else None,
+                "tipo_agendamento": r.tipo_agendamento,
+                "periodicidade": r.periodicidade,
+                "dia_execucao": r.dia_execucao,
+                "mes_execucao": r.mes_execucao,
+                "notificar_antes_dias": r.notificar_antes_dias,
+                "subcategoria_id": r.subcategoria_id,
+                "subcategoria_nome": r.subcategoria_nome,
+                "conta_id": r.conta_id,
+                "conta_nome": r.conta_nome,
+                "data_inicio": r.data_inicio.isoformat() if r.data_inicio else None,
+            } for r in rows]
+            return jsonify({"status": "success", "data": contas}), 200
+
+    except Exception as e:
+        print(f"[API] ❌ Erro ao buscar contas mensais: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": "Erro ao carregar contas mensais"}), 500
+
+
+def _create_bill_impl(user_id):
+    """Lógica interna para criar conta mensal/agendamento (sem decorator)."""
+    if not db_engine:
+        return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
+
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"status": "error", "message": "Dados não fornecidos"}), 400
+
+        # Validar campos obrigatórios
+        descricao = data.get('descricao', '').strip()
+        if not descricao:
+            return jsonify({"status": "error", "message": "Descrição é obrigatória"}), 400
+        descricao = descricao[:255]  # Proteção XSS/tamanho
+
+        tipo_agendamento = data.get('tipo_agendamento', '').strip()
+        if not tipo_agendamento or tipo_agendamento not in TIPOS_AGENDAMENTO:
+            return jsonify({
+                "status": "error",
+                "message": f"Tipo de agendamento inválido. Valores permitidos: {', '.join(TIPOS_AGENDAMENTO)}"
+            }), 400
+
+        periodicidade = data.get('periodicidade', '').strip()
+        if not periodicidade or periodicidade not in PERIODICIDADES:
+            return jsonify({
+                "status": "error",
+                "message": f"Periodicidade inválida. Valores permitidos: {', '.join(PERIODICIDADES)}"
+            }), 400
+
+        subcategoria_id = data.get('subcategoria_id')
+        if not subcategoria_id:
+            return jsonify({"status": "error", "message": "Subcategoria é obrigatória"}), 400
+
+        conta_id = data.get('conta_id')
+        if not conta_id:
+            return jsonify({"status": "error", "message": "Conta bancária é obrigatória"}), 400
+
+        # Validar dia de execução
+        dia_execucao = data.get('dia_execucao')
+        try:
+            dia_execucao = int(dia_execucao)
+            if not (1 <= dia_execucao <= 31):
+                raise ValueError()
+        except (TypeError, ValueError):
+            return jsonify({"status": "error", "message": "Dia de execução deve ser entre 1 e 31"}), 400
+
+        # valor_previsto obrigatório para FIXO
+        valor_previsto = data.get('valor_previsto')
+        if tipo_agendamento == 'FIXO':
+            if valor_previsto is None:
+                return jsonify({"status": "error", "message": "Valor previsto é obrigatório para contas fixas"}), 400
+            try:
+                valor_previsto = float(valor_previsto)
+                if valor_previsto <= 0:
+                    raise ValueError()
+            except (TypeError, ValueError):
+                return jsonify({"status": "error", "message": "Valor previsto deve ser um número positivo"}), 400
+        elif valor_previsto is not None:
+            try:
+                valor_previsto = float(valor_previsto)
+            except (TypeError, ValueError):
+                valor_previsto = None
+
+        # mes_execucao só válido para ANUAL
+        mes_execucao = data.get('mes_execucao')
+        if periodicidade == 'ANUAL' and mes_execucao is not None:
+            try:
+                mes_execucao = int(mes_execucao)
+                if not (1 <= mes_execucao <= 12):
+                    raise ValueError()
+            except (TypeError, ValueError):
+                return jsonify({"status": "error", "message": "Mês de execução deve ser entre 1 e 12"}), 400
+        else:
+            mes_execucao = None
+
+        notificar_antes_dias = data.get('notificar_antes_dias', 3)
+        try:
+            notificar_antes_dias = int(notificar_antes_dias)
+        except (TypeError, ValueError):
+            notificar_antes_dias = 3
+
+        data_inicio = data.get('data_inicio')
+        if not data_inicio:
+            data_inicio = date.today().isoformat()
+
+        with db_engine.connect() as conn:
+            # Verificar que conta_id pertence ao usuário
+            check_sql = text("SELECT id FROM Contas WHERE id = :cid AND usuario_id = :uid AND ativa = true")
+            conta_row = conn.execute(check_sql, {"cid": conta_id, "uid": user_id}).fetchone()
+            if not conta_row:
+                return jsonify({"status": "error", "message": "Conta bancária não encontrada"}), 404
+
+            insert_sql = text("""
+                INSERT INTO Agendamentos (
+                    usuario_id, conta_id, subcategoria_id, descricao,
+                    valor_previsto, tipo_agendamento, periodicidade,
+                    data_inicio, dia_execucao, mes_execucao,
+                    notificar_antes_dias, ativo, parcelas_executadas
+                ) VALUES (
+                    :uid, :conta_id, :sub_id, :descricao,
+                    :valor_previsto, :tipo, :periodicidade,
+                    :data_inicio, :dia_execucao, :mes_execucao,
+                    :notificar_antes_dias, true, 0
+                ) RETURNING id
+            """)
+            result = conn.execute(insert_sql, {
+                "uid": user_id,
+                "conta_id": conta_id,
+                "sub_id": subcategoria_id,
+                "descricao": descricao,
+                "valor_previsto": valor_previsto,
+                "tipo": tipo_agendamento,
+                "periodicidade": periodicidade,
+                "data_inicio": data_inicio,
+                "dia_execucao": dia_execucao,
+                "mes_execucao": mes_execucao,
+                "notificar_antes_dias": notificar_antes_dias,
+            })
+            new_id = result.fetchone()[0]
+            conn.commit()
+
+            # Buscar registro criado com JOINs
+            fetch_sql = text("""
+                SELECT a.id, a.descricao, a.valor_previsto, a.tipo_agendamento,
+                       a.periodicidade, a.dia_execucao, a.mes_execucao,
+                       a.notificar_antes_dias, a.subcategoria_id, s.nome_sub AS subcategoria_nome,
+                       a.conta_id, c.nome_conta AS conta_nome, a.data_inicio
+                FROM Agendamentos a
+                LEFT JOIN SubCategoria s ON a.subcategoria_id = s.id
+                LEFT JOIN Contas c ON a.conta_id = c.id
+                WHERE a.id = :id
+            """)
+            row = conn.execute(fetch_sql, {"id": new_id}).fetchone()
+            bill = {
+                "id": row.id,
+                "descricao": row.descricao,
+                "valor_previsto": float(row.valor_previsto) if row.valor_previsto is not None else None,
+                "tipo_agendamento": row.tipo_agendamento,
+                "periodicidade": row.periodicidade,
+                "dia_execucao": row.dia_execucao,
+                "mes_execucao": row.mes_execucao,
+                "notificar_antes_dias": row.notificar_antes_dias,
+                "subcategoria_id": row.subcategoria_id,
+                "subcategoria_nome": row.subcategoria_nome,
+                "conta_id": row.conta_id,
+                "conta_nome": row.conta_nome,
+                "data_inicio": row.data_inicio.isoformat() if row.data_inicio else None,
+            }
+            return jsonify({"status": "success", "data": bill}), 201
+
+    except Exception as e:
+        print(f"[API] ❌ Erro ao criar conta mensal: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": "Erro ao criar conta mensal"}), 500
+
+
+def _update_bill_impl(user_id, bill_id):
+    """Lógica interna para atualizar conta mensal/agendamento (sem decorator)."""
+    if not db_engine:
+        return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
+
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"status": "error", "message": "Dados não fornecidos"}), 400
+
+        with db_engine.connect() as conn:
+            # Verificar que o agendamento pertence ao usuário
+            check_sql = text("SELECT id FROM Agendamentos WHERE id = :id AND usuario_id = :uid AND ativo = true")
+            if not conn.execute(check_sql, {"id": bill_id, "uid": user_id}).fetchone():
+                return jsonify({"status": "error", "message": "Conta mensal não encontrada"}), 404
+
+            updates = []
+            params = {"id": bill_id, "uid": user_id}
+
+            if 'descricao' in data:
+                desc = str(data['descricao']).strip()[:255]
+                if not desc:
+                    return jsonify({"status": "error", "message": "Descrição não pode ser vazia"}), 400
+                updates.append("descricao = :descricao")
+                params['descricao'] = desc
+
+            if 'tipo_agendamento' in data:
+                tipo = data['tipo_agendamento']
+                if tipo not in TIPOS_AGENDAMENTO:
+                    return jsonify({"status": "error", "message": f"Tipo inválido. Valores: {', '.join(TIPOS_AGENDAMENTO)}"}), 400
+                updates.append("tipo_agendamento = :tipo_agendamento")
+                params['tipo_agendamento'] = tipo
+
+            if 'periodicidade' in data:
+                per = data['periodicidade']
+                if per not in PERIODICIDADES:
+                    return jsonify({"status": "error", "message": f"Periodicidade inválida. Valores: {', '.join(PERIODICIDADES)}"}), 400
+                updates.append("periodicidade = :periodicidade")
+                params['periodicidade'] = per
+
+            if 'dia_execucao' in data:
+                try:
+                    dia = int(data['dia_execucao'])
+                    if not (1 <= dia <= 31):
+                        raise ValueError()
+                    updates.append("dia_execucao = :dia_execucao")
+                    params['dia_execucao'] = dia
+                except (TypeError, ValueError):
+                    return jsonify({"status": "error", "message": "Dia de execução deve ser entre 1 e 31"}), 400
+
+            if 'mes_execucao' in data:
+                if data['mes_execucao'] is None:
+                    updates.append("mes_execucao = :mes_execucao")
+                    params['mes_execucao'] = None
+                else:
+                    try:
+                        mes = int(data['mes_execucao'])
+                        if not (1 <= mes <= 12):
+                            raise ValueError()
+                        updates.append("mes_execucao = :mes_execucao")
+                        params['mes_execucao'] = mes
+                    except (TypeError, ValueError):
+                        return jsonify({"status": "error", "message": "Mês deve ser entre 1 e 12"}), 400
+
+            if 'valor_previsto' in data:
+                if data['valor_previsto'] is None:
+                    updates.append("valor_previsto = :valor_previsto")
+                    params['valor_previsto'] = None
+                else:
+                    try:
+                        val = float(data['valor_previsto'])
+                        updates.append("valor_previsto = :valor_previsto")
+                        params['valor_previsto'] = val
+                    except (TypeError, ValueError):
+                        return jsonify({"status": "error", "message": "Valor previsto inválido"}), 400
+
+            if 'subcategoria_id' in data:
+                updates.append("subcategoria_id = :subcategoria_id")
+                params['subcategoria_id'] = data['subcategoria_id']
+
+            if 'conta_id' in data:
+                chk = text("SELECT id FROM Contas WHERE id = :cid AND usuario_id = :uid AND ativa = true")
+                if not conn.execute(chk, {"cid": data['conta_id'], "uid": user_id}).fetchone():
+                    return jsonify({"status": "error", "message": "Conta bancária não encontrada"}), 404
+                updates.append("conta_id = :conta_id")
+                params['conta_id'] = data['conta_id']
+
+            if 'notificar_antes_dias' in data:
+                try:
+                    updates.append("notificar_antes_dias = :notificar_antes_dias")
+                    params['notificar_antes_dias'] = int(data['notificar_antes_dias'])
+                except (TypeError, ValueError):
+                    pass
+
+            if 'data_inicio' in data:
+                updates.append("data_inicio = :data_inicio")
+                params['data_inicio'] = data['data_inicio']
+
+            if not updates:
+                return jsonify({"status": "error", "message": "Nenhum campo para atualizar"}), 400
+
+            update_sql = text(f"UPDATE Agendamentos SET {', '.join(updates)} WHERE id = :id AND usuario_id = :uid")
+            conn.execute(update_sql, params)
+            conn.commit()
+
+            # Buscar registro atualizado
+            fetch_sql = text("""
+                SELECT a.id, a.descricao, a.valor_previsto, a.tipo_agendamento,
+                       a.periodicidade, a.dia_execucao, a.mes_execucao,
+                       a.notificar_antes_dias, a.subcategoria_id, s.nome_sub AS subcategoria_nome,
+                       a.conta_id, c.nome_conta AS conta_nome, a.data_inicio
+                FROM Agendamentos a
+                LEFT JOIN SubCategoria s ON a.subcategoria_id = s.id
+                LEFT JOIN Contas c ON a.conta_id = c.id
+                WHERE a.id = :id
+            """)
+            row = conn.execute(fetch_sql, {"id": bill_id}).fetchone()
+            bill = {
+                "id": row.id,
+                "descricao": row.descricao,
+                "valor_previsto": float(row.valor_previsto) if row.valor_previsto is not None else None,
+                "tipo_agendamento": row.tipo_agendamento,
+                "periodicidade": row.periodicidade,
+                "dia_execucao": row.dia_execucao,
+                "mes_execucao": row.mes_execucao,
+                "notificar_antes_dias": row.notificar_antes_dias,
+                "subcategoria_id": row.subcategoria_id,
+                "subcategoria_nome": row.subcategoria_nome,
+                "conta_id": row.conta_id,
+                "conta_nome": row.conta_nome,
+                "data_inicio": row.data_inicio.isoformat() if row.data_inicio else None,
+            }
+            return jsonify({"status": "success", "data": bill}), 200
+
+    except Exception as e:
+        print(f"[API] ❌ Erro ao atualizar conta mensal: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": "Erro ao atualizar conta mensal"}), 500
+
+
+def _delete_bill_impl(user_id, bill_id):
+    """Lógica interna para deletar (soft) conta mensal/agendamento (sem decorator)."""
+    if not db_engine:
+        return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
+
+    try:
+        with db_engine.connect() as conn:
+            sql = text("""
+                UPDATE Agendamentos
+                SET ativo = false
+                WHERE id = :id AND usuario_id = :uid AND ativo = true
+            """)
+            result = conn.execute(sql, {"id": bill_id, "uid": user_id})
+            if result.rowcount == 0:
+                return jsonify({"status": "error", "message": "Conta mensal não encontrada"}), 404
+            conn.commit()
+            return jsonify({"status": "success", "message": "Conta mensal removida com sucesso"}), 200
+
+    except Exception as e:
+        print(f"[API] ❌ Erro ao deletar conta mensal: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": "Erro ao remover conta mensal"}), 500
+
+
+# Rotas REST — contas mensais (bills)
+@api_bp.route('/bills', methods=['GET'])
+@token_required
+def get_bills(user_id):
+    """GET /api/bills - Lista contas mensais/agendamentos do usuário."""
+    return _get_bills_impl(user_id)
+
+
+@api_bp.route('/bills', methods=['POST'])
+@token_required
+def create_bill(user_id):
+    """POST /api/bills - Cria nova conta mensal/agendamento."""
+    return _create_bill_impl(user_id)
+
+
+@api_bp.route('/bills/<int:bill_id>', methods=['PUT'])
+@token_required
+def update_bill(user_id, bill_id):
+    """PUT /api/bills/<id> - Atualiza conta mensal/agendamento."""
+    return _update_bill_impl(user_id, bill_id)
+
+
+@api_bp.route('/bills/<int:bill_id>', methods=['DELETE'])
+@token_required
+def delete_bill(user_id, bill_id):
+    """DELETE /api/bills/<id> - Remove (soft delete) conta mensal/agendamento."""
+    return _delete_bill_impl(user_id, bill_id)
+
+
+# Aliases em português
+@api_bp.route('/contas-mensais', methods=['GET'])
+@token_required
+def get_contas_mensais(user_id):
+    """GET /api/contas-mensais - Alias em português para /api/bills."""
+    return _get_bills_impl(user_id)
+
+
+@api_bp.route('/contas-mensais', methods=['POST'])
+@token_required
+def create_conta_mensal(user_id):
+    """POST /api/contas-mensais - Alias em português para /api/bills."""
+    return _create_bill_impl(user_id)
+
+
+@api_bp.route('/contas-mensais/<int:bill_id>', methods=['PUT'])
+@token_required
+def update_conta_mensal(user_id, bill_id):
+    """PUT /api/contas-mensais/<id> - Alias em português para /api/bills/<id>."""
+    return _update_bill_impl(user_id, bill_id)
+
+
+@api_bp.route('/contas-mensais/<int:bill_id>', methods=['DELETE'])
+@token_required
+def delete_conta_mensal(user_id, bill_id):
+    """DELETE /api/contas-mensais/<id> - Alias em português para /api/bills/<id>."""
+    return _delete_bill_impl(user_id, bill_id)
