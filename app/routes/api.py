@@ -1671,10 +1671,10 @@ def _get_bills_impl(user_id):
             return jsonify({"status": "success", "data": contas}), 200
 
     except Exception as e:
-        print(f"[API] ❌ Erro ao buscar contas mensais: {e}")
+        print(f"[API] ❌ Erro ao buscar contas mensais (user_id={user_id}): {e}")
         import traceback
         traceback.print_exc()
-        return jsonify({"status": "error", "message": "Erro ao carregar contas mensais"}), 500
+        return jsonify({"status": "error", "message": f"Erro ao carregar contas mensais: {str(e)}"}), 500
 
 
 def _create_bill_impl(user_id):
