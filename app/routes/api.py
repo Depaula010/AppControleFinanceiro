@@ -1671,7 +1671,8 @@ def _get_bills_impl(user_id):
                     g.nome_grupo AS grupo,
                     a.conta_id,
                     c.nome_conta AS conta_nome,
-                    a.data_inicio
+                    a.data_inicio,
+                    a.incluir_na_reserva
                 FROM Agendamentos a
                 LEFT JOIN SubCategoria s ON a.subcategoria_id = s.id
                 LEFT JOIN MacroCategoria m ON s.macro_id = m.id
@@ -1698,6 +1699,7 @@ def _get_bills_impl(user_id):
                 "conta_id": r.conta_id,
                 "conta_nome": r.conta_nome,
                 "data_inicio": r.data_inicio.isoformat() if r.data_inicio else None,
+                "incluir_na_reserva": r.incluir_na_reserva
             } for r in rows]
             return jsonify({"status": "success", "data": contas}), 200
 
@@ -1794,6 +1796,8 @@ def _create_bill_impl(user_id):
         if not data_inicio:
             data_inicio = date.today().isoformat()
 
+        incluir_na_reserva = data.get('incluir_na_reserva', False)
+
         with db_engine.connect() as conn:
             # Verificar que conta_id pertence ao usuário
             check_sql = text("SELECT id FROM Contas WHERE id = :cid AND usuario_id = :uid AND ativa = true")
@@ -1806,12 +1810,14 @@ def _create_bill_impl(user_id):
                     usuario_id, conta_id, subcategoria_id, descricao,
                     valor_previsto, tipo_agendamento, periodicidade,
                     data_inicio, dia_execucao, mes_execucao,
-                    notificar_antes_dias, ativo, parcelas_executadas
+                    notificar_antes_dias, ativo, parcelas_executadas,
+                    incluir_na_reserva
                 ) VALUES (
                     :uid, :conta_id, :sub_id, :descricao,
                     :valor_previsto, :tipo, :periodicidade,
                     :data_inicio, :dia_execucao, :mes_execucao,
-                    :notificar_antes_dias, true, 0
+                    :notificar_antes_dias, true, 0,
+                    :incluir_na_reserva
                 ) RETURNING id
             """)
             result = conn.execute(insert_sql, {
@@ -1826,6 +1832,7 @@ def _create_bill_impl(user_id):
                 "dia_execucao": dia_execucao,
                 "mes_execucao": mes_execucao,
                 "notificar_antes_dias": notificar_antes_dias,
+                "incluir_na_reserva": incluir_na_reserva
             })
             new_id = result.fetchone()[0]
             conn.commit()
@@ -1835,7 +1842,7 @@ def _create_bill_impl(user_id):
                 SELECT a.id, a.descricao, a.valor_previsto, a.tipo_agendamento,
                        a.periodicidade, a.dia_execucao, a.mes_execucao,
                        a.notificar_antes_dias, a.subcategoria_id, s.nome_sub AS subcategoria_nome,
-                       a.conta_id, c.nome_conta AS conta_nome, a.data_inicio
+                       a.conta_id, c.nome_conta AS conta_nome, a.data_inicio, a.incluir_na_reserva
                 FROM Agendamentos a
                 LEFT JOIN SubCategoria s ON a.subcategoria_id = s.id
                 LEFT JOIN Contas c ON a.conta_id = c.id
@@ -1856,6 +1863,7 @@ def _create_bill_impl(user_id):
                 "conta_id": row.conta_id,
                 "conta_nome": row.conta_nome,
                 "data_inicio": row.data_inicio.isoformat() if row.data_inicio else None,
+                "incluir_na_reserva": row.incluir_na_reserva
             }
             return jsonify({"status": "success", "data": bill}), 201
 
@@ -1964,6 +1972,10 @@ def _update_bill_impl(user_id, bill_id):
                 updates.append("data_inicio = :data_inicio")
                 params['data_inicio'] = data['data_inicio']
 
+            if 'incluir_na_reserva' in data:
+                updates.append("incluir_na_reserva = :incluir_na_reserva")
+                params['incluir_na_reserva'] = bool(data['incluir_na_reserva'])
+
             if not updates:
                 return jsonify({"status": "error", "message": "Nenhum campo para atualizar"}), 400
 
@@ -1976,7 +1988,7 @@ def _update_bill_impl(user_id, bill_id):
                 SELECT a.id, a.descricao, a.valor_previsto, a.tipo_agendamento,
                        a.periodicidade, a.dia_execucao, a.mes_execucao,
                        a.notificar_antes_dias, a.subcategoria_id, s.nome_sub AS subcategoria_nome,
-                       a.conta_id, c.nome_conta AS conta_nome, a.data_inicio
+                       a.conta_id, c.nome_conta AS conta_nome, a.data_inicio, a.incluir_na_reserva
                 FROM Agendamentos a
                 LEFT JOIN SubCategoria s ON a.subcategoria_id = s.id
                 LEFT JOIN Contas c ON a.conta_id = c.id
@@ -1997,6 +2009,7 @@ def _update_bill_impl(user_id, bill_id):
                 "conta_id": row.conta_id,
                 "conta_nome": row.conta_nome,
                 "data_inicio": row.data_inicio.isoformat() if row.data_inicio else None,
+                "incluir_na_reserva": row.incluir_na_reserva
             }
             return jsonify({"status": "success", "data": bill}), 200
 
