@@ -2119,12 +2119,26 @@ def get_bills_summary(user_id):
 
             for r in rows:
                 val = float(r.total or 0)
-                if r.tipo == 'Despesa' and r.periodicidade == 'MENSAL':
-                    total_despesas_mensais += val
-                elif r.tipo == 'Despesa' and r.periodicidade == 'ANUAL':
-                    total_despesas_anuais += val
-                elif r.tipo == 'Receita' and r.periodicidade == 'MENSAL':
-                    total_receitas_mensais += val
+                if r.tipo == 'Despesa':
+                    if r.periodicidade == 'MENSAL':
+                        total_despesas_mensais += val
+                    elif r.periodicidade == 'SEMANAL':
+                        total_despesas_mensais += val * 4.33
+                    elif r.periodicidade == 'QUINZENAL':
+                        total_despesas_mensais += val * 2.16
+                    elif r.periodicidade == 'DIARIA':
+                        total_despesas_mensais += val * 30
+                    elif r.periodicidade == 'ANUAL':
+                        total_despesas_anuais += val
+                elif r.tipo == 'Receita':
+                    if r.periodicidade == 'MENSAL':
+                        total_receitas_mensais += val
+                    elif r.periodicidade == 'SEMANAL':
+                        total_receitas_mensais += val * 4.33
+                    elif r.periodicidade == 'QUINZENAL':
+                        total_receitas_mensais += val * 2.16
+                    elif r.periodicidade == 'DIARIA':
+                        total_receitas_mensais += val * 30
 
             # 2. Configuração de reserva de emergência (meses configurados pelo usuário)
             sql_meses = text("""
