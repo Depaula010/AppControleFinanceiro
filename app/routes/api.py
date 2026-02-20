@@ -2064,18 +2064,20 @@ def create_bill(user_id):
     return _create_bill_impl(user_id)
 
 
-@api_bp.route('/bills/<int:bill_id>', methods=['PUT'])
+@api_bp.route('/bills/<int:bill_id>', methods=['PUT', 'DELETE'])
 @token_required
-def update_bill(user_id, bill_id):
-    """PUT /api/bills/<id> - Atualiza conta mensal/agendamento."""
-    return _update_bill_impl(user_id, bill_id)
-
-
-@api_bp.route('/bills/<int:bill_id>', methods=['DELETE'])
-@token_required
-def delete_bill(user_id, bill_id):
-    """DELETE /api/bills/<id> - Remove conta mensal/agendamento."""
-    return _delete_bill_impl(user_id, bill_id)
+def manage_bill(user_id, bill_id):
+    """
+    Controla atualização e remoção de conta mensal.
+    PUT: Atualiza
+    DELETE: Remove (soft delete)
+    """
+    if request.method == 'PUT':
+        return _update_bill_impl(user_id, bill_id)
+    elif request.method == 'DELETE':
+        return _delete_bill_impl(user_id, bill_id)
+    
+    return jsonify({"status": "error", "message": "Método não permitido"}), 405
 
 
 @api_bp.route('/bills/summary', methods=['GET'])
