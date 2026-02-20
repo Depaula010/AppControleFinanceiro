@@ -146,6 +146,9 @@ VALID_ENDPOINTS = {
     '/api/transactions/recent',  # Alias em inglês para /transacoes/recentes
     '/api/transacoes/recentes',
     '/api/categories',
+    '/api/categorias',  # Alias em português
+    '/api/bills',          # Contas mensais / agendamentos
+    '/api/contas-mensais', # Alias em português para /api/bills
     '/api-keys/validate',
 }
 
@@ -187,7 +190,12 @@ def is_suspicious_request(path, user_agent):
         '/admin/test-monthly-report/',
         '/connect-calendar/',
         '/disconnect-calendar/',
-        '/api/fatura/',  # Permite /api/fatura/<id>/reprocessar
+        '/api/fatura/',        # Permite /api/fatura/<id>/reprocessar
+        '/api/bills/',         # Permite /api/bills/<id> (PUT, DELETE)
+        '/api/contas-mensais/', # Permite /api/contas-mensais/<id>
+        '/api/transactions/',  # Permite /api/transactions/<id>
+        '/api/accounts/',      # Permite /api/accounts/<id>
+        '/api/contas/',        # Permite /api/contas/<id>
         '/settings/',
         '/api-keys/preferencias/',
         '/calendar-alerts/config/',
