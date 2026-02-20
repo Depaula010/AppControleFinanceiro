@@ -278,7 +278,31 @@ def _get_accounts_impl(user_id):
 
     try:
         with db_engine.connect() as conn:
-            contas = finance_service.get_saldo_contas(conn, user_id)
+            # Query direta retornando id, nome e tipo para compatibilidade com o frontend Angular.
+            # O modelo BankAccount espera: { id, nome, banco, tipo, saldo }
+            # A coluna 'banco' não existe na tabela; usamos tipo_conta como banco.
+            sql = text("""
+                SELECT
+                    c.id,
+                    c.nome_conta,
+                    c.tipo_conta,
+                    c.saldo_inicial + COALESCE(SUM(t.valor), 0) AS saldo
+                FROM Contas c
+                LEFT JOIN Transacoes t ON c.id = t.conta_id
+                WHERE c.usuario_id = :uid
+                    AND c.ativa = true
+                GROUP BY c.id, c.nome_conta, c.tipo_conta, c.saldo_inicial
+                ORDER BY c.tipo_conta, c.nome_conta
+            """)
+            rows = conn.execute(sql, {"uid": user_id}).fetchall()
+
+            contas = [{
+                "id": row.id,
+                "nome": row.nome_conta,
+                "banco": row.tipo_conta,   # Usamos tipo_conta como label do banco
+                "tipo": row.tipo_conta,
+                "saldo": float(row.saldo)
+            } for row in rows]
 
             return jsonify({
                 "status": "success",
