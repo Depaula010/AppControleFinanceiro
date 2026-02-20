@@ -2072,11 +2072,13 @@ def manage_bill(user_id, bill_id):
     PUT: Atualiza
     DELETE: Remove (soft delete)
     """
+    print(f"[DEBUG] Rota manage_bill acionada! ID: {bill_id}, Método: {request.method}")
     if request.method == 'PUT':
         return _update_bill_impl(user_id, bill_id)
     elif request.method == 'DELETE':
         return _delete_bill_impl(user_id, bill_id)
     
+    print(f"[DEBUG] Método não suportado: {request.method}")
     return jsonify({"status": "error", "message": "Método não permitido"}), 405
 
 
