@@ -1667,11 +1667,15 @@ def _get_bills_impl(user_id):
                     a.notificar_antes_dias,
                     a.subcategoria_id,
                     s.nome_sub AS subcategoria_nome,
+                    m.nome_macro AS macro_categoria_nome,
+                    g.nome_grupo AS grupo,
                     a.conta_id,
                     c.nome_conta AS conta_nome,
                     a.data_inicio
                 FROM Agendamentos a
                 LEFT JOIN SubCategoria s ON a.subcategoria_id = s.id
+                LEFT JOIN MacroCategoria m ON s.macro_id = m.id
+                LEFT JOIN GrupoCategoria g ON m.grupo_id = g.id
                 LEFT JOIN Contas c ON a.conta_id = c.id
                 WHERE a.usuario_id = :uid AND a.ativo = true
                 ORDER BY a.periodicidade, a.dia_execucao, a.descricao
@@ -1682,12 +1686,15 @@ def _get_bills_impl(user_id):
                 "descricao": r.descricao,
                 "valor_previsto": float(r.valor_previsto) if r.valor_previsto is not None else None,
                 "tipo_agendamento": r.tipo_agendamento,
+                "tipo_transacao": "Receita" if (r.grupo == "Renda") else "Despesa",
+                "grupo": r.grupo,
                 "periodicidade": r.periodicidade,
                 "dia_execucao": r.dia_execucao,
                 "mes_execucao": r.mes_execucao,
                 "notificar_antes_dias": r.notificar_antes_dias,
                 "subcategoria_id": r.subcategoria_id,
                 "subcategoria_nome": r.subcategoria_nome,
+                "macro_categoria_nome": r.macro_categoria_nome,
                 "conta_id": r.conta_id,
                 "conta_nome": r.conta_nome,
                 "data_inicio": r.data_inicio.isoformat() if r.data_inicio else None,
