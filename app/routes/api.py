@@ -1672,7 +1672,9 @@ def _get_bills_impl(user_id):
                     a.conta_id,
                     c.nome_conta AS conta_nome,
                     a.data_inicio,
-                    a.incluir_na_reserva
+                    a.incluir_na_reserva,
+                    a.total_parcelas,
+                    a.parcelas_executadas
                 FROM Agendamentos a
                 LEFT JOIN SubCategoria s ON a.subcategoria_id = s.id
                 LEFT JOIN MacroCategoria m ON s.macro_id = m.id
@@ -1699,7 +1701,9 @@ def _get_bills_impl(user_id):
                 "conta_id": r.conta_id,
                 "conta_nome": r.conta_nome,
                 "data_inicio": r.data_inicio.isoformat() if r.data_inicio else None,
-                "incluir_na_reserva": r.incluir_na_reserva
+                "incluir_na_reserva": r.incluir_na_reserva,
+                "total_parcelas": r.total_parcelas,
+                "parcelas_executadas": r.parcelas_executadas
             } for r in rows]
             return jsonify({"status": "success", "data": contas}), 200
 
