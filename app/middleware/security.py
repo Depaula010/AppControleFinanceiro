@@ -148,6 +148,7 @@ VALID_ENDPOINTS = {
     '/api/categories',
     '/api/categorias',  # Alias em português
     '/api/bills',          # Contas mensais / agendamentos
+    '/api/bills/summary',  # Resumo financeiro das contas mensais
     '/api/contas-mensais', # Alias em português para /api/bills
     '/api-keys/validate',
 }

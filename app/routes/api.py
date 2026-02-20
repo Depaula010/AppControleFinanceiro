@@ -2054,11 +2054,124 @@ def update_bill(user_id, bill_id):
     return _update_bill_impl(user_id, bill_id)
 
 
+
 @api_bp.route('/bills/<int:bill_id>', methods=['DELETE'])
 @token_required
 def delete_bill(user_id, bill_id):
     """DELETE /api/bills/<id> - Remove (soft delete) conta mensal/agendamento."""
     return _delete_bill_impl(user_id, bill_id)
+
+
+@api_bp.route('/bills/summary', methods=['GET'])
+@token_required
+def get_bills_summary(user_id):
+    """
+    GET /api/bills/summary
+
+    Retorna um resumo financeiro das contas mensais do usuário:
+    - total_despesas_mensais: soma das despesas com periodicidade MENSAL
+    - total_despesas_anuais: soma das despesas com periodicidade ANUAL
+    - total_receitas_mensais: soma das receitas com periodicidade MENSAL
+    - reserva_emergencia: meta, gasto mensal equivalente, meses configurados
+    """
+    if not db_engine:
+        return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
+
+    try:
+        with db_engine.connect() as conn:
+            # 1. Totais por periodicidade e tipo (Despesa / Receita)
+            sql_totais = text("""
+                SELECT
+                    a.periodicidade,
+                    CASE WHEN g.nome_grupo = 'Renda' THEN 'Receita' ELSE 'Despesa' END AS tipo,
+                    COALESCE(SUM(a.valor_previsto), 0) AS total
+                FROM Agendamentos a
+                LEFT JOIN SubCategoria s ON a.subcategoria_id = s.id
+                LEFT JOIN MacroCategoria m ON s.macro_id = m.id
+                LEFT JOIN GrupoCategoria g ON m.grupo_id = g.id
+                WHERE a.usuario_id = :uid
+                  AND a.ativo = TRUE
+                  AND a.valor_previsto IS NOT NULL
+                  AND a.valor_previsto > 0
+                GROUP BY a.periodicidade, g.nome_grupo
+            """)
+            rows = conn.execute(sql_totais, {"uid": user_id}).fetchall()
+
+            total_despesas_mensais = 0.0
+            total_despesas_anuais = 0.0
+            total_receitas_mensais = 0.0
+
+            for r in rows:
+                val = float(r.total or 0)
+                if r.tipo == 'Despesa' and r.periodicidade == 'MENSAL':
+                    total_despesas_mensais += val
+                elif r.tipo == 'Despesa' and r.periodicidade == 'ANUAL':
+                    total_despesas_anuais += val
+                elif r.tipo == 'Receita' and r.periodicidade == 'MENSAL':
+                    total_receitas_mensais += val
+
+            # 2. Configuração de reserva de emergência (meses configurados pelo usuário)
+            sql_meses = text("""
+                SELECT COALESCE(meses_reserva_emergencia, 6) AS meses
+                FROM Usuarios WHERE id = :uid
+            """)
+            meses_row = conn.execute(sql_meses, {"uid": user_id}).fetchone()
+            meses_reserva = int(meses_row.meses) if meses_row else 6
+
+            # 3. Calcular reserva: considera agendamentos marcados com incluir_na_reserva
+            sql_reserva = text("""
+                SELECT
+                    a.periodicidade,
+                    COALESCE(SUM(a.valor_previsto), 0) AS total_periodo
+                FROM Agendamentos a
+                WHERE a.usuario_id = :uid
+                  AND a.ativo = TRUE
+                  AND a.incluir_na_reserva = TRUE
+                  AND a.valor_previsto IS NOT NULL
+                GROUP BY a.periodicidade
+            """)
+            reserva_rows = conn.execute(sql_reserva, {"uid": user_id}).fetchall()
+
+            reserva_total = 0.0
+            for rr in reserva_rows:
+                val = float(rr.total_periodo or 0)
+                p = rr.periodicidade
+                if p == 'MENSAL':
+                    reserva_total += val * meses_reserva
+                elif p == 'ANUAL':
+                    reserva_total += val  # valor integral (mais conservador)
+                elif p == 'SEMANAL':
+                    reserva_total += val * round(meses_reserva * 4.33)
+                elif p == 'QUINZENAL':
+                    reserva_total += val * (meses_reserva * 2)
+                elif p == 'DIARIA':
+                    reserva_total += val * (meses_reserva * 30)
+
+            # Se não há agendamentos marcados, usa despesas mensais como base
+            if reserva_total == 0 and total_despesas_mensais > 0:
+                reserva_total = total_despesas_mensais * meses_reserva
+
+            gasto_mensal_equiv = reserva_total / meses_reserva if meses_reserva > 0 else 0
+
+            return jsonify({
+                "status": "success",
+                "data": {
+                    "total_despesas_mensais": total_despesas_mensais,
+                    "total_despesas_anuais": total_despesas_anuais,
+                    "total_receitas_mensais": total_receitas_mensais,
+                    "reserva_emergencia": {
+                        "meta": round(reserva_total, 2),
+                        "gasto_mensal_equivalente": round(gasto_mensal_equiv, 2),
+                        "meses_configurados": meses_reserva,
+                    }
+                }
+            }), 200
+
+    except Exception as e:
+        print(f"[API] ❌ Erro ao buscar resumo de bills (user_id={user_id}): {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": "Erro ao calcular resumo"}), 500
 
 
 # Aliases em português
@@ -2088,3 +2201,4 @@ def update_conta_mensal(user_id, bill_id):
 def delete_conta_mensal(user_id, bill_id):
     """DELETE /api/contas-mensais/<id> - Alias em português para /api/bills/<id>."""
     return _delete_bill_impl(user_id, bill_id)
+
