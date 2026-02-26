@@ -8,6 +8,7 @@ import requests as http_requests
 from functools import wraps
 from flask import Blueprint, jsonify, request
 from sqlalchemy import text
+import calendar as cal_module
 from datetime import date, datetime, timedelta
 from cryptography.fernet import Fernet
 
@@ -1155,6 +1156,115 @@ def get_dashboard_recent(user_id):
     """
     # Reutilizar a lógica do endpoint de transações recentes
     return _get_transacoes_recentes_impl(user_id)
+
+
+@api_bp.route('/dashboard/alerts', methods=['GET'])
+@token_required
+def get_dashboard_alerts(user_id):
+    """
+    GET /api/dashboard/alerts
+
+    Retorna contas agendadas a vencer nos próximos 7 dias.
+
+    Headers:
+        Authorization: Bearer <jwt_token>
+
+    Response:
+        {
+            "status": "success",
+            "data": [
+                {
+                    "id": "42",
+                    "descricao": "Aluguel",
+                    "subcategoria": "Aluguel / Condomínio",
+                    "valor_previsto": 1200.00,
+                    "dia_execucao": 5,
+                    "dias_restantes": 2,
+                    "data_vencimento": "2026-03-05",
+                    "tipo": "warning",
+                    "tipo_agendamento": "FIXO"
+                }
+            ]
+        }
+    """
+    def _impl():
+        if not db_engine:
+            return jsonify({"status": "error", "message": "Banco de dados não configurado"}), 503
+
+        hoje = date.today()
+        data_fim = hoje + timedelta(days=7)
+
+        with db_engine.connect() as conn:
+            rows = conn.execute(text("""
+                SELECT a.id, a.descricao, a.valor_previsto, a.tipo_agendamento,
+                       a.dia_execucao, a.notificar_antes_dias,
+                       sc.nome_sub AS subcategoria
+                FROM agendamentos a
+                LEFT JOIN SubCategoria sc ON a.subcategoria_id = sc.id
+                WHERE a.usuario_id = :uid
+                  AND a.ativo = true
+                ORDER BY a.dia_execucao
+            """), {"uid": user_id}).fetchall()
+
+        alerts = []
+        for row in rows:
+            r = dict(row._mapping)
+            dia = r.get('dia_execucao')
+            if not dia:
+                continue
+
+            # Calcular próxima data de vencimento (este mês ou próximo)
+            try:
+                dias_no_mes = cal_module.monthrange(hoje.year, hoje.month)[1]
+                dia_seguro = min(dia, dias_no_mes)
+                due_this_month = date(hoje.year, hoje.month, dia_seguro)
+
+                if due_this_month >= hoje:
+                    due_date = due_this_month
+                else:
+                    # Próximo mês
+                    next_month = (hoje.month % 12) + 1
+                    next_year = hoje.year + (1 if hoje.month == 12 else 0)
+                    dias_prox_mes = cal_module.monthrange(next_year, next_month)[1]
+                    due_date = date(next_year, next_month, min(dia, dias_prox_mes))
+            except ValueError:
+                continue
+
+            if due_date > data_fim:
+                continue
+
+            dias_restantes = (due_date - hoje).days
+
+            if dias_restantes == 0:
+                tipo_alerta = 'danger'
+            elif dias_restantes <= 2:
+                tipo_alerta = 'warning'
+            else:
+                tipo_alerta = 'info'
+
+            valor = float(r['valor_previsto']) if r['valor_previsto'] else None
+
+            alerts.append({
+                'id': str(r['id']),
+                'descricao': r['descricao'],
+                'subcategoria': r.get('subcategoria'),
+                'valor_previsto': valor,
+                'dia_execucao': dia,
+                'dias_restantes': dias_restantes,
+                'data_vencimento': due_date.isoformat(),
+                'tipo': tipo_alerta,
+                'tipo_agendamento': r['tipo_agendamento']
+            })
+
+        alerts.sort(key=lambda x: x['dias_restantes'])
+
+        return jsonify({"status": "success", "data": alerts}), 200
+
+    try:
+        return _impl()
+    except Exception as e:
+        print(f"[API] ❌ Erro ao buscar alertas do dashboard: {e}")
+        return jsonify({"status": "error", "message": "Erro ao buscar alertas"}), 500
 
 
 # ============================================================
