@@ -2790,12 +2790,30 @@ def get_user_settings(user_id):
                     "financialAlerts": {"enabled": True, "daysBeforeDue": 3}
                 }
 
+            addr_rows = conn.execute(text("""
+                SELECT id, label, endereco_completo AS address,
+                       latitude, longitude
+                FROM enderecosfavoritos
+                WHERE usuario_id = :uid
+                ORDER BY label
+            """), {"uid": user_id}).fetchall()
+
+            addresses = []
+            for r in addr_rows:
+                item = dict(r._mapping)
+                lat = item.pop("latitude", None)
+                lng = item.pop("longitude", None)
+                if lat is not None and lng is not None:
+                    item["coordinates"] = {"lat": float(lat), "lng": float(lng)}
+                addresses.append(item)
+
             return jsonify({
                 "status": "success",
                 "data": {
                     "profile": profile,
                     "apiKeys": api_keys,
-                    "notifications": notifications
+                    "notifications": notifications,
+                    "addresses": addresses
                 }
             }), 200
 
