@@ -19,6 +19,7 @@ from app.presentation.admin import admin_bp
 # Imports necessários para rotas legadas
 from app.jobs.schedule_processor import processar_agendamentos
 from app.config import API_SECRET_KEY
+from app.middleware.security import remove_temp_block, remove_from_blacklist
 
 
 # ============================================================================
@@ -53,6 +54,31 @@ def run_motor_agendamentos():
     except Exception as e:
         print(f"[MOTOR] ERRO CRÍTICO ao rodar /run-motor-agendamentos: {e}")
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
+
+
+@admin_bp.route('/security-unblock-ip', methods=['POST'])
+def security_unblock_ip():
+    """
+    POST /admin/security-unblock-ip
+    Header: x-api-key: API_SECRET_KEY
+    Body:   { "ip": "X.X.X.X" }
+
+    Remove bloqueio temporário de um IP (falsos positivos / desenvolvimento).
+    """
+    secret_key_recebida = request.headers.get('x-api-key')
+    if secret_key_recebida != API_SECRET_KEY:
+        return jsonify({"status": "erro", "mensagem": "Não autorizado"}), 401
+
+    body = request.get_json(silent=True) or {}
+    ip = body.get('ip', '').strip()
+
+    if not ip:
+        return jsonify({"status": "erro", "mensagem": "Campo 'ip' obrigatório"}), 400
+
+    remove_temp_block(ip)
+    remove_from_blacklist(ip)
+
+    return jsonify({"status": "sucesso", "mensagem": f"IP {ip} desbloqueado"}), 200
 
 
 # ============================================================================

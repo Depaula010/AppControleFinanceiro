@@ -128,6 +128,7 @@ VALID_ENDPOINTS = {
     '/admin/security-stats',
     '/admin/security-blacklist-add',
     '/admin/security-blacklist-remove',
+    '/admin/security-unblock-ip',
     '/admin/gemini-cache-stats',
 
     # Admin - Utilidades
@@ -151,6 +152,14 @@ VALID_ENDPOINTS = {
     '/api/bills/summary',  # Resumo financeiro das contas mensais
     '/api/contas-mensais', # Alias em português para /api/bills
     '/api-keys/validate',
+
+    # API REST - Configurações do Usuário (protegidas por JWT)
+    '/api/user/settings',
+    '/api/user/profile',
+    '/api/user/api-keys',
+    '/api/user/api-keys/validate',
+    '/api/user/notifications',
+    '/api/user/addresses',
 }
 
 def is_trusted_ip(ip):
@@ -201,6 +210,7 @@ def is_suspicious_request(path, user_agent):
         '/api-keys/preferencias/',
         '/calendar-alerts/config/',
         '/addresses/',
+        '/api/user/addresses/', # Permite /api/user/addresses/<label> (DELETE)
     ]
 
     is_dynamic = any(path.startswith(prefix) for prefix in dynamic_endpoints)
@@ -268,6 +278,26 @@ def remove_from_blacklist(ip):
         )
 
     return result
+
+
+def remove_temp_block(ip):
+    """
+    Remove bloqueio TEMPORÁRIO de um IP (limpa security:blocked: e security:attempts:)
+    Usado por admins para desbloquear IPs após falsos positivos.
+    """
+    if not redis_service.is_connected():
+        return False
+
+    blocked_key  = f"{REDIS_PREFIX_BLOCKED}{ip}"
+    attempts_key = f"{REDIS_PREFIX_ATTEMPTS}{ip}"
+
+    redis_service.delete(blocked_key)
+    redis_service.delete(attempts_key)
+
+    security_logger.warning(
+        f"[SECURITY-UNBLOCK] Bloqueio temporário removido manualmente: {ip}"
+    )
+    return True
 
 def is_ip_blocked(ip):
     """
