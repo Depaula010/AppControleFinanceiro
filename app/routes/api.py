@@ -4,6 +4,7 @@ Blueprint de API REST para Dashboard Web
 Endpoints para consumo do frontend Angular
 """
 import os
+import traceback
 import requests as http_requests
 from functools import wraps
 from flask import Blueprint, jsonify, request
@@ -2404,13 +2405,27 @@ def update_user_profile(user_id):
         if not updates:
             return jsonify({"status": "error", "message": "Nenhum campo válido para atualizar"}), 400
 
-        if "nome" in updates and (not updates["nome"] or len(updates["nome"].strip()) < 2):
+        # Sanitizações antes de validar
+        # String vazia → NULL para campos opcionais
+        for nullable_field in ("email", "cidade", "estado"):
+            if nullable_field in updates and updates[nullable_field] == "":
+                updates[nullable_field] = None
+
+        # Garantir int para meses_reserva_emergencia
+        if "meses_reserva_emergencia" in updates and updates["meses_reserva_emergencia"] is not None:
+            try:
+                updates["meses_reserva_emergencia"] = int(updates["meses_reserva_emergencia"])
+            except (ValueError, TypeError):
+                return jsonify({"status": "error", "message": "Meses de reserva deve ser um número inteiro"}), 400
+
+        # Validações
+        if "nome" in updates and (not updates["nome"] or len(str(updates["nome"]).strip()) < 2):
             return jsonify({"status": "error", "message": "Nome deve ter pelo menos 2 caracteres"}), 400
         if "estado" in updates and updates["estado"] and len(updates["estado"]) != 2:
             return jsonify({"status": "error", "message": "Estado deve ter 2 caracteres (ex: SP)"}), 400
-        if "meses_reserva_emergencia" in updates:
+        if "meses_reserva_emergencia" in updates and updates["meses_reserva_emergencia"] is not None:
             meses = updates["meses_reserva_emergencia"]
-            if not isinstance(meses, int) or meses < 1 or meses > 36:
+            if meses < 1 or meses > 36:
                 return jsonify({"status": "error", "message": "Meses de reserva deve ser entre 1 e 36"}), 400
 
         set_clause = ", ".join(f"{col} = :{col}" for col in updates)
@@ -2426,21 +2441,22 @@ def update_user_profile(user_id):
                               cidade, estado, fuso_horario, meses_reserva_emergencia
                 """), updates)
                 row = result.fetchone()
+                if not row:
+                    return jsonify({"status": "error", "message": "Usuário não encontrado"}), 404
+                row_data = dict(row._mapping)
 
-            if not row:
-                return jsonify({"status": "error", "message": "Usuário não encontrado"}), 404
-
-            return jsonify({
-                "status": "success",
-                "data": dict(row._mapping),
-                "message": "Perfil atualizado com sucesso"
-            }), 200
+        return jsonify({
+            "status": "success",
+            "data": row_data,
+            "message": "Perfil atualizado com sucesso"
+        }), 200
 
     try:
         return _impl()
     except Exception as e:
         print(f"[API] ❌ Erro ao atualizar perfil (user_id={user_id}): {e}")
-        return jsonify({"status": "error", "message": "Erro ao atualizar perfil"}), 500
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": f"Erro ao atualizar perfil: {str(e)}"}), 500
 
 
 # ------------------------------------------------------------
