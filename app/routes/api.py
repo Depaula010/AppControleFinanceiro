@@ -3,10 +3,13 @@
 Blueprint de API REST para Dashboard Web
 Endpoints para consumo do frontend Angular
 """
+import os
+import requests as http_requests
 from functools import wraps
 from flask import Blueprint, jsonify, request
 from sqlalchemy import text
 from datetime import date, datetime, timedelta
+from cryptography.fernet import Fernet
 
 from app import db_engine
 from app.routes.auth import verify_jwt_token
@@ -14,6 +17,10 @@ from app.services import finance_service, analytics_service
 from app.services.finance_service import get_or_create_fatura
 from app.services.period_query_service import PeriodQueryService
 from app.utils import formatar_moeda
+
+# Fernet para criptografia de chaves API dos usuários
+_ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY', '')
+_fernet = Fernet(_ENCRYPTION_KEY.encode()) if _ENCRYPTION_KEY else None
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -2235,5 +2242,565 @@ def manage_conta_mensal(user_id, bill_id):
         return _update_bill_impl(user_id, bill_id)
     elif request.method == 'DELETE':
         return _delete_bill_impl(user_id, bill_id)
-    
+
     return jsonify({"status": "error", "message": "Método não permitido"}), 405
+
+
+# ============================================================
+# CONFIGURAÇÕES DO USUÁRIO — /api/user/*
+# Segurança: user_id SEMPRE via JWT (token_required), nunca via URL
+# ============================================================
+
+# ------------------------------------------------------------
+# PERFIL DO USUÁRIO
+# ------------------------------------------------------------
+
+@api_bp.route('/user/profile', methods=['GET'])
+@token_required
+def get_user_profile(user_id):
+    """GET /api/user/profile — Retorna dados do perfil do usuário autenticado."""
+    def _impl():
+        with db_engine.connect() as conn:
+            row = conn.execute(text("""
+                SELECT id, nome, email, numero_whatsapp,
+                       cidade, estado, fuso_horario,
+                       meses_reserva_emergencia
+                FROM usuarios
+                WHERE id = :uid AND ativo = true
+            """), {"uid": user_id}).fetchone()
+
+            if not row:
+                return jsonify({"status": "error", "message": "Usuário não encontrado"}), 404
+
+            return jsonify({"status": "success", "data": dict(row._mapping)}), 200
+
+    try:
+        return _impl()
+    except Exception as e:
+        print(f"[API] ❌ Erro ao buscar perfil (user_id={user_id}): {e}")
+        return jsonify({"status": "error", "message": "Erro ao buscar perfil"}), 500
+
+
+@api_bp.route('/user/profile', methods=['PUT'])
+@token_required
+def update_user_profile(user_id):
+    """PUT /api/user/profile — Atualiza dados do perfil do usuário autenticado."""
+    def _impl():
+        body = request.get_json(silent=True) or {}
+
+        allowed = {"nome", "email", "cidade", "estado", "fuso_horario", "meses_reserva_emergencia"}
+        updates = {k: v for k, v in body.items() if k in allowed}
+
+        if not updates:
+            return jsonify({"status": "error", "message": "Nenhum campo válido para atualizar"}), 400
+
+        if "nome" in updates and (not updates["nome"] or len(updates["nome"].strip()) < 2):
+            return jsonify({"status": "error", "message": "Nome deve ter pelo menos 2 caracteres"}), 400
+        if "estado" in updates and updates["estado"] and len(updates["estado"]) != 2:
+            return jsonify({"status": "error", "message": "Estado deve ter 2 caracteres (ex: SP)"}), 400
+        if "meses_reserva_emergencia" in updates:
+            meses = updates["meses_reserva_emergencia"]
+            if not isinstance(meses, int) or meses < 1 or meses > 36:
+                return jsonify({"status": "error", "message": "Meses de reserva deve ser entre 1 e 36"}), 400
+
+        set_clause = ", ".join(f"{col} = :{col}" for col in updates)
+        updates["uid"] = user_id
+
+        with db_engine.connect() as conn:
+            with conn.begin():
+                result = conn.execute(text(f"""
+                    UPDATE usuarios
+                    SET {set_clause}
+                    WHERE id = :uid AND ativo = true
+                    RETURNING id, nome, email, numero_whatsapp,
+                              cidade, estado, fuso_horario, meses_reserva_emergencia
+                """), updates)
+                row = result.fetchone()
+
+            if not row:
+                return jsonify({"status": "error", "message": "Usuário não encontrado"}), 404
+
+            return jsonify({
+                "status": "success",
+                "data": dict(row._mapping),
+                "message": "Perfil atualizado com sucesso"
+            }), 200
+
+    try:
+        return _impl()
+    except Exception as e:
+        print(f"[API] ❌ Erro ao atualizar perfil (user_id={user_id}): {e}")
+        return jsonify({"status": "error", "message": "Erro ao atualizar perfil"}), 500
+
+
+# ------------------------------------------------------------
+# CHAVES API (BYOK — Bring Your Own Key)
+# ------------------------------------------------------------
+
+def _mask_key(key: str) -> str:
+    """Retorna chave mascarada: primeiros 4 + '...' + últimos 4 chars."""
+    if not key or len(key) < 10:
+        return "****"
+    return f"{key[:4]}...{key[-4:]}"
+
+
+@api_bp.route('/user/api-keys', methods=['GET'])
+@token_required
+def get_user_api_keys(user_id):
+    """GET /api/user/api-keys — Retorna preferências de chaves API (sem revelar as chaves)."""
+    def _impl():
+        with db_engine.connect() as conn:
+            rows = conn.execute(text("""
+                SELECT p.provedor,
+                       p.usar_chave_propria,
+                       CASE WHEN c.id IS NOT NULL THEN true ELSE false END AS has_key
+                FROM preferenciaschaveapi p
+                LEFT JOIN chavesapiusuario c
+                       ON c.usuario_id = p.usuario_id
+                      AND c.provedor = p.provedor
+                      AND c.ativo = true
+                WHERE p.usuario_id = :uid
+            """), {"uid": user_id}).fetchall()
+
+            providers = ["gemini", "weather", "openroute"]
+            existing = {r._mapping["provedor"]: dict(r._mapping) for r in rows}
+
+            result = []
+            for prov in providers:
+                if prov in existing:
+                    result.append(existing[prov])
+                else:
+                    result.append({"provedor": prov, "usar_chave_propria": False, "has_key": False})
+
+            return jsonify({"status": "success", "data": result}), 200
+
+    try:
+        return _impl()
+    except Exception as e:
+        print(f"[API] ❌ Erro ao buscar api-keys (user_id={user_id}): {e}")
+        return jsonify({"status": "error", "message": "Erro ao buscar chaves API"}), 500
+
+
+@api_bp.route('/user/api-keys', methods=['PUT'])
+@token_required
+def update_user_api_key(user_id):
+    """PUT /api/user/api-keys — Salva/atualiza preferência e chave API criptografada."""
+    def _impl():
+        body = request.get_json(silent=True) or {}
+        provider = body.get("type") or body.get("provedor")
+        use_own = body.get("useOwnKey", False)
+        raw_key = body.get("key", "").strip()
+
+        valid_providers = {"gemini", "weather", "openroute"}
+        if provider not in valid_providers:
+            return jsonify({"status": "error",
+                            "message": f"Provedor inválido. Use: {', '.join(valid_providers)}"}), 400
+
+        if use_own and not raw_key:
+            return jsonify({"status": "error",
+                            "message": "Chave API obrigatória quando usar_chave_propria=true"}), 400
+
+        with db_engine.connect() as conn:
+            with conn.begin():
+                conn.execute(text("""
+                    INSERT INTO preferenciaschaveapi (usuario_id, provedor, usar_chave_propria)
+                    VALUES (:uid, :prov, :uso)
+                    ON CONFLICT (usuario_id, provedor)
+                    DO UPDATE SET usar_chave_propria = EXCLUDED.usar_chave_propria,
+                                  atualizado_em = NOW()
+                """), {"uid": user_id, "prov": provider, "uso": use_own})
+
+                if use_own and raw_key:
+                    if not _fernet:
+                        return jsonify({"status": "error",
+                                        "message": "Criptografia não configurada no servidor"}), 500
+                    encrypted = _fernet.encrypt(raw_key.encode()).decode()
+                    conn.execute(text("""
+                        INSERT INTO chavesapiusuario
+                               (usuario_id, provedor, chave_api_criptografada, ativo)
+                        VALUES (:uid, :prov, :chave, true)
+                        ON CONFLICT (usuario_id, provedor)
+                        DO UPDATE SET chave_api_criptografada = EXCLUDED.chave_api_criptografada,
+                                      ativo = true,
+                                      atualizado_em = NOW()
+                    """), {"uid": user_id, "prov": provider, "chave": encrypted})
+                elif not use_own:
+                    conn.execute(text("""
+                        UPDATE chavesapiusuario SET ativo = false, atualizado_em = NOW()
+                        WHERE usuario_id = :uid AND provedor = :prov
+                    """), {"uid": user_id, "prov": provider})
+
+        return jsonify({"status": "success", "message": "Chave API salva com sucesso"}), 200
+
+    try:
+        return _impl()
+    except Exception as e:
+        print(f"[API] ❌ Erro ao salvar api-key (user_id={user_id}): {e}")
+        return jsonify({"status": "error", "message": "Erro ao salvar chave API"}), 500
+
+
+@api_bp.route('/user/api-keys/validate', methods=['POST'])
+@token_required
+def validate_user_api_key(user_id):
+    """POST /api/user/api-keys/validate — Valida chave API contra serviço externo."""
+    def _impl():
+        body = request.get_json(silent=True) or {}
+        provider = body.get("type") or body.get("provedor")
+        raw_key = body.get("key", "").strip()
+
+        if not provider or not raw_key:
+            return jsonify({"status": "error",
+                            "message": "Campos 'type' e 'key' são obrigatórios"}), 400
+
+        is_valid = False
+        try:
+            if provider == "gemini":
+                resp = http_requests.get(
+                    f"https://generativelanguage.googleapis.com/v1beta/models?key={raw_key}",
+                    timeout=5
+                )
+                is_valid = resp.status_code == 200
+            elif provider == "weather":
+                resp = http_requests.get(
+                    f"https://api.openweathermap.org/data/2.5/weather?q=London&appid={raw_key}",
+                    timeout=5
+                )
+                is_valid = resp.status_code != 401
+            elif provider == "openroute":
+                resp = http_requests.get(
+                    "https://api.openrouteservice.org/v2/directions/driving-car",
+                    headers={"Authorization": raw_key},
+                    timeout=5
+                )
+                is_valid = resp.status_code != 403
+            else:
+                return jsonify({"status": "error",
+                                "message": "Provedor não suportado para validação"}), 400
+        except Exception as req_err:
+            print(f"[API] ⚠️ Timeout/erro ao validar chave {provider}: {req_err}")
+            return jsonify({"status": "error",
+                            "message": "Não foi possível validar (timeout ou erro de rede)"}), 503
+
+        return jsonify({"status": "success", "data": {"is_valid": is_valid}}), 200
+
+    try:
+        return _impl()
+    except Exception as e:
+        print(f"[API] ❌ Erro ao validar api-key (user_id={user_id}): {e}")
+        return jsonify({"status": "error", "message": "Erro ao validar chave API"}), 500
+
+
+# ------------------------------------------------------------
+# NOTIFICAÇÕES
+# ------------------------------------------------------------
+
+@api_bp.route('/user/notifications', methods=['GET'])
+@token_required
+def get_user_notifications(user_id):
+    """GET /api/user/notifications — Retorna configurações de notificação do usuário."""
+    def _impl():
+        with db_engine.connect() as conn:
+            row = conn.execute(text("""
+                SELECT resumo_matinal_ativo,
+                       resumo_matinal_hora::text AS resumo_matinal_hora,
+                       checkin_noturno_ativo,
+                       checkin_noturno_hora::text AS checkin_noturno_hora,
+                       alertas_financeiros_ativos,
+                       alerta_potes_threshold
+                FROM notificationconfigs
+                WHERE usuario_id = :uid
+            """), {"uid": user_id}).fetchone()
+
+            if not row:
+                data = {
+                    "morningBriefing": {"enabled": True, "time": "07:00"},
+                    "eveningCheckIn": {"enabled": True, "time": "19:00"},
+                    "financialAlerts": {"enabled": True, "daysBeforeDue": 3}
+                }
+            else:
+                r = dict(row._mapping)
+                data = {
+                    "morningBriefing": {
+                        "enabled": r["resumo_matinal_ativo"],
+                        "time": str(r["resumo_matinal_hora"])[:5]
+                    },
+                    "eveningCheckIn": {
+                        "enabled": r["checkin_noturno_ativo"],
+                        "time": str(r["checkin_noturno_hora"])[:5]
+                    },
+                    "financialAlerts": {
+                        "enabled": bool(r["alertas_financeiros_ativos"]),
+                        "daysBeforeDue": r["alerta_potes_threshold"] or 3
+                    }
+                }
+
+            return jsonify({"status": "success", "data": data}), 200
+
+    try:
+        return _impl()
+    except Exception as e:
+        print(f"[API] ❌ Erro ao buscar notificações (user_id={user_id}): {e}")
+        return jsonify({"status": "error", "message": "Erro ao buscar notificações"}), 500
+
+
+@api_bp.route('/user/notifications', methods=['PUT'])
+@token_required
+def update_user_notifications(user_id):
+    """PUT /api/user/notifications — Salva/atualiza configurações de notificação."""
+    def _impl():
+        body = request.get_json(silent=True) or {}
+        morning = body.get("morningBriefing", {})
+        evening = body.get("eveningCheckIn", {})
+        financial = body.get("financialAlerts", {})
+
+        evening_time = evening.get("time", "19:00")
+        try:
+            h, _ = map(int, evening_time.split(":"))
+            if not (18 <= h <= 23):
+                return jsonify({"status": "error",
+                                "message": "Horário do check-in noturno deve ser entre 18:00 e 23:00"}), 400
+        except (ValueError, AttributeError):
+            return jsonify({"status": "error",
+                            "message": "Formato de horário inválido (use HH:MM)"}), 400
+
+        morning_time = morning.get("time", "07:00")
+        threshold = financial.get("daysBeforeDue", 3)
+
+        with db_engine.connect() as conn:
+            with conn.begin():
+                conn.execute(text("""
+                    INSERT INTO notificationconfigs
+                           (usuario_id, resumo_matinal_ativo, resumo_matinal_hora,
+                            checkin_noturno_ativo, checkin_noturno_hora,
+                            alertas_financeiros_ativos, alerta_potes_threshold)
+                    VALUES (:uid, :mat_ativo, :mat_hora,
+                            :noturno_ativo, :noturno_hora,
+                            :fin_ativo, :threshold)
+                    ON CONFLICT (usuario_id)
+                    DO UPDATE SET
+                        resumo_matinal_ativo       = EXCLUDED.resumo_matinal_ativo,
+                        resumo_matinal_hora        = EXCLUDED.resumo_matinal_hora,
+                        checkin_noturno_ativo      = EXCLUDED.checkin_noturno_ativo,
+                        checkin_noturno_hora       = EXCLUDED.checkin_noturno_hora,
+                        alertas_financeiros_ativos = EXCLUDED.alertas_financeiros_ativos,
+                        alerta_potes_threshold     = EXCLUDED.alerta_potes_threshold,
+                        updated_at                 = NOW()
+                """), {
+                    "uid": user_id,
+                    "mat_ativo": morning.get("enabled", True),
+                    "mat_hora": morning_time,
+                    "noturno_ativo": evening.get("enabled", True),
+                    "noturno_hora": evening_time,
+                    "fin_ativo": financial.get("enabled", True),
+                    "threshold": threshold
+                })
+
+        return jsonify({"status": "success",
+                        "message": "Notificações atualizadas com sucesso"}), 200
+
+    try:
+        return _impl()
+    except Exception as e:
+        print(f"[API] ❌ Erro ao salvar notificações (user_id={user_id}): {e}")
+        return jsonify({"status": "error", "message": "Erro ao salvar notificações"}), 500
+
+
+# ------------------------------------------------------------
+# ENDEREÇOS FAVORITOS
+# ------------------------------------------------------------
+
+_VALID_LABELS = {"casa", "trabalho", "outro"}
+
+
+@api_bp.route('/user/addresses', methods=['GET'])
+@token_required
+def get_user_addresses(user_id):
+    """GET /api/user/addresses — Lista endereços favoritos do usuário."""
+    def _impl():
+        with db_engine.connect() as conn:
+            rows = conn.execute(text("""
+                SELECT id, label, endereco_completo AS address,
+                       latitude, longitude
+                FROM enderecosfavoritos
+                WHERE usuario_id = :uid
+                ORDER BY label
+            """), {"uid": user_id}).fetchall()
+
+            result = []
+            for r in rows:
+                item = dict(r._mapping)
+                lat = item.pop("latitude", None)
+                lng = item.pop("longitude", None)
+                if lat is not None and lng is not None:
+                    item["coordinates"] = {"lat": float(lat), "lng": float(lng)}
+                result.append(item)
+
+            return jsonify({"status": "success", "data": result}), 200
+
+    try:
+        return _impl()
+    except Exception as e:
+        print(f"[API] ❌ Erro ao buscar endereços (user_id={user_id}): {e}")
+        return jsonify({"status": "error", "message": "Erro ao buscar endereços"}), 500
+
+
+@api_bp.route('/user/addresses', methods=['POST'])
+@token_required
+def create_user_address(user_id):
+    """POST /api/user/addresses — Adiciona ou atualiza um endereço favorito."""
+    def _impl():
+        body = request.get_json(silent=True) or {}
+        label = (body.get("label") or "").strip().lower()
+        address = (body.get("address") or "").strip()
+        coords = body.get("coordinates") or {}
+
+        if label not in _VALID_LABELS:
+            return jsonify({"status": "error",
+                            "message": f"Label inválido. Use: {', '.join(sorted(_VALID_LABELS))}"}), 400
+        if not address:
+            return jsonify({"status": "error", "message": "Endereço é obrigatório"}), 400
+
+        lat = coords.get("lat")
+        lng = coords.get("lng")
+
+        with db_engine.connect() as conn:
+            with conn.begin():
+                conn.execute(text("""
+                    INSERT INTO enderecosfavoritos
+                           (usuario_id, label, endereco_completo, latitude, longitude)
+                    VALUES (:uid, :label, :addr, :lat, :lng)
+                    ON CONFLICT (usuario_id, label)
+                    DO UPDATE SET endereco_completo = EXCLUDED.endereco_completo,
+                                  latitude  = EXCLUDED.latitude,
+                                  longitude = EXCLUDED.longitude,
+                                  updated_at = NOW()
+                """), {"uid": user_id, "label": label, "addr": address,
+                       "lat": lat, "lng": lng})
+
+        return jsonify({"status": "success", "message": "Endereço salvo com sucesso"}), 201
+
+    try:
+        return _impl()
+    except Exception as e:
+        print(f"[API] ❌ Erro ao salvar endereço (user_id={user_id}): {e}")
+        return jsonify({"status": "error", "message": "Erro ao salvar endereço"}), 500
+
+
+@api_bp.route('/user/addresses/<string:addr_label>', methods=['DELETE'])
+@token_required
+def delete_user_address(user_id, addr_label):
+    """DELETE /api/user/addresses/<label> — Remove endereço favorito pelo label."""
+    def _impl():
+        label_lower = addr_label.lower()
+        if label_lower not in _VALID_LABELS:
+            return jsonify({"status": "error",
+                            "message": f"Label inválido. Use: {', '.join(sorted(_VALID_LABELS))}"}), 400
+
+        with db_engine.connect() as conn:
+            with conn.begin():
+                result = conn.execute(text("""
+                    DELETE FROM enderecosfavoritos
+                    WHERE usuario_id = :uid AND label = :label
+                """), {"uid": user_id, "label": label_lower})
+
+            if result.rowcount == 0:
+                return jsonify({"status": "error", "message": "Endereço não encontrado"}), 404
+
+        return jsonify({"status": "success", "message": "Endereço removido com sucesso"}), 200
+
+    try:
+        return _impl()
+    except Exception as e:
+        print(f"[API] ❌ Erro ao deletar endereço (user_id={user_id}): {e}")
+        return jsonify({"status": "error", "message": "Erro ao remover endereço"}), 500
+
+
+# ------------------------------------------------------------
+# AGGREGATED SETTINGS — carrega tudo em uma única chamada
+# ------------------------------------------------------------
+
+@api_bp.route('/user/settings', methods=['GET'])
+@token_required
+def get_user_settings(user_id):
+    """GET /api/user/settings — Retorna perfil + api-keys + notificações em uma chamada."""
+    def _impl():
+        with db_engine.connect() as conn:
+            profile_row = conn.execute(text("""
+                SELECT id, nome, email, numero_whatsapp,
+                       cidade, estado, fuso_horario, meses_reserva_emergencia
+                FROM usuarios
+                WHERE id = :uid AND ativo = true
+            """), {"uid": user_id}).fetchone()
+
+            if not profile_row:
+                return jsonify({"status": "error", "message": "Usuário não encontrado"}), 404
+
+            profile = dict(profile_row._mapping)
+
+            key_rows = conn.execute(text("""
+                SELECT p.provedor,
+                       p.usar_chave_propria,
+                       CASE WHEN c.id IS NOT NULL THEN true ELSE false END AS has_key
+                FROM preferenciaschaveapi p
+                LEFT JOIN chavesapiusuario c
+                       ON c.usuario_id = p.usuario_id
+                      AND c.provedor = p.provedor
+                      AND c.ativo = true
+                WHERE p.usuario_id = :uid
+            """), {"uid": user_id}).fetchall()
+
+            providers = ["gemini", "weather", "openroute"]
+            existing_keys = {r._mapping["provedor"]: dict(r._mapping) for r in key_rows}
+            api_keys = []
+            for prov in providers:
+                api_keys.append(existing_keys.get(prov) or
+                                {"provedor": prov, "usar_chave_propria": False, "has_key": False})
+
+            notif_row = conn.execute(text("""
+                SELECT resumo_matinal_ativo,
+                       resumo_matinal_hora::text AS resumo_matinal_hora,
+                       checkin_noturno_ativo,
+                       checkin_noturno_hora::text AS checkin_noturno_hora,
+                       alertas_financeiros_ativos,
+                       alerta_potes_threshold
+                FROM notificationconfigs
+                WHERE usuario_id = :uid
+            """), {"uid": user_id}).fetchone()
+
+            if notif_row:
+                nr = dict(notif_row._mapping)
+                notifications = {
+                    "morningBriefing": {
+                        "enabled": nr["resumo_matinal_ativo"],
+                        "time": str(nr["resumo_matinal_hora"])[:5]
+                    },
+                    "eveningCheckIn": {
+                        "enabled": nr["checkin_noturno_ativo"],
+                        "time": str(nr["checkin_noturno_hora"])[:5]
+                    },
+                    "financialAlerts": {
+                        "enabled": bool(nr["alertas_financeiros_ativos"]),
+                        "daysBeforeDue": nr["alerta_potes_threshold"] or 3
+                    }
+                }
+            else:
+                notifications = {
+                    "morningBriefing": {"enabled": True, "time": "07:00"},
+                    "eveningCheckIn": {"enabled": True, "time": "19:00"},
+                    "financialAlerts": {"enabled": True, "daysBeforeDue": 3}
+                }
+
+            return jsonify({
+                "status": "success",
+                "data": {
+                    "profile": profile,
+                    "apiKeys": api_keys,
+                    "notifications": notifications
+                }
+            }), 200
+
+    try:
+        return _impl()
+    except Exception as e:
+        print(f"[API] ❌ Erro ao buscar settings (user_id={user_id}): {e}")
+        return jsonify({"status": "error", "message": "Erro ao buscar configurações"}), 500
