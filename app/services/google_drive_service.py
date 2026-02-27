@@ -26,7 +26,7 @@ Uso:
 """
 
 from io import BytesIO
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, List, Optional, Tuple, Union
 from googleapiclient.http import MediaIoBaseUpload
 
 
@@ -209,21 +209,48 @@ class GoogleDriveService:
         return GoogleDriveService.create_folder(service, folder_name, parent_id)
 
     @staticmethod
+    def find_or_create_folder_path(
+        service,
+        folder_path: List[str]
+    ) -> str:
+        """
+        Navega e cria estrutura de pastas aninhadas no Google Drive.
+
+        Percorre cada segmento do caminho, criando as pastas que não existirem,
+        sempre dentro da pasta pai anterior.
+
+        Args:
+            service: Google Drive API service
+            folder_path: Lista de nomes de pasta (ex: ["IR", "IR 2026"])
+
+        Returns:
+            str: folder_id da pasta final do caminho
+        """
+        parent_id = None
+        for folder_name in folder_path:
+            parent_id = GoogleDriveService.find_or_create_folder(
+                service, folder_name, parent_id
+            )
+        return parent_id
+
+    @staticmethod
     def upload_file(
         service,
         file_data: bytes,
         filename: str,
-        folder_name: str,
+        folder_path: Union[str, List[str]],
         mime_type: str
     ) -> Dict[str, Any]:
         """
         Faz upload de arquivo para pasta específica no Google Drive.
 
+        Suporta caminhos aninhados via lista de segmentos.
+
         Args:
             service: Google Drive API service
             file_data: Bytes do arquivo
             filename: Nome do arquivo
-            folder_name: Nome da pasta destino
+            folder_path: Nome da pasta (str) ou caminho aninhado (list), ex: ["IR", "IR 2026"]
             mime_type: Tipo MIME do arquivo
 
         Returns:
@@ -239,6 +266,12 @@ class GoogleDriveService:
             }
         """
         try:
+            # Normalizar folder_path para lista
+            if isinstance(folder_path, str):
+                folder_path = [folder_path]
+
+            folder_display = " > ".join(folder_path)
+
             # 1. Validar arquivo
             is_valid, error_msg = GoogleDriveService.validate_file(
                 file_data, filename, mime_type
@@ -250,9 +283,9 @@ class GoogleDriveService:
                     "error": error_msg
                 }
 
-            # 2. Buscar/criar pasta
-            print(f"[DRIVE] Buscando/criando pasta '{folder_name}'...")
-            folder_id = GoogleDriveService.find_or_create_folder(service, folder_name)
+            # 2. Buscar/criar caminho de pastas (suporta aninhamento)
+            print(f"[DRIVE] Buscando/criando caminho '{folder_display}'...")
+            folder_id = GoogleDriveService.find_or_create_folder_path(service, folder_path)
 
             # 3. Preparar metadata do arquivo
             file_metadata = {
@@ -284,7 +317,9 @@ class GoogleDriveService:
                 "success": True,
                 "file_id": file.get('id'),
                 "filename": file.get('name'),
-                "folder_name": folder_name,
+                "folder_name": folder_path[-1],
+                "folder_path": folder_path,
+                "folder_path_display": folder_display,
                 "folder_id": folder_id,
                 "web_view_link": file.get('webViewLink'),
                 "web_content_link": file.get('webContentLink')  # Pode ser None para alguns tipos

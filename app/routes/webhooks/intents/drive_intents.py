@@ -39,6 +39,10 @@ class UploadDriveIntent(BaseIntent):
 
     # Pasta padrão caso não especificada
     DEFAULT_FOLDER = "WhatsApp Uploads"
+    DEFAULT_FOLDER_PATH = ["WhatsApp Uploads"]
+
+    # Separador de caminho de pastas (ex: IR/IR 2026, IR > IR 2026, IR\IR 2026)
+    PATH_SEPARATOR = re.compile(r'\s*[/\\>]\s*')
 
     # Padrões para extrair nome da pasta da mensagem
     FOLDER_PATTERNS = [
@@ -65,49 +69,64 @@ class UploadDriveIntent(BaseIntent):
 
     def extract_params(self) -> Dict[str, Any]:
         """
-        Extrai nome da pasta da mensagem do usuário.
+        Extrai caminho de pasta da mensagem do usuário.
 
         Tenta extrair de padrões como:
-        - "salvar no drive pasta Notas Fiscais"
-        - "guardar no drive em Documentos"
-        - "pasta Comprovantes"
+        - "salvar no drive pasta IR > IR 2026"
+        - "guardar no drive em IR/Comprovantes"
+        - "pasta Notas Fiscais"
 
         Returns:
-            Dict com folder_name
+            Dict com folder_path (lista de segmentos de pasta)
         """
-        folder_name = self._extract_folder_name(self.mensagem)
+        folder_path = self._extract_folder_path(self.mensagem)
 
-        logger.info(f"[UploadDriveIntent] Pasta extraída: '{folder_name}'")
+        logger.info(f"[UploadDriveIntent] Caminho extraído: {folder_path}")
 
         return {
-            "folder_name": folder_name
+            "folder_path": folder_path
         }
 
-    def _extract_folder_name(self, text: str) -> str:
+    def _extract_folder_path(self, text: str) -> list:
         """
-        Extrai nome da pasta do texto usando regex.
+        Extrai caminho de pastas do texto, preservando o case original.
+
+        Suporta caminhos aninhados separados por '/', '\' ou '>':
+        - "pasta IR > IR 2026"  → ["IR", "IR 2026"]
+        - "pasta IR/Notas"      → ["IR", "Notas"]
+        - "pasta Comprovantes"  → ["Comprovantes"]
 
         Args:
             text: Texto da mensagem
 
         Returns:
-            Nome da pasta ou DEFAULT_FOLDER se não encontrar
+            Lista com segmentos do caminho, ou DEFAULT_FOLDER_PATH se não encontrar
         """
         if not text:
-            return self.DEFAULT_FOLDER
+            return self.DEFAULT_FOLDER_PATH
 
+        # Usar versão lowercase apenas para matching do regex
         text_lower = text.lower().strip()
+        text_original = text.strip()
 
         for pattern in self.FOLDER_PATTERNS:
             match = re.search(pattern, text_lower, re.IGNORECASE)
             if match:
-                folder_name = match.group(1).strip()
-                # Limpar e capitalizar
-                folder_name = self._sanitize_folder_name(folder_name)
-                if folder_name:
-                    return folder_name
+                # Extrair do texto ORIGINAL para preservar o case (ex: "IR" não vira "Ir")
+                start, end = match.span(1)
+                raw_path = text_original[start:end].strip()
 
-        return self.DEFAULT_FOLDER
+                # Dividir por separadores de caminho
+                parts = [
+                    self._sanitize_folder_name(p)
+                    for p in self.PATH_SEPARATOR.split(raw_path)
+                ]
+                parts = [p for p in parts if p]
+
+                if parts:
+                    return parts
+
+        return self.DEFAULT_FOLDER_PATH
 
     def _sanitize_folder_name(self, name: str) -> str:
         """
@@ -132,8 +151,10 @@ class UploadDriveIntent(BaseIntent):
         # Limitar tamanho
         sanitized = sanitized[:100]
 
-        # Capitalizar primeira letra de cada palavra
-        sanitized = sanitized.title()
+        # Capitalizar apenas se o usuário digitou tudo em minúsculas
+        # (preserva nomes como "IR 2026", "IRF", "CNPJ" que já estão em maiúsculas)
+        if sanitized == sanitized.lower():
+            sanitized = sanitized.title()
 
         return sanitized
 
@@ -160,7 +181,7 @@ class UploadDriveIntent(BaseIntent):
             return "Não foi possível identificar o tipo do arquivo."
 
         # Verificar se a pasta foi especificada (já tem padrão, então só log)
-        if self.params.get("folder_name") == self.DEFAULT_FOLDER:
+        if self.params.get("folder_path") == self.DEFAULT_FOLDER_PATH:
             logger.info(
                 f"[UploadDriveIntent] Pasta não especificada, usando padrão: {self.DEFAULT_FOLDER}"
             )
@@ -177,7 +198,7 @@ class UploadDriveIntent(BaseIntent):
         from app.services.google_calendar_oauth_service import GoogleCalendarOAuthService
         from app.services.google_drive_service import GoogleDriveService
 
-        folder_name = self.params.get("folder_name", self.DEFAULT_FOLDER)
+        folder_path = self.params.get("folder_path", self.DEFAULT_FOLDER_PATH)
 
         # 1. Verificar se usuário tem Drive conectado
         logger.info(f"[UploadDriveIntent] Verificando conexão Drive para usuario_id={self.usuario_id}")
@@ -240,15 +261,16 @@ class UploadDriveIntent(BaseIntent):
             }
 
         # 5. Fazer upload
+        folder_display = " > ".join(folder_path)
         logger.info(
-            f"[UploadDriveIntent] Fazendo upload: {self.media_filename} -> {folder_name}"
+            f"[UploadDriveIntent] Fazendo upload: {self.media_filename} -> {folder_display}"
         )
 
         result = GoogleDriveService.upload_file(
             service=service,
             file_data=file_data,
             filename=self.media_filename or f"arquivo_{self.usuario_id}",
-            folder_name=folder_name,
+            folder_path=folder_path,
             mime_type=self.media_type
         )
 
@@ -304,12 +326,12 @@ class UploadDriveIntent(BaseIntent):
             return data.get("message", "❌ Erro ao enviar arquivo para o Drive.")
 
         # Sucesso - formatar mensagem bonita
-        folder_name = data.get("folder_name", self.DEFAULT_FOLDER)
+        folder_display = data.get("folder_path_display", data.get("folder_name", self.DEFAULT_FOLDER))
         filename = data.get("filename", "arquivo")
         web_link = data.get("web_view_link", "")
 
         message = "✅ *Arquivo enviado para o Google Drive!*\n\n"
-        message += f"📁 *Pasta:* {folder_name}\n"
+        message += f"📁 *Pasta:* {folder_display}\n"
         message += f"📄 *Arquivo:* {filename}\n"
 
         if web_link:
