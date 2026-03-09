@@ -238,16 +238,15 @@ class AgendamentosQueries:
             :uid (int) - ID do usuário
             :hoje (date) - Data atual
             :data_minima (date) - Data mínima para buscar (ex: hoje - 30 dias)
-            :data_maxima (date) - Data máxima de atraso (ex: hoje - 8 dias para >7 dias)
             :data_limite_transacao (date) - Data limite para verificar transações (hoje - 60 dias)
 
-        Retorna: Agendamentos atrasados com data_vencimento_real calculada
+        Retorna: Agendamentos atrasados com data_vencimento_real calculada CORRETAMENTE
         """
         return text("""
             WITH ExpectedDates AS (
                 SELECT
                     a.*,
-                    c.nome_conta, c.tipo_conta,
+                    c.nome_conta, c.tipo_conta, c.dia_vencimento, c.dia_fechamento,
                     s.nome_sub as categoria,
                     m.nome_macro,
                     g.nome_grupo,
@@ -330,7 +329,6 @@ class AgendamentosQueries:
             :uid (int) - ID do usuário
             :hoje (date) - Data atual
             :data_minima (date) - Data mínima para buscar (ex: hoje - 30 dias)
-            :data_maxima (date) - Data máxima de atraso (ex: hoje - 8 dias para >7 dias)
             :data_limite_transacao (date) - Data limite para verificar transações (hoje - 60 dias)
 
         Retorna: Agendamentos atrasados com data_vencimento_real calculada CORRETAMENTE
@@ -527,7 +525,6 @@ class AgendamentosQueries:
             # dia_minimo removido - não mais necessário com nova query usando CTE
             "data_limite_transacao": hoje - timedelta(days=60),  # Aceita pagamentos dos últimos 60 dias
             "data_minima": hoje - timedelta(days=30),  # Últimos 30 dias (para query de atrasadas)
-            "data_maxima": hoje - timedelta(days=7),   # CORRIGIDO: era days=8, agora days=7 (atrasadas há mais de 7 dias)
         }
 
     @staticmethod

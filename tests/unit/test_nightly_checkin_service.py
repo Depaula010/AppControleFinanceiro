@@ -157,9 +157,8 @@ class TestAgendamentosParceladosNasQueries:
         assert "'PARCELADO'" in query_str or '"PARCELADO"' in query_str, \
             "Query deve incluir 'PARCELADO' no filtro tipo_agendamento"
 
-    @patch('app.services.nightly_checkin_service.db_engine')
     def test_get_pending_bills_retorna_agendamentos_parcelados(
-        self, mock_engine, mock_conn, sample_agendamento_parcelado
+        self, mock_conn, sample_agendamento_parcelado
     ):
         """get_pending_bills deve retornar agendamentos PARCELADOS."""
         # Configurar mock para retornar agendamento parcelado
@@ -168,9 +167,6 @@ class TestAgendamentosParceladosNasQueries:
         mock_result = MagicMock()
         mock_result.fetchall.return_value = [mock_row]
         mock_conn.execute.return_value = mock_result
-
-        mock_engine.connect.return_value.__enter__ = lambda s: mock_conn
-        mock_engine.connect.return_value.__exit__ = lambda s, *args: None
 
         # Executar
         pending_bills = NightlyCheckinService.get_pending_bills(mock_conn, 1, date.today())
@@ -216,12 +212,13 @@ class TestIncrementoParcelas:
         assert confirmadas[0] == 'Notebook 3x'
 
         # Verificar que UPDATE foi executado (incremento de parcelas)
+        # Detecta pela presença de 'nova_parcela' no dict de params (text() é mockado,
+        # então str(query) não contém "UPDATE" - usamos os parâmetros como indicador)
         calls = mock_conn.execute.call_args_list
 
-        # Deve ter pelo menos uma chamada com UPDATE Agendamentos
         update_calls = [
-            call for call in calls
-            if len(call[0]) > 1 and 'UPDATE' in str(call[0][0]).upper()
+            c for c in calls
+            if len(c[0]) > 1 and isinstance(c[0][1], dict) and 'nova_parcela' in c[0][1]
         ]
 
         assert len(update_calls) > 0, "Deve executar UPDATE para incrementar parcelas"
@@ -250,8 +247,8 @@ class TestIncrementoParcelas:
 
         # Verificar que UPDATE foi chamado com ativo=TRUE
         update_calls = [
-            call for call in mock_conn.execute.call_args_list
-            if len(call[0]) > 1 and 'UPDATE' in str(call[0][0]).upper()
+            c for c in mock_conn.execute.call_args_list
+            if len(c[0]) > 1 and isinstance(c[0][1], dict) and 'nova_parcela' in c[0][1]
         ]
 
         if update_calls:
@@ -285,8 +282,8 @@ class TestIncrementoParcelas:
 
         # Verificar que UPDATE foi chamado com ativo=FALSE
         update_calls = [
-            call for call in mock_conn.execute.call_args_list
-            if len(call[0]) > 1 and 'UPDATE' in str(call[0][0]).upper()
+            c for c in mock_conn.execute.call_args_list
+            if len(c[0]) > 1 and isinstance(c[0][1], dict) and 'nova_parcela' in c[0][1]
         ]
 
         if update_calls:
@@ -322,8 +319,8 @@ class TestReceitasConfirmaveis:
         assert mock_finance_service.create_transaction.called
 
         call_args = mock_finance_service.create_transaction.call_args[0]
-        valor_criado = call_args[4]  # 5º argumento é o valor
-        tipo_criado = call_args[5]   # 6º argumento é o tipo
+        valor_criado = call_args[6]  # 7º argumento é o valor (conn, uid, conta_id, sub_id, fatura_id, descricao, valor, tipo, data)
+        tipo_criado = call_args[7]   # 8º argumento é o tipo
 
         # Receita deve ter valor POSITIVO e tipo 'Renda'
         assert valor_criado > 0, "Receita deve ter valor positivo"
@@ -347,8 +344,8 @@ class TestReceitasConfirmaveis:
         assert mock_finance_service.create_transaction.called
 
         call_args = mock_finance_service.create_transaction.call_args[0]
-        valor_criado = call_args[4]  # 5º argumento é o valor
-        tipo_criado = call_args[5]   # 6º argumento é o tipo
+        valor_criado = call_args[6]  # 7º argumento é o valor (conn, uid, conta_id, sub_id, fatura_id, descricao, valor, tipo, data)
+        tipo_criado = call_args[7]   # 8º argumento é o tipo
 
         # Despesa deve ter valor NEGATIVO e tipo 'Despesa'
         assert valor_criado < 0, "Despesa deve ter valor negativo"
@@ -458,6 +455,8 @@ class TestFormatacaoMensagem:
         """Mensagem deve mostrar número da parcela para agendamentos PARCELADOS."""
         # Preparar dados
         sample_agendamento_parcelado['parcelas_executadas'] = 0
+        # Usar Conta Corrente: cartão de crédito é filtrado pela lógica de formatação
+        sample_agendamento_parcelado['tipo_conta'] = 'Conta Corrente'
         pending_bills = [sample_agendamento_parcelado]
         overdue_bills = []
         bills_due_today = []
@@ -539,6 +538,7 @@ class TestCenariosCompletos:
             'id': 1,
             'descricao': 'Notebook 3x',
             'valor_previsto': Decimal('500.00'),
+            'dia_execucao': 10,
             'conta_id': 1,
             'subcategoria_id': 1,
             'nome_conta': 'Nubank',
@@ -569,8 +569,8 @@ class TestCenariosCompletos:
 
         # Verificar que foram executados 3 UPDATEs
         update_calls = [
-            call for call in mock_conn.execute.call_args_list
-            if len(call[0]) > 1 and 'UPDATE' in str(call[0][0]).upper()
+            c for c in mock_conn.execute.call_args_list
+            if len(c[0]) > 1 and isinstance(c[0][1], dict) and 'nova_parcela' in c[0][1]
         ]
         assert len(update_calls) == 3, "Deve executar 3 UPDATEs (um por parcela)"
 

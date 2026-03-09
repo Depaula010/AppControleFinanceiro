@@ -125,10 +125,15 @@ class NightlyCheckinService:
         params_overdue = AgendamentosQueries.get_parametros_padrao(usuario_id, hoje)
         params_overdue["hoje"] = hoje
         params_overdue["data_minima"] = hoje - timedelta(days=30)
-        params_overdue["data_maxima"] = hoje - timedelta(days=7)
 
         result_overdue = conn.execute(sql_overdue, params_overdue).fetchall()
         overdue_bills = [dict(row._mapping) for row in result_overdue]
+
+        # Deduplicação: remove de overdue qualquer agendamento que já aparece em pending.
+        # Isso evita que o mesmo agendamento apareça nas duas seções quando o mês anterior
+        # está inadimplente E o mês atual vence hoje/esta semana (ex: dia_execucao=15, hoje=15/03).
+        pending_ids = {b['id'] for b in pending_bills}
+        overdue_bills = [b for b in overdue_bills if b['id'] not in pending_ids]
 
         # 3. Faturas vencidas
         sql_invoices = FaturasQueries.get_faturas_vencidas()
