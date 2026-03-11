@@ -154,39 +154,55 @@ defaults = conn.execute(sql, {"uid": usuario_id}).fetchone()
 
 ---
 
-## 🐛 Correção do Bug do Kotas
+## 🐛 Histórico de Bugs no Check de Transação
 
-O bug onde "Kotas venceu 19/12/2025, pagou 04/01/2026 mas ainda aparece como pendente" foi resolvido **neste sistema de queries**.
+### Bug do Kotas (corrigido em 2026-01-06)
+"Kotas venceu 19/12/2025, pagou 04/01/2026 mas ainda aparecia como pendente."
+Causa: check por `EXTRACT(MONTH) = mês_atual` não encontrava pagamento feito no mês seguinte.
+Fix: mudou para janela rolante de `hoje - 60 dias`.
 
-**ANTES:**
+### Bug da Escola (corrigido em 2026-03-11)
+"Escola venceu em 10/03, mas o check-in noturno não a exibiu."
+Causa: a janela de 60 dias era larga demais — o pagamento de **janeiro/31** estava dentro dos
+60 dias contados a partir de março/10, fazendo o sistema entender a conta como já paga.
+Fix: lógica híbrida nas queries `_checkin_noturno` (veja abaixo).
+
+### Regra atual (queries `_checkin_noturno` — 2026-03-11)
+
+As queries `get_contas_pendentes_checkin_noturno` e `get_contas_atrasadas_checkin_noturno`
+usam uma lógica híbrida no NOT EXISTS que resolve ambos os cenários:
+
 ```sql
--- Só aceitava pagamento no MESMO MÊS do vencimento
-AND NOT EXISTS (
-    SELECT 1 FROM Transacoes t
-    WHERE t.descricao = a.descricao
-      AND EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM :hoje)  ❌
-      AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM :hoje)
+-- Considera a conta como PAGA se houver transação que satisfaça:
+AND (
+    -- Regra 1: pagamento no mesmo mês/ano do vencimento (caso normal)
+    (EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM data_esperada)
+     AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM data_esperada))
+    OR
+    -- Regra 2: pagamento atrasado cross-month (até 20 dias após vencimento)
+    -- Resolve o caso Kotas: venceu dez/19, pagou jan/04
+    (t.data_transacao > data_esperada
+     AND t.data_transacao <= data_esperada + INTERVAL '20 days')
 )
 ```
 
-**AGORA (em todas as queries):**
-```sql
--- Aceita pagamentos nos ÚLTIMOS 60 DIAS
-AND NOT EXISTS (
-    SELECT 1 FROM Transacoes t
-    WHERE t.descricao = a.descricao
-      AND t.data_transacao >= :data_limite_transacao  ✅ (hoje - 60 dias)
-      AND t.data_transacao <= :hoje
-)
-```
+**Comportamento por cenário:**
 
-**Arquivos afetados automaticamente:**
-- ✅ `agendamentos_queries.py::get_contas_pendentes_ultimos_7_dias()`
-- ✅ `agendamentos_queries.py::get_contas_atrasadas_com_data_real()`
-- ✅ `agendamentos_queries.py::get_contas_vencendo_hoje()`
-- ✅ `transaction_queries.py::check_transaction_exists_in_period()`
+| Conta | Vencimento | Pagamento | Resultado |
+|-------|-----------|-----------|-----------|
+| Escola | mar/10 | jan/31 | Aparece (jan ≠ mar, jan < mar) ✅ |
+| Escola | mar/10 | mar/10 | Oculta (mar = mar) ✅ |
+| Escola | mar/10 | mar/15 | Oculta (mar = mar) ✅ |
+| Kotas  | dez/19 | jan/04 | Oculta (jan/4 > dez/19 e ≤ jan/8) ✅ |
 
-Todos os lugares que usam essas queries foram corrigidos automaticamente! 🎉
+**Queries afetadas:**
+- ✅ `agendamentos_queries.py::get_contas_pendentes_checkin_noturno()`
+- ✅ `agendamentos_queries.py::get_contas_atrasadas_checkin_noturno()`
+
+**Queries com lógica diferente (não alteradas):**
+- `get_upcoming_bills_and_invoices()` em `finance_service.py` (matinal) — usa `EXTRACT(MONTH/YEAR)` simples pois não tem agendamento_id, compara por descrição
+- `get_contas_pendentes_ultimos_7_dias()` — versão legada, mantida para compatibilidade
+- `get_contas_vencendo_hoje()` — usa janela de 60 dias por descrição (sem agendamento_id)
 
 ---
 
@@ -330,6 +346,6 @@ Garanta que funciona igual ao código antigo.
 
 ---
 
-**Última atualização:** 04/01/2026
-**Versão:** 1.0.0
+**Última atualização:** 11/03/2026
+**Versão:** 1.1.0
 **Autor:** Sistema de Queries Centralizadas

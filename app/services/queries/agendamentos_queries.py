@@ -115,7 +115,7 @@ class AgendamentosQueries:
     @staticmethod
     def get_contas_pendentes_checkin_noturno() -> text:
         """
-        Busca contas pendentes para o check-in noturno (versão corrigida).
+        Busca contas pendentes para o check-in noturno.
 
         DIFERENÇA DA QUERY ORIGINAL (get_contas_pendentes_ultimos_7_dias):
         - Usa CASE em vez de COALESCE para retornar a data que REALMENTE correspondeu ao WHERE
@@ -123,12 +123,20 @@ class AgendamentosQueries:
 
         CORREÇÃO (2026-01-08): Agendamentos ANUAIS não calculam mês anterior
 
+        CORREÇÃO (2026-03-11): Check de transação usa mês/ano + janela de atraso cross-month.
+        Motivo: a janela rolante de 60 dias causava falso-positivo — pagamento de jan/31 bloqueava
+        a detecção da conta de março (mesmo agendamento, meses diferentes).
+        Regras do NOT EXISTS:
+          1. Pagamento no mesmo mês/ano da data esperada (caso normal)
+          2. Pagamento atrasado até 20 dias após o vencimento (caso cross-month, ex: Kotas venceu
+             19/dez, pagou 04/jan — sem esse fallback aparecia como inadimplente em janeiro)
+          3. Pagamentos de meses anteriores ao vencimento são ignorados (não bloqueiam o mês corrente)
+
         Usado em: Check-in noturno (nightly_checkin_service.py)
 
         Parâmetros necessários:
             :uid (int) - ID do usuário
             :target_date (date) - Data de referência (normalmente hoje)
-            :data_limite_transacao (date) - Data limite para verificar transações (hoje - 60 dias)
 
         Retorna: Agendamentos não pagos que vencem hoje ou estão atrasados (últimos 7 dias)
                  INCLUI campo data_vencimento_real calculado CORRETAMENTE
@@ -170,7 +178,7 @@ class AgendamentosQueries:
                 ed.nome_conta, ed.tipo_conta, ed.categoria,
                 ed.nome_macro, ed.nome_grupo,
                 ed.tipo_agendamento, ed.parcelas_executadas, ed.total_parcelas,
-                -- CORRIGIDO (2026-01-07): Usa CASE em vez de COALESCE para retornar a data que corresponde ao WHERE
+                -- Usa CASE em vez de COALESCE para retornar a data que corresponde ao WHERE
                 CASE
                     WHEN ed.data_esperada_mes_atual <= :target_date
                          AND ed.data_esperada_mes_atual >= :target_date - INTERVAL '7 days'
@@ -185,8 +193,15 @@ class AgendamentosQueries:
                  AND NOT EXISTS (
                      SELECT 1 FROM Transacoes t
                      WHERE t.agendamento_id = ed.id
-                       AND t.data_transacao >= :data_limite_transacao
-                       AND t.data_transacao <= :target_date
+                       AND (
+                           -- Regra 1: pagamento no mesmo mês/ano do vencimento (caso normal)
+                           (EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM ed.data_esperada_mes_atual)
+                            AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM ed.data_esperada_mes_atual))
+                           OR
+                           -- Regra 2: pagamento atrasado cross-month (até 20 dias após vencimento)
+                           (t.data_transacao > ed.data_esperada_mes_atual
+                            AND t.data_transacao <= ed.data_esperada_mes_atual + INTERVAL '20 days')
+                       )
                  ))
                 OR
                 -- Mês anterior: atrasado nos últimos 7 dias
@@ -195,8 +210,15 @@ class AgendamentosQueries:
                  AND NOT EXISTS (
                      SELECT 1 FROM Transacoes t
                      WHERE t.agendamento_id = ed.id
-                       AND t.data_transacao >= :data_limite_transacao
-                       AND t.data_transacao <= :target_date
+                       AND (
+                           -- Regra 1: pagamento no mesmo mês/ano do vencimento
+                           (EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM ed.data_esperada_mes_anterior)
+                            AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM ed.data_esperada_mes_anterior))
+                           OR
+                           -- Regra 2: pagamento atrasado cross-month (até 20 dias após vencimento)
+                           (t.data_transacao > ed.data_esperada_mes_anterior
+                            AND t.data_transacao <= ed.data_esperada_mes_anterior + INTERVAL '20 days')
+                       )
                  ))
             )
             -- Filtro para agendamentos anuais: incluir apenas se o mês bater
@@ -315,7 +337,7 @@ class AgendamentosQueries:
     @staticmethod
     def get_contas_atrasadas_checkin_noturno() -> text:
         """
-        Busca contas atrasadas para o check-in noturno (versão corrigida).
+        Busca contas atrasadas para o check-in noturno (>7 dias sem pagamento).
 
         DIFERENÇA DA QUERY ORIGINAL (get_contas_atrasadas_com_data_real):
         - Usa CASE em vez de COALESCE para retornar a data que REALMENTE correspondeu ao WHERE
@@ -323,13 +345,17 @@ class AgendamentosQueries:
 
         CORREÇÃO (2026-01-08): Agendamentos ANUAIS não calculam mês anterior
 
+        CORREÇÃO (2026-03-11): Check de transação usa mês/ano + janela de atraso cross-month.
+        Mesmo motivo de get_contas_pendentes_checkin_noturno: a janela rolante de 60 dias causava
+        falso-positivo — pagamento de mês anterior bloqueava detecção de inadimplência no mês corrente.
+        Ver docstring de get_contas_pendentes_checkin_noturno para detalhes das regras.
+
         Usado em: Check-in noturno (nightly_checkin.py)
 
         Parâmetros necessários:
             :uid (int) - ID do usuário
             :hoje (date) - Data atual
             :data_minima (date) - Data mínima para buscar (ex: hoje - 30 dias)
-            :data_limite_transacao (date) - Data limite para verificar transações (hoje - 60 dias)
 
         Retorna: Agendamentos atrasados com data_vencimento_real calculada CORRETAMENTE
         """
@@ -363,7 +389,7 @@ class AgendamentosQueries:
                 WHERE a.usuario_id = :uid
                   AND a.ativo = TRUE
                   AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL', 'PARCELADO')
-                  -- CORRIGIDO (2026-01-07): Exclui débitos recorrentes de cartão com fatura configurada
+                  -- Exclui débitos recorrentes de cartão com fatura configurada
                   AND NOT (
                       a.tipo_agendamento = 'FIXO'
                       AND g.nome_grupo = 'Despesa'
@@ -378,7 +404,7 @@ class AgendamentosQueries:
                 ed.nome_conta, ed.tipo_conta, ed.categoria,
                 ed.nome_macro, ed.nome_grupo,
                 ed.tipo_agendamento, ed.parcelas_executadas, ed.total_parcelas,
-                -- CORRIGIDO (2026-01-07): Usa CASE em vez de COALESCE para retornar a data que corresponde ao WHERE
+                -- Usa CASE em vez de COALESCE para retornar a data que corresponde ao WHERE
                 CASE
                     WHEN ed.data_esperada_mes_atual < :hoje
                          AND ed.data_esperada_mes_atual < :hoje - INTERVAL '7 days'
@@ -393,8 +419,15 @@ class AgendamentosQueries:
                  AND NOT EXISTS (
                      SELECT 1 FROM Transacoes t
                      WHERE t.agendamento_id = ed.id
-                       AND t.data_transacao >= :data_limite_transacao
-                       AND t.data_transacao <= :hoje
+                       AND (
+                           -- Regra 1: pagamento no mesmo mês/ano do vencimento (caso normal)
+                           (EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM ed.data_esperada_mes_atual)
+                            AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM ed.data_esperada_mes_atual))
+                           OR
+                           -- Regra 2: pagamento atrasado cross-month (até 20 dias após vencimento)
+                           (t.data_transacao > ed.data_esperada_mes_atual
+                            AND t.data_transacao <= ed.data_esperada_mes_atual + INTERVAL '20 days')
+                       )
                  ))
                 OR
                 -- Mês anterior está atrasado (mais de 7 dias)
@@ -404,8 +437,15 @@ class AgendamentosQueries:
                  AND NOT EXISTS (
                      SELECT 1 FROM Transacoes t
                      WHERE t.agendamento_id = ed.id
-                       AND t.data_transacao >= :data_limite_transacao
-                       AND t.data_transacao <= :hoje
+                       AND (
+                           -- Regra 1: pagamento no mesmo mês/ano do vencimento
+                           (EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM ed.data_esperada_mes_anterior)
+                            AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM ed.data_esperada_mes_anterior))
+                           OR
+                           -- Regra 2: pagamento atrasado cross-month (até 20 dias após vencimento)
+                           (t.data_transacao > ed.data_esperada_mes_anterior
+                            AND t.data_transacao <= ed.data_esperada_mes_anterior + INTERVAL '20 days')
+                       )
                  ))
             )
             -- Filtro para agendamentos anuais
@@ -522,8 +562,10 @@ class AgendamentosQueries:
             "uid": usuario_id,
             "hoje": hoje,
             "target_date": hoje,
-            # dia_minimo removido - não mais necessário com nova query usando CTE
-            "data_limite_transacao": hoje - timedelta(days=60),  # Aceita pagamentos dos últimos 60 dias
+            # Usado por: get_contas_pendentes_ultimos_7_dias (legada), get_contas_vencendo_hoje
+            # NÃO usado por: get_contas_pendentes_checkin_noturno, get_contas_atrasadas_checkin_noturno
+            #   (essas queries usam lógica mês/ano + cross-month 20 dias — ver ADR #5)
+            "data_limite_transacao": hoje - timedelta(days=60),
             "data_minima": hoje - timedelta(days=30),  # Últimos 30 dias (para query de atrasadas)
         }
 
