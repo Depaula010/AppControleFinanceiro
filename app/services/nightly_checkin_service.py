@@ -1,26 +1,115 @@
 """
-Serviço de Check-in Noturno - FONTE DA VERDADE para Dados Financeiros
+NightlyCheckinService — Serviço de Check-in Noturno
+====================================================
 
-Este serviço centraliza TODA a lógica de coleta e formatação de dados financeiros:
-- Receitas/despesas pendentes (últimos 7 dias)
-- Contas atrasadas (>7 dias)
-- Faturas vencidas
-- Faturas vencendo hoje
+RESPONSABILIDADE
+----------------
+Centraliza toda a lógica de coleta de dados financeiros pendentes e gerencia
+o fluxo de confirmação de pagamentos via WhatsApp.
 
-USOS:
-1. Job Noturno (nightly_checkin.py): Envia notificação automática às 22h
-2. Intenções WhatsApp (notification_intents.py): Responde queries manuais ("Contas atrasadas")
-3. APIs futuras: Dashboard web, relatórios, etc.
+É a FONTE DA VERDADE para dados financeiros do sistema: tanto o job automático
+quanto as intenções manuais do chatbot consomem os mesmos métodos, garantindo
+que o usuário veja exatamente os mesmos dados em qualquer canal.
 
-IMPORTANTE: Nunca busque dados financeiros diretamente nas queries.
-SEMPRE use collect_financial_snapshot() para garantir consistência entre Job e Intenções.
 
-Gerencia também o fluxo de confirmação em lote de contas pendentes (Agendamentos).
+FLUXO COMPLETO
+--------------
 
-REFATORAÇÃO (2026-01-11):
-- Criado collect_financial_snapshot() como método centralizado de coleta
-- format_consolidated_checkin_message() agora suporta modo read-only (checkin_id=None)
-- Job e Intenções usam a mesma fonte de dados
+1. COLETA (collect_financial_snapshot)
+   ├── pending_bills  → Agendamentos vencidos há ≤ 7 dias e ainda não pagos
+   │                    (query: get_contas_pendentes_checkin_noturno)
+   ├── overdue_bills  → Agendamentos vencidos há > 7 dias e não pagos
+   │                    (query: get_contas_atrasadas_checkin_noturno)
+   │                    deduplicados contra pending_bills pelo agendamento.id
+   ├── overdue_invoices    → Faturas de cartão com data_vencimento < hoje
+   └── invoices_due_today  → Faturas de cartão que vencem exatamente hoje
+
+2. SESSÃO (create_checkin_session)
+   ├── Recebe: all_bills = pending_bills + overdue_bills
+   ├── Filtra: exclui Cartão de Crédito + Despesa (não confirmáveis via agendamento)
+   ├── Ordena: receitas primeiro (1..R), despesas depois (R+1..N)
+   ├── Serializa: date → ISO string, Decimal → float (para salvar no Redis)
+   └── Persiste no Redis com TTL de 1 hora:
+       • nightly_checkin:{numero}:{checkin_id}  → {items: {idx: bill}, total_items: N}
+       • nightly_checkin_active:{numero}         → checkin_id
+
+3. MENSAGEM (format_consolidated_checkin_message)
+   Modos:
+   • checkin_id fornecido  → "🌙 CHECK-IN NOTURNO" (job automático, interativo)
+   • checkin_id = None     → "📊 RESUMO FINANCEIRO" (intenção manual, read-only)
+
+   Seções da mensagem (em ordem):
+   ┌─ 💳 DÉBITO CARTÃO       → informativo, sem número (lembretes_cartao)
+   ├─ 💵 RECEITAS PENDENTES  → numeradas 1..R (receitas_pendentes + receitas_atrasadas)
+   ├─ 💸 DESPESAS PENDENTES  → numeradas R+1..P (despesas_pendentes, sem CC)
+   ├─ 🔴 DESPESAS ATRASADAS  → numeradas P+1..N (despesas_atrasadas, > 7 dias)
+   ├─ 🔴 FATURAS VENCIDAS    → bullet "•" informativo (NÃO numerado, NÃO confirmável)
+   ├─ ⏰ FATURAS HOJE        → bullet informativo, alerta preventivo
+   └─ 🔹 COMO RESPONDER      → exibido sempre que há item numerado (any_confirmable)
+
+   INVARIANTE: número exibido na mensagem == índice na sessão Redis.
+
+4. RESPOSTA (process_response)
+   ├── Busca sessão no Redis
+   ├── Chama parse_checkin_response():
+   │   • "ok" / 👍 / ✅  → full  → [1..N]
+   │   • "não" / depois  → defer → [] (encerra sessão)
+   │   • "1" / "1,3"     → partial → [1, 3]
+   │   • inválido        → error  → encerra sessão (evita loop)
+   ├── Chama mark_bills_as_paid() dentro de conn.begin()
+   └── Limpa sessão Redis (inclusive em caso de exceção — evita loop infinito)
+
+5. PAGAMENTO (mark_bills_as_paid)
+   ├── Determina data_tx via data_vencimento_real (ISO string → date)
+   │   • venceu hoje ou ontem → data_tx = data_vencimento_real
+   │   • vencido há mais      → data_tx = hoje (pagamento tardio)
+   ├── Se CC: cria/busca fatura via finance_service.get_or_create_fatura
+   ├── Cria transação via finance_service.create_transaction (com agendamento_id)
+   └── Se PARCELADO: incrementa parcelas_executadas; desativa se concluído
+
+
+REGRAS DE VERIFICAÇÃO DE PAGAMENTO (nas queries SQL)
+-----------------------------------------------------
+Ambas as queries de pending e overdue usam a mesma lógica de NOT EXISTS:
+  Regra 1 → pagamento no mesmo mês/ano do vencimento  (caso normal)
+  Regra 2 → pagamento em até 20 dias após o vencimento (pagamento tardio cross-month)
+Pagamentos de meses ANTERIORES ao vencimento são ignorados (não "bloqueiam" o mês corrente).
+
+
+REGRAS DE NEGÓCIO — O QUE NÃO APARECE
+---------------------------------------
+• Cartão de Crédito + Despesa Fixa em pending_bills → seção "DÉBITO CARTÃO" (informativo)
+  Motivo: já é cobrado automaticamente na fatura; não precisa confirmação manual.
+• overdue_bills (query) já exclui CC+Despesa com dia_vencimento configurado.
+• Agendamentos anuais só aparecem no mês do mes_execucao.
+• Deduplicação: agendamento que aparece em pending_bills é removido de overdue_bills.
+
+
+CHAVES REDIS
+------------
+nightly_checkin:{numero_whatsapp}:{checkin_id}   TTL 1h — dados da sessão
+nightly_checkin_active:{numero_whatsapp}          TTL 1h — checkin_id ativo
+
+
+USOS
+----
+• app/jobs/nightly_checkin.py           → job automático (Ofelia cron)
+• app/routes/webhooks/handlers/         → processa resposta WhatsApp
+• app/routes/webhooks/intents/          → intenção "Contas atrasadas" (read-only)
+
+
+HISTÓRICO DE CORREÇÕES
+----------------------
+2026-01-06  data_vencimento_real via CTE (corrige virada de mês)
+2026-01-07  Filtrar CC despesas da numeração; lembretes_cartao informativos
+2026-01-08  Receitas confirmáveis; serialização JSON; agendamento_id nas transações
+2026-01-11  collect_financial_snapshot() como fonte única; modo read-only
+2026-03-11  NOT EXISTS usa mês/ano + janela 20 dias (fix falso-positivo cross-month)
+2026-03-17  [BUG FIX] create_checkin_session filtra CC despesas (índice = mensagem)
+            [BUG FIX] overdue_invoices bullet "•" em vez de número (não estão na sessão)
+            [BUG FIX] instruções exibidas para qualquer item numerado (not only despesas)
+            [BUG FIX] sessão Redis limpa em exceção de mark_bills_as_paid (evita loop)
+            [BUG FIX] mark_bills_as_paid usa data_vencimento_real para data da transação
 """
 
 from app.services.redis_service import redis_service
@@ -228,8 +317,12 @@ class NightlyCheckinService:
 
         # CORRIGIDO (2026-01-08): Separar receitas e despesas para salvar NA MESMA ORDEM da mensagem
         # (mensagem mostra: receitas primeiro, depois despesas)
+        # CORRIGIDO (2026-03-17): Filtrar CC despesas igual à mensagem (evita índice diferente)
         receitas = [b for b in pending_bills if b.get('nome_grupo') == 'Renda']
-        despesas = [b for b in pending_bills if b.get('nome_grupo') != 'Renda']
+        despesas = [b for b in pending_bills
+                    if b.get('nome_grupo') != 'Renda'
+                    and not (b.get('tipo_conta') == 'Cartão de Crédito'
+                             and b.get('nome_grupo') == 'Despesa')]
 
         # IMPORTANTE: Concatenar na ordem correta (receitas → despesas)
         bills_ordenadas = receitas + despesas
@@ -379,8 +472,12 @@ class NightlyCheckinService:
 
             idx += 1
 
-        # Processar contas atrasadas (>7 dias) - sem numeração, apenas informativo
+        # Processar contas atrasadas (>7 dias)
+        # CORRIGIDO (2026-03-17): Filtrar CC despesas igual ao loop de pending
+        # (sessão também as filtra — manter consistência)
         for bill in overdue_bills:
+            if bill.get('tipo_conta') == 'Cartão de Crédito' and bill.get('nome_grupo') == 'Despesa':
+                continue
             # NOVO (2026-01-07): Mostrar número da parcela para agendamentos parcelados
             descricao = bill['descricao']
             if bill.get('tipo_agendamento') == 'PARCELADO' and bill.get('total_parcelas'):
@@ -477,13 +574,12 @@ class NightlyCheckinService:
 
             msg += f"\n💸 *Total atrasado:* {formatar_moeda(total_atrasado)}\n"
 
-        # 4. FATURAS VENCIDAS (se houver) - continua numeração
+        # 4. FATURAS VENCIDAS (informativo - não confirmável via check-in)
         if overdue_invoices:
             msg += "🔴 *FATURAS VENCIDAS:*\n"
             for fatura in overdue_invoices:
                 valor_fmt = formatar_moeda(fatura.get('valor_total', 0))
-                msg += f"{numero_global}. {fatura['nome_conta']} - {valor_fmt} - Venceu em {fatura['data_vencimento'].strftime('%d/%m/%Y')}\n"
-                numero_global += 1
+                msg += f"• {fatura['nome_conta']} - {valor_fmt} - Venceu em {fatura['data_vencimento'].strftime('%d/%m/%Y')}\n"
             msg += "\n"
 
         # 4.5. FATURAS QUE VENCEM HOJE (alerta preventivo - não numerado)
@@ -496,9 +592,12 @@ class NightlyCheckinService:
                 msg += f"💳 {nome_cartao} - {valor_fmt} - Vence HOJE\n"
             msg += "\n"
 
-        # 5. INSTRUÇÕES (apenas se houver despesas pendentes para confirmar)
+        # 5. INSTRUÇÕES (para qualquer item confirmável numerado)
         # CORRIGIDO (2026-01-11): Modo condicional baseado em checkin_id
-        if despesas_pendentes:
+        # CORRIGIDO (2026-03-17): Mostrar instruções sempre que houver item numerado
+        any_confirmable = bool(despesas_pendentes or receitas_pendentes or
+                               despesas_atrasadas or receitas_atrasadas)
+        if any_confirmable:
             if checkin_id:
                 # Modo interativo (job noturno): instruções de confirmação
                 msg += "━━━━━━━━━━━━━━━━━━━━\n"
@@ -581,16 +680,22 @@ class NightlyCheckinService:
         hoje = date.today()
 
         for bill in bills_to_confirm:
-            # Determinar data de pagamento
-            # Se venceu hoje/ontem, usar dia de vencimento
-            # Senão, usar hoje (pagamento atrasado)
-            dia_venc = bill['dia_execucao']
-
-            if hoje.day - dia_venc <= 1 and hoje.day - dia_venc >= 0:
-                data_tx = hoje.replace(day=dia_venc)
+            # CORRIGIDO (2026-03-17): Usar data_vencimento_real quando disponível (mais preciso)
+            # Na sessão Redis, data_vencimento_real foi convertida para string ISO (ex: "2026-03-15")
+            data_venc_real = bill.get('data_vencimento_real')
+            if data_venc_real:
+                if isinstance(data_venc_real, str):
+                    from datetime import date as date_type
+                    data_venc_real = date_type.fromisoformat(data_venc_real)
+                dias_atraso_real = (hoje - data_venc_real).days
+                data_tx = data_venc_real if dias_atraso_real <= 1 else hoje
             else:
-                # Pagamento atrasado - usar hoje
-                data_tx = hoje
+                # Fallback: calcular por dia_execucao (pode falhar em cross-month)
+                dia_venc = bill['dia_execucao']
+                if 0 <= hoje.day - dia_venc <= 1:
+                    data_tx = hoje.replace(day=dia_venc)
+                else:
+                    data_tx = hoje
 
             # Criar fatura se cartão de crédito
             fatura_id = None
@@ -746,6 +851,9 @@ class NightlyCheckinService:
             print(f"[CHECKIN-ERROR] Erro ao criar transações: {e}")
             import traceback
             traceback.print_exc()
+            # CORRIGIDO (2026-03-17): Limpar sessão em caso de erro para evitar loop infinito
+            redis_service.delete(session_key)
+            redis_service.delete(f"nightly_checkin_active:{numero_whatsapp}")
             return ('error', f"❌ Erro ao salvar transações: {str(e)}")
 
         # Limpar sessão

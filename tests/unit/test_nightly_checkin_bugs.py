@@ -534,5 +534,209 @@ class TestCenarioCompletoCheckinNoturno:
         assert "3." in mensagem, "Deve ter item 3"
 
 
+# ============================================================================
+# Bug 3 (2026-03-17): Índice sessão ≠ mensagem quando há CC despesas
+# ============================================================================
+
+@pytest.fixture
+def sample_cc_despesa():
+    """Despesa de Cartão de Crédito — deve ser filtrada da numeração."""
+    return {
+        'id': 10,
+        'descricao': 'Google One (CC)',
+        'valor_previsto': Decimal('96.99'),
+        'dia_execucao': 11,
+        'conta_id': 5,
+        'subcategoria_id': 9,
+        'usuario_id': 1,
+        'nome_conta': 'Nubank',
+        'tipo_conta': 'Cartão de Crédito',
+        'categoria': 'Assinaturas',
+        'nome_macro': 'Tecnologia',
+        'nome_grupo': 'Despesa',
+        'tipo_agendamento': 'FIXO',
+        'parcelas_executadas': None,
+        'total_parcelas': None,
+        'data_vencimento_real': date(2026, 3, 11)
+    }
+
+
+class TestIndicesSessaoIgualMensagem:
+    """
+    Garante que os índices na sessão Redis correspondem exatamente aos
+    números exibidos na mensagem WhatsApp (Bug 3 — 2026-03-17).
+    """
+
+    @patch('app.services.nightly_checkin_service.redis_service')
+    def test_cc_despesa_nao_entra_na_sessao(
+        self, mock_redis, sample_receita_pendente_1, sample_cc_despesa, sample_despesa_pendente
+    ):
+        """
+        CC despesa deve ser EXCLUÍDA da sessão Redis.
+
+        Cenário: [Salário(Renda), Google_CC(CC+Despesa), Material(Despesa)]
+        Sessão esperada: {1: Salário, 2: Material} — CC fora
+        """
+        all_bills = [sample_receita_pendente_1, sample_cc_despesa, sample_despesa_pendente]
+
+        NightlyCheckinService.create_checkin_session("5511999999999", all_bills)
+
+        session_call = [
+            c for c in mock_redis.set_with_ttl.call_args_list
+            if 'nightly_checkin:' in str(c)
+        ][0]
+        session_data = session_call[0][1]
+        items = session_data['items']
+
+        assert session_data['total_items'] == 2, \
+            f"Sessão deve ter 2 itens (CC excluída), obteve {session_data['total_items']}"
+        assert items['1']['nome_grupo'] == 'Renda', "Índice 1 deve ser Renda"
+        assert items['2']['nome_grupo'] == 'Despesa', "Índice 2 deve ser Despesa (não CC)"
+        assert items['2']['descricao'] == 'Material', \
+            f"Índice 2 deve ser 'Material', obteve '{items['2']['descricao']}'"
+
+    @patch('app.services.nightly_checkin_service.redis_service')
+    def test_mensagem_nao_numera_cc_despesa(
+        self, mock_redis, sample_receita_pendente_1, sample_cc_despesa, sample_despesa_pendente
+    ):
+        """
+        CC despesa não deve receber número na mensagem.
+
+        Cenário: [Salário(Renda), Google_CC(CC+Despesa), Material(Despesa)]
+        Mensagem esperada: 1.Salário ... 2.Material (Google em DÉBITO CARTÃO se vence hoje)
+        """
+        pending_bills = [sample_receita_pendente_1, sample_cc_despesa, sample_despesa_pendente]
+        mensagem = NightlyCheckinService.format_consolidated_checkin_message(
+            pending_bills, [], [], [], [], "abc123"
+        )
+
+        assert mensagem is not None
+        # Não deve ter "3." (seria o índice se CC estivesse numerada)
+        assert "3." not in mensagem, "Não deve haver item 3 (CC não é numerada)"
+        assert "2." in mensagem, "Deve ter item 2 (Material)"
+        assert "1." in mensagem, "Deve ter item 1 (Salário)"
+
+    @patch('app.services.nightly_checkin_service.redis_service')
+    def test_indices_sessao_coincidem_com_numeros_mensagem(
+        self, mock_redis, sample_receita_pendente_1, sample_cc_despesa, sample_despesa_pendente
+    ):
+        """
+        Invariante crítico: número exibido na mensagem == índice na sessão.
+
+        Cenário: [Salário(1), CC_despesa(filtrada), Material(2)]
+        Quando usuário responder "2", sessão[2] deve ser 'Material'.
+        """
+        all_bills = [sample_receita_pendente_1, sample_cc_despesa, sample_despesa_pendente]
+
+        NightlyCheckinService.create_checkin_session("5511999999999", all_bills)
+
+        session_call = [
+            c for c in mock_redis.set_with_ttl.call_args_list
+            if 'nightly_checkin:' in str(c)
+        ][0]
+        items = session_call[0][1]['items']
+
+        # Usuário verá "2. Material" na mensagem — sessão[2] deve ser Material
+        assert items.get('2') is not None, "Sessão deve ter índice '2'"
+        assert items['2']['descricao'] == 'Material', \
+            f"Sessão[2] deve ser 'Material', obteve '{items['2']['descricao']}'"
+
+    def test_faturas_vencidas_nao_sao_numeradas_na_mensagem(self, sample_despesa_pendente):
+        """
+        Faturas vencidas devem ser bullets (•), nunca números.
+        Não existem na sessão, então não podem ser confirmadas.
+        """
+        fatura_vencida = {
+            'nome_conta': 'Nubank',
+            'data_vencimento': date(2026, 3, 1),
+            'valor_total': Decimal('500.00')
+        }
+        mensagem = NightlyCheckinService.format_consolidated_checkin_message(
+            [sample_despesa_pendente], [], [], [fatura_vencida], [], "abc123"
+        )
+
+        assert mensagem is not None
+        # Fatura deve aparecer com bullet, não com número
+        assert "• Nubank" in mensagem, "Fatura vencida deve ser bullet '•'"
+        # Não deve haver "2. Nubank" (numeração incorreta)
+        assert "2. Nubank" not in mensagem, "Fatura vencida não deve ser numerada"
+
+    def test_instrucoes_aparecem_com_apenas_despesas_atrasadas(self):
+        """
+        Instruções de resposta devem aparecer quando só há overdue_bills (sem pending).
+        Bug anterior: instruções só apareciam com despesas_pendentes.
+        """
+        overdue_bill = {
+            'id': 99,
+            'descricao': 'Internet',
+            'valor_previsto': Decimal('109.00'),
+            'dia_execucao': 15,
+            'conta_id': 1,
+            'subcategoria_id': 1,
+            'usuario_id': 1,
+            'nome_conta': 'Banco do Brasil',
+            'tipo_conta': 'Conta Corrente',
+            'categoria': 'Internet',
+            'nome_macro': 'Contas',
+            'nome_grupo': 'Despesa',
+            'tipo_agendamento': 'FIXO',
+            'parcelas_executadas': None,
+            'total_parcelas': None,
+            'data_vencimento_real': date(2026, 3, 1)
+        }
+        mensagem = NightlyCheckinService.format_consolidated_checkin_message(
+            [], [overdue_bill], [], [], [], "abc123"
+        )
+
+        assert mensagem is not None
+        assert "COMO RESPONDER" in mensagem, \
+            "Instruções devem aparecer mesmo com apenas contas atrasadas"
+        assert "1." in mensagem, "Conta atrasada deve ser numerada"
+
+    @patch('app.services.nightly_checkin_service.redis_service')
+    def test_session_limpa_em_excecao_de_mark_bills_as_paid(self, mock_redis):
+        """
+        Sessão deve ser deletada mesmo quando mark_bills_as_paid lança exceção.
+        Bug anterior: sessão permanecia, prendendo o usuário em loop infinito.
+        """
+        session_data = {
+            'items': {
+                '1': {
+                    'id': 1, 'descricao': 'Aluguel',
+                    'valor_previsto': 1500.0, 'dia_execucao': 5,
+                    'conta_id': 1, 'subcategoria_id': 1, 'usuario_id': 1,
+                    'nome_conta': 'BB', 'tipo_conta': 'Conta Corrente',
+                    'nome_grupo': 'Despesa', 'tipo_agendamento': 'FIXO',
+                    'parcelas_executadas': None, 'total_parcelas': None,
+                    'data_vencimento_real': '2026-03-05'
+                }
+            },
+            'created_at': '2026-03-17',
+            'total_items': 1
+        }
+        mock_redis.get.return_value = session_data
+
+        with patch('app.services.nightly_checkin_service.NightlyCheckinService.mark_bills_as_paid',
+                   side_effect=Exception("DB connection failed")), \
+             patch('app.db_engine') as mock_engine:
+
+            mock_conn = MagicMock()
+            mock_conn.__enter__ = lambda s: mock_conn
+            mock_conn.__exit__ = MagicMock(return_value=False)
+            mock_engine.connect.return_value = mock_conn
+
+            status, _ = NightlyCheckinService.process_response(
+                "5511999999999", "ok", "abc123"
+            )
+
+        assert status == 'error'
+        # Sessão E flag ativa devem ser deletados
+        delete_calls = [str(c) for c in mock_redis.delete.call_args_list]
+        assert any('nightly_checkin:' in c for c in delete_calls), \
+            "Sessão deve ser deletada em caso de erro"
+        assert any('nightly_checkin_active:' in c for c in delete_calls), \
+            "Flag ativa deve ser deletada em caso de erro"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s"])
