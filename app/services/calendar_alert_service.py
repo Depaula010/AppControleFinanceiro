@@ -361,16 +361,28 @@ class CalendarAlertService:
             print(f"[CALENDAR-ALERT] ℹ️ Usuário {usuario_id} já foi notificado esta semana sobre Calendar desconectado")
             return
 
+        # Gerar link de reconexão
+        from app.config import GOOGLE_REDIRECT_URI
+        connect_url = None
+        if GOOGLE_REDIRECT_URI:
+            base_url = GOOGLE_REDIRECT_URI.rsplit('/', 1)[0]
+            connect_url = f"{base_url}/connect-calendar/{usuario_id}"
+
         # Preparar mensagem
-        mensagem = """⚠️ *Google Calendar Desconectado*
-
-Seus alertas de tarefas estão ativos, mas o Google Calendar não está conectado.
-
-Para continuar recebendo alertas:
-1. Acesse as configurações do app
-2. Reconecte sua conta do Google Calendar
-
-_Esta notificação é enviada 1x por semana enquanto o Calendar estiver desconectado._"""
+        if connect_url:
+            mensagem = (
+                f"⚠️ *Google Calendar Desconectado*\n\n"
+                f"Seus alertas de tarefas estão ativos, mas o Google Calendar não está conectado.\n\n"
+                f"👉 *Reconecte agora:*\n{connect_url}\n\n"
+                f"_Esta notificação é enviada 1x por semana enquanto o Calendar estiver desconectado._"
+            )
+        else:
+            mensagem = (
+                f"⚠️ *Google Calendar Desconectado*\n\n"
+                f"Seus alertas de tarefas estão ativos, mas o Google Calendar não está conectado.\n\n"
+                f"Para continuar recebendo alertas, reconecte sua conta Google nas configurações do app.\n\n"
+                f"_Esta notificação é enviada 1x por semana enquanto o Calendar estiver desconectado._"
+            )
 
         # Enviar notificação
         sucesso = enviar_notificacao_whatsapp(

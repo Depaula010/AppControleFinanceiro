@@ -213,19 +213,30 @@ class GoogleCalendarOAuthService:
 
             numero_whatsapp = user_result.numero_whatsapp
 
+            # Gerar link de reconexão
+            from app.config import GOOGLE_REDIRECT_URI
+            connect_url = None
+            if GOOGLE_REDIRECT_URI:
+                base_url = GOOGLE_REDIRECT_URI.rsplit('/', 1)[0]
+                connect_url = f"{base_url}/connect-calendar/{usuario_id}"
+
             # Preparar mensagem específica para token revogado
-            mensagem = """⚠️ *Google Calendar - Reconexão Necessária*
-
-Detectamos que sua conexão com o Google Calendar expirou ou foi revogada.
-
-🔴 *Seus alertas de tarefas estão PAUSADOS* até você reconectar.
-
-✅ *Como resolver:*
-1. Acesse as configurações do app
-2. Clique em "Conectar Google Calendar"
-3. Autorize novamente o acesso
-
-_Esta notificação é enviada 1x por semana enquanto a reconexão for necessária._"""
+            if connect_url:
+                mensagem = (
+                    f"⚠️ *Google Calendar - Reconexão Necessária*\n\n"
+                    f"Detectamos que sua conexão com o Google Calendar expirou ou foi revogada.\n\n"
+                    f"🔴 *Seus alertas de tarefas estão PAUSADOS* até você reconectar.\n\n"
+                    f"👉 *Reconecte agora:*\n{connect_url}\n\n"
+                    f"_Esta notificação é enviada 1x por semana enquanto a reconexão for necessária._"
+                )
+            else:
+                mensagem = (
+                    f"⚠️ *Google Calendar - Reconexão Necessária*\n\n"
+                    f"Detectamos que sua conexão com o Google Calendar expirou ou foi revogada.\n\n"
+                    f"🔴 *Seus alertas de tarefas estão PAUSADOS* até você reconectar.\n\n"
+                    f"✅ *Como resolver:* Acesse as configurações do app e clique em \"Conectar Google Calendar\".\n\n"
+                    f"_Esta notificação é enviada 1x por semana enquanto a reconexão for necessária._"
+                )
 
             # Enviar notificação
             sucesso = enviar_notificacao_whatsapp(

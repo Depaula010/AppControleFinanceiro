@@ -227,13 +227,21 @@ class UploadDriveIntent(BaseIntent):
             service = GoogleCalendarOAuthService.get_drive_service(self.usuario_id)
         except Exception as e:
             logger.error(f"[UploadDriveIntent] Erro ao obter serviço Drive: {e}")
+            from app.config import GOOGLE_REDIRECT_URI
+            auth_connect_url = None
+            if GOOGLE_REDIRECT_URI:
+                base_url = GOOGLE_REDIRECT_URI.rsplit('/', 1)[0]
+                auth_connect_url = f"{base_url}/connect-calendar/{self.usuario_id}"
             return {
                 "success": False,
                 "error": "drive_auth_error",
                 "message": (
                     "⚠️ *Erro de autenticação*\n\n"
-                    "Não foi possível acessar o Google Drive.\n"
-                    "Por favor, reconecte sua conta Google nas configurações."
+                    "Não foi possível acessar o Google Drive. Sua conexão pode ter expirado.\n\n"
+                    + (f"👉 *Reconecte agora:*\n{auth_connect_url}\n\n"
+                       f"Após reconectar, envie o arquivo novamente."
+                       if auth_connect_url else
+                       "Reconecte sua conta Google nas configurações do app.")
                 )
             }
 
