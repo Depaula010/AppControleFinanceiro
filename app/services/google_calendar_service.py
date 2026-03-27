@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, date, timedelta
 
 class GoogleCalendarService:
@@ -10,6 +11,20 @@ class GoogleCalendarService:
         """
         pass
     
+    @staticmethod
+    def strip_html(text):
+        """Remove tags HTML e normaliza espaços em branco."""
+        if not text:
+            return text
+        text = re.sub(r'<[^>]+>', ' ', text)
+        text = re.sub(r'&nbsp;', ' ', text)
+        text = re.sub(r'&amp;', '&', text)
+        text = re.sub(r'&lt;', '<', text)
+        text = re.sub(r'&gt;', '>', text)
+        text = re.sub(r'[ \t]+', ' ', text)
+        text = re.sub(r'\n{3,}', '\n\n', text)
+        return text.strip()
+
     @staticmethod
     def format_time(time_str):
         """
@@ -104,18 +119,12 @@ class GoogleCalendarService:
                     mensagem += f"   ⏰ {start_time}\n"
             
             if event['location']:
-                # Limitar localização a 50 caracteres
-                location = event['location'][:50]
-                if len(event['location']) > 50:
-                    location += "..."
-                mensagem += f"   📍 {location}\n"
-            
+                mensagem += f"   📍 {event['location']}\n"
+
             if event['description']:
-                # Limitar descrição a 50 caracteres
-                desc = event['description'][:50]
-                if len(event['description']) > 50:
-                    desc += "..."
-                mensagem += f"   📝 {desc}\n"
+                desc = GoogleCalendarService.strip_html(event['description'])
+                if desc:
+                    mensagem += f"   📝 {desc}\n"
             
             mensagem += "\n"
         
