@@ -301,7 +301,7 @@ class HorariosLivresIntent(BaseIntent):
     def execute(self) -> Dict[str, Any]:
         """Busca horários livres."""
         from app.services.free_time_finder_service import FreeTimeFinderService
-        from app.db import db_engine
+        from app import db_engine
 
         period_type = self.params["period_type"]
         duracao_minutos = self.params["duracao_minutos"]
