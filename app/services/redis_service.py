@@ -7,22 +7,42 @@ class RedisService:
     """Serviço centralizado para gerenciar o Redis"""
     
     def __init__(self):
+        self.redis_client = None
+        self._connect()
+
+    def _connect(self):
+        """Tenta (re)conectar ao Redis. Retorna True se bem-sucedido."""
         try:
-            self.redis_client = redis.from_url(
+            client = redis.from_url(
                 REDIS_URL,
                 decode_responses=True,  # Retorna strings em vez de bytes
-                socket_connect_timeout=5
+                socket_connect_timeout=2
             )
             # Testa a conexão
-            self.redis_client.ping()
+            client.ping()
+            self.redis_client = client
             print("[REDIS] ✅ Conexão estabelecida com sucesso!")
+            return True
         except Exception as e:
             print(f"[REDIS] ❌ ERRO ao conectar: {e}")
             self.redis_client = None
-    
+            return False
+
     def is_connected(self):
-        """Verifica se o Redis está conectado"""
-        return self.redis_client is not None
+        """
+        Verifica se o Redis está conectado.
+        Se não estiver, tenta reconectar automaticamente (lazy reconnect).
+        """
+        if self.redis_client is not None:
+            try:
+                self.redis_client.ping()
+                return True
+            except Exception:
+                print("[REDIS] ⚠️ Conexão perdida. Tentando reconectar...")
+                self.redis_client = None
+
+        # Lazy reconnect: tenta reconectar antes de falhar
+        return self._connect()
     
     def set_with_ttl(self, key, value, ttl_seconds=300):
         """Define um valor com tempo de expiração (padrão: 5 minutos)"""
