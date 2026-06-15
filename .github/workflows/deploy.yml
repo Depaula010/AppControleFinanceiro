@@ -9,6 +9,7 @@ on:
 
 env:
   DEPLOY_PATH: /opt/meu-secretario
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   deploy:
@@ -20,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🔐 Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.CONTABO_SSH_KEY }}
 
