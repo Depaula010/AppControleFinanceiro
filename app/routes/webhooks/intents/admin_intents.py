@@ -629,6 +629,34 @@ class ConsultaFaturaIntent(BaseIntent):
         return msg
 
 
+class ConsultaTodasContasIntent(BaseIntent):
+    """
+    Handler para intent 'Consulta Todas Contas'.
+
+    Lista TODAS as contas fixas do mês — pagas e pendentes.
+
+    Exemplo de mensagem:
+    - "todas as minhas contas do mês"
+    - "listar todas as contas"
+    - "quais contas tenho esse mês"
+    - "me mostra todas as contas"
+    """
+
+    def extract_params(self) -> Dict[str, Any]:
+        return {}
+
+    def validate(self) -> Optional[str]:
+        return None
+
+    def execute(self) -> Dict[str, Any]:
+        from app.services.fixed_bills_service import FixedBillsService
+        mensagem = FixedBillsService.list_all_bills_formatted(self.conn, self.usuario_id)
+        return {"mensagem_formatada": mensagem}
+
+    def format_response(self, data: Dict[str, Any]) -> str:
+        return data.get("mensagem_formatada", "❌ Erro ao buscar contas.")
+
+
 class MenuAjudaIntent(BaseIntent):
     """
     Handler para intent 'Menu de Ajuda'.
@@ -662,7 +690,8 @@ class MenuAjudaIntent(BaseIntent):
 • _"qual meu saldo?"_ - Consultar saldo das contas
 • _"quanto gastei hoje/semana/mês?"_ - Gastos por período
 • _"meus potes"_ - Ver limite e gasto dos potes
-• _"minhas contas fixas"_ - Listar contas recorrentes
+• _"todas as minhas contas"_ - Listar TODAS as contas recorrentes (pagas ou não)
+• _"minhas contas fixas"_ - Ver contas ainda não pagas no mês
 • _"paguei água"_ - Quitar conta fixa
 • _"paguei a internet e comprei pizza de 50"_ - Quitar múltiplas (híbrido)
 • _"transferir 100 da carteira para banco"_ - Transferência
@@ -713,6 +742,7 @@ __all__ = [
     'ListarContasIntent',
     'AjustarSaldoIntent',
     'ConsultaContasFixasIntent',
+    'ConsultaTodasContasIntent',
     'ConsultaFaturaIntent',
     'MenuAjudaIntent',
 ]

@@ -338,6 +338,159 @@ class FixedBillsService:
         return resposta
     
     @staticmethod
+    def get_all_scheduled_bills(conn, usuario_id):
+        """
+        Busca TODOS os agendamentos ativos do usuário, sem filtro de mês.
+        Retorna o catálogo completo de contas recorrentes (mensal, semanal,
+        quinzenal, anual, etc.).
+        """
+        sql = text("""
+            SELECT
+                a.id,
+                a.descricao,
+                a.valor_previsto,
+                a.dia_execucao,
+                a.mes_execucao,
+                a.periodicidade,
+                a.tipo_agendamento,
+                s.nome_sub as categoria,
+                c.nome_conta,
+                c.tipo_conta,
+                g.nome_grupo
+            FROM Agendamentos a
+            JOIN SubCategoria s ON a.subcategoria_id = s.id
+            JOIN MacroCategoria m ON s.macro_id = m.id
+            JOIN GrupoCategoria g ON m.grupo_id = g.id
+            JOIN Contas c ON a.conta_id = c.id
+            WHERE a.usuario_id = :uid
+              AND a.ativo = TRUE
+              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+            ORDER BY
+                CASE a.periodicidade
+                    WHEN 'SEMANAL'    THEN 1
+                    WHEN 'QUINZENAL'  THEN 2
+                    WHEN 'MENSAL'     THEN 3
+                    WHEN 'ANUAL'      THEN 4
+                    ELSE 5
+                END,
+                a.dia_execucao ASC
+        """)
+
+        return conn.execute(sql, {"uid": usuario_id}).fetchall()
+
+    @staticmethod
+    def list_all_bills_formatted(conn, usuario_id):
+        """
+        Catálogo completo de todas as contas recorrentes ativas do usuário,
+        agrupadas por periodicidade. Independe do mês corrente ou status de pagamento.
+        """
+        MESES_PT = {
+            1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
+            5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
+            9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
+        }
+        LABEL_PERIODICIDADE = {
+            'SEMANAL':   '🔄 SEMANAL',
+            'QUINZENAL': '🔄 QUINZENAL',
+            'MENSAL':    '📅 MENSAL',
+            'ANUAL':     '📆 ANUAL',
+        }
+
+        todas = FixedBillsService.get_all_scheduled_bills(conn, usuario_id)
+
+        if not todas:
+            return "📋 Você não tem contas recorrentes cadastradas."
+
+        # Agrupar por periodicidade → tipo (despesa/cartão/receita)
+        grupos = {}  # periodicidade → {'despesas': [], 'cartao': [], 'receitas': []}
+
+        for row in todas:
+            (agend_id, descricao, valor_previsto, dia_execucao, mes_execucao,
+             periodicidade, tipo_agend, categoria, conta_nome, tipo_conta, nome_grupo) = row
+
+            valor_float = float(valor_previsto or 0)
+            period = periodicidade or 'MENSAL'
+
+            # Montar descrição do vencimento
+            if period == 'SEMANAL':
+                vencimento = f"toda semana (dia {dia_execucao})"
+            elif period == 'QUINZENAL':
+                vencimento = f"quinzenal (dia {dia_execucao})"
+            elif period == 'ANUAL':
+                mes_nome = MESES_PT.get(mes_execucao, str(mes_execucao)) if mes_execucao else '?'
+                vencimento = f"{mes_nome}, dia {dia_execucao}"
+            else:
+                vencimento = f"dia {dia_execucao}"
+
+            item = {
+                'descricao': descricao,
+                'valor': valor_float,
+                'categoria': categoria,
+                'vencimento': vencimento,
+                'tipo_conta': tipo_conta,
+                'nome_grupo': nome_grupo,
+            }
+
+            if period not in grupos:
+                grupos[period] = {'despesas': [], 'cartao': [], 'receitas': []}
+
+            if nome_grupo == 'Renda':
+                grupos[period]['receitas'].append(item)
+            elif tipo_conta == 'Cartão de Crédito':
+                grupos[period]['cartao'].append(item)
+            else:
+                grupos[period]['despesas'].append(item)
+
+        resposta = "📋 *TODAS AS SUAS CONTAS RECORRENTES* 📋\n\n"
+
+        total_mensal_estimado = 0.0
+        ORDER = ['SEMANAL', 'QUINZENAL', 'MENSAL', 'ANUAL']
+
+        for period in ORDER:
+            if period not in grupos:
+                continue
+
+            label = LABEL_PERIODICIDADE.get(period, period)
+            g = grupos[period]
+            todas_itens = g['despesas'] + g['cartao'] + g['receitas']
+            if not todas_itens:
+                continue
+
+            resposta += f"*{label}*\n"
+            resposta += "─────────────────────\n"
+
+            if g['despesas']:
+                resposta += "💸 *Despesas:*\n"
+                for item in g['despesas']:
+                    resposta += f"  • {item['descricao']}\n"
+                    resposta += f"    {formatar_moeda(item['valor'])} · {item['vencimento']}\n"
+                    if period == 'MENSAL':
+                        total_mensal_estimado += item['valor']
+                resposta += "\n"
+
+            if g['cartao']:
+                resposta += "💳 *Cartão de Crédito:*\n"
+                for item in g['cartao']:
+                    resposta += f"  • {item['descricao']}\n"
+                    resposta += f"    {formatar_moeda(item['valor'])} · {item['vencimento']}\n"
+                    if period == 'MENSAL':
+                        total_mensal_estimado += item['valor']
+                resposta += "\n"
+
+            if g['receitas']:
+                resposta += "💰 *Receitas:*\n"
+                for item in g['receitas']:
+                    resposta += f"  • {item['descricao']}\n"
+                    resposta += f"    {formatar_moeda(item['valor'])} · {item['vencimento']}\n"
+                resposta += "\n"
+
+        if total_mensal_estimado:
+            resposta += "━━━━━━━━━━━━━━━━━━━━\n"
+            resposta += f"💸 Total despesas mensais: {formatar_moeda(total_mensal_estimado)}"
+
+        return resposta
+
+    @staticmethod
     def mark_bill_as_paid_response(descricao, valor_pago, categoria):
         """Formata mensagem de confirmação de pagamento"""
         return (

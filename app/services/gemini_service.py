@@ -206,7 +206,8 @@ def get_message_intent(texto_msg, usuario_id=None):
     - "Consulta Valor Fatura" → Pergunta VALOR da fatura: "quanto está a fatura?", "valor da fatura do nubank?"
     - "Consulta Categoria Específica" → Gasto em categoria: "quanto gastei com uber?", "gastos de supermercado"
     - "Consulta Potes" → Status dos potes de gastos
-    - "Consulta Contas Fixas" → Contas fixas pendentes
+    - "Consulta Contas Fixas" → Contas fixas pendentes (só as não pagas)
+    - "Consulta Todas Contas" → TODAS as contas do mês, pagas e pendentes: "todas as minhas contas", "listar todas as contas", "quais contas tenho esse mês", "me mostra todas as contas"
     - "Consulta Reserva" → Reserva de emergência (6 meses)
     - "Consulta Detalhes Reserva" → Ver QUAIS contas estão incluídas na reserva: "detalhes da reserva", "quais contas na reserva", "mostrar contas da reserva", "listar reserva"
     - "Listar Contas" → Quais contas cadastradas
@@ -286,6 +287,11 @@ def get_message_intent(texto_msg, usuario_id=None):
     - "tenho conta que vence hoje?" → {{"intent": "Vencimentos Hoje"}}
     - "o que vence amanhã?" → {{"intent": "Vencimentos Amanhã"}}
     - "contas que vencem essa semana" → {{"intent": "Vencimentos Essa Semana"}}
+    - "todas as minhas contas" → {{"intent": "Consulta Todas Contas"}}
+    - "quais contas tenho esse mês" → {{"intent": "Consulta Todas Contas"}}
+    - "listar todas as contas do mês" → {{"intent": "Consulta Todas Contas"}}
+    - "me mostra todas as contas" → {{"intent": "Consulta Todas Contas"}}
+    - "minhas contas desse mês" → {{"intent": "Consulta Todas Contas"}}
 
     ⚠️ VENCIMENTOS: DIFERENCIE PASSADO DE PRESENTE/FUTURO:
 

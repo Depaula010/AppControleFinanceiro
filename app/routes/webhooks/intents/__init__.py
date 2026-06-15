@@ -82,6 +82,7 @@ from .admin_intents import (
     ListarContasIntent,
     AjustarSaldoIntent,
     ConsultaContasFixasIntent,
+    ConsultaTodasContasIntent,
     ConsultaFaturaIntent,
     MenuAjudaIntent,
 )
@@ -108,6 +109,7 @@ INTENT_REGISTRY: Dict[str, Type[BaseIntent]] = {
     'Consulta Período': ConsultaPeriodoIntent,
     'Consulta Categoria Específica': ConsultaCategoriaIntent,
     'Consulta Contas Fixas': ConsultaContasFixasIntent,
+    'Consulta Todas Contas': ConsultaTodasContasIntent,
     'Consulta Valor Fatura': ConsultaFaturaIntent,
     'Listar Contas': ListarContasIntent,
     'Ajustar Saldo Inicial': AjustarSaldoIntent,
