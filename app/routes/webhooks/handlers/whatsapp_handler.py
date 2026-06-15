@@ -956,6 +956,19 @@ class WhatsAppHandler:
                     )
                     return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
 
+                # ===== INTENCAO: Consulta Todas as Contas Recorrentes =====
+                elif intent == 'Consulta Todas Contas':
+                    from app.routes.webhooks.intents import route_intent
+
+                    result = route_intent(
+                        intent_name='Consulta Todas Contas',
+                        usuario_id=usuario_id,
+                        mensagem=texto_msg,
+                        conn=conn,
+                        numero_whatsapp=numero_limpo
+                    )
+                    return jsonify({"status": "sucesso", "resposta": result["message"]}), 200
+
                 # ===== INTENCAO: Vencimentos Hoje =====
                 elif intent == 'Vencimentos Hoje':
                     from app.routes.webhooks.intents import route_intent
