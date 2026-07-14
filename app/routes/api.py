@@ -343,7 +343,7 @@ TIPOS_CONTA_VALIDOS = [
 ]
 
 # Tipos de agendamento e periodicidades válidos
-TIPOS_AGENDAMENTO = ['FIXO', 'LEMBRETE_VARIAVEL']
+TIPOS_AGENDAMENTO = ['FIXO', 'LEMBRETE_VARIAVEL', 'PARCELADO']
 PERIODICIDADES = ['DIARIA', 'SEMANAL', 'QUINZENAL', 'MENSAL', 'ANUAL']
 
 
@@ -1879,11 +1879,11 @@ def _create_bill_impl(user_id):
         except (TypeError, ValueError):
             return jsonify({"status": "error", "message": "Dia de execução deve ser entre 1 e 31"}), 400
 
-        # valor_previsto obrigatório para FIXO
+        # valor_previsto obrigatório para FIXO e PARCELADO (valor da parcela)
         valor_previsto = data.get('valor_previsto')
-        if tipo_agendamento == 'FIXO':
+        if tipo_agendamento in ('FIXO', 'PARCELADO'):
             if valor_previsto is None:
-                return jsonify({"status": "error", "message": "Valor previsto é obrigatório para contas fixas"}), 400
+                return jsonify({"status": "error", "message": "Valor previsto é obrigatório para contas fixas ou parceladas"}), 400
             try:
                 valor_previsto = float(valor_previsto)
                 if valor_previsto <= 0:
@@ -1895,6 +1895,17 @@ def _create_bill_impl(user_id):
                 valor_previsto = float(valor_previsto)
             except (TypeError, ValueError):
                 valor_previsto = None
+
+        # total_parcelas obrigatório para PARCELADO
+        total_parcelas = None
+        if tipo_agendamento == 'PARCELADO':
+            total_parcelas = data.get('total_parcelas')
+            try:
+                total_parcelas = int(total_parcelas)
+                if total_parcelas < 2:
+                    raise ValueError()
+            except (TypeError, ValueError):
+                return jsonify({"status": "error", "message": "Número de parcelas deve ser um inteiro maior ou igual a 2"}), 400
 
         # mes_execucao só válido para ANUAL
         mes_execucao = data.get('mes_execucao')
@@ -1933,13 +1944,13 @@ def _create_bill_impl(user_id):
                     valor_previsto, tipo_agendamento, periodicidade,
                     data_inicio, dia_execucao, mes_execucao,
                     notificar_antes_dias, ativo, parcelas_executadas,
-                    incluir_na_reserva
+                    incluir_na_reserva, total_parcelas
                 ) VALUES (
                     :uid, :conta_id, :sub_id, :descricao,
                     :valor_previsto, :tipo, :periodicidade,
                     :data_inicio, :dia_execucao, :mes_execucao,
                     :notificar_antes_dias, true, 0,
-                    :incluir_na_reserva
+                    :incluir_na_reserva, :total_parcelas
                 ) RETURNING id
             """)
             result = conn.execute(insert_sql, {
@@ -1954,7 +1965,8 @@ def _create_bill_impl(user_id):
                 "dia_execucao": dia_execucao,
                 "mes_execucao": mes_execucao,
                 "notificar_antes_dias": notificar_antes_dias,
-                "incluir_na_reserva": incluir_na_reserva
+                "incluir_na_reserva": incluir_na_reserva,
+                "total_parcelas": total_parcelas
             })
             new_id = result.fetchone()[0]
             conn.commit()
@@ -1964,7 +1976,8 @@ def _create_bill_impl(user_id):
                 SELECT a.id, a.descricao, a.valor_previsto, a.tipo_agendamento,
                        a.periodicidade, a.dia_execucao, a.mes_execucao,
                        a.notificar_antes_dias, a.subcategoria_id, s.nome_sub AS subcategoria_nome,
-                       a.conta_id, c.nome_conta AS conta_nome, a.data_inicio, a.incluir_na_reserva
+                       a.conta_id, c.nome_conta AS conta_nome, a.data_inicio, a.incluir_na_reserva,
+                       a.total_parcelas, a.parcelas_executadas
                 FROM Agendamentos a
                 LEFT JOIN SubCategoria s ON a.subcategoria_id = s.id
                 LEFT JOIN Contas c ON a.conta_id = c.id
@@ -1985,7 +1998,9 @@ def _create_bill_impl(user_id):
                 "conta_id": row.conta_id,
                 "conta_nome": row.conta_nome,
                 "data_inicio": row.data_inicio.isoformat() if row.data_inicio else None,
-                "incluir_na_reserva": row.incluir_na_reserva
+                "incluir_na_reserva": row.incluir_na_reserva,
+                "total_parcelas": row.total_parcelas,
+                "parcelas_executadas": row.parcelas_executadas
             }
             return jsonify({"status": "success", "data": bill}), 201
 
@@ -2098,6 +2113,23 @@ def _update_bill_impl(user_id, bill_id):
                 updates.append("incluir_na_reserva = :incluir_na_reserva")
                 params['incluir_na_reserva'] = bool(data['incluir_na_reserva'])
 
+            if 'total_parcelas' in data:
+                if data['total_parcelas'] is None:
+                    updates.append("total_parcelas = :total_parcelas")
+                    params['total_parcelas'] = None
+                else:
+                    try:
+                        tp = int(data['total_parcelas'])
+                        if tp < 2:
+                            raise ValueError()
+                        updates.append("total_parcelas = :total_parcelas")
+                        params['total_parcelas'] = tp
+                    except (TypeError, ValueError):
+                        return jsonify({"status": "error", "message": "Número de parcelas deve ser um inteiro maior ou igual a 2"}), 400
+
+            if params.get('tipo_agendamento') == 'PARCELADO' and 'total_parcelas' not in data:
+                return jsonify({"status": "error", "message": "Número de parcelas é obrigatório para contas parceladas"}), 400
+
             if not updates:
                 return jsonify({"status": "error", "message": "Nenhum campo para atualizar"}), 400
 
@@ -2110,7 +2142,8 @@ def _update_bill_impl(user_id, bill_id):
                 SELECT a.id, a.descricao, a.valor_previsto, a.tipo_agendamento,
                        a.periodicidade, a.dia_execucao, a.mes_execucao,
                        a.notificar_antes_dias, a.subcategoria_id, s.nome_sub AS subcategoria_nome,
-                       a.conta_id, c.nome_conta AS conta_nome, a.data_inicio, a.incluir_na_reserva
+                       a.conta_id, c.nome_conta AS conta_nome, a.data_inicio, a.incluir_na_reserva,
+                       a.total_parcelas, a.parcelas_executadas
                 FROM Agendamentos a
                 LEFT JOIN SubCategoria s ON a.subcategoria_id = s.id
                 LEFT JOIN Contas c ON a.conta_id = c.id
@@ -2131,7 +2164,9 @@ def _update_bill_impl(user_id, bill_id):
                 "conta_id": row.conta_id,
                 "conta_nome": row.conta_nome,
                 "data_inicio": row.data_inicio.isoformat() if row.data_inicio else None,
-                "incluir_na_reserva": row.incluir_na_reserva
+                "incluir_na_reserva": row.incluir_na_reserva,
+                "total_parcelas": row.total_parcelas,
+                "parcelas_executadas": row.parcelas_executadas
             }
             return jsonify({"status": "success", "data": bill}), 200
 

@@ -16,7 +16,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Valores esperados (não importados do app - testes isolados de infra)
-TIPOS_AGENDAMENTO_ESPERADOS = ['FIXO', 'LEMBRETE_VARIAVEL']
+TIPOS_AGENDAMENTO_ESPERADOS = ['FIXO', 'LEMBRETE_VARIAVEL', 'PARCELADO']
 PERIODICIDADES_ESPERADAS = ['DIARIA', 'SEMANAL', 'QUINZENAL', 'MENSAL', 'ANUAL']
 
 
@@ -27,7 +27,8 @@ class TestBillConstants:
         """TIPOS_AGENDAMENTO deve ter exatamente os tipos corretos."""
         assert 'FIXO' in TIPOS_AGENDAMENTO_ESPERADOS
         assert 'LEMBRETE_VARIAVEL' in TIPOS_AGENDAMENTO_ESPERADOS
-        assert len(TIPOS_AGENDAMENTO_ESPERADOS) == 2
+        assert 'PARCELADO' in TIPOS_AGENDAMENTO_ESPERADOS
+        assert len(TIPOS_AGENDAMENTO_ESPERADOS) == 3
 
     def test_periodicidades_esperadas(self):
         """PERIODICIDADES deve ter todas as periodicidades corretas."""
@@ -79,14 +80,32 @@ class TestCreateBillValidations:
         requer_valor = (tipo == 'FIXO' and valor is None)
         assert requer_valor is False
 
+    def test_tipo_parcelado_requer_valor_previsto(self):
+        """valor_previsto (valor da parcela) é obrigatório se tipo_agendamento = PARCELADO."""
+        tipo = 'PARCELADO'
+        valor = None
+        requer_valor = (tipo in ('FIXO', 'PARCELADO') and valor is None)
+        assert requer_valor is True
+
+    def test_tipo_parcelado_requer_total_parcelas(self):
+        """total_parcelas é obrigatório e deve ser um inteiro >= 2 para PARCELADO."""
+        validos = [2, 3, 12, 24]
+        invalidos = [0, 1, -1, None]
+        for tp in validos:
+            assert tp is not None and tp >= 2
+        for tp in invalidos:
+            invalido = tp is None or tp < 2
+            assert invalido
+
     def test_tipo_valido(self):
         """Tipos de agendamento válidos devem estar na lista."""
         assert 'FIXO' in TIPOS_AGENDAMENTO_ESPERADOS
         assert 'LEMBRETE_VARIAVEL' in TIPOS_AGENDAMENTO_ESPERADOS
+        assert 'PARCELADO' in TIPOS_AGENDAMENTO_ESPERADOS
 
     def test_tipo_invalido_nao_permitido(self):
         """Tipos inválidos devem ser rejeitados."""
-        invalidos = ['fixo', 'PARCELADO', 'INVALIDO', '']
+        invalidos = ['fixo', 'parcelado', 'INVALIDO', '']
         for tipo in invalidos:
             assert tipo not in TIPOS_AGENDAMENTO_ESPERADOS
 
@@ -163,14 +182,28 @@ class TestUpdateBillValidations:
         campos = [
             'descricao', 'tipo_agendamento', 'periodicidade',
             'dia_execucao', 'mes_execucao', 'valor_previsto',
-            'subcategoria_id', 'conta_id', 'notificar_antes_dias', 'data_inicio'
+            'subcategoria_id', 'conta_id', 'notificar_antes_dias', 'data_inicio',
+            'incluir_na_reserva', 'total_parcelas'
         ]
-        assert len(campos) == 10
+        assert len(campos) == 12
 
     def test_tipo_invalido_nao_permitido_no_update(self):
         """Update deve rejeitar tipos inválidos."""
         assert 'TIPO_INEXISTENTE' not in TIPOS_AGENDAMENTO_ESPERADOS
         assert 'parcelado' not in TIPOS_AGENDAMENTO_ESPERADOS
+
+    def test_tipo_parcelado_permitido_no_update(self):
+        """PARCELADO deve ser aceito como tipo válido no update."""
+        assert 'PARCELADO' in TIPOS_AGENDAMENTO_ESPERADOS
+
+    def test_update_parcelado_requer_total_parcelas(self):
+        """Ao mudar tipo_agendamento para PARCELADO no update, total_parcelas deve ser enviado."""
+        data_sem_total_parcelas = {'tipo_agendamento': 'PARCELADO'}
+        exige_total_parcelas = (
+            data_sem_total_parcelas.get('tipo_agendamento') == 'PARCELADO'
+            and 'total_parcelas' not in data_sem_total_parcelas
+        )
+        assert exige_total_parcelas is True
 
     def test_periodicidade_invalida_nao_permitida_no_update(self):
         """Update deve rejeitar periodicidades inválidas."""
