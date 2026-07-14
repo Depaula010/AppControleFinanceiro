@@ -364,7 +364,7 @@ class FixedBillsService:
             JOIN Contas c ON a.conta_id = c.id
             WHERE a.usuario_id = :uid
               AND a.ativo = TRUE
-              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL', 'PARCELADO')
             ORDER BY
                 CASE a.periodicidade
                     WHEN 'SEMANAL'    THEN 1
@@ -443,6 +443,16 @@ class FixedBillsService:
 
         resposta = "📋 *TODAS AS SUAS CONTAS RECORRENTES* 📋\n\n"
 
+        # Mesmo fator de normalização usado em /api/bills/summary (dashboard),
+        # para que o total aqui bata com o card "Gastos Mensais" do site.
+        # ANUAL fica de fora (contabilizada separadamente, não é gasto mensal).
+        FATOR_MENSAL = {
+            'MENSAL': 1.0,
+            'SEMANAL': 4.33,
+            'QUINZENAL': 2.16,
+            'DIARIA': 30.0,
+        }
+
         total_mensal_estimado = 0.0
         ORDER = ['SEMANAL', 'QUINZENAL', 'MENSAL', 'ANUAL']
 
@@ -456,6 +466,8 @@ class FixedBillsService:
             if not todas_itens:
                 continue
 
+            fator = FATOR_MENSAL.get(period)
+
             resposta += f"*{label}*\n"
             resposta += "─────────────────────\n"
 
@@ -464,8 +476,8 @@ class FixedBillsService:
                 for item in g['despesas']:
                     resposta += f"  • {item['descricao']}\n"
                     resposta += f"    {formatar_moeda(item['valor'])} · {item['vencimento']}\n"
-                    if period == 'MENSAL':
-                        total_mensal_estimado += item['valor']
+                    if fator is not None:
+                        total_mensal_estimado += item['valor'] * fator
                 resposta += "\n"
 
             if g['cartao']:
@@ -473,8 +485,8 @@ class FixedBillsService:
                 for item in g['cartao']:
                     resposta += f"  • {item['descricao']}\n"
                     resposta += f"    {formatar_moeda(item['valor'])} · {item['vencimento']}\n"
-                    if period == 'MENSAL':
-                        total_mensal_estimado += item['valor']
+                    if fator is not None:
+                        total_mensal_estimado += item['valor'] * fator
                 resposta += "\n"
 
             if g['receitas']:
@@ -486,7 +498,8 @@ class FixedBillsService:
 
         if total_mensal_estimado:
             resposta += "━━━━━━━━━━━━━━━━━━━━\n"
-            resposta += f"💸 Total despesas mensais: {formatar_moeda(total_mensal_estimado)}"
+            resposta += f"💸 Total despesas mensais: {formatar_moeda(total_mensal_estimado)}\n"
+            resposta += "_(semanais e quinzenais convertidas para média mensal; anuais ficam de fora)_"
 
         return resposta
 
