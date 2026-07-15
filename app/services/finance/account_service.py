@@ -148,9 +148,10 @@ def get_saldo_contas(
                 c.tipo_conta,
                 c.saldo_inicial + COALESCE(SUM(t.valor), 0) as saldo
             FROM Contas c
-            LEFT JOIN Transacoes t ON c.id = t.conta_id
+            LEFT JOIN Transacoes t ON c.id = t.conta_id AND t.consolidada = true
             WHERE c.usuario_id = :uid
                 AND c.id = :cid
+                AND c.ativa = true
             GROUP BY c.id, c.nome_conta, c.tipo_conta, c.saldo_inicial
         """)
         result = conn.execute(sql, {"uid": usuario_id, "cid": conta_id}).fetchall()
@@ -162,8 +163,9 @@ def get_saldo_contas(
                 c.tipo_conta,
                 c.saldo_inicial + COALESCE(SUM(t.valor), 0) as saldo
             FROM Contas c
-            LEFT JOIN Transacoes t ON c.id = t.conta_id
+            LEFT JOIN Transacoes t ON c.id = t.conta_id AND t.consolidada = true
             WHERE c.usuario_id = :uid
+                AND c.ativa = true
             GROUP BY c.id, c.nome_conta, c.tipo_conta, c.saldo_inicial
             ORDER BY c.tipo_conta, c.nome_conta
         """)

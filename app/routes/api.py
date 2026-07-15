@@ -134,7 +134,7 @@ def _get_dashboard_summary_impl(user_id):
                 tipo = row.tipo_transacao
                 total = abs(float(row.total or 0))
 
-                if tipo == 'Receita':
+                if tipo == 'Renda':
                     receitas_mes = total
                 elif tipo == 'Despesa':
                     despesas_mes = total
@@ -1198,7 +1198,8 @@ def get_dashboard_alerts(user_id):
         with db_engine.connect() as conn:
             rows = conn.execute(text("""
                 SELECT a.id, a.descricao, a.valor_previsto, a.tipo_agendamento,
-                       a.dia_execucao, a.notificar_antes_dias,
+                       a.periodicidade, a.dia_execucao, a.mes_execucao, a.data_inicio,
+                       a.notificar_antes_dias,
                        sc.nome_sub AS subcategoria
                 FROM agendamentos a
                 LEFT JOIN SubCategoria sc ON a.subcategoria_id = sc.id
@@ -1210,24 +1211,49 @@ def get_dashboard_alerts(user_id):
         alerts = []
         for row in rows:
             r = dict(row._mapping)
+            periodicidade = r.get('periodicidade') or 'MENSAL'
             dia = r.get('dia_execucao')
-            if not dia:
-                continue
 
-            # Calcular próxima data de vencimento (este mês ou próximo)
+            # Calcular próxima data de vencimento de acordo com a periodicidade
             try:
-                dias_no_mes = cal_module.monthrange(hoje.year, hoje.month)[1]
-                dia_seguro = min(dia, dias_no_mes)
-                due_this_month = date(hoje.year, hoje.month, dia_seguro)
+                if periodicidade == 'ANUAL':
+                    mes = r.get('mes_execucao')
+                    if not dia or not mes:
+                        continue
+                    dias_no_mes = cal_module.monthrange(hoje.year, mes)[1]
+                    due_date = date(hoje.year, mes, min(dia, dias_no_mes))
+                    if due_date < hoje:
+                        dias_prox_ano = cal_module.monthrange(hoje.year + 1, mes)[1]
+                        due_date = date(hoje.year + 1, mes, min(dia, dias_prox_ano))
 
-                if due_this_month >= hoje:
-                    due_date = due_this_month
-                else:
-                    # Próximo mês
-                    next_month = (hoje.month % 12) + 1
-                    next_year = hoje.year + (1 if hoje.month == 12 else 0)
-                    dias_prox_mes = cal_module.monthrange(next_year, next_month)[1]
-                    due_date = date(next_year, next_month, min(dia, dias_prox_mes))
+                elif periodicidade in ('SEMANAL', 'QUINZENAL', 'DIARIA'):
+                    # Sem semântica de "dia do mês" nessas periodicidades: a próxima
+                    # ocorrência é calculada a partir da data_inicio + ciclos do intervalo.
+                    data_inicio = r.get('data_inicio')
+                    if not data_inicio:
+                        continue
+                    intervalo_dias = {'SEMANAL': 7, 'QUINZENAL': 14, 'DIARIA': 1}[periodicidade]
+                    due_date = data_inicio
+                    if due_date < hoje:
+                        dias_passados = (hoje - due_date).days
+                        ciclos = -(-dias_passados // intervalo_dias)  # arredonda pra cima
+                        due_date = due_date + timedelta(days=ciclos * intervalo_dias)
+
+                else:  # MENSAL (padrão)
+                    if not dia:
+                        continue
+                    dias_no_mes = cal_module.monthrange(hoje.year, hoje.month)[1]
+                    dia_seguro = min(dia, dias_no_mes)
+                    due_this_month = date(hoje.year, hoje.month, dia_seguro)
+
+                    if due_this_month >= hoje:
+                        due_date = due_this_month
+                    else:
+                        # Próximo mês
+                        next_month = (hoje.month % 12) + 1
+                        next_year = hoje.year + (1 if hoje.month == 12 else 0)
+                        dias_prox_mes = cal_module.monthrange(next_year, next_month)[1]
+                        due_date = date(next_year, next_month, min(dia, dias_prox_mes))
             except ValueError:
                 continue
 
