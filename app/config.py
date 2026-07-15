@@ -23,6 +23,10 @@ WEBHOOK_SIGNATURE_KEY = os.environ.get('WEBHOOK_SIGNATURE_KEY', API_SECRET_KEY)
 
 # Integração com Bot WhatsApp (API v1 - SaaS)
 BOT_WHATSAPP_URL = os.environ.get('BOT_WHATSAPP_URL', 'https://bot-appfinanceiro-whatsapp.onrender.com')
+# BOT_SESSION_NAME identifica a sessão pelo nome estável (não muda quando a sessão é recriada no bot).
+# O session_id (UUID) é resolvido em runtime via API e cacheado - ver notification_service.py
+BOT_SESSION_NAME = os.environ.get('BOT_SESSION_NAME', 'sessao-principal')
+# BOT_SESSION_ID: override manual opcional. Deixe vazio para resolver automaticamente por BOT_SESSION_NAME.
 BOT_SESSION_ID = os.environ.get('BOT_SESSION_ID', '')
 BOT_API_KEY = os.environ.get('BOT_API_KEY', '')
 
