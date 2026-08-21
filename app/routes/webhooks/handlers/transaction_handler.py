@@ -8,6 +8,7 @@ Rotas:
 - /webhook-sms-payment: Pagamento via SMS
 """
 
+import unicodedata
 from typing import Tuple, Any
 from flask import request, jsonify
 from werkzeug.exceptions import BadRequest
@@ -216,8 +217,8 @@ class TransactionHandler:
             # Normalizar tipo_pagamento
             if tipo_pagamento_raw:
                 tipo_pagamento = sanitize_input(tipo_pagamento_raw, max_length=20).strip().lower()
-                # Normalizar variacoes comuns
-                tipo_pagamento = tipo_pagamento.replace('e', 'e').replace('i', 'i')
+                # Remover acentos (ex: "credito" -> "credito", "debito" -> "debito")
+                tipo_pagamento = unicodedata.normalize('NFKD', tipo_pagamento).encode('ascii', 'ignore').decode('ascii')
             else:
                 tipo_pagamento = None
 
