@@ -16,12 +16,6 @@ public sealed class AccountsModule : IFeatureModule
 {
     private static readonly string[] BasePaths = ["/api/accounts", "/api/contas"];
 
-    /// <summary>Equivale ao <c>&lt;int:id&gt;</c> do Flask: só dígitos (<c>-1</c>, <c>1.5</c> e <c>abc</c> não casam).</summary>
-    private const string NumericId = "{id:regex(^[0-9]+$)}";
-
-    /// <summary>O contrário: qualquer segmento que não seja só dígitos cai no 404 HTML do Flask, com qualquer método.</summary>
-    private const string NonNumericId = "{id:regex(^(?![0-9]+$)[^/]+$)}";
-
     public void AddServices(IServiceCollection services)
     {
         services.AddScoped<IAccountRepository, AccountRepository>();
@@ -37,11 +31,13 @@ public sealed class AccountsModule : IFeatureModule
         {
             app.MapGet(basePath, ListAsync).RequireUser();
             app.MapPost(basePath, CreateAsync).RequireUser();
-            app.MapPut($"{basePath}/{NumericId}", UpdateAsync).RequireUser();
-            app.MapDelete($"{basePath}/{NumericId}", DeleteAsync).RequireUser();
+            // O conversor <int:id> do Flask só casa dígitos: com outro valor a rota nem existe e o 404 vem antes da
+            // autenticação (AC-002-83). O filtro de id vem antes do RequireUser por isso.
+            app.MapPut($"{basePath}/{{id}}", UpdateAsync).AddEndpointFilter<NumericIdFilter>().RequireUser();
+            app.MapDelete($"{basePath}/{{id}}", DeleteAsync).AddEndpointFilter<NumericIdFilter>().RequireUser();
 
-            // O roteamento do Flask responde 404 antes da autenticação (AC-002-83).
-            app.Map($"{basePath}/{NonNumericId}", FlaskNotFound.WriteAsync);
+            // Os outros métodos em /{id}: id numérico ⇒ 405 (a rota existe para PUT e DELETE); senão 404 HTML.
+            app.Map($"{basePath}/{{id}}", OtherMethods);
         }
     }
 
@@ -127,8 +123,13 @@ public sealed class AccountsModule : IFeatureModule
         }
     }
 
+    private static IResult OtherMethods(string id) =>
+        NumericIdFilter.IsNumeric(id)
+            ? Results.StatusCode(StatusCodes.Status405MethodNotAllowed)
+            : new FlaskNotFoundResult();
+
     /// <summary>
-    /// A rota só deixa passar dígitos. Um número que não cabe em <see cref="int"/> nunca é o id de uma conta:
+    /// O filtro só deixa passar dígitos. Um número que não cabe em <see cref="int"/> nunca é o id de uma conta:
     /// vira 0 (a identidade começa em 1), e o resultado é "conta não encontrada" como no Postgres (RN-002-18).
     /// </summary>
     private static int ParseId(string id) =>
@@ -137,4 +138,21 @@ public sealed class AccountsModule : IFeatureModule
     private static IResult BadRequest(string message) => AccountsResponses.Error(message, StatusCodes.Status400BadRequest);
 
     private static IResult NotFound() => AccountsResponses.Error(AccountsMessages.NotFound, StatusCodes.Status404NotFound);
+}
+
+/// <summary>Equivale ao <c>&lt;int:id&gt;</c> do Flask: só dígitos ASCII (<c>-1</c>, <c>1.5</c> e <c>abc</c> não casam).</summary>
+internal sealed class NumericIdFilter : IEndpointFilter
+{
+    public static bool IsNumeric(string? value) => !string.IsNullOrEmpty(value) && value.All(char.IsAsciiDigit);
+
+    public ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next) =>
+        IsNumeric(context.HttpContext.Request.RouteValues["id"] as string)
+            ? next(context)
+            : ValueTask.FromResult<object?>(new FlaskNotFoundResult());
+}
+
+/// <summary>O 404 em HTML do Flask como <see cref="IResult"/>.</summary>
+internal sealed class FlaskNotFoundResult : IResult
+{
+    public Task ExecuteAsync(HttpContext httpContext) => FlaskNotFound.WriteAsync(httpContext);
 }
