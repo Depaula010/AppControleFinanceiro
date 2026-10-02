@@ -32,6 +32,12 @@ public sealed class AppSettings
     public string LogDirectory { get; init; } = "logs";
     public bool LogToFile { get; init; } = true;
 
+    /// <summary>
+    /// <c>API_KEYS_ROUTES_ENABLED</c>: só com <c>true</c> as rotas <c>/api-keys/*</c> existem (desvio 052).
+    /// Padrão false: desligadas respondem 404.
+    /// </summary>
+    public bool ApiKeysRoutesEnabled { get; init; }
+
     /// <param name="get">Leitor de variáveis (ex.: <c>key =&gt; configuration[key]</c>).</param>
     public static AppSettings Load(Func<string, string?> get)
     {
@@ -128,6 +134,7 @@ public sealed class AppSettings
             PasswordHashIterations = iterations,
             LogDirectory = Optional("LOG_DIR", "logs"),
             LogToFile = !string.Equals(Optional("LOG_TO_FILE", "true"), "false", StringComparison.OrdinalIgnoreCase),
+            ApiKeysRoutesEnabled = string.Equals(Optional("API_KEYS_ROUTES_ENABLED", "false"), "true", StringComparison.OrdinalIgnoreCase),
         };
     }
 }

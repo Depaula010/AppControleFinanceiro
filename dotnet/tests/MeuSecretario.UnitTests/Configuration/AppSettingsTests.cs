@@ -85,6 +85,30 @@ public class AppSettingsTests
     }
 
     [Fact]
+    [Trait("AC", "008-05")]
+    public void Load_ApiKeysRoutes_AreDisabledByDefault()
+    {
+        Load(Valid()).ApiKeysRoutesEnabled.ShouldBeFalse();
+    }
+
+    [Theory]
+    [Trait("AC", "008-05")]
+    [InlineData("true", true)]
+    [InlineData("TRUE", true)]
+    [InlineData(" true ", true)]
+    [InlineData("false", false)]
+    [InlineData("1", false)]
+    [InlineData("sim", false)]
+    [InlineData("", false)]
+    public void Load_ApiKeysRoutes_OnlyTrueEnables(string value, bool expected)
+    {
+        var values = Valid();
+        values["API_KEYS_ROUTES_ENABLED"] = value;
+
+        Load(values).ApiKeysRoutesEnabled.ShouldBe(expected);
+    }
+
+    [Fact]
     public void Load_PasswordHashIterations_DefaultsToWerkzeugValue()
     {
         Load(Valid()).PasswordHashIterations.ShouldBe(1_000_000);
