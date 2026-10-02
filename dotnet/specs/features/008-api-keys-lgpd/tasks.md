@@ -18,7 +18,7 @@ A 010 só precisa da T3 (interfaces e tipos) para começar; a 009 e a 012 só pr
 - [ ] **T1 — `PythonDateFormat`** (`Api/Http`): testes vermelhos (fração só com microssegundos, `+00:00`, `null`, local sem fuso) ⇒ implementação ⇒ verdes.
 - [ ] **T2 — `IApiKeyValidator` + `ApiSecretKeyValidator` + `RequireApiKeyFilter`** com `ApiKeyUnauthorized.EnvelopeC` (AC-008-01, 02): testes unitários do validador (tempo constante via hash, tamanhos diferentes) e do filtro (`next` não chamado, 401 em envelopes C, B e E). Registrar o validador em `AddInfrastructure` só se a 009/012 ainda não o tiverem feito; senão o `ApiKeysModule` o registra com `TryAdd`.
 - [ ] **T3 — Porta `IApiKeyProvider`** em `Application/Abstractions`: interfaces, `ApiKeyResolution`, `ApiKeyFailure`, `ApiKeyMessages` (textos literais) e `ToString()` sem a chave. Teste unitário das mensagens (AC-008-60 a 62, 64, 68). Avisar a 010.
-- [ ] **T4 — Fixtures do Python:** `generate_apikeys_fixtures.py` e `apikeys-fixtures.json` (Fernet de chaves fictícias, texto puro legado, token adulterado) com `ApiKeysFixtures.cs`.
+- [x] **T4 — Fixtures do Python:** dispensada; reutiliza `AuthFixtures` (tokens Fernet do Python, token adulterado) e texto puro nos próprios testes.
 
 ## 008a — chaves, preferências, uso, logs
 
@@ -45,7 +45,7 @@ A 010 só precisa da T3 (interfaces e tipos) para começar; a 009 e a 012 só pr
 
 - [ ] **T20 — Desvios e PR:** marcar 005, 006 (só checagem de dono), 008, 024 e 028 como `implementado` nos trechos desta feature; registrar decisões sobre P-008-1 a P-008-9 (cada aprovado vira arquivo em `parity-deviations/`, criado por quem aprovar); atualizar `api-contract.md` (§7: rotas `/api-keys/*` agora alcançáveis) e esta spec se algo mudou; abrir PR.
 
-## Tarefas condicionais (só se o Rafael aprovar)
+## Tarefas condicionais (APROVADAS em 2026-10-02: C1 a C6 entram nas tarefas acima; 051 rejeitado; flag 052 em T9)
 
 - [ ] **C1 — P-008-1:** upsert de consentimento com `revogado_em` + testes (reativar, revogar, versão nova).
 - [ ] **C2 — P-008-2 e P-008-3:** 409 de chave duplicada e 404 de usuário inexistente + testes.

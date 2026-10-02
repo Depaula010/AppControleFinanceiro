@@ -1,6 +1,20 @@
 # Plan 008 — API keys e LGPD
 
-- **Spec:** `spec.md` (em revisão; este plan só vale depois da aprovação)
+- **Spec:** `spec.md` (aprovada em 2026-10-02)
+
+## 0. Ajustes após a aprovação (valem sobre o resto deste plan)
+
+- **Desvios 041 a 048 e 052 estão aprovados** (051 rejeitado): onde o texto abaixo diz "só se P-008-N for aprovado", vale a versão aprovada.
+- `IConsentRepository.InsertAsync` faz upsert (041): `ON CONFLICT (usuario_id, tipo_consentimento, versao_consentimento) DO UPDATE SET consentimento_dado = EXCLUDED.consentimento_dado, data_consentimento = now(), revogado_em = CASE WHEN EXCLUDED.consentimento_dado THEN NULL ELSE now() END RETURNING id`. Resultado `Created(id)` ou `UserNotFound` (sem `AlreadyRegistered`).
+- `IApiKeyRepository.UpdateAsync/DeactivateAsync` recebem `ownerUserId` **obrigatório** (`int`), `WHERE id = @keyId AND usuario_id = @ownerUserId`.
+- `IUsageRepository.SumSystemMonthAsync` soma só `tipo_chave = 'sistema'` (046).
+- `IAccessLogRepository.InsertAsync(userId, provider, keyType, operation, success, error)` (047), usado pela porta.
+- `IAccountDataRepository.DeleteAccountCompletelyAsync(userId)` → `AccountDeletionCounts?` (`null` = usuário inexistente ⇒ 404), uma transação, na ordem do spec §4.14. Não existe mais `DeleteApiDataAsync` separado.
+- `IUserCacheCleaner { Task ClearAsync(int userId, CancellationToken) }` (Application/Abstractions); registro com `TryAddSingleton<IUserCacheCleaner, NullUserCacheCleaner>` no `ApiKeysModule.AddServices` (a 010a substitui; como `TryAdd`, a 010a deve registrar a sua ANTES do módulo ou usar `Replace`).
+- **Flag 052:** `AppSettings.ApiKeysRoutesEnabled` (`API_KEYS_ROUTES_ENABLED`, padrão false). `ApiKeysModule.MapEndpoints` só mapeia o grupo se a flag estiver ligada (lê `AppSettings` do `app.ServiceProvider`). Serviços (inclusive `IApiKeyProvider`) são registrados sempre.
+- **008-0** entrega também `Api/Http/ApiKeyAuthModule : IFeatureModule` (só `AddServices`, registra `IApiKeyValidator` com `TryAddSingleton`), para o validador existir para qualquer feature sem editar `DependencyInjection.cs`.
+- **Fixtures do Python:** os testes de Fernet reutilizam os tokens gerados pelo Python em `AuthFixtures` (`FernetCases`, `FernetTamperedToken`, mesma `ENCRYPTION_KEY` fictícia); não há gerador novo (T4 dispensada).
+
 
 ## 1. Domain (`MeuSecretario.Domain/ApiKeys`)
 
