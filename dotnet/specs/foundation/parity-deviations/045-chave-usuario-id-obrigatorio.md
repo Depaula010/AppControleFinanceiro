@@ -1,6 +1,6 @@
 # Desvio 045 — API keys: usuario_id obrigatório em PUT/DELETE /chave/<id>
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 008, 2026-10-02)
 - **Features afetadas:** 008
 - **Severidade:** segurança
 

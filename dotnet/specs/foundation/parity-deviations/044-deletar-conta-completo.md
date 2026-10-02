@@ -1,6 +1,6 @@
 # Desvio 044 — LGPD: deletar-conta apaga de fato
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 008, 2026-10-02)
 - **Features afetadas:** 008
 - **Severidade:** segurança
 

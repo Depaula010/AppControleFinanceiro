@@ -1,6 +1,6 @@
 # Desvio 052 — Rotas /api-keys/* desligadas por padrão em produção
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 008, 2026-10-02)
 - **Features afetadas:** 008, 009
 - **Severidade:** segurança
 

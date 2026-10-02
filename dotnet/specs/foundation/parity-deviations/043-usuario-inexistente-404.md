@@ -1,6 +1,6 @@
 # Desvio 043 — API keys e LGPD: usuário inexistente responde 404
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 008, 2026-10-02)
 - **Features afetadas:** 008
 - **Severidade:** correção
 

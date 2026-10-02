@@ -158,4 +158,6 @@ Sem autenticação hoje (ver desvios): `GET /admin/get-notification-config/<int:
 Código morto: `app/presentation/routes/example_with_di.py` (`/api/example`, 7 rotas, não registrado). `oauth_proxy` (4 rotas) só entra se o `GOOGLE_REDIRECT_URI` real ainda apontar para ele (ver `infra-deploy.md`).
 
 ## 7. Whitelist de segurança
+
+> **Atualização (2026-10-02, desvio 052):** as rotas `/api-keys/*` só são registradas com `API_KEYS_ROUTES_ENABLED=true` (padrão **false**); desligada, respondem 404 como hoje para IP público. As demais rotas registradas são todas alcançáveis (whitelist derivada, desvio 005).
 O Flask devolve 404 + conta tentativa para rotas **registradas** que não estão em `VALID_ENDPOINTS` (ex.: `/api-keys/usuario/*`, `/api-keys/lgpd/*`, `/calendar-alerts/ativar/*`, `/api/agendamento*/reserva`) quando chamadas por IP público. Hoje essas rotas são inalcançáveis de fora. Decisão em `parity-deviations/005`.

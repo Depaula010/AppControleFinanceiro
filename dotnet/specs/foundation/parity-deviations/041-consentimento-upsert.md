@@ -1,6 +1,6 @@
 # Desvio 041 — LGPD: consentimento pode ser atualizado e revogado
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 008, 2026-10-02)
 - **Features afetadas:** 008
 - **Severidade:** correção
 

@@ -1,6 +1,6 @@
 # Desvio 048 — API keys: tipos JSON inesperados viram 400
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 008, 2026-10-02)
 - **Features afetadas:** 008
 - **Severidade:** correção
 

@@ -47,19 +47,19 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [037](037-remocao-conta-agendamentos-e-padrao.md) | Contas: remoção considera agendamentos ativos e conta padrão | correção | 002 | implementado |
 | [038](038-contas-get-campos-extras.md) | Contas: GET devolve também os campos que o Angular espera | compatibilidade | 002 | implementado |
 | [039](039-contas-inativas-em-outras-features.md) | Contas inativas deixam de ser usadas por outras features | correção | 004, 011, 012 | aprovado |
-| [040](040-categorias-receitas-gerais.md) | Categorias: Receita inclui Receitas Gerais, Despesa não | correção | 003 | aprovado |
-| [041](041-consentimento-upsert.md) | LGPD: consentimento pode ser atualizado e revogado | correção | 008 | aprovado |
-| [042](042-chave-api-duplicada-409.md) | API keys: chave duplicada responde 409 | correção | 008 | aprovado |
-| [043](043-usuario-inexistente-404.md) | API keys e LGPD: usuário inexistente responde 404 | correção | 008 | aprovado |
-| [044](044-deletar-conta-completo.md) | LGPD: deletar-conta apaga de fato | segurança | 008 | aprovado |
-| [045](045-chave-usuario-id-obrigatorio.md) | API keys: usuario_id obrigatório em PUT/DELETE /chave/<id> | segurança | 008 | aprovado |
-| [046](046-limite-plano-so-chave-sistema.md) | API keys: limite do plano conta só chamadas com chave do sistema | correção | 008 | aprovado |
-| [047](047-gravar-log-acesso-chaves.md) | API keys: gravar o log de acesso | correção | 008 | aprovado |
-| [048](048-tipos-json-api-keys.md) | API keys: tipos JSON inesperados viram 400 | correção | 008 | aprovado |
+| [040](040-categorias-receitas-gerais.md) | Categorias: Receita inclui Receitas Gerais, Despesa não | correção | 003 | implementado |
+| [041](041-consentimento-upsert.md) | LGPD: consentimento pode ser atualizado e revogado | correção | 008 | implementado |
+| [042](042-chave-api-duplicada-409.md) | API keys: chave duplicada responde 409 | correção | 008 | implementado |
+| [043](043-usuario-inexistente-404.md) | API keys e LGPD: usuário inexistente responde 404 | correção | 008 | implementado |
+| [044](044-deletar-conta-completo.md) | LGPD: deletar-conta apaga de fato | segurança | 008 | implementado |
+| [045](045-chave-usuario-id-obrigatorio.md) | API keys: usuario_id obrigatório em PUT/DELETE /chave/<id> | segurança | 008 | implementado |
+| [046](046-limite-plano-so-chave-sistema.md) | API keys: limite do plano conta só chamadas com chave do sistema | correção | 008 | implementado |
+| [047](047-gravar-log-acesso-chaves.md) | API keys: gravar o log de acesso | correção | 008 | implementado |
+| [048](048-tipos-json-api-keys.md) | API keys: tipos JSON inesperados viram 400 | correção | 008 | implementado |
 | [049](049-limite-credito-zero.md) | Contas: limite_credito zero respondido como null | compatibilidade | 002 | rejeitado |
 | [050](050-esconder-outros-duplicado.md) | Categorias: esconder o Outros global duplicado na API | correção | 003 | rejeitado |
 | [051](051-exportar-mascarar-chaves.md) | LGPD: mascarar chaves no exportar | segurança | 008 | rejeitado |
-| [052](052-api-keys-desligadas-por-padrao.md) | Rotas /api-keys/* desligadas por padrão em produção | segurança | 008, 009 | aprovado |
+| [052](052-api-keys-desligadas-por-padrao.md) | Rotas /api-keys/* desligadas por padrão em produção | segurança | 008, 009 | implementado |
 | [053](053-connect-calendar-link-assinado.md) | Google: link de conexão assinado (/connect-calendar) | segurança | 010, 012 | aprovado |
 | [054](054-clima-traducao-e-chuva.md) | Clima: tradução em português e chance de chuva | correção | 010 | aprovado |
 | [055](055-rotas-limite-diario-data.md) | OpenRoute: data de São Paulo e incremento atômico no limite diário | correção | 010, 012 | aprovado |

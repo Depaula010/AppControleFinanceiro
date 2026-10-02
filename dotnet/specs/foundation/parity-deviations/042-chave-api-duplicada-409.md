@@ -1,6 +1,6 @@
 # Desvio 042 — API keys: chave duplicada responde 409
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 008, 2026-10-02)
 - **Features afetadas:** 008
 - **Severidade:** correção
 

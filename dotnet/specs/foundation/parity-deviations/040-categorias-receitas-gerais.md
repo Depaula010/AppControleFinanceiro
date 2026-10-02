@@ -1,6 +1,6 @@
 # Desvio 040 — Categorias: Receita inclui Receitas Gerais, Despesa não
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 003, 2026-10-02)
 - **Features afetadas:** 003
 - **Severidade:** correção
 
