@@ -67,7 +67,7 @@ RETURNING <detalhes>
 
 ## 4. Api (`MeuSecretario.Api/Accounts`)
 
-- `AccountsModule : IFeatureModule`. `AddServices`: repositório e os 4 casos de uso (`AddScoped`). `MapEndpoints`: para `["/api/accounts", "/api/contas"]`: `MapGet(base)`, `MapPost(base)`, `MapPut/MapDelete($"{base}/{{id:regex(^[0-9]+$)}}")`, todos `.RequireUser()`. Mais, para reproduzir o 404 HTML do Flask em `<int:id>` inválido (`abc`, `-1`, `1.5`) **antes** da autenticação e para qualquer método, uma rota `{base}/{id}` com restrição regex "não é só dígitos" ligada a `FlaskNotFound`. O handler recebe `id` como `string`; valor maior que `int.MaxValue` vira conta inexistente (404 JSON).
+- `AccountsModule : IFeatureModule`. `AddServices`: repositório e os 4 casos de uso (`AddScoped`). `MapEndpoints`: para `["/api/accounts", "/api/contas"]`: `MapGet(base)`, `MapPost(base)`, todos `.RequireUser()`; `MapPut/MapDelete($"{base}/{{id}}")` com um `NumericIdFilter` **antes** do `RequireUser`: id que não seja só dígitos ASCII (`abc`, `-1`, `1.5`) responde o 404 HTML do Flask antes da autenticação, como o `<int:id>`. Para os outros métodos em `{base}/{{id}}` (GET, POST, PATCH...) há uma rota sem método: id numérico ⇒ 405, senão 404 HTML. (Uma restrição `regex` na rota não serve: o ASP.NET avalia a política de método antes da restrição, então uma rota-coringa 404 anula o 405 dos ids numéricos.) O handler recebe `id` como `string`; valor maior que `int.MaxValue` vira id 0 (conta inexistente, 404 JSON; RN-002-18, AC-002-86).
 - `AccountsBodyReader.ReadAsync(HttpRequest, ct)` ⇒ `RawBody?` (`JsonDocument`, corpo ausente/inválido/não-objeto ⇒ `null`; não exige `Content-Type`).
 - `AccountsResponses`: corpos com `Envelopes.A`; `data` na ordem da spec; `limite_credito` 0 ⇒ `null`; valores monetários como `double`.
 - `AccountsMessages` (constantes da spec, copiadas literalmente) e `AccountsLog` (`LoggerMessage`, EventIds 2001–2004, só `SafeError.Describe`).
@@ -97,7 +97,7 @@ Nomes `Metodo_Cenario_Resultado` com `[Trait("AC","002-NN")]`; integração com 
 
 - **Contrato do front quebrado (spec §8):** o backend não aceita aliases; o AC-002-54 documenta o PUT do Angular.
 - **Ordem das validações do PUT** intercala banco e regras; por isso o Domain expõe passos e o caso de uso os encadeia.
-- **Rota 404 HTML** para `id` inválido exige a rota-coringa regex do módulo (não há fallback global; não se edita `Program.cs`). Outros módulos que queiram o mesmo precisam de rota própria.
+- **404 HTML e 405 em `{id}`** são reproduzidos por filtro e rota sem método do próprio módulo (não há fallback global e não se edita `Program.cs`). `/api/accounts/abc/x` (dois segmentos) cai no 404 vazio padrão do ASP.NET: lacuna global, de todas as features.
 - **`limite_credito` do GET** sai `null` quando 0, por consistência com POST/PUT (049 rejeitado).
 - **Saldo (desvio 007):** a 006 deve reutilizar `IAccountRepository.ListActiveAsync` (ou o mesmo SQL).
 - **Sem índice em `transacoes.conta_id`:** irrelevante com o volume atual.
