@@ -1,6 +1,6 @@
 # Desvio 033 — Contas: tipo JSON errado e números extremos
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 002, 2026-10-02)
 - **Features afetadas:** 002
 - **Severidade:** correção
 

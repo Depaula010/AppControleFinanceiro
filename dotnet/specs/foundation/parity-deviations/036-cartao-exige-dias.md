@@ -1,6 +1,6 @@
 # Desvio 036 — Contas: cartão de crédito exige os dois dias
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 002, 2026-10-02)
 - **Features afetadas:** 002
 - **Severidade:** correção
 

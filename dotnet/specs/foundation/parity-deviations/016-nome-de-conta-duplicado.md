@@ -1,6 +1,6 @@
 # Desvio 016 — Nome de conta duplicado devolve 500
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 002, 2026-10-02)
 - **Features afetadas:** 002
 - **Severidade:** correção
 

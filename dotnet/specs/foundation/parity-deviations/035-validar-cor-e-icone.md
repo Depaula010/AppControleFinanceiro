@@ -1,6 +1,6 @@
 # Desvio 035 — Contas: validar cor_hex e icone
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 002, 2026-10-02)
 - **Features afetadas:** 002
 - **Severidade:** correção
 

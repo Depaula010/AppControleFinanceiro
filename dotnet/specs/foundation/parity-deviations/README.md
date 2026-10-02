@@ -23,7 +23,7 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [013](013-motor-agendamentos.md) | Motor de agendamentos sem idempotência e lembrete variável | correção | 009, 013 | aprovado |
 | [014](014-reserva-unica.md) | Reserva de emergência calculada em três lugares | correção | 005, 011, 012 | aprovado |
 | [015](015-periodo-do-pote.md) | Três definições de período de pote | correção | 004, 013 | aprovado |
-| [016](016-nome-de-conta-duplicado.md) | Nome de conta duplicado devolve 500 | correção | 002 | aprovado |
+| [016](016-nome-de-conta-duplicado.md) | Nome de conta duplicado devolve 500 | correção | 002 | implementado |
 | [017](017-api-key-texto-puro.md) | api_key_automate em texto puro e coluna pequena demais para Fernet | segurança | 001, 011 | implementado |
 | [018](018-enumeracao-de-usuarios.md) | Login distingue usuário inexistente de senha errada | segurança | 001 | aprovado |
 | [019](019-validacao-chave-weather.md) | Validação de chave weather usa outro provedor | correção | 007, 010 | aprovado |
@@ -39,13 +39,13 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [029](029-tokens-google-texto-puro.md) | Tokens do Google guardados em texto puro | segurança | 010, 014 | aprovado |
 | [030](030-subcategoria-global-duplicada.md) | Subcategoria global duplicada: Outros (macro 17) | correção | 003, 004, 011 | aprovado |
 | [031](031-validacoes-do-cadastro.md) | Validações do cadastro: WhatsApp sem dígitos, dias não inteiros e cadastro concorrente | correção | 001 | implementado |
-| [032](032-reativar-conta-inativa.md) | Reativar conta inativa de mesmo nome | correção | 002 | aprovado |
-| [033](033-tipos-json-e-numeros-extremos-contas.md) | Contas: tipo JSON errado e números extremos | correção | 002 | aprovado |
-| [034](034-dias-fora-de-cartao.md) | Contas: dias e limite fora de cartão e troca de tipo | correção | 002 | aprovado |
-| [035](035-validar-cor-e-icone.md) | Contas: validar cor_hex e icone | correção | 002 | aprovado |
-| [036](036-cartao-exige-dias.md) | Contas: cartão de crédito exige os dois dias | correção | 002 | aprovado |
-| [037](037-remocao-conta-agendamentos-e-padrao.md) | Contas: remoção considera agendamentos ativos e conta padrão | correção | 002 | aprovado |
-| [038](038-contas-get-campos-extras.md) | Contas: GET devolve também os campos que o Angular espera | compatibilidade | 002 | aprovado |
+| [032](032-reativar-conta-inativa.md) | Reativar conta inativa de mesmo nome | correção | 002 | implementado |
+| [033](033-tipos-json-e-numeros-extremos-contas.md) | Contas: tipo JSON errado e números extremos | correção | 002 | implementado |
+| [034](034-dias-fora-de-cartao.md) | Contas: dias e limite fora de cartão e troca de tipo | correção | 002 | implementado |
+| [035](035-validar-cor-e-icone.md) | Contas: validar cor_hex e icone | correção | 002 | implementado |
+| [036](036-cartao-exige-dias.md) | Contas: cartão de crédito exige os dois dias | correção | 002 | implementado |
+| [037](037-remocao-conta-agendamentos-e-padrao.md) | Contas: remoção considera agendamentos ativos e conta padrão | correção | 002 | implementado |
+| [038](038-contas-get-campos-extras.md) | Contas: GET devolve também os campos que o Angular espera | compatibilidade | 002 | implementado |
 | [039](039-contas-inativas-em-outras-features.md) | Contas inativas deixam de ser usadas por outras features | correção | 004, 011, 012 | aprovado |
 | [040](040-categorias-receitas-gerais.md) | Categorias: Receita inclui Receitas Gerais, Despesa não | correção | 003 | aprovado |
 | [041](041-consentimento-upsert.md) | LGPD: consentimento pode ser atualizado e revogado | correção | 008 | aprovado |

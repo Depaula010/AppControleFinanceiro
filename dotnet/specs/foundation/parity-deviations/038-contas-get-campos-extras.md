@@ -1,6 +1,6 @@
 # Desvio 038 — Contas: GET devolve também os campos que o Angular espera
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 002, 2026-10-02)
 - **Features afetadas:** 002
 - **Severidade:** compatibilidade
 

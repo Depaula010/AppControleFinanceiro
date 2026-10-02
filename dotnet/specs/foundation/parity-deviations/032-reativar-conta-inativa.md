@@ -1,6 +1,6 @@
 # Desvio 032 — Reativar conta inativa de mesmo nome
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 002, 2026-10-02)
 - **Features afetadas:** 002
 - **Severidade:** correção
 

@@ -1,6 +1,6 @@
 # Desvio 034 — Contas: dias e limite fora de cartão e troca de tipo
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 002, 2026-10-02)
 - **Features afetadas:** 002
 - **Severidade:** correção
 

@@ -1,6 +1,6 @@
 # Desvio 037 — Contas: remoção considera agendamentos ativos e conta padrão
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 002, 2026-10-02)
 - **Features afetadas:** 002
 - **Severidade:** correção
 
