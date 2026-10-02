@@ -125,3 +125,8 @@ dmypy.json
 migrations/schema.sql
 AI_RULES.md
 app/routes/webhooks/intents/admin_intents.py
+
+# .NET rewrite
+dotnet/scripts/homol/out/
+dotnet/**/bin/
+dotnet/**/obj/

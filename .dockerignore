@@ -16,3 +16,5 @@ README.md
 .mypy_cache
 *.log
 .DS_Store
+# .NET rewrite (nao entra na imagem Python)
+dotnet/
