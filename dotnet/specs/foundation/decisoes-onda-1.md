@@ -121,3 +121,20 @@ Rode `scripts/homol/heidisql/05-conferencia-onda-1.sql` conectado em `bot_whatsa
 > **"Aprovo as recomendações"** equivale a: G-1 a G-4, G-6 (B), G-7 e G-8 aprovados; G-5 rejeitado (sem HEAD); desvios 032 a 048 aprovados (048 incluso; 044 com a condição acima); P-002-9, P-003-2 e P-008-6 rejeitados; 008-Q5, Q6 e Q7 aprovadas como estão escritas.
 
 Depois da sua resposta eu: (1) crio os arquivos de desvio 032–048 com o estado decidido, (2) ajusto as três specs ao que ficou, (3) abro a implementação em paralelo, começando pelos PRs de apoio (G-4 e a 008-0) e liberando 002, 003 e 008a/008b em seguida.
+
+---
+
+## 7. Feature 010 — Integrações (decidido em 2026-10-02: "aceito os desvios propostos" e "aprovo todas as decisões")
+
+**Decisões técnicas aprovadas:** D-1 Gemini por REST direto (a chave vai por chamada; o fake valida o payload) em vez do SDK citado no `tech-stack.md`; D-2 pacote de teste `Testcontainers.Redis`; D-3 timeouts do Gemini (45 s por tentativa, 90 s no total, 1 retry em 503/504/rede); D-4 os clientes do Google recebem só o `access_token`, e a renovação fica num lugar só; D-5 `IIntegrationSettings` e `IProviderKeySelector` na 010-0.
+
+**Desvios:** P-010-1 a P-010-12 aprovados como **053 a 064** (055 aprovado só em parte: o limite diário de rotas continua sem uso até haver decisão de produto; 054 só a tradução do clima; 053 com a condição do `oauth_proxy`).
+
+**Respostas e confirmações:**
+- O **`oauth_proxy` ainda existe** (Render). Ele repassa `/connect-calendar/<id>` e `/oauth2callback` ao servidor real. Achado: no `connect-calendar` ele **descartava a query string**, o que faria o link assinado (053) chegar sem o token. Corrigi `oauth_proxy/app.py` neste repositório (repassa a query string, compatível com o comportamento antigo). **Ele precisa ser reimplantado no Render antes da virada.** O valor real de `GOOGLE_REDIRECT_URI` é um secret; basta que o host registrado no Google Cloud Console continue apontando para o proxy e o proxy para o servidor, que passará a ser o .NET na mesma porta.
+- **Ninguém chama `disconnect-calendar`** (nem Angular, bot, scripts ou atalhos): com o desvio 003 ele passa a exigir `x-api-key` sem risco para clientes.
+- Validade da chave `weather` (desvio 019): `status != 401` é válida. Textos fixos dos 500 (`Erro ao conectar`, `Erro ao desconectar Google Calendar`, `Erro ao fazer upload.` e os dois da página de erro do OAuth) e a prioridade de erros do Drive (403 de cota antes de "Sem permissão"): aceitos como na spec.
+
+**Achado sobre o PKCE (confirmado no código):** a `google-auth-oauthlib==1.2.0` fixada no `requirements.txt` tem `autogenerate_code_verifier=True` por padrão em `Flow.__init__` (verificado instalando a versão). O Flask cria um `Flow` novo no callback (`google_calendar_oauth_service.py:88-92`) sem o `code_verifier` do `Flow` que gerou a URL; o Google então recusa a troca do código (`invalid_grant`, "Missing code verifier"). Portanto o **fluxo de conectar o Google Calendar deve estar quebrado em produção hoje** (a linha existente em `googlecalendartokens` provavelmente vem de antes dessa versão). O .NET não usa PKCE, então após a virada o fluxo volta a funcionar. Se você tentar conectar uma conta nova no Flask hoje e ele falhar no callback, isso confirma.
+
+**Ordem de execução:** a 010-0 depende da 008-0 (porta `IApiKeyProvider`); a 010a a 010e rodam em paralelo depois da 010-0, respeitando o limite de 3 agentes simultâneos.

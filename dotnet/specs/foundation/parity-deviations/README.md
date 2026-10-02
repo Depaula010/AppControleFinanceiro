@@ -60,3 +60,15 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [050](050-esconder-outros-duplicado.md) | Categorias: esconder o Outros global duplicado na API | correção | 003 | rejeitado |
 | [051](051-exportar-mascarar-chaves.md) | LGPD: mascarar chaves no exportar | segurança | 008 | rejeitado |
 | [052](052-api-keys-desligadas-por-padrao.md) | Rotas /api-keys/* desligadas por padrão em produção | segurança | 008, 009 | aprovado |
+| [053](053-connect-calendar-link-assinado.md) | Google: link de conexão assinado (/connect-calendar) | segurança | 010, 012 | aprovado |
+| [054](054-clima-traducao-e-chuva.md) | Clima: tradução em português e chance de chuva | correção | 010 | aprovado |
+| [055](055-rotas-limite-diario-data.md) | OpenRoute: data de São Paulo e incremento atômico no limite diário | correção | 010, 012 | aprovado |
+| [056](056-travel-time-codigo-morto.md) | OpenRoute: não portar o código morto e quebrado do travel_time_service | correção | 010 | aprovado |
+| [057](057-calendar-evento-virada-do-dia.md) | Calendar: evento na virada do dia e atualização de data | correção | 010 | aprovado |
+| [058](058-google-refresh-com-needs-reconnect.md) | Google: não renovar token quando needs_reconnect está ligado | correção | 010, 014 | aprovado |
+| [059](059-bot-texto-acima-de-4096.md) | Bot: dividir mensagens com mais de 4096 caracteres | correção | 010, 012, 013 | aprovado |
+| [060](060-oauth-nome-com-escape-html.md) | OAuth: escapar o nome do usuário na página de sucesso | segurança | 010 | aprovado |
+| [061](061-drive-escape-barra-invertida.md) | Drive: escapar a barra invertida na busca de pasta | correção | 010 | aprovado |
+| [062](062-prompt-evento-com-data-de-hoje.md) | Gemini: prompt de criação de evento recebe a data de hoje | correção | 010, 012 | aprovado |
+| [063](063-gemini-chamadas-com-usuario.md) | Gemini: três chamadas passam a usar o usuário e a chave dele | correção | 010, 006 | aprovado |
+| [064](064-openroute-retry-so-em-5xx.md) | OpenRoute: repetir só em timeout, rede e 5xx | correção | 010 | aprovado |

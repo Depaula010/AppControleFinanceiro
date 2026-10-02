@@ -1,6 +1,6 @@
 # Spec 010 — Integrações (Redis, bot WhatsApp, Gemini, Google, clima e rotas)
 
-- **Estado:** em revisão
+- **Estado:** aprovada (2026-10-02), com as decisões de `foundation/decisoes-onda-1.md` §7
 - **Onda:** 1 (a mais ampla da onda; dividida em sub-entregas independentes, §2)
 - **Origem (Python):** `app/services/redis_service.py:1-131`; `app/services/notification_service.py:1-204`; `app/services/gemini_service.py:1-1888`; `app/services/gemini_cache_service.py:1-366`; `app/services/google_calendar_oauth_service.py:1-669`; `app/services/google_calendar_service.py:1-185`; `app/services/google_drive_service.py:1-370`; `app/services/calendar_management_service.py:1-312` (só as chamadas à API do Google); `app/routes/webhooks/__init__.py:81-96`; `app/routes/webhooks/handlers/calendar_handler.py:1-359`; `app/services/weather_service.py:1-250`; `app/services/travel_time_service.py:1-533`; `app/routes/api.py:2630-2672` (validação de chave); contrato externo do bot em `bot-appfinanceiro-whatsapp/src/routes/messageRoutes.js` e `sessionRoutes.js` (somente leitura).
 - **Depende de:** 001a (`IDbConnectionFactory`, `SafeError`, `Envelopes`, `AppSettings`, `IClock`); **008-0** (porta `IApiKeyProvider` e filtro `RequireApiKey`, ver `features/008-api-keys-lgpd/spec.md` §2 e §5)

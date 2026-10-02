@@ -9,6 +9,7 @@ Estratégia: construir e validar tudo em homol; em produção, trocar o containe
 - [ ] Todos os desvios com estado `aprovado` ou `rejeitado` (nenhum `proposto`).
 - [ ] Homol estável por **7 dias** com os jobs ativos.
 - [ ] Respostas confirmadas pelo Rafael: URL que o bot usa para chamar o backend; `GOOGLE_REDIRECT_URI` real e se passa pelo `oauth_proxy`; quem chama `/admin/run-motor-agendamentos` e `/admin/trigger-*` hoje (bot, UptimeRobot, cron do host).
+- [ ] `oauth_proxy` (Render) **reimplantado** com a versão que repassa a query string no `/connect-calendar` (desvio 053); testar `https://<proxy>/connect-calendar/<id>?t=x` e conferir que o servidor recebe `?t=x`.
 - [ ] `pg_dump` completo de `bot_whatsapp_prod` guardado fora do servidor.
 - [ ] Tag `flask-final` criada no commit do Flask em produção.
 - [ ] Janela de baixo uso (madrugada), evitando 00:01 (processador de faturas) e as horas 18–23.
