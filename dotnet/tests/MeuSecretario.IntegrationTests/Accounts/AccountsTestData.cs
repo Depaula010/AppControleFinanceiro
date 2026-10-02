@@ -14,6 +14,15 @@ internal sealed class AccountsTestData(NpgsqlDataSource dataSource)
             new { nome, whatsapp });
     }
 
+    /// <summary>Usuário com id fixo (para os tokens das fixtures do PyJWT, que levam <c>user_id</c> 42).</summary>
+    public async Task<int> InsertUserWithIdAsync(int id)
+    {
+        await using var connection = await dataSource.OpenConnectionAsync();
+        return await connection.ExecuteScalarAsync<int>(
+            "INSERT INTO usuarios (id, nome, numero_whatsapp) VALUES (@id, 'Fixture', @whatsapp) RETURNING id",
+            new { id, whatsapp = $"55119{id:D8}" });
+    }
+
     public async Task<int> InsertAccountAsync(
         int userId,
         string nome,
