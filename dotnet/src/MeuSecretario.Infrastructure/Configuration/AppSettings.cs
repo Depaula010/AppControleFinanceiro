@@ -28,6 +28,7 @@ public sealed class AppSettings
     public string OpenRouteApiKey { get; init; } = string.Empty;
     public string OpenRouteBaseUrl { get; init; } = "https://api.openrouteservice.org";
     public int TravelTimeDailyLimit { get; init; } = 10;
+    public int PasswordHashIterations { get; init; } = Security.WerkzeugPasswordHasher.DefaultIterations;
     public string LogDirectory { get; init; } = "logs";
     public bool LogToFile { get; init; } = true;
 
@@ -64,6 +65,11 @@ public sealed class AppSettings
             errors.Add($"API_SECRET_KEY deve ter no mínimo {MinSecretKeyLength} caracteres");
         }
 
+        if (encryptionKey.Length > 0 && !Security.FernetEncryptionService.IsValidKey(encryptionKey))
+        {
+            errors.Add("ENCRYPTION_KEY inválida: deve ser uma chave Fernet (base64 url-safe de 32 bytes)");
+        }
+
         var connectionString = string.Empty;
         if (databaseUrl.Length > 0)
         {
@@ -82,6 +88,16 @@ public sealed class AppSettings
         if (dailyLimitText.Length > 0 && !int.TryParse(dailyLimitText, out dailyLimit))
         {
             errors.Add("TRAVEL_TIME_DAILY_LIMIT deve ser um número inteiro");
+        }
+
+        var iterations = Security.WerkzeugPasswordHasher.DefaultIterations;
+        var iterationsText = Optional("PASSWORD_HASH_ITERATIONS");
+        if (iterationsText.Length > 0
+            && (!int.TryParse(iterationsText, out iterations)
+                || iterations < Security.WerkzeugPasswordHasher.MinIterations
+                || iterations > Security.WerkzeugPasswordHasher.MaxIterationsAllowed))
+        {
+            errors.Add($"PASSWORD_HASH_ITERATIONS deve ser um inteiro entre {Security.WerkzeugPasswordHasher.MinIterations} e {Security.WerkzeugPasswordHasher.MaxIterationsAllowed}");
         }
 
         if (errors.Count > 0)
@@ -109,6 +125,7 @@ public sealed class AppSettings
             OpenRouteApiKey = Optional("OPENROUTE_API_KEY"),
             OpenRouteBaseUrl = Optional("OPENROUTE_BASE_URL", "https://api.openrouteservice.org"),
             TravelTimeDailyLimit = dailyLimit,
+            PasswordHashIterations = iterations,
             LogDirectory = Optional("LOG_DIR", "logs"),
             LogToFile = !string.Equals(Optional("LOG_TO_FILE", "true"), "false", StringComparison.OrdinalIgnoreCase),
         };

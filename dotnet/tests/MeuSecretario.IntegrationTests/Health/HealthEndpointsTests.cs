@@ -15,7 +15,7 @@ public class HealthEndpointsTests : IClassFixture<WebApplicationFactory<Program>
         {
             builder.UseSetting("DATABASE_URL", "postgresql://u:p@localhost:5432/db");
             builder.UseSetting("API_SECRET_KEY", "0123456789abcdef0123456789abcdef");
-            builder.UseSetting("ENCRYPTION_KEY", "chave-de-teste");
+            builder.UseSetting("ENCRYPTION_KEY", "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=");
             builder.UseSetting("GEMINI_API_KEY", "gemini-de-teste");
             builder.UseSetting("REDIS_URL", "redis://localhost:6379");
             builder.UseSetting("LOG_TO_FILE", "false");

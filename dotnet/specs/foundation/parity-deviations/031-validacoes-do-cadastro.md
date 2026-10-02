@@ -1,6 +1,6 @@
 # Desvio 031 — Validações do cadastro: WhatsApp sem dígitos, dias não inteiros e cadastro concorrente
 
-- **Estado:** proposto
+- **Estado:** aprovado
 - **Features afetadas:** 001
 - **Severidade:** correção
 
@@ -20,4 +20,4 @@ Manter como está (paridade estrita).
 Aprovar (pequeno e seguro).
 
 ## Decisão do Rafael
-(pendente)
+Aprovado em 2026-10-02 (aprovação em bloco de todos os desvios propostos).

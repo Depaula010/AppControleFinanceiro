@@ -28,6 +28,27 @@ public static class Envelopes
             return Json(body, statusCode);
         }
 
+        /// <summary>
+        /// Campos de sucesso na RAIZ (rotas <c>/auth/*</c>: <c>token</c>, <c>user</c>, <c>user_id</c>, <c>valid</c>),
+        /// na ordem informada: <c>status</c>, <c>message</c> (se houver) e depois os campos.
+        /// </summary>
+        public static IResult SuccessWithFields(
+            IReadOnlyDictionary<string, object?> fields,
+            string? message = null,
+            int statusCode = StatusCodes.Status200OK)
+        {
+            var body = new Dictionary<string, object?> { ["status"] = "success" };
+            if (message is not null)
+            {
+                body["message"] = message;
+            }
+            foreach (var (key, value) in fields)
+            {
+                body[key] = value;
+            }
+            return Json(body, statusCode);
+        }
+
         public static IResult Error(string message, int statusCode) =>
             Json(new Dictionary<string, object?> { ["status"] = "error", ["message"] = message }, statusCode);
     }

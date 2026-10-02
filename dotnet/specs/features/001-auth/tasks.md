@@ -4,12 +4,12 @@ Regra: cada tarefa termina com testes verdes e um commit. Ordem importa. As tare
 
 ## 001a — blocos compartilhados
 
-- [ ] **T1 — Fixtures do Python.** Escrever `tests/Fixtures/generate_auth_fixtures.py` e commitar a saída (hashes pbkdf2 e scrypt, token Fernet, JWTs válido/expirado/sem `user_id`/`alg=none`), com chaves fictícias.
-- [ ] **T2 — `WerkzeugPasswordHasher`.** Testes vermelhos (AC-001-26, 27, 50) ⇒ implementação ⇒ verdes. Adicionar `BouncyCastle.Cryptography`.
-- [ ] **T3 — `FernetEncryptionService`.** Vetores oficiais + token do Python (AC-001-51, 52).
-- [ ] **T4 — `JwtTokenService`.** Emissão e validação (AC-001-28, 32, 34); `RequireExpirationTime`, `ClockSkew = 0`, só HS256.
-- [ ] **T5 — `Envelopes.A.SuccessWithFields`** + teste; ajustar `api-contract.md` §1 se necessário.
-- [ ] **T6 — `RequireUserFilter` + `ICurrentUser`** com testes de integração usando uma rota de teste (AC-001-40 a 44). `IDbConnectionFactory` e `AppSettings.PasswordHashIterations`. **Abrir PR da 001a.**
+- [x] **T1 — Fixtures do Python.** Escrever `tests/Fixtures/generate_auth_fixtures.py` e commitar a saída (hashes pbkdf2 e scrypt, token Fernet, JWTs válido/expirado/sem `user_id`/`alg=none`), com chaves fictícias.
+- [x] **T2 — `WerkzeugPasswordHasher`.** Testes vermelhos (AC-001-26, 27, 50) ⇒ implementação ⇒ verdes. Adicionar `BouncyCastle.Cryptography`.
+- [x] **T3 — `FernetEncryptionService`.** Vetores oficiais + token do Python (AC-001-51, 52).
+- [x] **T4 — `JwtTokenService`.** Emissão e validação (AC-001-28, 32, 34); `RequireExpirationTime`, `ClockSkew = 0`, só HS256.
+- [x] **T5 — `Envelopes.A.SuccessWithFields`** + teste; ajustar `api-contract.md` §1 se necessário.
+- [x] **T6 — `RequireUserFilter` + `ICurrentUser`** com testes de integração usando uma rota de teste (AC-001-40 a 44). `IDbConnectionFactory` e `AppSettings.PasswordHashIterations`. **001a concluída em 2026-10-02** (130 testes verdes). Notas: (a) o filtro foi testado por invocação direta com `DefaultHttpContext` (unitário), sem rota de teste num host; o teste de integração do filtro acontece com a primeira rota `/api/*` real (feature 002). (b) Compatibilidade provada nos dois sentidos com as bibliotecas de referência: JWT, Fernet e hash do .NET aceitos por PyJWT, `cryptography` e Werkzeug. (c) Os vetores do Fernet vêm da implementação de referência do Python (timestamp e IV fixos), não da lista do site da especificação. (d) `ENCRYPTION_KEY` e `PASSWORD_HASH_ITERATIONS` passaram a ser validadas no boot.
 
 ## 001b — rotas
 

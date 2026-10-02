@@ -1,6 +1,6 @@
 # Plan 001 — Auth
 
-- **Spec:** `spec.md` (em revisão)
+- **Spec:** `spec.md` (aprovada em 2026-10-02)
 
 ## 1. Domain (`MeuSecretario.Domain/Auth`)
 

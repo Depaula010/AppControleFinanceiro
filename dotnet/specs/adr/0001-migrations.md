@@ -1,7 +1,7 @@
 # ADR 0001 — Como o schema do banco é alterado
 
 - **Data:** 2026-10-02
-- **Estado:** proposto
+- **Estado:** aceito (2026-10-02)
 
 ## Contexto
 

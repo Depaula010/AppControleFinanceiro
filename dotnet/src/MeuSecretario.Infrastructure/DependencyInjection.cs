@@ -1,9 +1,11 @@
 using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Infrastructure.Configuration;
 using MeuSecretario.Infrastructure.Database;
+using MeuSecretario.Infrastructure.Security;
 using MeuSecretario.Infrastructure.Time;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Npgsql;
 
 namespace MeuSecretario.Infrastructure;
 
@@ -15,7 +17,20 @@ public static class DependencyInjection
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton(_ => AppSettings.Load(get));
         services.AddSingleton<IClock, BrazilClock>();
+
+        // Banco
+        services.AddSingleton(sp => NpgsqlDataSource.Create(sp.GetRequiredService<AppSettings>().ConnectionString));
+        services.AddSingleton<IDbConnectionFactory, NpgsqlConnectionFactory>();
         services.AddSingleton<IDatabaseHealth, NpgsqlDatabaseHealth>();
+
+        // Segurança (spec 001a)
+        services.AddSingleton<IPasswordHasher>(sp =>
+            new WerkzeugPasswordHasher(sp.GetRequiredService<AppSettings>().PasswordHashIterations));
+        services.AddSingleton<IEncryptionService>(sp =>
+            new FernetEncryptionService(sp.GetRequiredService<AppSettings>().EncryptionKey, sp.GetRequiredService<TimeProvider>()));
+        services.AddSingleton<IJwtTokenService>(sp =>
+            new JwtTokenService(sp.GetRequiredService<AppSettings>().ApiSecretKey, sp.GetRequiredService<TimeProvider>()));
+
         return services;
     }
 }

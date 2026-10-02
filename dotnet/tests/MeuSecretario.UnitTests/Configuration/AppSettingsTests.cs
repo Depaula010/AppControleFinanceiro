@@ -10,7 +10,7 @@ public class AppSettingsTests
     {
         ["DATABASE_URL"] = "postgresql://u:p@h:5432/db",
         ["API_SECRET_KEY"] = SecretKey,
-        ["ENCRYPTION_KEY"] = "chave-fernet",
+        ["ENCRYPTION_KEY"] = "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
         ["GEMINI_API_KEY"] = "gemini",
         ["REDIS_URL"] = "redis://redis:6379",
     };
@@ -82,5 +82,38 @@ public class AppSettingsTests
         values["TRAVEL_TIME_DAILY_LIMIT"] = "muitos";
 
         Should.Throw<InvalidOperationException>(() => Load(values)).Message.ShouldContain("TRAVEL_TIME_DAILY_LIMIT");
+    }
+
+    [Fact]
+    public void Load_PasswordHashIterations_DefaultsToWerkzeugValue()
+    {
+        Load(Valid()).PasswordHashIterations.ShouldBe(1_000_000);
+    }
+
+    [Theory]
+    [InlineData("abc")]
+    [InlineData("10")]
+    [InlineData("999999999")]
+    public void Load_RejectsInvalidPasswordHashIterations(string value)
+    {
+        var values = Valid();
+        values["PASSWORD_HASH_ITERATIONS"] = value;
+
+        Should.Throw<InvalidOperationException>(() => Load(values)).Message.ShouldContain("PASSWORD_HASH_ITERATIONS");
+    }
+
+    [Theory]
+    [InlineData("chave-fernet-invalida")]
+    [InlineData("###")]
+    [InlineData("AAECAwQ=")] // base64 válido, mas só 5 bytes
+    public void Load_RejectsEncryptionKeyThatIsNotAFernetKey_WithoutLeakingIt(string key)
+    {
+        var values = Valid();
+        values["ENCRYPTION_KEY"] = key;
+
+        var ex = Should.Throw<InvalidOperationException>(() => Load(values));
+
+        ex.Message.ShouldContain("ENCRYPTION_KEY");
+        ex.Message.ShouldNotContain(key);
     }
 }

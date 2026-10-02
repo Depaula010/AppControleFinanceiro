@@ -1,10 +1,10 @@
 # Spec 001 — Auth (cadastro, login, verificação de token)
 
-- **Estado:** em revisão
+- **Estado:** aprovada (2026-10-02)
 - **Onda:** 1 (a parte compartilhada, **001a**, precisa entrar antes das demais features)
 - **Origem (Python):** `app/routes/auth.py:20-352`; filtro `token_required` em `app/routes/api.py:34-90`; `app/services/encryption_service.py`
 - **Depende de:** esqueleto da Fase 1
-- **Desvios aplicáveis:** 017 (aprovado), 024 (aprovado), 008 (aprovado), **031 (proposto, novo)**
+- **Desvios aplicáveis:** 017 (aprovado), 024 (aprovado), 008 (aprovado), 031 (aprovado)
 
 ## 1. Objetivo
 

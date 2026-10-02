@@ -37,6 +37,40 @@ public class EnvelopesTests
     }
 
     [Fact]
+    public async Task A_SuccessWithFields_PutsFieldsAtTheRootInOrder()
+    {
+        var fields = new Dictionary<string, object?>
+        {
+            ["token"] = "abc",
+            ["user"] = new Dictionary<string, object?> { ["id"] = 1, ["nome"] = "Ana", ["whatsapp"] = "5511999999999" },
+        };
+
+        var (status, json) = await Run(Envelopes.A.SuccessWithFields(fields));
+
+        status.ShouldBe(200);
+        json.ShouldBe("""{"status":"success","token":"abc","user":{"id":1,"nome":"Ana","whatsapp":"5511999999999"}}""");
+    }
+
+    [Fact]
+    public async Task A_SuccessWithFields_PutsMessageBeforeFields_LikeRegister()
+    {
+        var (status, json) = await Run(Envelopes.A.SuccessWithFields(
+            new Dictionary<string, object?> { ["user_id"] = 123 }, "Usuário cadastrado com sucesso", StatusCodes.Status201Created));
+
+        status.ShouldBe(201);
+        json.ShouldBe("""{"status":"success","message":"Usuário cadastrado com sucesso","user_id":123}""");
+    }
+
+    [Fact]
+    public async Task A_SuccessWithFields_SupportsBooleanLikeVerify()
+    {
+        var (_, json) = await Run(Envelopes.A.SuccessWithFields(
+            new Dictionary<string, object?> { ["valid"] = true, ["user_id"] = 42 }));
+
+        json.ShouldBe("""{"status":"success","valid":true,"user_id":42}""");
+    }
+
+    [Fact]
     public async Task A_Error_UsesStatusErrorAndMessage()
     {
         var (status, json) = await Run(Envelopes.A.Error("Token inválido ou expirado", 401));
