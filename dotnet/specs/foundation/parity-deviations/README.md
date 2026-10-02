@@ -24,7 +24,7 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [014](014-reserva-unica.md) | Reserva de emergência calculada em três lugares | correção | 005, 011, 012 | aprovado |
 | [015](015-periodo-do-pote.md) | Três definições de período de pote | correção | 004, 013 | aprovado |
 | [016](016-nome-de-conta-duplicado.md) | Nome de conta duplicado devolve 500 | correção | 002 | aprovado |
-| [017](017-api-key-texto-puro.md) | api_key_automate em texto puro e coluna pequena demais para Fernet | segurança | 001, 011 | aprovado |
+| [017](017-api-key-texto-puro.md) | api_key_automate em texto puro e coluna pequena demais para Fernet | segurança | 001, 011 | implementado |
 | [018](018-enumeracao-de-usuarios.md) | Login distingue usuário inexistente de senha errada | segurança | 001 | aprovado |
 | [019](019-validacao-chave-weather.md) | Validação de chave weather usa outro provedor | correção | 007, 010 | aprovado |
 | [020](020-relatorio-mensal-porta.md) | Relatórios mensais nunca rodam | operação | 013 | aprovado |
@@ -38,4 +38,4 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [028](028-caminhos-com-colunas-ausentes.md) | Outros caminhos que usam colunas ou tabelas inexistentes | correção | 007, 008, 009, 013 | aprovado |
 | [029](029-tokens-google-texto-puro.md) | Tokens do Google guardados em texto puro | segurança | 010, 014 | aprovado |
 | [030](030-subcategoria-global-duplicada.md) | Subcategoria global duplicada: Outros (macro 17) | correção | 003, 004, 011 | aprovado |
-| [031](031-validacoes-do-cadastro.md) | Validações do cadastro: WhatsApp sem dígitos, dias não inteiros e cadastro concorrente | correção | 001 | aprovado |
+| [031](031-validacoes-do-cadastro.md) | Validações do cadastro: WhatsApp sem dígitos, dias não inteiros e cadastro concorrente | correção | 001 | implementado |

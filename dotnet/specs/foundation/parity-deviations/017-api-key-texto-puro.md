@@ -1,6 +1,6 @@
 # Desvio 017 — api_key_automate em texto puro e coluna pequena demais para Fernet
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 001, 2026-10-02)
 - **Features afetadas:** 001, 011
 - **Severidade:** segurança
 
