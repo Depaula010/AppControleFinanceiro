@@ -13,6 +13,7 @@ COPY src/MeuSecretario.Api/*.csproj src/MeuSecretario.Api/
 RUN dotnet restore src/MeuSecretario.Api/MeuSecretario.Api.csproj
 
 COPY src/ src/
+COPY migrations/ migrations/
 RUN dotnet publish src/MeuSecretario.Api/MeuSecretario.Api.csproj -c Release -o /app --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime

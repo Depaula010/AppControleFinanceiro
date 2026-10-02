@@ -1,4 +1,6 @@
 using MeuSecretario.Application.Abstractions;
+using MeuSecretario.Application.Auth;
+using MeuSecretario.Infrastructure.Auth;
 using MeuSecretario.Infrastructure.Configuration;
 using MeuSecretario.Infrastructure.Database;
 using MeuSecretario.Infrastructure.Security;
@@ -22,6 +24,11 @@ public static class DependencyInjection
         services.AddSingleton(sp => NpgsqlDataSource.Create(sp.GetRequiredService<AppSettings>().ConnectionString));
         services.AddSingleton<IDbConnectionFactory, NpgsqlConnectionFactory>();
         services.AddSingleton<IDatabaseHealth, NpgsqlDatabaseHealth>();
+
+        services.AddSingleton<MigrationRunner>();
+
+        // Auth (spec 001)
+        services.AddSingleton<IUserRepository, UserRepository>();
 
         // Segurança (spec 001a)
         services.AddSingleton<IPasswordHasher>(sp =>
