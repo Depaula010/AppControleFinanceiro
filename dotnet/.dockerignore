@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+tests/
+specs/
+scripts/
+*.md
+.vs/
+**/.env
