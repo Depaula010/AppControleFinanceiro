@@ -98,7 +98,7 @@ Esperado: 5, 18, 61, 0, 0; um duplicado (`macro_id = 17`, `Outros`, 2); macros 1
 | Unitário | `Domain/Categories/CategoryTypeFilterParserTests` | AC-003-05, 31 (valores exatos, vazio, `" Receita"`, hostil, nulo) |
 | Unitário | `Domain/Categories/CategoryTreeTests` | AC-003-06 (formato), 08, 32 (ordem de primeira aparição, macros intercaladas, subs na ordem recebida) |
 | Unitário | `Application/Categories/ListCategoriesTests` (NSubstitute) | repositório recebe `userId` e filtro certos; resultado agrupado; exceção sobe |
-| Unitário | `Api/Categories/CategoriesEndpointTests` (host mínimo com fake de repositório e `RequireUser`) | AC-003-20, 21, 30 (500 sem texto da exceção), `data: []` (AC-003-09), mesmo corpo nos dois caminhos (AC-003-02) |
+| Integração sem Docker | `IntegrationTests/Categories/CategoriesEndpointTests` (WebApplicationFactory com fake de repositório; `TestHost` só existe no projeto de integração) | AC-003-20, 21, 30 (500 sem texto da exceção), `data: []` (AC-003-09), mesmo corpo nos dois caminhos (AC-003-02) |
 | Integração (Docker) | `Categories/CategoriesEndpointsTests` (`PostgresFixture`, token via `JwtTokenService.Issue`, usuários e categorias próprias inseridos por SQL) | AC-003-01 a 08, 10 a 15, 31, 32; corpo comparado como texto exato |
 | Integração | `Database/ReferenceDataMigrationTests` (existente) + `Categories/CategorySeedGapsTests` | AC-003-40 a 45 |
 | Integração | `Categories/CategoryLookupTests` (G-3) | AC-003-50 a 53 |
