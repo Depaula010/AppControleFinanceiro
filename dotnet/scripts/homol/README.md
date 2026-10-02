@@ -6,14 +6,7 @@ Arquivos em `heidisql/`. Você precisa da sessão do HeidiSQL já conectada ao `
 
 1. **Inspeção** — conectado em `bot_whatsapp_prod`, abra `01-inspecao-producao.sql` e execute tudo (Shift+Ctrl+F9). São só `SELECT`. Salve os resultados (botão direito na grade → *Exportar resultados da grade* → CSV) ou me mande o que ele mostrar, principalmente as consultas 1, 4, 6, 8, 9, 10, 11, 12 e 14. Nenhuma consulta devolve hash, chave ou token, só formato e contagem.
 2. **Criar o banco** — rode `02-criar-banco-homol.sql` (uma linha: `CREATE DATABASE bot_whatsapp_homol`). Atualize a lista de bancos com F5.
-3. **Copiar a estrutura** — no HeidiSQL:
-   1. Botão direito em `bot_whatsapp_prod` → *Exportar banco de dados como SQL*.
-   2. Marque todas as tabelas; em *Dados* escolha **Nenhum**; em *Estrutura* escolha **Criar**; *Saída*: **Arquivo único** (ou *Copiar para a área de transferência*).
-   3. Clique em *Exportar*.
-   4. Selecione `bot_whatsapp_homol`, abra uma aba de consulta nela, cole/abra o arquivo exportado e execute.
-   5. Confira no cabeçalho do arquivo que não há `DROP DATABASE`; se houver, apague essa linha antes de executar.
-   
-   Salve esse arquivo como `dotnet/specs/foundation/schema-prod.sql` (só estrutura; confira que não há `INSERT`).
+3. **Criar a estrutura** — conectado em `bot_whatsapp_homol`, abra `dotnet/specs/foundation/schema-prod.sql` no HeidiSQL e execute tudo (F9). O arquivo já é PostgreSQL válido (24 tabelas, 33 FKs, 33 índices, função e 9 triggers de `updated_at`), sem dados. **Não use** o *Exportar banco de dados como SQL* do HeidiSQL para isso: o export dele mistura sintaxe MySQL (`KEY (...)`, `DELIMITER`, `RETURNS UNKNOWN`) e falha no Postgres com erros como `no language specified`.
 4. **Dados de referência** — conectado em `bot_whatsapp_prod`, execute os 4 `SELECT` de `03-gerar-dados-de-referencia.sql`, copie a célula de cada resultado e execute na `bot_whatsapp_homol`, **na ordem**. Depois rode o bloco de `setval` comentado no fim do arquivo.
 5. **Conferir** — `04-conferir-homol.sql` na `bot_whatsapp_homol`: as tabelas devem ser as mesmas da produção, `usuarios` e `transacoes` com 0 linhas e as 3 subcategorias exigidas presentes.
 

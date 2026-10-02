@@ -16,6 +16,8 @@ Cinco dialetos coexistem. **Cada rota usa o seu**; nunca unificar.
 | **D** | filtro de segurança | — | `{"error":"...","message":"..."}` |
 | **E** | `/webhook-whatsapp` | `{"status":"sucesso","resposta":"<texto>"}` | `{"status":"erro","resposta":"..."}` (o 400 usa `mensagem`) |
 
+**Campos na raiz no envelope A.** `/auth/register`, `/auth/login` e `/auth/verify` não usam `data`: devolvem `user_id`, `token`, `user` e `valid` direto na raiz (`{"status":"success","token":...,"user":{...}}`). As rotas `/api/*` usam `message` e `data`.
+
 Exceções por rota (todas preservadas):
 - `POST /api/transacao`: sucesso `{"status":"success","message",...}` (inglês); erro `{"status":"erro","mensagem"}`; JSON inválido `{"erro":"JSON invalido ou ausente"}`.
 - Várias rotas `/admin/setup-*` devolvem texto puro ou HTML `<pre>`; as páginas OAuth são HTML.

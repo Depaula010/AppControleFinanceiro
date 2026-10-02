@@ -130,3 +130,6 @@ app/routes/webhooks/intents/admin_intents.py
 dotnet/scripts/homol/out/
 dotnet/**/bin/
 dotnet/**/obj/
+
+# Estrutura do banco de producao (somente local; gerada a partir de migrations/schema.sql)
+dotnet/specs/foundation/schema-prod.sql

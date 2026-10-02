@@ -1,6 +1,6 @@
 # Modelo de dados
 
-Reconstruído do dump `migrations/schema.sql` (HeidiSQL, PostgreSQL 15.15, **17/03/2026**) cruzado com o código (commits até 07/09/2026). A estrutura exportada de produção está em `schema-prod.sql` (mesma pasta; HeidiSQL, 2026-10-02, sem dados, com os triggers acrescentados à mão). Em caso de divergência, vale o `schema-prod.sql` e as consultas de §6.
+Reconstruído do dump `migrations/schema.sql` (HeidiSQL, PostgreSQL 15.15, **17/03/2026**) cruzado com o código (commits até 07/09/2026). A estrutura exportada de produção está em `schema-prod.sql` (mesma pasta; **arquivo local, fora do git**; HeidiSQL, 2026-10-02, sem dados, com os triggers acrescentados à mão). Em caso de divergência, vale o `schema-prod.sql` e as consultas de §6.
 
 > `migrations/schema.sql` contém dados reais (hash de senha, chave de API, sessão do bot). Está fora do git (`.gitignore:125`) e **nunca** deve ser commitado ou compartilhado.
 

@@ -13,6 +13,17 @@ Estratégia: construir e validar tudo em homol; em produção, trocar o containe
 - [ ] Tag `flask-final` criada no commit do Flask em produção.
 - [ ] Janela de baixo uso (madrugada), evitando 00:01 (processador de faturas) e as horas 18–23.
 
+## Migrations de schema (ADR 0001)
+
+Antes do passo 5 da sequência, aplicar em produção, com o Rafael presente, as migrations de `dotnet/migrations/` ainda não aplicadas. As previstas até aqui, todas aditivas:
+
+| # | Migration | Desvio |
+|---|---|---|
+| 0001 | `usuarios.api_key_automate` para `varchar(255)` | 017 |
+| (a definir) | `transacoes.observacoes text`, `transacoes.origem varchar(20)` | 027 |
+
+Aplicar antes é seguro: o Flask não usa as colunas novas e a alteração de tipo só alarga.
+
 ## Sequência
 
 1. **Congelar** o Flask: parar o recebimento de novos atalhos avisando o bot (ou aceitar alguns minutos de falha).

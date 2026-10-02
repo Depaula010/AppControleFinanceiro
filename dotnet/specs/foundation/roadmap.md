@@ -21,13 +21,14 @@ Virada única (big-bang): nada vai a produção antes da Fase 4. Valor intermedi
 | Middleware de segurança (whitelist, bloqueio de IP, Redis) | feature 009 | precisa do cliente Redis e da spec 009 aprovada (formato de chave duplamente codificado, desvios 005 e 023) |
 | Build da imagem validado localmente | job `docker-build` do `ci.yml` | Docker Desktop indisponível na máquina de desenvolvimento |
 | ~~SDK 10 estável~~ | **resolvido** | SDK 10.0.401 instalado; `global.json` fixado nele e os 38 testes passam |
-| ~~`schema-prod.sql`~~ | **resolvido** | estrutura exportada em 2026-10-02 e salva em `foundation/schema-prod.sql` (sem dados); falta só criar o banco de homol |
+| ~~`schema-prod.sql`~~ | **resolvido** | estrutura exportada em 2026-10-02 em `foundation/schema-prod.sql` (sem dados). **Arquivo local, ignorado pelo git** por decisão do Rafael; **os testes de integração com Testcontainers e o CI precisam de um schema versionado: decidir antes da T9 da feature 001** (ex.: baseline em `dotnet/migrations/0000_baseline.sql`). Homol já criado, falta carregar a estrutura e os dados de referência |
 
 ## Features e ondas
 
 | # | Feature | Origem principal (Python) | Onda |
 |---|---|---|---|
-| 001 | Auth (register, login, verify) | `app/routes/auth.py` | 1 |
+| **001a** | **Blocos compartilhados de auth** (JWT, filtro `RequireUser`, hasher Werkzeug, Fernet, conexão Dapper) | `app/routes/auth.py`, `api.py:34-90`, `encryption_service.py` | **1 — entra primeiro, sozinha** |
+| 001b | Auth: rotas `/auth/register`, `/auth/login`, `/auth/verify` | `app/routes/auth.py` | 1 |
 | 002 | Contas | `app/routes/api.py:283-727` | 1 |
 | 003 | Categorias | `api.py:1702`, seed em `setup_service.py:78-105` | 1 |
 | 008 | API keys e LGPD | `app/routes/api_keys.py`, `servico_consentimento_lgpd.py`, `gerenciador_chaves_api.py` | 1 |
@@ -57,7 +58,7 @@ Regras para evitar conflito:
 - Pacote NuGet novo ou mudança em arquivo compartilhado entra por PR separado, antes da onda.
 - Cada agente só altera a pasta da sua feature (`*/NNN-nome/`), os testes dela e, se necessário, um arquivo de desvio.
 
-A onda N+1 só começa quando os PRs da onda N estão em `main`.
+A onda N+1 só começa quando os PRs da onda N estão em `main`. **Exceção na onda 1:** a 001a (blocos compartilhados de auth) entra em `main` primeiro e sozinha, porque toda rota `/api/*` das outras features depende do filtro `RequireUser`; só depois a 001b, a 002, a 003, a 008 e a 010 rodam em paralelo.
 
 ## Marcos
 
