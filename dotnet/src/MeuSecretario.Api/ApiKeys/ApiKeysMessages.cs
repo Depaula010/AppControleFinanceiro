@@ -52,6 +52,25 @@ internal static class ApiKeysMessages
     public const string UsageFailed = "Erro ao consultar uso";
     public const string LogsFailed = "Erro ao consultar logs";
 
+    // ---- LGPD
+    public const string RegisterConsentFailed = "Erro ao registrar consentimento";
+    public const string RegisterConsentMissing = "usuario_id, tipo_consentimento e consentimento_dado são obrigatórios";
+    public const string ValidationTitle = "Validação";
+    public const string ConsentRegistered = "Consentimento registrado com sucesso";
+    public const string ListConsentsFailed = "Erro ao listar consentimentos";
+    public const string InitialConsentsFailed = "Erro ao solicitar consentimentos";
+    public const string InitialConsentsMessage = "Para continuar, você precisa consentir com os termos abaixo";
+    public const string ExportFailed = "Erro ao exportar dados";
+    public const string DeleteAccountFailed = "Erro ao deletar conta";
+    public const string DeleteConfirmationTitle = "Confirmação inválida";
+
+    public const string DeleteConfirmationMessage =
+        "Confirmação inválida. Para deletar a conta, você deve passar confirmacao='" + AccountDeletion.Confirmation + "' explicitamente.";
+
+    public static string AccountDeleted(int userId) => $"Conta e todos os dados do usuário {userId} foram deletados com sucesso";
+
+    public const string CheckConsentFailed = "Erro ao verificar consentimento";
+
     // ---- health
     public const string ServiceName = "API Keys Management";
     public const string ServiceVersion = "1.0.0";

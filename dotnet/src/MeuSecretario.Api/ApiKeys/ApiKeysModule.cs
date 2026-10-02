@@ -28,6 +28,12 @@ public sealed class ApiKeysModule : IFeatureModule
         services.AddScoped<DeletePreference>();
         services.AddScoped<GetUsage>();
         services.AddScoped<GetAccessLogs>();
+
+        services.AddScoped<RegisterConsent>();
+        services.AddScoped<ListConsents>();
+        services.AddScoped<CheckConsent>();
+        services.AddScoped<ExportUserData>();
+        services.AddScoped<DeleteAccount>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder app)
@@ -49,6 +55,7 @@ public sealed class ApiKeysModule : IFeatureModule
 
         var secured = group.MapGroup(string.Empty).RequireApiKey(ApiKeyUnauthorized.EnvelopeC);
         KeysEndpoints.Map(secured);
+        LgpdEndpoints.Map(secured);
     }
 
     // ------------------------------------------------------------------ utilidades compartilhadas

@@ -27,6 +27,24 @@ internal static partial class ApiKeysLog
     [LoggerMessage(EventId = 8008, Level = LogLevel.Error, Message = "Erro ao consultar uso (usuário {UserId}): {Error}")]
     public static partial void UsageFailed(ILogger logger, int userId, string error);
 
+    [LoggerMessage(EventId = 8010, Level = LogLevel.Error, Message = "Erro ao registrar consentimento: {Error}")]
+    public static partial void RegisterConsentFailed(ILogger logger, string error);
+
+    [LoggerMessage(EventId = 8011, Level = LogLevel.Error, Message = "Erro ao solicitar consentimentos (usuário {UserId}): {Error}")]
+    public static partial void InitialConsentsFailed(ILogger logger, int userId, string error);
+
+    [LoggerMessage(EventId = 8012, Level = LogLevel.Error, Message = "Erro ao exportar dados (usuário {UserId}): {Error}")]
+    public static partial void ExportFailed(ILogger logger, int userId, string error);
+
+    [LoggerMessage(EventId = 8013, Level = LogLevel.Error, Message = "Erro ao deletar conta (usuário {UserId}): {Error}")]
+    public static partial void DeleteAccountFailed(ILogger logger, int userId, string error);
+
+    [LoggerMessage(EventId = 8014, Level = LogLevel.Information, Message = "Conta do usuário {UserId} deletada por pedido LGPD")]
+    public static partial void AccountDeleted(ILogger logger, int userId);
+
+    [LoggerMessage(EventId = 8015, Level = LogLevel.Information, Message = "Exportação LGPD dos dados do usuário {UserId}")]
+    public static partial void DataExported(ILogger logger, int userId);
+
     [LoggerMessage(EventId = 8009, Level = LogLevel.Error, Message = "Erro ao consultar logs de acesso (usuário {UserId}): {Error}")]
     public static partial void LogsFailed(ILogger logger, int userId, string error);
 }

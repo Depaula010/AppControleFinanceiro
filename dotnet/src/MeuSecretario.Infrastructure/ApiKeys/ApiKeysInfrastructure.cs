@@ -45,6 +45,11 @@ public static class ApiKeysServiceCollectionExtensions
         services.TryAddSingleton<ISystemApiKeys, SystemApiKeys>();
         services.TryAddSingleton<IApiKeyDiagnostics, ApiKeyDiagnostics>();
         services.TryAddSingleton<IApiKeyProvider, ApiKeyProvider>();
+
+        // LGPD (008b). O limpador de cache é nulo até a 010a (cliente Redis) registrar o seu.
+        services.TryAddSingleton<IConsentRepository, ConsentRepository>();
+        services.TryAddSingleton<IAccountDataRepository, AccountDataRepository>();
+        services.TryAddSingleton<IUserCacheCleaner, NullUserCacheCleaner>();
         return services;
     }
 }
