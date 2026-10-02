@@ -40,6 +40,12 @@ public class ArchitectureTests
     }
 
     [Fact]
+    public void Application_DoesNotDependOnGoogleRedisOrHttp()
+    {
+        ShouldNotDependOn(Application, "Google", "StackExchange.Redis", "Npgsql", "System.Net.Http");
+    }
+
+    [Fact]
     public void Infrastructure_DoesNotDependOnApi()
     {
         ShouldNotDependOn(Infrastructure, "MeuSecretario.Api", "Microsoft.AspNetCore");
