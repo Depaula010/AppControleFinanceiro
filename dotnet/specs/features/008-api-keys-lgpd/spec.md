@@ -302,8 +302,8 @@ Cada critério vira pelo menos um teste (`[Trait("AC","008-NN")]`).
 - **AC-008-01** Dado header `X-API-KEY` ausente, vazio ou errado, quando qualquer rota exceto health, então 401 `{"erro":"Não autorizado","mensagem":"API key inválida ou ausente"}` e nada é lido nem gravado (corpo e banco intactos).
 - **AC-008-02** Dado a chave correta, então a rota executa; a comparação usa `FixedTimeEquals` sobre hashes (teste unitário do validador, inclusive chaves de tamanhos diferentes).
 - **AC-008-03** `GET /api-keys/health` sem header ⇒ 200 `{"status":"ok","servico":"API Keys Management","versao":"1.0.0"}`.
-- **AC-008-04** `/api-keys/usuario/abc`, `/api-keys/usuario/-1` e `/api-keys/usuario/1/` ⇒ 404 HTML do Flask.
-- **AC-008-05** (desvio 052) Com `API_KEYS_ROUTES_ENABLED` ausente ou `false`, todas as 16 rotas (inclusive `health`) ⇒ 404 HTML do Flask, mesmo com `X-API-KEY` correta; com `true`, existem. `AppSettings.ApiKeysRoutesEnabled` lê a variável (padrão false; `true`/`TRUE` ligam).
+- **AC-008-04** `/api-keys/usuario/abc`, `/api-keys/usuario/-1` e `/api-keys/usuario/1/` ⇒ 404. Divergência de corpo (aceita): só a barra final e ids acima de `int.MaxValue` devolvem o HTML do Flask; os ids não numéricos/negativos caem na rota inexistente do ASP.NET (404 de corpo vazio). Nenhum cliente depende do corpo.
+- **AC-008-05** (desvio 052) Com `API_KEYS_ROUTES_ENABLED` ausente ou `false`, todas as 16 rotas (inclusive `health`) ⇒ 404 (corpo vazio do ASP.NET, ver AC-008-04), mesmo com `X-API-KEY` correta; com `true`, existem. `AppSettings.ApiKeysRoutesEnabled` lê a variável (padrão false; `true`/`TRUE` ligam).
 
 **Chaves**
 - **AC-008-10** Dado corpo válido, `POST /usuario/<id>` ⇒ 201 com `mensagem`, `id`, `provedor`, `usuario_id`; o banco tem a chave em token Fernet decifrável pelo Python (fixture) e `ativo = true`.
