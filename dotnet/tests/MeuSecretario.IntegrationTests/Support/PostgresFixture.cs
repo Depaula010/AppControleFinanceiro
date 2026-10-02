@@ -71,11 +71,15 @@ public sealed class PostgresFixture : IAsyncLifetime
         await _container.DisposeAsync();
     }
 
-    /// <summary>Apaga usuários (e, em cascata, contas e o resto) e reinicia as sequências entre testes.</summary>
+    /// <summary>
+    /// Apaga usuários (e, em cascata, contas, categorias e o resto) e reinicia as sequências entre testes,
+    /// e em seguida reaplica o seed das categorias globais (migration 0020), que o CASCADE também apaga.
+    /// </summary>
     public async Task ResetAsync()
     {
         await using var connection = await DataSource.OpenConnectionAsync();
         await connection.ExecuteAsync("TRUNCATE usuarios RESTART IDENTITY CASCADE");
+        await connection.ExecuteAsync(MigrationRunner.ReadScript("0020_categorias_globais"));
     }
 }
 

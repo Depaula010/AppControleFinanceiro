@@ -1,5 +1,17 @@
 # Decisões da onda 1 (specs 002, 003 e 008)
 
+> **DECIDIDO em 2026-10-02: "aprovo as recomendações", atuando com no máximo 3 agentes ao mesmo tempo.**
+> Valem todas as recomendações da tabela. Resultado: G-1 a G-4, G-6 (opção B), G-7 e G-8 aprovados; G-5 rejeitado (sem HEAD);
+> desvios **032 a 048** e **052** aprovados (044 com condições); **049, 050 e 051** rejeitados (P-002-9, P-003-2 e P-008-6).
+> Arquivos em `parity-deviations/`. Perguntas 008-Q5, Q6 e Q7 aprovadas como estão escritas.
+>
+> **Respostas do banco de produção (script 05, 2026-10-02):**
+> - Collation `en_US.utf8` (imagem Alpine/musl, na qual a ordenação efetiva é por bytes; o container de teste é a mesma imagem `postgres:15-alpine`, então a ordem dos testes representa a produção). Risco: se a produção migrar para uma imagem Debian/glibc, a ordem de nomes com acento muda.
+> - Seed de categorias confere: 5 grupos, 18 macros globais, 61 subcategorias globais (60 do seed + o `Outros` duplicado da macro 17, desvio 030), 0 de usuário; macro 17 = `Despesas Gerais`, macro 18 = `Receitas Gerais`.
+> - UNIQUE de `contas` = `contas_usuario_id_nome_conta_key`, como a spec 002 supunha.
+> - 4 contas, todas ativas (Cartão Inter, Mercado pago, Carteira, Swile); nenhuma não-cartão com dias, nenhum cartão sem dias.
+> - Agendamentos ativos: conta 2 (Cartão Inter) tem 5 e conta 3 (Mercado pago) tem 23. Pelo desvio 037, essas duas contas deixam de poder ser excluídas até os agendamentos serem desativados.
+
 Consolida o que os agentes de spec deixaram para aprovação. Fontes: seções "Desvios propostos" e "Perguntas em aberto" de `features/002-contas`, `003-categorias` e `008-api-keys-lgpd`. A 010 (Integrações) entra num segundo documento quando sair.
 
 **Como responder:** aprove tudo de uma vez ("aprovo as recomendações") ou liste só as exceções ("aprovo as recomendações, exceto P-002-1 e G-5"). O que ficar sem resposta **não é implementado**: o .NET reproduz o Flask.

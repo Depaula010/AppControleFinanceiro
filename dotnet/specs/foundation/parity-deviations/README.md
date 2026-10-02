@@ -39,3 +39,24 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [029](029-tokens-google-texto-puro.md) | Tokens do Google guardados em texto puro | segurança | 010, 014 | aprovado |
 | [030](030-subcategoria-global-duplicada.md) | Subcategoria global duplicada: Outros (macro 17) | correção | 003, 004, 011 | aprovado |
 | [031](031-validacoes-do-cadastro.md) | Validações do cadastro: WhatsApp sem dígitos, dias não inteiros e cadastro concorrente | correção | 001 | implementado |
+| [032](032-reativar-conta-inativa.md) | Reativar conta inativa de mesmo nome | correção | 002 | aprovado |
+| [033](033-tipos-json-e-numeros-extremos-contas.md) | Contas: tipo JSON errado e números extremos | correção | 002 | aprovado |
+| [034](034-dias-fora-de-cartao.md) | Contas: dias e limite fora de cartão e troca de tipo | correção | 002 | aprovado |
+| [035](035-validar-cor-e-icone.md) | Contas: validar cor_hex e icone | correção | 002 | aprovado |
+| [036](036-cartao-exige-dias.md) | Contas: cartão de crédito exige os dois dias | correção | 002 | aprovado |
+| [037](037-remocao-conta-agendamentos-e-padrao.md) | Contas: remoção considera agendamentos ativos e conta padrão | correção | 002 | aprovado |
+| [038](038-contas-get-campos-extras.md) | Contas: GET devolve também os campos que o Angular espera | compatibilidade | 002 | aprovado |
+| [039](039-contas-inativas-em-outras-features.md) | Contas inativas deixam de ser usadas por outras features | correção | 004, 011, 012 | aprovado |
+| [040](040-categorias-receitas-gerais.md) | Categorias: Receita inclui Receitas Gerais, Despesa não | correção | 003 | aprovado |
+| [041](041-consentimento-upsert.md) | LGPD: consentimento pode ser atualizado e revogado | correção | 008 | aprovado |
+| [042](042-chave-api-duplicada-409.md) | API keys: chave duplicada responde 409 | correção | 008 | aprovado |
+| [043](043-usuario-inexistente-404.md) | API keys e LGPD: usuário inexistente responde 404 | correção | 008 | aprovado |
+| [044](044-deletar-conta-completo.md) | LGPD: deletar-conta apaga de fato | segurança | 008 | aprovado |
+| [045](045-chave-usuario-id-obrigatorio.md) | API keys: usuario_id obrigatório em PUT/DELETE /chave/<id> | segurança | 008 | aprovado |
+| [046](046-limite-plano-so-chave-sistema.md) | API keys: limite do plano conta só chamadas com chave do sistema | correção | 008 | aprovado |
+| [047](047-gravar-log-acesso-chaves.md) | API keys: gravar o log de acesso | correção | 008 | aprovado |
+| [048](048-tipos-json-api-keys.md) | API keys: tipos JSON inesperados viram 400 | correção | 008 | aprovado |
+| [049](049-limite-credito-zero.md) | Contas: limite_credito zero respondido como null | compatibilidade | 002 | rejeitado |
+| [050](050-esconder-outros-duplicado.md) | Categorias: esconder o Outros global duplicado na API | correção | 003 | rejeitado |
+| [051](051-exportar-mascarar-chaves.md) | LGPD: mascarar chaves no exportar | segurança | 008 | rejeitado |
+| [052](052-api-keys-desligadas-por-padrao.md) | Rotas /api-keys/* desligadas por padrão em produção | segurança | 008, 009 | aprovado |

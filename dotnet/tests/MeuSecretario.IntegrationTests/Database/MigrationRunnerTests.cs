@@ -54,38 +54,43 @@ public class MigrationRunnerTests(PostgresFixture postgres)
 
         var versions = (await connection.QueryAsync<string>("SELECT versao FROM dotnet_migrations ORDER BY versao")).ToList();
 
-        versions.ShouldBe(["0000_baseline", "0001_usuarios_api_key_varchar255"]);
+        versions.ShouldBe(["0000_baseline", "0001_usuarios_api_key_varchar255", "0020_categorias_globais"]);
     }
 
     [Fact]
-    public async Task ExistingProductionDatabase_AdoptsTheBaselineWithoutExecutingIt()
+    public async Task ExistingProductionDatabase_AdoptsTheBaseline_AndInsertsNoReferenceData()
     {
-        // Simula a produção: o banco já tem "usuarios" (e nada mais do baseline).
-        var adminConnectionString = postgres.ConnectionString;
-        await using (var admin = new NpgsqlConnection(adminConnectionString))
+        // Simula a produção: schema completo já existente (criado "à mão"), api_key_automate ainda varchar(100),
+        // categorias já semeadas (com o "Outros" duplicado da macro 17 = 61 subcategorias) e um usuário real.
+        await using (var admin = new NpgsqlConnection(postgres.ConnectionString))
         {
             await admin.OpenAsync();
             await admin.ExecuteAsync("CREATE DATABASE adotado");
         }
 
-        var adoptedConnectionString = new NpgsqlConnectionStringBuilder(adminConnectionString) { Database = "adotado" }.ConnectionString;
+        var adoptedConnectionString = new NpgsqlConnectionStringBuilder(postgres.ConnectionString) { Database = "adotado" }.ConnectionString;
         await using var dataSource = NpgsqlDataSource.Create(adoptedConnectionString);
         await using (var connection = await dataSource.OpenConnectionAsync())
         {
-            await connection.ExecuteAsync("CREATE TABLE usuarios (id int primary key, api_key_automate varchar(100))");
-            await connection.ExecuteAsync("INSERT INTO usuarios VALUES (1, 'chave-existente-em-texto-puro')");
+            await connection.ExecuteAsync(MigrationRunner.ReadScript(MigrationRunner.BaselineVersion));
+            await connection.ExecuteAsync("ALTER TABLE usuarios ALTER COLUMN api_key_automate TYPE varchar(100)");
+            await connection.ExecuteAsync(MigrationRunner.ReadScript("0020_categorias_globais"));
+            await connection.ExecuteAsync("INSERT INTO subcategoria (macro_id, nome_sub) VALUES (17, 'Outros')"); // a duplicata real
+            await connection.ExecuteAsync("INSERT INTO usuarios (nome, numero_whatsapp, api_key_automate) VALUES ('Real', '5511888888888', 'chave-existente-em-texto-puro')");
+            await connection.ExecuteAsync("DROP TABLE IF EXISTS dotnet_migrations");
         }
 
+        // Se o baseline fosse executado, falharia com "relation already exists": o sucesso prova que foi só adotado.
         var processed = await new MigrationRunner(dataSource).RunAsync();
 
-        processed.ShouldBe(["0000_baseline", "0001_usuarios_api_key_varchar255"]);
+        processed.ShouldBe(["0000_baseline", "0001_usuarios_api_key_varchar255", "0020_categorias_globais"]);
         await using var check = await dataSource.OpenConnectionAsync();
-        // O baseline NÃO foi executado: nenhuma outra tabela do Flask apareceu...
-        (await check.ExecuteScalarAsync<bool>("SELECT to_regclass('public.contas') IS NULL")).ShouldBeTrue();
-        // ...mas a 0001 foi aplicada e os dados existentes continuam intactos.
+        (await check.ExecuteScalarAsync<int>("SELECT count(*) FROM subcategoria WHERE usuario_id IS NULL")).ShouldBe(61);
+        (await check.ExecuteScalarAsync<int>("SELECT count(*) FROM macrocategoria WHERE usuario_id IS NULL")).ShouldBe(18);
+        (await check.ExecuteScalarAsync<int>("SELECT count(*) FROM grupocategoria")).ShouldBe(5);
         (await check.ExecuteScalarAsync<int>(
             "SELECT character_maximum_length FROM information_schema.columns WHERE table_name = 'usuarios' AND column_name = 'api_key_automate'"))
             .ShouldBe(255);
-        (await check.ExecuteScalarAsync<string>("SELECT api_key_automate FROM usuarios WHERE id = 1")).ShouldBe("chave-existente-em-texto-puro");
+        (await check.ExecuteScalarAsync<string>("SELECT api_key_automate FROM usuarios WHERE nome = 'Real'")).ShouldBe("chave-existente-em-texto-puro");
     }
 }

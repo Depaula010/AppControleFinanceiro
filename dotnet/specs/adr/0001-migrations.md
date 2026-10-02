@@ -24,3 +24,7 @@ O banco `bot_whatsapp_prod` é compartilhado com o bot Node e foi criado à mão
 - O runner é uma pequena classe de Infrastructure (lê a pasta, ordena, aplica em transação, registra).
 - Cada migration precisa de uma nota no `cutover-runbook.md` se for necessária antes da virada.
 - Perde-se a geração automática do EF; ganha-se controle explícito e idempotência.
+
+## Adendo (2026-10-02): migrations com dados de referência
+
+Algumas migrations carregam **dados de referência** (ex.: `0020_categorias_globais`, o seed de categorias que no Flask era uma rota admin). Regras: (1) sempre **idempotentes** e protegidas por uma guarda ("só insere se a tabela de referência estiver vazia") para nunca duplicar dados em produção, onde as linhas já existem; (2) **nunca** `DELETE`/`UPDATE` em linhas existentes nem em linhas de usuário (`usuario_id` não nulo); (3) em produção devem inserir **zero** linhas; o teste de integração prova isso simulando o estado de produção.

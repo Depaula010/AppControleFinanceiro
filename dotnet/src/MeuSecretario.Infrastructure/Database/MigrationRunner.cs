@@ -69,6 +69,10 @@ public sealed class MigrationRunner(NpgsqlDataSource dataSource)
         }
     }
 
+    /// <summary>Texto de uma migration embutida (ex.: <c>0020_categorias_globais</c>); usado pelo reset dos testes.</summary>
+    public static string ReadScript(string version) =>
+        LoadEmbeddedScripts().Single(m => m.Version == version).Script;
+
     private static List<(string Version, string Script)> LoadEmbeddedScripts()
     {
         var assembly = typeof(MigrationRunner).Assembly;
