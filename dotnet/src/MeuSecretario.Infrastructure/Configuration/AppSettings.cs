@@ -16,6 +16,9 @@ public sealed class AppSettings
     public required string GeminiApiKey { get; init; }
     public required string RedisUrl { get; init; }
 
+    /// <summary><c>GEMINI_MODEL</c> (opcional).</summary>
+    public string GeminiModel { get; init; } = "gemini-2.5-flash-lite";
+
     public string WebhookSignatureKey { get; init; } = string.Empty;
     public string BotWhatsappUrl { get; init; } = string.Empty;
     public string BotSessionName { get; init; } = "sessao-principal";
@@ -119,6 +122,7 @@ public sealed class AppSettings
             EncryptionKey = encryptionKey,
             GeminiApiKey = geminiApiKey,
             RedisUrl = redisUrl,
+            GeminiModel = Optional("GEMINI_MODEL", "gemini-2.5-flash-lite"),
             WebhookSignatureKey = Optional("WEBHOOK_SIGNATURE_KEY", apiSecretKey),
             BotWhatsappUrl = Optional("BOT_WHATSAPP_URL"),
             BotSessionName = Optional("BOT_SESSION_NAME", "sessao-principal"),

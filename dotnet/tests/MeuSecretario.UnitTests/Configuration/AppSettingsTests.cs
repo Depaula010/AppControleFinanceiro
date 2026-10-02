@@ -31,6 +31,16 @@ public class AppSettingsTests
     }
 
     [Fact]
+    public void Load_GeminiModel_DefaultsAndCanBeOverridden()
+    {
+        Load(Valid()).GeminiModel.ShouldBe("gemini-2.5-flash-lite");
+
+        var values = Valid();
+        values["GEMINI_MODEL"] = "gemini-2.5-pro";
+        Load(values).GeminiModel.ShouldBe("gemini-2.5-pro");
+    }
+
+    [Fact]
     public void Load_ListsEveryMissingRequiredVariable()
     {
         var ex = Should.Throw<InvalidOperationException>(() => Load([]));
