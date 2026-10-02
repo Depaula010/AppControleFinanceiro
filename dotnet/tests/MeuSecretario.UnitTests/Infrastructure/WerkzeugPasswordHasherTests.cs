@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using MeuSecretario.Infrastructure.Security;
-using MeuSecretario.UnitTests.Fixtures;
+using MeuSecretario.TestFixtures;
 
 namespace MeuSecretario.UnitTests.Infrastructure;
 

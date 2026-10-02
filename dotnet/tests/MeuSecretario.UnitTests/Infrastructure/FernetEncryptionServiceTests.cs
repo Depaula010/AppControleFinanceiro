@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using MeuSecretario.Infrastructure.Security;
-using MeuSecretario.UnitTests.Fixtures;
+using MeuSecretario.TestFixtures;
 using Microsoft.Extensions.Time.Testing;
 
 namespace MeuSecretario.UnitTests.Infrastructure;

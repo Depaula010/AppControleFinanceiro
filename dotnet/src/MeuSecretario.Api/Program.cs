@@ -2,6 +2,7 @@ using System.Globalization;
 using MeuSecretario.Api.Http;
 using MeuSecretario.Api.Modules;
 using MeuSecretario.Infrastructure;
+using MeuSecretario.Infrastructure.Database;
 using MeuSecretario.Infrastructure.Configuration;
 using Serilog;
 
@@ -45,6 +46,17 @@ var app = builder.Build();
 
 // Falha rápido: configuração inválida derruba o processo no boot, não na primeira requisição.
 _ = app.Services.GetRequiredService<AppSettings>();
+
+// Modo de migração (ADR 0001): `dotnet MeuSecretario.Api.dll --migrate` aplica as migrations pendentes e sai.
+// O app nunca executa DDL no boot normal.
+if (args.Contains("--migrate"))
+{
+    var applied = await app.Services.GetRequiredService<MigrationRunner>().RunAsync();
+    Console.WriteLine(applied.Count == 0
+        ? "Nenhuma migration pendente."
+        : "Migrations aplicadas: " + string.Join(", ", applied));
+    return;
+}
 
 app.UseMiddleware<StrictRoutingMiddleware>();
 

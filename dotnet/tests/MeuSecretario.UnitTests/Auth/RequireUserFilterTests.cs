@@ -1,7 +1,7 @@
 using MeuSecretario.Api.Auth;
 using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Infrastructure.Security;
-using MeuSecretario.UnitTests.Fixtures;
+using MeuSecretario.TestFixtures;
 using MeuSecretario.UnitTests.TestSupport;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;

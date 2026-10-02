@@ -1,4 +1,6 @@
 using Dapper;
+using MeuSecretario.TestFixtures;
+using Microsoft.AspNetCore.Mvc.Testing;
 using MeuSecretario.Infrastructure.Database;
 using Npgsql;
 using Testcontainers.PostgreSql;
@@ -20,6 +22,33 @@ public sealed class PostgresFixture : IAsyncLifetime
 
     public IDbConnectionFactory Connections { get; private set; } = default!;
 
+    /// <summary>DATABASE_URL no formato do Flask (<c>postgresql://usuario:senha@host:porta/banco</c>) para o container.</summary>
+    public string DatabaseUrl
+    {
+        get
+        {
+            var b = new NpgsqlConnectionStringBuilder(ConnectionString);
+            return $"postgresql://{Uri.EscapeDataString(b.Username!)}:{Uri.EscapeDataString(b.Password!)}@{b.Host}:{b.Port}/{b.Database}";
+        }
+    }
+
+    /// <summary>
+    /// A API real em memória apontando para o container. A <c>API_SECRET_KEY</c> é a das fixtures, para que os tokens
+    /// emitidos pelo PyJWT do Flask sejam aceitos. Hash com 1000 iterações só para os testes ficarem rápidos.
+    /// </summary>
+    public WebApplicationFactory<Program> Api => _api ??= new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+    {
+        builder.UseSetting("DATABASE_URL", DatabaseUrl);
+        builder.UseSetting("API_SECRET_KEY", AuthFixtures.JwtSecret);
+        builder.UseSetting("ENCRYPTION_KEY", AuthFixtures.FernetKey);
+        builder.UseSetting("GEMINI_API_KEY", "gemini-de-teste");
+        builder.UseSetting("REDIS_URL", "redis://localhost:6379");
+        builder.UseSetting("PASSWORD_HASH_ITERATIONS", "1000");
+        builder.UseSetting("LOG_TO_FILE", "false");
+    });
+
+    private WebApplicationFactory<Program>? _api;
+
     public async Task InitializeAsync()
     {
         await _container.StartAsync();
@@ -30,6 +59,11 @@ public sealed class PostgresFixture : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
+        if (_api is not null)
+        {
+            await _api.DisposeAsync();
+        }
+
         if (DataSource is not null)
         {
             await DataSource.DisposeAsync();

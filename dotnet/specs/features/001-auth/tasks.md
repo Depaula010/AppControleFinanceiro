@@ -13,10 +13,18 @@ Regra: cada tarefa termina com testes verdes e um commit. Ordem importa. As tare
 
 ## 001b — rotas
 
-- [ ] **T7 — Domain.** `PhoneNumber`, `CardDays`, `PasswordRules`, `DefaultAccounts` com testes (AC-001-02, 04, 06, 07).
-- [ ] **T8 — Casos de uso** `RegisterUser`, `LoginUser`, `VerifyToken` com fakes (ordem das validações; AC-001-03 a 09, 20 a 25, 30 a 33).
-- [ ] **T9 — `UserRepository` + migration 0001** com testes de integração em Testcontainers (AC-001-01, 08, 11, 12, 13).
-- [ ] **T10 — Endpoints** `AuthModule` com leitura de corpo tolerante (desvio 024) e `AuthMessages` (AC-001-10 e demais por rota).
-- [ ] **T11 — Teste de contrato** das respostas exatas (§4 da spec) e fechamento: desvios 017, 024 e 031 marcados como `implementado` (se aprovados), spec atualizada, PR aberto.
+- [x] **T7 — Domain.** `PhoneNumber`, `CardDays`, `PasswordRules`, `DefaultAccounts` com testes (AC-001-02, 04, 06, 07).
+- [x] **T8 — Casos de uso** `RegisterUser`, `LoginUser`, `VerifyToken` com fakes (ordem das validações; AC-001-03 a 09, 20 a 25, 30 a 33).
+- [x] **T9 — `UserRepository` + migration 0001** com testes de integração em Testcontainers (AC-001-01, 08, 11, 12, 13).
+- [x] **T10 — Endpoints** `AuthModule` com leitura de corpo tolerante (desvio 024) e `AuthMessages` (AC-001-10 e demais por rota).
+- [x] **T11 — Teste de contrato** das respostas exatas (§4 da spec) e fechamento: desvios 017, 024 e 031 marcados como `implementado` (se aprovados), spec atualizada, PR aberto.
 
 Definição de pronto: `constitution.md` §10.
+
+## Fechamento da 001b (2026-10-02)
+
+- Entregue: domínio, casos de uso, `UserRepository` (Dapper), `MigrationRunner` (baseline adotado em banco existente), migrations 0000 e 0001, endpoints `/auth/register`, `/auth/login` e `/auth/verify`, modo `--migrate`.
+- **295 testes verdes** (211 unitários + 84 de integração com PostgreSQL 15 em container). Os corpos das respostas são comparados como texto exato; um teste de mutação confirmou que os testes falham quando uma mensagem muda.
+- O teste de contrato (T11) ficou embutido nos testes de integração, que comparam o corpo exato de cada resposta, em vez de snapshots em arquivo; o que o Flask devolve vem da spec e do código lido, não de respostas capturadas (a captura em homol acontece na Fase 3).
+- Desvios 017 e 031 `implementado`. O 024 vale por rota; fica `aprovado` e é aplicado nas próximas.
+- Notas: (a) o `/auth/*` não loga PII; erros usam `SafeError.Describe`. (b) `Content-Type` é ignorado na leitura do corpo (o Flask devolvia 415/500 sem ele). (c) O baseline `0000` só roda em banco vazio; em produção é registrado sem executar.

@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace MeuSecretario.UnitTests.Fixtures;
+namespace MeuSecretario.TestFixtures;
 
 /// <summary>
 /// Fixtures geradas pelo Python (tests/Fixtures/generate_auth_fixtures.py): hashes do Werkzeug,

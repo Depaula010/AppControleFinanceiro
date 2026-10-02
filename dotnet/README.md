@@ -12,6 +12,16 @@ dotnet run --project src/MeuSecretario.Api
 
 `GET http://localhost:5000/` e `GET /api/health` respondem sem login. A aplicação aborta no boot, listando os nomes, se faltar variável obrigatória.
 
+## Migrations (ADR 0001)
+
+Scripts SQL em `migrations/` (embutidos no assembly). A aplicação **nunca** altera o schema no boot normal. Para aplicar os pendentes:
+
+```bash
+dotnet run --project src/MeuSecretario.Api -- --migrate      # usa o DATABASE_URL do ambiente
+```
+
+Em banco vazio (homol, testes) o `0000_baseline` cria tudo; em um banco que já tem `usuarios` (produção) ele só é registrado e as migrations seguintes são aplicadas. Cuidado: confira o `DATABASE_URL` antes de rodar.
+
 ## Testes
 
 ```bash
@@ -19,7 +29,7 @@ dotnet test MeuSecretario.slnx
 ```
 
 - `MeuSecretario.UnitTests`: sem I/O (configuração, relógio, envelopes, regras de dependência entre camadas).
-- `MeuSecretario.IntegrationTests`: API em memória via `WebApplicationFactory`; os testes com Postgres em container entram junto com a primeira feature que grava no banco.
+- `MeuSecretario.IntegrationTests`: API em memória (`WebApplicationFactory`) contra um PostgreSQL 15 em container (Testcontainers). **Exige o Docker ligado**; sem ele, rode só os unitários: `dotnet test tests/MeuSecretario.UnitTests`.
 
 ## Estrutura
 
