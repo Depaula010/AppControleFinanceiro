@@ -42,6 +42,21 @@ public class CategoryTypeFilterParserTests
     }
 }
 
+public class SpecialCategoriesTests
+{
+    [Fact]
+    [Trait("AC", "003-50")]
+    public void Names_AreExactlyTheOnesTheSeedAndTheFlaskUse()
+    {
+        SpecialCategories.ShortTermInvestment.ShouldBe("Investimentos de Curto Prazo");
+        SpecialCategories.LoanPrincipal.ShouldBe("Quitação de Empréstimos (Principal)");
+        SpecialCategories.Fallback.ShouldBe("Outros");
+        SpecialCategories.MetaGroup.ShouldBe("Meta Financeira");
+        SpecialCategories.ExpenseFallbackMacro.ShouldBe("Despesas Gerais");
+        SpecialCategories.IncomeFallbackMacro.ShouldBe("Receitas Gerais");
+    }
+}
+
 public class CategoryTreeTests
 {
     private static CategoryRow Row(string grupo, int macroId, string macro, int subId, string sub) =>

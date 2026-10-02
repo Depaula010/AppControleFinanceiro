@@ -9,7 +9,7 @@ namespace MeuSecretario.Infrastructure.Categories;
 /// Leitura de <c>grupocategoria</c>, <c>macrocategoria</c> e <c>subcategoria</c> com Dapper (spec 003 §3.5).
 /// O fragmento de filtro vem de um <c>switch</c> no enum: nenhum texto do cliente entra no SQL.
 /// </summary>
-public sealed class CategoryRepository(IDbConnectionFactory connections) : ICategoryRepository
+public sealed class CategoryRepository(IDbConnectionFactory connections) : ICategoryRepository, ICategoryLookup
 {
     private const string SelectVisible =
         """
@@ -45,5 +45,45 @@ public sealed class CategoryRepository(IDbConnectionFactory connections) : ICate
         var rows = await connection.QueryAsync<CategoryRow>(new CommandDefinition(
             sql, new { userId }, cancellationToken: cancellationToken));
         return rows.AsList();
+    }
+
+    public Task<int?> FindShortTermInvestmentAsync(int userId, CancellationToken cancellationToken) =>
+        FindMetaSubcategoryAsync(userId, SpecialCategories.ShortTermInvestment, cancellationToken);
+
+    public Task<int?> FindLoanPrincipalAsync(int userId, CancellationToken cancellationToken) =>
+        FindMetaSubcategoryAsync(userId, SpecialCategories.LoanPrincipal, cancellationToken);
+
+    public async Task<int?> FindFallbackAsync(bool income, CancellationToken cancellationToken)
+    {
+        await using var connection = await connections.OpenAsync(cancellationToken);
+        return await connection.QueryFirstOrDefaultAsync<int?>(new CommandDefinition(
+            """
+            SELECT s.id FROM subcategoria s
+            JOIN macrocategoria m ON s.macro_id = m.id
+            WHERE m.nome_macro = @macro AND s.nome_sub = @nome AND s.usuario_id IS NULL
+            ORDER BY s.id LIMIT 1
+            """,
+            new
+            {
+                macro = income ? SpecialCategories.IncomeFallbackMacro : SpecialCategories.ExpenseFallbackMacro,
+                nome = SpecialCategories.Fallback,
+            },
+            cancellationToken: cancellationToken));
+    }
+
+    private async Task<int?> FindMetaSubcategoryAsync(int userId, string name, CancellationToken cancellationToken)
+    {
+        await using var connection = await connections.OpenAsync(cancellationToken);
+        return await connection.QueryFirstOrDefaultAsync<int?>(new CommandDefinition(
+            """
+            SELECT s.id FROM subcategoria s
+            JOIN macrocategoria m ON s.macro_id = m.id
+            JOIN grupocategoria g ON m.grupo_id = g.id
+            WHERE g.nome_grupo = @grupo AND s.nome_sub = @nome
+              AND (s.usuario_id IS NULL OR s.usuario_id = @userId)
+            ORDER BY s.id LIMIT 1
+            """,
+            new { grupo = SpecialCategories.MetaGroup, nome = name, userId },
+            cancellationToken: cancellationToken));
     }
 }
