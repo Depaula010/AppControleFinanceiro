@@ -464,8 +464,9 @@ public partial class LgpdEndpointsTests(PostgresFixture postgres) : IAsyncLifeti
         (await ApiKeysTestSupport.Scalar<int>(postgres, "SELECT count(*) FROM subcategoria WHERE usuario_id IS NULL")).ShouldBe(globalSubcategories);
         (await ApiKeysTestSupport.Scalar<int>(postgres, "SELECT count(*) FROM macrocategoria WHERE usuario_id IS NULL")).ShouldBe(globalMacros);
 
-        // O limpador de cache roda uma vez, com o id certo, depois do commit (o usuário já não existe).
-        cleaner.Calls.ShouldBe([(target, false)]);
+        // O limpador de cache roda uma vez, com o id certo, ANTES da deleção: as chaves do Redis usam o WhatsApp, que só
+        // existe enquanto a linha de usuarios existe (o usuário ainda existia quando ele foi chamado).
+        cleaner.Calls.ShouldBe([(target, true)]);
     }
 
     [Fact]

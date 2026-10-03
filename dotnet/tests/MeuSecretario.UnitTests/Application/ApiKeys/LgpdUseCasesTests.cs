@@ -181,7 +181,7 @@ public class LgpdUseCasesTests
 
     [Fact]
     [Trait("AC", "008-49")]
-    public async Task DeleteAccount_Success_SumsTheCounters_AndClearsTheCacheAfterwards()
+    public async Task DeleteAccount_Success_SumsTheCounters_AndClearsTheCacheBeforeDeleting()
     {
         _data.DeleteAccountCompletelyAsync(7, default).Returns(Counts());
 
@@ -189,28 +189,28 @@ public class LgpdUseCasesTests
 
         var success = result.ShouldBeOfType<DeleteAccountResult.Success>();
         success.Counts.Total.ShouldBe(91);
+        // O cache é limpo ANTES: as chaves do Redis usam o WhatsApp, que some junto com a linha de usuarios.
         Received.InOrder(() =>
         {
-            _data.DeleteAccountCompletelyAsync(7, default);
             _cache.ClearAsync(7, default);
+            _data.DeleteAccountCompletelyAsync(7, default);
         });
     }
 
     [Fact]
     [Trait("AC", "008-49")]
-    public async Task DeleteAccount_UnknownUser_IsNotFound_AndTheCacheIsUntouched()
+    public async Task DeleteAccount_UnknownUser_IsNotFound()
     {
         _data.DeleteAccountCompletelyAsync(7, default).Returns((AccountDeletionCounts?)null);
 
         var result = await new DeleteAccount(_data, _cache, _diagnostics).ExecuteAsync(new DeleteAccountInput(7, "CONFIRMO_DELECAO"), default);
 
         result.ShouldBe(new DeleteAccountResult.UserNotFound(7));
-        await _cache.DidNotReceiveWithAnyArgs().ClearAsync(default, default);
     }
 
     [Fact]
     [Trait("AC", "008-49")]
-    public async Task DeleteAccount_CacheFailure_DoesNotUndoTheDeletion()
+    public async Task DeleteAccount_CacheFailure_DoesNotPreventTheDeletion()
     {
         _data.DeleteAccountCompletelyAsync(7, default).Returns(Counts());
         _cache.ClearAsync(7, default).ThrowsAsync(new InvalidOperationException("redis fora do ar"));

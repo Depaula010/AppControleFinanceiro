@@ -148,8 +148,10 @@ public abstract record DeleteAccountResult
 }
 
 /// <summary>
-/// Deleta a conta de fato (§4.14; desvio 044): confirmação exata, uma transação em ordem explícita e, depois do commit,
-/// limpeza do cache do usuário. Falha na limpeza é registrada e não desfaz a deleção.
+/// Deleta a conta de fato (§4.14; desvio 044): confirmação exata, limpeza do cache do usuário e uma transação em ordem
+/// explícita. A limpeza vem ANTES da deleção porque as chaves do Redis usam o número de WhatsApp, que só existe enquanto a
+/// linha de <c>usuarios</c> existe; falha na limpeza é registrada e não impede a deleção. Para um usuário inexistente a
+/// limpeza não encontra número e não faz nada.
 /// </summary>
 public sealed class DeleteAccount(IAccountDataRepository data, IUserCacheCleaner cache, IApiKeyDiagnostics diagnostics)
 {
@@ -158,12 +160,6 @@ public sealed class DeleteAccount(IAccountDataRepository data, IUserCacheCleaner
         if (!AccountDeletion.IsConfirmed(input.Confirmation))
         {
             return new DeleteAccountResult.NotConfirmed();
-        }
-
-        var counts = await data.DeleteAccountCompletelyAsync(input.UserId, cancellationToken);
-        if (counts is null)
-        {
-            return new DeleteAccountResult.UserNotFound(input.UserId);
         }
 
         try
@@ -175,6 +171,9 @@ public sealed class DeleteAccount(IAccountDataRepository data, IUserCacheCleaner
             diagnostics.Swallowed("limpar_cache_usuario", ErrorText.Describe(ex));
         }
 
-        return new DeleteAccountResult.Success(input.UserId, counts);
+        var counts = await data.DeleteAccountCompletelyAsync(input.UserId, cancellationToken);
+        return counts is null
+            ? new DeleteAccountResult.UserNotFound(input.UserId)
+            : new DeleteAccountResult.Success(input.UserId, counts);
     }
 }
