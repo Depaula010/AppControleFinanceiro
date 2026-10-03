@@ -123,7 +123,7 @@ Os dois clientes nomeados existem porque os timeouts diferem (10 s e 30 s) e a p
 
 **Domain/Llm/** (puro): `LlmCacheKey.Build(prefix, userId, userSpecific, prompt)` (MD5 UTF-8, 12 hex, `gemini_cache:{prefix}:{uid|global}:{hash}`), `LlmCacheKinds` (tabela de TTL de RN-010-27), `LlmJson.Parse`.
 
-**Application/Llm/**
+**Application/Llm/** (implementado em `Infrastructure/Llm/`: o Application não referencia `Microsoft.Extensions.Logging`, e `LlmClient`/`LlmCacheAdmin` precisam de `ILogger`; só `LlmCachePolicies`, as 5 políticas de cache dos consumidores, ficou em `Application/Abstractions`). O `cached_at` usa `IClock.Now` (São Paulo, formato `isoformat()` do Python); os limites de tempo do pipeline vêm de `GeminiResilienceSettings` (padrão 45 s / 90 s / 1 s, substituível em teste). Chamada sem chave do sistema configurada lança `LlmException("Modelo Gemini não configurado.")` (texto do Python). Entrada de cache sem `text` conta como erro e segue como MISS (o `KeyError` do Python).
 
 | Classe | Papel |
 |---|---|
