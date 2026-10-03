@@ -42,7 +42,7 @@ Dependências externas: **008-0 T3** (porta `IApiKeyProvider`) para 010-0, 010c 
 
 ## 010c — Gemini
 
-- [ ] **T15 — Domain: `LlmCacheKey`, `LlmCacheKinds`, `LlmJson`.** Vetor `abc` ⇒ `900150983cd2`, prefixos e TTL, `LlmJson` com e sem cercas de código (AC-010-50, 58).
+- [x] **T15 — Domain: `LlmCacheKey`, `LlmCacheKinds`, `LlmJson`.** Vetor `abc` ⇒ `900150983cd2`, prefixos e TTL, `LlmJson` com e sem cercas de código (AC-010-50, 58).
 - [ ] **T16 — `GeminiResponseParser` e `GeminiHttpTransport`.** Corpo exato `{"contents":[{"role":"user","parts":[{"text":...}]}]}`, header `x-goog-api-key` na requisição, modelo na URL, partes concatenadas, bloqueio, 429/403/400/503, retry só onde permitido (AC-010-40, 41, 45 a 48); teste concorrente com chaves distintas (AC-010-42).
 - [ ] **T17 — `LlmClient` (chave).** `IProviderKeySelector` antes do cache; `Failed` ⇒ `LlmKeyUnavailableException` sem requisição; usuário nulo usa a chave do sistema (AC-010-43, 44).
 - [ ] **T18 — `LlmClient` (cache) e `LlmCacheMetricsCollector`.** HIT/MISS, TTL, valor `{text, prompt_feedback, cached_at}`, bypass sem Redis, não grava erro, lê entrada do Python, `Cache` nulo (AC-010-51 a 55, 57).
