@@ -99,7 +99,7 @@ Acrescentar `public string GeminiModel { get; init; } = "gemini-2.5-flash-lite";
 | `CacheLog` | `[LoggerMessage]` EventIds 10100 a 10199: `Unavailable(operation)` (limitado), `OperationFailed(operation, error)`; só chave truncada e `SafeError`-like (`ex.GetType().Name`) |
 | `CachingServiceCollectionExtensions.AddRedisCache` | `AddSingleton<ICache, RedisCache>()`; `RedisCacheOptions` lido de `AppSettings.RedisUrl` |
 
-Sem Dapper, sem Api. Não há migration.
+Sem Api. Não há migration. **Implementação (010a):** `UserCacheCleaner` (Dapper só para ler `usuarios.numero_whatsapp`) apaga `pending_tx`, `last_pending`, `pending_event`, `nightly_checkin*` do usuário; como `DeleteAccount` (008) chama `ClearAsync(userId)` DEPOIS do commit, a linha já não existe e a limpeza vira no-op registrado em log (o TTL de até 1 h expira as chaves). Para limpar de fato a 008 precisa ler o número antes de deletar (pendência registrada no relatório da 010a).
 
 **Testes:** unitários de `RedisConnectionOptions` (AC-010-09) e de `CacheJson` (round trip, escapes, AC-010-02, 03, 12, 13 com vetores literais do Python); integração com `RedisFixture` (AC-010-01 a 08, 11); o fail-open usa um `RedisCache` apontado para uma porta fechada (rápido: timeout de 2 s só no primeiro acesso; o teste usa `ConnectTimeout` pequeno via opções).
 

@@ -27,10 +27,10 @@ Dependências externas: **008-0 T3** (porta `IApiKeyProvider`) para 010-0, 010c 
 
 ## 010a — Redis e cache
 
-- [ ] **T6 — `RedisConnectionOptions`.** Testes vermelhos ⇒ implementação: `redis://host:porta`, `redis://:senha@host:6380/2`, `rediss://`, usuário e senha, valor inválido sem eco do valor (AC-010-09).
-- [ ] **T7 — `CacheJson` e fixtures do Python.** Round trip, escapes, texto JSON com aspas, valor cru, codificação dupla; fixtures `json.dumps` commitadas (AC-010-02, 03, 12, 13).
-- [ ] **T8 — `RedisCache` + `AddRedisCache`.** Integração com `RedisFixture`: AC-010-01, 04 (50 chamadas concorrentes), 05, 06; fail-open e reconexão (AC-010-07, 08); boot sem Redis (AC-010-11).
-- [ ] **T9 — Logs e contrato com os consumidores.** `CacheLog` sem valores (AC-010-07, limite de 1 aviso por minuto); nota no `plan.md`/`spec.md` se a implementação mudar algo; avisar 009 (uso de `SetJsonAsync<string>`) e 012 (ordem de `KeysByPatternAsync`).
+- [x] **T6 — `RedisConnectionOptions`.** Testes vermelhos ⇒ implementação: `redis://host:porta`, `redis://:senha@host:6380/2`, `rediss://`, usuário e senha, valor inválido sem eco do valor (AC-010-09).
+- [x] **T7 — `CacheJson` e fixtures do Python.** Round trip, escapes, texto JSON com aspas, valor cru, codificação dupla; fixtures `json.dumps` commitadas (AC-010-02, 03, 12, 13).
+- [x] **T8 — `RedisCache` + `AddRedisCache`.** Integração com `RedisFixture`: AC-010-01, 04 (50 chamadas concorrentes), 05, 06; fail-open e reconexão (AC-010-07, 08); boot sem Redis (AC-010-11).
+- [x] **T9 — Logs e contrato com os consumidores.** `CacheLog` sem valores (AC-010-07, limite de 1 aviso por minuto); nota no `plan.md`/`spec.md` se a implementação mudar algo; avisar 009 (uso de `SetJsonAsync<string>`) e 012 (ordem de `KeysByPatternAsync`).
 
 ## 010b — Bot WhatsApp
 
