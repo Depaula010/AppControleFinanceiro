@@ -1,4 +1,5 @@
 using System.Text.Json;
+using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Domain.Llm;
 
 namespace MeuSecretario.UnitTests.Domain.Llm;
@@ -51,6 +52,17 @@ public class LlmDomainTests
     [Trait("AC", "010-51")]
     public void Kinds_TtlPerPrefix(string prefix, int seconds) =>
         LlmCacheKinds.TtlFor(prefix).ShouldBe(TimeSpan.FromSeconds(seconds));
+
+    [Fact]
+    [Trait("AC", "010-51")]
+    public void Policies_MatchTheFiveCachedFunctionsOfThePython()
+    {
+        LlmCachePolicies.Intent.ShouldBe(new LlmCachePolicy("intent", TimeSpan.FromSeconds(604800), false));
+        LlmCachePolicies.Category.ShouldBe(new LlmCachePolicy("category", TimeSpan.FromSeconds(2592000), true));
+        LlmCachePolicies.ExtractTransaction.ShouldBe(new LlmCachePolicy("extract_trans", TimeSpan.FromSeconds(86400), false));
+        LlmCachePolicies.PeriodQuery.ShouldBe(new LlmCachePolicy("period_query", TimeSpan.FromSeconds(604800), false));
+        LlmCachePolicies.ChartType.ShouldBe(new LlmCachePolicy("chart_type", TimeSpan.FromSeconds(604800), false));
+    }
 
     [Fact]
     public void Kinds_MetricKey_UnknownPrefixCountsAsOther()
