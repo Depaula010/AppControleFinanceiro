@@ -172,7 +172,7 @@ Devolvem `true` somente se o bot respondeu **HTTP 200**. Nunca lançam por falha
 - **RN-010-16** **Origem da configuração.** `BOT_WHATSAPP_URL`, `BOT_API_KEY`, `BOT_SESSION_NAME`, `BOT_SESSION_ID` e `API_SECRET_KEY` vêm de `AppSettings`. O envio do gráfico (intent da 012) usa este mesmo cliente: o Python usava `WHATSAPP_BOT_URL` com padrão `http://localhost:3003`, variável que não existe (desvio 026). *Origem: `analytics_intents.py:185`.*
 - **RN-010-17** `BOT_WHATSAPP_URL` vazia (o `AppSettings` não tem o padrão do Render que o Python tem em `config.py:25`) ⇒ `false`, aviso no log, **nenhuma requisição**. Barra final da URL é removida antes de montar o caminho (o Python não remove; ficaria `//`).
 - **RN-010-18** **Logs** (desvio 008): só `status` HTTP, tipo de chamada (`texto`/`imagem`), `session_id` não é segredo e pode ser logado, número com os 4 últimos dígitos. Nunca a mensagem, o corpo da resposta do bot, a chave ou o número completo. O Python imprime número, corpo da resposta e exceção cru (`notification_service.py:107-114`).
-- **RN-010-19** O bot recusa `mensagem` com mais de 4096 caracteres (HTTP 400, `messageRoutes.js:46`) e imagens que não sejam JPEG, PNG ou GIF (`:160-167`); o Flask trata como falha (`false`). Sem mudança aqui; ver P-010-7.
+- **RN-010-19** (desvio 059 aprovado: `SendTextAsync` divide em partes de até 4096 caracteres, em quebra de linha, e envia em sequência; falha em uma parte interrompe e devolve `false`) O bot recusa `mensagem` com mais de 4096 caracteres (HTTP 400, `messageRoutes.js:46`) e imagens que não sejam JPEG, PNG ou GIF (`:160-167`); o Flask trata como falha (`false`). Sem mudança aqui; ver P-010-7.
 
 ### 5.4 O que muda de comportamento (010b)
 

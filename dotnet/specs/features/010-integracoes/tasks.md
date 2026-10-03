@@ -34,11 +34,11 @@ Dependências externas: **008-0 T3** (porta `IApiKeyProvider`) para 010-0, 010c 
 
 ## 010b — Bot WhatsApp
 
-- [ ] **T10 — `BotSessionResolver`.** Testes com `FakeHttpHandler` e `InMemoryCache`: header `X-API-Key`, correspondência exata do `session_name`, cache de 600 s, override `BOT_SESSION_ID`, sem correspondência não cacheia, erro ⇒ sem sessão (AC-010-20, 21, 22, 29, 33).
-- [ ] **T11 — `BotClient.SendTextAsync`.** URL, headers, corpo exato `{"numero","mensagem"}`, sucesso só com 200, falha de rede sem retry, URL vazia, barra final (AC-010-23, 25, 28, 30, 31).
-- [ ] **T12 — Retry de 404 e fallback legado.** Apagar cache, ressolver ignorando cache, 2 POSTs no máximo; `/enviar-mensagem` e `/enviar-imagem` com `x-api-key = API_SECRET_KEY` (AC-010-26, 27).
-- [ ] **T13 — `SendImageAsync`.** Base64 com padding, `legenda` nula, timeout de 30 s (AC-010-24); logs mascarados e sem corpo de resposta (AC-010-32); `AddBotClient` com os dois `HttpClient` nomeados e resiliência só de timeout.
-- [ ] **T14 — Integração com Redis real** (depende da 010a): valor `"<uuid>"` no Redis, TTL ≈ 600 s, ciclo 404 → apagar → ressolver (AC-010-34).
+- [x] **T10 — `BotSessionResolver`.** Testes com `FakeHttpHandler` e `InMemoryCache`: header `X-API-Key`, correspondência exata do `session_name`, cache de 600 s, override `BOT_SESSION_ID`, sem correspondência não cacheia, erro ⇒ sem sessão (AC-010-20, 21, 22, 29, 33).
+- [x] **T11 — `BotClient.SendTextAsync`.** URL, headers, corpo exato `{"numero","mensagem"}`, sucesso só com 200, falha de rede sem retry, URL vazia, barra final (AC-010-23, 25, 28, 30, 31).
+- [x] **T12 — Retry de 404 e fallback legado.** Apagar cache, ressolver ignorando cache, 2 POSTs no máximo; `/enviar-mensagem` e `/enviar-imagem` com `x-api-key = API_SECRET_KEY` (AC-010-26, 27).
+- [x] **T13 — `SendImageAsync`.** Base64 com padding, `legenda` nula, timeout de 30 s (AC-010-24); logs mascarados e sem corpo de resposta (AC-010-32); `AddBotClient` com os dois `HttpClient` nomeados e resiliência só de timeout.
+- [x] **T14 — Integração com Redis real** (depende da 010a): valor `"<uuid>"` no Redis, TTL ≈ 600 s, ciclo 404 → apagar → ressolver (AC-010-34).
 
 ## 010c — Gemini
 
