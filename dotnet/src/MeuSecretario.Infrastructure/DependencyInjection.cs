@@ -1,8 +1,14 @@
 using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Application.Auth;
+using MeuSecretario.Application.Integrations;
 using MeuSecretario.Infrastructure.Auth;
+using MeuSecretario.Infrastructure.Bot;
+using MeuSecretario.Infrastructure.Caching;
 using MeuSecretario.Infrastructure.Configuration;
 using MeuSecretario.Infrastructure.Database;
+using MeuSecretario.Infrastructure.External;
+using MeuSecretario.Infrastructure.Google;
+using MeuSecretario.Infrastructure.Llm;
 using MeuSecretario.Infrastructure.Security;
 using MeuSecretario.Infrastructure.Time;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,6 +43,15 @@ public static class DependencyInjection
             new FernetEncryptionService(sp.GetRequiredService<AppSettings>().EncryptionKey, sp.GetRequiredService<TimeProvider>()));
         services.AddSingleton<IJwtTokenService>(sp =>
             new JwtTokenService(sp.GetRequiredService<AppSettings>().ApiSecretKey, sp.GetRequiredService<TimeProvider>()));
+
+        // Integrações (spec 010). Um método por trilha, cada um em arquivo próprio; ninguém mais edita este arquivo.
+        services.AddSingleton<IIntegrationSettings, AppSettingsIntegrationSettings>();
+        services.AddSingleton<IProviderKeySelector, ProviderKeySelector>();
+        services.AddRedisCache();
+        services.AddBotClient();
+        services.AddGeminiClient();
+        services.AddGoogleIntegration();
+        services.AddWeatherAndRoutes();
 
         return services;
     }

@@ -19,11 +19,11 @@ Dependências externas: **008-0 T3** (porta `IApiKeyProvider`) para 010-0, 010c 
 
 ## 010-0 — Contratos e pontos compartilhados (PR único)
 
-- [ ] **T1 — Pacotes.** `Microsoft.Extensions.Http.Resilience`, `Google.Apis.Auth`, `Google.Apis.Calendar.v3`, `Google.Apis.Drive.v3` em Infrastructure; `Testcontainers.Redis` em IntegrationTests; versões no `Directory.Packages.props`; linha em `tech-stack.md` (tabela "Testes") justificando o pacote novo. `dotnet build` verde.
-- [ ] **T2 — Portas, records e exceções** em `Application/Abstractions` (plan §1.2), `CacheKeys` e `PhoneMask`. Testes unitários: `CacheKeysTests` (AC-010-10) e `PhoneMaskTests`.
-- [ ] **T3 — `IIntegrationSettings`, `ProviderKeySelector` e `AppSettings.GeminiModel`.** Testes: `ProviderKeySelectorTests` com `IApiKeyProvider` falso (AC-010-123), `AppSettingsTests` (`GEMINI_MODEL` padrão e override).
-- [ ] **T4 — DI sem conflito.** Criar os métodos vazios `AddRedisCache`, `AddBotClient`, `AddGeminiClient`, `AddGoogleIntegration` (+ `AddGoogleOAuth`, `AddGoogleApiClients` e `GoogleHttpClientFactory`), `AddWeatherAndRoutes`; **uma** edição em `AddInfrastructure` registrando as peças de T3 e chamando os cinco métodos. Teste: o contêiner resolve `IIntegrationSettings` e `IProviderKeySelector`.
-- [ ] **T5 — Apoio de teste.** `FakeHttpHandler`, `InMemoryCache`, `FakeGoogleHttpClientFactory`, `RedisFixture`, esqueleto de `generate_integrations_fixtures.py` + `integrations-fixtures.json`. Cada fake com teste próprio; `ArchitectureTests`: Application não referencia Google, Redis, Npgsql nem `System.Net.Http`.
+- [x] **T1 — Pacotes.** `Microsoft.Extensions.Http.Resilience`, `Google.Apis.Auth`, `Google.Apis.Calendar.v3`, `Google.Apis.Drive.v3` em Infrastructure; `Testcontainers.Redis` em IntegrationTests; versões no `Directory.Packages.props`; linha em `tech-stack.md` (tabela "Testes") justificando o pacote novo. `dotnet build` verde.
+- [x] **T2 — Portas, records e exceções** em `Application/Abstractions` (plan §1.2), `CacheKeys` e `PhoneMask`. Testes unitários: `CacheKeysTests` (AC-010-10) e `PhoneMaskTests`.
+- [x] **T3 — `IIntegrationSettings`, `ProviderKeySelector` e `AppSettings.GeminiModel`.** Testes: `ProviderKeySelectorTests` com `IApiKeyProvider` falso (AC-010-123), `AppSettingsTests` (`GEMINI_MODEL` padrão e override).
+- [x] **T4 — DI sem conflito.** Criar os métodos vazios `AddRedisCache`, `AddBotClient`, `AddGeminiClient`, `AddGoogleIntegration` (+ `AddGoogleOAuth`, `AddGoogleApiClients` e `GoogleHttpClientFactory`), `AddWeatherAndRoutes`; **uma** edição em `AddInfrastructure` registrando as peças de T3 e chamando os cinco métodos. Teste: o contêiner resolve `IIntegrationSettings` e `IProviderKeySelector`.
+- [x] **T5 — Apoio de teste.** `FakeHttpHandler`, `InMemoryCache`, `FakeGoogleHttpClientFactory`, `RedisFixture`, esqueleto de `generate_integrations_fixtures.py` + `integrations-fixtures.json`. Cada fake com teste próprio; `ArchitectureTests`: Application não referencia Google, Redis, Npgsql nem `System.Net.Http`.
 
 ## 010a — Redis e cache
 

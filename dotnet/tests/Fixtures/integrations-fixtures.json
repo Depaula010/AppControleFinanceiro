@@ -1,0 +1,70 @@
+{
+  "redis_json": [
+    {
+      "value": "abc",
+      "json": "\"abc\""
+    },
+    {
+      "value": true,
+      "json": "true"
+    },
+    {
+      "value": 3,
+      "json": "3"
+    },
+    {
+      "value": "3",
+      "json": "\"3\""
+    },
+    {
+      "value": {
+        "text": "ação",
+        "x": [
+          1,
+          2
+        ]
+      },
+      "json": "{\"text\": \"a\\u00e7\\u00e3o\", \"x\": [1, 2]}"
+    },
+    {
+      "value": {
+        "text": "ok 😀",
+        "prompt_feedback": null,
+        "cached_at": "2026-10-02T10:00:00"
+      },
+      "json": "{\"text\": \"ok \\ud83d\\ude00\", \"prompt_feedback\": null, \"cached_at\": \"2026-10-02T10:00:00\"}"
+    },
+    {
+      "value": "{\"a\":1}",
+      "json": "\"{\\\"a\\\":1}\""
+    }
+  ],
+  "hash12": [
+    {
+      "prompt": "abc",
+      "hash12": "900150983cd2"
+    },
+    {
+      "prompt": "Qual é o saldo? 😀",
+      "hash12": "c19bc9ad75be"
+    },
+    {
+      "prompt": "",
+      "hash12": "d41d8cd98f00"
+    }
+  ],
+  "calendar_alert": [
+    {
+      "user_id": 7,
+      "event_id": "abc",
+      "start": "2026-10-02T10:00:00-03:00",
+      "key": "calendar_alert:5aef3b874c52d2afaf362b25687d0b4e"
+    },
+    {
+      "user_id": 12,
+      "event_id": "evt_ç",
+      "start": "2026-10-02",
+      "key": "calendar_alert:90ac8c8dc67b393f629d99707abb7320"
+    }
+  ]
+}
