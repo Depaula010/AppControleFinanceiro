@@ -44,11 +44,11 @@ Dependências externas: **008-0 T3** (porta `IApiKeyProvider`) para 010-0, 010c 
 
 - [x] **T15 — Domain: `LlmCacheKey`, `LlmCacheKinds`, `LlmJson`.** Vetor `abc` ⇒ `900150983cd2`, prefixos e TTL, `LlmJson` com e sem cercas de código (AC-010-50, 58).
 - [x] **T16 — `GeminiResponseParser` e `GeminiHttpTransport`.** Corpo exato `{"contents":[{"role":"user","parts":[{"text":...}]}]}`, header `x-goog-api-key` na requisição, modelo na URL, partes concatenadas, bloqueio, 429/403/400/503, retry só onde permitido (AC-010-40, 41, 45 a 48); teste concorrente com chaves distintas (AC-010-42).
-- [ ] **T17 — `LlmClient` (chave).** `IProviderKeySelector` antes do cache; `Failed` ⇒ `LlmKeyUnavailableException` sem requisição; usuário nulo usa a chave do sistema (AC-010-43, 44).
-- [ ] **T18 — `LlmClient` (cache) e `LlmCacheMetricsCollector`.** HIT/MISS, TTL, valor `{text, prompt_feedback, cached_at}`, bypass sem Redis, não grava erro, lê entrada do Python, `Cache` nulo (AC-010-51 a 55, 57).
-- [ ] **T19 — `LlmCacheAdmin`.** Padrões de varredura e contagem, Redis fora (AC-010-56); avisar a 009.
-- [ ] **T20 — DI, resiliência e logs.** `AddGeminiClient` com timeout por tentativa de 45 s, total de 90 s, 1 retry em 503/504/rede (AC-010-49); logs sem prompt, resposta ou chave (AC-010-61).
-- [ ] **T21 — Conferência do catálogo (apêndice A).** Rodar `grep` por `prompt =` e pelas funções `generate_content` e confirmar as 29 linhas, os arquivos:linha e os consumidores; ajustar o apêndice se algo mudou. Avisar a 012, a 013 e a 011 do que cada uma porta (sem criar arquivo de prompt aqui).
+- [x] **T17 — `LlmClient` (chave).** `IProviderKeySelector` antes do cache; `Failed` ⇒ `LlmKeyUnavailableException` sem requisição; usuário nulo usa a chave do sistema (AC-010-43, 44).
+- [x] **T18 — `LlmClient` (cache) e `LlmCacheMetricsCollector`.** HIT/MISS, TTL, valor `{text, prompt_feedback, cached_at}`, bypass sem Redis, não grava erro, lê entrada do Python, `Cache` nulo (AC-010-51 a 55, 57).
+- [x] **T19 — `LlmCacheAdmin`.** Padrões de varredura e contagem, Redis fora (AC-010-56); avisar a 009.
+- [x] **T20 — DI, resiliência e logs.** `AddGeminiClient` com timeout por tentativa de 45 s, total de 90 s, 1 retry em 503/504/rede (AC-010-49); logs sem prompt, resposta ou chave (AC-010-61).
+- [x] **T21 — Conferência do catálogo (apêndice A).** Rodar `grep` por `prompt =` e pelas funções `generate_content` e confirmar as 29 linhas, os arquivos:linha e os consumidores; ajustar o apêndice se algo mudou. Avisar a 012, a 013 e a 011 do que cada uma porta (sem criar arquivo de prompt aqui).
 
 ## 010d-1 — OAuth, credenciais e rotas
 
