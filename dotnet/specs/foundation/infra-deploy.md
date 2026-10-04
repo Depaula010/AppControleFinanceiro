@@ -69,3 +69,25 @@ Objetivo: testar o .NET e capturar respostas douradas do Flask sem tocar a produ
 6. Fuso e cultura: fixar no app; garantir `tzdata` e ICU na imagem.
 7. `oauth_proxy`: confirmar o `GOOGLE_REDIRECT_URI` real (default aponta para Render). Se o URI atual passa pelo proxy, o .NET precisa responder em `/oauth2callback` no host registrado no Google Cloud Console.
 8. Segredo `API_SECRET_KEY` aparece nos labels do Ofelia (visível em `docker inspect`); resolvido ao remover o Ofelia.
+
+## 5. Variáveis novas da feature 009 (filtro de segurança, entrega 009-0)
+
+Entram nos três lugares (heredoc do `.env` do workflow, `environment` do compose e, se secretas, secrets do GitHub). Nenhuma é secreta e todas têm padrão, então nada precisa mudar para o app subir.
+
+| Variável | Padrão | Efeito |
+|---|---|---|
+| `BOT_PROTECTION_ENABLED` | `true` | liga o filtro de segurança (bloqueio de IP, blacklist, padrões suspeitos). Como no Flask, só o texto `true` liga |
+| `SECURITY_HEADERS_ENABLED` | `true` | liga os headers de segurança (HSTS, CSP, `X-Frame-Options`...) |
+| `SECURITY_LOG_FILE` | `<LOG_DIR>/security.log` | arquivo do `security.log`; só é gravado com `LOG_TO_FILE=true` |
+| `SECURITY_LOG_LEVEL` | `WARNING` | nível mínimo do `security.log` (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`) |
+| `RATE_LIMIT_ENABLED` | `false` | liga o rate limit por IP real (desvio 081). **Só ligar depois de conferir os 429 nos logs de produção** (Q-009-1) |
+| `RATE_LIMIT_PER_HOUR` | `300` | balde geral por IP |
+| `RATE_LIMIT_ADMIN_PER_HOUR` | `60` | balde de `/admin/*` por IP |
+
+`AUTO_BLOCK_ENABLED`, `BLOCK_DURATION_MINUTES` e `MAX_SUSPICIOUS_ATTEMPTS` existem no `.env` do Flask mas nenhum código as lia; o .NET também as ignora (5 tentativas em 10 min, bloqueio de 60 min, fixos).
+
+Pontos de atenção:
+- O IP do cliente vem do `X-Forwarded-For` lido **da direita para a esquerda**, só quando a origem da conexão é da rede privada (loopback, 10/8, 172.16/12, 192.168/16, 169.254/16, `fc00::/7`, `fe80::/10`). O nginx do compose precisa continuar mandando `X-Forwarded-For`.
+- Chamadas internas (origem privada **sem** `X-Forwarded-For`: bot, health do compose, Ofelia) passam sem filtro e sem rate limit.
+- **Ofelia:** os labels de `trigger-monthly-reports-*` chamam `http://localhost:5000`, mas o .NET escuta na porta 8000. Ou os labels passam para `localhost:8000`, ou o Ofelia deixa de existir na virada (o Quartz da 013 assume). Sem isso essas chamadas falham como já falhavam no Flask.
+- Respostas 404 de rota inexistente: IP externo recebe `{"error":"Not found"}` (JSON, conta tentativa); chamada interna recebe o HTML do Flask.

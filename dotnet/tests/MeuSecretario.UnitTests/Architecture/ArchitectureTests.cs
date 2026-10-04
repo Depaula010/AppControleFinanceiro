@@ -46,6 +46,13 @@ public class ArchitectureTests
     }
 
     [Fact]
+    public void DomainAndApplication_DoNotDependOnSerilog()
+    {
+        ShouldNotDependOn(Domain, "Serilog");
+        ShouldNotDependOn(Application, "Serilog");
+    }
+
+    [Fact]
     public void Infrastructure_DoesNotDependOnApi()
     {
         ShouldNotDependOn(Infrastructure, "MeuSecretario.Api", "Microsoft.AspNetCore");

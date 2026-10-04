@@ -1,6 +1,6 @@
 # Desvio 082 — IP do cliente pelo ForwardedHeaders
 
-- **Estado:** aprovado (onda 2, 2026-10-04)
+- **Estado:** implementado (feature 009-0, 2026-10-04)
 - **Features afetadas:** 009
 - **Severidade:** segurança
 

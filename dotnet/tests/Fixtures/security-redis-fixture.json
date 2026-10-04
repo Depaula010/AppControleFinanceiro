@@ -1,0 +1,22 @@
+{
+  "cases": [
+    {
+      "name": "blacklist",
+      "key": "security:blacklist:192.0.2.10",
+      "raw": "\"{\\\"ip\\\": \\\"192.0.2.10\\\", \\\"reason\\\": \\\"Manual block via API\\\", \\\"blacklisted_at\\\": \\\"2026-10-04T10:00:00.123456\\\", \\\"permanent\\\": true}\"",
+      "inner": "{\"ip\": \"192.0.2.10\", \"reason\": \"Manual block via API\", \"blacklisted_at\": \"2026-10-04T10:00:00.123456\", \"permanent\": true}"
+    },
+    {
+      "name": "blocked",
+      "key": "security:blocked:192.0.2.11",
+      "raw": "\"{\\\"blocked_until\\\": \\\"2026-10-04T11:00:00.123456\\\", \\\"count\\\": 2, \\\"first_blocked\\\": \\\"2026-10-04T10:00:00.123456\\\"}\"",
+      "inner": "{\"blocked_until\": \"2026-10-04T11:00:00.123456\", \"count\": 2, \"first_blocked\": \"2026-10-04T10:00:00.123456\"}"
+    },
+    {
+      "name": "attempts",
+      "key": "security:attempts:192.0.2.12",
+      "raw": "\"[{\\\"timestamp\\\": \\\"2026-10-04T10:05:00.123456\\\", \\\"reason\\\": \\\"Unknown endpoint: /x\\\"}, {\\\"timestamp\\\": \\\"2026-10-04T10:06:00\\\", \\\"reason\\\": \\\"Suspicious URL pattern: /\\\\\\\\.env\\\"}]\"",
+      "inner": "[{\"timestamp\": \"2026-10-04T10:05:00.123456\", \"reason\": \"Unknown endpoint: /x\"}, {\"timestamp\": \"2026-10-04T10:06:00\", \"reason\": \"Suspicious URL pattern: /\\\\.env\"}]"
+    }
+  ]
+}

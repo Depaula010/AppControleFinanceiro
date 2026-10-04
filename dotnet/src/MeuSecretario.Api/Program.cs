@@ -1,9 +1,12 @@
 using System.Globalization;
 using MeuSecretario.Api.Http;
 using MeuSecretario.Api.Modules;
+using MeuSecretario.Api.Security;
+using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Infrastructure;
 using MeuSecretario.Infrastructure.Database;
 using MeuSecretario.Infrastructure.Configuration;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 // Cultura fixa: mensagens de WhatsApp e formatos em pt-BR, independentemente do container.
@@ -30,6 +33,12 @@ builder.Host.UseSerilog((_, services, logger) =>
             formatProvider: CultureInfo.InvariantCulture,
             rollingInterval: RollingInterval.Day,
             retainedFileCountLimit: 14);
+
+        // 009: security.log (mesmo formato do Flask) só com a categoria de segurança. Respeita LOG_TO_FILE.
+        logger.AddSecurityLog(
+            services.GetService<IOptions<SecurityOptions>>()?.Value,
+            services.GetService<IClock>()?.TimeZone,
+            settings.LogDirectory);
     }
 });
 
@@ -58,7 +67,14 @@ if (args.Contains("--migrate"))
     return;
 }
 
-app.UseMiddleware<StrictRoutingMiddleware>();
+// 009: IP real, rate limit, filtro de segurança, 404 do Flask. A ordem importa. O WebApplication já insere o
+// UseRouting no início do pipeline: GetEndpoint() está preenchido a partir do filtro (passo 4).
+app.UseForwardedHeaders();                              // 1. IP do cliente (desvio 082)
+app.UseMiddleware<SecurityHeadersMiddleware>();         // 2. headers em todas as respostas, inclusive 403/404 do filtro
+app.UseRateLimiter();                                   // 3. antes do filtro, como o Limiter do Flask
+app.UseMiddleware<SecurityFilterMiddleware>();          // 4. blacklist, bloqueio, suspeito (usa GetEndpoint())
+app.UseMiddleware<StrictRoutingMiddleware>();           // 5. barra final => 404
+app.UseMiddleware<UnmatchedRouteMiddleware>();          // 6. sem endpoint => 404 HTML do Flask
 
 foreach (var module in modules)
 {
