@@ -1,6 +1,6 @@
 # Desvio 081 — Valores do rate limit (desligado por padrão)
 
-- **Estado:** aprovado (onda 2, 2026-10-04)
+- **Estado:** implementado (feature 009-0, 2026-10-04) — limitador e valores implementados, desligado por padrão (`RATE_LIMIT_ENABLED=false`); ligar só depois de conferir os 429 em produção
 - **Features afetadas:** 009
 - **Severidade:** segurança
 

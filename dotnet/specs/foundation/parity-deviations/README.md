@@ -12,7 +12,7 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [002](002-admin-setup-sem-auth.md) | Rotas /admin/setup-* sem autenticação e com DDL via GET | segurança | 009 | aprovado |
 | [003](003-rotas-sem-auth.md) | Rotas de escrita sem autenticação | segurança | 009, 011, 014 | aprovado |
 | [004](004-rotas-que-falham.md) | Rotas que hoje respondem 500 | correção | 009, 014 | aprovado |
-| [005](005-whitelist-rotas-inalcancaveis.md) | Rotas registradas porém bloqueadas pela whitelist | compatibilidade | 008, 009, 011, 014 | aprovado |
+| [005](005-whitelist-rotas-inalcancaveis.md) | Rotas registradas porém bloqueadas pela whitelist | compatibilidade | 008, 009, 011, 014 | implementado |
 | [006](006-api-keys-idor-segredo-unico.md) | IDOR em /api-keys e segredo único para JWT e admin | segurança | 001, 008, 009 | aprovado |
 | [007](007-saldo-consolidado.md) | Dois cálculos de saldo | correção | 002, 006 | aprovado |
 | [008](008-vazamento-erros-e-logs.md) | Vazamento de str(e) e de segredos em log | segurança | todas | aprovado |
@@ -88,8 +88,8 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [078](078-admin-valida-ip.md) | Validar e normalizar IP em blacklist e unblock | segurança | 009 | aprovado |
 | [079](079-admin-tipos-estritos.md) | Tipos estritos no corpo das rotas admin | correção | 009 | aprovado |
 | [080](080-admin-notificacao-usuario-inexistente.md) | Usuário inexistente na configuração de notificação: 404 | correção | 009 | aprovado |
-| [081](081-rate-limit-valores.md) | Valores do rate limit (desligado por padrão) | segurança | 009 | aprovado |
-| [082](082-ip-cliente-forwardedheaders.md) | IP do cliente pelo ForwardedHeaders | segurança | 009 | aprovado |
+| [081](081-rate-limit-valores.md) | Valores do rate limit (desligado por padrão) | segurança | 009 | implementado |
+| [082](082-ip-cliente-forwardedheaders.md) | IP do cliente pelo ForwardedHeaders | segurança | 009 | implementado |
 | [083](083-admin-api-key-errada-suspeita.md) | x-api-key errada em /admin conta como tentativa suspeita | segurança | 009 | aprovado |
 | [084](084-configuracoes-tipos-json-400.md) | Configurações: tipos JSON inesperados dão 400 | correção | 007 | aprovado |
 | [085](085-perfil-validacoes.md) | Perfil: e-mail único, limites, fuso e horários válidos | correção | 007 | aprovado |

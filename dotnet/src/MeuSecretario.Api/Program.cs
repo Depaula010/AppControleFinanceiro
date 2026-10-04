@@ -8,7 +8,6 @@ using MeuSecretario.Infrastructure.Database;
 using MeuSecretario.Infrastructure.Configuration;
 using Microsoft.Extensions.Options;
 using Serilog;
-using Serilog.Filters;
 
 // Cultura fixa: mensagens de WhatsApp e formatos em pt-BR, independentemente do container.
 var culture = new CultureInfo("pt-BR");
@@ -36,19 +35,10 @@ builder.Host.UseSerilog((_, services, logger) =>
             retainedFileCountLimit: 14);
 
         // 009: security.log (mesmo formato do Flask) só com a categoria de segurança. Respeita LOG_TO_FILE.
-        var security = services.GetService<IOptions<SecurityOptions>>()?.Value;
-        if (security is not null)
-        {
-            var zone = services.GetService<IClock>()?.TimeZone ?? TimeZoneInfo.Utc;
-            logger.WriteTo.Logger(sub => sub
-                .Enrich.With(new SaoPauloTimestampEnricher(zone))
-                .MinimumLevel.Is(security.LogLevel)
-                .Filter.ByIncludingOnly(Matching.FromSource(SecurityLog.Category))
-                .WriteTo.File(
-                    security.LogFile ?? Path.Combine(settings.LogDirectory, "security.log"),
-                    outputTemplate: "[{" + SaoPauloTimestampEnricher.PropertyName + "}] {Level:u}: {Message:lj}{NewLine}",
-                    formatProvider: CultureInfo.InvariantCulture));
-        }
+        logger.AddSecurityLog(
+            services.GetService<IOptions<SecurityOptions>>()?.Value,
+            services.GetService<IClock>()?.TimeZone,
+            settings.LogDirectory);
     }
 });
 
