@@ -40,8 +40,8 @@ public sealed class TransactionsModule : IFeatureModule
         app.MapGet(BasePath, ListAsync).RequireUser();
         app.MapPost(BasePath, CreateAsync).RequireUser();
         // O conversor <int:id> do Flask só casa dígitos: com outro valor o 404 vem antes da autenticação (AC-004-81).
-        app.MapPut($"{BasePath}/{{id}}", UpdateAsync).AddEndpointFilter<NumericIdFilter>().RequireUser();
-        app.MapDelete($"{BasePath}/{{id}}", DeleteAsync).AddEndpointFilter<NumericIdFilter>().RequireUser();
+        app.MapPut($"{BasePath}/{{id}}", UpdateAsync).AddEndpointFilter<TransactionIdFilter>().RequireUser();
+        app.MapDelete($"{BasePath}/{{id}}", DeleteAsync).AddEndpointFilter<TransactionIdFilter>().RequireUser();
 
         // Outros métodos em /{id}: id numérico ou `recent` (rota do GET da 006) ⇒ 405; senão 404 HTML.
         app.Map($"{BasePath}/{{id}}", OtherMethods);
@@ -140,10 +140,7 @@ public sealed class TransactionsModule : IFeatureModule
         }
     }
 
-    private static IResult OtherMethods(string id) =>
-        NumericIdFilter.IsNumeric(id) || id == "recent"
-            ? Results.StatusCode(StatusCodes.Status405MethodNotAllowed)
-            : new FlaskNotFoundResult();
+    private static IResult OtherMethods(string id) => TransactionIdFilter.Answer(id) ?? new FlaskNotFoundResult();
 
     /// <summary>Número que não cabe em <see cref="int"/> nunca é o id de uma transação: vira 0 e responde 404 (RN-004-18).</summary>
     private static int ParseId(string id) =>
@@ -152,4 +149,28 @@ public sealed class TransactionsModule : IFeatureModule
     private static IResult BadRequest(string message) => TransactionsResponses.Error(message, StatusCodes.Status400BadRequest);
 
     private static IResult NotFound(string message) => TransactionsResponses.Error(message, StatusCodes.Status404NotFound);
+}
+
+/// <summary>
+/// <c>&lt;int:id&gt;</c> do Flask: só dígitos casam. Com outro valor o 404 HTML vem antes da autenticação, exceto
+/// <c>recent</c>, que é uma rota estática só de GET (006): os demais métodos respondem 405 (AC-004-82).
+/// </summary>
+internal sealed class TransactionIdFilter : IEndpointFilter
+{
+    private const string Recent = "recent";
+
+    /// <summary>405 para <c>recent</c> e para id numérico (a rota existe, o método não); <c>null</c> = 404.</summary>
+    public static IResult? Answer(string? id) =>
+        NumericIdFilter.IsNumeric(id) || id == Recent ? Results.StatusCode(StatusCodes.Status405MethodNotAllowed) : null;
+
+    public ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    {
+        var id = context.HttpContext.Request.RouteValues["id"] as string;
+        if (NumericIdFilter.IsNumeric(id))
+        {
+            return next(context);
+        }
+
+        return ValueTask.FromResult<object?>(id == Recent ? Results.StatusCode(StatusCodes.Status405MethodNotAllowed) : new FlaskNotFoundResult());
+    }
 }
