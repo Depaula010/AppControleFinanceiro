@@ -17,3 +17,6 @@ public sealed class GoogleInvalidGrantException() : Exception("invalid_grant");
 
 /// <summary>Outra falha do endpoint OAuth do Google (sem corpo, sem token).</summary>
 public sealed class GoogleAuthException(string message, Exception? inner = null) : Exception(message, inner);
+
+/// <summary><c>GOOGLE_CLIENT_ID</c>/<c>GOOGLE_CLIENT_SECRET</c> ausentes (erro de configuração, nunca com valores).</summary>
+public sealed class GoogleOAuthConfigurationException() : Exception("Credenciais OAuth2 não configuradas (GOOGLE_CLIENT_ID/SECRET)");

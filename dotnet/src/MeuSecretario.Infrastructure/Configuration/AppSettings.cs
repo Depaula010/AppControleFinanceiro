@@ -27,6 +27,13 @@ public sealed class AppSettings
     public string GoogleClientId { get; init; } = string.Empty;
     public string GoogleClientSecret { get; init; } = string.Empty;
     public string GoogleRedirectUri { get; init; } = string.Empty;
+    /// <summary>
+    /// <c>GOOGLE_CONNECT_LEGACY_UNTIL</c> (opcional, desvio 053): aceita links de conexão sem <c>t</c> até esta data.
+    /// Só data (<c>2026-11-30</c>) vale até o fim desse dia em São Paulo (-03:00); data e hora usam o deslocamento informado
+    /// (ou UTC, sem deslocamento). Ausente = desligado.
+    /// </summary>
+    public DateTimeOffset? GoogleConnectLegacyUntil { get; init; }
+
     public string WeatherApiKey { get; init; } = string.Empty;
     public string OpenRouteApiKey { get; init; } = string.Empty;
     public string OpenRouteBaseUrl { get; init; } = "https://api.openrouteservice.org";
@@ -40,6 +47,20 @@ public sealed class AppSettings
     /// Padrão false: desligadas respondem 404.
     /// </summary>
     public bool ApiKeysRoutesEnabled { get; init; }
+
+    private static DateTimeOffset? ParseLegacyUntil(string text)
+    {
+        var invariant = System.Globalization.CultureInfo.InvariantCulture;
+        if (DateOnly.TryParseExact(text, "yyyy-MM-dd", invariant, System.Globalization.DateTimeStyles.None, out var date))
+        {
+            // Válido até o fim do dia em São Paulo (sem horário de verão desde 2019).
+            return new DateTimeOffset(date.AddDays(1).ToDateTime(TimeOnly.MinValue), TimeSpan.FromHours(-3));
+        }
+
+        return DateTimeOffset.TryParse(text, invariant, System.Globalization.DateTimeStyles.AssumeUniversal, out var moment)
+            ? moment
+            : null;
+    }
 
     /// <param name="get">Leitor de variáveis (ex.: <c>key =&gt; configuration[key]</c>).</param>
     public static AppSettings Load(Func<string, string?> get)
@@ -109,6 +130,17 @@ public sealed class AppSettings
             errors.Add($"PASSWORD_HASH_ITERATIONS deve ser um inteiro entre {Security.WerkzeugPasswordHasher.MinIterations} e {Security.WerkzeugPasswordHasher.MaxIterationsAllowed}");
         }
 
+        DateTimeOffset? legacyUntil = null;
+        var legacyText = Optional("GOOGLE_CONNECT_LEGACY_UNTIL");
+        if (legacyText.Length > 0)
+        {
+            legacyUntil = ParseLegacyUntil(legacyText);
+            if (legacyUntil is null)
+            {
+                errors.Add("GOOGLE_CONNECT_LEGACY_UNTIL deve ser uma data (AAAA-MM-DD) ou data e hora ISO 8601");
+            }
+        }
+
         if (errors.Count > 0)
         {
             throw new InvalidOperationException("Configuração inválida: " + string.Join("; ", errors));
@@ -131,6 +163,7 @@ public sealed class AppSettings
             GoogleClientId = Optional("GOOGLE_CLIENT_ID"),
             GoogleClientSecret = Optional("GOOGLE_CLIENT_SECRET"),
             GoogleRedirectUri = Optional("GOOGLE_REDIRECT_URI"),
+            GoogleConnectLegacyUntil = legacyUntil,
             WeatherApiKey = Optional("WEATHER_API_KEY"),
             OpenRouteApiKey = Optional("OPENROUTE_API_KEY"),
             OpenRouteBaseUrl = Optional("OPENROUTE_BASE_URL", "https://api.openrouteservice.org"),

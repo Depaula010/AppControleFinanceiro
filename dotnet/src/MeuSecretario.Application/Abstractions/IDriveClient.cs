@@ -21,7 +21,8 @@ public sealed record DriveUploadResult(
     string? FolderId,
     string? WebViewLink,
     string? WebContentLink,
-    string? Error)
+    string? Error,
+    IReadOnlyList<string>? FolderPath = null)
 {
     public static DriveUploadResult Failure(string error) => new(false, null, null, null, null, null, null, null, error);
 }

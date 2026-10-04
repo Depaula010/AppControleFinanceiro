@@ -16,16 +16,33 @@ public interface ICalendarClient
 
     Task<CalendarEvent?> GetEventAsync(int userId, string eventId, string calendarId, CancellationToken cancellationToken);
 
-    /// <summary>Devolve o id do evento criado.</summary>
+    /// <summary>Devolve o id do evento criado. Falha da API lança <see cref="CalendarApiException"/>.</summary>
     Task<string> InsertEventAsync(int userId, NewCalendarEvent newEvent, CancellationToken cancellationToken);
 
-    Task UpdateEventAsync(int userId, string eventId, EventUpdate update, CancellationToken cancellationToken);
+    /// <summary><c>false</c> se o evento não existe (HTTP 404). Outra falha da API lança <see cref="CalendarApiException"/>.</summary>
+    Task<bool> UpdateEventAsync(int userId, string eventId, string calendarId, EventUpdate update, CancellationToken cancellationToken);
 
-    /// <summary>Devolve o título do evento removido (<c>Evento</c> se a leitura falhar).</summary>
-    Task<string> DeleteEventAsync(int userId, string eventId, CancellationToken cancellationToken);
+    /// <summary>
+    /// Remove o evento; <see cref="CalendarDeleteResult.Found"/> falso = HTTP 404 ("Evento não encontrado ou já foi deletado.").
+    /// O título vem da leitura prévia (<c>Evento</c> se ela falhar, <c>Sem título</c> se o evento não tiver título).
+    /// </summary>
+    Task<CalendarDeleteResult> DeleteEventAsync(int userId, string eventId, string calendarId, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Busca por título nos próximos 90 dias em todos os calendários selecionados. Como o Python, qualquer falha
+    /// (inclusive usuário sem Google conectado) vira lista vazia; calendário com erro é pulado.
+    /// </summary>
     Task<IReadOnlyList<CalendarEvent>> FindEventsByTitleAsync(int userId, string title, CancellationToken cancellationToken);
 }
+
+/// <summary>Falha da API do Google Calendar (sem corpo, sem URL, sem token na mensagem).</summary>
+public sealed class CalendarApiException(string message, System.Net.HttpStatusCode? statusCode, Exception? inner = null)
+    : Exception(message, inner)
+{
+    public System.Net.HttpStatusCode? StatusCode { get; } = statusCode;
+}
+
+public sealed record CalendarDeleteResult(bool Found, string Title);
 
 public sealed record CalendarInfo(string Id, string Summary, bool Primary);
 
@@ -38,7 +55,8 @@ public sealed record CalendarEvent(
     string Location,
     string Description,
     bool AllDay,
-    string? CalendarName);
+    string? CalendarName,
+    string? CalendarId = null);
 
 /// <param name="StartTime">Nulo = evento de dia inteiro.</param>
 /// <param name="EndTime">Nulo = <paramref name="StartTime"/> mais 1 hora.</param>
@@ -48,7 +66,8 @@ public sealed record NewCalendarEvent(
     TimeOnly? StartTime,
     TimeOnly? EndTime,
     string? Description,
-    string? Location);
+    string? Location,
+    string CalendarId = "primary");
 
 /// <summary><c>null</c> = não alterar; <c>""</c> em descrição/local limpa o campo (RN-010-49).</summary>
 public sealed record EventUpdate(

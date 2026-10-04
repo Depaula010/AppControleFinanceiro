@@ -25,6 +25,8 @@ public sealed class AppSettingsIntegrationSettings(AppSettings settings) : IInte
 
     public string GoogleRedirectUri => settings.GoogleRedirectUri;
 
+    public DateTimeOffset? GoogleConnectLegacyUntil => settings.GoogleConnectLegacyUntil;
+
     public string WeatherApiKey => settings.WeatherApiKey;
 
     public string OpenRouteApiKey => settings.OpenRouteApiKey;

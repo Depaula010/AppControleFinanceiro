@@ -133,3 +133,6 @@ dotnet/**/obj/
 
 # Estrutura do banco de producao (somente local; gerada a partir de migrations/schema.sql)
 dotnet/specs/foundation/schema-prod.sql
+
+# Visual Studio
+.vs/

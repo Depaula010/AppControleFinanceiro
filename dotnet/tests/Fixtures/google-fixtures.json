@@ -1,0 +1,350 @@
+{
+  "pages": {
+    "already_connected": "\n            <!DOCTYPE html>\n            <html>\n            <head>\n                <title>Ja Conectado</title>\n                <meta charset=\"utf-8\">\n                <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n                <style>\n                    body {\n                        font-family: Arial, sans-serif;\n                        text-align: center;\n                        padding: 50px;\n                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n                        color: white;\n                    }\n                    .container {\n                        background: white;\n                        color: #333;\n                        padding: 40px;\n                        border-radius: 15px;\n                        max-width: 500px;\n                        margin: 0 auto;\n                        box-shadow: 0 10px 30px rgba(0,0,0,0.3);\n                    }\n                    .icon { font-size: 64px; margin-bottom: 20px; }\n                    h1 { color: #667eea; margin-bottom: 20px; }\n                </style>\n            </head>\n            <body>\n                <div class=\"container\">\n                    <div class=\"icon\">OK</div>\n                    <h1>Voce ja esta conectado!</h1>\n                    <p>Seu Google Calendar e Google Drive ja estao integrados.</p>\n                    <p>Volte para o WhatsApp e use:</p>\n                    <p><strong>\"Tenho compromisso hoje?\"</strong></p>\n                    <p><strong>\"Salvar no drive pasta X\"</strong> (envie com uma imagem)</p>\n                </div>\n            </body>\n            </html>\n            ",
+    "denied": "\n            <!DOCTYPE html>\n            <html>\n            <head>\n                <title>Autorizacao Negada</title>\n                <meta charset=\"utf-8\">\n                <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n                <style>\n                    body {\n                        font-family: Arial, sans-serif;\n                        text-align: center;\n                        padding: 50px;\n                        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);\n                        color: white;\n                    }\n                    .container {\n                        background: white;\n                        color: #333;\n                        padding: 40px;\n                        border-radius: 15px;\n                        max-width: 500px;\n                        margin: 0 auto;\n                        box-shadow: 0 10px 30px rgba(0,0,0,0.3);\n                    }\n                    .icon { font-size: 64px; margin-bottom: 20px; }\n                    h1 { color: #f5576c; margin-bottom: 20px; }\n                </style>\n            </head>\n            <body>\n                <div class=\"container\">\n                    <div class=\"icon\">X</div>\n                    <h1>Autorizacao Negada</h1>\n                    <p>Voce negou o acesso ao Google Calendar.</p>\n                    <p>Para usar esta funcionalidade, voce precisa autorizar o acesso.</p>\n                    <p>Tente novamente quando quiser!</p>\n                </div>\n            </body>\n            </html>\n            ",
+    "connected": "\n        <!DOCTYPE html>\n        <html>\n        <head>\n            <title>Conexao Autorizada</title>\n            <meta charset=\"utf-8\">\n            <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n            <style>\n                body {\n                    font-family: Arial, sans-serif;\n                    text-align: center;\n                    padding: 50px;\n                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n                    color: white;\n                }\n                .container {\n                    background: white;\n                    color: #333;\n                    padding: 40px;\n                    border-radius: 15px;\n                    max-width: 500px;\n                    margin: 0 auto;\n                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);\n                    animation: slideIn 0.5s ease-out;\n                }\n                @keyframes slideIn {\n                    from { transform: translateY(-50px); opacity: 0; }\n                    to { transform: translateY(0); opacity: 1; }\n                }\n                .icon {\n                    font-size: 80px;\n                    margin-bottom: 20px;\n                    animation: bounce 1s infinite;\n                }\n                @keyframes bounce {\n                    0%, 100% { transform: translateY(0); }\n                    50% { transform: translateY(-10px); }\n                }\n                h1 {\n                    color: #667eea;\n                    margin-bottom: 20px;\n                    font-size: 28px;\n                }\n                .success { color: #10b981; font-weight: bold; }\n                .info {\n                    background: #f0f9ff;\n                    padding: 20px;\n                    border-radius: 10px;\n                    margin: 20px 0;\n                    border-left: 4px solid #667eea;\n                }\n                .commands {\n                    text-align: left;\n                    margin: 20px 0;\n                }\n                .command {\n                    background: #f9fafb;\n                    padding: 10px;\n                    margin: 8px 0;\n                    border-radius: 5px;\n                    border-left: 3px solid #10b981;\n                }\n                .footer {\n                    margin-top: 30px;\n                    font-size: 14px;\n                    color: #6b7280;\n                }\n            </style>\n        </head>\n        <body>\n            <div class=\"container\">\n                <div class=\"icon\">OK</div>\n                <h1 class=\"success\">Google Calendar + Drive Conectados!</h1>\n                <p>Ola <strong>{nome}</strong>!</p>\n                <p>Sua conta Google foi conectada com sucesso.</p>\n\n                <div class=\"info\">\n                    <h3 style=\"margin-top: 0; color: #667eea;\">Calendario:</h3>\n                    <div class=\"commands\">\n                        <div class=\"command\">- \"Tenho compromisso hoje?\"</div>\n                        <div class=\"command\">- \"Minha agenda amanha\"</div>\n                        <div class=\"command\">- \"Compromissos do final de semana\"</div>\n                    </div>\n                    <h3 style=\"color: #667eea;\">Google Drive:</h3>\n                    <div class=\"commands\">\n                        <div class=\"command\">- Envie uma imagem com: \"salvar no drive pasta X\"</div>\n                        <div class=\"command\">- Envie um PDF com: \"guardar no drive\"</div>\n                    </div>\n                </div>\n\n                <div class=\"footer\">\n                    <p>Voce ja pode fechar esta janela</p>\n                    <p>Volte para o WhatsApp!</p>\n                    <p style=\"margin-top: 20px;\">\n                        <small>Conexao segura via OAuth2 oficial do Google</small>\n                    </p>\n                </div>\n            </div>\n        </body>\n        </html>\n        ",
+    "error": "\n        <!DOCTYPE html>\n        <html>\n        <head>\n            <title>Erro</title>\n            <meta charset=\"utf-8\">\n            <style>\n                body { text-align: center; padding: 50px; font-family: Arial; }\n                .error { color: red; }\n            </style>\n        </head>\n        <body>\n            <h1 class=\"error\">Erro</h1>\n            <p>Ocorreu um erro ao processar a autorizacao:</p>\n            <p><code>{texto}</code></p>\n            <p>Tente novamente ou contate o suporte.</p>\n        </body>\n        </html>\n        "
+  },
+  "whatsapp": {
+    "connected": "*Google Calendar + Drive Conectados!*\n\nOla {nome}! Sua conta Google foi conectada com sucesso.\n\n*Calendario:*\n- Tenho compromisso hoje?\n- Minha agenda amanha\n\n*Google Drive:*\n- Envie uma imagem/documento com a legenda:\n  _salvar no drive pasta Notas Fiscais_\n\nSeus dados estao seguros via OAuth2!",
+    "token_revoked_with_link": "⚠️ *Google Calendar - Reconexão Necessária*\n\nDetectamos que sua conexão com o Google Calendar expirou ou foi revogada.\n\n🔴 *Seus alertas de tarefas estão PAUSADOS* até você reconectar.\n\n👉 *Reconecte agora:*\n{connect_url}\n\n_Esta notificação é enviada 1x por semana enquanto a reconexão for necessária._",
+    "token_revoked_without_link": "⚠️ *Google Calendar - Reconexão Necessária*\n\nDetectamos que sua conexão com o Google Calendar expirou ou foi revogada.\n\n🔴 *Seus alertas de tarefas estão PAUSADOS* até você reconectar.\n\n✅ *Como resolver:* Acesse as configurações do app e clique em \"Conectar Google Calendar\".\n\n_Esta notificação é enviada 1x por semana enquanto a reconexão for necessária._"
+  },
+  "calendar": {
+    "strip_html": [
+      {
+        "input": "",
+        "output": ""
+      },
+      {
+        "input": null,
+        "output": null
+      },
+      {
+        "input": "<p>Ola&nbsp;<b>mundo</b> &amp; cia &lt;3 &gt;</p>",
+        "output": "Ola mundo & cia <3 >"
+      },
+      {
+        "input": "a \t\t b\n\n\n\nc",
+        "output": "a b\n\nc"
+      },
+      {
+        "input": "  <br>  x  ",
+        "output": "x"
+      },
+      {
+        "input": "sem tags",
+        "output": "sem tags"
+      }
+    ],
+    "format_time": [
+      {
+        "input": "2026-10-02T10:30:00-03:00",
+        "output": "10:30"
+      },
+      {
+        "input": "2026-10-02T10:30:00Z",
+        "output": "10:30"
+      },
+      {
+        "input": "2026-10-02T10:30:00+00:00",
+        "output": "10:30"
+      },
+      {
+        "input": "2026-10-02T09:05:00.000-03:00",
+        "output": "09:05"
+      },
+      {
+        "input": "2026-10-02",
+        "output": ""
+      },
+      {
+        "input": "",
+        "output": ""
+      },
+      {
+        "input": null,
+        "output": ""
+      },
+      {
+        "input": "T",
+        "output": ""
+      },
+      {
+        "input": "2026-10-02T7:5",
+        "output": "7:5"
+      }
+    ],
+    "today": "2026-10-02",
+    "day": [
+      {
+        "name": "vazio hoje",
+        "date": "2026-10-02",
+        "events": [],
+        "output": "📅 Você não tem compromissos agendados hoje! 🎉"
+      },
+      {
+        "name": "vazio amanha",
+        "date": "2026-10-03",
+        "events": [],
+        "output": "📅 Você não tem compromissos agendados amanhã! 🎉"
+      },
+      {
+        "name": "vazio outra data",
+        "date": "2026-11-15",
+        "events": [],
+        "output": "📅 Você não tem compromissos agendados no dia 15/11/2026! 🎉"
+      },
+      {
+        "name": "um evento com horario, local e descricao html",
+        "date": "2026-10-02",
+        "events": [
+          {
+            "summary": "Reuniao",
+            "start": "2026-10-02T10:00:00-03:00",
+            "end": "2026-10-02T11:30:00-03:00",
+            "location": "Sala 3",
+            "description": "<p>Pauta &amp; ata</p><br>Levar <b>notebook</b>",
+            "all_day": false
+          }
+        ],
+        "output": "📅 *AGENDA - 02/10/2026 (SEXTA-FEIRA)* 📅\n\n📊 Total de compromissos: *1*\n\n━━━━━━━━━━━━━━━━━━━━\n\n🔵 *Reuniao*\n   ⏰ 10:00 - 11:30\n   📍 Sala 3\n   📝 Pauta & ata Levar notebook"
+      },
+      {
+        "name": "dia inteiro e sem fim",
+        "date": "2026-10-04",
+        "events": [
+          {
+            "summary": "Feriado",
+            "start": "2026-10-02",
+            "end": "2026-10-03",
+            "location": "",
+            "description": "",
+            "all_day": true
+          },
+          {
+            "summary": "Ligacao",
+            "start": "2026-10-02T15:00:00Z",
+            "end": "",
+            "location": "",
+            "description": "",
+            "all_day": false
+          }
+        ],
+        "output": "📅 *AGENDA - 04/10/2026 (DOMINGO)* 📅\n\n📊 Total de compromissos: *2*\n\n━━━━━━━━━━━━━━━━━━━━\n\n📆 *Feriado*\n   ⏰ Dia inteiro\n\n🔵 *Ligacao*\n   ⏰ 15:00"
+      },
+      {
+        "name": "varios (sabado, domingo, terca)",
+        "date": "2026-10-06",
+        "events": [
+          {
+            "summary": "Dentista",
+            "start": "2026-10-02T08:30:00+00:00",
+            "end": "2026-10-02T09:00:00+00:00",
+            "location": "",
+            "description": "<p></p>",
+            "all_day": false
+          },
+          {
+            "summary": "Reuniao",
+            "start": "2026-10-02T10:00:00-03:00",
+            "end": "2026-10-02T11:30:00-03:00",
+            "location": "Sala 3",
+            "description": "<p>Pauta &amp; ata</p><br>Levar <b>notebook</b>",
+            "all_day": false
+          },
+          {
+            "summary": "Feriado",
+            "start": "2026-10-02",
+            "end": "2026-10-03",
+            "location": "",
+            "description": "",
+            "all_day": true
+          }
+        ],
+        "output": "📅 *AGENDA - 06/10/2026 (TERÇA-FEIRA)* 📅\n\n📊 Total de compromissos: *3*\n\n━━━━━━━━━━━━━━━━━━━━\n\n🔵 *Dentista*\n   ⏰ 08:30 - 09:00\n\n🔵 *Reuniao*\n   ⏰ 10:00 - 11:30\n   📍 Sala 3\n   📝 Pauta & ata Levar notebook\n\n📆 *Feriado*\n   ⏰ Dia inteiro"
+      },
+      {
+        "name": "quarta, quinta, sexta",
+        "date": "2026-10-07",
+        "events": [
+          {
+            "summary": "Dentista",
+            "start": "2026-10-02T08:30:00+00:00",
+            "end": "2026-10-02T09:00:00+00:00",
+            "location": "",
+            "description": "<p></p>",
+            "all_day": false
+          }
+        ],
+        "output": "📅 *AGENDA - 07/10/2026 (QUARTA-FEIRA)* 📅\n\n📊 Total de compromissos: *1*\n\n━━━━━━━━━━━━━━━━━━━━\n\n🔵 *Dentista*\n   ⏰ 08:30 - 09:00"
+      },
+      {
+        "name": "cabecalho 2026-10-08",
+        "date": "2026-10-08",
+        "events": [
+          {
+            "summary": "Dentista",
+            "start": "2026-10-02T08:30:00+00:00",
+            "end": "2026-10-02T09:00:00+00:00",
+            "location": "",
+            "description": "<p></p>",
+            "all_day": false
+          }
+        ],
+        "output": "📅 *AGENDA - 08/10/2026 (QUINTA-FEIRA)* 📅\n\n📊 Total de compromissos: *1*\n\n━━━━━━━━━━━━━━━━━━━━\n\n🔵 *Dentista*\n   ⏰ 08:30 - 09:00"
+      },
+      {
+        "name": "cabecalho 2026-10-09",
+        "date": "2026-10-09",
+        "events": [
+          {
+            "summary": "Dentista",
+            "start": "2026-10-02T08:30:00+00:00",
+            "end": "2026-10-02T09:00:00+00:00",
+            "location": "",
+            "description": "<p></p>",
+            "all_day": false
+          }
+        ],
+        "output": "📅 *AGENDA - 09/10/2026 (SEXTA-FEIRA)* 📅\n\n📊 Total de compromissos: *1*\n\n━━━━━━━━━━━━━━━━━━━━\n\n🔵 *Dentista*\n   ⏰ 08:30 - 09:00"
+      },
+      {
+        "name": "cabecalho 2026-10-10",
+        "date": "2026-10-10",
+        "events": [
+          {
+            "summary": "Dentista",
+            "start": "2026-10-02T08:30:00+00:00",
+            "end": "2026-10-02T09:00:00+00:00",
+            "location": "",
+            "description": "<p></p>",
+            "all_day": false
+          }
+        ],
+        "output": "📅 *AGENDA - 10/10/2026 (SÁBADO)* 📅\n\n📊 Total de compromissos: *1*\n\n━━━━━━━━━━━━━━━━━━━━\n\n🔵 *Dentista*\n   ⏰ 08:30 - 09:00"
+      },
+      {
+        "name": "cabecalho 2026-10-11",
+        "date": "2026-10-11",
+        "events": [
+          {
+            "summary": "Dentista",
+            "start": "2026-10-02T08:30:00+00:00",
+            "end": "2026-10-02T09:00:00+00:00",
+            "location": "",
+            "description": "<p></p>",
+            "all_day": false
+          }
+        ],
+        "output": "📅 *AGENDA - 11/10/2026 (DOMINGO)* 📅\n\n📊 Total de compromissos: *1*\n\n━━━━━━━━━━━━━━━━━━━━\n\n🔵 *Dentista*\n   ⏰ 08:30 - 09:00"
+      },
+      {
+        "name": "cabecalho 2026-10-12",
+        "date": "2026-10-12",
+        "events": [
+          {
+            "summary": "Dentista",
+            "start": "2026-10-02T08:30:00+00:00",
+            "end": "2026-10-02T09:00:00+00:00",
+            "location": "",
+            "description": "<p></p>",
+            "all_day": false
+          }
+        ],
+        "output": "📅 *AGENDA - 12/10/2026 (SEGUNDA-FEIRA)* 📅\n\n📊 Total de compromissos: *1*\n\n━━━━━━━━━━━━━━━━━━━━\n\n🔵 *Dentista*\n   ⏰ 08:30 - 09:00"
+      }
+    ],
+    "period": [
+      {
+        "name": "vazio",
+        "start": "2026-10-02",
+        "end": "2026-10-04",
+        "by_date": {},
+        "output": "📅 Você não tem compromissos agendados neste período! 🎉"
+      },
+      {
+        "name": "dois dias",
+        "start": "2026-10-02",
+        "end": "2026-10-03",
+        "by_date": {
+          "2026-10-02": [
+            {
+              "summary": "Reuniao",
+              "start": "2026-10-02T10:00:00-03:00",
+              "end": "2026-10-02T11:30:00-03:00",
+              "location": "Sala 3",
+              "description": "<p>Pauta &amp; ata</p><br>Levar <b>notebook</b>",
+              "all_day": false
+            },
+            {
+              "summary": "Feriado",
+              "start": "2026-10-02",
+              "end": "2026-10-03",
+              "location": "",
+              "description": "",
+              "all_day": true
+            }
+          ],
+          "2026-10-03": [
+            {
+              "summary": "Ligacao",
+              "start": "2026-10-02T15:00:00Z",
+              "end": "",
+              "location": "",
+              "description": "",
+              "all_day": false
+            },
+            {
+              "summary": "Dentista",
+              "start": "2026-10-02T08:30:00+00:00",
+              "end": "2026-10-02T09:00:00+00:00",
+              "location": "",
+              "description": "<p></p>",
+              "all_day": false
+            }
+          ]
+        },
+        "output": "📅 *AGENDA - 02/10 a 03/10/2026* 📅\n\n📊 Total: *4 compromisso(s)* em *2 dia(s)*\n\n━━━━━━━━━━━━━━━━━━━━\n\n📆 *02/10 (Sex)* - 2 compromisso(s)\n  • 10:00 - Reuniao\n  • Feriado (dia inteiro)\n\n📆 *03/10 (Sáb)* - 2 compromisso(s)\n  • 15:00 - Ligacao\n  • 08:30 - Dentista"
+      },
+      {
+        "name": "fora de ordem",
+        "start": "2026-10-02",
+        "end": "2026-10-09",
+        "by_date": {
+          "2026-10-09": [
+            {
+              "summary": "Dentista",
+              "start": "2026-10-02T08:30:00+00:00",
+              "end": "2026-10-02T09:00:00+00:00",
+              "location": "",
+              "description": "<p></p>",
+              "all_day": false
+            }
+          ],
+          "2026-10-04": [
+            {
+              "summary": "Sem hora",
+              "start": "garbage",
+              "end": "",
+              "location": "",
+              "description": "",
+              "all_day": false
+            }
+          ],
+          "2026-10-05": [
+            {
+              "summary": "Reuniao",
+              "start": "2026-10-02T10:00:00-03:00",
+              "end": "2026-10-02T11:30:00-03:00",
+              "location": "Sala 3",
+              "description": "<p>Pauta &amp; ata</p><br>Levar <b>notebook</b>",
+              "all_day": false
+            }
+          ]
+        },
+        "output": "📅 *AGENDA - 02/10 a 09/10/2026* 📅\n\n📊 Total: *3 compromisso(s)* em *3 dia(s)*\n\n━━━━━━━━━━━━━━━━━━━━\n\n📆 *04/10 (Dom)* - 1 compromisso(s)\n  • Sem hora\n\n📆 *05/10 (Seg)* - 1 compromisso(s)\n  • 10:00 - Reuniao\n\n📆 *09/10 (Sex)* - 1 compromisso(s)\n  • 08:30 - Dentista"
+      }
+    ]
+  }
+}

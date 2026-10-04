@@ -41,6 +41,32 @@ public class AppSettingsTests
     }
 
     [Fact]
+    [Trait("AC", "010-53")]
+    public void Load_GoogleConnectLegacyUntil_IsOffByDefaultAndParsesDateOrDateTime()
+    {
+        Load(Valid()).GoogleConnectLegacyUntil.ShouldBeNull();
+
+        var values = Valid();
+        values["GOOGLE_CONNECT_LEGACY_UNTIL"] = "2026-11-30";
+        Load(values).GoogleConnectLegacyUntil.ShouldBe(new DateTimeOffset(2026, 12, 1, 0, 0, 0, TimeSpan.FromHours(-3)));
+
+        values["GOOGLE_CONNECT_LEGACY_UNTIL"] = "2026-11-30T12:00:00-03:00";
+        Load(values).GoogleConnectLegacyUntil.ShouldBe(new DateTimeOffset(2026, 11, 30, 12, 0, 0, TimeSpan.FromHours(-3)));
+
+        values["GOOGLE_CONNECT_LEGACY_UNTIL"] = "2026-11-30T12:00:00";
+        Load(values).GoogleConnectLegacyUntil.ShouldBe(new DateTimeOffset(2026, 11, 30, 12, 0, 0, TimeSpan.Zero));
+    }
+
+    [Fact]
+    public void Load_GoogleConnectLegacyUntil_RejectsGarbage()
+    {
+        var values = Valid();
+        values["GOOGLE_CONNECT_LEGACY_UNTIL"] = "amanha";
+
+        Should.Throw<InvalidOperationException>(() => Load(values)).Message.ShouldContain("GOOGLE_CONNECT_LEGACY_UNTIL");
+    }
+
+    [Fact]
     public void Load_ListsEveryMissingRequiredVariable()
     {
         var ex = Should.Throw<InvalidOperationException>(() => Load([]));

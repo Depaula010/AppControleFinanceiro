@@ -26,6 +26,9 @@ public interface IIntegrationSettings
 
     string GoogleRedirectUri { get; }
 
+    /// <summary><c>GOOGLE_CONNECT_LEGACY_UNTIL</c> (desvio 053): links <c>/connect-calendar</c> sem <c>t</c> valem até este instante. Nulo = desligado.</summary>
+    DateTimeOffset? GoogleConnectLegacyUntil { get; }
+
     string WeatherApiKey { get; }
 
     string OpenRouteApiKey { get; }

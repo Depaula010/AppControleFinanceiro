@@ -36,6 +36,8 @@ internal sealed class FakeIntegrationSettings : IIntegrationSettings
     public string OpenRouteBaseUrl { get; set; } = string.Empty;
 
     public int TravelTimeDailyLimit { get; set; }
+
+    public DateTimeOffset? GoogleConnectLegacyUntil { get; set; }
 }
 
 /// <summary>Fábrica que devolve sempre o mesmo handler fake e registra o nome do cliente pedido.</summary>

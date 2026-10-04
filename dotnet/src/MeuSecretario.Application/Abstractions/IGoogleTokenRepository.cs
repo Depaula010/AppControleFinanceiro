@@ -23,7 +23,7 @@ public sealed record GoogleTokenRecord(string AccessToken, string? RefreshToken,
 }
 
 /// <summary>Resultado de troca de código ou renovação.</summary>
-public sealed record GoogleTokenSet(string AccessToken, string? RefreshToken, DateTime? ExpiresAtUtc, IReadOnlyList<string> Scopes)
+public sealed record GoogleTokenSet(string AccessToken, string? RefreshToken, DateTimeOffset? ExpiresAtUtc, IReadOnlyList<string> Scopes)
 {
     /// <summary>Nunca inclui os tokens.</summary>
     public override string ToString() => "GoogleTokenSet { Tokens = *** }";
