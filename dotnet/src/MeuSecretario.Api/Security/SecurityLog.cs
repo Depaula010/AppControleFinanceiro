@@ -35,7 +35,29 @@ internal static partial class SecurityLog
     public static void FilterFailed(ILogger logger, string error) =>
         FilterFailedCore(logger, Clean(error));
 
+    // Rotas admin (009a, spec §4.1 a §4.4).
+    public static void Unblocked(ILogger logger, string ip) => UnblockedCore(logger, Clean(ip));
+
+    public static void BlacklistRemoved(ILogger logger, string ip) => BlacklistRemovedCore(logger, Clean(ip));
+
+    public static void BlacklistAdded(ILogger logger, string ip, string? reason) =>
+        BlacklistAddedCore(logger, Clean(ip), Clean(reason));
+
+    public static void BlacklistAddWithoutRedis(ILogger logger, string ip) => BlacklistAddWithoutRedisCore(logger, Clean(ip));
+
     private static string Clean(string? text) => SecurityLogText.Sanitize(text);
+
+    [LoggerMessage(EventId = 9009, Level = LogLevel.Warning, Message = "[SECURITY-UNBLOCK] Bloqueio temporário removido manualmente: {Ip}")]
+    private static partial void UnblockedCore(ILogger logger, string ip);
+
+    [LoggerMessage(EventId = 9010, Level = LogLevel.Warning, Message = "[SECURITY-BLACKLIST] IP removido da blacklist: {Ip}")]
+    private static partial void BlacklistRemovedCore(ILogger logger, string ip);
+
+    [LoggerMessage(EventId = 9011, Level = LogLevel.Warning, Message = "[SECURITY-BLACKLIST] IP adicionado à blacklist permanente: {Ip} | Razão: {Reason}")]
+    private static partial void BlacklistAddedCore(ILogger logger, string ip, string reason);
+
+    [LoggerMessage(EventId = 9012, Level = LogLevel.Error, Message = "[SECURITY-BLACKLIST] Redis indisponível, não foi possível adicionar IP à blacklist: {Ip}")]
+    private static partial void BlacklistAddWithoutRedisCore(ILogger logger, string ip);
 
     [LoggerMessage(EventId = 9001, Level = LogLevel.Warning, Message = "[SECURITY-BLACKLISTED] IP na blacklist tentou acessar | IP: {Ip} | Path: {Path}")]
     private static partial void BlacklistedCore(ILogger logger, string ip, string path);
