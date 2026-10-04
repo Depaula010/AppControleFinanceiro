@@ -117,6 +117,30 @@ internal sealed class SecurityTestHost : IAsyncDisposable
         return (response, await response.Content.ReadAsStringAsync());
     }
 
+    /// <summary>Requisição com corpo e headers livres (rotas admin).</summary>
+    public async Task<(HttpResponseMessage Response, string Body)> Call(
+        HttpMethod method,
+        string path,
+        string? body = null,
+        IReadOnlyDictionary<string, string>? headers = null,
+        string contentType = "application/json")
+    {
+        using var client = _factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        using var request = new HttpRequestMessage(method, new Uri(path, UriKind.Relative));
+        foreach (var (name, value) in headers ?? new Dictionary<string, string>())
+        {
+            request.Headers.TryAddWithoutValidation(name, value);
+        }
+
+        if (body is not null)
+        {
+            request.Content = new StringContent(body, System.Text.Encoding.UTF8, contentType);
+        }
+
+        var response = await client.SendAsync(request);
+        return (response, await response.Content.ReadAsStringAsync());
+    }
+
     /// <summary>Requisição externa: o proxy privado do nginx entrega com <c>X-Forwarded-For: ip</c>.</summary>
     public Task<(HttpResponseMessage Response, string Body)> SendFrom(
         string clientIp, string path, string? userAgent = null, HttpMethod? method = null) =>

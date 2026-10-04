@@ -1,6 +1,6 @@
 # Desvio 005 — Rotas registradas porém bloqueadas pela whitelist
 
-- **Estado:** implementado (feature 009-0, 2026-10-04) — escopo 009-0: whitelist derivada de `GetEndpoint()` e padrões suspeitos só para caminho sem endpoint; as rotas `/admin/*` entram nas entregas 009a/b/c
+- **Estado:** implementado (feature 009-0, 2026-10-04) — escopo 009-0: whitelist derivada de `GetEndpoint()` e padrões suspeitos só para caminho sem endpoint; escopo 009a: as 9 rotas `/admin/*` com `x-api-key` (incl. `/admin/config-alertas-financeiros`, que casava com `/config`) alcançam o handler; 009b/c ainda pendentes
 - **Features afetadas:** 008, 009, 011, 014
 - **Severidade:** compatibilidade
 
