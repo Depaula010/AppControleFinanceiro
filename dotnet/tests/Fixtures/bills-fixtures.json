@@ -1,0 +1,3834 @@
+{
+ "round2": [
+  {
+   "value": "0.125",
+   "rounded": "0.12"
+  },
+  {
+   "value": "2.675",
+   "rounded": "2.67"
+  },
+  {
+   "value": "1.115",
+   "rounded": "1.11"
+  },
+  {
+   "value": "0.5",
+   "rounded": "0.5"
+  },
+  {
+   "value": "0.005",
+   "rounded": "0.01"
+  },
+  {
+   "value": "0.015",
+   "rounded": "0.01"
+  },
+  {
+   "value": "0.025",
+   "rounded": "0.03"
+  },
+  {
+   "value": "1.005",
+   "rounded": "1.0"
+  },
+  {
+   "value": "10.005",
+   "rounded": "10.01"
+  },
+  {
+   "value": "100.125",
+   "rounded": "100.12"
+  },
+  {
+   "value": "0.375",
+   "rounded": "0.38"
+  },
+  {
+   "value": "0.625",
+   "rounded": "0.62"
+  },
+  {
+   "value": "1234.565",
+   "rounded": "1234.57"
+  },
+  {
+   "value": "-0.125",
+   "rounded": "-0.12"
+  },
+  {
+   "value": "-2.675",
+   "rounded": "-2.67"
+  },
+  {
+   "value": "-1.115",
+   "rounded": "-1.11"
+  },
+  {
+   "value": "-0.5",
+   "rounded": "-0.5"
+  },
+  {
+   "value": "-0.005",
+   "rounded": "-0.01"
+  },
+  {
+   "value": "-1.005",
+   "rounded": "-1.0"
+  },
+  {
+   "value": "0.0",
+   "rounded": "0.0"
+  },
+  {
+   "value": "-0.0",
+   "rounded": "-0.0"
+  },
+  {
+   "value": "1e-09",
+   "rounded": "0.0"
+  },
+  {
+   "value": "0.994999",
+   "rounded": "0.99"
+  },
+  {
+   "value": "0.995",
+   "rounded": "0.99"
+  },
+  {
+   "value": "99.995",
+   "rounded": "100.0"
+  },
+  {
+   "value": "2.5",
+   "rounded": "2.5"
+  },
+  {
+   "value": "3.5",
+   "rounded": "3.5"
+  },
+  {
+   "value": "1000000000000000.1",
+   "rounded": "1000000000000000.1"
+  },
+  {
+   "value": "123456789012.345",
+   "rounded": "123456789012.35"
+  },
+  {
+   "value": "4503599627370496.0",
+   "rounded": "4503599627370496.0"
+  },
+  {
+   "value": "311.3",
+   "rounded": "311.3"
+  },
+  {
+   "value": "3020.0",
+   "rounded": "3020.0"
+  },
+  {
+   "value": "503.3333333333333",
+   "rounded": "503.33"
+  },
+  {
+   "value": "1445.9999999999998",
+   "rounded": "1446.0"
+  },
+  {
+   "value": "4603.433",
+   "rounded": "4603.43"
+  },
+  {
+   "value": "16606.761",
+   "rounded": "16606.76"
+  },
+  {
+   "value": "40533.223",
+   "rounded": "40533.22"
+  },
+  {
+   "value": "21180.333815",
+   "rounded": "21180.33"
+  },
+  {
+   "value": "27831.522",
+   "rounded": "27831.52"
+  },
+  {
+   "value": "6776.03",
+   "rounded": "6776.03"
+  },
+  {
+   "value": "48107.3067",
+   "rounded": "48107.31"
+  },
+  {
+   "value": "16865.992",
+   "rounded": "16865.99"
+  },
+  {
+   "value": "3529.655",
+   "rounded": "3529.66"
+  },
+  {
+   "value": "40801.087",
+   "rounded": "40801.09"
+  },
+  {
+   "value": "18144.698",
+   "rounded": "18144.7"
+  },
+  {
+   "value": "15314.79",
+   "rounded": "15314.79"
+  },
+  {
+   "value": "7591.530199",
+   "rounded": "7591.53"
+  },
+  {
+   "value": "47469.6436",
+   "rounded": "47469.64"
+  },
+  {
+   "value": "41931.6897",
+   "rounded": "41931.69"
+  },
+  {
+   "value": "44356.5351",
+   "rounded": "44356.54"
+  },
+  {
+   "value": "32236.88",
+   "rounded": "32236.88"
+  },
+  {
+   "value": "44257.4873",
+   "rounded": "44257.49"
+  },
+  {
+   "value": "27516.171",
+   "rounded": "27516.17"
+  },
+  {
+   "value": "10983.13678",
+   "rounded": "10983.14"
+  },
+  {
+   "value": "1486.707",
+   "rounded": "1486.71"
+  },
+  {
+   "value": "14602.2208",
+   "rounded": "14602.22"
+  },
+  {
+   "value": "19458.2431",
+   "rounded": "19458.24"
+  },
+  {
+   "value": "39426.04",
+   "rounded": "39426.04"
+  },
+  {
+   "value": "6510.8126",
+   "rounded": "6510.81"
+  },
+  {
+   "value": "40319.066",
+   "rounded": "40319.07"
+  },
+  {
+   "value": "22558.0226",
+   "rounded": "22558.02"
+  },
+  {
+   "value": "26359.70361",
+   "rounded": "26359.7"
+  },
+  {
+   "value": "19370.5452",
+   "rounded": "19370.55"
+  },
+  {
+   "value": "36242.849708",
+   "rounded": "36242.85"
+  },
+  {
+   "value": "34055.6473",
+   "rounded": "34055.65"
+  },
+  {
+   "value": "43144.113838",
+   "rounded": "43144.11"
+  },
+  {
+   "value": "-2178.08",
+   "rounded": "-2178.08"
+  },
+  {
+   "value": "31248.92813",
+   "rounded": "31248.93"
+  },
+  {
+   "value": "23229.8909",
+   "rounded": "23229.89"
+  },
+  {
+   "value": "20426.1411",
+   "rounded": "20426.14"
+  },
+  {
+   "value": "35250.3",
+   "rounded": "35250.3"
+  },
+  {
+   "value": "3966.4852",
+   "rounded": "3966.49"
+  },
+  {
+   "value": "29732.8587",
+   "rounded": "29732.86"
+  },
+  {
+   "value": "12935.30382",
+   "rounded": "12935.3"
+  },
+  {
+   "value": "30472.2209",
+   "rounded": "30472.22"
+  },
+  {
+   "value": "35948.929",
+   "rounded": "35948.93"
+  },
+  {
+   "value": "31604.939562",
+   "rounded": "31604.94"
+  },
+  {
+   "value": "18255.167",
+   "rounded": "18255.17"
+  },
+  {
+   "value": "48459.28",
+   "rounded": "48459.28"
+  },
+  {
+   "value": "29509.301043",
+   "rounded": "29509.3"
+  },
+  {
+   "value": "6930.46",
+   "rounded": "6930.46"
+  },
+  {
+   "value": "2249.22",
+   "rounded": "2249.22"
+  },
+  {
+   "value": "25495.255",
+   "rounded": "25495.26"
+  },
+  {
+   "value": "40519.8694",
+   "rounded": "40519.87"
+  },
+  {
+   "value": "-2304.589",
+   "rounded": "-2304.59"
+  },
+  {
+   "value": "31935.4401",
+   "rounded": "31935.44"
+  },
+  {
+   "value": "2027.1615",
+   "rounded": "2027.16"
+  },
+  {
+   "value": "46252.557188",
+   "rounded": "46252.56"
+  },
+  {
+   "value": "21808.159",
+   "rounded": "21808.16"
+  },
+  {
+   "value": "11199.37",
+   "rounded": "11199.37"
+  },
+  {
+   "value": "46569.39",
+   "rounded": "46569.39"
+  },
+  {
+   "value": "13518.97",
+   "rounded": "13518.97"
+  },
+  {
+   "value": "31726.482",
+   "rounded": "31726.48"
+  },
+  {
+   "value": "28834.129",
+   "rounded": "28834.13"
+  },
+  {
+   "value": "1476.22",
+   "rounded": "1476.22"
+  },
+  {
+   "value": "46483.72",
+   "rounded": "46483.72"
+  },
+  {
+   "value": "34298.088",
+   "rounded": "34298.09"
+  },
+  {
+   "value": "36488.1381",
+   "rounded": "36488.14"
+  },
+  {
+   "value": "43656.6615",
+   "rounded": "43656.66"
+  },
+  {
+   "value": "28978.1966",
+   "rounded": "28978.2"
+  },
+  {
+   "value": "8646.919499",
+   "rounded": "8646.92"
+  },
+  {
+   "value": "24341.81262",
+   "rounded": "24341.81"
+  },
+  {
+   "value": "41717.307619",
+   "rounded": "41717.31"
+  },
+  {
+   "value": "47515.5691",
+   "rounded": "47515.57"
+  },
+  {
+   "value": "17410.957971",
+   "rounded": "17410.96"
+  },
+  {
+   "value": "-1938.439285",
+   "rounded": "-1938.44"
+  },
+  {
+   "value": "-4057.9625",
+   "rounded": "-4057.96"
+  },
+  {
+   "value": "6139.693",
+   "rounded": "6139.69"
+  },
+  {
+   "value": "26744.3582",
+   "rounded": "26744.36"
+  },
+  {
+   "value": "35950.04",
+   "rounded": "35950.04"
+  },
+  {
+   "value": "37409.1862",
+   "rounded": "37409.19"
+  },
+  {
+   "value": "39669.33",
+   "rounded": "39669.33"
+  },
+  {
+   "value": "16975.5119",
+   "rounded": "16975.51"
+  },
+  {
+   "value": "16982.72",
+   "rounded": "16982.72"
+  },
+  {
+   "value": "36677.184",
+   "rounded": "36677.18"
+  },
+  {
+   "value": "-1383.59",
+   "rounded": "-1383.59"
+  },
+  {
+   "value": "36961.0341",
+   "rounded": "36961.03"
+  },
+  {
+   "value": "40487.6705",
+   "rounded": "40487.67"
+  },
+  {
+   "value": "33057.9244",
+   "rounded": "33057.92"
+  },
+  {
+   "value": "22021.0346",
+   "rounded": "22021.03"
+  },
+  {
+   "value": "44322.347",
+   "rounded": "44322.35"
+  },
+  {
+   "value": "36697.2792",
+   "rounded": "36697.28"
+  },
+  {
+   "value": "33635.1936",
+   "rounded": "33635.19"
+  },
+  {
+   "value": "6024.88",
+   "rounded": "6024.88"
+  },
+  {
+   "value": "-659.169147",
+   "rounded": "-659.17"
+  },
+  {
+   "value": "7972.846",
+   "rounded": "7972.85"
+  },
+  {
+   "value": "21975.84",
+   "rounded": "21975.84"
+  },
+  {
+   "value": "22854.3464",
+   "rounded": "22854.35"
+  },
+  {
+   "value": "34088.11",
+   "rounded": "34088.11"
+  },
+  {
+   "value": "29860.944108",
+   "rounded": "29860.94"
+  },
+  {
+   "value": "27246.7215",
+   "rounded": "27246.72"
+  },
+  {
+   "value": "-593.9859",
+   "rounded": "-593.99"
+  },
+  {
+   "value": "4519.14",
+   "rounded": "4519.14"
+  },
+  {
+   "value": "42632.554238",
+   "rounded": "42632.55"
+  },
+  {
+   "value": "42044.737",
+   "rounded": "42044.74"
+  },
+  {
+   "value": "29749.46",
+   "rounded": "29749.46"
+  },
+  {
+   "value": "1753.773",
+   "rounded": "1753.77"
+  },
+  {
+   "value": "-4424.89",
+   "rounded": "-4424.89"
+  },
+  {
+   "value": "28118.881",
+   "rounded": "28118.88"
+  },
+  {
+   "value": "28137.9751",
+   "rounded": "28137.98"
+  },
+  {
+   "value": "17356.8697",
+   "rounded": "17356.87"
+  },
+  {
+   "value": "6028.8",
+   "rounded": "6028.8"
+  },
+  {
+   "value": "14170.9904",
+   "rounded": "14170.99"
+  },
+  {
+   "value": "3436.799",
+   "rounded": "3436.8"
+  },
+  {
+   "value": "35346.2429",
+   "rounded": "35346.24"
+  },
+  {
+   "value": "36290.5962",
+   "rounded": "36290.6"
+  },
+  {
+   "value": "27618.167257",
+   "rounded": "27618.17"
+  },
+  {
+   "value": "32492.05674",
+   "rounded": "32492.06"
+  },
+  {
+   "value": "1215.0839",
+   "rounded": "1215.08"
+  },
+  {
+   "value": "23619.6855",
+   "rounded": "23619.69"
+  },
+  {
+   "value": "1174.24",
+   "rounded": "1174.24"
+  },
+  {
+   "value": "17971.729019",
+   "rounded": "17971.73"
+  },
+  {
+   "value": "21373.86",
+   "rounded": "21373.86"
+  },
+  {
+   "value": "17665.5081",
+   "rounded": "17665.51"
+  },
+  {
+   "value": "1897.604",
+   "rounded": "1897.6"
+  },
+  {
+   "value": "102.299",
+   "rounded": "102.3"
+  },
+  {
+   "value": "601.287",
+   "rounded": "601.29"
+  },
+  {
+   "value": "639.194",
+   "rounded": "639.19"
+  },
+  {
+   "value": "1453.882",
+   "rounded": "1453.88"
+  },
+  {
+   "value": "1123.557",
+   "rounded": "1123.56"
+  },
+  {
+   "value": "727.781",
+   "rounded": "727.78"
+  },
+  {
+   "value": "1767.041",
+   "rounded": "1767.04"
+  },
+  {
+   "value": "1648.81",
+   "rounded": "1648.81"
+  },
+  {
+   "value": "57.519",
+   "rounded": "57.52"
+  },
+  {
+   "value": "1147.712",
+   "rounded": "1147.71"
+  },
+  {
+   "value": "768.637",
+   "rounded": "768.64"
+  },
+  {
+   "value": "1655.133",
+   "rounded": "1655.13"
+  },
+  {
+   "value": "659.802",
+   "rounded": "659.8"
+  },
+  {
+   "value": "33.219",
+   "rounded": "33.22"
+  },
+  {
+   "value": "1684.448",
+   "rounded": "1684.45"
+  },
+  {
+   "value": "1981.614",
+   "rounded": "1981.61"
+  },
+  {
+   "value": "1372.64",
+   "rounded": "1372.64"
+  },
+  {
+   "value": "525.962",
+   "rounded": "525.96"
+  },
+  {
+   "value": "1189.377",
+   "rounded": "1189.38"
+  },
+  {
+   "value": "334.939",
+   "rounded": "334.94"
+  },
+  {
+   "value": "1812.155",
+   "rounded": "1812.15"
+  },
+  {
+   "value": "474.617",
+   "rounded": "474.62"
+  },
+  {
+   "value": "856.572",
+   "rounded": "856.57"
+  },
+  {
+   "value": "973.009",
+   "rounded": "973.01"
+  },
+  {
+   "value": "1813.401",
+   "rounded": "1813.4"
+  },
+  {
+   "value": "776.144",
+   "rounded": "776.14"
+  },
+  {
+   "value": "922.4",
+   "rounded": "922.4"
+  },
+  {
+   "value": "278.063",
+   "rounded": "278.06"
+  },
+  {
+   "value": "1816.021",
+   "rounded": "1816.02"
+  },
+  {
+   "value": "1364.312",
+   "rounded": "1364.31"
+  },
+  {
+   "value": "1549.369",
+   "rounded": "1549.37"
+  },
+  {
+   "value": "678.729",
+   "rounded": "678.73"
+  },
+  {
+   "value": "182.847",
+   "rounded": "182.85"
+  },
+  {
+   "value": "1075.022",
+   "rounded": "1075.02"
+  },
+  {
+   "value": "186.119",
+   "rounded": "186.12"
+  },
+  {
+   "value": "1824.813",
+   "rounded": "1824.81"
+  },
+  {
+   "value": "382.077",
+   "rounded": "382.08"
+  },
+  {
+   "value": "506.084",
+   "rounded": "506.08"
+  },
+  {
+   "value": "1979.885",
+   "rounded": "1979.88"
+  },
+  {
+   "value": "1611.889",
+   "rounded": "1611.89"
+  },
+  {
+   "value": "1.227",
+   "rounded": "1.23"
+  },
+  {
+   "value": "1043.157",
+   "rounded": "1043.16"
+  },
+  {
+   "value": "753.009",
+   "rounded": "753.01"
+  },
+  {
+   "value": "50.852",
+   "rounded": "50.85"
+  },
+  {
+   "value": "1492.691",
+   "rounded": "1492.69"
+  },
+  {
+   "value": "1986.498",
+   "rounded": "1986.5"
+  },
+  {
+   "value": "195.777",
+   "rounded": "195.78"
+  },
+  {
+   "value": "752.039",
+   "rounded": "752.04"
+  },
+  {
+   "value": "1971.356",
+   "rounded": "1971.36"
+  },
+  {
+   "value": "365.434",
+   "rounded": "365.43"
+  },
+  {
+   "value": "1984.784",
+   "rounded": "1984.78"
+  },
+  {
+   "value": "1346.895",
+   "rounded": "1346.89"
+  },
+  {
+   "value": "583.869",
+   "rounded": "583.87"
+  },
+  {
+   "value": "546.423",
+   "rounded": "546.42"
+  },
+  {
+   "value": "1323.256",
+   "rounded": "1323.26"
+  },
+  {
+   "value": "306.583",
+   "rounded": "306.58"
+  },
+  {
+   "value": "815.294",
+   "rounded": "815.29"
+  },
+  {
+   "value": "1978.414",
+   "rounded": "1978.41"
+  },
+  {
+   "value": "856.696",
+   "rounded": "856.7"
+  },
+  {
+   "value": "1392956.67",
+   "rounded": "1392956.67"
+  },
+  {
+   "value": "1284568.11",
+   "rounded": "1284568.11"
+  },
+  {
+   "value": "496616.36",
+   "rounded": "496616.36"
+  },
+  {
+   "value": "1308067.02",
+   "rounded": "1308067.02"
+  },
+  {
+   "value": "1096109.19",
+   "rounded": "1096109.19"
+  },
+  {
+   "value": "498595.17",
+   "rounded": "498595.17"
+  },
+  {
+   "value": "1139651.67",
+   "rounded": "1139651.67"
+  },
+  {
+   "value": "1572993.74",
+   "rounded": "1572993.74"
+  },
+  {
+   "value": "870711.04",
+   "rounded": "870711.04"
+  },
+  {
+   "value": "713060.0700000001",
+   "rounded": "713060.07"
+  },
+  {
+   "value": "40494.16",
+   "rounded": "40494.16"
+  },
+  {
+   "value": "1246940.41",
+   "rounded": "1246940.41"
+  },
+  {
+   "value": "1302104.61",
+   "rounded": "1302104.61"
+  },
+  {
+   "value": "666421.64",
+   "rounded": "666421.64"
+  },
+  {
+   "value": "536192.56",
+   "rounded": "536192.56"
+  },
+  {
+   "value": "1486818.08",
+   "rounded": "1486818.08"
+  },
+  {
+   "value": "1416503.21",
+   "rounded": "1416503.21"
+  },
+  {
+   "value": "413025.71",
+   "rounded": "413025.71"
+  },
+  {
+   "value": "552226.55",
+   "rounded": "552226.55"
+  },
+  {
+   "value": "594790.45",
+   "rounded": "594790.45"
+  },
+  {
+   "value": "1405427.07",
+   "rounded": "1405427.07"
+  },
+  {
+   "value": "836889.41",
+   "rounded": "836889.41"
+  },
+  {
+   "value": "1545052.25",
+   "rounded": "1545052.25"
+  },
+  {
+   "value": "359164.84",
+   "rounded": "359164.84"
+  },
+  {
+   "value": "60901.450000000004",
+   "rounded": "60901.45"
+  },
+  {
+   "value": "739611.63",
+   "rounded": "739611.63"
+  },
+  {
+   "value": "541016.18",
+   "rounded": "541016.18"
+  },
+  {
+   "value": "472961.57",
+   "rounded": "472961.57"
+  },
+  {
+   "value": "931361.35",
+   "rounded": "931361.35"
+  },
+  {
+   "value": "129064.31",
+   "rounded": "129064.31"
+  },
+  {
+   "value": "288516.56",
+   "rounded": "288516.56"
+  },
+  {
+   "value": "1447367.45",
+   "rounded": "1447367.45"
+  },
+  {
+   "value": "1170463.95",
+   "rounded": "1170463.95"
+  },
+  {
+   "value": "1612825.41",
+   "rounded": "1612825.41"
+  },
+  {
+   "value": "1717949.1500000001",
+   "rounded": "1717949.15"
+  },
+  {
+   "value": "578791.1",
+   "rounded": "578791.1"
+  },
+  {
+   "value": "1492576.98",
+   "rounded": "1492576.98"
+  },
+  {
+   "value": "1522973.58",
+   "rounded": "1522973.58"
+  },
+  {
+   "value": "1059070.37",
+   "rounded": "1059070.37"
+  },
+  {
+   "value": "897011.46",
+   "rounded": "897011.46"
+  },
+  {
+   "value": "1343902.1",
+   "rounded": "1343902.1"
+  },
+  {
+   "value": "1051804.6300000001",
+   "rounded": "1051804.63"
+  },
+  {
+   "value": "592820.3",
+   "rounded": "592820.3"
+  },
+  {
+   "value": "1190940.52",
+   "rounded": "1190940.52"
+  },
+  {
+   "value": "1255665.36",
+   "rounded": "1255665.36"
+  },
+  {
+   "value": "1706890.33",
+   "rounded": "1706890.33"
+  },
+  {
+   "value": "156793.63",
+   "rounded": "156793.63"
+  },
+  {
+   "value": "11734.300000000001",
+   "rounded": "11734.3"
+  },
+  {
+   "value": "821357.7000000001",
+   "rounded": "821357.7"
+  },
+  {
+   "value": "760486.56",
+   "rounded": "760486.56"
+  },
+  {
+   "value": "205285.30000000002",
+   "rounded": "205285.3"
+  },
+  {
+   "value": "1070016.61",
+   "rounded": "1070016.61"
+  },
+  {
+   "value": "170718.91",
+   "rounded": "170718.91"
+  },
+  {
+   "value": "270278.6",
+   "rounded": "270278.6"
+  },
+  {
+   "value": "1082889.7",
+   "rounded": "1082889.7"
+  },
+  {
+   "value": "888308.16",
+   "rounded": "888308.16"
+  },
+  {
+   "value": "1107579.36",
+   "rounded": "1107579.36"
+  },
+  {
+   "value": "1321416.41",
+   "rounded": "1321416.41"
+  },
+  {
+   "value": "1542268.06",
+   "rounded": "1542268.06"
+  },
+  {
+   "value": "1217327.54",
+   "rounded": "1217327.54"
+  },
+  {
+   "value": "207642.96000000002",
+   "rounded": "207642.96"
+  },
+  {
+   "value": "169004.88",
+   "rounded": "169004.88"
+  },
+  {
+   "value": "136470.96000000002",
+   "rounded": "136470.96"
+  },
+  {
+   "value": "177683.76",
+   "rounded": "177683.76"
+  },
+  {
+   "value": "108602.64000000001",
+   "rounded": "108602.64"
+  },
+  {
+   "value": "123992.64000000001",
+   "rounded": "123992.64"
+  },
+  {
+   "value": "145236.24000000002",
+   "rounded": "145236.24"
+  },
+  {
+   "value": "81574.56000000001",
+   "rounded": "81574.56"
+  },
+  {
+   "value": "110397.6",
+   "rounded": "110397.6"
+  },
+  {
+   "value": "46768.32",
+   "rounded": "46768.32"
+  },
+  {
+   "value": "167037.12000000002",
+   "rounded": "167037.12"
+  },
+  {
+   "value": "167499.36000000002",
+   "rounded": "167499.36"
+  },
+  {
+   "value": "89795.52",
+   "rounded": "89795.52"
+  },
+  {
+   "value": "159967.44",
+   "rounded": "159967.44"
+  },
+  {
+   "value": "187956.72",
+   "rounded": "187956.72"
+  },
+  {
+   "value": "32354.640000000003",
+   "rounded": "32354.64"
+  },
+  {
+   "value": "202169.52000000002",
+   "rounded": "202169.52"
+  },
+  {
+   "value": "211911.12000000002",
+   "rounded": "211911.12"
+  },
+  {
+   "value": "39614.4",
+   "rounded": "39614.4"
+  },
+  {
+   "value": "21504.960000000003",
+   "rounded": "21504.96"
+  },
+  {
+   "value": "32488.56",
+   "rounded": "32488.56"
+  },
+  {
+   "value": "6156.0",
+   "rounded": "6156.0"
+  },
+  {
+   "value": "51999.840000000004",
+   "rounded": "51999.84"
+  },
+  {
+   "value": "93096.0",
+   "rounded": "93096.0"
+  },
+  {
+   "value": "192192.48",
+   "rounded": "192192.48"
+  },
+  {
+   "value": "138978.72",
+   "rounded": "138978.72"
+  },
+  {
+   "value": "41087.520000000004",
+   "rounded": "41087.52"
+  },
+  {
+   "value": "182319.12000000002",
+   "rounded": "182319.12"
+  },
+  {
+   "value": "67130.64",
+   "rounded": "67130.64"
+  },
+  {
+   "value": "92169.36",
+   "rounded": "92169.36"
+  },
+  {
+   "value": "112551.12000000001",
+   "rounded": "112551.12"
+  },
+  {
+   "value": "55786.32000000001",
+   "rounded": "55786.32"
+  },
+  {
+   "value": "137503.44",
+   "rounded": "137503.44"
+  },
+  {
+   "value": "203376.96000000002",
+   "rounded": "203376.96"
+  },
+  {
+   "value": "129623.76000000001",
+   "rounded": "129623.76"
+  },
+  {
+   "value": "100539.36",
+   "rounded": "100539.36"
+  },
+  {
+   "value": "44031.600000000006",
+   "rounded": "44031.6"
+  },
+  {
+   "value": "198758.88",
+   "rounded": "198758.88"
+  },
+  {
+   "value": "187246.08000000002",
+   "rounded": "187246.08"
+  },
+  {
+   "value": "85851.36",
+   "rounded": "85851.36"
+  }
+ ],
+ "reserve": [
+  {
+   "months": 1,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "1323.24"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "227.52"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "806.05"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2424.46"
+    }
+   ],
+   "monthly_equivalent": "13803.81",
+   "total": "13803.81",
+   "months_result": 1
+  },
+  {
+   "months": 1,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "1418.17"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "1804.48"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "2699.11"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2303.47"
+    }
+   ],
+   "monthly_equivalent": "62858.62",
+   "total": "62858.62",
+   "months_result": 1
+  },
+  {
+   "months": 1,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "230.0"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "974.66"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "4171.92"
+    }
+   ],
+   "monthly_equivalent": "16218.5",
+   "total": "16218.5",
+   "months_result": 1
+  },
+  {
+   "months": 2,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "650.36"
+    }
+   ],
+   "monthly_equivalent": "19510.8",
+   "total": "39021.6",
+   "months_result": 2
+  },
+  {
+   "months": 2,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "3723.4"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "1555.6"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "3710.08"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "4894.84"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1318.37"
+    }
+   ],
+   "monthly_equivalent": "67962.125",
+   "total": "135924.25",
+   "months_result": 2
+  },
+  {
+   "months": 2,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "3735.35"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "1803.51"
+    }
+   ],
+   "monthly_equivalent": "113864.01",
+   "total": "227728.02",
+   "months_result": 2
+  },
+  {
+   "months": 3,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "415.25"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "2169.49"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "1008.29"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "3337.27"
+    }
+   ],
+   "monthly_equivalent": "31105.073333333334",
+   "total": "93315.22",
+   "months_result": 3
+  },
+  {
+   "months": 3,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "4816.62"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "3837.58"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "3171.2"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2399.7"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "4420.91"
+    }
+   ],
+   "monthly_equivalent": "143860.81666666668",
+   "total": "431582.45",
+   "months_result": 3
+  },
+  {
+   "months": 3,
+   "totals": [
+    {
+     "periodicity": "MENSAL",
+     "total": "1495.22"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1386.22"
+    }
+   ],
+   "monthly_equivalent": "7502.173333333333",
+   "total": "22506.52",
+   "months_result": 3
+  },
+  {
+   "months": 4,
+   "totals": [
+    {
+     "periodicity": "MENSAL",
+     "total": "2761.03"
+    }
+   ],
+   "monthly_equivalent": "2761.03",
+   "total": "11044.12",
+   "months_result": 4
+  },
+  {
+   "months": 4,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2719.68"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "2934.87"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "1960.7"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1365.26"
+    }
+   ],
+   "monthly_equivalent": "13338.545",
+   "total": "53354.18",
+   "months_result": 4
+  },
+  {
+   "months": 4,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "4743.11"
+    }
+   ],
+   "monthly_equivalent": "1185.7775",
+   "total": "4743.11",
+   "months_result": 4
+  },
+  {
+   "months": 5,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "3729.29"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "1206.73"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2097.54"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "337.4"
+    }
+   ],
+   "monthly_equivalent": "7632.228",
+   "total": "38161.14",
+   "months_result": 5
+  },
+  {
+   "months": 5,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2432.7"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "4110.68"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "3742.93"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "206.99"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "4959.01"
+    }
+   ],
+   "monthly_equivalent": "149783.494",
+   "total": "748917.47",
+   "months_result": 5
+  },
+  {
+   "months": 5,
+   "totals": [
+    {
+     "periodicity": "SEMANAL",
+     "total": "3810.68"
+    }
+   ],
+   "monthly_equivalent": "16766.992",
+   "total": "83834.95999999999",
+   "months_result": 5
+  },
+  {
+   "months": 6,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "626.16"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "4930.75"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "1924.8"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1309.58"
+    }
+   ],
+   "monthly_equivalent": "155626.50666666668",
+   "total": "933759.04",
+   "months_result": 6
+  },
+  {
+   "months": 6,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "1652.16"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "2903.94"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "3513.3"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "50.59"
+    }
+   ],
+   "monthly_equivalent": "91008.04",
+   "total": "546048.24",
+   "months_result": 6
+  },
+  {
+   "months": 6,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "4232.39"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "4135.5"
+    }
+   ],
+   "monthly_equivalent": "144892.2",
+   "total": "869353.2000000001",
+   "months_result": 6
+  },
+  {
+   "months": 7,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "2982.13"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "707.02"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2644.51"
+    }
+   ],
+   "monthly_equivalent": "95459.94000000002",
+   "total": "668219.5800000001",
+   "months_result": 7
+  },
+  {
+   "months": 7,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "4150.63"
+    }
+   ],
+   "monthly_equivalent": "592.9471428571429",
+   "total": "4150.63",
+   "months_result": 7
+  },
+  {
+   "months": 7,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "403.82"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "1021.68"
+    }
+   ],
+   "monthly_equivalent": "2101.048571428571",
+   "total": "14707.339999999998",
+   "months_result": 7
+  },
+  {
+   "months": 8,
+   "totals": [
+    {
+     "periodicity": "QUINZENAL",
+     "total": "3706.92"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "2736.63"
+    }
+   ],
+   "monthly_equivalent": "19386.596250000002",
+   "total": "155092.77000000002",
+   "months_result": 8
+  },
+  {
+   "months": 8,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2543.59"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "601.95"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2838.47"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "3939.88"
+    }
+   ],
+   "monthly_equivalent": "23833.81375",
+   "total": "190670.51",
+   "months_result": 8
+  },
+  {
+   "months": 8,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "2018.88"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "3525.95"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2363.45"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1641.45"
+    }
+   ],
+   "monthly_equivalent": "76000.59375",
+   "total": "608004.75",
+   "months_result": 8
+  },
+  {
+   "months": 9,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "4253.24"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "3549.95"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "4567.83"
+    }
+   ],
+   "monthly_equivalent": "116106.74222222221",
+   "total": "1044960.6799999999",
+   "months_result": 9
+  },
+  {
+   "months": 9,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2279.47"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "2677.58"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "1792.58"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "4461.95"
+    }
+   ],
+   "monthly_equivalent": "25851.13111111111",
+   "total": "232660.18",
+   "months_result": 9
+  },
+  {
+   "months": 9,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "988.97"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "179.51"
+    }
+   ],
+   "monthly_equivalent": "289.3955555555556",
+   "total": "2604.56",
+   "months_result": 9
+  },
+  {
+   "months": 10,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "79.57"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "1117.68"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "4748.82"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1828.05"
+    }
+   ],
+   "monthly_equivalent": "20863.034999999996",
+   "total": "208630.34999999998",
+   "months_result": 10
+  },
+  {
+   "months": 10,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "3817.62"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "3728.06"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "473.68"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "4588.17"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "4393.11"
+    }
+   ],
+   "monthly_equivalent": "140763.95500000002",
+   "total": "1407639.55",
+   "months_result": 10
+  },
+  {
+   "months": 10,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "332.44"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "4789.82"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "881.96"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "4142.75"
+    }
+   ],
+   "monthly_equivalent": "24400.809",
+   "total": "244008.09",
+   "months_result": 10
+  },
+  {
+   "months": 11,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "777.03"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "1505.72"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "3288.45"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "2348.92"
+    }
+   ],
+   "monthly_equivalent": "41643.35272727273",
+   "total": "458076.88",
+   "months_result": 11
+  },
+  {
+   "months": 11,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2187.88"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "4958.18"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "3619.1"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "4395.34"
+    }
+   ],
+   "monthly_equivalent": "31574.943636363638",
+   "total": "347324.38",
+   "months_result": 11
+  },
+  {
+   "months": 11,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "4284.49"
+    }
+   ],
+   "monthly_equivalent": "128534.7",
+   "total": "1413881.7",
+   "months_result": 11
+  },
+  {
+   "months": 12,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "1098.87"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "4459.56"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2892.9"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1196.82"
+    }
+   ],
+   "monthly_equivalent": "144850.39250000002",
+   "total": "1738204.7100000002",
+   "months_result": 12
+  },
+  {
+   "months": 12,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "2499.89"
+    }
+   ],
+   "monthly_equivalent": "74996.7",
+   "total": "899960.3999999999",
+   "months_result": 12
+  },
+  {
+   "months": 12,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "2903.37"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "3030.01"
+    }
+   ],
+   "monthly_equivalent": "93161.12",
+   "total": "1117933.44",
+   "months_result": 12
+  },
+  {
+   "months": 13,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "3875.07"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "1419.48"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2979.69"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "2900.58"
+    }
+   ],
+   "monthly_equivalent": "61336.66846153846",
+   "total": "797376.69",
+   "months_result": 13
+  },
+  {
+   "months": 13,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "4529.05"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "4602.72"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "64.87"
+    }
+   ],
+   "monthly_equivalent": "140753.66",
+   "total": "1829797.58",
+   "months_result": 13
+  },
+  {
+   "months": 13,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2951.33"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "2543.75"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "145.76"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "1046.95"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1712.43"
+    }
+   ],
+   "monthly_equivalent": "86155.80692307692",
+   "total": "1120025.49",
+   "months_result": 13
+  },
+  {
+   "months": 14,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "3420.89"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "1435.44"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "3440.57"
+    }
+   ],
+   "monthly_equivalent": "58298.60428571429",
+   "total": "816180.4600000001",
+   "months_result": 14
+  },
+  {
+   "months": 14,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "816.51"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "4637.8"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "4003.39"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2730.43"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "4305.54"
+    }
+   ],
+   "monthly_equivalent": "167416.42500000002",
+   "total": "2343829.95",
+   "months_result": 14
+  },
+  {
+   "months": 14,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2652.14"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "1536.23"
+    }
+   ],
+   "monthly_equivalent": "46276.33857142857",
+   "total": "647868.74",
+   "months_result": 14
+  },
+  {
+   "months": 15,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "4549.88"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "4991.93"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "823.02"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "3084.13"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "316.94"
+    }
+   ],
+   "monthly_equivalent": "158425.91199999998",
+   "total": "2376388.6799999997",
+   "months_result": 15
+  },
+  {
+   "months": 15,
+   "totals": [
+    {
+     "periodicity": "MENSAL",
+     "total": "1298.6"
+    }
+   ],
+   "monthly_equivalent": "1298.6",
+   "total": "19479.0",
+   "months_result": 15
+  },
+  {
+   "months": 15,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2152.77"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "1481.49"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "4409.95"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2288.69"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "4961.2"
+    }
+   ],
+   "monthly_equivalent": "75074.08133333334",
+   "total": "1126111.22",
+   "months_result": 15
+  },
+  {
+   "months": 16,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "4142.87"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "1596.0"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "4927.09"
+    }
+   ],
+   "monthly_equivalent": "69387.005",
+   "total": "1110192.08",
+   "months_result": 16
+  },
+  {
+   "months": 16,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "971.81"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "705.18"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1368.37"
+    }
+   ],
+   "monthly_equivalent": "36465.755625",
+   "total": "583452.09",
+   "months_result": 16
+  },
+  {
+   "months": 16,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "3774.13"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "4999.44"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "1224.04"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "2798.32"
+    }
+   ],
+   "monthly_equivalent": "19751.158125",
+   "total": "316018.53",
+   "months_result": 16
+  },
+  {
+   "months": 17,
+   "totals": [
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2291.09"
+    }
+   ],
+   "monthly_equivalent": "4582.18",
+   "total": "77897.06",
+   "months_result": 17
+  },
+  {
+   "months": 17,
+   "totals": [
+    {
+     "periodicity": "MENSAL",
+     "total": "3367.87"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "1714.55"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "2905.28"
+    }
+   ],
+   "monthly_equivalent": "19443.48294117647",
+   "total": "330539.20999999996",
+   "months_result": 17
+  },
+  {
+   "months": 17,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "4867.42"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "3586.92"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "3242.96"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "1931.52"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "2558.42"
+    }
+   ],
+   "monthly_equivalent": "126136.57058823528",
+   "total": "2144321.6999999997",
+   "months_result": 17
+  },
+  {
+   "months": 18,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2106.08"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "3714.43"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "2689.44"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "3201.41"
+    }
+   ],
+   "monthly_equivalent": "120642.16444444444",
+   "total": "2171558.96",
+   "months_result": 18
+  },
+  {
+   "months": 18,
+   "totals": [
+    {
+     "periodicity": "SEMANAL",
+     "total": "4875.44"
+    }
+   ],
+   "monthly_equivalent": "21126.906666666662",
+   "total": "380284.31999999995",
+   "months_result": 18
+  },
+  {
+   "months": 18,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "1500.74"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "2514.75"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1993.07"
+    }
+   ],
+   "monthly_equivalent": "56173.58666666666",
+   "total": "1011124.5599999999",
+   "months_result": 18
+  },
+  {
+   "months": 19,
+   "totals": [
+    {
+     "periodicity": "QUINZENAL",
+     "total": "3139.35"
+    }
+   ],
+   "monthly_equivalent": "6278.7",
+   "total": "119295.3",
+   "months_result": 19
+  },
+  {
+   "months": 19,
+   "totals": [
+    {
+     "periodicity": "MENSAL",
+     "total": "2614.92"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "993.63"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "3734.29"
+    }
+   ],
+   "monthly_equivalent": "20718.58947368421",
+   "total": "393653.19999999995",
+   "months_result": 19
+  },
+  {
+   "months": 19,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "1850.98"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "1738.18"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "3406.82"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2972.94"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "2599.61"
+    }
+   ],
+   "monthly_equivalent": "72814.88947368422",
+   "total": "1383482.9000000001",
+   "months_result": 19
+  },
+  {
+   "months": 20,
+   "totals": [
+    {
+     "periodicity": "MENSAL",
+     "total": "2987.47"
+    }
+   ],
+   "monthly_equivalent": "2987.47",
+   "total": "59749.399999999994",
+   "months_result": 20
+  },
+  {
+   "months": 20,
+   "totals": [
+    {
+     "periodicity": "QUINZENAL",
+     "total": "183.75"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1535.1"
+    }
+   ],
+   "monthly_equivalent": "7045.1849999999995",
+   "total": "140903.69999999998",
+   "months_result": 20
+  },
+  {
+   "months": 20,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "3713.0"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "4599.57"
+    }
+   ],
+   "monthly_equivalent": "115989.56999999999",
+   "total": "2319791.4",
+   "months_result": 20
+  },
+  {
+   "months": 21,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2969.58"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "2330.15"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "2579.81"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2482.55"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "2650.69"
+    }
+   ],
+   "monthly_equivalent": "89077.14190476191",
+   "total": "1870619.9800000002",
+   "months_result": 21
+  },
+  {
+   "months": 21,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "10.52"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "773.87"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "103.25"
+    }
+   ],
+   "monthly_equivalent": "1995.657619047619",
+   "total": "41908.81",
+   "months_result": 21
+  },
+  {
+   "months": 21,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "1916.33"
+    }
+   ],
+   "monthly_equivalent": "57489.899999999994",
+   "total": "1207287.9",
+   "months_result": 21
+  },
+  {
+   "months": 22,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2915.54"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "1966.95"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "2955.31"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "3269.65"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "517.77"
+    }
+   ],
+   "monthly_equivalent": "70871.45954545455",
+   "total": "1559172.11",
+   "months_result": 22
+  },
+  {
+   "months": 22,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "3778.33"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "2658.28"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "1225.44"
+    }
+   ],
+   "monthly_equivalent": "82371.02227272728",
+   "total": "1812162.4900000002",
+   "months_result": 22
+  },
+  {
+   "months": 22,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "1934.9"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "4203.92"
+    }
+   ],
+   "monthly_equivalent": "126205.55",
+   "total": "2776522.1",
+   "months_result": 22
+  },
+  {
+   "months": 23,
+   "totals": [
+    {
+     "periodicity": "MENSAL",
+     "total": "1806.93"
+    }
+   ],
+   "monthly_equivalent": "1806.93",
+   "total": "41559.39",
+   "months_result": 23
+  },
+  {
+   "months": 23,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "90.9"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "4241.76"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "4885.18"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2371.04"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "3251.5"
+    }
+   ],
+   "monthly_equivalent": "151020.96869565218",
+   "total": "3473482.2800000003",
+   "months_result": 23
+  },
+  {
+   "months": 23,
+   "totals": [
+    {
+     "periodicity": "QUINZENAL",
+     "total": "4595.75"
+    }
+   ],
+   "monthly_equivalent": "9191.5",
+   "total": "211404.5",
+   "months_result": 23
+  },
+  {
+   "months": 24,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "1760.02"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "4066.6"
+    }
+   ],
+   "monthly_equivalent": "56867.19999999999",
+   "total": "1364812.7999999998",
+   "months_result": 24
+  },
+  {
+   "months": 24,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "3456.73"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "1169.8"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "3168.44"
+    }
+   ],
+   "monthly_equivalent": "16213.537083333335",
+   "total": "389124.89",
+   "months_result": 24
+  },
+  {
+   "months": 24,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "4034.46"
+    }
+   ],
+   "monthly_equivalent": "168.1025",
+   "total": "4034.46",
+   "months_result": 24
+  },
+  {
+   "months": 25,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "1686.64"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "4367.37"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "2464.64"
+    }
+   ],
+   "monthly_equivalent": "133553.20560000002",
+   "total": "3338830.14",
+   "months_result": 25
+  },
+  {
+   "months": 25,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "4980.51"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "3006.81"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2742.45"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "2492.26"
+    }
+   ],
+   "monthly_equivalent": "106654.98359999999",
+   "total": "2666374.59",
+   "months_result": 25
+  },
+  {
+   "months": 25,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2943.47"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "3954.8"
+    }
+   ],
+   "monthly_equivalent": "8027.3388",
+   "total": "200683.47",
+   "months_result": 25
+  },
+  {
+   "months": 26,
+   "totals": [
+    {
+     "periodicity": "MENSAL",
+     "total": "2538.43"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2660.69"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "3627.98"
+    }
+   ],
+   "monthly_equivalent": "23627.569230769233",
+   "total": "614316.8",
+   "months_result": 26
+  },
+  {
+   "months": 26,
+   "totals": [
+    {
+     "periodicity": "QUINZENAL",
+     "total": "3247.51"
+    }
+   ],
+   "monthly_equivalent": "6495.02",
+   "total": "168870.52000000002",
+   "months_result": 26
+  },
+  {
+   "months": 26,
+   "totals": [
+    {
+     "periodicity": "QUINZENAL",
+     "total": "4369.36"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "118.76"
+    }
+   ],
+   "monthly_equivalent": "9254.869230769229",
+   "total": "240626.59999999998",
+   "months_result": 26
+  },
+  {
+   "months": 27,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "1889.87"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "3571.73"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "3381.49"
+    }
+   ],
+   "monthly_equivalent": "121875.01851851853",
+   "total": "3290625.5",
+   "months_result": 27
+  },
+  {
+   "months": 27,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "4438.07"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "4079.09"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "710.48"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "3647.37"
+    }
+   ],
+   "monthly_equivalent": "154447.41999999998",
+   "total": "4170080.34",
+   "months_result": 27
+  },
+  {
+   "months": 27,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "1722.47"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "204.87"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "4449.04"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1513.03"
+    }
+   ],
+   "monthly_equivalent": "15723.208518518519",
+   "total": "424526.63",
+   "months_result": 27
+  },
+  {
+   "months": 28,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "1291.71"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "4750.93"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "1020.71"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "2908.04"
+    }
+   ],
+   "monthly_equivalent": "156161.62964285715",
+   "total": "4372525.63",
+   "months_result": 28
+  },
+  {
+   "months": 28,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "1227.91"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "4598.56"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "3066.7"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "3897.54"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "462.73"
+    }
+   ],
+   "monthly_equivalent": "150862.08857142858",
+   "total": "4224138.48",
+   "months_result": 28
+  },
+  {
+   "months": 28,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2668.38"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "1562.05"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "579.1"
+    }
+   ],
+   "monthly_equivalent": "47535.89928571428",
+   "total": "1331005.18",
+   "months_result": 28
+  },
+  {
+   "months": 29,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "502.2"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "4408.62"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "46.42"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1533.11"
+    }
+   ],
+   "monthly_equivalent": "11179.875862068964",
+   "total": "324216.39999999997",
+   "months_result": 29
+  },
+  {
+   "months": 29,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2476.69"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "3172.07"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "2153.72"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "82.92"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1038.76"
+    }
+   ],
+   "monthly_equivalent": "102080.29620689654",
+   "total": "2960328.59",
+   "months_result": 29
+  },
+  {
+   "months": 29,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "3192.39"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "3139.89"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "4752.86"
+    }
+   ],
+   "monthly_equivalent": "23900.329655172412",
+   "total": "693109.5599999999",
+   "months_result": 29
+  },
+  {
+   "months": 30,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "4193.31"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "662.97"
+    }
+   ],
+   "monthly_equivalent": "126462.27000000002",
+   "total": "3793868.1000000006",
+   "months_result": 30
+  },
+  {
+   "months": 30,
+   "totals": [
+    {
+     "periodicity": "MENSAL",
+     "total": "4280.62"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "3882.95"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "4617.54"
+    }
+   ],
+   "monthly_equivalent": "32055.859999999997",
+   "total": "961675.7999999999",
+   "months_result": 30
+  },
+  {
+   "months": 30,
+   "totals": [
+    {
+     "periodicity": "QUINZENAL",
+     "total": "4921.07"
+    }
+   ],
+   "monthly_equivalent": "9842.139999999998",
+   "total": "295264.19999999995",
+   "months_result": 30
+  },
+  {
+   "months": 31,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "4688.0"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "2430.22"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "2258.94"
+    }
+   ],
+   "monthly_equivalent": "75316.7658064516",
+   "total": "2334819.7399999998",
+   "months_result": 31
+  },
+  {
+   "months": 31,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "1899.2"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "1325.89"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2298.71"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1070.49"
+    }
+   ],
+   "monthly_equivalent": "10611.853870967741",
+   "total": "328967.47",
+   "months_result": 31
+  },
+  {
+   "months": 31,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "1099.34"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "2639.62"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "4651.72"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "3746.67"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1479.23"
+    }
+   ],
+   "monthly_equivalent": "97763.21354838708",
+   "total": "3030659.6199999996",
+   "months_result": 31
+  },
+  {
+   "months": 32,
+   "totals": [
+    {
+     "periodicity": "MENSAL",
+     "total": "755.66"
+    }
+   ],
+   "monthly_equivalent": "755.66",
+   "total": "24181.12",
+   "months_result": 32
+  },
+  {
+   "months": 32,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2307.2"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "1901.45"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "4548.59"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2195.2"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "865.38"
+    }
+   ],
+   "monthly_equivalent": "69813.58437499999",
+   "total": "2234034.6999999997",
+   "months_result": 32
+  },
+  {
+   "months": 32,
+   "totals": [
+    {
+     "periodicity": "MENSAL",
+     "total": "4716.48"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "831.78"
+    }
+   ],
+   "monthly_equivalent": "6380.039999999999",
+   "total": "204161.27999999997",
+   "months_result": 32
+  },
+  {
+   "months": 33,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "3717.09"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "2638.38"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "537.39"
+    }
+   ],
+   "monthly_equivalent": "80338.81909090909",
+   "total": "2651181.0300000003",
+   "months_result": 33
+  },
+  {
+   "months": 33,
+   "totals": [
+    {
+     "periodicity": "QUINZENAL",
+     "total": "4603.54"
+    }
+   ],
+   "monthly_equivalent": "9207.08",
+   "total": "303833.64",
+   "months_result": 33
+  },
+  {
+   "months": 33,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2440.45"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "835.7"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "384.09"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "506.38"
+    }
+   ],
+   "monthly_equivalent": "27723.35636363636",
+   "total": "914870.7599999999",
+   "months_result": 33
+  },
+  {
+   "months": 34,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "1210.88"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2894.25"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "3024.1"
+    }
+   ],
+   "monthly_equivalent": "55189.68529411765",
+   "total": "1876449.3",
+   "months_result": 34
+  },
+  {
+   "months": 34,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "1848.41"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "2153.97"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "1758.83"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "3124.75"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "1694.55"
+    }
+   ],
+   "monthly_equivalent": "80008.2317647059",
+   "total": "2720279.8800000004",
+   "months_result": 34
+  },
+  {
+   "months": 34,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "4219.19"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "2827.98"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2420.09"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "2772.04"
+    }
+   ],
+   "monthly_equivalent": "101788.67029411765",
+   "total": "3460814.79",
+   "months_result": 34
+  },
+  {
+   "months": 35,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2648.46"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "4605.68"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "4130.71"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "1595.36"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "2353.77"
+    }
+   ],
+   "monthly_equivalent": "155789.58714285714",
+   "total": "5452635.55",
+   "months_result": 35
+  },
+  {
+   "months": 35,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2809.16"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "2391.8"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "4434.01"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "4978.55"
+    }
+   ],
+   "monthly_equivalent": "97889.40314285715",
+   "total": "3426129.1100000003",
+   "months_result": 35
+  },
+  {
+   "months": 35,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "3291.68"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "2646.81"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "4147.57"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "861.99"
+    }
+   ],
+   "monthly_equivalent": "113435.84942857143",
+   "total": "3970254.73",
+   "months_result": 35
+  },
+  {
+   "months": 36,
+   "totals": [
+    {
+     "periodicity": "MENSAL",
+     "total": "1592.86"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "2601.04"
+    }
+   ],
+   "monthly_equivalent": "12864.033333333333",
+   "total": "463105.2",
+   "months_result": 36
+  },
+  {
+   "months": 36,
+   "totals": [
+    {
+     "periodicity": "MENSAL",
+     "total": "4795.72"
+    }
+   ],
+   "monthly_equivalent": "4795.72",
+   "total": "172645.92",
+   "months_result": 36
+  },
+  {
+   "months": 36,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "2143.88"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "1644.52"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "3746.38"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "3666.82"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "4363.95"
+    }
+   ],
+   "monthly_equivalent": "79385.62222222223",
+   "total": "2857882.4000000004",
+   "months_result": 36
+  },
+  {
+   "months": 50,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "4190.75"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "3184.69"
+    }
+   ],
+   "monthly_equivalent": "95624.515",
+   "total": "4781225.75",
+   "months_result": 50
+  },
+  {
+   "months": 50,
+   "totals": [
+    {
+     "periodicity": "DIARIA",
+     "total": "4772.56"
+    }
+   ],
+   "monthly_equivalent": "143176.80000000002",
+   "total": "7158840.000000001",
+   "months_result": 50
+  },
+  {
+   "months": 50,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "42.49"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "4112.02"
+    },
+    {
+     "periodicity": "MENSAL",
+     "total": "2645.07"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "2461.87"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "137.88"
+    }
+   ],
+   "monthly_equivalent": "131525.90140000003",
+   "total": "6576295.070000001",
+   "months_result": 50
+  },
+  {
+   "months": 0,
+   "totals": [
+    {
+     "periodicity": "QUINZENAL",
+     "total": "4203.63"
+    }
+   ],
+   "monthly_equivalent": "0",
+   "total": "0.0",
+   "months_result": 0
+  },
+  {
+   "months": 0,
+   "totals": [
+    {
+     "periodicity": "ANUAL",
+     "total": "763.69"
+    },
+    {
+     "periodicity": "DIARIA",
+     "total": "4028.32"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "4575.77"
+    },
+    {
+     "periodicity": "SEMANAL",
+     "total": "2482.7"
+    }
+   ],
+   "monthly_equivalent": "0",
+   "total": "763.69",
+   "months_result": 0
+  },
+  {
+   "months": 0,
+   "totals": [
+    {
+     "periodicity": "MENSAL",
+     "total": "1113.12"
+    },
+    {
+     "periodicity": "QUINZENAL",
+     "total": "3880.17"
+    }
+   ],
+   "monthly_equivalent": "0",
+   "total": "0.0",
+   "months_result": 0
+  },
+  {
+   "months": null,
+   "totals": [],
+   "monthly_equivalent": "0.0",
+   "total": "0.0",
+   "months_result": 6
+  }
+ ],
+ "factors": [
+  {
+   "months": 1,
+   "weekly": 4,
+   "biweekly": 2,
+   "daily": 30,
+   "monthly": 1
+  },
+  {
+   "months": 2,
+   "weekly": 9,
+   "biweekly": 4,
+   "daily": 60,
+   "monthly": 2
+  },
+  {
+   "months": 3,
+   "weekly": 13,
+   "biweekly": 6,
+   "daily": 90,
+   "monthly": 3
+  },
+  {
+   "months": 4,
+   "weekly": 17,
+   "biweekly": 8,
+   "daily": 120,
+   "monthly": 4
+  },
+  {
+   "months": 5,
+   "weekly": 22,
+   "biweekly": 10,
+   "daily": 150,
+   "monthly": 5
+  },
+  {
+   "months": 6,
+   "weekly": 26,
+   "biweekly": 12,
+   "daily": 180,
+   "monthly": 6
+  },
+  {
+   "months": 7,
+   "weekly": 30,
+   "biweekly": 14,
+   "daily": 210,
+   "monthly": 7
+  },
+  {
+   "months": 8,
+   "weekly": 35,
+   "biweekly": 16,
+   "daily": 240,
+   "monthly": 8
+  },
+  {
+   "months": 9,
+   "weekly": 39,
+   "biweekly": 18,
+   "daily": 270,
+   "monthly": 9
+  },
+  {
+   "months": 10,
+   "weekly": 43,
+   "biweekly": 20,
+   "daily": 300,
+   "monthly": 10
+  },
+  {
+   "months": 11,
+   "weekly": 48,
+   "biweekly": 22,
+   "daily": 330,
+   "monthly": 11
+  },
+  {
+   "months": 12,
+   "weekly": 52,
+   "biweekly": 24,
+   "daily": 360,
+   "monthly": 12
+  },
+  {
+   "months": 13,
+   "weekly": 56,
+   "biweekly": 26,
+   "daily": 390,
+   "monthly": 13
+  },
+  {
+   "months": 14,
+   "weekly": 61,
+   "biweekly": 28,
+   "daily": 420,
+   "monthly": 14
+  },
+  {
+   "months": 15,
+   "weekly": 65,
+   "biweekly": 30,
+   "daily": 450,
+   "monthly": 15
+  },
+  {
+   "months": 16,
+   "weekly": 69,
+   "biweekly": 32,
+   "daily": 480,
+   "monthly": 16
+  },
+  {
+   "months": 17,
+   "weekly": 74,
+   "biweekly": 34,
+   "daily": 510,
+   "monthly": 17
+  },
+  {
+   "months": 18,
+   "weekly": 78,
+   "biweekly": 36,
+   "daily": 540,
+   "monthly": 18
+  },
+  {
+   "months": 19,
+   "weekly": 82,
+   "biweekly": 38,
+   "daily": 570,
+   "monthly": 19
+  },
+  {
+   "months": 20,
+   "weekly": 87,
+   "biweekly": 40,
+   "daily": 600,
+   "monthly": 20
+  },
+  {
+   "months": 21,
+   "weekly": 91,
+   "biweekly": 42,
+   "daily": 630,
+   "monthly": 21
+  },
+  {
+   "months": 22,
+   "weekly": 95,
+   "biweekly": 44,
+   "daily": 660,
+   "monthly": 22
+  },
+  {
+   "months": 23,
+   "weekly": 100,
+   "biweekly": 46,
+   "daily": 690,
+   "monthly": 23
+  },
+  {
+   "months": 24,
+   "weekly": 104,
+   "biweekly": 48,
+   "daily": 720,
+   "monthly": 24
+  },
+  {
+   "months": 25,
+   "weekly": 108,
+   "biweekly": 50,
+   "daily": 750,
+   "monthly": 25
+  },
+  {
+   "months": 26,
+   "weekly": 113,
+   "biweekly": 52,
+   "daily": 780,
+   "monthly": 26
+  },
+  {
+   "months": 27,
+   "weekly": 117,
+   "biweekly": 54,
+   "daily": 810,
+   "monthly": 27
+  },
+  {
+   "months": 28,
+   "weekly": 121,
+   "biweekly": 56,
+   "daily": 840,
+   "monthly": 28
+  },
+  {
+   "months": 29,
+   "weekly": 126,
+   "biweekly": 58,
+   "daily": 870,
+   "monthly": 29
+  },
+  {
+   "months": 30,
+   "weekly": 130,
+   "biweekly": 60,
+   "daily": 900,
+   "monthly": 30
+  },
+  {
+   "months": 31,
+   "weekly": 134,
+   "biweekly": 62,
+   "daily": 930,
+   "monthly": 31
+  },
+  {
+   "months": 32,
+   "weekly": 139,
+   "biweekly": 64,
+   "daily": 960,
+   "monthly": 32
+  },
+  {
+   "months": 33,
+   "weekly": 143,
+   "biweekly": 66,
+   "daily": 990,
+   "monthly": 33
+  },
+  {
+   "months": 34,
+   "weekly": 147,
+   "biweekly": 68,
+   "daily": 1020,
+   "monthly": 34
+  },
+  {
+   "months": 35,
+   "weekly": 152,
+   "biweekly": 70,
+   "daily": 1050,
+   "monthly": 35
+  },
+  {
+   "months": 36,
+   "weekly": 156,
+   "biweekly": 72,
+   "daily": 1080,
+   "monthly": 36
+  },
+  {
+   "months": 50,
+   "weekly": 216,
+   "biweekly": 100,
+   "daily": 1500,
+   "monthly": 50
+  }
+ ]
+}
