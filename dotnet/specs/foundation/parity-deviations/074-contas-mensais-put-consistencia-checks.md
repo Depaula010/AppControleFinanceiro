@@ -1,6 +1,6 @@
 # Desvio 074 — PUT confere o estado final contra os CHECK
 
-- **Estado:** aprovado (onda 2, 2026-10-04)
+- **Estado:** implementado (feature 005, 2026-10-04)
 - **Features afetadas:** 005
 - **Severidade:** correção
 

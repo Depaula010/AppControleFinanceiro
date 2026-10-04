@@ -343,7 +343,22 @@ Sem aprovação, o .NET reproduz o Flask (coluna "Atual"). Recomendação: **apr
 | 008 sem vazamento de erro | aprovado | RN-005-14; AC-005-08, 84 |
 | 014 reserva única | aprovado | RN-005-11; §7; AC-005-93, 94, 100 a 104 |
 | 024 corpo sem Content-Type | aprovado | RN-005-15; AC-005-11, 40 |
-| P-005-1 a P-005-5 | **pendentes** | §9; sem aprovação, o .NET reproduz o Flask (ACs marcados "muda com P-005-N") |
+| P-005-1 a P-005-5 (desvios 072 a 076) | aprovados em 2026-10-04 e **implementados** | §9; valem as colunas "Proposta"; os ACs marcados "muda com P-005-N" passam a valer com o comportamento novo (ver §10.1) |
+| Q-005-1 (`incluir_na_reserva` ausente grava `false`), Q-005-4 (último dígito do resumo) | aceitas como padrão | RN-005-10, RN-005-13 |
+| Q-005-5 (`descricao` > 255) | **recusar com 400** (aprovada) | §10.1, item 1 |
+
+### 10.1 Como ficou na implementação (divergências e detalhes que a spec não fixava)
+
+1. **Descrição longa (Q-005-5):** mais de 255 pontos de código depois do `trim`, no POST e no PUT, é 400 `"Descrição deve ter no máximo 255 caracteres"` (mensagem nova), na posição logo depois de "Descrição é obrigatória"/"Descrição não pode ser vazia". Substitui o corte em silêncio dos AC-005-13 e AC-005-42.
+2. **P-005-1:** no POST, as duas validações novas (`data_inicio`, `incluir_na_reserva`) vêm depois da linha 11 e antes da conta (a 404 da conta continua depois de todos os 400); `data_inicio` `""`, `0` e `false` contam como ausente (hoje), qualquer outro valor que não seja texto `YYYY-MM-DD` válido é 400 (o formato aceita mês e dia com 1 ou 2 dígitos, como a 004). `incluir_na_reserva` `null` é `false` no POST e **400 no PUT** (a spec só cita o `null` do POST). `notificar_antes_dias` ilegível no PUT é ignorado (corpo só com ele ⇒ `"Nenhum campo para atualizar"`).
+3. **P-005-2:** 404 `"Subcategoria não encontrada"` (como na §9 e na 004; o arquivo do desvio 073 resume "400"). No POST vem depois da conta; no PUT, entre `valor_previsto` e `conta_id`; `null`/não inteiro no PUT vira id 0 e responde 404.
+4. **P-005-3:** a consistência (`BillConsistency`) roda sobre o estado gravado + corpo, depois do "nenhum campo". A checagem de `valor_previsto` (obrigatório/positivo em `FIXO`/`PARCELADO`) só vale quando o corpo toca `tipo_agendamento` ou `valor_previsto`, para um agendamento antigo sem valor ainda poder ser renomeado. O que deixa de se aplicar é limpo (`mes_execucao`, `total_parcelas`, `parcelas_executadas = 0`). `PARCELADO` com `total_parcelas: null` explícito continua aceito (a spec não o proíbe).
+5. **P-005-4/5:** o predicado de receita (grupo `Renda` ou macro `Receitas Gerais` do grupo `Geral`) vale no GET, no resumo e na reserva (total e itens). A lista de itens da reserva também ignora `valor_previsto` NULL (o total já ignorava).
+6. **Resumo:** a consulta agrupa por `periodicidade, grupo` e pelo lado receita/despesa (mesmas parcelas que o Flask somava) e ordena por `periodicidade, nome_grupo, lado`.
+7. **Rotas:** `/api/bills/summary` tem um `Map` sem método (405) ao lado do `MapGet`, porque `PUT|DELETE` cairiam no `{id}` e dariam 404.
+8. **Portas:** `IBillRepository` ficou sem `ActiveScheduleExistsAsync` (o `GetCurrentAsync` serve ao 404 e à consistência numa consulta só) e `ListReserveItemsAsync` devolve linhas cruas (`ReserveItemRow`); o `Impact` é calculado no `EmergencyReserveService`, que conhece os meses. `BillsSummaryCalculator.Calculate` recebe `reserveTotal` e `months` (o Domain não conhece `EmergencyReserveStatus`).
+9. **Números JSON:** dinheiro sai como o `System.Text.Json` escreve o `double` (`120`, não `120.0`), igual às demais features.
+10. **Fixtures:** `tests/Fixtures/generate_bills_fixtures.py` (round e `get_reserva_status` do Flask) gera `bills-fixtures.json`; o csproj de testes unitários ganhou uma linha para copiá-lo. Sem migration (`0060-0069` continuam livres) e `MigrationRunnerTests` não mudou.
 
 ## 11. O que o Angular espera × o que o Flask devolve
 
