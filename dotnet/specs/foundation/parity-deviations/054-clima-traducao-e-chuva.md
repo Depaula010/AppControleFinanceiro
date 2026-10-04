@@ -1,6 +1,6 @@
 # Desvio 054 — Clima: tradução em português e chance de chuva
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 010, 2026-10-02)
 - **Features afetadas:** 010
 - **Severidade:** correção
 

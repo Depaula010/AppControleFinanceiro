@@ -1,6 +1,6 @@
 # Desvio 021 — State do OAuth sem assinatura
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 010, 2026-10-02)
 - **Features afetadas:** 010
 - **Severidade:** segurança
 

@@ -26,17 +26,17 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [016](016-nome-de-conta-duplicado.md) | Nome de conta duplicado devolve 500 | correção | 002 | implementado |
 | [017](017-api-key-texto-puro.md) | api_key_automate em texto puro e coluna pequena demais para Fernet | segurança | 001, 011 | implementado |
 | [018](018-enumeracao-de-usuarios.md) | Login distingue usuário inexistente de senha errada | segurança | 001 | aprovado |
-| [019](019-validacao-chave-weather.md) | Validação de chave weather usa outro provedor | correção | 007, 010 | aprovado |
+| [019](019-validacao-chave-weather.md) | Validação de chave weather usa outro provedor | correção | 007, 010 | implementado |
 | [020](020-relatorio-mensal-porta.md) | Relatórios mensais nunca rodam | operação | 013 | aprovado |
-| [021](021-oauth-state-assinado.md) | State do OAuth sem assinatura | segurança | 010 | aprovado |
-| [022](022-weather-https.md) | WeatherAPI por HTTP sem TLS | segurança | 010 | aprovado |
+| [021](021-oauth-state-assinado.md) | State do OAuth sem assinatura | segurança | 010 | implementado |
+| [022](022-weather-https.md) | WeatherAPI por HTTP sem TLS | segurança | 010 | implementado |
 | [023](023-rate-limit-proxy.md) | Rate limit de 100/hora por IP do proxy | operação | 009 | aprovado |
 | [024](024-corpo-sem-content-type.md) | Corpo sem Content-Type JSON gera 500 | correção | todas | aprovado |
 | [025](025-cartao-sem-acento.md) | Tipo 'Cartao de Credito' sem acento no handler do Automate | correção | 011 | aprovado |
 | [026](026-url-bot-grafico.md) | URL do bot no intent de gráfico | correção | 012 | aprovado |
 | [027](027-colunas-ausentes-transacoes.md) | POST/PUT /api/transactions gravam colunas que não existem | correção | 004 | aprovado |
 | [028](028-caminhos-com-colunas-ausentes.md) | Outros caminhos que usam colunas ou tabelas inexistentes | correção | 007, 008, 009, 013 | aprovado |
-| [029](029-tokens-google-texto-puro.md) | Tokens do Google guardados em texto puro | segurança | 010, 014 | aprovado |
+| [029](029-tokens-google-texto-puro.md) | Tokens do Google guardados em texto puro | segurança | 010, 014 | implementado |
 | [030](030-subcategoria-global-duplicada.md) | Subcategoria global duplicada: Outros (macro 17) | correção | 003, 004, 011 | aprovado |
 | [031](031-validacoes-do-cadastro.md) | Validações do cadastro: WhatsApp sem dígitos, dias não inteiros e cadastro concorrente | correção | 001 | implementado |
 | [032](032-reativar-conta-inativa.md) | Reativar conta inativa de mesmo nome | correção | 002 | implementado |
@@ -60,15 +60,15 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [050](050-esconder-outros-duplicado.md) | Categorias: esconder o Outros global duplicado na API | correção | 003 | rejeitado |
 | [051](051-exportar-mascarar-chaves.md) | LGPD: mascarar chaves no exportar | segurança | 008 | rejeitado |
 | [052](052-api-keys-desligadas-por-padrao.md) | Rotas /api-keys/* desligadas por padrão em produção | segurança | 008, 009 | implementado |
-| [053](053-connect-calendar-link-assinado.md) | Google: link de conexão assinado (/connect-calendar) | segurança | 010, 012 | aprovado |
-| [054](054-clima-traducao-e-chuva.md) | Clima: tradução em português e chance de chuva | correção | 010 | aprovado |
-| [055](055-rotas-limite-diario-data.md) | OpenRoute: data de São Paulo e incremento atômico no limite diário | correção | 010, 012 | aprovado |
-| [056](056-travel-time-codigo-morto.md) | OpenRoute: não portar o código morto e quebrado do travel_time_service | correção | 010 | aprovado |
-| [057](057-calendar-evento-virada-do-dia.md) | Calendar: evento na virada do dia e atualização de data | correção | 010 | aprovado |
-| [058](058-google-refresh-com-needs-reconnect.md) | Google: não renovar token quando needs_reconnect está ligado | correção | 010, 014 | aprovado |
-| [059](059-bot-texto-acima-de-4096.md) | Bot: dividir mensagens com mais de 4096 caracteres | correção | 010, 012, 013 | aprovado |
-| [060](060-oauth-nome-com-escape-html.md) | OAuth: escapar o nome do usuário na página de sucesso | segurança | 010 | aprovado |
-| [061](061-drive-escape-barra-invertida.md) | Drive: escapar a barra invertida na busca de pasta | correção | 010 | aprovado |
+| [053](053-connect-calendar-link-assinado.md) | Google: link de conexão assinado (/connect-calendar) | segurança | 010, 012 | implementado |
+| [054](054-clima-traducao-e-chuva.md) | Clima: tradução em português e chance de chuva | correção | 010 | implementado |
+| [055](055-rotas-limite-diario-data.md) | OpenRoute: data de São Paulo e incremento atômico no limite diário | correção | 010, 012 | implementado |
+| [056](056-travel-time-codigo-morto.md) | OpenRoute: não portar o código morto e quebrado do travel_time_service | correção | 010 | implementado |
+| [057](057-calendar-evento-virada-do-dia.md) | Calendar: evento na virada do dia e atualização de data | correção | 010 | implementado |
+| [058](058-google-refresh-com-needs-reconnect.md) | Google: não renovar token quando needs_reconnect está ligado | correção | 010, 014 | implementado |
+| [059](059-bot-texto-acima-de-4096.md) | Bot: dividir mensagens com mais de 4096 caracteres | correção | 010, 012, 013 | implementado |
+| [060](060-oauth-nome-com-escape-html.md) | OAuth: escapar o nome do usuário na página de sucesso | segurança | 010 | implementado |
+| [061](061-drive-escape-barra-invertida.md) | Drive: escapar a barra invertida na busca de pasta | correção | 010 | implementado |
 | [062](062-prompt-evento-com-data-de-hoje.md) | Gemini: prompt de criação de evento recebe a data de hoje | correção | 010, 012 | aprovado |
 | [063](063-gemini-chamadas-com-usuario.md) | Gemini: três chamadas passam a usar o usuário e a chave dele | correção | 010, 006 | aprovado |
-| [064](064-openroute-retry-so-em-5xx.md) | OpenRoute: repetir só em timeout, rede e 5xx | correção | 010 | aprovado |
+| [064](064-openroute-retry-so-em-5xx.md) | OpenRoute: repetir só em timeout, rede e 5xx | correção | 010 | implementado |

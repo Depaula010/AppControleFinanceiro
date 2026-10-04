@@ -1,6 +1,6 @@
 # Desvio 058 — Google: não renovar token quando needs_reconnect está ligado
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 010, 2026-10-02)
 - **Features afetadas:** 010, 014
 - **Severidade:** correção
 

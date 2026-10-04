@@ -1,6 +1,6 @@
 # Desvio 061 — Drive: escapar a barra invertida na busca de pasta
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 010, 2026-10-02)
 - **Features afetadas:** 010
 - **Severidade:** correção
 

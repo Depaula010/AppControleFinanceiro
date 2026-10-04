@@ -1,6 +1,6 @@
 # Desvio 056 — OpenRoute: não portar o código morto e quebrado do travel_time_service
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 010, 2026-10-02)
 - **Features afetadas:** 010
 - **Severidade:** correção
 

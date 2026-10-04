@@ -10,6 +10,8 @@ Estratégia: construir e validar tudo em homol; em produção, trocar o containe
 - [ ] Homol estável por **7 dias** com os jobs ativos.
 - [ ] Respostas confirmadas pelo Rafael: URL que o bot usa para chamar o backend; `GOOGLE_REDIRECT_URI` real e se passa pelo `oauth_proxy`; quem chama `/admin/run-motor-agendamentos` e `/admin/trigger-*` hoje (bot, UptimeRobot, cron do host).
 - [ ] `oauth_proxy` (Render) **reimplantado** com a versão que repassa a query string no `/connect-calendar` (desvio 053); testar `https://<proxy>/connect-calendar/<id>?t=x` e conferir que o servidor recebe `?t=x`.
+- [ ] Google: confirmar que o `GOOGLE_REDIRECT_URI` registrado no Google Cloud Console continua apontando para o `oauth_proxy` e que o proxy aponta (`REAL_SERVER_URL`) para o servidor que passará a ser o .NET, na mesma porta. Opcional na virada: `GOOGLE_CONNECT_LEGACY_UNTIL` (data) aceita por um tempo links de conexão antigos, sem o token assinado (desvio 053); o padrão é desligado.
+- [ ] Redis compartilhado: conferir que as chaves de dedupe (`invoice_*`, `calendar_*`) continuam presentes; o .NET lê o formato do Python e o Python lê o JSON compacto do .NET (rollback seguro).
 - [ ] `pg_dump` completo de `bot_whatsapp_prod` guardado fora do servidor.
 - [ ] Tag `flask-final` criada no commit do Flask em produção.
 - [ ] Janela de baixo uso (madrugada), evitando 00:01 (processador de faturas) e as horas 18–23.

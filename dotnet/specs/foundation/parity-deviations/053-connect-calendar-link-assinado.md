@@ -1,6 +1,6 @@
 # Desvio 053 — Google: link de conexão assinado (/connect-calendar)
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 010, 2026-10-02)
 - **Features afetadas:** 010, 012
 - **Severidade:** segurança
 

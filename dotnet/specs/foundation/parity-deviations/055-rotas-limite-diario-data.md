@@ -1,6 +1,6 @@
 # Desvio 055 — OpenRoute: data de São Paulo e incremento atômico no limite diário
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 010, 2026-10-02)
 - **Features afetadas:** 010, 012
 - **Severidade:** correção
 

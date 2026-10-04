@@ -16,8 +16,8 @@ SDK: **.NET 10** (LTS). `global.json` fixa a versão estável; a máquina de des
 | Fernet | Implementação própria (~80 linhas) | AES-128-CBC + HMAC-SHA256 conforme a especificação; validada com os vetores oficiais. Pacotes NuGet de Fernet estão sem manutenção. |
 | Validação | FluentValidation | Mensagens em português idênticas às atuais, testáveis isoladamente. |
 | HTTP externo | `IHttpClientFactory` + `Microsoft.Extensions.Http.Resilience` | Timeouts e retry do bot (10s/30s), WeatherAPI (5s), OpenRoute (15s, 2 tentativas). |
-| IA | SDK oficial do Gemini atrás de `ILlmClient` | Chave por usuário passada por chamada; o Flask usa `genai.configure` global, que vaza chave entre requisições. Modelo `gemini-2.5-flash-lite` configurável. |
-| Google | `Google.Apis.Calendar.v3`, `Google.Apis.Drive.v3`, `Google.Apis.Auth` | SDKs oficiais; escopos `calendar` e `drive.file`. |
+| IA | **REST direto** (`HttpClient` via `IHttpClientFactory`) atrás de `ILlmClient`, sem SDK | Chave por usuário passada por chamada; o Flask usa `genai.configure` global, que vaza chave entre requisições. Modelo `gemini-2.5-flash-lite` configurável. |
+| Google | `Google.Apis.Calendar.v3` (1.75), `Google.Apis.Drive.v3` (1.77), `Google.Apis.Auth` (1.77); a troca de código por token usa POST de formulário, sem PKCE | SDKs oficiais; escopos `calendar` e `drive.file`. |
 | Jobs | Quartz.NET | Cron com fuso, misfire policy, no mesmo processo. |
 | Gráficos | ScottPlot 5 | PNG em memória para o relatório mensal e o intent de gráfico. |
 | Fuzzy match | FuzzySharp | Equivalente do rapidfuzz no casamento de nomes de conta. |
@@ -32,6 +32,7 @@ SDK: **.NET 10** (LTS). `global.json` fixa a versão estável; a máquina de des
 | NSubstitute | Fakes de portas |
 | Shouldly | Asserções (FluentAssertions virou licença comercial) |
 | `Testcontainers.PostgreSql` | Postgres real nos testes de integração |
+| `Testcontainers.Redis` | Redis real nos testes do cache, do bot e do limitador (decisão D-2, 010) |
 | Respawn | Limpeza do banco entre testes |
 | `Microsoft.AspNetCore.Mvc.Testing` | `WebApplicationFactory` |
 | Verify | Snapshots de resposta JSON (paridade) |

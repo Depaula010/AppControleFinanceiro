@@ -23,6 +23,8 @@ Virada única (big-bang): nada vai a produção antes da Fase 4. Valor intermedi
 | ~~SDK 10 estável~~ | **resolvido** | SDK 10.0.401 instalado; `global.json` fixado nele e os 38 testes passam |
 | ~~`schema-prod.sql`~~ | **resolvido** | estrutura exportada em 2026-10-02 em `foundation/schema-prod.sql` (sem dados). **Arquivo local, ignorado pelo git** por decisão do Rafael; **os testes de integração com Testcontainers e o CI precisam de um schema versionado: decidir antes da T9 da feature 001** (ex.: baseline em `dotnet/migrations/0000_baseline.sql`). Homol já criado, falta carregar a estrutura e os dados de referência |
 
+> **ONDA 1 CONCLUÍDA em 2026-10-04:** 001 Auth, 002 Contas, 003 Categorias, 008 API keys/LGPD e 010 Integrações (010-0, 010a Redis, 010b bot, 010c Gemini, 010d Google, 010e clima e rotas) implementadas e integradas, com **1.731 testes verdes** (1.073 unitários + 658 de integração com PostgreSQL e Redis reais). Próxima: onda 2 (004 Transações, 005 Contas mensais, 007 Configurações, 009 Admin e segurança); as specs dessas features ainda precisam ser escritas e aprovadas.
+
 ## Features e ondas
 
 | # | Feature | Origem principal (Python) | Onda |

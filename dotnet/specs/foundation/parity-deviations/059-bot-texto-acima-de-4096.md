@@ -1,6 +1,6 @@
 # Desvio 059 — Bot: dividir mensagens com mais de 4096 caracteres
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 010, 2026-10-02)
 - **Features afetadas:** 010, 012, 013
 - **Severidade:** correção
 

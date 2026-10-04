@@ -1,6 +1,6 @@
 # Desvio 060 — OAuth: escapar o nome do usuário na página de sucesso
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 010, 2026-10-02)
 - **Features afetadas:** 010
 - **Severidade:** segurança
 

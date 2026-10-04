@@ -1,6 +1,6 @@
 # Desvio 022 — WeatherAPI por HTTP sem TLS
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 010, 2026-10-02)
 - **Features afetadas:** 010
 - **Severidade:** segurança
 

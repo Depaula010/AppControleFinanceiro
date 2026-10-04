@@ -1,6 +1,6 @@
 # Desvio 029 — Tokens do Google guardados em texto puro
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 010, 2026-10-02)
 - **Features afetadas:** 010, 014
 - **Severidade:** segurança
 

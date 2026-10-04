@@ -1,6 +1,6 @@
 # Desvio 057 — Calendar: evento na virada do dia e atualização de data
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 010, 2026-10-02)
 - **Features afetadas:** 010
 - **Severidade:** correção
 

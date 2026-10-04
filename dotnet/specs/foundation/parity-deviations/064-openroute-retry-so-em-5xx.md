@@ -1,6 +1,6 @@
 # Desvio 064 — OpenRoute: repetir só em timeout, rede e 5xx
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 010, 2026-10-02)
 - **Features afetadas:** 010
 - **Severidade:** correção
 

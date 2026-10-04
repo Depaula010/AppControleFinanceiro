@@ -1,6 +1,6 @@
 # Desvio 019 — Validação de chave weather usa outro provedor
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 010, 2026-10-02)
 - **Features afetadas:** 007, 010
 - **Severidade:** correção
 
