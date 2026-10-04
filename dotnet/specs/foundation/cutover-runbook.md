@@ -23,7 +23,7 @@ Antes do passo 5 da sequência, aplicar em produção, com o Rafael presente, as
 | # | Migration | Desvio |
 |---|---|---|
 | 0001 | `usuarios.api_key_automate` para `varchar(255)` | 017 |
-| (a definir) | `transacoes.observacoes text`, `transacoes.origem varchar(20)` | 027 |
+| 0050 | `transacoes.observacoes text`, `transacoes.origem varchar(20)` (`ADD COLUMN IF NOT EXISTS`, idempotente; linhas antigas ficam NULL) | 027 |
 
 Aplicar antes é seguro: o Flask não usa as colunas novas e a alteração de tipo só alarga.
 

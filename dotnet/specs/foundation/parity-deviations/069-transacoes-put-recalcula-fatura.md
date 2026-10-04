@@ -1,6 +1,6 @@
 # Desvio 069 — PUT recalcula fatura_id
 
-- **Estado:** aprovado (onda 2, 2026-10-04)
+- **Estado:** implementado (feature 004, 2026-10-04)
 - **Features afetadas:** 004
 - **Severidade:** correção
 

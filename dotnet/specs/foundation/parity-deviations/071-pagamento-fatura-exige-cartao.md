@@ -1,6 +1,6 @@
 # Desvio 071 — Pagamento de fatura exige conta de cartão
 
-- **Estado:** aprovado (onda 2, 2026-10-04)
+- **Estado:** implementado (feature 004, 2026-10-04)
 - **Features afetadas:** 004
 - **Severidade:** correção
 

@@ -1,6 +1,6 @@
 # Desvio 065 — Vencimento da fatura de compra após o fechamento
 
-- **Estado:** aprovado (onda 2, 2026-10-04)
+- **Estado:** implementado (feature 004, 2026-10-04)
 - **Features afetadas:** 004
 - **Severidade:** correção
 

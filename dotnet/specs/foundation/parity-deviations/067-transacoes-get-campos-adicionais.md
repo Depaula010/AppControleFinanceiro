@@ -1,6 +1,6 @@
 # Desvio 067 — GET /api/transactions devolve campos que o Angular lê
 
-- **Estado:** aprovado (onda 2, 2026-10-04)
+- **Estado:** implementado (feature 004, 2026-10-04)
 - **Features afetadas:** 004
 - **Severidade:** compatibilidade
 
