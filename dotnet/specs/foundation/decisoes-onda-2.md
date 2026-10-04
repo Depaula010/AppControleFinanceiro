@@ -139,3 +139,15 @@ Perguntas da 007:
 > **"Aprovo as recomendações"** equivale a: desvios **065 a 071** (004), **072 a 076** (005), **077 a 083** (009) e **084 a 088** (007) aprovados (081 e 083 com a condição indicada); **P-009-8** e **P-007-1** rejeitados (sem arquivo de desvio: ficam como "manter paridade"); decisões G-9 a G-13 aprovadas; perguntas com "Padrão/sugestão" aceitas como escritas; Q-004-6 = o populador de faturas fica com a 013; Q-005-5 = recusar descrição > 255 com 400 nas duas features.
 
 Depois da sua resposta: crio os arquivos de desvio, atualizo as quatro specs para "aprovada", e a implementação começa em paralelo (máx. 2 agentes), nesta ordem sugerida: **004 e 009-0** (a 004 é a base para 011/012; o filtro de segurança precisa estar pronto antes do admin), depois **005 e 009a**, depois **007 e 009b/009c**.
+
+---
+
+## 6. Registro da aprovação (2026-10-04)
+
+Rafael respondeu "aprovo as recomendações": desvios 065–088 aprovados (arquivos criados), P-007-1 e P-009-8 rejeitados (paridade), G-9 a G-13 e as perguntas com padrão aceitas como escritas.
+
+Respostas operacionais:
+- **Q-009-7 (CORS):** `CORS_ENABLED`/`CORS_ORIGINS` não existem no `.env` de produção, então **não há entrega 009d**; CORS fica desligado.
+- **Q-009-4 (UptimeRobot):** o UptimeRobot **não está mais funcionando**. Ninguém externo chama `trigger-*` de hora em hora; o Quartz (013) assume sozinho. Antes da virada, conferir se o Ofelia ainda dispara algo.
+- **V-3:** os comandos enviados foram colados como uma linha só (o `e` virou argumento do `grep`) e não geraram resultado. Sem esses dados, o rate limit nasce **desligado** (desvio 081) e os headers do Talisman serão capturados em homol.
+- **V-1 e V-2:** pendentes.

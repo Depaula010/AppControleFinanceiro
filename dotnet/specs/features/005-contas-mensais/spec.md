@@ -1,6 +1,6 @@
 # Spec 005 — Contas mensais / agendamentos (listar, criar, atualizar, remover, resumo) e reserva de emergência
 
-- **Estado:** em revisão
+- **Estado:** aprovada em 2026-10-04 (recomendações de foundation/decisoes-onda-2.md; onde a spec diverge, vale esse documento)
 - **Onda:** 2
 - **Origem (Python):** `app/routes/api.py:346-347` (constantes `TIPOS_AGENDAMENTO`, `PERIODICIDADES`), `api.py:1795-1858` (`_get_bills_impl`), `:1861-2037` (`_create_bill_impl`), `:2040-2203` (`_update_bill_impl`), `:2206-2228` (`_delete_bill_impl`), `:2231-2261` (rotas `/api/bills`), `:2264-2387` (`GET /api/bills/summary`), `:2390-2418` (aliases `/api/contas-mensais`); filtro `token_required` em `api.py:34-90`; `app/services/finance/emergency_reserve_service.py:13-93` (`get_reserva_status`) e os SQL duplicados de reserva em `routes/webhooks/handlers/whatsapp_handler.py:759-840` e `api.py:2326-2381`. `services/queries/agendamentos_queries.py` e `services/finance/bills_service.py` (vencimentos, check-in) **não são chamados por estas rotas**: são do motor e dos jobs (013).
 - **Depende de:** 001a (`RequireUser`, `ICurrentUser`, `IDbConnectionFactory`, `Envelopes`), 002 (tabela `contas`; `RawBody`/`PyNumber`/`AccountsBodyReader`, só como código reutilizado), 003 (grupos e macros para `tipo_transacao`). **Não precisa de migration** (números `0060-0069` reservados, nenhum usado).

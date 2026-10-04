@@ -1,6 +1,6 @@
 # Spec 007 — Configurações do usuário (`/api/user/*`)
 
-- **Estado:** em revisão
+- **Estado:** aprovada em 2026-10-04 (recomendações de foundation/decisoes-onda-2.md; onde a spec diverge, vale esse documento)
 - **Onda:** 2
 - **Origem (Python):** `app/routes/api.py:2425-3011` (perfil, chaves BYOK, validação, notificações, endereços, `settings` agregado) e o `token_required` de `api.py:34-90`; `app/services/user_address_service.py:22-195` (mesma tabela, via WhatsApp); `app/services/notification_config_service.py:81-137`; `app/routes/api.py:25` (`_fernet`); DDL real em `dotnet/migrations/0000_baseline.sql`
 - **Depende de:** 001a (`RequireUser`, `ICurrentUser`, `IEncryptionService`, `IDbConnectionFactory`, `Envelopes`, `SafeError`), 002 (`PyNumber`, `RawValue`), 008 (tabelas e `ApiProviders`), 010e (`IProviderKeyValidator`)

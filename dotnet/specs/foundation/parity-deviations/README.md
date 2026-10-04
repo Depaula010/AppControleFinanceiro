@@ -72,3 +72,27 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [062](062-prompt-evento-com-data-de-hoje.md) | Gemini: prompt de criação de evento recebe a data de hoje | correção | 010, 012 | aprovado |
 | [063](063-gemini-chamadas-com-usuario.md) | Gemini: três chamadas passam a usar o usuário e a chave dele | correção | 010, 006 | aprovado |
 | [064](064-openroute-retry-so-em-5xx.md) | OpenRoute: repetir só em timeout, rede e 5xx | correção | 010 | implementado |
+| [065](065-vencimento-fatura-compra-apos-fechamento.md) | Vencimento da fatura de compra após o fechamento | correção | 004 | aprovado |
+| [066](066-transacoes-entradas-invalidas-400.md) | Transações: entradas inválidas viram 400 | correção | 004 | aprovado |
+| [067](067-transacoes-get-campos-adicionais.md) | GET /api/transactions devolve campos que o Angular lê | compatibilidade | 004 | aprovado |
+| [068](068-transacoes-put-transferencia-pagamento.md) | PUT em Transferência ou Pagamento Fatura passa a dar 400 | correção | 004 | aprovado |
+| [069](069-transacoes-put-recalcula-fatura.md) | PUT recalcula fatura_id | correção | 004 | aprovado |
+| [070](070-transacoes-delete-pagamento-reabre-fatura.md) | Apagar Pagamento Fatura reabre a fatura | correção | 004 | aprovado |
+| [071](071-pagamento-fatura-exige-cartao.md) | Pagamento de fatura exige conta de cartão | correção | 004 | aprovado |
+| [072](072-contas-mensais-entradas-invalidas.md) | Contas mensais: entradas inválidas viram 400 ou são ignoradas | correção | 005 | aprovado |
+| [073](073-contas-mensais-valida-subcategoria.md) | Contas mensais: subcategoria validada | segurança | 005 | aprovado |
+| [074](074-contas-mensais-put-consistencia-checks.md) | PUT confere o estado final contra os CHECK | correção | 005 | aprovado |
+| [075](075-receitas-gerais-conta-como-receita.md) | Receitas Gerais conta como receita | correção | 005 | aprovado |
+| [076](076-receita-fora-da-reserva.md) | Receita fora da reserva de emergência | correção | 005 | aprovado |
+| [077](077-gemini-cache-clear-corpo-vazio.md) | gemini-cache-clear com corpo vazio limpa tudo | correção | 009 | aprovado |
+| [078](078-admin-valida-ip.md) | Validar e normalizar IP em blacklist e unblock | segurança | 009 | aprovado |
+| [079](079-admin-tipos-estritos.md) | Tipos estritos no corpo das rotas admin | correção | 009 | aprovado |
+| [080](080-admin-notificacao-usuario-inexistente.md) | Usuário inexistente na configuração de notificação: 404 | correção | 009 | aprovado |
+| [081](081-rate-limit-valores.md) | Valores do rate limit (desligado por padrão) | segurança | 009 | aprovado |
+| [082](082-ip-cliente-forwardedheaders.md) | IP do cliente pelo ForwardedHeaders | segurança | 009 | aprovado |
+| [083](083-admin-api-key-errada-suspeita.md) | x-api-key errada em /admin conta como tentativa suspeita | segurança | 009 | aprovado |
+| [084](084-configuracoes-tipos-json-400.md) | Configurações: tipos JSON inesperados dão 400 | correção | 007 | aprovado |
+| [085](085-perfil-validacoes.md) | Perfil: e-mail único, limites, fuso e horários válidos | correção | 007 | aprovado |
+| [086](086-endereco-preserva-coordenadas.md) | Endereço preserva coordenadas quando o texto não muda | correção | 007 | aprovado |
+| [087](087-endereco-faixa-coordenadas.md) | Faixa de latitude e longitude | correção | 007 | aprovado |
+| [088](088-api-keys-has-key-sem-preferencia.md) | has_key reflete chave sem linha de preferência | correção | 007 | aprovado |

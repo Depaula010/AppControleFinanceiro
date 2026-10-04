@@ -1,6 +1,6 @@
 # Spec 009 — Admin e segurança (`/admin/*`, filtro de segurança, 404 e rate limit)
 
-- **Estado:** em revisão
+- **Estado:** aprovada em 2026-10-04 (recomendações de foundation/decisoes-onda-2.md; onde a spec diverge, vale esse documento)
 - **Onda:** 2
 - **Origem (Python):** `app/routes/admin.py:31-81`; `app/presentation/admin/{cache_management,security,notification_config,database_setup,feature_migrations,testing,notification_triggers}.py`; `app/middleware/security.py:1-581`; `app/__init__.py:30-85` (logging, Limiter, Talisman, `before_request`); `app/security_config.py`; `app/shared/decorators.py:16-145`; `app/shared/responses/response_builder.py`; `app/services/redis_service.py:52-120`; `app/services/gemini_cache_service.py:240-352`; `app/services/notification_config_service.py:81-137, 333-378`; `app/services/finance/setup_service.py:17-36`; `app/services/monthly_report_processor_service.py:40-240`; `nginx/nginx.conf`; `docker-compose.yml:55-80`
 - **Depende de:** 008-0 (`RequireApiKey`, `IApiKeyValidator`, `PythonDateFormat`), 010a (`ICache`), 010c (`ILlmCacheAdmin`), 010d (`IGoogleAccountService`, `ICalendarClient`), 010b (`IBotClient`), 001a (`IDbConnectionFactory`, `Envelopes`, `SafeError`, `FlaskNotFound`). As rotas da sub-entrega **009c** dependem ainda de 013 (jobs e motor) e 012 (relatórios, briefing, formatadores).

@@ -1,6 +1,6 @@
 # Spec 004 — Transações (listar, criar, atualizar, remover) e serviço de lançamento
 
-- **Estado:** em revisão
+- **Estado:** aprovada em 2026-10-04 (recomendações de foundation/decisoes-onda-2.md; onde a spec diverge, vale esse documento)
 - **Onda:** 2
 - **Origem (Python):** `app/routes/api.py:728-901` (`GET /api/transactions`), `api.py:1301-1459` (POST), `api.py:1462-1635` (PUT), `api.py:1638-1695` (DELETE); filtro `token_required` em `api.py:34-90`; `app/services/finance/invoice_service.py:13-77` (`get_or_create_fatura`) e `:80-210` (`ensure_current_invoice_exists`); `app/services/finance/transaction_service.py:16-254` (`create_transaction`, `create_transfer_pair`, `create_fatura_payment`); `app/services/finance/installment_service.py:13-77`; usos do Flask que o serviço de lançamento precisa substituir: `routes/webhooks/handlers/whatsapp_handler.py:324-386` (confirmação com parcelamento), `:1080-1110` (pagamento de fatura), `routes/webhooks/handlers/transaction_handler.py:56-150, 284-420` (Automate e `/api/transacao`), `routes/webhooks/intents/transaction_intents.py:194-295, 349-440` (despesa e transferência).
 - **Depende de:** 001a (`RequireUser`, `ICurrentUser`, `IDbConnectionFactory`, `Envelopes`), 002 (contas; só a tabela, sem usar `IAccountRepository`), 003 (`ICategoryLookup`), migration baseline `0000` e a nova `0050`.
