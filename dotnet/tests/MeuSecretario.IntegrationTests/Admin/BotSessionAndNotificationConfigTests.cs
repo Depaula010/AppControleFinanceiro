@@ -112,7 +112,7 @@ public sealed class BotSessionAndNotificationConfigTests(PostgresFixture postgre
 
         status.ShouldBe(HttpStatusCode.OK);
         body.ShouldBe(
-            $$"""{"status":"sucesso","mensagem":"Configurações de notificação obtidas com sucesso","usuario_id":{{userId}},"configuracoes":{"resumo_matinal_ativo":true,"resumo_matinal_hora":"07:00","alertas_financeiros_ativos":true}}""");
+            $$$"""{"status":"sucesso","mensagem":"Configurações de notificação obtidas com sucesso","usuario_id":{{{userId}}},"configuracoes":{"resumo_matinal_ativo":true,"resumo_matinal_hora":"07:00","alertas_financeiros_ativos":true}}""");
         (await Scalar<int>("SELECT count(*) FROM notificationconfigs WHERE usuario_id = @userId", new { userId })).ShouldBe(1);
 
         // Segunda chamada: lê a mesma linha, não cria outra.
@@ -132,7 +132,7 @@ public sealed class BotSessionAndNotificationConfigTests(PostgresFixture postgre
         var (_, body, _) = await Send(HttpMethod.Get, $"/admin/get-notification-config/{userId}");
 
         body.ShouldBe(
-            $$"""{"status":"sucesso","mensagem":"Configurações de notificação obtidas com sucesso","usuario_id":{{userId}},"configuracoes":{"resumo_matinal_ativo":false,"resumo_matinal_hora":"08:30","alertas_financeiros_ativos":null}}""");
+            $$$"""{"status":"sucesso","mensagem":"Configurações de notificação obtidas com sucesso","usuario_id":{{{userId}}},"configuracoes":{"resumo_matinal_ativo":false,"resumo_matinal_hora":"08:30","alertas_financeiros_ativos":null}}""");
     }
 
     [Fact]

@@ -1,6 +1,6 @@
 # Desvio 079 — Tipos estritos no corpo das rotas admin
 
-- **Estado:** aprovado (onda 2, 2026-10-04)
+- **Estado:** implementado (feature 009a, 2026-10-04); aprovado na onda 2 em 2026-10-04
 - **Features afetadas:** 009
 - **Severidade:** correção
 
