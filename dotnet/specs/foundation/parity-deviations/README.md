@@ -103,3 +103,6 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [093](093-dashboard-alertas-data-inicio.md) | Dashboard: alertas MENSAL e ANUAL ignoram data_inicio | correção | 006 | proposto |
 | [094](094-dashboard-alertas-conta-ja-paga.md) | Dashboard: alerta continua para a conta já paga no mês | correção | 006 | proposto |
 | [095](095-dashboard-alertas-receita.md) | Dashboard: receita aparece como conta a vencer | correção | 006 | proposto |
+| [120](120-calendar-alerts-tipos-do-corpo.md) | Alertas de calendário: tipos do corpo de /config e /ativar | correção | 014 | proposto |
+| [121](121-calendar-alerts-janela-30s.md) | Alertas de calendário: janela de ±30 s perde o aviso se o ciclo atrasa | correção | 014 | proposto |
+| [122](122-calendar-alerts-usuario-inativo.md) | Alertas de calendário: usuário inativo ainda recebe alertas | correção | 014 | proposto |
