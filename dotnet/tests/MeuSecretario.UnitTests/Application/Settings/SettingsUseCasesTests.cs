@@ -1,4 +1,4 @@
-using MeuSecretario.Application.Abstractions;
+﻿using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Application.Settings;
 using MeuSecretario.Domain.Accounts;
 using MeuSecretario.Domain.Settings;
@@ -7,7 +7,7 @@ using NSubstitute;
 
 namespace MeuSecretario.UnitTests.Application.Settings;
 
-/// <summary>Casos de uso da 007 com fakes: ordem das validações, resultados tipados e nenhuma gravação em caso de 400.</summary>
+/// <summary>Casos de uso da 007 com fakes: ordem das validaÃ§Ãµes, resultados tipados e nenhuma gravaÃ§Ã£o em caso de 400.</summary>
 public class SettingsUseCasesTests
 {
     private const string SentinelKey = "SENTINELA-chave-9981";
@@ -159,7 +159,7 @@ public class SettingsUseCasesTests
     [Trait("AC", "007-32")]
     public async Task ValidateProviderKey_Unavailable_CarriesTheException_WithoutTheKey()
     {
-        _validator.ValidateAsync(default!, default!, default).ThrowsAsyncForAnyArgs(new ProviderUnavailableException("timeout"));
+        _validator.ValidateAsync(default!, default!, default).ReturnsForAnyArgs<Task<KeyValidation>>(_ => throw new ProviderUnavailableException("timeout"));
         var body = SettingsBodies.Of(("type", RawValue.Text("weather")), ("key", RawValue.Text(SentinelKey)));
 
         var result = await new ValidateProviderKey(_validator).ExecuteAsync(body, default);
@@ -168,7 +168,7 @@ public class SettingsUseCasesTests
         unavailable.ToString().ShouldNotContain(SentinelKey);
     }
 
-    // ---------------------------------------------------------------- notificações
+    // ---------------------------------------------------------------- notificaÃ§Ãµes
 
     [Fact]
     [Trait("AC", "007-40")]
@@ -215,7 +215,7 @@ public class SettingsUseCasesTests
         await _notifications.Received(1).UpsertAsync(1, new NotificationInput(true, "07:00", true, "19:00", true, 3), default);
     }
 
-    // ---------------------------------------------------------------- endereços
+    // ---------------------------------------------------------------- endereÃ§os
 
     [Fact]
     [Trait("AC", "007-52")]

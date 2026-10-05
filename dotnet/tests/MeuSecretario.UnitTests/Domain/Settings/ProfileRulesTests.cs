@@ -1,4 +1,4 @@
-using MeuSecretario.Domain.Accounts;
+﻿using MeuSecretario.Domain.Accounts;
 using MeuSecretario.Domain.Settings;
 
 namespace MeuSecretario.UnitTests.Domain.Settings;
@@ -13,7 +13,7 @@ internal static class SettingsBodies
     public static RawValue Obj(params (string Key, RawValue Value)[] values) => new ObjectValue(Of(values));
 }
 
-/// <summary>Spec 007 §3.2: ordem das validações do perfil e desvios 084 e 085.</summary>
+/// <summary>Spec 007 Â§3.2: ordem das validaÃ§Ãµes do perfil e desvios 084 e 085.</summary>
 public class ProfileRulesTests
 {
     private static ProfileError Rejected(RawBody? body) =>
@@ -55,7 +55,7 @@ public class ProfileRulesTests
     [Trait("AC", "007-11")]
     public void Name_IsStoredTrimmed_Desvio085()
     {
-        Ok(SettingsBodies.Of(("nome", RawValue.Text(" Ana ")))).Name.ShouldBe(new Change<string?>("Ana"));
+        Ok(SettingsBodies.Of(("nome", RawValue.Text(" Ana ")))).Name.ShouldBe(new FieldChange<string?>("Ana"));
     }
 
     [Theory]
@@ -72,9 +72,9 @@ public class ProfileRulesTests
     [Trait("AC", "007-12")]
     public void EmptyState_BecomesNull_AndIsNotUppercased()
     {
-        Ok(SettingsBodies.Of(("estado", RawValue.Text("")))).State.ShouldBe(new Change<string?>(null));
-        Ok(SettingsBodies.Of(("estado", RawValue.Text("sp")))).State.ShouldBe(new Change<string?>("sp"));
-        Ok(SettingsBodies.Of(("estado", RawValue.Null))).State.ShouldBe(new Change<string?>(null));
+        Ok(SettingsBodies.Of(("estado", RawValue.Text("")))).State.ShouldBe(new FieldChange<string?>(null));
+        Ok(SettingsBodies.Of(("estado", RawValue.Text("sp")))).State.ShouldBe(new FieldChange<string?>("sp"));
+        Ok(SettingsBodies.Of(("estado", RawValue.Null))).State.ShouldBe(new FieldChange<string?>(null));
     }
 
     [Fact]
@@ -127,14 +127,14 @@ public class ProfileRulesTests
     [Trait("AC", "007-13")]
     public void MonthsConvertedLikePythonInt(RawValue raw, int expected)
     {
-        Ok(SettingsBodies.Of(("meses_reserva_emergencia", raw))).ReserveMonths.ShouldBe(new Change<int?>(expected));
+        Ok(SettingsBodies.Of(("meses_reserva_emergencia", raw))).ReserveMonths.ShouldBe(new FieldChange<int?>(expected));
     }
 
     [Fact]
     [Trait("AC", "007-13")]
     public void NullMonths_IsAccepted_AndWritesNull()
     {
-        Ok(SettingsBodies.Of(("meses_reserva_emergencia", RawValue.Null))).ReserveMonths.ShouldBe(new Change<int?>(null));
+        Ok(SettingsBodies.Of(("meses_reserva_emergencia", RawValue.Null))).ReserveMonths.ShouldBe(new FieldChange<int?>(null));
     }
 
     [Fact]
@@ -155,8 +155,8 @@ public class ProfileRulesTests
     {
         var changes = Ok(SettingsBodies.Of(("email", RawValue.Text("")), ("cidade", RawValue.Text(" "))));
 
-        changes.Email.ShouldBe(new Change<string?>(null));
-        changes.City.ShouldBe(new Change<string?>(" "));
+        changes.Email.ShouldBe(new FieldChange<string?>(null));
+        changes.City.ShouldBe(new FieldChange<string?>(" "));
     }
 
     [Fact]
@@ -168,7 +168,7 @@ public class ProfileRulesTests
             ("fuso_horario", RawValue.Text("America/Sao_Paulo"))));
 
         changes.Name.ShouldNotBeNull();
-        changes.TimeZone.ShouldBe(new Change<string?>("America/Sao_Paulo"));
+        changes.TimeZone.ShouldBe(new FieldChange<string?>("America/Sao_Paulo"));
         changes.Email.ShouldBeNull();
         changes.City.ShouldBeNull();
         changes.State.ShouldBeNull();
@@ -189,9 +189,9 @@ public class ProfileRulesTests
     [Trait("AC", "007-17")]
     public void Length_CountsCodePoints_NotUtf16Units()
     {
-        // 255 emojis = 510 unidades UTF-16, mas 255 pontos de código: cabe no varchar(255).
-        Ok(SettingsBodies.Of(("nome", RawValue.Text(string.Concat(Enumerable.Repeat("😀", 255))))));
-        Rejected(SettingsBodies.Of(("nome", RawValue.Text(string.Concat(Enumerable.Repeat("😀", 256)))))).ShouldBe(ProfileError.NameTooLong);
+        // 255 emojis = 510 unidades UTF-16, mas 255 pontos de cÃ³digo: cabe no varchar(255).
+        Ok(SettingsBodies.Of(("nome", RawValue.Text(string.Concat(Enumerable.Repeat("\U0001F600", 255))))));
+        Rejected(SettingsBodies.Of(("nome", RawValue.Text(string.Concat(Enumerable.Repeat("\U0001F600", 256)))))).ShouldBe(ProfileError.NameTooLong);
     }
 
     [Theory]

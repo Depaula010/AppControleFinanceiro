@@ -1,6 +1,6 @@
-# Desvio 085 — Perfil: e-mail único, limites, fuso e horários válidos
+﻿# Desvio 085 — Perfil: e-mail único, limites, fuso e horários válidos
 
-- **Estado:** aprovado (onda 2, 2026-10-04)
+- **Estado:** implementado (feature 007, 2026-10-05)
 - **Features afetadas:** 007
 - **Severidade:** correção
 

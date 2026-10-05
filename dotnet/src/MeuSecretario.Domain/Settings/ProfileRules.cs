@@ -1,18 +1,18 @@
-using MeuSecretario.Domain.Accounts;
+﻿using MeuSecretario.Domain.Accounts;
 
 namespace MeuSecretario.Domain.Settings;
 
-/// <summary>Valor novo de uma coluna enviada (distingue "não enviada" de <c>null</c> explícito).</summary>
-public readonly record struct Change<T>(T Value);
+/// <summary>Valor novo de uma coluna enviada (distingue "nÃ£o enviada" de <c>null</c> explÃ­cito).</summary>
+public readonly record struct FieldChange<T>(T Value);
 
-/// <summary>Só as colunas enviadas entram no <c>UPDATE</c> (spec 007 §3.2).</summary>
+/// <summary>SÃ³ as colunas enviadas entram no <c>UPDATE</c> (spec 007 Â§3.2).</summary>
 public sealed record ProfileChanges(
-    Change<string?>? Name,
-    Change<string?>? Email,
-    Change<string?>? City,
-    Change<string?>? State,
-    Change<string?>? TimeZone,
-    Change<int?>? ReserveMonths);
+    FieldChange<string?>? Name,
+    FieldChange<string?>? Email,
+    FieldChange<string?>? City,
+    FieldChange<string?>? State,
+    FieldChange<string?>? TimeZone,
+    FieldChange<int?>? ReserveMonths);
 
 public enum ProfileError
 {
@@ -40,7 +40,7 @@ public abstract record ProfileValidation
 }
 
 /// <summary>
-/// <c>PUT /api/user/profile</c> (spec 007 §3.2, <c>api.py:2454-2519</c>), na ordem da spec: nada a atualizar, conversão de
+/// <c>PUT /api/user/profile</c> (spec 007 Â§3.2, <c>api.py:2454-2519</c>), na ordem da spec: nada a atualizar, conversÃ£o de
 /// <c>meses</c>, nome, estado, faixa de meses; depois as regras dos desvios 084 e 085 (tipos, limites, fuso).
 /// </summary>
 public static class ProfileRules
@@ -59,7 +59,7 @@ public static class ProfileRules
             return Reject(ProfileError.NothingToUpdate);
         }
 
-        // 2. int() de meses; null é aceito e grava NULL
+        // 2. int() de meses; null Ã© aceito e grava NULL
         var hasMonths = body.Has("meses_reserva_emergencia");
         int? months = null;
         if (hasMonths && body.Get("meses_reserva_emergencia") is not RawValue.NullValue)
@@ -92,7 +92,7 @@ public static class ProfileRules
             }
         }
 
-        // "" vira null (só a string vazia; " " é mantida) antes de qualquer validação
+        // "" vira null (sÃ³ a string vazia; " " Ã© mantida) antes de qualquer validaÃ§Ã£o
         var email = ReadNullableText(body.Get("email"), out var emailOk);
         var city = ReadNullableText(body.Get("cidade"), out var cityOk);
         var state = ReadNullableText(body.Get("estado"), out var stateOk);
@@ -149,19 +149,19 @@ public static class ProfileRules
             return Reject(ProfileError.CityTooLong);
         }
 
-        // 8. fuso IANA conhecido; null também é recusado
+        // 8. fuso IANA conhecido; null tambÃ©m Ã© recusado
         if (hasTimeZone && !IsKnownTimeZone(timeZone))
         {
             return Reject(ProfileError.InvalidTimeZone);
         }
 
         return new ProfileValidation.Ok(new ProfileChanges(
-            hasName ? new Change<string?>(name) : null,
-            body.Has("email") ? new Change<string?>(email) : null,
-            body.Has("cidade") ? new Change<string?>(city) : null,
-            body.Has("estado") ? new Change<string?>(state) : null,
-            hasTimeZone ? new Change<string?>(timeZone) : null,
-            hasMonths ? new Change<int?>(months) : null));
+            hasName ? new FieldChange<string?>(name) : null,
+            body.Has("email") ? new FieldChange<string?>(email) : null,
+            body.Has("cidade") ? new FieldChange<string?>(city) : null,
+            body.Has("estado") ? new FieldChange<string?>(state) : null,
+            hasTimeZone ? new FieldChange<string?>(timeZone) : null,
+            hasMonths ? new FieldChange<int?>(months) : null));
     }
 
     /// <summary>Texto, <c>null</c> ou ausente (valor <c>null</c>); <c>""</c> vira <c>null</c>. Outro tipo: <paramref name="ok"/> falso.</summary>
@@ -180,7 +180,7 @@ public static class ProfileRules
         }
     }
 
-    /// <summary>Id IANA (sem espaços: ids do Windows não valem) que o sistema conhece.</summary>
+    /// <summary>Id IANA (sem espaÃ§os: ids do Windows nÃ£o valem) que o sistema conhece.</summary>
     private static bool IsKnownTimeZone(string? id)
     {
         if (string.IsNullOrWhiteSpace(id) || id.Any(char.IsWhiteSpace) || id.Length > TimeZoneMax)
@@ -199,7 +199,7 @@ public static class ProfileRules
         }
     }
 
-    /// <summary>Comprimento em pontos de código, como o <c>len()</c> do Python e o <c>varchar(n)</c> do banco.</summary>
+    /// <summary>Comprimento em pontos de cÃ³digo, como o <c>len()</c> do Python e o <c>varchar(n)</c> do banco.</summary>
     private static int Length(string text) => text.EnumerateRunes().Count();
 
     private static ProfileValidation.Rejected Reject(ProfileError error) => new(error);

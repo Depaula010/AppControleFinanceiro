@@ -1,6 +1,6 @@
-# Desvio 084 — Configurações: tipos JSON inesperados dão 400
+﻿# Desvio 084 — Configurações: tipos JSON inesperados dão 400
 
-- **Estado:** aprovado (onda 2, 2026-10-04)
+- **Estado:** implementado (feature 007, 2026-10-05)
 - **Features afetadas:** 007
 - **Severidade:** correção
 

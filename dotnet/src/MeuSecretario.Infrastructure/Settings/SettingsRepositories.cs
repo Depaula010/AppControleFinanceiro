@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using MeuSecretario.Application.Settings;
 using MeuSecretario.Domain.Settings;
 using MeuSecretario.Infrastructure.Database;
@@ -9,9 +9,9 @@ using Npgsql;
 namespace MeuSecretario.Infrastructure.Settings;
 
 /// <summary>
-/// <c>usuarios</c> (perfil, spec 007 §3.1 e §3.2). O <c>UPDATE</c> monta o <c>SET</c> só com fragmentos fixos; todo valor
-/// vai em parâmetro. A violação de UNIQUE do e-mail vira <see cref="ProfileUpdateOutcome.EmailTaken"/> (desvio 085);
-/// qualquer outro erro do banco sobe como exceção.
+/// <c>usuarios</c> (perfil, spec 007 Â§3.1 e Â§3.2). O <c>UPDATE</c> monta o <c>SET</c> sÃ³ com fragmentos fixos; todo valor
+/// vai em parÃ¢metro. A violaÃ§Ã£o de UNIQUE do e-mail vira <see cref="ProfileUpdateOutcome.EmailTaken"/> (desvio 085);
+/// qualquer outro erro do banco sobe como exceÃ§Ã£o.
 /// </summary>
 public sealed class ProfileRepository(IDbConnectionFactory connections) : IProfileRepository
 {
@@ -61,7 +61,7 @@ public sealed class ProfileRepository(IDbConnectionFactory connections) : IProfi
         }
     }
 
-    private static void Add(List<string> assignments, DynamicParameters parameters, string column, Change<string?>? change)
+    private static void Add(List<string> assignments, DynamicParameters parameters, string column, FieldChange<string?>? change)
     {
         if (change is { } value)
         {
@@ -71,14 +71,14 @@ public sealed class ProfileRepository(IDbConnectionFactory connections) : IProfi
     }
 }
 
-/// <summary><c>preferenciaschaveapi</c> e <c>chavesapiusuario</c> (spec 007 §3.3 e §3.4).</summary>
+/// <summary><c>preferenciaschaveapi</c> e <c>chavesapiusuario</c> (spec 007 Â§3.3 e Â§3.4).</summary>
 public sealed class ApiKeySettingsRepository(IDbConnectionFactory connections) : IApiKeySettingsRepository
 {
     public async Task<IReadOnlyList<ApiKeyPreferenceRow>> ListAsync(int userId, CancellationToken cancellationToken)
     {
         await using var connection = await connections.OpenAsync(cancellationToken);
 
-        // Desvio 088: parte da lista fixa dos três provedores; has_key reflete a chave ativa mesmo sem preferência.
+        // Desvio 088: parte da lista fixa dos trÃªs provedores; has_key reflete a chave ativa mesmo sem preferÃªncia.
         var rows = await connection.QueryAsync<ApiKeyPreferenceRow>(new CommandDefinition(
             """
             SELECT v.provedor AS Provider,
@@ -136,7 +136,7 @@ public sealed class ApiKeySettingsRepository(IDbConnectionFactory connections) :
     }
 }
 
-/// <summary><c>notificationconfigs</c> (spec 007 §3.6 e §3.7). As horas vão como texto e o banco as converte.</summary>
+/// <summary><c>notificationconfigs</c> (spec 007 Â§3.6 e Â§3.7). As horas vÃ£o como texto e o banco as converte.</summary>
 public sealed class UserNotificationSettingsRepository(IDbConnectionFactory connections) : IUserNotificationSettingsRepository
 {
     public async Task<NotificationRow?> GetAsync(int userId, CancellationToken cancellationToken)
@@ -188,7 +188,7 @@ public sealed class UserNotificationSettingsRepository(IDbConnectionFactory conn
     }
 }
 
-/// <summary><c>enderecosfavoritos</c> (spec 007 §3.8 a §3.10); também usada pela 012.</summary>
+/// <summary><c>enderecosfavoritos</c> (spec 007 Â§3.8 a Â§3.10); tambÃ©m usada pela 012.</summary>
 public sealed class FavoriteAddressRepository(IDbConnectionFactory connections) : IFavoriteAddressRepository
 {
     private const string UpsertWithCoordinates =
@@ -200,7 +200,7 @@ public sealed class FavoriteAddressRepository(IDbConnectionFactory connections) 
             longitude = EXCLUDED.longitude, updated_at = now()
         """;
 
-    // Desvio 086: sem coordenadas na entrada, mantém as existentes quando o texto não mudou e zera quando mudou.
+    // Desvio 086: sem coordenadas na entrada, mantÃ©m as existentes quando o texto nÃ£o mudou e zera quando mudou.
     private const string UpsertPreservingCoordinates =
         """
         INSERT INTO enderecosfavoritos (usuario_id, label, endereco_completo, latitude, longitude)
@@ -249,7 +249,7 @@ public sealed class FavoriteAddressRepository(IDbConnectionFactory connections) 
 
 public static class SettingsServiceCollectionExtensions
 {
-    /// <summary>Repositórios da 007; chamado pelo <c>SettingsModule.AddServices</c>.</summary>
+    /// <summary>RepositÃ³rios da 007; chamado pelo <c>SettingsModule.AddServices</c>.</summary>
     public static IServiceCollection AddSettingsInfrastructure(this IServiceCollection services)
     {
         services.TryAddSingleton<IProfileRepository, ProfileRepository>();
