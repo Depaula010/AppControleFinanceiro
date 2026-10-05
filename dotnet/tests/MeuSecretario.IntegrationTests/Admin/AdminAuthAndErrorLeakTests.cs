@@ -25,6 +25,21 @@ public sealed class AdminAuthTests(RedisFixture redis) : IClassFixture<RedisFixt
         { "POST", "/admin/clear-bot-session", null },
         { "GET", "/admin/get-notification-config/1", null },
         { "POST", "/admin/config-alertas-financeiros", """{"usuario_id":1,"ativo":true}""" },
+        { "GET", "/admin/setup-database", null },
+        { "GET", "/admin/populate-global-categories", null },
+        { "GET", "/admin/setup-user-data", null },
+        { "GET", "/admin/setup-calendar-table", null },
+        { "GET", "/admin/setup-monthly-reports-table", null },
+        { "POST", "/admin/setup-api-keys-tables", null },
+        { "GET", "/admin/setup-resumo-matinal", null },
+        { "GET", "/admin/setup-checkin-noturno", null },
+        { "GET", "/admin/setup-potes-alerts", null },
+        { "GET", "/admin/setup-alertas-financeiros", null },
+        { "GET", "/admin/setup-reserva-emergencia", null },
+        { "GET", "/admin/cleanup-deprecated-notification-fields", null },
+        { "GET", "/admin/setup-budget-violations", null },
+        { "GET", "/admin/oauth-config-check", null },
+        { "GET", "/admin/debug-calendar", null },
     };
 
     private readonly List<SecurityTestHost> _hosts = [];
