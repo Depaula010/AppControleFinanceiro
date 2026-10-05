@@ -32,7 +32,7 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [022](022-weather-https.md) | WeatherAPI por HTTP sem TLS | segurança | 010 | implementado |
 | [023](023-rate-limit-proxy.md) | Rate limit de 100/hora por IP do proxy | operação | 009 | aprovado |
 | [024](024-corpo-sem-content-type.md) | Corpo sem Content-Type JSON gera 500 | correção | todas | aprovado |
-| [025](025-cartao-sem-acento.md) | Tipo 'Cartao de Credito' sem acento no handler do Automate | correção | 011 | aprovado |
+| [025](025-cartao-sem-acento.md) | Tipo 'Cartao de Credito' sem acento no handler do Automate | correção | 011 | implementado |
 | [026](026-url-bot-grafico.md) | URL do bot no intent de gráfico | correção | 012 | aprovado |
 | [027](027-colunas-ausentes-transacoes.md) | POST/PUT /api/transactions gravam colunas que não existem | correção | 004 | aprovado |
 | [028](028-caminhos-com-colunas-ausentes.md) | Outros caminhos que usam colunas ou tabelas inexistentes | correção | 007, 008, 009, 013 | aprovado |
@@ -103,6 +103,13 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [093](093-dashboard-alertas-data-inicio.md) | Dashboard: alertas MENSAL e ANUAL ignoram data_inicio | correção | 006 | proposto |
 | [094](094-dashboard-alertas-conta-ja-paga.md) | Dashboard: alerta continua para a conta já paga no mês | correção | 006 | proposto |
 | [095](095-dashboard-alertas-receita.md) | Dashboard: receita aparece como conta a vencer | correção | 006 | proposto |
+| [096](096-sms-chamada-inutil-gemini.md) | SMS: remover a chamada inútil ao Gemini | correção | 011 | proposto |
+| [097](097-automacao-entradas-invalidas-400.md) | Rotas de automação: entradas inválidas viram 400 com mensagem | correção | 011 | proposto |
+| [098](098-sms-valor-pago-texto.md) | SMS: valor_pago como texto numérico deve funcionar | correção | 011 | proposto |
+| [099](099-quitacao-casamento-sem-caixa.md) | Quitação por SMS: casar descrições sem diferenciar a caixa | correção | 011, 012 | proposto |
+| [100](100-confirmacao-emoji-cartao.md) | Confirmação de transação: restaurar o emoji do cartão | correção | 011, 012 | proposto |
+| [101](101-reprocessar-isola-erro-por-agendamento.md) | Reprocessar fatura: isolar o erro de cada agendamento | correção | 011 | proposto |
+| [102](102-chave-usuario-indice-cego.md) | Chave do atalho: índice cego e cabeçalho | segurança | 011 | proposto |
 | [120](120-calendar-alerts-tipos-do-corpo.md) | Alertas de calendário: tipos do corpo de /config e /ativar | correção | 014 | proposto |
 | [121](121-calendar-alerts-janela-30s.md) | Alertas de calendário: janela de ±30 s perde o aviso se o ciclo atrasa | correção | 014 | proposto |
 | [122](122-calendar-alerts-usuario-inativo.md) | Alertas de calendário: usuário inativo ainda recebe alertas | correção | 014 | proposto |

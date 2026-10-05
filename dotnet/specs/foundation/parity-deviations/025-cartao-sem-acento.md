@@ -1,6 +1,6 @@
 # Desvio 025 — Tipo 'Cartao de Credito' sem acento no handler do Automate
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 011, 2026-10-05)
 - **Features afetadas:** 011
 - **Severidade:** correção
 
