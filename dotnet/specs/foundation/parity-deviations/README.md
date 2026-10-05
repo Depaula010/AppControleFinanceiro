@@ -96,3 +96,10 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [086](086-endereco-preserva-coordenadas.md) | Endereço preserva coordenadas quando o texto não muda | correção | 007 | implementado |
 | [087](087-endereco-faixa-coordenadas.md) | Faixa de latitude e longitude | correção | 007 | implementado |
 | [088](088-api-keys-has-key-sem-preferencia.md) | has_key reflete chave sem linha de preferência | correção | 007 | implementado |
+| [089](089-dashboard-recentes-renda-vs-receita.md) | Dashboard: tipo Renda x Receita nas transações recentes | compatibilidade | 006 | proposto |
+| [090](090-dashboard-janela-gastos-mensais.md) | Dashboard: janela dos gastos mensais começa no meio de um mês | correção | 006 | proposto |
+| [091](091-dashboard-ordem-gastos-mensais.md) | Dashboard: gastos mensais em ordem decrescente de mês | correção | 006 | proposto |
+| [092](092-dashboard-top-categorias-invertido.md) | Dashboard: top 10 de categorias devolve as de menor gasto | correção | 006 | proposto |
+| [093](093-dashboard-alertas-data-inicio.md) | Dashboard: alertas MENSAL e ANUAL ignoram data_inicio | correção | 006 | proposto |
+| [094](094-dashboard-alertas-conta-ja-paga.md) | Dashboard: alerta continua para a conta já paga no mês | correção | 006 | proposto |
+| [095](095-dashboard-alertas-receita.md) | Dashboard: receita aparece como conta a vencer | correção | 006 | proposto |
