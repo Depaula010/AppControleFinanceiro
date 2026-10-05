@@ -1,6 +1,6 @@
-# Spec 007 — Configurações do usuário (`/api/user/*`)
+﻿# Spec 007 — Configurações do usuário (`/api/user/*`)
 
-- **Estado:** aprovada em 2026-10-04 (recomendações de foundation/decisoes-onda-2.md; onde a spec diverge, vale esse documento)
+- **Estado:** implementada em 2026-10-05 (aprovada em 2026-10-04; recomendações de foundation/decisoes-onda-2.md; onde a spec diverge, vale esse documento)
 - **Onda:** 2
 - **Origem (Python):** `app/routes/api.py:2425-3011` (perfil, chaves BYOK, validação, notificações, endereços, `settings` agregado) e o `token_required` de `api.py:34-90`; `app/services/user_address_service.py:22-195` (mesma tabela, via WhatsApp); `app/services/notification_config_service.py:81-137`; `app/routes/api.py:25` (`_fernet`); DDL real em `dotnet/migrations/0000_baseline.sql`
 - **Depende de:** 001a (`RequireUser`, `ICurrentUser`, `IEncryptionService`, `IDbConnectionFactory`, `Envelopes`, `SafeError`), 002 (`PyNumber`, `RawValue`), 008 (tabelas e `ApiProviders`), 010e (`IProviderKeyValidator`)
@@ -318,3 +318,13 @@ Sem aprovação, o .NET reproduz o Flask; onde a reprodução exata não é poss
 - **Q-007-2** Há usuários `ativo = false` em produção com JWT ainda válido? As rotas de perfil respondem 404 para eles, mas as demais (chaves, notificações, endereços) respondem normalmente (o Flask não checa `ativo` nelas). Reproduzido; confirmar que é aceitável.
 - **Q-007-3** `GET /api/user/api-keys`, `GET /api/user/notifications` e `GET /api/user/addresses` não têm cliente conhecido; manter as três (contrato) ou registrar para remoção futura?
 - **Q-007-4** O desvio 028 e o roadmap citam `agenda_diaria_*`; confirmar que o Angular não envia nem espera esses campos em `notifications` (conferido: não envia).
+
+
+## 12. Registro da implementação (2026-10-05)
+
+- P-007-1 rejeitada (paridade): daysBeforeDue continua gravado em lerta_potes_threshold; a 013 deve tratar o risco (valores 1 a 30 seriam lidos como % de pote).
+- Desvios 084 a 088 implementados; onde §3 diz sem aprovação/500, vale o 400 do desvio 084 (Dados inválidos ou a mensagem da própria rota).
+- Desvio 085: ordem após as 5 validações da §3.2: tipos, limites (nome 255, e-mail 255, cidade 100), fuso IANA (Fuso horário inválido, 
+ull incluído); 409 E-mail já cadastrado; resumo matinal e minutos do check-in exigem HH:MM (hora 0-23, minuto 0-59, senão Formato de horário inválido (use HH:MM)); horas gravadas em forma canônica HH:MM.
+- Desvio 086: IFavoriteAddressRepository.UpsertAsync com coordinates nulo preserva lat/lng se o texto não mudou; coordinates vazio ({}, 
+ull, []) conta como não enviado. A 012 deve tratar lat/lng nulos.

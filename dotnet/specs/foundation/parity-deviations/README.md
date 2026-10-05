@@ -1,4 +1,4 @@
-# Desvios de paridade
+﻿# Desvios de paridade
 
 Cada arquivo é um comportamento do Flask que o .NET **não** reproduz literalmente (bug, furo de segurança ou inconsistência). Sem estado `aprovado`, o .NET copia o comportamento atual. Use `../../_templates/deviation.md` para novos.
 
@@ -91,8 +91,8 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [081](081-rate-limit-valores.md) | Valores do rate limit (desligado por padrão) | segurança | 009 | implementado |
 | [082](082-ip-cliente-forwardedheaders.md) | IP do cliente pelo ForwardedHeaders | segurança | 009 | implementado |
 | [083](083-admin-api-key-errada-suspeita.md) | x-api-key errada em /admin conta como tentativa suspeita | segurança | 009 | aprovado |
-| [084](084-configuracoes-tipos-json-400.md) | Configurações: tipos JSON inesperados dão 400 | correção | 007 | aprovado |
-| [085](085-perfil-validacoes.md) | Perfil: e-mail único, limites, fuso e horários válidos | correção | 007 | aprovado |
-| [086](086-endereco-preserva-coordenadas.md) | Endereço preserva coordenadas quando o texto não muda | correção | 007 | aprovado |
-| [087](087-endereco-faixa-coordenadas.md) | Faixa de latitude e longitude | correção | 007 | aprovado |
-| [088](088-api-keys-has-key-sem-preferencia.md) | has_key reflete chave sem linha de preferência | correção | 007 | aprovado |
+| [084](084-configuracoes-tipos-json-400.md) | Configurações: tipos JSON inesperados dão 400 | correção | 007 | implementado |
+| [085](085-perfil-validacoes.md) | Perfil: e-mail único, limites, fuso e horários válidos | correção | 007 | implementado |
+| [086](086-endereco-preserva-coordenadas.md) | Endereço preserva coordenadas quando o texto não muda | correção | 007 | implementado |
+| [087](087-endereco-faixa-coordenadas.md) | Faixa de latitude e longitude | correção | 007 | implementado |
+| [088](088-api-keys-has-key-sem-preferencia.md) | has_key reflete chave sem linha de preferência | correção | 007 | implementado |

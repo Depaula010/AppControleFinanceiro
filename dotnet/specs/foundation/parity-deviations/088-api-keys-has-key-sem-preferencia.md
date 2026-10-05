@@ -1,6 +1,6 @@
-# Desvio 088 — has_key reflete chave sem linha de preferência
+﻿# Desvio 088 — has_key reflete chave sem linha de preferência
 
-- **Estado:** aprovado (onda 2, 2026-10-04)
+- **Estado:** implementado (feature 007, 2026-10-05)
 - **Features afetadas:** 007
 - **Severidade:** correção
 
