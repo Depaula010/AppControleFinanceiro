@@ -1,6 +1,6 @@
 # Desvio 072 — Contas mensais: entradas inválidas viram 400 ou são ignoradas
 
-- **Estado:** aprovado (onda 2, 2026-10-04)
+- **Estado:** implementado (feature 005, 2026-10-04)
 - **Features afetadas:** 005
 - **Severidade:** correção
 

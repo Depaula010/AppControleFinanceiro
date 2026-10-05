@@ -44,6 +44,12 @@ public static class AdminMessages
     public const string CacheStatsFailed = "Erro ao obter estatísticas do cache. Tente novamente.";
     public const string BotSessionFailed = "Erro ao limpar a sessão do bot. Tente novamente.";
     public const string NotificationConfigFailed = "Erro ao obter as configurações de notificação. Tente novamente.";
+    public const string OAuthConfigChecked = "Configuracao OAuth verificada";
+    public const string OAuthConfigFailed = "Erro ao verificar a configuração do OAuth. Tente novamente.";
+    public const string CalendarDebugFailed = "Erro ao executar o diagnóstico do Google Calendar. Tente novamente.";
+    public const string SetupNoOp =
+        "Rota mantida por compatibilidade: o esquema do banco é gerenciado por migrations. Nenhuma alteração foi feita.";
+
     public const string FinancialAlertsFailed = "Erro ao atualizar a configuração de alertas financeiros. Tente novamente.";
 
     public static string IpDesbloqueado(string ip) => $"IP {ip} desbloqueado";

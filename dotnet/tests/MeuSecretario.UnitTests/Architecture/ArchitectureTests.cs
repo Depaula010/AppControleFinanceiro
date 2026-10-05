@@ -65,6 +65,18 @@ public class ArchitectureTests
     }
 
     [Fact]
+    public void AdminSetupRoutes_NeverTouchTheDatabase()
+    {
+        var result = Types.InAssembly(Api)
+            .That().ResideInNamespace("MeuSecretario.Api.Admin").And().HaveNameStartingWith("SetupRoutes")
+            .ShouldNot().HaveDependencyOnAny("MeuSecretario.Infrastructure", "Npgsql", "Dapper")
+            .GetResult();
+
+        result.IsSuccessful.ShouldBeTrue(string.Join(", ", result.FailingTypeNames ?? []));
+        Types.InAssembly(Api).That().HaveNameStartingWith("SetupRoutes").GetTypes().ShouldNotBeEmpty();
+    }
+
+    [Fact]
     public void FeatureModules_AreDiscoveredFromTheApiAssembly()
     {
         FeatureModules.Discover(Api).ShouldNotBeEmpty();

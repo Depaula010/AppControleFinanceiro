@@ -32,6 +32,8 @@ public sealed class AdminModule : IFeatureModule
         services.AddScoped<ClearBotSession>();
         services.AddScoped<GetNotificationConfig>();
         services.AddScoped<SetFinancialAlerts>();
+        services.AddScoped<GetOAuthConfigCheck>();
+        services.AddScoped<RunCalendarDebug>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder app)
@@ -43,6 +45,9 @@ public sealed class AdminModule : IFeatureModule
         MapSecurityRoutes(admin);
         MapCacheRoutes(admin);
         MapBotAndNotificationRoutes(admin);
+        SetupRoutes.Map(admin);
+        admin.MapGet("/oauth-config-check", OAuthConfigCheckEndpoint);
+        admin.MapGet("/debug-calendar", CalendarDebugAsync);
 
         // Outros métodos na rota com id: numérico => 405 (a rota existe para GET); senão 404 HTML, antes da autenticação.
         app.Map(NotificationConfigPath, OtherMethods);
@@ -384,6 +389,42 @@ public sealed class AdminModule : IFeatureModule
         {
             AdminLog.RouteFailed(logger, "config-alertas-financeiros", SafeError.Describe(ex));
             return ServerError(AdminMessages.FinancialAlertsFailed);
+        }
+    }
+
+    // ---- 23 e 24: diagnóstico (009b) --------------------------------------------------------------------------------
+
+    private static IResult OAuthConfigCheckEndpoint(GetOAuthConfigCheck useCase, ILogger<AdminModule> logger)
+    {
+        try
+        {
+            var check = useCase.Execute();
+            return Envelopes.B.Success(AdminMessages.OAuthConfigChecked, new Dictionary<string, object?>
+            {
+                ["client_id_configured"] = check.ClientIdConfigured,
+                ["client_secret_configured"] = check.ClientSecretConfigured,
+                ["redirect_uri"] = check.RedirectUri,
+            });
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            AdminLog.RouteFailed(logger, "oauth-config-check", SafeError.Describe(ex));
+            return ServerError(AdminMessages.OAuthConfigFailed);
+        }
+    }
+
+    private static async Task<IResult> CalendarDebugAsync(
+        RunCalendarDebug useCase, ILogger<AdminModule> logger, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var report = await useCase.ExecuteAsync(cancellationToken);
+            return Results.Content(report.Html, "text/html; charset=utf-8");
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            AdminLog.RouteFailed(logger, "debug-calendar", SafeError.Describe(ex));
+            return ServerError(AdminMessages.CalendarDebugFailed);
         }
     }
 }

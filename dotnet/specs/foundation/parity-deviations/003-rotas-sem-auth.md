@@ -1,6 +1,6 @@
 # Desvio 003 — Rotas de escrita sem autenticação
 
-- **Estado:** aprovado
+- **Estado:** aprovado; implementado no escopo da feature 009 (009a: `clear-bot-session`, `config-alertas-financeiros`, `get-notification-config`); pendente nas features 011 e 014
 - **Features afetadas:** 009, 011, 014
 - **Severidade:** segurança
 

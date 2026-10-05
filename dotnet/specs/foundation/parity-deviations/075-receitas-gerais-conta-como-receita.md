@@ -1,6 +1,6 @@
 # Desvio 075 — Receitas Gerais conta como receita
 
-- **Estado:** aprovado (onda 2, 2026-10-04)
+- **Estado:** implementado (feature 005, 2026-10-04)
 - **Features afetadas:** 005
 - **Severidade:** correção
 
