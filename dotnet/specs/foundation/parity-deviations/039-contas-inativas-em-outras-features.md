@@ -1,6 +1,6 @@
 # Desvio 039 — Contas inativas deixam de ser usadas por outras features
 
-- **Estado:** aprovado
+- **Estado:** aprovado; implementado nas features 004 e 011 (2026-10-05); pendente na 012
 - **Features afetadas:** 004, 011, 012
 - **Severidade:** correção
 

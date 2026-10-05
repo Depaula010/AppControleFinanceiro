@@ -79,7 +79,6 @@ public interface IPendingTransactionStore  // create_pending_transaction
     Task SetLastPendingAsync(string whatsapp, string id, CancellationToken ct);
 }
 public interface IPendingIdGenerator { string Next(); }       // 8 hex
-public interface IAutomationDiagnostics { /* eventos sem texto de exceção: falha do bot, do populador */ }
 ```
 
 **Casos de uso** (uma classe cada, `ExecuteAsync`, resultado tipado sem HTTP):
@@ -109,7 +108,7 @@ Dapper, colunas minúsculas, sem aspas, texto do cliente sempre como parâmetro 
 
 ## 4. Api (`MeuSecretario.Api/Automation`)
 
-- `AutomationModule : IFeatureModule`. `AddServices`: todas as portas e casos de uso, `IInvoiceSchedulePopulator`, `IAutomationDiagnostics`, `IPendingIdGenerator`. `MapEndpoints`: `MapPost("/webhook-automate")`, `MapPost("/api/transacao")`, `MapPost("/webhook-sms-payment")`, `MapMethods("/api/agendamento/{id:regex(^\d+$)}/reserva", ["PATCH"])`, `MapGet("/api/agendamentos/reserva")`, `MapPost("/api/fatura/{id:regex(^\d+$)}/reprocessar").RequireApiKey(AutomationResponses.Unauthorized)`. Sem `RequireUser`. Id maior que `int.MaxValue` ⇒ tratado como 0 (404 do próprio caso).
+- `AutomationModule : IFeatureModule`. `AddServices`: todas as portas e casos de uso, `IInvoiceSchedulePopulator`, `IPendingIdGenerator`. `MapEndpoints`: `MapPost("/webhook-automate")`, `MapPost("/api/transacao")`, `MapPost("/webhook-sms-payment")`, `MapMethods("/api/agendamento/{id:regex(^\d+$)}/reserva", ["PATCH"])`, `MapGet("/api/agendamentos/reserva")`, `MapPost("/api/fatura/{id:regex(^\d+$)}/reprocessar").RequireApiKey(AutomationResponses.Unauthorized)`. Sem `RequireUser`. Id maior que `int.MaxValue` ⇒ tratado como 0 (404 do próprio caso).
 - Corpo lido como `JsonElement?` (`JsonBody.ReadObjectAsync` compartilhado, desvio 024; corpo inválido ⇒ `null`).
 - `AutomationResponses` (`Envelopes.B`, `Envelopes.E` no 503 do SMS, e o JSON próprio de `/api/transacao`); chaves na ordem da spec; `double` para números, texto `"49.90"` em `detalhes`.
 - `AutomationMessages` (todas as mensagens da spec, copiadas literalmente) e `AutomationLog` (`LoggerMessage`, EventIds **11001–11099**; só `SafeError.Describe`, ids e número mascarado).

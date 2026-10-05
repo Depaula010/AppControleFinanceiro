@@ -32,7 +32,7 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [022](022-weather-https.md) | WeatherAPI por HTTP sem TLS | segurança | 010 | implementado |
 | [023](023-rate-limit-proxy.md) | Rate limit de 100/hora por IP do proxy | operação | 009 | aprovado |
 | [024](024-corpo-sem-content-type.md) | Corpo sem Content-Type JSON gera 500 | correção | todas | aprovado |
-| [025](025-cartao-sem-acento.md) | Tipo 'Cartao de Credito' sem acento no handler do Automate | correção | 011 | aprovado |
+| [025](025-cartao-sem-acento.md) | Tipo 'Cartao de Credito' sem acento no handler do Automate | correção | 011 | implementado |
 | [026](026-url-bot-grafico.md) | URL do bot no intent de gráfico | correção | 012 | aprovado |
 | [027](027-colunas-ausentes-transacoes.md) | POST/PUT /api/transactions gravam colunas que não existem | correção | 004 | aprovado |
 | [028](028-caminhos-com-colunas-ausentes.md) | Outros caminhos que usam colunas ou tabelas inexistentes | correção | 007, 008, 009, 013 | aprovado |

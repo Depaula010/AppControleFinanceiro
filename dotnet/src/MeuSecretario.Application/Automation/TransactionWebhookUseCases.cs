@@ -26,7 +26,7 @@ public sealed class DirectPoster(ITransactionPosting posting)
             throw new AutomationFailureException("descrição ausente");
         }
 
-        if (!MoneyDecimal.TryFromDouble(Math.Abs(amount), out var decimalAmount))
+        if (!MoneyDecimal.TryFromDouble(amount, out var decimalAmount))
         {
             throw new AutomationFailureException("valor fora do numeric(15,2)");
         }

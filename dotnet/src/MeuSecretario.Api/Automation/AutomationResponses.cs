@@ -7,7 +7,7 @@ using MeuSecretario.Domain.Automation;
 namespace MeuSecretario.Api.Automation;
 
 /// <summary>Respostas das seis rotas, com as chaves na ordem do Flask (spec 011 §3). Dinheiro como <c>double</c> (o <c>float</c> do Python).</summary>
-internal static class AutomationResponses
+public static class AutomationResponses
 {
     private static double Money(decimal? value) => (double)(value ?? 0);
 
