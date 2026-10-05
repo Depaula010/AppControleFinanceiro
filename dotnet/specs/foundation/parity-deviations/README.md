@@ -106,3 +106,13 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [120](120-calendar-alerts-tipos-do-corpo.md) | Alertas de calendário: tipos do corpo de /config e /ativar | correção | 014 | proposto |
 | [121](121-calendar-alerts-janela-30s.md) | Alertas de calendário: janela de ±30 s perde o aviso se o ciclo atrasa | correção | 014 | proposto |
 | [122](122-calendar-alerts-usuario-inativo.md) | Alertas de calendário: usuário inativo ainda recebe alertas | correção | 014 | proposto |
+| [130](130-checkin-fatura-vencida-derruba-mensagem.md) | Check-in: fatura vencida derruba a mensagem do usuário | correção | 013, 012 | proposto |
+| [131](131-faturas-fechadas-fora-dos-alertas.md) | Faturas `Fechada` ficam fora dos alertas de vencimento | correção | 013, 012 | proposto |
+| [132](132-relatorio-mensal-sinal-das-despesas.md) | Relatório mensal: sinal das despesas | correção | 013, 009 | proposto |
+| [133](133-relatorio-mensal-formato-numerico.md) | Relatório mensal: formato numérico em inglês | correção | 013 | proposto |
+| [134](134-motor-dia-29-a-31-em-mes-curto.md) | Motor: agendamento de dia 29 a 31 não dispara em mês curto | correção | 013, 005 | proposto |
+| [135](135-populador-lembrete-variavel-vira-despesa.md) | Populador de fatura lança `LEMBRETE_VARIAVEL` como despesa | correção | 013, 004, 011 | proposto |
+| [136](136-horario-com-minutos-nunca-dispara.md) | Horário com minutos nunca dispara (resumo matinal e check-in) | correção | 013, 007 | proposto |
+| [137](137-resumo-sem-google-suprime-alertas-financeiros.md) | Resumo matinal sem Google suprime os alertas financeiros | correção | 013 | proposto |
+| [138](138-resumo-matinal-chave-do-usuario.md) | Resumo matinal usa a chave do usuário | correção | 013, 008, 010 | proposto |
+| [139](139-checkin-nao-confere-envio.md) | Check-in não confere o envio e deixa a sessão ativa | correção | 013, 012 | proposto |
