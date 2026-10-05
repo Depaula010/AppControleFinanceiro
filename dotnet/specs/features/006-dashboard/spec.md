@@ -207,7 +207,12 @@ Cada critério vira pelo menos um teste (`[Trait("AC","006-NN")]`); os de integr
 
 ## 10. Como ficou na implementação
 
-*(preenchido no fechamento, §T-final de `tasks.md`)*
+1. **Paridade total, sem desvio implementado.** Os desvios 089 a 095 seguem `proposto`; nenhum alterou o código. Recentes devolvem `Renda` (Q-006-1); gráficos reproduzem a janela de 30 dias, a ordem decrescente e o top 10 de menor gasto; alertas ignoram `data_inicio` em `MENSAL`/`ANUAL`, conta paga e receita.
+2. **Roteamento:** 8 `MapGet` com `RequireUser`; 405 nos outros métodos vem do roteamento (testado em POST/PUT/DELETE nos 8 caminhos, inclusive `/api/transactions/recent`, que convive com o `{id}` da 004). Caminho desconhecido e barra final dão 404 (sem corpo HTML do Flask garantido pelo `UnmatchedRoute` da 009).
+3. **Janela de datas:** todas as janelas usam `IClock.Today`; a de categorias é `[dia 1, dia 1 do mês seguinte)` (equivale ao `TO_CHAR = mes` do Flask). O resumo filtra por `data <= hoje`.
+4. **Soma do saldo:** `decimal` exato convertido para `double` antes do `PyRound` (Q-006-7).
+5. **Nome do dia da semana:** inglês sem preenchimento (Q-006-6).
+6. **Testes:** 80 unitários (Domain, Application, Api) e 65 de integração com PostgreSQL real, tudo com `[Trait("AC","006-NN")]`; fixtures de teste da 004 e 005 reaproveitadas sem edição. Nenhum arquivo compartilhado foi alterado (só `parity-deviations/README.md`, com as linhas 089 a 095).
 
 ## 11. O que o Angular espera × o que o Flask devolve
 

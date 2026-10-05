@@ -6,23 +6,23 @@ Regra: cada tarefa termina com testes verdes e um commit; testes primeiro, códi
 
 ## Domain
 
-- [ ] **T1 — Resumo.** `DashboardMonths`, `DashboardSummaryCalculator` (saldo, `abs`, `saldo_mes` com `PyRound`) (AC-006-10 a 20).
-- [ ] **T2 — Janelas e parâmetro.** `ChartsWindow`, `MonthsParameter` (`int()` do Python, fallback 3, faixa 1..12), `WeekdayNames` (AC-006-30 a 32, 36, 37).
-- [ ] **T3 — Alertas.** `DashboardAlerts` (ANUAL, SEMANAL/QUINZENAL/DIARIA, MENSAL, janela de 7 dias, nível, zero ⇒ null, ordenação estável) (AC-006-51 a 60).
+- [x] **T1 — Resumo.** `DashboardMonths`, `DashboardSummaryCalculator` (saldo, `abs`, `saldo_mes` com `PyRound`) (AC-006-10 a 20).
+- [x] **T2 — Janelas e parâmetro.** `ChartsWindow`, `MonthsParameter` (`int()` do Python, fallback 3, faixa 1..12), `WeekdayNames` (AC-006-30 a 32, 36, 37).
+- [x] **T3 — Alertas.** `DashboardAlerts` (ANUAL, SEMANAL/QUINZENAL/DIARIA, MENSAL, janela de 7 dias, nível, zero ⇒ null, ordenação estável) (AC-006-51 a 60).
 
 ## Application
 
-- [ ] **T4 — Porta e casos de uso.** `IDashboardRepository`, 4 casos de uso com repositório falso e relógio fixo (AC-006-14, 30, 38, 61).
+- [x] **T4 — Porta e casos de uso.** `IDashboardRepository`, 4 casos de uso com repositório falso e relógio fixo (AC-006-14, 30, 38, 61).
 
 ## Infrastructure
 
-- [ ] **T5 — `DashboardRepository`.** Testes de integração primeiro (SQL real): saldo (consolidada, ativa), `SUM` por tipo, mensal, categoria (ordem e limite), dia da semana, recentes, agendamentos ativos, tenant.
+- [x] **T5 — `DashboardRepository`.** Testes de integração primeiro (SQL real): saldo (consolidada, ativa), `SUM` por tipo, mensal, categoria (ordem e limite), dia da semana, recentes, agendamentos ativos, tenant.
 
 ## Api
 
-- [ ] **T6 — Respostas, mensagens e log.** `DashboardResponses`, `DashboardMessages`, `DashboardLog` (6001–6004), 500 fixo (AC-006-05, 19, 42, 59).
-- [ ] **T7 — Endpoints.** `DashboardModule` com os 8 caminhos; integração por rota com corpo exato; `RequireUser`; roteamento e isolamento (AC-006-01 a 06, 10 a 62).
+- [x] **T6 — Respostas, mensagens e log.** `DashboardResponses`, `DashboardMessages`, `DashboardLog` (6001–6004), 500 fixo (AC-006-05, 19, 42, 59).
+- [x] **T7 — Endpoints.** `DashboardModule` com os 8 caminhos; integração por rota com corpo exato; `RequireUser`; roteamento e isolamento (AC-006-01 a 06, 10 a 62).
 
 ## Fechamento
 
-- [ ] **T8 — Contrato e desvios.** Revisar cada resposta contra o Python lido; spec §10 preenchida; build sem warnings e testes verdes; relatório com os arquivos compartilhados tocados.
+- [x] **T8 — Contrato e desvios.** Revisar cada resposta contra o Python lido; spec §10 preenchida; build sem warnings e testes verdes; relatório com os arquivos compartilhados tocados.
