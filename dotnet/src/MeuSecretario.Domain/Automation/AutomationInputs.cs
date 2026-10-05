@@ -298,7 +298,7 @@ public abstract record ReserveListParse
     public sealed record InvalidPaging : ReserveListParse;
 }
 
-public static partial class ReserveListQuery
+public static class ReserveListQuery
 {
     public const string PeriodicityMessage = "Periodicidade inválida. Use: DIARIA, SEMANAL, QUINZENAL, MENSAL ou ANUAL";
 
@@ -310,7 +310,7 @@ public static partial class ReserveListQuery
         bool? includeFlag = include is null ? null : string.Equals(include, "true", StringComparison.OrdinalIgnoreCase);
 
         // O Flask lê limit e offset (int()) antes de montar o SQL: falha de conversão é erro inesperado e vem antes da periodicidade.
-        if (!TryPyInt(limit, 100, out var limitNumber) || !TryPyInt(offset, 0, out var offsetNumber))
+        if (!PyInt.TryParse(limit, 100, out var limitNumber) || !PyInt.TryParse(offset, 0, out var offsetNumber))
         {
             return new ReserveListParse.InvalidPaging();
         }
@@ -335,8 +335,13 @@ public static partial class ReserveListQuery
             includeFlag, periodicityUpper, string.IsNullOrEmpty(category) ? null : category, (long)limitNumber, (long)offsetNumber));
     }
 
-    /// <summary><c>int(texto)</c>: espaços, sinal, <c>_</c> entre dígitos, dígitos Unicode; ausente vale o padrão.</summary>
-    internal static bool TryPyInt(string? text, long defaultValue, out BigInteger value)
+}
+
+/// <summary><c>int(texto)</c> do Python: espaços, sinal, <c>_</c> entre dígitos e dígitos Unicode decimais.</summary>
+public static partial class PyInt
+{
+    /// <summary>Ausente (<c>null</c>) vale <paramref name="defaultValue"/>; texto que o <c>int()</c> recusa devolve <c>false</c>.</summary>
+    public static bool TryParse(string? text, long defaultValue, out BigInteger value)
     {
         value = defaultValue;
         if (text is null)

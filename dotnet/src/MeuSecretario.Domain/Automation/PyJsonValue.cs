@@ -30,6 +30,19 @@ public static partial class PyJsonValue
         };
     }
 
+    /// <summary><c>str(x)</c> do Python para o que cabe num f-string: texto como veio, <c>True</c>/<c>False</c>, inteiro, <c>float</c> com casa decimal.</summary>
+    public static string Str(JsonElement element) => element.ValueKind switch
+    {
+        JsonValueKind.String => element.GetString()!,
+        JsonValueKind.True => "True",
+        JsonValueKind.False => "False",
+        JsonValueKind.Null => "None",
+        JsonValueKind.Number when TypeName(element) == "int" => element.GetRawText(),
+        JsonValueKind.Number => PyFloat.Repr(double.Parse(element.GetRawText(), NumberStyles.Float, CultureInfo.InvariantCulture))
+            .Replace("E", "e", StringComparison.Ordinal),
+        _ => element.GetRawText(),
+    };
+
     /// <summary>Nome do tipo Python (<c>type(x).__name__</c>) para as mensagens de <c>TypeError</c>.</summary>
     public static string TypeName(JsonElement element) => element.ValueKind switch
     {
