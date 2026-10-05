@@ -43,10 +43,11 @@ Regra: cada tarefa termina com testes verdes e commit. Ordem importa. Teste prim
 
 ## 009b — setup e diagnóstico
 
-- [ ] **T20 — `SetupRoutes`:** tabela das 13 rotas e handler único sem acesso a banco; formatos texto/`<pre>`/envelope B; teste de arquitetura/spy de `IDbConnectionFactory` e ausência de `user_api_key_para_automate`, `tabelas_criadas`, `planos_inseridos` (AC-009-31).
-- [ ] **T21 — `GetOAuthConfigCheck` + endpoint 23:** valores sentinela de client id/secret ausentes do corpo; `redirect_uri` presente (AC-009-32).
-- [ ] **T22 — `RunCalendarDebug` + endpoint 24:** fakes de `IGoogleAccountService` e `ICalendarClient`; 5 etapas, `Token: [oculto]`, usuário desconectado com `<br>` sem `<pre>`, data de São Paulo, 500 de texto fixo (AC-009-33).
-- [ ] **T23 — Fechamento da 009b:** `AdminAuthTests` cobre as 22 rotas até aqui; desvios 002 e 003 marcados como `implementado` neste escopo.
+- [x] **T20 — `SetupRoutes`:** tabela das 13 rotas e handler único sem acesso a banco; formatos texto/`<pre>`/envelope B; teste de arquitetura/spy de `IDbConnectionFactory` e ausência de `user_api_key_para_automate`, `tabelas_criadas`, `planos_inseridos` (AC-009-31).
+- [x] **T21 — `GetOAuthConfigCheck` + endpoint 23:** valores sentinela de client id/secret ausentes do corpo; `redirect_uri` presente (AC-009-32).
+- [x] **T22 — `RunCalendarDebug` + endpoint 24:** fakes de `IGoogleAccountService` e `ICalendarClient`; 5 etapas, `Token: [oculto]`, usuário desconectado com `<br>` sem `<pre>`, data de São Paulo, 500 de texto fixo (AC-009-33).
+- [x] **T23 — Fechamento da 009b:** `AdminAuthTests` cobre as 22 rotas até aqui; desvios 002 e 003 marcados como `implementado` neste escopo.
+  - **Implementado em 2026-10-04 (009b):** desvio 002 `implementado`; 003 `implementado` só no escopo 009 (011/014 pendentes). Divergências: (1) `AdminAuthTests` cobre as 24 rotas (as 22 da tarefa mais `oauth-config-check` e `debug-calendar`); (2) `RunCalendarDebug` escapa `&`, `<`, `>` e `"` no título do evento (vem do Google e entra num `<pre>`; a spec não previa); (3) etapa 2 do `debug-calendar` omite as linhas de credencial se `GetCredentialsAsync` não devolver `Connected` (como o Flask com `credentials` vazio); (4) a etapa 5 não imprime `Start ISO`/`End ISO`/`Chamando API...` (a spec lista só Data, contagem e títulos); (5) `SetupRoutes.Table` é pública para os testes; o handler não recebe nada do contêiner e um teste de arquitetura impede dependência de Infrastructure/Npgsql/Dapper.
 
 ## 009c — rotas dependentes (contrato e portas)
 

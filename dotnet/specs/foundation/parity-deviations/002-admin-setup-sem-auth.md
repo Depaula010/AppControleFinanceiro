@@ -1,6 +1,6 @@
 # Desvio 002 — Rotas /admin/setup-* sem autenticação e com DDL via GET
 
-- **Estado:** aprovado
+- **Estado:** implementado (feature 009b, 2026-10-04); aprovado na onda 2
 - **Features afetadas:** 009
 - **Severidade:** segurança
 
