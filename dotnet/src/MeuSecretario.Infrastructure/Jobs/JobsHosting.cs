@@ -91,6 +91,16 @@ public sealed class JobsScheduler(
     private IScheduler? _scheduler;
     private bool _started;
 
+    /// <summary>Gatilho cron no fuso informado, descartando ciclos perdidos (misfire <c>DoNothing</c>).</summary>
+    public static ITrigger BuildTrigger(JobSchedule schedule, TimeZoneInfo timeZone)
+    {
+        ArgumentNullException.ThrowIfNull(schedule);
+        return TriggerBuilder.Create()
+            .WithIdentity(schedule.LockName)
+            .WithCronSchedule(schedule.Cron, x => x.InTimeZone(timeZone).WithMisfireInstruction(CronTriggerMisfireInstruction.DoNothing))
+            .Build();
+    }
+
     public static async Task ScheduleAllAsync(IScheduler scheduler, TimeZoneInfo timeZone, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(scheduler);
@@ -100,10 +110,7 @@ public sealed class JobsScheduler(
                 .WithIdentity(schedule.LockName)
                 .UsingJobData(ScheduledJobAdapter.JobKey, schedule.LockName)
                 .Build();
-            var trigger = TriggerBuilder.Create()
-                .WithIdentity(schedule.LockName)
-                .WithCronSchedule(schedule.Cron, x => x.InTimeZone(timeZone).WithMisfireInstruction(CronTriggerMisfireInstruction.DoNothing))
-                .Build();
+            var trigger = BuildTrigger(schedule, timeZone);
             await scheduler.ScheduleJob(job, trigger, new ScheduleJobOptions(), cancellationToken);
         }
     }
