@@ -1,6 +1,6 @@
 # Desvio 014 — Reserva de emergência calculada em três lugares
 
-- **Estado:** aprovado
+- **Estado:** aprovado; implementado nas features 005 e 011 (2026-10-05); pendente na 012
 - **Features afetadas:** 005, 011, 012
 - **Severidade:** correção
 

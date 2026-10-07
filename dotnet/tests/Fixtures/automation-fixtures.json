@@ -1,0 +1,6456 @@
+{
+ "sanitize": [
+  {
+   "text": "",
+   "max": 100,
+   "allow_special": false,
+   "result": ""
+  },
+  {
+   "text": "   ",
+   "max": 100,
+   "allow_special": false,
+   "result": ""
+  },
+  {
+   "text": "Mercado",
+   "max": 100,
+   "allow_special": false,
+   "result": "Mercado"
+  },
+  {
+   "text": "  Mercado   do  Zé  ",
+   "max": 100,
+   "allow_special": false,
+   "result": "Mercado do Zé"
+  },
+  {
+   "text": "<script>alert('xss')</script>",
+   "max": 200,
+   "allow_special": false,
+   "result": "scriptalert('xss')/script"
+  },
+  {
+   "text": "a{b}c\\d$e`f|g;h&i<j>k",
+   "max": 200,
+   "allow_special": false,
+   "result": "abcdefghijk"
+  },
+  {
+   "text": "a{b}c\\d$e`f|g;h&i<j>k",
+   "max": 200,
+   "allow_special": true,
+   "result": "a{b}c\\d$e`f|g;h&i<j>k"
+  },
+  {
+   "text": "Olá, mundo!",
+   "max": 5,
+   "allow_special": false,
+   "result": "Olá,"
+  },
+  {
+   "text": "abcdef",
+   "max": 3,
+   "allow_special": false,
+   "result": "abc"
+  },
+  {
+   "text": "tab\there\nnova\rlinha",
+   "max": 100,
+   "allow_special": false,
+   "result": "tab here nova linha"
+  },
+  {
+   "text": "ctrl\u0001\u0002\u001fok",
+   "max": 100,
+   "allow_special": false,
+   "result": "ctrlok"
+  },
+  {
+   "text": "emoji 😀😀😀😀😀",
+   "max": 8,
+   "allow_special": false,
+   "result": "emoji 😀😀"
+  },
+  {
+   "text": "😀😀😀😀😀",
+   "max": 3,
+   "allow_special": true,
+   "result": "😀😀😀"
+  },
+  {
+   "text": "  <>  ",
+   "max": 100,
+   "allow_special": false,
+   "result": ""
+  },
+  {
+   "text": "a   b   c",
+   "max": 100,
+   "allow_special": false,
+   "result": "a b c"
+  },
+  {
+   "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+   "max": 100,
+   "allow_special": false,
+   "result": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  {
+   "text": "2 sorvetes & 1 café; tudo",
+   "max": 200,
+   "allow_special": true,
+   "result": "2 sorvetes & 1 café; tudo"
+  },
+  {
+   "text": "linha1\n\n\nlinha2",
+   "max": 100,
+   "allow_special": true,
+   "result": "linha1 linha2"
+  },
+  {
+   "text": " sep ",
+   "max": 100,
+   "allow_special": false,
+   "result": "sep"
+  },
+  {
+   "text": "Ação 100% $",
+   "max": 20,
+   "allow_special": false,
+   "result": "Ação 100%"
+  }
+ ],
+ "money": [
+  {
+   "value": null,
+   "text": "R$ 0,00"
+  },
+  {
+   "value": 0,
+   "text": "R$ 0,00"
+  },
+  {
+   "value": 0.0,
+   "text": "R$ 0,00"
+  },
+  {
+   "value": 1.5,
+   "text": "R$ 1,50"
+  },
+  {
+   "value": 12,
+   "text": "R$ 12,00"
+  },
+  {
+   "value": 1234.56,
+   "text": "R$ 1.234,56"
+  },
+  {
+   "value": 1234567.891,
+   "text": "R$ 1.234.567,89"
+  },
+  {
+   "value": 0.005,
+   "text": "R$ 0,01"
+  },
+  {
+   "value": 0.015,
+   "text": "R$ 0,01"
+  },
+  {
+   "value": 0.125,
+   "text": "R$ 0,12"
+  },
+  {
+   "value": 2.675,
+   "text": "R$ 2,67"
+  },
+  {
+   "value": 100.0,
+   "text": "R$ 100,00"
+  },
+  {
+   "value": 49.9,
+   "text": "R$ 49,90"
+  },
+  {
+   "value": 999999.995,
+   "text": "R$ 999.999,99"
+  },
+  {
+   "value": 1000000000.0,
+   "text": "R$ 1.000.000.000,00"
+  },
+  {
+   "value": 15.9,
+   "text": "R$ 15,90"
+  },
+  {
+   "value": -5,
+   "text": "R$ -5,00"
+  },
+  {
+   "value": -1234.5,
+   "text": "R$ -1.234,50"
+  }
+ ],
+ "grouped": [
+  {
+   "value": 0,
+   "text": "0.00"
+  },
+  {
+   "value": 1.5,
+   "text": "1.50"
+  },
+  {
+   "value": 12,
+   "text": "12.00"
+  },
+  {
+   "value": 1234.56,
+   "text": "1,234.56"
+  },
+  {
+   "value": 1234567.891,
+   "text": "1,234,567.89"
+  },
+  {
+   "value": 0.005,
+   "text": "0.01"
+  },
+  {
+   "value": 0.125,
+   "text": "0.12"
+  },
+  {
+   "value": 0.375,
+   "text": "0.38"
+  },
+  {
+   "value": 2.675,
+   "text": "2.67"
+  },
+  {
+   "value": 1000,
+   "text": "1,000.00"
+  },
+  {
+   "value": 999.995,
+   "text": "1,000.00"
+  },
+  {
+   "value": 150.0,
+   "text": "150.00"
+  }
+ ],
+ "float": [
+  {
+   "input": "abc",
+   "ok": false,
+   "error": "could not convert string to float: 'abc'"
+  },
+  {
+   "input": "1,5",
+   "ok": false,
+   "error": "could not convert string to float: '1,5'"
+  },
+  {
+   "input": "  12.5 ",
+   "ok": true,
+   "value": "12.5"
+  },
+  {
+   "input": "1_000",
+   "ok": true,
+   "value": "1000.0"
+  },
+  {
+   "input": "inf",
+   "ok": true,
+   "value": "inf"
+  },
+  {
+   "input": "-inf",
+   "ok": true,
+   "value": "-inf"
+  },
+  {
+   "input": "nan",
+   "ok": true,
+   "value": "nan"
+  },
+  {
+   "input": "NaN",
+   "ok": true,
+   "value": "nan"
+  },
+  {
+   "input": "Infinity",
+   "ok": true,
+   "value": "inf"
+  },
+  {
+   "input": "-infinity",
+   "ok": true,
+   "value": "-inf"
+  },
+  {
+   "input": "1e3",
+   "ok": true,
+   "value": "1000.0"
+  },
+  {
+   "input": "",
+   "ok": false,
+   "error": "could not convert string to float: ''"
+  },
+  {
+   "input": "  ",
+   "ok": false,
+   "error": "could not convert string to float: ''"
+  },
+  {
+   "input": "0x10",
+   "ok": false,
+   "error": "could not convert string to float: '0x10'"
+  },
+  {
+   "input": "١٢",
+   "ok": true,
+   "value": "12.0"
+  },
+  {
+   "input": "1__0",
+   "ok": false,
+   "error": "could not convert string to float: '1__0'"
+  },
+  {
+   "input": "15.90",
+   "ok": true,
+   "value": "15.9"
+  },
+  {
+   "input": "+7",
+   "ok": true,
+   "value": "7.0"
+  },
+  {
+   "input": "-0",
+   "ok": true,
+   "value": "-0.0"
+  },
+  {
+   "input": "1e400",
+   "ok": true,
+   "value": "inf"
+  },
+  {
+   "input": ".5",
+   "ok": true,
+   "value": "0.5"
+  },
+  {
+   "input": "5.",
+   "ok": true,
+   "value": "5.0"
+  },
+  {
+   "input": "'",
+   "ok": false,
+   "error": "could not convert string to float: \"'\""
+  },
+  {
+   "input": "a\"b",
+   "ok": false,
+   "error": "could not convert string to float: 'a\"b'"
+  },
+  {
+   "input": "it's",
+   "ok": false,
+   "error": "could not convert string to float: \"it's\""
+  },
+  {
+   "input": "a'b\"c",
+   "ok": false,
+   "error": "could not convert string to float: 'a\\'b\"c'"
+  },
+  {
+   "input": "tab\t",
+   "ok": false,
+   "error": "could not convert string to float: 'tab\\t'"
+  },
+  {
+   "input": "nl\n",
+   "ok": false,
+   "error": "could not convert string to float: 'nl\\n'"
+  },
+  {
+   "input": "back\\slash",
+   "ok": false,
+   "error": "could not convert string to float: 'back\\\\slash'"
+  },
+  {
+   "input": "ç",
+   "ok": false,
+   "error": "could not convert string to float: 'ç'"
+  },
+  {
+   "input": true,
+   "ok": true,
+   "value": "1.0"
+  },
+  {
+   "input": false,
+   "ok": true,
+   "value": "0.0"
+  },
+  {
+   "input": 0,
+   "ok": true,
+   "value": "0.0"
+  },
+  {
+   "input": 5,
+   "ok": true,
+   "value": "5.0"
+  },
+  {
+   "input": -5,
+   "ok": true,
+   "value": "-5.0"
+  },
+  {
+   "input": 1.5,
+   "ok": true,
+   "value": "1.5"
+  },
+  {
+   "input": 15.9,
+   "ok": true,
+   "value": "15.9"
+  },
+  {
+   "input": [
+    1
+   ],
+   "ok": false,
+   "error": "float() argument must be a string or a real number, not 'list'"
+  },
+  {
+   "input": [],
+   "ok": false,
+   "error": "float() argument must be a string or a real number, not 'list'"
+  },
+  {
+   "input": {
+    "a": 1
+   },
+   "ok": false,
+   "error": "float() argument must be a string or a real number, not 'dict'"
+  },
+  {
+   "input": {},
+   "ok": false,
+   "error": "float() argument must be a string or a real number, not 'dict'"
+  }
+ ],
+ "fuzz": [
+  {
+   "query": "luz",
+   "choice": "Luz",
+   "ratio": 66.66666666666667,
+   "partial_ratio": 80.0,
+   "token_sort_ratio": 66.66666666666667,
+   "token_set_ratio": 66.66666666666666,
+   "partial_token_sort_ratio": 80.0,
+   "partial_token_set_ratio": 80.0,
+   "wratio": 66.66666666666667
+  },
+  {
+   "query": "luz",
+   "choice": "Conta de Luz",
+   "ratio": 26.66666666666667,
+   "partial_ratio": 80.0,
+   "token_sort_ratio": 26.66666666666667,
+   "token_set_ratio": 26.66666666666667,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 72.0
+  },
+  {
+   "query": "net",
+   "choice": "Netflix",
+   "ratio": 40.0,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 40.0,
+   "token_set_ratio": 40.0,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 60.00000000000001
+  },
+  {
+   "query": "net",
+   "choice": "Net",
+   "ratio": 66.66666666666667,
+   "partial_ratio": 80.0,
+   "token_sort_ratio": 66.66666666666667,
+   "token_set_ratio": 66.66666666666666,
+   "partial_token_sort_ratio": 80.0,
+   "partial_token_set_ratio": 80.0,
+   "wratio": 66.66666666666667
+  },
+  {
+   "query": "agua",
+   "choice": "Água",
+   "ratio": 75.0,
+   "partial_ratio": 85.71428571428572,
+   "token_sort_ratio": 75.0,
+   "token_set_ratio": 75.0,
+   "partial_token_sort_ratio": 85.71428571428572,
+   "partial_token_set_ratio": 85.71428571428572,
+   "wratio": 75.0
+  },
+  {
+   "query": "agua",
+   "choice": "Agua",
+   "ratio": 75.0,
+   "partial_ratio": 85.71428571428572,
+   "token_sort_ratio": 75.0,
+   "token_set_ratio": 75.0,
+   "partial_token_sort_ratio": 85.71428571428572,
+   "partial_token_set_ratio": 85.71428571428572,
+   "wratio": 75.0
+  },
+  {
+   "query": "aluguel",
+   "choice": "Aluguel",
+   "ratio": 85.71428571428572,
+   "partial_ratio": 92.3076923076923,
+   "token_sort_ratio": 85.71428571428572,
+   "token_set_ratio": 85.71428571428571,
+   "partial_token_sort_ratio": 92.3076923076923,
+   "partial_token_set_ratio": 92.3076923076923,
+   "wratio": 85.71428571428572
+  },
+  {
+   "query": "aluguel",
+   "choice": "aluguel",
+   "ratio": 100.0,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 100.0,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 100.0
+  },
+  {
+   "query": "internet",
+   "choice": "Internet Vivo Fibra",
+   "ratio": 51.85185185185186,
+   "partial_ratio": 87.5,
+   "token_sort_ratio": 59.25925925925925,
+   "token_set_ratio": 59.25925925925926,
+   "partial_token_sort_ratio": 87.5,
+   "partial_token_set_ratio": 87.5,
+   "wratio": 78.75
+  },
+  {
+   "query": "condominio",
+   "choice": "Condomínio",
+   "ratio": 80.0,
+   "partial_ratio": 84.21052631578947,
+   "token_sort_ratio": 80.0,
+   "token_set_ratio": 80.0,
+   "partial_token_sort_ratio": 84.21052631578947,
+   "partial_token_set_ratio": 84.21052631578947,
+   "wratio": 80.0
+  },
+  {
+   "query": "netflix",
+   "choice": "Netflix",
+   "ratio": 85.71428571428572,
+   "partial_ratio": 92.3076923076923,
+   "token_sort_ratio": 85.71428571428572,
+   "token_set_ratio": 85.71428571428571,
+   "partial_token_sort_ratio": 92.3076923076923,
+   "partial_token_set_ratio": 92.3076923076923,
+   "wratio": 85.71428571428572
+  },
+  {
+   "query": "spotify",
+   "choice": "Spotify Premium Familia",
+   "ratio": 40.0,
+   "partial_ratio": 85.71428571428572,
+   "token_sort_ratio": 40.0,
+   "token_set_ratio": 40.0,
+   "partial_token_sort_ratio": 92.3076923076923,
+   "partial_token_set_ratio": 92.3076923076923,
+   "wratio": 78.92307692307692
+  },
+  {
+   "query": "escola",
+   "choice": "Escola do Joao",
+   "ratio": 50.0,
+   "partial_ratio": 83.33333333333334,
+   "token_sort_ratio": 50.0,
+   "token_set_ratio": 50.0,
+   "partial_token_sort_ratio": 83.33333333333334,
+   "partial_token_set_ratio": 83.33333333333334,
+   "wratio": 75.00000000000001
+  },
+  {
+   "query": "baba",
+   "choice": "Babá",
+   "ratio": 50.0,
+   "partial_ratio": 57.14285714285714,
+   "token_sort_ratio": 50.0,
+   "token_set_ratio": 50.0,
+   "partial_token_sort_ratio": 57.14285714285714,
+   "partial_token_set_ratio": 57.14285714285714,
+   "wratio": 50.0
+  },
+  {
+   "query": "a",
+   "choice": "abc",
+   "ratio": 50.0,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 50.0,
+   "token_set_ratio": 50.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 90.0
+  },
+  {
+   "query": "ab",
+   "choice": "ba",
+   "ratio": 50.0,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 50.0,
+   "token_set_ratio": 50.0,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 50.0
+  },
+  {
+   "query": "",
+   "choice": "abc",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "abc",
+   "choice": "",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "",
+   "choice": "",
+   "ratio": 100.0,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 100.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "seguro do carro",
+   "choice": "Seguro Carro",
+   "ratio": 74.07407407407408,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 74.07407407407408,
+   "token_set_ratio": 74.07407407407408,
+   "partial_token_sort_ratio": 70.0,
+   "partial_token_set_ratio": 70.0,
+   "wratio": 74.07407407407408
+  },
+  {
+   "query": "plano de saude",
+   "choice": "Plano Saude Unimed Familia Completo",
+   "ratio": 40.816326530612244,
+   "partial_ratio": 72.0,
+   "token_sort_ratio": 44.89795918367348,
+   "token_set_ratio": 44.89795918367347,
+   "partial_token_sort_ratio": 71.42857142857143,
+   "partial_token_set_ratio": 71.42857142857143,
+   "wratio": 64.8
+  },
+  {
+   "query": "iptu",
+   "choice": "IPTU 2026 parcela",
+   "ratio": 9.523809523809524,
+   "partial_ratio": 25.0,
+   "token_sort_ratio": 9.523809523809524,
+   "token_set_ratio": 9.523809523809518,
+   "partial_token_sort_ratio": 25.0,
+   "partial_token_set_ratio": 25.0,
+   "wratio": 22.5
+  },
+  {
+   "query": "gas",
+   "choice": "Gás",
+   "ratio": 33.333333333333336,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 33.333333333333336,
+   "token_set_ratio": 33.33333333333333,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 33.333333333333336
+  },
+  {
+   "query": "energia eletrica",
+   "choice": "Energia",
+   "ratio": 52.17391304347826,
+   "partial_ratio": 85.71428571428572,
+   "token_sort_ratio": 52.17391304347826,
+   "token_set_ratio": 52.17391304347826,
+   "partial_token_sort_ratio": 92.3076923076923,
+   "partial_token_set_ratio": 92.3076923076923,
+   "wratio": 78.92307692307692
+  },
+  {
+   "query": "celular",
+   "choice": "Plano Celular Claro 50GB",
+   "ratio": 38.70967741935484,
+   "partial_ratio": 85.71428571428572,
+   "token_sort_ratio": 38.70967741935484,
+   "token_set_ratio": 38.70967741935484,
+   "partial_token_sort_ratio": 85.71428571428572,
+   "partial_token_set_ratio": 85.71428571428572,
+   "wratio": 77.14285714285715
+  },
+  {
+   "query": "academia",
+   "choice": "Smart Fit",
+   "ratio": 23.529411764705888,
+   "partial_ratio": 36.36363636363637,
+   "token_sort_ratio": 23.529411764705888,
+   "token_set_ratio": 23.529411764705884,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 23.529411764705888
+  },
+  {
+   "query": "fatura do cartao",
+   "choice": "Cartão Inter",
+   "ratio": 35.71428571428571,
+   "partial_ratio": 47.05882352941176,
+   "token_sort_ratio": 50.0,
+   "token_set_ratio": 50.0,
+   "partial_token_sort_ratio": 52.63157894736843,
+   "partial_token_set_ratio": 52.63157894736843,
+   "wratio": 47.5
+  },
+  {
+   "query": "mensalidade",
+   "choice": "Mensalidade Faculdade de Engenharia Civil UFMG Campus Pampulha",
+   "ratio": 27.397260273972602,
+   "partial_ratio": 90.9090909090909,
+   "token_sort_ratio": 30.136986301369863,
+   "token_set_ratio": 30.13698630136986,
+   "partial_token_sort_ratio": 90.9090909090909,
+   "partial_token_set_ratio": 90.9090909090909,
+   "wratio": 81.81818181818181
+  },
+  {
+   "query": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+   "choice": "yyyyy",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "abcdefghij",
+   "choice": "abcxefghij",
+   "ratio": 90.0,
+   "partial_ratio": 90.0,
+   "token_sort_ratio": 90.0,
+   "token_set_ratio": 90.0,
+   "partial_token_sort_ratio": 90.0,
+   "partial_token_set_ratio": 90.0,
+   "wratio": 90.0
+  },
+  {
+   "query": "hello world",
+   "choice": "world hello",
+   "ratio": 45.45454545454546,
+   "partial_ratio": 62.5,
+   "token_sort_ratio": 100.0,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 95.0
+  },
+  {
+   "query": "new york mets vs atlanta braves",
+   "choice": "braves vs mets",
+   "ratio": 40.0,
+   "partial_ratio": 60.0,
+   "token_sort_ratio": 62.22222222222222,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 85.71428571428572,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "tv a cabo",
+   "choice": "TV a Cabo Sky",
+   "ratio": 54.54545454545454,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 36.36363636363637,
+   "token_set_ratio": 54.54545454545455,
+   "partial_token_sort_ratio": 57.14285714285714,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 54.54545454545454
+  },
+  {
+   "query": "pagamento de luz",
+   "choice": "Luz",
+   "ratio": 21.052631578947366,
+   "partial_ratio": 80.0,
+   "token_sort_ratio": 21.052631578947366,
+   "token_set_ratio": 21.05263157894737,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 72.0
+  },
+  {
+   "query": "faculdade",
+   "choice": "Faculdade",
+   "ratio": 88.88888888888889,
+   "partial_ratio": 94.11764705882352,
+   "token_sort_ratio": 88.88888888888889,
+   "token_set_ratio": 88.88888888888889,
+   "partial_token_sort_ratio": 94.11764705882352,
+   "partial_token_set_ratio": 94.11764705882352,
+   "wratio": 88.88888888888889
+  },
+  {
+   "query": "ç",
+   "choice": "c",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "café",
+   "choice": "cafe",
+   "ratio": 75.0,
+   "partial_ratio": 85.71428571428572,
+   "token_sort_ratio": 75.0,
+   "token_set_ratio": 75.0,
+   "partial_token_sort_ratio": 85.71428571428572,
+   "partial_token_set_ratio": 85.71428571428572,
+   "wratio": 75.0
+  },
+  {
+   "query": "a b c d e f",
+   "choice": "f e d c b a",
+   "ratio": 45.45454545454546,
+   "partial_ratio": 52.63157894736843,
+   "token_sort_ratio": 100.0,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 95.0
+  },
+  {
+   "query": "sky",
+   "choice": "Sky Tv",
+   "ratio": 44.44444444444444,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 44.44444444444444,
+   "token_set_ratio": 44.44444444444444,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 60.00000000000001
+  },
+  {
+   "query": "inglês",
+   "choice": "Inglês Wizard",
+   "ratio": 52.63157894736843,
+   "partial_ratio": 83.33333333333334,
+   "token_sort_ratio": 52.63157894736843,
+   "token_set_ratio": 52.63157894736842,
+   "partial_token_sort_ratio": 83.33333333333334,
+   "partial_token_set_ratio": 83.33333333333334,
+   "wratio": 75.00000000000001
+  },
+  {
+   "query": "passeio com cachorro",
+   "choice": "Passeio Cachorro",
+   "ratio": 77.77777777777779,
+   "partial_ratio": 69.23076923076923,
+   "token_sort_ratio": 77.77777777777779,
+   "token_set_ratio": 77.77777777777777,
+   "partial_token_sort_ratio": 68.75,
+   "partial_token_set_ratio": 68.75,
+   "wratio": 77.77777777777779
+  },
+  {
+   "query": "dog walker",
+   "choice": "Dog",
+   "ratio": 30.76923076923077,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 30.76923076923077,
+   "token_set_ratio": 30.769230769230774,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 60.00000000000001
+  },
+  {
+   "query": "babysitter",
+   "choice": "Baba",
+   "ratio": 28.57142857142857,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 28.57142857142857,
+   "token_set_ratio": 28.57142857142857,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 60.00000000000001
+  },
+  {
+   "query": "pet",
+   "choice": "Pet Shop Banho e Tosa Mensal",
+   "ratio": 12.903225806451612,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 12.903225806451612,
+   "token_set_ratio": 12.903225806451616,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 40.0
+  },
+  {
+   "query": "academia plano",
+   "choice": "aluguel internet pet mensalidade",
+   "ratio": 30.434782608695656,
+   "partial_ratio": 38.095238095238095,
+   "token_sort_ratio": 30.434782608695656,
+   "token_set_ratio": 30.434782608695656,
+   "partial_token_sort_ratio": 48.0,
+   "partial_token_set_ratio": 48.0,
+   "wratio": 41.04
+  },
+  {
+   "query": "netflix",
+   "choice": "plano",
+   "ratio": 16.666666666666664,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 16.666666666666664,
+   "token_set_ratio": 16.66666666666667,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 16.666666666666664
+  },
+  {
+   "query": "plano carro gás",
+   "choice": "cabo do luz aluguel tv",
+   "ratio": 32.432432432432435,
+   "partial_ratio": 43.47826086956522,
+   "token_sort_ratio": 32.432432432432435,
+   "token_set_ratio": 32.432432432432435,
+   "partial_token_sort_ratio": 41.379310344827594,
+   "partial_token_set_ratio": 41.379310344827594,
+   "wratio": 32.432432432432435
+  },
+  {
+   "query": "tv plano",
+   "choice": "conta plano aluguel Água",
+   "ratio": 43.75,
+   "partial_ratio": 87.5,
+   "token_sort_ratio": 37.5,
+   "token_set_ratio": 76.92307692307692,
+   "partial_token_sort_ratio": 75.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "casa",
+   "choice": "saude a mensalidade",
+   "ratio": 26.086956521739136,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 26.086956521739136,
+   "token_set_ratio": 26.086956521739125,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 60.00000000000001
+  },
+  {
+   "query": "faculdade do luz",
+   "choice": "condominio mensalidade parcela a fibra seguro",
+   "ratio": 29.508196721311474,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 42.622950819672134,
+   "token_set_ratio": 42.622950819672134,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "unimed tv da",
+   "choice": "net a Luz",
+   "ratio": 47.61904761904761,
+   "partial_ratio": 47.05882352941176,
+   "token_sort_ratio": 38.095238095238095,
+   "token_set_ratio": 38.095238095238095,
+   "partial_token_sort_ratio": 46.15384615384615,
+   "partial_token_set_ratio": 46.15384615384615,
+   "wratio": 47.61904761904761
+  },
+  {
+   "query": "água seguro net",
+   "choice": "b",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "net condominio",
+   "choice": "faculdade academia net condominio luz",
+   "ratio": 54.90196078431373,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 54.90196078431373,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 78.57142857142857,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 90.0
+  },
+  {
+   "query": "saude unimed ç",
+   "choice": "conta saude casa",
+   "ratio": 40.0,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 33.333333333333336,
+   "token_set_ratio": 52.63157894736842,
+   "partial_token_sort_ratio": 52.63157894736843,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 49.99999999999999
+  },
+  {
+   "query": "luz",
+   "choice": "academia tv luz",
+   "ratio": 33.333333333333336,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 33.333333333333336,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 90.0
+  },
+  {
+   "query": "condominio claro",
+   "choice": "da",
+   "ratio": 22.22222222222222,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 11.111111111111116,
+   "token_set_ratio": 11.111111111111114,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "carro da escola",
+   "choice": "claro saude ão",
+   "ratio": 55.172413793103445,
+   "partial_ratio": 60.86956521739131,
+   "token_sort_ratio": 55.172413793103445,
+   "token_set_ratio": 55.172413793103445,
+   "partial_token_sort_ratio": 60.86956521739131,
+   "partial_token_set_ratio": 60.86956521739131,
+   "wratio": 55.172413793103445
+  },
+  {
+   "query": "celular shop shop",
+   "choice": "a agua a Vivo seguro aluguel",
+   "ratio": 31.11111111111111,
+   "partial_ratio": 41.17647058823529,
+   "token_sort_ratio": 26.66666666666667,
+   "token_set_ratio": 31.578947368421055,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 47.61904761904761,
+   "wratio": 40.71428571428571
+  },
+  {
+   "query": "plano unimed",
+   "choice": "Condomínio aluguel pet shop a",
+   "ratio": 24.390243902439025,
+   "partial_ratio": 41.666666666666664,
+   "token_sort_ratio": 24.390243902439025,
+   "token_set_ratio": 24.390243902439025,
+   "partial_token_sort_ratio": 41.666666666666664,
+   "partial_token_set_ratio": 41.666666666666664,
+   "wratio": 37.5
+  },
+  {
+   "query": "b parcela",
+   "choice": "academia luz carro saude fibra Netflix",
+   "ratio": 21.276595744680847,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 25.531914893617024,
+   "token_set_ratio": 25.531914893617028,
+   "partial_token_sort_ratio": 55.55555555555556,
+   "partial_token_set_ratio": 55.55555555555556,
+   "wratio": 47.5
+  },
+  {
+   "query": "de da carro",
+   "choice": "tv faculdade conta Unimed",
+   "ratio": 33.333333333333336,
+   "partial_ratio": 45.45454545454546,
+   "token_sort_ratio": 38.888888888888886,
+   "token_set_ratio": 38.888888888888886,
+   "partial_token_sort_ratio": 54.54545454545454,
+   "partial_token_set_ratio": 54.54545454545454,
+   "wratio": 46.63636363636363
+  },
+  {
+   "query": "da",
+   "choice": "de fibra Água saude Condomínio",
+   "ratio": 12.5,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 12.5,
+   "token_set_ratio": 12.5,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 40.0
+  },
+  {
+   "query": "carro saude",
+   "choice": "sky",
+   "ratio": 14.28571428571429,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 14.28571428571429,
+   "token_set_ratio": 14.285714285714292,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 30.000000000000004
+  },
+  {
+   "query": "claro pet",
+   "choice": "luz mensalidade Luz agua",
+   "ratio": 18.181818181818176,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 18.181818181818176,
+   "token_set_ratio": 18.181818181818187,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "gás net pet",
+   "choice": "faculdade luz parcela",
+   "ratio": 25.0,
+   "partial_ratio": 36.36363636363637,
+   "token_sort_ratio": 25.0,
+   "token_set_ratio": 25.0,
+   "partial_token_sort_ratio": 36.36363636363637,
+   "partial_token_set_ratio": 36.36363636363637,
+   "wratio": 32.727272727272734
+  },
+  {
+   "query": "netflix",
+   "choice": "parcela cabo conta",
+   "ratio": 16.000000000000004,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 24.0,
+   "token_set_ratio": 24.0,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "netflix parcela",
+   "choice": "da mensalidade cabo iptu iptu academia",
+   "ratio": 33.9622641509434,
+   "partial_ratio": 46.15384615384615,
+   "token_sort_ratio": 26.415094339622648,
+   "token_set_ratio": 29.16666666666667,
+   "partial_token_sort_ratio": 41.666666666666664,
+   "partial_token_set_ratio": 41.666666666666664,
+   "wratio": 41.53846153846154
+  },
+  {
+   "query": "pet aluguel",
+   "choice": "b iptu gás ç Unimed",
+   "ratio": 33.333333333333336,
+   "partial_ratio": 42.10526315789473,
+   "token_sort_ratio": 26.66666666666667,
+   "token_set_ratio": 26.66666666666667,
+   "partial_token_sort_ratio": 38.095238095238095,
+   "partial_token_set_ratio": 38.095238095238095,
+   "wratio": 37.89473684210526
+  },
+  {
+   "query": "netflix",
+   "choice": "luz ç",
+   "ratio": 16.666666666666664,
+   "partial_ratio": 25.0,
+   "token_sort_ratio": 16.666666666666664,
+   "token_set_ratio": 16.66666666666667,
+   "partial_token_sort_ratio": 25.0,
+   "partial_token_set_ratio": 25.0,
+   "wratio": 16.666666666666664
+  },
+  {
+   "query": "net da",
+   "choice": "faculdade conta cabo faculdade luz",
+   "ratio": 25.0,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 19.999999999999996,
+   "token_set_ratio": 26.66666666666667,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 60.00000000000001
+  },
+  {
+   "query": "plano claro",
+   "choice": "Condomínio condominio de Condomínio Vivo",
+   "ratio": 19.6078431372549,
+   "partial_ratio": 45.45454545454546,
+   "token_sort_ratio": 15.686274509803921,
+   "token_set_ratio": 20.0,
+   "partial_token_sort_ratio": 37.5,
+   "partial_token_set_ratio": 37.5,
+   "wratio": 40.909090909090914
+  },
+  {
+   "query": "parcela sky ç",
+   "choice": "pet",
+   "ratio": 25.0,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 25.0,
+   "token_set_ratio": 25.0,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "da pet",
+   "choice": "da condominio faculdade",
+   "ratio": 27.586206896551722,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 27.586206896551722,
+   "token_set_ratio": 50.0,
+   "partial_token_sort_ratio": 60.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "sky luz engenharia",
+   "choice": "saude luz Condomínio academia cabo agua",
+   "ratio": 38.59649122807017,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 38.59649122807017,
+   "token_set_ratio": 38.59649122807018,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "do luz luz",
+   "choice": "Netflix carro Água escola",
+   "ratio": 28.57142857142857,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 28.57142857142857,
+   "token_set_ratio": 25.80645161290323,
+   "partial_token_sort_ratio": 44.44444444444444,
+   "partial_token_set_ratio": 36.36363636363637,
+   "wratio": 38.0
+  },
+  {
+   "query": "academia faculdade",
+   "choice": "Condomínio gás Condomínio Vivo",
+   "ratio": 20.833333333333336,
+   "partial_ratio": 27.77777777777778,
+   "token_sort_ratio": 20.833333333333336,
+   "token_set_ratio": 21.621621621621628,
+   "partial_token_sort_ratio": 30.303030303030297,
+   "partial_token_set_ratio": 27.586206896551722,
+   "wratio": 25.909090909090903
+  },
+  {
+   "query": "ç internet fibra",
+   "choice": "condominio Água Unimed",
+   "ratio": 21.052631578947366,
+   "partial_ratio": 26.086956521739136,
+   "token_sort_ratio": 26.315789473684216,
+   "token_set_ratio": 26.315789473684205,
+   "partial_token_sort_ratio": 31.25,
+   "partial_token_set_ratio": 31.25,
+   "wratio": 25.000000000000004
+  },
+  {
+   "query": "engenharia faculdade",
+   "choice": "Água net engenharia Vivo",
+   "ratio": 50.0,
+   "partial_ratio": 62.857142857142854,
+   "token_sort_ratio": 59.09090909090908,
+   "token_set_ratio": 66.66666666666666,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 63.33333333333332
+  },
+  {
+   "query": "do ão internet",
+   "choice": "seguro de Netflix",
+   "ratio": 32.25806451612904,
+   "partial_ratio": 38.46153846153846,
+   "token_sort_ratio": 32.25806451612904,
+   "token_set_ratio": 32.25806451612904,
+   "partial_token_sort_ratio": 43.47826086956522,
+   "partial_token_set_ratio": 43.47826086956522,
+   "wratio": 32.25806451612904
+  },
+  {
+   "query": "internet saude",
+   "choice": "conta cabo da",
+   "ratio": 37.03703703703704,
+   "partial_ratio": 45.45454545454546,
+   "token_sort_ratio": 29.629629629629626,
+   "token_set_ratio": 29.629629629629633,
+   "partial_token_sort_ratio": 36.36363636363637,
+   "partial_token_set_ratio": 36.36363636363637,
+   "wratio": 37.03703703703704
+  },
+  {
+   "query": "tv de",
+   "choice": "fibra",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "do",
+   "choice": "mensalidade",
+   "ratio": 15.384615384615385,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 15.384615384615385,
+   "token_set_ratio": 15.384615384615387,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "conta",
+   "choice": "cabo parcela academia Unimed iptu parcela",
+   "ratio": 21.739130434782606,
+   "partial_ratio": 57.14285714285714,
+   "token_sort_ratio": 17.391304347826086,
+   "token_set_ratio": 21.05263157894737,
+   "partial_token_sort_ratio": 44.44444444444444,
+   "partial_token_set_ratio": 44.44444444444444,
+   "wratio": 34.285714285714285
+  },
+  {
+   "query": "b parcela",
+   "choice": "cabo condominio iptu do iptu",
+   "ratio": 16.216216216216218,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 16.216216216216218,
+   "token_set_ratio": 18.75,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "net saude shop",
+   "choice": "carro gás Luz agua iptu",
+   "ratio": 32.432432432432435,
+   "partial_ratio": 41.666666666666664,
+   "token_sort_ratio": 32.432432432432435,
+   "token_set_ratio": 32.432432432432435,
+   "partial_token_sort_ratio": 35.71428571428571,
+   "partial_token_set_ratio": 35.71428571428571,
+   "wratio": 37.5
+  },
+  {
+   "query": "sky",
+   "choice": "sky pet b aluguel fibra mensalidade",
+   "ratio": 15.789473684210531,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 15.789473684210531,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 60.0
+  },
+  {
+   "query": "netflix",
+   "choice": "net academia",
+   "ratio": 42.10526315789473,
+   "partial_ratio": 60.0,
+   "token_sort_ratio": 31.57894736842105,
+   "token_set_ratio": 31.578947368421055,
+   "partial_token_sort_ratio": 60.0,
+   "partial_token_set_ratio": 60.0,
+   "wratio": 54.0
+  },
+  {
+   "query": "fibra aluguel",
+   "choice": "saude conta Água mensalidade",
+   "ratio": 34.14634146341463,
+   "partial_ratio": 46.15384615384615,
+   "token_sort_ratio": 29.268292682926834,
+   "token_set_ratio": 29.268292682926827,
+   "partial_token_sort_ratio": 45.45454545454546,
+   "partial_token_set_ratio": 45.45454545454546,
+   "wratio": 41.53846153846154
+  },
+  {
+   "query": "net",
+   "choice": "sky luz Condomínio internet",
+   "ratio": 19.999999999999996,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 19.999999999999996,
+   "token_set_ratio": 20.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 60.0
+  },
+  {
+   "query": "escola",
+   "choice": "de plano luz celular Luz plano",
+   "ratio": 22.22222222222222,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 22.22222222222222,
+   "token_set_ratio": 20.0,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "vivo escola da",
+   "choice": "ão Água seguro Luz fibra",
+   "ratio": 31.57894736842105,
+   "partial_ratio": 36.36363636363637,
+   "token_sort_ratio": 36.8421052631579,
+   "token_set_ratio": 36.8421052631579,
+   "partial_token_sort_ratio": 42.85714285714286,
+   "partial_token_set_ratio": 42.85714285714286,
+   "wratio": 36.642857142857146
+  },
+  {
+   "query": "água claro",
+   "choice": "iptu cabo",
+   "ratio": 52.63157894736843,
+   "partial_ratio": 58.82352941176471,
+   "token_sort_ratio": 52.63157894736843,
+   "token_set_ratio": 52.63157894736842,
+   "partial_token_sort_ratio": 55.55555555555556,
+   "partial_token_set_ratio": 55.55555555555556,
+   "wratio": 52.63157894736843
+  },
+  {
+   "query": "a b netflix",
+   "choice": "engenharia shop cabo fibra",
+   "ratio": 32.432432432432435,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 37.83783783783784,
+   "token_set_ratio": 37.83783783783784,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "aluguel",
+   "choice": "seguro celular casa",
+   "ratio": 30.76923076923077,
+   "partial_ratio": 42.85714285714286,
+   "token_sort_ratio": 38.46153846153846,
+   "token_set_ratio": 38.46153846153846,
+   "partial_token_sort_ratio": 57.14285714285714,
+   "partial_token_set_ratio": 57.14285714285714,
+   "wratio": 48.857142857142854
+  },
+  {
+   "query": "claro iptu",
+   "choice": "cabo agua",
+   "ratio": 52.63157894736843,
+   "partial_ratio": 53.333333333333336,
+   "token_sort_ratio": 31.57894736842105,
+   "token_set_ratio": 31.578947368421055,
+   "partial_token_sort_ratio": 42.85714285714286,
+   "partial_token_set_ratio": 42.85714285714286,
+   "wratio": 52.63157894736843
+  },
+  {
+   "query": "escola",
+   "choice": "agua iptu pet tv Condomínio Condomínio",
+   "ratio": 9.090909090909093,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 9.090909090909093,
+   "token_set_ratio": 12.121212121212125,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 28.5
+  },
+  {
+   "query": "engenharia",
+   "choice": "ç condominio luz b mensalidade saude",
+   "ratio": 26.086956521739136,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 26.086956521739136,
+   "token_set_ratio": 26.086956521739125,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "gás",
+   "choice": "conta ão celular escola",
+   "ratio": 7.692307692307687,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 7.692307692307687,
+   "token_set_ratio": 7.692307692307693,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 30.000000000000004
+  },
+  {
+   "query": "casa unimed pet",
+   "choice": "Condomínio ç",
+   "ratio": 22.22222222222222,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 14.814814814814813,
+   "token_set_ratio": 14.81481481481481,
+   "partial_token_sort_ratio": 23.529411764705888,
+   "partial_token_set_ratio": 23.529411764705888,
+   "wratio": 22.22222222222222
+  },
+  {
+   "query": "carro",
+   "choice": "da Luz Água escola Netflix",
+   "ratio": 12.903225806451612,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 12.903225806451612,
+   "token_set_ratio": 12.903225806451616,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "parcela condomínio do",
+   "choice": "Vivo tv academia",
+   "ratio": 32.432432432432435,
+   "partial_ratio": 38.095238095238095,
+   "token_sort_ratio": 37.83783783783784,
+   "token_set_ratio": 37.83783783783784,
+   "partial_token_sort_ratio": 48.275862068965516,
+   "partial_token_set_ratio": 48.275862068965516,
+   "wratio": 35.945945945945944
+  },
+  {
+   "query": "aluguel fibra",
+   "choice": "celular academia tv condominio a Condomínio",
+   "ratio": 21.42857142857143,
+   "partial_ratio": 45.45454545454546,
+   "token_sort_ratio": 21.42857142857143,
+   "token_set_ratio": 21.42857142857143,
+   "partial_token_sort_ratio": 38.46153846153846,
+   "partial_token_set_ratio": 38.46153846153846,
+   "wratio": 40.909090909090914
+  },
+  {
+   "query": "do unimed tv",
+   "choice": "luz gás Condomínio",
+   "ratio": 26.66666666666667,
+   "partial_ratio": 42.10526315789473,
+   "token_sort_ratio": 33.333333333333336,
+   "token_set_ratio": 33.33333333333333,
+   "partial_token_sort_ratio": 38.095238095238095,
+   "partial_token_set_ratio": 38.095238095238095,
+   "wratio": 37.89473684210526
+  },
+  {
+   "query": "parcela engenharia aluguel",
+   "choice": "a mensalidade cabo Água claro b",
+   "ratio": 42.10526315789473,
+   "partial_ratio": 46.15384615384615,
+   "token_sort_ratio": 35.08771929824561,
+   "token_set_ratio": 35.08771929824562,
+   "partial_token_sort_ratio": 39.13043478260869,
+   "partial_token_set_ratio": 39.13043478260869,
+   "wratio": 42.10526315789473
+  },
+  {
+   "query": "de",
+   "choice": "gás tv parcela seguro internet tv",
+   "ratio": 5.714285714285716,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 5.714285714285716,
+   "token_set_ratio": 6.25,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 30.0
+  },
+  {
+   "query": "celular",
+   "choice": "gás b fibra conta Água Água",
+   "ratio": 17.647058823529417,
+   "partial_ratio": 44.44444444444444,
+   "token_sort_ratio": 17.647058823529417,
+   "token_set_ratio": 20.689655172413794,
+   "partial_token_sort_ratio": 44.44444444444444,
+   "partial_token_set_ratio": 44.44444444444444,
+   "wratio": 40.0
+  },
+  {
+   "query": "conta do",
+   "choice": "parcela engenharia conta saude tv",
+   "ratio": 34.14634146341463,
+   "partial_ratio": 75.0,
+   "token_sort_ratio": 34.14634146341463,
+   "token_set_ratio": 76.92307692307692,
+   "partial_token_sort_ratio": 85.71428571428572,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "aluguel",
+   "choice": "carro ão shop saude",
+   "ratio": 23.076923076923073,
+   "partial_ratio": 54.54545454545454,
+   "token_sort_ratio": 23.076923076923073,
+   "token_set_ratio": 23.07692307692308,
+   "partial_token_sort_ratio": 42.85714285714286,
+   "partial_token_set_ratio": 42.85714285714286,
+   "wratio": 49.090909090909086
+  },
+  {
+   "query": "escola casa saude",
+   "choice": "claro iptu",
+   "ratio": 37.03703703703704,
+   "partial_ratio": 47.05882352941176,
+   "token_sort_ratio": 37.03703703703704,
+   "token_set_ratio": 37.03703703703704,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 42.75
+  },
+  {
+   "query": "faculdade gás engenharia",
+   "choice": "a agua",
+   "ratio": 26.66666666666667,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 33.333333333333336,
+   "token_set_ratio": 33.33333333333333,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 57.0
+  },
+  {
+   "query": "b casa escola",
+   "choice": "gás iptu internet Condomínio fibra",
+   "ratio": 21.276595744680847,
+   "partial_ratio": 25.0,
+   "token_sort_ratio": 21.276595744680847,
+   "token_set_ratio": 21.276595744680847,
+   "partial_token_sort_ratio": 38.46153846153846,
+   "partial_token_set_ratio": 38.46153846153846,
+   "wratio": 32.88461538461538
+  },
+  {
+   "query": "cabo luz",
+   "choice": "da",
+   "ratio": 19.999999999999996,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 19.999999999999996,
+   "token_set_ratio": 20.0,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "cabo",
+   "choice": "condominio condominio gás condominio saude",
+   "ratio": 8.695652173913048,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 8.695652173913048,
+   "token_set_ratio": 16.66666666666667,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 40.0
+  },
+  {
+   "query": "faculdade saude gás",
+   "choice": "escola conta internet",
+   "ratio": 30.000000000000004,
+   "partial_ratio": 37.5,
+   "token_sort_ratio": 30.000000000000004,
+   "token_set_ratio": 30.0,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 30.000000000000004
+  },
+  {
+   "query": "netflix",
+   "choice": "do",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "fibra condomínio",
+   "choice": "do celular",
+   "ratio": 15.384615384615385,
+   "partial_ratio": 23.529411764705888,
+   "token_sort_ratio": 23.076923076923073,
+   "token_set_ratio": 23.07692307692308,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 34.2
+  },
+  {
+   "query": "água seguro ão",
+   "choice": "sky fibra saude conta escola",
+   "ratio": 33.333333333333336,
+   "partial_ratio": 42.85714285714286,
+   "token_sort_ratio": 23.809523809523814,
+   "token_set_ratio": 23.80952380952381,
+   "partial_token_sort_ratio": 35.71428571428571,
+   "partial_token_set_ratio": 35.71428571428571,
+   "wratio": 38.57142857142858
+  },
+  {
+   "query": "condomínio carro",
+   "choice": "casa gás",
+   "ratio": 16.666666666666664,
+   "partial_ratio": 30.76923076923077,
+   "token_sort_ratio": 25.0,
+   "token_set_ratio": 25.0,
+   "partial_token_sort_ratio": 42.85714285714286,
+   "partial_token_set_ratio": 42.85714285714286,
+   "wratio": 36.642857142857146
+  },
+  {
+   "query": "água mensalidade",
+   "choice": "shop faculdade Vivo carro",
+   "ratio": 34.14634146341463,
+   "partial_ratio": 46.666666666666664,
+   "token_sort_ratio": 34.14634146341463,
+   "token_set_ratio": 34.14634146341463,
+   "partial_token_sort_ratio": 48.275862068965516,
+   "partial_token_set_ratio": 48.275862068965516,
+   "wratio": 42.0
+  },
+  {
+   "query": "carro",
+   "choice": "saude",
+   "ratio": 19.999999999999996,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 19.999999999999996,
+   "token_set_ratio": 20.0,
+   "partial_token_sort_ratio": 28.57142857142857,
+   "partial_token_set_ratio": 28.57142857142857,
+   "wratio": 19.999999999999996
+  },
+  {
+   "query": "sky",
+   "choice": "academia a internet do",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "casa",
+   "choice": "pet Unimed",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "ç conta",
+   "choice": "plano da Netflix tv tv net",
+   "ratio": 18.181818181818176,
+   "partial_ratio": 54.54545454545454,
+   "token_sort_ratio": 24.242424242424242,
+   "token_set_ratio": 26.66666666666667,
+   "partial_token_sort_ratio": 42.85714285714286,
+   "partial_token_set_ratio": 42.85714285714286,
+   "wratio": 49.090909090909086
+  },
+  {
+   "query": "netflix casa",
+   "choice": "sky",
+   "ratio": 13.33333333333333,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 13.33333333333333,
+   "token_set_ratio": 13.333333333333329,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 36.0
+  },
+  {
+   "query": "condominio",
+   "choice": "sky escola seguro",
+   "ratio": 22.22222222222222,
+   "partial_ratio": 22.22222222222222,
+   "token_sort_ratio": 22.22222222222222,
+   "token_set_ratio": 22.22222222222223,
+   "partial_token_sort_ratio": 28.57142857142857,
+   "partial_token_set_ratio": 28.57142857142857,
+   "wratio": 24.428571428571427
+  },
+  {
+   "query": "netflix a",
+   "choice": "net",
+   "ratio": 50.0,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 50.0,
+   "token_set_ratio": 50.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 90.0
+  },
+  {
+   "query": "aluguel",
+   "choice": "cabo b seguro gás",
+   "ratio": 25.0,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 25.0,
+   "token_set_ratio": 25.0,
+   "partial_token_sort_ratio": 36.36363636363637,
+   "partial_token_set_ratio": 36.36363636363637,
+   "wratio": 31.090909090909093
+  },
+  {
+   "query": "aluguel conta ç",
+   "choice": "ç Água",
+   "ratio": 28.57142857142857,
+   "partial_ratio": 36.36363636363637,
+   "token_sort_ratio": 47.61904761904761,
+   "token_set_ratio": 47.61904761904762,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "tv",
+   "choice": "casa condominio",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "água net ç",
+   "choice": "fibra",
+   "ratio": 13.33333333333333,
+   "partial_ratio": 22.22222222222222,
+   "token_sort_ratio": 13.33333333333333,
+   "token_set_ratio": 13.333333333333329,
+   "partial_token_sort_ratio": 25.0,
+   "partial_token_set_ratio": 25.0,
+   "wratio": 21.375
+  },
+  {
+   "query": "do de",
+   "choice": "casa",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "luz",
+   "choice": "luz mensalidade luz escola mensalidade do",
+   "ratio": 13.636363636363635,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 13.636363636363635,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 60.0
+  },
+  {
+   "query": "condominio",
+   "choice": "sky b",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "fibra shop a",
+   "choice": "casa faculdade cabo engenharia Netflix",
+   "ratio": 24.0,
+   "partial_ratio": 42.10526315789473,
+   "token_sort_ratio": 24.0,
+   "token_set_ratio": 24.0,
+   "partial_token_sort_ratio": 34.78260869565217,
+   "partial_token_set_ratio": 34.78260869565217,
+   "wratio": 37.89473684210526
+  },
+  {
+   "query": "net água",
+   "choice": "a luz tv ç do sky",
+   "ratio": 16.000000000000004,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 16.000000000000004,
+   "token_set_ratio": 16.0,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 30.000000000000004
+  },
+  {
+   "query": "iptu",
+   "choice": "luz shop Netflix",
+   "ratio": 19.999999999999996,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 19.999999999999996,
+   "token_set_ratio": 20.0,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 34.2
+  },
+  {
+   "query": "seguro ão",
+   "choice": "gás luz seguro de engenharia",
+   "ratio": 37.83783783783784,
+   "partial_ratio": 77.77777777777779,
+   "token_sort_ratio": 32.432432432432435,
+   "token_set_ratio": 80.0,
+   "partial_token_sort_ratio": 80.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "sky seguro",
+   "choice": "condominio Água casa sky",
+   "ratio": 17.647058823529417,
+   "partial_ratio": 46.15384615384615,
+   "token_sort_ratio": 35.29411764705882,
+   "token_set_ratio": 46.15384615384615,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "casa casa",
+   "choice": "net net Condomínio do carro condominio",
+   "ratio": 17.021276595744684,
+   "partial_ratio": 44.44444444444444,
+   "token_sort_ratio": 17.021276595744684,
+   "token_set_ratio": 10.526315789473685,
+   "partial_token_sort_ratio": 44.44444444444444,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 42.75
+  },
+  {
+   "query": "plano condomínio",
+   "choice": "do da internet luz celular",
+   "ratio": 19.047619047619047,
+   "partial_ratio": 34.78260869565217,
+   "token_sort_ratio": 28.57142857142857,
+   "token_set_ratio": 28.57142857142857,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 31.304347826086957
+  },
+  {
+   "query": "escola",
+   "choice": "do agua tv",
+   "ratio": 25.0,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 12.5,
+   "token_set_ratio": 12.5,
+   "partial_token_sort_ratio": 28.57142857142857,
+   "partial_token_set_ratio": 28.57142857142857,
+   "wratio": 36.0
+  },
+  {
+   "query": "internet",
+   "choice": "carro mensalidade iptu Condomínio",
+   "ratio": 19.512195121951216,
+   "partial_ratio": 37.5,
+   "token_sort_ratio": 24.390243902439025,
+   "token_set_ratio": 24.390243902439025,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 42.75
+  },
+  {
+   "query": "a",
+   "choice": "cabo parcela parcela",
+   "ratio": 9.523809523809524,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 9.523809523809524,
+   "token_set_ratio": 15.384615384615387,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 60.0
+  },
+  {
+   "query": "condominio luz",
+   "choice": "cabo agua pet",
+   "ratio": 29.629629629629626,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 22.22222222222222,
+   "token_set_ratio": 22.22222222222223,
+   "partial_token_sort_ratio": 26.66666666666667,
+   "partial_token_set_ratio": 26.66666666666667,
+   "wratio": 29.629629629629626
+  },
+  {
+   "query": "água",
+   "choice": "do casa net pet",
+   "ratio": 10.526315789473683,
+   "partial_ratio": 25.0,
+   "token_sort_ratio": 10.526315789473683,
+   "token_set_ratio": 10.526315789473685,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 28.5
+  },
+  {
+   "query": "shop agua claro",
+   "choice": "pet condominio Unimed tv",
+   "ratio": 20.512820512820518,
+   "partial_ratio": 38.095238095238095,
+   "token_sort_ratio": 25.64102564102564,
+   "token_set_ratio": 25.641025641025635,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 34.285714285714285
+  },
+  {
+   "query": "pet carro seguro",
+   "choice": "Unimed parcela a parcela seguro",
+   "ratio": 51.06382978723405,
+   "partial_ratio": 69.23076923076923,
+   "token_sort_ratio": 51.06382978723405,
+   "token_set_ratio": 56.41025641025641,
+   "partial_token_sort_ratio": 68.96551724137932,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "saude luz claro",
+   "choice": "Água Unimed condominio da agua Condomínio",
+   "ratio": 21.42857142857143,
+   "partial_ratio": 34.48275862068966,
+   "token_sort_ratio": 21.42857142857143,
+   "token_set_ratio": 21.42857142857143,
+   "partial_token_sort_ratio": 38.095238095238095,
+   "partial_token_set_ratio": 38.095238095238095,
+   "wratio": 32.57142857142857
+  },
+  {
+   "query": "escola",
+   "choice": "Condomínio carro celular pet academia Luz",
+   "ratio": 17.021276595744684,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 21.276595744680847,
+   "token_set_ratio": 21.276595744680847,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "ç gás de",
+   "choice": "tv conta luz agua casa",
+   "ratio": 19.999999999999996,
+   "partial_ratio": 37.5,
+   "token_sort_ratio": 19.999999999999996,
+   "token_set_ratio": 20.0,
+   "partial_token_sort_ratio": 37.5,
+   "partial_token_set_ratio": 37.5,
+   "wratio": 33.75
+  },
+  {
+   "query": "parcela academia escola",
+   "choice": "parcela",
+   "ratio": 46.666666666666664,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 46.666666666666664,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 90.0
+  },
+  {
+   "query": "tv plano aluguel",
+   "choice": "Netflix ç engenharia luz shop do",
+   "ratio": 25.0,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 29.166666666666664,
+   "token_set_ratio": 29.16666666666667,
+   "partial_token_sort_ratio": 42.85714285714286,
+   "partial_token_set_ratio": 42.85714285714286,
+   "wratio": 36.642857142857146
+  },
+  {
+   "query": "iptu",
+   "choice": "Luz da",
+   "ratio": 19.999999999999996,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 19.999999999999996,
+   "token_set_ratio": 20.0,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 30.000000000000004
+  },
+  {
+   "query": "internet da",
+   "choice": "plano cabo do conta da casa",
+   "ratio": 31.57894736842105,
+   "partial_ratio": 45.45454545454546,
+   "token_sort_ratio": 26.315789473684216,
+   "token_set_ratio": 31.578947368421055,
+   "partial_token_sort_ratio": 36.36363636363637,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "sky shop celular",
+   "choice": "conta agua da b cabo luz",
+   "ratio": 25.0,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 25.0,
+   "token_set_ratio": 25.0,
+   "partial_token_sort_ratio": 35.71428571428571,
+   "partial_token_set_ratio": 35.71428571428571,
+   "wratio": 36.0
+  },
+  {
+   "query": "b",
+   "choice": "academia",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "ão casa",
+   "choice": "carro Luz",
+   "ratio": 25.0,
+   "partial_ratio": 44.44444444444444,
+   "token_sort_ratio": 37.5,
+   "token_set_ratio": 37.5,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 35.625
+  },
+  {
+   "query": "luz agua",
+   "choice": "seguro",
+   "ratio": 28.57142857142857,
+   "partial_ratio": 44.44444444444444,
+   "token_sort_ratio": 28.57142857142857,
+   "token_set_ratio": 28.57142857142857,
+   "partial_token_sort_ratio": 44.44444444444444,
+   "partial_token_set_ratio": 44.44444444444444,
+   "wratio": 28.57142857142857
+  },
+  {
+   "query": "iptu b agua",
+   "choice": "claro shop",
+   "ratio": 9.523809523809524,
+   "partial_ratio": 18.181818181818176,
+   "token_sort_ratio": 28.57142857142857,
+   "token_set_ratio": 28.57142857142857,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 27.14285714285714
+  },
+  {
+   "query": "academia a fibra",
+   "choice": "condominio de luz escola iptu Condomínio",
+   "ratio": 28.57142857142857,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 28.57142857142857,
+   "token_set_ratio": 28.57142857142857,
+   "partial_token_sort_ratio": 37.5,
+   "partial_token_set_ratio": 37.5,
+   "wratio": 36.0
+  },
+  {
+   "query": "aluguel engenharia",
+   "choice": "faculdade da luz Netflix ão",
+   "ratio": 31.11111111111111,
+   "partial_ratio": 35.29411764705882,
+   "token_sort_ratio": 22.22222222222222,
+   "token_set_ratio": 22.22222222222223,
+   "partial_token_sort_ratio": 32.25806451612904,
+   "partial_token_set_ratio": 32.25806451612904,
+   "wratio": 31.76470588235294
+  },
+  {
+   "query": "conta engenharia",
+   "choice": "Condomínio Vivo Vivo Netflix de",
+   "ratio": 21.276595744680847,
+   "partial_ratio": 31.999999999999996,
+   "token_sort_ratio": 21.276595744680847,
+   "token_set_ratio": 23.80952380952381,
+   "partial_token_sort_ratio": 31.999999999999996,
+   "partial_token_set_ratio": 31.999999999999996,
+   "wratio": 28.799999999999997
+  },
+  {
+   "query": "shop b",
+   "choice": "casa casa",
+   "ratio": 26.66666666666667,
+   "partial_ratio": 36.36363636363637,
+   "token_sort_ratio": 26.66666666666667,
+   "token_set_ratio": 20.0,
+   "partial_token_sort_ratio": 36.36363636363637,
+   "partial_token_set_ratio": 28.57142857142857,
+   "wratio": 32.727272727272734
+  },
+  {
+   "query": "escola engenharia",
+   "choice": "celular condominio b academia",
+   "ratio": 39.13043478260869,
+   "partial_ratio": 41.666666666666664,
+   "token_sort_ratio": 30.434782608695656,
+   "token_set_ratio": 30.434782608695656,
+   "partial_token_sort_ratio": 41.17647058823529,
+   "partial_token_set_ratio": 41.17647058823529,
+   "wratio": 39.13043478260869
+  },
+  {
+   "query": "netflix",
+   "choice": "cabo Condomínio parcela cabo de",
+   "ratio": 15.789473684210531,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 15.789473684210531,
+   "token_set_ratio": 18.181818181818187,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 34.2
+  },
+  {
+   "query": "vivo condominio",
+   "choice": "gás pet Luz claro",
+   "ratio": 18.75,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 18.75,
+   "token_set_ratio": 18.75,
+   "partial_token_sort_ratio": 24.0,
+   "partial_token_set_ratio": 24.0,
+   "wratio": 18.75
+  },
+  {
+   "query": "mensalidade engenharia a",
+   "choice": "academia da aluguel de a Unimed",
+   "ratio": 32.72727272727273,
+   "partial_ratio": 45.714285714285715,
+   "token_sort_ratio": 43.63636363636364,
+   "token_set_ratio": 50.90909090909091,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 48.36363636363636
+  },
+  {
+   "query": "vivo conta",
+   "choice": "tv parcela plano Condomínio da aluguel",
+   "ratio": 25.0,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 20.833333333333336,
+   "token_set_ratio": 20.83333333333333,
+   "partial_token_sort_ratio": 42.85714285714286,
+   "partial_token_set_ratio": 42.85714285714286,
+   "wratio": 36.642857142857146
+  },
+  {
+   "query": "casa luz",
+   "choice": "Água b",
+   "ratio": 28.57142857142857,
+   "partial_ratio": 36.36363636363637,
+   "token_sort_ratio": 28.57142857142857,
+   "token_set_ratio": 28.57142857142857,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 28.57142857142857
+  },
+  {
+   "query": "carro luz",
+   "choice": "Luz aluguel condominio luz b",
+   "ratio": 32.432432432432435,
+   "partial_ratio": 62.5,
+   "token_sort_ratio": 32.432432432432435,
+   "token_set_ratio": 50.0,
+   "partial_token_sort_ratio": 71.42857142857143,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "casa",
+   "choice": "condominio ão Unimed",
+   "ratio": 8.333333333333337,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 8.333333333333337,
+   "token_set_ratio": 8.333333333333329,
+   "partial_token_sort_ratio": 25.0,
+   "partial_token_set_ratio": 25.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "tv",
+   "choice": "Netflix academia carro agua Vivo",
+   "ratio": 11.764705882352944,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 11.764705882352944,
+   "token_set_ratio": 11.764705882352942,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 30.0
+  },
+  {
+   "query": "condomínio ç vivo",
+   "choice": "Unimed parcela",
+   "ratio": 19.354838709677423,
+   "partial_ratio": 25.0,
+   "token_sort_ratio": 19.354838709677423,
+   "token_set_ratio": 19.354838709677423,
+   "partial_token_sort_ratio": 25.0,
+   "partial_token_set_ratio": 25.0,
+   "wratio": 19.354838709677423
+  },
+  {
+   "query": "gás netflix",
+   "choice": "Água plano Vivo net net",
+   "ratio": 29.411764705882348,
+   "partial_ratio": 53.333333333333336,
+   "token_sort_ratio": 29.411764705882348,
+   "token_set_ratio": 33.33333333333333,
+   "partial_token_sort_ratio": 45.45454545454546,
+   "partial_token_set_ratio": 45.45454545454546,
+   "wratio": 48.0
+  },
+  {
+   "query": "cabo condominio do",
+   "choice": "plano",
+   "ratio": 26.086956521739136,
+   "partial_ratio": 44.44444444444444,
+   "token_sort_ratio": 26.086956521739136,
+   "token_set_ratio": 26.086956521739125,
+   "partial_token_sort_ratio": 44.44444444444444,
+   "partial_token_set_ratio": 44.44444444444444,
+   "wratio": 40.0
+  },
+  {
+   "query": "luz condominio shop",
+   "choice": "celular fibra",
+   "ratio": 25.0,
+   "partial_ratio": 35.29411764705882,
+   "token_sort_ratio": 25.0,
+   "token_set_ratio": 25.0,
+   "partial_token_sort_ratio": 28.57142857142857,
+   "partial_token_set_ratio": 28.57142857142857,
+   "wratio": 25.0
+  },
+  {
+   "query": "internet",
+   "choice": "iptu Netflix",
+   "ratio": 40.0,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 19.999999999999996,
+   "token_set_ratio": 20.0,
+   "partial_token_sort_ratio": 36.36363636363637,
+   "partial_token_set_ratio": 36.36363636363637,
+   "wratio": 45.0
+  },
+  {
+   "query": "mensalidade parcela",
+   "choice": "ão iptu",
+   "ratio": 15.384615384615385,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 15.384615384615385,
+   "token_set_ratio": 15.384615384615387,
+   "partial_token_sort_ratio": 28.57142857142857,
+   "partial_token_set_ratio": 28.57142857142857,
+   "wratio": 25.71428571428571
+  },
+  {
+   "query": "mensalidade escola ão",
+   "choice": "faculdade",
+   "ratio": 40.0,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 40.0,
+   "token_set_ratio": 40.0,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 60.00000000000001
+  },
+  {
+   "query": "gás mensalidade shop",
+   "choice": "shop",
+   "ratio": 33.333333333333336,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 33.333333333333336,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 90.0
+  },
+  {
+   "query": "condomínio",
+   "choice": "plano Vivo casa Condomínio",
+   "ratio": 55.55555555555556,
+   "partial_ratio": 94.73684210526316,
+   "token_sort_ratio": 50.0,
+   "token_set_ratio": 50.0,
+   "partial_token_sort_ratio": 90.0,
+   "partial_token_set_ratio": 90.0,
+   "wratio": 85.26315789473685
+  },
+  {
+   "query": "shop",
+   "choice": "Vivo Luz ç engenharia",
+   "ratio": 7.9999999999999964,
+   "partial_ratio": 25.0,
+   "token_sort_ratio": 7.9999999999999964,
+   "token_set_ratio": 8.0,
+   "partial_token_sort_ratio": 25.0,
+   "partial_token_set_ratio": 25.0,
+   "wratio": 22.5
+  },
+  {
+   "query": "fibra conta",
+   "choice": "parcela academia escola",
+   "ratio": 35.29411764705882,
+   "partial_ratio": 60.0,
+   "token_sort_ratio": 35.29411764705882,
+   "token_set_ratio": 35.294117647058826,
+   "partial_token_sort_ratio": 45.45454545454546,
+   "partial_token_set_ratio": 45.45454545454546,
+   "wratio": 54.0
+  },
+  {
+   "query": "conta aluguel",
+   "choice": "luz internet net condominio cabo",
+   "ratio": 22.22222222222222,
+   "partial_ratio": 38.46153846153846,
+   "token_sort_ratio": 26.66666666666667,
+   "token_set_ratio": 26.66666666666667,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 42.75
+  },
+  {
+   "query": "saude vivo",
+   "choice": "Água faculdade conta ão",
+   "ratio": 36.36363636363637,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 36.36363636363637,
+   "token_set_ratio": 36.36363636363637,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "carro saude",
+   "choice": "luz",
+   "ratio": 14.28571428571429,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 14.28571428571429,
+   "token_set_ratio": 14.285714285714292,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 30.000000000000004
+  },
+  {
+   "query": "internet vivo",
+   "choice": "Vivo seguro",
+   "ratio": 33.333333333333336,
+   "partial_ratio": 42.85714285714286,
+   "token_sort_ratio": 33.333333333333336,
+   "token_set_ratio": 33.33333333333333,
+   "partial_token_sort_ratio": 42.85714285714286,
+   "partial_token_set_ratio": 42.85714285714286,
+   "wratio": 33.333333333333336
+  },
+  {
+   "query": "shop",
+   "choice": "net shop fibra ç iptu",
+   "ratio": 31.999999999999996,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 31.999999999999996,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 90.0
+  },
+  {
+   "query": "celular casa",
+   "choice": "fibra saude de a",
+   "ratio": 28.57142857142857,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 28.57142857142857,
+   "token_set_ratio": 28.57142857142857,
+   "partial_token_sort_ratio": 42.10526315789473,
+   "partial_token_set_ratio": 42.10526315789473,
+   "wratio": 28.57142857142857
+  },
+  {
+   "query": "condomínio",
+   "choice": "aluguel",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "aluguel de",
+   "choice": "engenharia",
+   "ratio": 19.999999999999996,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 19.999999999999996,
+   "token_set_ratio": 20.0,
+   "partial_token_sort_ratio": 28.57142857142857,
+   "partial_token_set_ratio": 28.57142857142857,
+   "wratio": 19.999999999999996
+  },
+  {
+   "query": "fibra tv",
+   "choice": "shop mensalidade Netflix de",
+   "ratio": 22.857142857142854,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 22.857142857142854,
+   "token_set_ratio": 22.85714285714286,
+   "partial_token_sort_ratio": 37.5,
+   "partial_token_set_ratio": 37.5,
+   "wratio": 36.0
+  },
+  {
+   "query": "casa de b",
+   "choice": "luz net engenharia engenharia faculdade agua",
+   "ratio": 22.64150943396226,
+   "partial_ratio": 55.55555555555556,
+   "token_sort_ratio": 22.64150943396226,
+   "token_set_ratio": 28.57142857142857,
+   "partial_token_sort_ratio": 53.333333333333336,
+   "partial_token_set_ratio": 53.333333333333336,
+   "wratio": 50.0
+  },
+  {
+   "query": "casa",
+   "choice": "luz Netflix engenharia",
+   "ratio": 15.384615384615385,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 15.384615384615385,
+   "token_set_ratio": 15.384615384615387,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "b pet",
+   "choice": "do",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "seguro net",
+   "choice": "faculdade net casa a",
+   "ratio": 33.333333333333336,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 19.999999999999996,
+   "token_set_ratio": 46.15384615384615,
+   "partial_token_sort_ratio": 46.15384615384615,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "condominio",
+   "choice": "casa ão",
+   "ratio": 23.529411764705888,
+   "partial_ratio": 44.44444444444444,
+   "token_sort_ratio": 23.529411764705888,
+   "token_set_ratio": 23.529411764705884,
+   "partial_token_sort_ratio": 44.44444444444444,
+   "partial_token_set_ratio": 44.44444444444444,
+   "wratio": 23.529411764705888
+  },
+  {
+   "query": "unimed claro netflix",
+   "choice": "condominio b parcela condominio Netflix faculdade",
+   "ratio": 40.57971014492754,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 31.88405797101449,
+   "token_set_ratio": 34.48275862068965,
+   "partial_token_sort_ratio": 52.94117647058824,
+   "partial_token_set_ratio": 52.94117647058824,
+   "wratio": 45.26470588235294
+  },
+  {
+   "query": "net",
+   "choice": "ç pet",
+   "ratio": 50.0,
+   "partial_ratio": 80.0,
+   "token_sort_ratio": 50.0,
+   "token_set_ratio": 50.0,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 72.0
+  },
+  {
+   "query": "condomínio",
+   "choice": "ão mensalidade engenharia de sky gás",
+   "ratio": 21.739130434782606,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 21.739130434782606,
+   "token_set_ratio": 21.73913043478261,
+   "partial_token_sort_ratio": 30.000000000000004,
+   "partial_token_set_ratio": 30.000000000000004,
+   "wratio": 36.0
+  },
+  {
+   "query": "saude",
+   "choice": "a pet parcela Luz",
+   "ratio": 18.181818181818176,
+   "partial_ratio": 44.44444444444444,
+   "token_sort_ratio": 18.181818181818176,
+   "token_set_ratio": 18.181818181818187,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 40.0
+  },
+  {
+   "query": "condomínio",
+   "choice": "carro de",
+   "ratio": 33.333333333333336,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 33.333333333333336,
+   "token_set_ratio": 33.33333333333333,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 33.333333333333336
+  },
+  {
+   "query": "b netflix condominio",
+   "choice": "ão iptu",
+   "ratio": 14.814814814814813,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 14.814814814814813,
+   "token_set_ratio": 14.81481481481481,
+   "partial_token_sort_ratio": 36.36363636363637,
+   "partial_token_set_ratio": 36.36363636363637,
+   "wratio": 31.090909090909093
+  },
+  {
+   "query": "luz casa cabo",
+   "choice": "saude Luz plano Unimed net",
+   "ratio": 25.64102564102564,
+   "partial_ratio": 38.46153846153846,
+   "token_sort_ratio": 30.76923076923077,
+   "token_set_ratio": 30.769230769230774,
+   "partial_token_sort_ratio": 54.54545454545454,
+   "partial_token_set_ratio": 54.54545454545454,
+   "wratio": 46.63636363636363
+  },
+  {
+   "query": "academia celular",
+   "choice": "b ão net",
+   "ratio": 16.666666666666664,
+   "partial_ratio": 25.0,
+   "token_sort_ratio": 16.666666666666664,
+   "token_set_ratio": 16.66666666666667,
+   "partial_token_sort_ratio": 25.0,
+   "partial_token_set_ratio": 25.0,
+   "wratio": 22.5
+  },
+  {
+   "query": "luz tv",
+   "choice": "Condomínio agua claro ç Unimed shop",
+   "ratio": 9.756097560975608,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 9.756097560975608,
+   "token_set_ratio": 9.756097560975604,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 30.000000000000004
+  },
+  {
+   "query": "do netflix sky",
+   "choice": "saude",
+   "ratio": 21.052631578947366,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 21.052631578947366,
+   "token_set_ratio": 21.05263157894737,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "plano a ç",
+   "choice": "Vivo faculdade",
+   "ratio": 26.086956521739136,
+   "partial_ratio": 37.5,
+   "token_sort_ratio": 26.086956521739136,
+   "token_set_ratio": 26.086956521739125,
+   "partial_token_sort_ratio": 35.29411764705882,
+   "partial_token_set_ratio": 35.29411764705882,
+   "wratio": 33.75
+  },
+  {
+   "query": "shop",
+   "choice": "engenharia",
+   "ratio": 14.28571428571429,
+   "partial_ratio": 25.0,
+   "token_sort_ratio": 14.28571428571429,
+   "token_set_ratio": 14.285714285714292,
+   "partial_token_sort_ratio": 25.0,
+   "partial_token_set_ratio": 25.0,
+   "wratio": 22.5
+  },
+  {
+   "query": "seguro carro b",
+   "choice": "aluguel engenharia parcela",
+   "ratio": 30.000000000000004,
+   "partial_ratio": 42.85714285714286,
+   "token_sort_ratio": 25.0,
+   "token_set_ratio": 25.0,
+   "partial_token_sort_ratio": 36.36363636363637,
+   "partial_token_set_ratio": 36.36363636363637,
+   "wratio": 38.57142857142858
+  },
+  {
+   "query": "tv gás",
+   "choice": "saude carro",
+   "ratio": 11.764705882352944,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 11.764705882352944,
+   "token_set_ratio": 11.764705882352942,
+   "partial_token_sort_ratio": 18.181818181818176,
+   "partial_token_set_ratio": 18.181818181818176,
+   "wratio": 25.71428571428571
+  },
+  {
+   "query": "sky",
+   "choice": "Condomínio plano b ão",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "luz",
+   "choice": "Netflix conta cabo do conta fibra",
+   "ratio": 5.555555555555558,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 5.555555555555558,
+   "token_set_ratio": 6.666666666666671,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 20.0
+  },
+  {
+   "query": "escola",
+   "choice": "b de de",
+   "ratio": 15.384615384615385,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 15.384615384615385,
+   "token_set_ratio": 20.0,
+   "partial_token_sort_ratio": 28.57142857142857,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 19.0
+  },
+  {
+   "query": "carro",
+   "choice": "de engenharia escola",
+   "ratio": 24.0,
+   "partial_ratio": 44.44444444444444,
+   "token_sort_ratio": 24.0,
+   "token_set_ratio": 24.0,
+   "partial_token_sort_ratio": 44.44444444444444,
+   "partial_token_set_ratio": 44.44444444444444,
+   "wratio": 40.0
+  },
+  {
+   "query": "celular da",
+   "choice": "a Vivo ão de da academia",
+   "ratio": 29.411764705882348,
+   "partial_ratio": 47.05882352941176,
+   "token_sort_ratio": 35.29411764705882,
+   "token_set_ratio": 35.294117647058826,
+   "partial_token_sort_ratio": 60.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "gás a",
+   "choice": "academia iptu seguro academia claro",
+   "ratio": 15.000000000000002,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 15.000000000000002,
+   "token_set_ratio": 19.354838709677423,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "casa sky",
+   "choice": "iptu academia",
+   "ratio": 28.57142857142857,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 38.095238095238095,
+   "token_set_ratio": 38.095238095238095,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 42.75
+  },
+  {
+   "query": "de saude mensalidade",
+   "choice": "b",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "aluguel ão",
+   "choice": "iptu do",
+   "ratio": 35.29411764705882,
+   "partial_ratio": 46.15384615384615,
+   "token_sort_ratio": 11.764705882352944,
+   "token_set_ratio": 11.764705882352942,
+   "partial_token_sort_ratio": 25.0,
+   "partial_token_set_ratio": 25.0,
+   "wratio": 35.29411764705882
+  },
+  {
+   "query": "gás net",
+   "choice": "celular a ão de plano de",
+   "ratio": 19.354838709677423,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 12.903225806451612,
+   "token_set_ratio": 14.285714285714292,
+   "partial_token_sort_ratio": 36.36363636363637,
+   "partial_token_set_ratio": 36.36363636363637,
+   "wratio": 36.0
+  },
+  {
+   "query": "netflix carro fibra",
+   "choice": "academia mensalidade ç",
+   "ratio": 29.268292682926834,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 39.02439024390244,
+   "token_set_ratio": 39.02439024390244,
+   "partial_token_sort_ratio": 45.714285714285715,
+   "partial_token_set_ratio": 45.714285714285715,
+   "wratio": 37.073170731707314
+  },
+  {
+   "query": "condominio",
+   "choice": "cabo shop saude mensalidade gás",
+   "ratio": 29.268292682926834,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 29.268292682926834,
+   "token_set_ratio": 29.268292682926827,
+   "partial_token_sort_ratio": 30.000000000000004,
+   "partial_token_set_ratio": 30.000000000000004,
+   "wratio": 36.0
+  },
+  {
+   "query": "da",
+   "choice": "pet Luz",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "condomínio",
+   "choice": "gás Netflix tv escola Unimed",
+   "ratio": 21.052631578947366,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 15.789473684210531,
+   "token_set_ratio": 15.78947368421052,
+   "partial_token_sort_ratio": 30.000000000000004,
+   "partial_token_set_ratio": 30.000000000000004,
+   "wratio": 36.0
+  },
+  {
+   "query": "ão",
+   "choice": "celular ão aluguel",
+   "ratio": 19.999999999999996,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 19.999999999999996,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 60.0
+  },
+  {
+   "query": "escola engenharia",
+   "choice": "escola escola a",
+   "ratio": 62.5,
+   "partial_ratio": 69.56521739130434,
+   "token_sort_ratio": 56.25,
+   "token_set_ratio": 85.71428571428571,
+   "partial_token_sort_ratio": 69.56521739130434,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 81.42857142857142
+  },
+  {
+   "query": "de",
+   "choice": "agua Netflix sky claro",
+   "ratio": 8.333333333333337,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 8.333333333333337,
+   "token_set_ratio": 8.333333333333329,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 30.0
+  },
+  {
+   "query": "celular de escola",
+   "choice": "Netflix",
+   "ratio": 16.666666666666664,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 16.666666666666664,
+   "token_set_ratio": 16.66666666666667,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "shop",
+   "choice": "claro cabo",
+   "ratio": 14.28571428571429,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 14.28571428571429,
+   "token_set_ratio": 14.285714285714292,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "claro seguro",
+   "choice": "carro faculdade mensalidade",
+   "ratio": 35.89743589743589,
+   "partial_ratio": 58.82352941176471,
+   "token_sort_ratio": 35.89743589743589,
+   "token_set_ratio": 35.8974358974359,
+   "partial_token_sort_ratio": 58.82352941176471,
+   "partial_token_set_ratio": 58.82352941176471,
+   "wratio": 52.94117647058824
+  },
+  {
+   "query": "engenharia condomínio",
+   "choice": "academia parcela conta do agua agua",
+   "ratio": 35.71428571428571,
+   "partial_ratio": 47.61904761904761,
+   "token_sort_ratio": 35.71428571428571,
+   "token_set_ratio": 39.21568627450981,
+   "partial_token_sort_ratio": 48.64864864864865,
+   "partial_token_set_ratio": 48.64864864864865,
+   "wratio": 42.857142857142854
+  },
+  {
+   "query": "faculdade",
+   "choice": "faculdade",
+   "ratio": 100.0,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 100.0,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 100.0
+  },
+  {
+   "query": "celular",
+   "choice": "do Luz faculdade seguro faculdade",
+   "ratio": 25.0,
+   "partial_ratio": 57.14285714285714,
+   "token_sort_ratio": 30.000000000000004,
+   "token_set_ratio": 33.33333333333333,
+   "partial_token_sort_ratio": 57.14285714285714,
+   "partial_token_set_ratio": 57.14285714285714,
+   "wratio": 51.42857142857142
+  },
+  {
+   "query": "da",
+   "choice": "condominio luz claro agua conta engenharia",
+   "ratio": 9.090909090909093,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 9.090909090909093,
+   "token_set_ratio": 9.090909090909093,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 40.0
+  },
+  {
+   "query": "luz net cabo",
+   "choice": "fibra condominio do carro",
+   "ratio": 32.432432432432435,
+   "partial_ratio": 47.61904761904761,
+   "token_sort_ratio": 27.027027027027028,
+   "token_set_ratio": 27.02702702702703,
+   "partial_token_sort_ratio": 47.61904761904761,
+   "partial_token_set_ratio": 47.61904761904761,
+   "wratio": 42.857142857142854
+  },
+  {
+   "query": "vivo vivo",
+   "choice": "parcela da mensalidade fibra ç Netflix",
+   "ratio": 12.765957446808507,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 12.765957446808507,
+   "token_set_ratio": 4.761904761904759,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 25.0,
+   "wratio": 30.000000000000004
+  },
+  {
+   "query": "luz",
+   "choice": "seguro aluguel engenharia claro",
+   "ratio": 11.764705882352944,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 11.764705882352944,
+   "token_set_ratio": 11.764705882352942,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 40.0
+  },
+  {
+   "query": "fibra",
+   "choice": "tv pet pet",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "saude mensalidade casa",
+   "choice": "Vivo Condomínio luz",
+   "ratio": 24.390243902439025,
+   "partial_ratio": 27.77777777777778,
+   "token_sort_ratio": 24.390243902439025,
+   "token_set_ratio": 24.390243902439025,
+   "partial_token_sort_ratio": 27.77777777777778,
+   "partial_token_set_ratio": 27.77777777777778,
+   "wratio": 24.390243902439025
+  },
+  {
+   "query": "condomínio",
+   "choice": "escola mensalidade Luz ç Unimed",
+   "ratio": 29.268292682926834,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 29.268292682926834,
+   "token_set_ratio": 29.268292682926827,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "conta conta conta",
+   "choice": "iptu pet condominio Vivo",
+   "ratio": 34.14634146341463,
+   "partial_ratio": 48.275862068965516,
+   "token_sort_ratio": 39.02439024390244,
+   "token_set_ratio": 27.58620689655173,
+   "partial_token_sort_ratio": 47.05882352941176,
+   "partial_token_set_ratio": 60.0,
+   "wratio": 37.073170731707314
+  },
+  {
+   "query": "água cabo luz",
+   "choice": "academia",
+   "ratio": 28.57142857142857,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 28.57142857142857,
+   "token_set_ratio": 28.57142857142857,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "vivo",
+   "choice": "Luz do internet academia saude luz",
+   "ratio": 5.263157894736848,
+   "partial_ratio": 25.0,
+   "token_sort_ratio": 10.526315789473683,
+   "token_set_ratio": 10.526315789473685,
+   "partial_token_sort_ratio": 25.0,
+   "partial_token_set_ratio": 25.0,
+   "wratio": 15.0
+  },
+  {
+   "query": "ão aluguel",
+   "choice": "carro internet",
+   "ratio": 25.0,
+   "partial_ratio": 30.000000000000004,
+   "token_sort_ratio": 16.666666666666664,
+   "token_set_ratio": 16.66666666666667,
+   "partial_token_sort_ratio": 26.66666666666667,
+   "partial_token_set_ratio": 26.66666666666667,
+   "wratio": 25.0
+  },
+  {
+   "query": "saude ç",
+   "choice": "Condomínio ç Vivo do",
+   "ratio": 22.22222222222222,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 22.22222222222222,
+   "token_set_ratio": 25.0,
+   "partial_token_sort_ratio": 54.54545454545454,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "sky",
+   "choice": "Unimed",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "claro plano celular",
+   "choice": "b casa ç carro",
+   "ratio": 42.42424242424242,
+   "partial_ratio": 42.85714285714286,
+   "token_sort_ratio": 42.42424242424242,
+   "token_set_ratio": 42.42424242424242,
+   "partial_token_sort_ratio": 53.84615384615385,
+   "partial_token_set_ratio": 53.84615384615385,
+   "wratio": 42.42424242424242
+  },
+  {
+   "query": "fibra",
+   "choice": "aluguel Unimed agua do parcela internet",
+   "ratio": 13.636363636363635,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 13.636363636363635,
+   "token_set_ratio": 13.63636363636364,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "conta b condomínio",
+   "choice": "ão fibra mensalidade",
+   "ratio": 36.8421052631579,
+   "partial_ratio": 41.17647058823529,
+   "token_sort_ratio": 36.8421052631579,
+   "token_set_ratio": 36.8421052631579,
+   "partial_token_sort_ratio": 38.888888888888886,
+   "partial_token_set_ratio": 38.888888888888886,
+   "wratio": 36.8421052631579
+  },
+  {
+   "query": "b",
+   "choice": "de",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "a",
+   "choice": "escola de fibra",
+   "ratio": 12.5,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 12.5,
+   "token_set_ratio": 12.5,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 60.0
+  },
+  {
+   "query": "gás",
+   "choice": "plano cabo shop engenharia sky",
+   "ratio": 12.121212121212121,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 12.121212121212121,
+   "token_set_ratio": 12.121212121212125,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 20.0
+  },
+  {
+   "query": "do",
+   "choice": "mensalidade ç cabo",
+   "ratio": 19.999999999999996,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 9.999999999999998,
+   "token_set_ratio": 10.0,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 40.0
+  },
+  {
+   "query": "seguro parcela",
+   "choice": "plano",
+   "ratio": 31.57894736842105,
+   "partial_ratio": 57.14285714285714,
+   "token_sort_ratio": 42.10526315789473,
+   "token_set_ratio": 42.10526315789474,
+   "partial_token_sort_ratio": 57.14285714285714,
+   "partial_token_set_ratio": 57.14285714285714,
+   "wratio": 51.42857142857142
+  },
+  {
+   "query": "pet",
+   "choice": "fibra tv escola luz saude fibra",
+   "ratio": 5.882352941176472,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 11.764705882352944,
+   "token_set_ratio": 14.285714285714292,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 38.0
+  },
+  {
+   "query": "vivo faculdade escola",
+   "choice": "saude luz Unimed",
+   "ratio": 32.432432432432435,
+   "partial_ratio": 38.70967741935484,
+   "token_sort_ratio": 37.83783783783784,
+   "token_set_ratio": 37.83783783783784,
+   "partial_token_sort_ratio": 43.75,
+   "partial_token_set_ratio": 43.75,
+   "wratio": 35.945945945945944
+  },
+  {
+   "query": "água faculdade a",
+   "choice": "gás aluguel parcela claro agua",
+   "ratio": 43.47826086956522,
+   "partial_ratio": 56.25,
+   "token_sort_ratio": 39.13043478260869,
+   "token_set_ratio": 39.130434782608695,
+   "partial_token_sort_ratio": 46.15384615384615,
+   "partial_token_set_ratio": 46.15384615384615,
+   "wratio": 50.625
+  },
+  {
+   "query": "mensalidade",
+   "choice": "celular conta mensalidade mensalidade conta",
+   "ratio": 40.74074074074075,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 40.74074074074075,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 90.0
+  },
+  {
+   "query": "saude condomínio tv",
+   "choice": "agua Água seguro academia ão",
+   "ratio": 38.297872340425535,
+   "partial_ratio": 43.24324324324324,
+   "token_sort_ratio": 38.297872340425535,
+   "token_set_ratio": 38.297872340425535,
+   "partial_token_sort_ratio": 48.484848484848484,
+   "partial_token_set_ratio": 48.484848484848484,
+   "wratio": 38.297872340425535
+  },
+  {
+   "query": "b",
+   "choice": "Netflix iptu",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "b engenharia agua",
+   "choice": "Vivo de",
+   "ratio": 16.666666666666664,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 16.666666666666664,
+   "token_set_ratio": 16.66666666666667,
+   "partial_token_sort_ratio": 28.57142857142857,
+   "partial_token_set_ratio": 28.57142857142857,
+   "wratio": 36.0
+  },
+  {
+   "query": "gás",
+   "choice": "escola b carro fibra",
+   "ratio": 8.695652173913048,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 8.695652173913048,
+   "token_set_ratio": 8.695652173913047,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 36.0
+  },
+  {
+   "query": "parcela da internet",
+   "choice": "parcela net ç fibra condominio condominio",
+   "ratio": 43.333333333333336,
+   "partial_ratio": 73.33333333333334,
+   "token_sort_ratio": 53.333333333333336,
+   "token_set_ratio": 61.224489795918366,
+   "partial_token_sort_ratio": 76.47058823529412,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "claro",
+   "choice": "conta",
+   "ratio": 40.0,
+   "partial_ratio": 57.14285714285714,
+   "token_sort_ratio": 40.0,
+   "token_set_ratio": 40.0,
+   "partial_token_sort_ratio": 57.14285714285714,
+   "partial_token_set_ratio": 57.14285714285714,
+   "wratio": 40.0
+  },
+  {
+   "query": "carro iptu celular",
+   "choice": "da sky parcela agua net carro",
+   "ratio": 38.297872340425535,
+   "partial_ratio": 48.275862068965516,
+   "token_sort_ratio": 46.808510638297875,
+   "token_set_ratio": 46.808510638297875,
+   "partial_token_sort_ratio": 51.42857142857142,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "sky escola",
+   "choice": "aluguel",
+   "ratio": 23.529411764705888,
+   "partial_ratio": 30.76923076923077,
+   "token_sort_ratio": 23.529411764705888,
+   "token_set_ratio": 23.529411764705884,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 23.529411764705888
+  },
+  {
+   "query": "pet seguro casa",
+   "choice": "a",
+   "ratio": 12.5,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 12.5,
+   "token_set_ratio": 12.5,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 60.0
+  },
+  {
+   "query": "de condominio shop",
+   "choice": "do b iptu plano Vivo iptu",
+   "ratio": 37.2093023255814,
+   "partial_ratio": 41.17647058823529,
+   "token_sort_ratio": 32.55813953488372,
+   "token_set_ratio": 31.578947368421055,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 37.2093023255814
+  },
+  {
+   "query": "academia",
+   "choice": "net da do gás",
+   "ratio": 19.047619047619047,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 28.57142857142857,
+   "token_set_ratio": 28.57142857142857,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 34.2
+  },
+  {
+   "query": "iptu do",
+   "choice": "agua Água mensalidade Luz",
+   "ratio": 18.75,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 18.75,
+   "token_set_ratio": 18.75,
+   "partial_token_sort_ratio": 42.85714285714286,
+   "partial_token_set_ratio": 42.85714285714286,
+   "wratio": 36.642857142857146
+  },
+  {
+   "query": "do plano condomínio",
+   "choice": "tv mensalidade iptu condominio fibra",
+   "ratio": 47.27272727272728,
+   "partial_ratio": 68.42105263157895,
+   "token_sort_ratio": 50.90909090909091,
+   "token_set_ratio": 50.90909090909091,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 61.578947368421055
+  },
+  {
+   "query": "pet",
+   "choice": "mensalidade",
+   "ratio": 14.28571428571429,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 14.28571428571429,
+   "token_set_ratio": 14.285714285714292,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "cabo",
+   "choice": "sky da Água Netflix fibra",
+   "ratio": 13.793103448275868,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 13.793103448275868,
+   "token_set_ratio": 13.793103448275858,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "saude",
+   "choice": "shop da Vivo",
+   "ratio": 23.529411764705888,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 11.764705882352944,
+   "token_set_ratio": 11.764705882352942,
+   "partial_token_sort_ratio": 22.22222222222222,
+   "partial_token_set_ratio": 22.22222222222222,
+   "wratio": 30.000000000000004
+  },
+  {
+   "query": "iptu",
+   "choice": "Água internet",
+   "ratio": 23.529411764705888,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 35.29411764705882,
+   "token_set_ratio": 35.294117647058826,
+   "partial_token_sort_ratio": 57.14285714285714,
+   "partial_token_set_ratio": 57.14285714285714,
+   "wratio": 48.857142857142854
+  },
+  {
+   "query": "sky luz plano",
+   "choice": "ão fibra ç parcela",
+   "ratio": 32.25806451612904,
+   "partial_ratio": 43.47826086956522,
+   "token_sort_ratio": 38.70967741935484,
+   "token_set_ratio": 38.70967741935484,
+   "partial_token_sort_ratio": 46.15384615384615,
+   "partial_token_set_ratio": 46.15384615384615,
+   "wratio": 36.774193548387096
+  },
+  {
+   "query": "sky",
+   "choice": "Netflix seguro net gás",
+   "ratio": 7.9999999999999964,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 7.9999999999999964,
+   "token_set_ratio": 8.0,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 45.0
+  },
+  {
+   "query": "b celular",
+   "choice": "gás engenharia shop ão iptu",
+   "ratio": 22.22222222222222,
+   "partial_ratio": 44.44444444444444,
+   "token_sort_ratio": 16.666666666666664,
+   "token_set_ratio": 16.66666666666667,
+   "partial_token_sort_ratio": 35.29411764705882,
+   "partial_token_set_ratio": 35.29411764705882,
+   "wratio": 40.0
+  },
+  {
+   "query": "gás",
+   "choice": "de engenharia",
+   "ratio": 12.5,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 12.5,
+   "token_set_ratio": 12.5,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 30.000000000000004
+  },
+  {
+   "query": "shop",
+   "choice": "casa Luz agua saude b a",
+   "ratio": 7.4074074074074066,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 7.4074074074074066,
+   "token_set_ratio": 7.407407407407405,
+   "partial_token_sort_ratio": 25.0,
+   "partial_token_set_ratio": 25.0,
+   "wratio": 25.71428571428571
+  },
+  {
+   "query": "unimed luz",
+   "choice": "conta pet",
+   "ratio": 21.052631578947366,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 21.052631578947366,
+   "token_set_ratio": 21.05263157894737,
+   "partial_token_sort_ratio": 28.57142857142857,
+   "partial_token_set_ratio": 28.57142857142857,
+   "wratio": 21.052631578947366
+  },
+  {
+   "query": "internet",
+   "choice": "agua ç do",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "condomínio agua",
+   "choice": "internet shop conta iptu ç",
+   "ratio": 29.268292682926834,
+   "partial_ratio": 37.03703703703704,
+   "token_sort_ratio": 29.268292682926834,
+   "token_set_ratio": 29.268292682926827,
+   "partial_token_sort_ratio": 36.36363636363637,
+   "partial_token_set_ratio": 36.36363636363637,
+   "wratio": 33.333333333333336
+  },
+  {
+   "query": "b",
+   "choice": "seguro claro do",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "condomínio condomínio",
+   "choice": "fibra carro fibra casa",
+   "ratio": 23.25581395348837,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 23.25581395348837,
+   "token_set_ratio": 23.07692307692308,
+   "partial_token_sort_ratio": 29.411764705882348,
+   "partial_token_set_ratio": 26.66666666666667,
+   "wratio": 23.25581395348837
+  },
+  {
+   "query": "a",
+   "choice": "shop engenharia conta",
+   "ratio": 9.090909090909093,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 9.090909090909093,
+   "token_set_ratio": 9.090909090909093,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 60.0
+  },
+  {
+   "query": "carro",
+   "choice": "iptu gás",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "unimed",
+   "choice": "casa saude do net ão Vivo",
+   "ratio": 19.354838709677423,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 19.354838709677423,
+   "token_set_ratio": 19.354838709677423,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 45.0
+  },
+  {
+   "query": "gás",
+   "choice": "cabo",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "ç condomínio internet",
+   "choice": "engenharia agua celular ão",
+   "ratio": 25.531914893617024,
+   "partial_ratio": 25.64102564102564,
+   "token_sort_ratio": 25.531914893617024,
+   "token_set_ratio": 25.531914893617028,
+   "partial_token_sort_ratio": 28.57142857142857,
+   "partial_token_set_ratio": 28.57142857142857,
+   "wratio": 25.531914893617024
+  },
+  {
+   "query": "a de",
+   "choice": "faculdade",
+   "ratio": 46.15384615384615,
+   "partial_ratio": 85.71428571428572,
+   "token_sort_ratio": 46.15384615384615,
+   "token_set_ratio": 46.15384615384615,
+   "partial_token_sort_ratio": 85.71428571428572,
+   "partial_token_set_ratio": 85.71428571428572,
+   "wratio": 77.14285714285715
+  },
+  {
+   "query": "plano",
+   "choice": "Unimed pet engenharia",
+   "ratio": 15.384615384615385,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 7.692307692307687,
+   "token_set_ratio": 7.692307692307693,
+   "partial_token_sort_ratio": 28.57142857142857,
+   "partial_token_set_ratio": 28.57142857142857,
+   "wratio": 30.000000000000004
+  },
+  {
+   "query": "conta",
+   "choice": "tv a",
+   "ratio": 44.44444444444444,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 22.22222222222222,
+   "token_set_ratio": 22.22222222222223,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 44.44444444444444
+  },
+  {
+   "query": "shop pet",
+   "choice": "sky Vivo",
+   "ratio": 25.0,
+   "partial_ratio": 36.36363636363637,
+   "token_sort_ratio": 25.0,
+   "token_set_ratio": 25.0,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 25.0
+  },
+  {
+   "query": "unimed",
+   "choice": "Netflix conta ç",
+   "ratio": 9.523809523809524,
+   "partial_ratio": 25.0,
+   "token_sort_ratio": 9.523809523809524,
+   "token_set_ratio": 9.523809523809518,
+   "partial_token_sort_ratio": 25.0,
+   "partial_token_set_ratio": 25.0,
+   "wratio": 22.5
+  },
+  {
+   "query": "a a agua",
+   "choice": "Luz",
+   "ratio": 18.181818181818176,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 18.181818181818176,
+   "token_set_ratio": 22.22222222222223,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "ão luz",
+   "choice": "seguro",
+   "ratio": 16.666666666666664,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 33.333333333333336,
+   "token_set_ratio": 33.33333333333333,
+   "partial_token_sort_ratio": 44.44444444444444,
+   "partial_token_set_ratio": 44.44444444444444,
+   "wratio": 31.666666666666668
+  },
+  {
+   "query": "a seguro pet",
+   "choice": "agua do Unimed Unimed casa ão",
+   "ratio": 29.268292682926834,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 29.268292682926834,
+   "token_set_ratio": 29.411764705882348,
+   "partial_token_sort_ratio": 42.10526315789473,
+   "partial_token_set_ratio": 42.10526315789473,
+   "wratio": 45.0
+  },
+  {
+   "query": "carro condomínio",
+   "choice": "mensalidade",
+   "ratio": 22.22222222222222,
+   "partial_ratio": 37.5,
+   "token_sort_ratio": 22.22222222222222,
+   "token_set_ratio": 22.22222222222223,
+   "partial_token_sort_ratio": 37.5,
+   "partial_token_set_ratio": 37.5,
+   "wratio": 22.22222222222222
+  },
+  {
+   "query": "luz celular",
+   "choice": "faculdade Luz cabo internet condominio carro",
+   "ratio": 29.09090909090909,
+   "partial_ratio": 47.05882352941176,
+   "token_sort_ratio": 18.181818181818176,
+   "token_set_ratio": 18.181818181818187,
+   "partial_token_sort_ratio": 45.45454545454546,
+   "partial_token_set_ratio": 45.45454545454546,
+   "wratio": 42.35294117647059
+  },
+  {
+   "query": "água ão",
+   "choice": "b aluguel faculdade condominio condominio",
+   "ratio": 20.833333333333336,
+   "partial_ratio": 42.85714285714286,
+   "token_sort_ratio": 16.666666666666664,
+   "token_set_ratio": 21.621621621621628,
+   "partial_token_sort_ratio": 42.85714285714286,
+   "partial_token_set_ratio": 42.85714285714286,
+   "wratio": 38.57142857142858
+  },
+  {
+   "query": "tv",
+   "choice": "ão iptu",
+   "ratio": 22.22222222222222,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 22.22222222222222,
+   "token_set_ratio": 22.22222222222223,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "faculdade",
+   "choice": "condominio Unimed",
+   "ratio": 23.076923076923073,
+   "partial_ratio": 30.76923076923077,
+   "token_sort_ratio": 15.384615384615385,
+   "token_set_ratio": 15.384615384615387,
+   "partial_token_sort_ratio": 22.22222222222222,
+   "partial_token_set_ratio": 22.22222222222222,
+   "wratio": 27.692307692307693
+  },
+  {
+   "query": "shop",
+   "choice": "aluguel",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "luz shop",
+   "choice": "Água mensalidade condominio Condomínio Água iptu",
+   "ratio": 17.85714285714286,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 10.71428571428571,
+   "token_set_ratio": 11.764705882352942,
+   "partial_token_sort_ratio": 37.5,
+   "partial_token_set_ratio": 37.5,
+   "wratio": 36.0
+  },
+  {
+   "query": "carro seguro",
+   "choice": "a Netflix casa claro parcela",
+   "ratio": 30.000000000000004,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 30.000000000000004,
+   "token_set_ratio": 30.0,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "luz netflix",
+   "choice": "parcela shop do de do",
+   "ratio": 18.75,
+   "partial_ratio": 23.529411764705888,
+   "token_sort_ratio": 18.75,
+   "token_set_ratio": 20.689655172413794,
+   "partial_token_sort_ratio": 27.27272727272727,
+   "partial_token_set_ratio": 27.27272727272727,
+   "wratio": 23.318181818181817
+  },
+  {
+   "query": "da mensalidade",
+   "choice": "faculdade gás luz aluguel ão da",
+   "ratio": 35.55555555555555,
+   "partial_ratio": 52.17391304347826,
+   "token_sort_ratio": 40.0,
+   "token_set_ratio": 44.44444444444444,
+   "partial_token_sort_ratio": 64.28571428571428,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "água",
+   "choice": "Luz mensalidade",
+   "ratio": 21.052631578947366,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 21.052631578947366,
+   "token_set_ratio": 21.05263157894737,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 30.000000000000004
+  },
+  {
+   "query": "escola ç",
+   "choice": "parcela plano shop de Condomínio",
+   "ratio": 19.999999999999996,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 25.0,
+   "token_set_ratio": 25.0,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "shop agua",
+   "choice": "Água casa condominio Unimed",
+   "ratio": 16.666666666666664,
+   "partial_ratio": 46.15384615384615,
+   "token_sort_ratio": 22.22222222222222,
+   "token_set_ratio": 22.22222222222223,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 42.75
+  },
+  {
+   "query": "a",
+   "choice": "faculdade saude b ç",
+   "ratio": 9.999999999999998,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 9.999999999999998,
+   "token_set_ratio": 10.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 60.0
+  },
+  {
+   "query": "seguro",
+   "choice": "celular celular",
+   "ratio": 28.57142857142857,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 28.57142857142857,
+   "token_set_ratio": 46.15384615384615,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "tv",
+   "choice": "saude sky gás Vivo",
+   "ratio": 9.999999999999998,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 9.999999999999998,
+   "token_set_ratio": 10.0,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 30.0
+  },
+  {
+   "query": "seguro escola",
+   "choice": "sky cabo saude a",
+   "ratio": 34.48275862068966,
+   "partial_ratio": 42.10526315789473,
+   "token_sort_ratio": 34.48275862068966,
+   "token_set_ratio": 34.48275862068965,
+   "partial_token_sort_ratio": 43.47826086956522,
+   "partial_token_set_ratio": 43.47826086956522,
+   "wratio": 34.48275862068966
+  },
+  {
+   "query": "tv gás",
+   "choice": "Netflix academia Netflix escola iptu",
+   "ratio": 14.28571428571429,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 14.28571428571429,
+   "token_set_ratio": 17.647058823529406,
+   "partial_token_sort_ratio": 36.36363636363637,
+   "partial_token_set_ratio": 36.36363636363637,
+   "wratio": 31.090909090909093
+  },
+  {
+   "query": "ão",
+   "choice": "ão",
+   "ratio": 100.0,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 100.0,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 100.0
+  },
+  {
+   "query": "cabo",
+   "choice": "do sky Netflix da shop",
+   "ratio": 15.384615384615385,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 15.384615384615385,
+   "token_set_ratio": 15.384615384615387,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 42.75
+  },
+  {
+   "query": "condominio",
+   "choice": "luz gás a cabo Condomínio",
+   "ratio": 51.42857142857142,
+   "partial_ratio": 84.21052631578947,
+   "token_sort_ratio": 45.714285714285715,
+   "token_set_ratio": 45.714285714285715,
+   "partial_token_sort_ratio": 80.0,
+   "partial_token_set_ratio": 80.0,
+   "wratio": 75.78947368421052
+  },
+  {
+   "query": "faculdade casa",
+   "choice": "Vivo",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "b condomínio",
+   "choice": "seguro luz da",
+   "ratio": 16.000000000000004,
+   "partial_ratio": 26.66666666666667,
+   "token_sort_ratio": 16.000000000000004,
+   "token_set_ratio": 16.0,
+   "partial_token_sort_ratio": 21.052631578947366,
+   "partial_token_set_ratio": 21.052631578947366,
+   "wratio": 16.000000000000004
+  },
+  {
+   "query": "shop carro da",
+   "choice": "shop de tv casa academia",
+   "ratio": 54.054054054054056,
+   "partial_ratio": 63.1578947368421,
+   "token_sort_ratio": 48.64864864864865,
+   "token_set_ratio": 48.648648648648646,
+   "partial_token_sort_ratio": 69.23076923076923,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "academia a ç",
+   "choice": "luz b academia luz",
+   "ratio": 60.0,
+   "partial_ratio": 75.0,
+   "token_sort_ratio": 60.0,
+   "token_set_ratio": 80.0,
+   "partial_token_sort_ratio": 85.71428571428572,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "mensalidade b",
+   "choice": "faculdade fibra",
+   "ratio": 57.14285714285714,
+   "partial_ratio": 61.53846153846154,
+   "token_sort_ratio": 42.85714285714286,
+   "token_set_ratio": 42.857142857142854,
+   "partial_token_sort_ratio": 54.54545454545454,
+   "partial_token_set_ratio": 54.54545454545454,
+   "wratio": 57.14285714285714
+  },
+  {
+   "query": "escola engenharia",
+   "choice": "internet Vivo aluguel",
+   "ratio": 26.315789473684216,
+   "partial_ratio": 31.25,
+   "token_sort_ratio": 26.315789473684216,
+   "token_set_ratio": 26.315789473684205,
+   "partial_token_sort_ratio": 35.71428571428571,
+   "partial_token_set_ratio": 35.71428571428571,
+   "wratio": 26.315789473684216
+  },
+  {
+   "query": "academia",
+   "choice": "Unimed aluguel saude academia condominio do",
+   "ratio": 31.372549019607842,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 31.372549019607842,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 90.0
+  },
+  {
+   "query": "engenharia",
+   "choice": "carro pet",
+   "ratio": 21.052631578947366,
+   "partial_ratio": 30.76923076923077,
+   "token_sort_ratio": 21.052631578947366,
+   "token_set_ratio": 21.05263157894737,
+   "partial_token_sort_ratio": 30.76923076923077,
+   "partial_token_set_ratio": 30.76923076923077,
+   "wratio": 21.052631578947366
+  },
+  {
+   "query": "sky saude ão",
+   "choice": "parcela net ç",
+   "ratio": 24.0,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 24.0,
+   "token_set_ratio": 24.0,
+   "partial_token_sort_ratio": 30.000000000000004,
+   "partial_token_set_ratio": 30.000000000000004,
+   "wratio": 24.0
+  },
+  {
+   "query": "claro",
+   "choice": "seguro celular fibra carro seguro faculdade",
+   "ratio": 20.833333333333336,
+   "partial_ratio": 80.0,
+   "token_sort_ratio": 20.833333333333336,
+   "token_set_ratio": 24.390243902439025,
+   "partial_token_sort_ratio": 80.0,
+   "partial_token_set_ratio": 80.0,
+   "wratio": 48.0
+  },
+  {
+   "query": "luz",
+   "choice": "gás mensalidade Netflix shop agua",
+   "ratio": 11.111111111111116,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 11.111111111111116,
+   "token_set_ratio": 11.111111111111114,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 24.0
+  },
+  {
+   "query": "unimed do",
+   "choice": "iptu tv plano condominio escola",
+   "ratio": 25.0,
+   "partial_ratio": 44.44444444444444,
+   "token_sort_ratio": 25.0,
+   "token_set_ratio": 25.0,
+   "partial_token_sort_ratio": 55.55555555555556,
+   "partial_token_set_ratio": 55.55555555555556,
+   "wratio": 47.5
+  },
+  {
+   "query": "água luz carro",
+   "choice": "parcela claro",
+   "ratio": 51.85185185185186,
+   "partial_ratio": 58.33333333333333,
+   "token_sort_ratio": 51.85185185185186,
+   "token_set_ratio": 51.851851851851855,
+   "partial_token_sort_ratio": 60.0,
+   "partial_token_set_ratio": 60.0,
+   "wratio": 51.85185185185186
+  },
+  {
+   "query": "sky condomínio agua",
+   "choice": "parcela",
+   "ratio": 15.384615384615385,
+   "partial_ratio": 36.36363636363637,
+   "token_sort_ratio": 15.384615384615385,
+   "token_set_ratio": 15.384615384615387,
+   "partial_token_sort_ratio": 36.36363636363637,
+   "partial_token_set_ratio": 36.36363636363637,
+   "wratio": 32.727272727272734
+  },
+  {
+   "query": "escola seguro luz",
+   "choice": "mensalidade luz do Unimed",
+   "ratio": 42.85714285714286,
+   "partial_ratio": 56.25,
+   "token_sort_ratio": 42.85714285714286,
+   "token_set_ratio": 42.857142857142854,
+   "partial_token_sort_ratio": 48.484848484848484,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 42.85714285714286
+  },
+  {
+   "query": "academia",
+   "choice": "casa iptu fibra mensalidade claro",
+   "ratio": 24.390243902439025,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 29.268292682926834,
+   "token_set_ratio": 29.268292682926827,
+   "partial_token_sort_ratio": 54.54545454545454,
+   "partial_token_set_ratio": 54.54545454545454,
+   "wratio": 46.63636363636363
+  },
+  {
+   "query": "ão casa",
+   "choice": "cabo claro Netflix plano",
+   "ratio": 32.25806451612904,
+   "partial_ratio": 57.14285714285714,
+   "token_sort_ratio": 32.25806451612904,
+   "token_set_ratio": 32.25806451612904,
+   "partial_token_sort_ratio": 42.85714285714286,
+   "partial_token_set_ratio": 42.85714285714286,
+   "wratio": 51.42857142857142
+  },
+  {
+   "query": "mensalidade",
+   "choice": "de net",
+   "ratio": 35.29411764705882,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 35.29411764705882,
+   "token_set_ratio": 35.294117647058826,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "aluguel internet faculdade",
+   "choice": "claro de seguro do Unimed",
+   "ratio": 31.372549019607842,
+   "partial_ratio": 35.0,
+   "token_sort_ratio": 39.21568627450981,
+   "token_set_ratio": 39.21568627450981,
+   "partial_token_sort_ratio": 43.47826086956522,
+   "partial_token_set_ratio": 43.47826086956522,
+   "wratio": 37.254901960784316
+  },
+  {
+   "query": "plano",
+   "choice": "seguro",
+   "ratio": 18.181818181818176,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 18.181818181818176,
+   "token_set_ratio": 18.181818181818187,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 18.181818181818176
+  },
+  {
+   "query": "luz",
+   "choice": "carro casa net casa carro sky",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "gás claro fibra",
+   "choice": "agua cabo",
+   "ratio": 41.666666666666664,
+   "partial_ratio": 55.55555555555556,
+   "token_sort_ratio": 25.0,
+   "token_set_ratio": 25.0,
+   "partial_token_sort_ratio": 42.85714285714286,
+   "partial_token_set_ratio": 42.85714285714286,
+   "wratio": 50.0
+  },
+  {
+   "query": "claro",
+   "choice": "academia shop de engenharia casa",
+   "ratio": 16.216216216216218,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 21.62162162162162,
+   "token_set_ratio": 21.621621621621628,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "faculdade sky",
+   "choice": "sky celular Luz aluguel",
+   "ratio": 27.77777777777778,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 50.0,
+   "token_set_ratio": 50.0,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "do agua",
+   "choice": "ç do Luz",
+   "ratio": 53.333333333333336,
+   "partial_ratio": 61.53846153846154,
+   "token_sort_ratio": 53.333333333333336,
+   "token_set_ratio": 53.333333333333336,
+   "partial_token_sort_ratio": 61.53846153846154,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 53.333333333333336
+  },
+  {
+   "query": "condomínio condomínio cabo",
+   "choice": "de seguro fibra casa",
+   "ratio": 30.434782608695656,
+   "partial_ratio": 37.5,
+   "token_sort_ratio": 30.434782608695656,
+   "token_set_ratio": 34.28571428571429,
+   "partial_token_sort_ratio": 37.03703703703704,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 32.57142857142858
+  },
+  {
+   "query": "b",
+   "choice": "carro plano aluguel agua faculdade",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "unimed da luz",
+   "choice": "agua agua casa",
+   "ratio": 29.629629629629626,
+   "partial_ratio": 38.095238095238095,
+   "token_sort_ratio": 29.629629629629626,
+   "token_set_ratio": 27.272727272727266,
+   "partial_token_sort_ratio": 38.095238095238095,
+   "partial_token_set_ratio": 37.5,
+   "wratio": 29.629629629629626
+  },
+  {
+   "query": "saude condominio",
+   "choice": "Água ão do",
+   "ratio": 38.46153846153846,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 30.76923076923077,
+   "token_set_ratio": 30.769230769230774,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "b",
+   "choice": "shop engenharia Unimed Condomínio ão",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "shop celular net",
+   "choice": "iptu",
+   "ratio": 19.999999999999996,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 9.999999999999998,
+   "token_set_ratio": 10.0,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "conta",
+   "choice": "fibra do conta plano",
+   "ratio": 40.0,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 40.0,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 90.0
+  },
+  {
+   "query": "parcela seguro",
+   "choice": "de Luz Água",
+   "ratio": 31.999999999999996,
+   "partial_ratio": 38.095238095238095,
+   "token_sort_ratio": 31.999999999999996,
+   "token_set_ratio": 32.0,
+   "partial_token_sort_ratio": 44.44444444444444,
+   "partial_token_set_ratio": 44.44444444444444,
+   "wratio": 31.999999999999996
+  },
+  {
+   "query": "condominio ç aluguel",
+   "choice": "mensalidade faculdade b mensalidade net Netflix",
+   "ratio": 26.865671641791046,
+   "partial_ratio": 37.83783783783784,
+   "token_sort_ratio": 29.850746268656714,
+   "token_set_ratio": 32.727272727272734,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 35.89743589743589,
+   "wratio": 34.2
+  },
+  {
+   "query": "engenharia shop",
+   "choice": "ç b claro",
+   "ratio": 25.0,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 25.0,
+   "token_set_ratio": 25.0,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 30.000000000000004
+  },
+  {
+   "query": "net carro",
+   "choice": "claro seguro de parcela saude luz",
+   "ratio": 23.809523809523814,
+   "partial_ratio": 57.14285714285714,
+   "token_sort_ratio": 28.57142857142857,
+   "token_set_ratio": 28.57142857142857,
+   "partial_token_sort_ratio": 70.58823529411764,
+   "partial_token_set_ratio": 70.58823529411764,
+   "wratio": 60.35294117647058
+  },
+  {
+   "query": "saude",
+   "choice": "iptu da",
+   "ratio": 33.333333333333336,
+   "partial_ratio": 44.44444444444444,
+   "token_sort_ratio": 33.333333333333336,
+   "token_set_ratio": 33.33333333333333,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 33.333333333333336
+  },
+  {
+   "query": "academia ç internet",
+   "choice": "tv luz",
+   "ratio": 7.9999999999999964,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 16.000000000000004,
+   "token_set_ratio": 16.0,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 28.5
+  },
+  {
+   "query": "fibra engenharia",
+   "choice": "pet a a b shop conta",
+   "ratio": 22.22222222222222,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 27.77777777777778,
+   "token_set_ratio": 23.529411764705884,
+   "partial_token_sort_ratio": 38.095238095238095,
+   "partial_token_set_ratio": 31.999999999999996,
+   "wratio": 26.38888888888889
+  },
+  {
+   "query": "sky",
+   "choice": "plano Água aluguel da",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "seguro agua faculdade",
+   "choice": "mensalidade saude gás",
+   "ratio": 38.095238095238095,
+   "partial_ratio": 43.75,
+   "token_sort_ratio": 52.38095238095239,
+   "token_set_ratio": 52.38095238095238,
+   "partial_token_sort_ratio": 57.89473684210527,
+   "partial_token_set_ratio": 57.89473684210527,
+   "wratio": 49.761904761904766
+  },
+  {
+   "query": "plano",
+   "choice": "conta",
+   "ratio": 19.999999999999996,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 19.999999999999996,
+   "token_set_ratio": 20.0,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 19.999999999999996
+  },
+  {
+   "query": "fibra academia",
+   "choice": "iptu aluguel internet luz fibra Condomínio",
+   "ratio": 32.14285714285714,
+   "partial_ratio": 57.14285714285714,
+   "token_sort_ratio": 35.71428571428571,
+   "token_set_ratio": 52.63157894736842,
+   "partial_token_sort_ratio": 57.14285714285714,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "água b",
+   "choice": "agua faculdade da",
+   "ratio": 34.78260869565217,
+   "partial_ratio": 72.72727272727273,
+   "token_sort_ratio": 26.086956521739136,
+   "token_set_ratio": 26.086956521739125,
+   "partial_token_sort_ratio": 60.0,
+   "partial_token_set_ratio": 60.0,
+   "wratio": 65.45454545454547
+  },
+  {
+   "query": "ç a casa",
+   "choice": "do pet Unimed",
+   "ratio": 19.047619047619047,
+   "partial_ratio": 26.66666666666667,
+   "token_sort_ratio": 19.047619047619047,
+   "token_set_ratio": 19.04761904761905,
+   "partial_token_sort_ratio": 26.66666666666667,
+   "partial_token_set_ratio": 26.66666666666667,
+   "wratio": 24.000000000000004
+  },
+  {
+   "query": "pet sky",
+   "choice": "academia internet faculdade",
+   "ratio": 17.647058823529417,
+   "partial_ratio": 42.85714285714286,
+   "token_sort_ratio": 11.764705882352944,
+   "token_set_ratio": 11.764705882352942,
+   "partial_token_sort_ratio": 44.44444444444444,
+   "partial_token_set_ratio": 44.44444444444444,
+   "wratio": 38.57142857142858
+  },
+  {
+   "query": "plano condomínio gás",
+   "choice": "da iptu",
+   "ratio": 22.22222222222222,
+   "partial_ratio": 30.76923076923077,
+   "token_sort_ratio": 22.22222222222222,
+   "token_set_ratio": 22.22222222222223,
+   "partial_token_sort_ratio": 30.76923076923077,
+   "partial_token_set_ratio": 30.76923076923077,
+   "wratio": 27.692307692307693
+  },
+  {
+   "query": "cabo a",
+   "choice": "Unimed",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "mensalidade",
+   "choice": "tv",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "faculdade aluguel",
+   "choice": "fibra",
+   "ratio": 18.181818181818176,
+   "partial_ratio": 57.14285714285714,
+   "token_sort_ratio": 18.181818181818176,
+   "token_set_ratio": 18.181818181818187,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 51.42857142857142
+  },
+  {
+   "query": "mensalidade faculdade",
+   "choice": "Água condominio",
+   "ratio": 22.22222222222222,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 33.333333333333336,
+   "token_set_ratio": 33.33333333333333,
+   "partial_token_sort_ratio": 34.48275862068966,
+   "partial_token_set_ratio": 34.48275862068966,
+   "wratio": 31.666666666666668
+  },
+  {
+   "query": "aluguel a",
+   "choice": "cabo Condomínio claro",
+   "ratio": 19.999999999999996,
+   "partial_ratio": 30.76923076923077,
+   "token_sort_ratio": 19.999999999999996,
+   "token_set_ratio": 20.0,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 28.5
+  },
+  {
+   "query": "escola",
+   "choice": "condominio Netflix casa net saude",
+   "ratio": 20.512820512820518,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 25.64102564102564,
+   "token_set_ratio": 25.641025641025635,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "academia",
+   "choice": "engenharia mensalidade b plano",
+   "ratio": 26.315789473684216,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 26.315789473684216,
+   "token_set_ratio": 26.315789473684205,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "plano pet carro",
+   "choice": "seguro",
+   "ratio": 28.57142857142857,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 19.047619047619047,
+   "token_set_ratio": 19.04761904761905,
+   "partial_token_sort_ratio": 36.36363636363637,
+   "partial_token_set_ratio": 36.36363636363637,
+   "wratio": 45.0
+  },
+  {
+   "query": "condominio",
+   "choice": "Netflix de",
+   "ratio": 9.999999999999998,
+   "partial_ratio": 16.666666666666664,
+   "token_sort_ratio": 9.999999999999998,
+   "token_set_ratio": 10.0,
+   "partial_token_sort_ratio": 16.666666666666664,
+   "partial_token_set_ratio": 16.666666666666664,
+   "wratio": 9.999999999999998
+  },
+  {
+   "query": "engenharia condominio",
+   "choice": "escola",
+   "ratio": 22.22222222222222,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 22.22222222222222,
+   "token_set_ratio": 22.22222222222223,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 42.75
+  },
+  {
+   "query": "de",
+   "choice": "cabo",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "cabo",
+   "choice": "shop do fibra",
+   "ratio": 11.764705882352944,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 23.529411764705888,
+   "token_set_ratio": 23.529411764705884,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 36.0
+  },
+  {
+   "query": "gás",
+   "choice": "condominio agua conta Vivo faculdade cabo",
+   "ratio": 4.545454545454541,
+   "partial_ratio": 33.333333333333336,
+   "token_sort_ratio": 4.545454545454541,
+   "token_set_ratio": 4.545454545454547,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 20.0
+  },
+  {
+   "query": "shop engenharia",
+   "choice": "internet Unimed ç shop",
+   "ratio": 27.027027027027028,
+   "partial_ratio": 42.10526315789473,
+   "token_sort_ratio": 48.64864864864865,
+   "token_set_ratio": 48.648648648648646,
+   "partial_token_sort_ratio": 59.25925925925925,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 46.21621621621622
+  },
+  {
+   "query": "casa",
+   "choice": "carro plano sky a Luz carro",
+   "ratio": 25.806451612903224,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 19.354838709677423,
+   "token_set_ratio": 24.0,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 60.00000000000001
+  },
+  {
+   "query": "a parcela celular",
+   "choice": "celular fibra da",
+   "ratio": 42.42424242424242,
+   "partial_ratio": 60.86956521739131,
+   "token_sort_ratio": 66.66666666666667,
+   "token_set_ratio": 72.72727272727272,
+   "partial_token_sort_ratio": 70.96774193548387,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 69.09090909090908
+  },
+  {
+   "query": "escola condominio",
+   "choice": "ç iptu fibra Vivo escola",
+   "ratio": 29.268292682926834,
+   "partial_ratio": 52.17391304347826,
+   "token_sort_ratio": 43.90243902439024,
+   "token_set_ratio": 52.17391304347826,
+   "partial_token_sort_ratio": 64.28571428571428,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 49.565217391304344
+  },
+  {
+   "query": "da do shop",
+   "choice": "academia escola pet sky",
+   "ratio": 36.36363636363637,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 36.36363636363637,
+   "token_set_ratio": 36.36363636363637,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "carro",
+   "choice": "da cabo escola seguro condominio",
+   "ratio": 21.62162162162162,
+   "partial_ratio": 60.0,
+   "token_sort_ratio": 21.62162162162162,
+   "token_set_ratio": 21.621621621621628,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 57.0
+  },
+  {
+   "query": "internet tv",
+   "choice": "condominio tv",
+   "ratio": 41.666666666666664,
+   "partial_ratio": 55.55555555555556,
+   "token_sort_ratio": 41.666666666666664,
+   "token_set_ratio": 41.666666666666664,
+   "partial_token_sort_ratio": 55.55555555555556,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 41.666666666666664
+  },
+  {
+   "query": "fibra net",
+   "choice": "academia",
+   "ratio": 23.529411764705888,
+   "partial_ratio": 30.76923076923077,
+   "token_sort_ratio": 23.529411764705888,
+   "token_set_ratio": 23.529411764705884,
+   "partial_token_sort_ratio": 30.76923076923077,
+   "partial_token_set_ratio": 30.76923076923077,
+   "wratio": 23.529411764705888
+  },
+  {
+   "query": "tv luz netflix",
+   "choice": "mensalidade b fibra seguro escola seguro",
+   "ratio": 18.518518518518523,
+   "partial_ratio": 35.71428571428571,
+   "token_sort_ratio": 22.22222222222222,
+   "token_set_ratio": 25.531914893617028,
+   "partial_token_sort_ratio": 35.71428571428571,
+   "partial_token_set_ratio": 35.71428571428571,
+   "wratio": 32.14285714285714
+  },
+  {
+   "query": "agua tv pet",
+   "choice": "de Vivo Unimed casa",
+   "ratio": 26.66666666666667,
+   "partial_ratio": 36.36363636363637,
+   "token_sort_ratio": 26.66666666666667,
+   "token_set_ratio": 26.66666666666667,
+   "partial_token_sort_ratio": 47.05882352941176,
+   "partial_token_set_ratio": 47.05882352941176,
+   "wratio": 40.23529411764706
+  },
+  {
+   "query": "da parcela",
+   "choice": "fibra iptu",
+   "ratio": 30.000000000000004,
+   "partial_ratio": 42.85714285714286,
+   "token_sort_ratio": 30.000000000000004,
+   "token_set_ratio": 30.0,
+   "partial_token_sort_ratio": 42.85714285714286,
+   "partial_token_set_ratio": 42.85714285714286,
+   "wratio": 30.000000000000004
+  },
+  {
+   "query": "plano",
+   "choice": "sky mensalidade escola engenharia academia de",
+   "ratio": 12.0,
+   "partial_ratio": 60.0,
+   "token_sort_ratio": 12.0,
+   "token_set_ratio": 12.0,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "academia",
+   "choice": "seguro casa Condomínio",
+   "ratio": 33.333333333333336,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 26.66666666666667,
+   "token_set_ratio": 26.66666666666667,
+   "partial_token_sort_ratio": 37.5,
+   "partial_token_set_ratio": 37.5,
+   "wratio": 36.0
+  },
+  {
+   "query": "parcela",
+   "choice": "fibra fibra",
+   "ratio": 33.333333333333336,
+   "partial_ratio": 44.44444444444444,
+   "token_sort_ratio": 33.333333333333336,
+   "token_set_ratio": 33.33333333333333,
+   "partial_token_sort_ratio": 44.44444444444444,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 40.0
+  },
+  {
+   "query": "iptu engenharia cabo",
+   "choice": "Água parcela condominio",
+   "ratio": 37.2093023255814,
+   "partial_ratio": 45.714285714285715,
+   "token_sort_ratio": 41.860465116279066,
+   "token_set_ratio": 41.86046511627907,
+   "partial_token_sort_ratio": 43.75,
+   "partial_token_set_ratio": 43.75,
+   "wratio": 39.76744186046512
+  },
+  {
+   "query": "internet",
+   "choice": "shop internet internet carro Netflix",
+   "ratio": 36.36363636363637,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 36.36363636363637,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 90.0
+  },
+  {
+   "query": "conta fibra carro",
+   "choice": "pet saude condominio mensalidade Unimed escola",
+   "ratio": 28.57142857142857,
+   "partial_ratio": 41.379310344827594,
+   "token_sort_ratio": 28.57142857142857,
+   "token_set_ratio": 28.57142857142857,
+   "partial_token_sort_ratio": 41.17647058823529,
+   "partial_token_set_ratio": 41.17647058823529,
+   "wratio": 37.24137931034483
+  },
+  {
+   "query": "vivo condomínio",
+   "choice": "pet carro a conta b",
+   "ratio": 29.411764705882348,
+   "partial_ratio": 38.46153846153846,
+   "token_sort_ratio": 29.411764705882348,
+   "token_set_ratio": 29.411764705882348,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 29.411764705882348
+  },
+  {
+   "query": "engenharia água",
+   "choice": "seguro saude gás mensalidade parcela internet",
+   "ratio": 30.000000000000004,
+   "partial_ratio": 46.666666666666664,
+   "token_sort_ratio": 33.333333333333336,
+   "token_set_ratio": 33.33333333333333,
+   "partial_token_sort_ratio": 46.666666666666664,
+   "partial_token_set_ratio": 46.666666666666664,
+   "wratio": 42.0
+  },
+  {
+   "query": "ão do",
+   "choice": "Netflix condominio casa escola de luz",
+   "ratio": 14.28571428571429,
+   "partial_ratio": 60.0,
+   "token_sort_ratio": 19.047619047619047,
+   "token_set_ratio": 19.04761904761905,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 54.0
+  },
+  {
+   "query": "netflix pet saude",
+   "choice": "condominio",
+   "ratio": 14.814814814814813,
+   "partial_ratio": 25.0,
+   "token_sort_ratio": 14.814814814814813,
+   "token_set_ratio": 14.81481481481481,
+   "partial_token_sort_ratio": 25.0,
+   "partial_token_set_ratio": 25.0,
+   "wratio": 22.5
+  },
+  {
+   "query": "casa",
+   "choice": "fibra",
+   "ratio": 22.22222222222222,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 22.22222222222222,
+   "token_set_ratio": 22.22222222222223,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 22.22222222222222
+  },
+  {
+   "query": "aluguel",
+   "choice": "ão agua",
+   "ratio": 42.85714285714286,
+   "partial_ratio": 54.54545454545454,
+   "token_sort_ratio": 42.85714285714286,
+   "token_set_ratio": 42.857142857142854,
+   "partial_token_sort_ratio": 60.0,
+   "partial_token_set_ratio": 60.0,
+   "wratio": 42.85714285714286
+  },
+  {
+   "query": "casa luz",
+   "choice": "engenharia faculdade",
+   "ratio": 28.57142857142857,
+   "partial_ratio": 37.5,
+   "token_sort_ratio": 28.57142857142857,
+   "token_set_ratio": 28.57142857142857,
+   "partial_token_sort_ratio": 37.5,
+   "partial_token_set_ratio": 37.5,
+   "wratio": 33.75
+  },
+  {
+   "query": "plano plano",
+   "choice": "Vivo",
+   "ratio": 13.33333333333333,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 13.33333333333333,
+   "token_set_ratio": 22.22222222222223,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 36.0
+  },
+  {
+   "query": "faculdade luz sky",
+   "choice": "da aluguel Unimed cabo",
+   "ratio": 30.76923076923077,
+   "partial_ratio": 43.47826086956522,
+   "token_sort_ratio": 25.64102564102564,
+   "token_set_ratio": 25.641025641025635,
+   "partial_token_sort_ratio": 31.25,
+   "partial_token_set_ratio": 31.25,
+   "wratio": 30.76923076923077
+  },
+  {
+   "query": "claro",
+   "choice": "condominio a claro do",
+   "ratio": 38.46153846153846,
+   "partial_ratio": 100.0,
+   "token_sort_ratio": 38.46153846153846,
+   "token_set_ratio": 100.0,
+   "partial_token_sort_ratio": 100.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 90.0
+  },
+  {
+   "query": "luz",
+   "choice": "Luz engenharia gás parcela",
+   "ratio": 13.793103448275868,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 13.793103448275868,
+   "token_set_ratio": 13.793103448275858,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 40.0
+  },
+  {
+   "query": "celular fibra",
+   "choice": "Unimed internet internet",
+   "ratio": 27.027027027027028,
+   "partial_ratio": 38.46153846153846,
+   "token_sort_ratio": 27.027027027027028,
+   "token_set_ratio": 28.57142857142857,
+   "partial_token_sort_ratio": 38.46153846153846,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 34.61538461538461
+  },
+  {
+   "query": "condominio ão",
+   "choice": "seguro cabo pet Luz a saude",
+   "ratio": 15.000000000000002,
+   "partial_ratio": 25.0,
+   "token_sort_ratio": 25.0,
+   "token_set_ratio": 25.0,
+   "partial_token_sort_ratio": 27.27272727272727,
+   "partial_token_set_ratio": 27.27272727272727,
+   "wratio": 23.318181818181817
+  },
+  {
+   "query": "pet",
+   "choice": "aluguel engenharia academia tv",
+   "ratio": 12.121212121212121,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 12.121212121212121,
+   "token_set_ratio": 12.121212121212125,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 24.0
+  },
+  {
+   "query": "claro parcela",
+   "choice": "ç internet net",
+   "ratio": 22.22222222222222,
+   "partial_ratio": 28.57142857142857,
+   "token_sort_ratio": 22.22222222222222,
+   "token_set_ratio": 22.22222222222223,
+   "partial_token_sort_ratio": 26.086956521739136,
+   "partial_token_set_ratio": 26.086956521739136,
+   "wratio": 22.22222222222222
+  },
+  {
+   "query": "condominio",
+   "choice": "claro parcela do saude",
+   "ratio": 25.0,
+   "partial_ratio": 30.000000000000004,
+   "token_sort_ratio": 25.0,
+   "token_set_ratio": 25.0,
+   "partial_token_sort_ratio": 44.44444444444444,
+   "partial_token_set_ratio": 44.44444444444444,
+   "wratio": 38.0
+  },
+  {
+   "query": "ç escola luz",
+   "choice": "gás Luz internet parcela escola",
+   "ratio": 32.55813953488372,
+   "partial_ratio": 73.6842105263158,
+   "token_sort_ratio": 37.2093023255814,
+   "token_set_ratio": 66.66666666666666,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "celular",
+   "choice": "sky casa claro sky plano",
+   "ratio": 25.806451612903224,
+   "partial_ratio": 57.14285714285714,
+   "token_sort_ratio": 25.806451612903224,
+   "token_set_ratio": 29.629629629629633,
+   "partial_token_sort_ratio": 57.14285714285714,
+   "partial_token_set_ratio": 57.14285714285714,
+   "wratio": 51.42857142857142
+  },
+  {
+   "query": "luz seguro shop",
+   "choice": "conta saude ão cabo",
+   "ratio": 35.29411764705882,
+   "partial_ratio": 41.379310344827594,
+   "token_sort_ratio": 29.411764705882348,
+   "token_set_ratio": 29.411764705882348,
+   "partial_token_sort_ratio": 41.666666666666664,
+   "partial_token_set_ratio": 41.666666666666664,
+   "wratio": 35.29411764705882
+  },
+  {
+   "query": "internet condominio a",
+   "choice": "seguro claro",
+   "ratio": 30.303030303030297,
+   "partial_ratio": 43.47826086956522,
+   "token_sort_ratio": 30.303030303030297,
+   "token_set_ratio": 30.303030303030297,
+   "partial_token_sort_ratio": 37.5,
+   "partial_token_set_ratio": 37.5,
+   "wratio": 39.130434782608695
+  },
+  {
+   "query": "celular",
+   "choice": "fibra conta parcela",
+   "ratio": 30.76923076923077,
+   "partial_ratio": 72.72727272727273,
+   "token_sort_ratio": 30.76923076923077,
+   "token_set_ratio": 30.769230769230774,
+   "partial_token_sort_ratio": 72.72727272727273,
+   "partial_token_set_ratio": 72.72727272727273,
+   "wratio": 65.45454545454547
+  },
+  {
+   "query": "aluguel da",
+   "choice": "b escola",
+   "ratio": 33.333333333333336,
+   "partial_ratio": 46.15384615384615,
+   "token_sort_ratio": 33.333333333333336,
+   "token_set_ratio": 33.33333333333333,
+   "partial_token_sort_ratio": 46.15384615384615,
+   "partial_token_set_ratio": 46.15384615384615,
+   "wratio": 33.333333333333336
+  },
+  {
+   "query": "água netflix",
+   "choice": "carro Água ç",
+   "ratio": 33.333333333333336,
+   "partial_ratio": 47.05882352941176,
+   "token_sort_ratio": 33.333333333333336,
+   "token_set_ratio": 33.33333333333333,
+   "partial_token_sort_ratio": 47.05882352941176,
+   "partial_token_set_ratio": 47.05882352941176,
+   "wratio": 33.333333333333336
+  },
+  {
+   "query": "luz",
+   "choice": "claro Luz net Unimed Condomínio carro",
+   "ratio": 15.000000000000002,
+   "partial_ratio": 66.66666666666667,
+   "token_sort_ratio": 9.999999999999998,
+   "token_set_ratio": 10.0,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 40.0
+  },
+  {
+   "query": "saude aluguel",
+   "choice": "gás b fibra mensalidade celular",
+   "ratio": 36.36363636363637,
+   "partial_ratio": 58.33333333333333,
+   "token_sort_ratio": 36.36363636363637,
+   "token_set_ratio": 36.36363636363637,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 52.5
+  },
+  {
+   "query": "de",
+   "choice": "parcela plano Água",
+   "ratio": 9.999999999999998,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 9.999999999999998,
+   "token_set_ratio": 10.0,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 30.0
+  },
+  {
+   "query": "sky engenharia",
+   "choice": "aluguel cabo fibra",
+   "ratio": 31.25,
+   "partial_ratio": 31.999999999999996,
+   "token_sort_ratio": 31.25,
+   "token_set_ratio": 31.25,
+   "partial_token_sort_ratio": 29.629629629629626,
+   "partial_token_set_ratio": 29.629629629629626,
+   "wratio": 31.25
+  },
+  {
+   "query": "academia",
+   "choice": "sky",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "do",
+   "choice": "agua luz",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "vivo a",
+   "choice": "iptu a b cabo pet",
+   "ratio": 26.086956521739136,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 26.086956521739136,
+   "token_set_ratio": 28.57142857142857,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 100.0,
+   "wratio": 85.5
+  },
+  {
+   "query": "iptu faculdade gás",
+   "choice": "aluguel pet",
+   "ratio": 27.586206896551722,
+   "partial_ratio": 36.36363636363637,
+   "token_sort_ratio": 41.379310344827594,
+   "token_set_ratio": 41.37931034482759,
+   "partial_token_sort_ratio": 45.45454545454546,
+   "partial_token_set_ratio": 45.45454545454546,
+   "wratio": 38.86363636363637
+  },
+  {
+   "query": "gás condominio celular",
+   "choice": "b escola shop engenharia a faculdade",
+   "ratio": 37.93103448275862,
+   "partial_ratio": 40.90909090909091,
+   "token_sort_ratio": 31.034482758620683,
+   "token_set_ratio": 31.034482758620683,
+   "partial_token_sort_ratio": 41.17647058823529,
+   "partial_token_set_ratio": 41.17647058823529,
+   "wratio": 37.93103448275862
+  },
+  {
+   "query": "de fibra",
+   "choice": "sky shop Vivo agua",
+   "ratio": 23.076923076923073,
+   "partial_ratio": 37.5,
+   "token_sort_ratio": 15.384615384615385,
+   "token_set_ratio": 15.384615384615387,
+   "partial_token_sort_ratio": 28.57142857142857,
+   "partial_token_set_ratio": 28.57142857142857,
+   "wratio": 33.75
+  },
+  {
+   "query": "celular tv netflix",
+   "choice": "Água faculdade de b iptu",
+   "ratio": 33.333333333333336,
+   "partial_ratio": 40.0,
+   "token_sort_ratio": 33.333333333333336,
+   "token_set_ratio": 33.33333333333333,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 33.333333333333336
+  },
+  {
+   "query": "cabo netflix engenharia",
+   "choice": "tv",
+   "ratio": 7.9999999999999964,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 7.9999999999999964,
+   "token_set_ratio": 8.0,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 30.0
+  },
+  {
+   "query": "gás carro ão",
+   "choice": "iptu conta conta academia a iptu",
+   "ratio": 22.72727272727273,
+   "partial_ratio": 41.666666666666664,
+   "token_sort_ratio": 22.72727272727273,
+   "token_set_ratio": 24.24242424242425,
+   "partial_token_sort_ratio": 33.333333333333336,
+   "partial_token_set_ratio": 33.333333333333336,
+   "wratio": 37.5
+  },
+  {
+   "query": "netflix netflix conta",
+   "choice": "sky",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "claro casa",
+   "choice": "b",
+   "ratio": 0.0,
+   "partial_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "token_set_ratio": 0.0,
+   "partial_token_sort_ratio": 0.0,
+   "partial_token_set_ratio": 0.0,
+   "wratio": 0.0
+  },
+  {
+   "query": "cabo conta",
+   "choice": "do condominio",
+   "ratio": 43.47826086956522,
+   "partial_ratio": 62.5,
+   "token_sort_ratio": 34.78260869565217,
+   "token_set_ratio": 34.78260869565217,
+   "partial_token_sort_ratio": 46.15384615384615,
+   "partial_token_set_ratio": 46.15384615384615,
+   "wratio": 43.47826086956522
+  },
+  {
+   "query": "engenharia",
+   "choice": "seguro saude Luz",
+   "ratio": 30.76923076923077,
+   "partial_ratio": 42.10526315789473,
+   "token_sort_ratio": 23.076923076923073,
+   "token_set_ratio": 23.07692307692308,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 37.89473684210526
+  },
+  {
+   "query": "internet da",
+   "choice": "seguro Água Vivo sky Netflix",
+   "ratio": 20.512820512820518,
+   "partial_ratio": 36.36363636363637,
+   "token_sort_ratio": 20.512820512820518,
+   "token_set_ratio": 20.51282051282051,
+   "partial_token_sort_ratio": 36.36363636363637,
+   "partial_token_set_ratio": 36.36363636363637,
+   "wratio": 32.727272727272734
+  },
+  {
+   "query": "aluguel shop",
+   "choice": "conta luz parcela ão",
+   "ratio": 43.75,
+   "partial_ratio": 47.61904761904761,
+   "token_sort_ratio": 43.75,
+   "token_set_ratio": 43.75,
+   "partial_token_sort_ratio": 47.61904761904761,
+   "partial_token_set_ratio": 47.61904761904761,
+   "wratio": 43.75
+  },
+  {
+   "query": "claro",
+   "choice": "Unimed plano faculdade luz plano Unimed",
+   "ratio": 18.181818181818176,
+   "partial_ratio": 60.0,
+   "token_sort_ratio": 18.181818181818176,
+   "token_set_ratio": 25.80645161290323,
+   "partial_token_sort_ratio": 66.66666666666667,
+   "partial_token_set_ratio": 66.66666666666667,
+   "wratio": 57.0
+  },
+  {
+   "query": "pet",
+   "choice": "tv luz",
+   "ratio": 22.22222222222222,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 22.22222222222222,
+   "token_set_ratio": 22.22222222222223,
+   "partial_token_sort_ratio": 40.0,
+   "partial_token_set_ratio": 40.0,
+   "wratio": 45.0
+  },
+  {
+   "query": "casa vivo shop",
+   "choice": "Condomínio ç",
+   "ratio": 23.076923076923073,
+   "partial_ratio": 30.000000000000004,
+   "token_sort_ratio": 23.076923076923073,
+   "token_set_ratio": 23.07692307692308,
+   "partial_token_sort_ratio": 31.57894736842105,
+   "partial_token_set_ratio": 31.57894736842105,
+   "wratio": 23.076923076923073
+  },
+  {
+   "query": "shop faculdade",
+   "choice": "ç condominio aluguel da celular parcela",
+   "ratio": 30.188679245283023,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 30.188679245283023,
+   "token_set_ratio": 30.188679245283012,
+   "partial_token_sort_ratio": 45.45454545454546,
+   "partial_token_set_ratio": 45.45454545454546,
+   "wratio": 45.0
+  },
+  {
+   "query": "plano",
+   "choice": "pet",
+   "ratio": 25.0,
+   "partial_ratio": 50.0,
+   "token_sort_ratio": 25.0,
+   "token_set_ratio": 25.0,
+   "partial_token_sort_ratio": 50.0,
+   "partial_token_set_ratio": 50.0,
+   "wratio": 45.0
+  }
+ ],
+ "extract_one": [
+  {
+   "query": "luz",
+   "choices": [
+    "Luz",
+    "Aluguel",
+    "Internet"
+   ],
+   "match": "Luz",
+   "score": 66.66666666666667
+  },
+  {
+   "query": "luz",
+   "choices": [
+    "Conta de Luz",
+    "Aluguel"
+   ],
+   "match": "Conta de Luz",
+   "score": 72.0
+  },
+  {
+   "query": "agua",
+   "choices": [
+    "Água",
+    "Aluguel"
+   ],
+   "match": "Água",
+   "score": 75.0
+  },
+  {
+   "query": "internet",
+   "choices": [
+    "Internet",
+    "Internet Vivo",
+    "Intercept"
+   ],
+   "match": "Internet",
+   "score": 87.5
+  },
+  {
+   "query": "net",
+   "choices": [
+    "Netflix",
+    "Net",
+    "NET Claro"
+   ],
+   "match": "Net",
+   "score": 66.66666666666667
+  },
+  {
+   "query": "escola",
+   "choices": [
+    "Escola do Joao",
+    "Escolha",
+    "Escola"
+   ],
+   "match": "Escola",
+   "score": 83.33333333333334
+  },
+  {
+   "query": "xyz",
+   "choices": [
+    "Luz",
+    "Aluguel"
+   ],
+   "match": null,
+   "score": null
+  },
+  {
+   "query": "aluguel",
+   "choices": [
+    "Aluguel",
+    "aluguel",
+    "Aluguel"
+   ],
+   "match": "aluguel",
+   "score": 100.0
+  },
+  {
+   "query": "condominio",
+   "choices": [
+    "Condomínio",
+    "Condominio Bloco B",
+    "Aluguel"
+   ],
+   "match": "Condominio Bloco B",
+   "score": 81.0
+  },
+  {
+   "query": "plano",
+   "choices": [
+    "Plano de Saude",
+    "Plano Celular",
+    "Planta"
+   ],
+   "match": "Plano Celular",
+   "score": 76.0
+  },
+  {
+   "query": "spotify",
+   "choices": [],
+   "match": null,
+   "score": null
+  },
+  {
+   "query": "gas",
+   "choices": [
+    "Gás",
+    "Gas Encanado",
+    "Gasolina"
+   ],
+   "match": "Gas Encanado",
+   "score": 68.4
+  }
+ ],
+ "periods": [
+  {
+   "periodicity": "SEMANAL",
+   "date": "2026-10-05",
+   "start": "2026-10-05",
+   "end": "2026-10-11"
+  },
+  {
+   "periodicity": "SEMANAL",
+   "date": "2026-10-15",
+   "start": "2026-10-12",
+   "end": "2026-10-18"
+  },
+  {
+   "periodicity": "SEMANAL",
+   "date": "2026-10-16",
+   "start": "2026-10-12",
+   "end": "2026-10-18"
+  },
+  {
+   "periodicity": "SEMANAL",
+   "date": "2026-02-28",
+   "start": "2026-02-23",
+   "end": "2026-03-01"
+  },
+  {
+   "periodicity": "SEMANAL",
+   "date": "2028-02-29",
+   "start": "2028-02-28",
+   "end": "2028-03-05"
+  },
+  {
+   "periodicity": "SEMANAL",
+   "date": "2026-12-31",
+   "start": "2026-12-28",
+   "end": "2027-01-03"
+  },
+  {
+   "periodicity": "SEMANAL",
+   "date": "2026-01-01",
+   "start": "2025-12-29",
+   "end": "2026-01-04"
+  },
+  {
+   "periodicity": "SEMANAL",
+   "date": "2026-10-04",
+   "start": "2026-09-28",
+   "end": "2026-10-04"
+  },
+  {
+   "periodicity": "SEMANAL",
+   "date": "2026-10-11",
+   "start": "2026-10-05",
+   "end": "2026-10-11"
+  },
+  {
+   "periodicity": "QUINZENAL",
+   "date": "2026-10-05",
+   "start": "2026-10-01",
+   "end": "2026-10-15"
+  },
+  {
+   "periodicity": "QUINZENAL",
+   "date": "2026-10-15",
+   "start": "2026-10-01",
+   "end": "2026-10-15"
+  },
+  {
+   "periodicity": "QUINZENAL",
+   "date": "2026-10-16",
+   "start": "2026-10-16",
+   "end": "2026-10-31"
+  },
+  {
+   "periodicity": "QUINZENAL",
+   "date": "2026-02-28",
+   "start": "2026-02-16",
+   "end": "2026-02-28"
+  },
+  {
+   "periodicity": "QUINZENAL",
+   "date": "2028-02-29",
+   "start": "2028-02-16",
+   "end": "2028-02-29"
+  },
+  {
+   "periodicity": "QUINZENAL",
+   "date": "2026-12-31",
+   "start": "2026-12-16",
+   "end": "2026-12-31"
+  },
+  {
+   "periodicity": "QUINZENAL",
+   "date": "2026-01-01",
+   "start": "2026-01-01",
+   "end": "2026-01-15"
+  },
+  {
+   "periodicity": "QUINZENAL",
+   "date": "2026-10-04",
+   "start": "2026-10-01",
+   "end": "2026-10-15"
+  },
+  {
+   "periodicity": "QUINZENAL",
+   "date": "2026-10-11",
+   "start": "2026-10-01",
+   "end": "2026-10-15"
+  },
+  {
+   "periodicity": "MENSAL",
+   "date": "2026-10-05",
+   "start": "2026-10-01",
+   "end": "2026-10-31"
+  },
+  {
+   "periodicity": "MENSAL",
+   "date": "2026-10-15",
+   "start": "2026-10-01",
+   "end": "2026-10-31"
+  },
+  {
+   "periodicity": "MENSAL",
+   "date": "2026-10-16",
+   "start": "2026-10-01",
+   "end": "2026-10-31"
+  },
+  {
+   "periodicity": "MENSAL",
+   "date": "2026-02-28",
+   "start": "2026-02-01",
+   "end": "2026-02-28"
+  },
+  {
+   "periodicity": "MENSAL",
+   "date": "2028-02-29",
+   "start": "2028-02-01",
+   "end": "2028-02-29"
+  },
+  {
+   "periodicity": "MENSAL",
+   "date": "2026-12-31",
+   "start": "2026-12-01",
+   "end": "2026-12-31"
+  },
+  {
+   "periodicity": "MENSAL",
+   "date": "2026-01-01",
+   "start": "2026-01-01",
+   "end": "2026-01-31"
+  },
+  {
+   "periodicity": "MENSAL",
+   "date": "2026-10-04",
+   "start": "2026-10-01",
+   "end": "2026-10-31"
+  },
+  {
+   "periodicity": "MENSAL",
+   "date": "2026-10-11",
+   "start": "2026-10-01",
+   "end": "2026-10-31"
+  },
+  {
+   "periodicity": "ANUAL",
+   "date": "2026-10-05",
+   "start": "2026-01-01",
+   "end": "2026-12-31"
+  },
+  {
+   "periodicity": "ANUAL",
+   "date": "2026-10-15",
+   "start": "2026-01-01",
+   "end": "2026-12-31"
+  },
+  {
+   "periodicity": "ANUAL",
+   "date": "2026-10-16",
+   "start": "2026-01-01",
+   "end": "2026-12-31"
+  },
+  {
+   "periodicity": "ANUAL",
+   "date": "2026-02-28",
+   "start": "2026-01-01",
+   "end": "2026-12-31"
+  },
+  {
+   "periodicity": "ANUAL",
+   "date": "2028-02-29",
+   "start": "2028-01-01",
+   "end": "2028-12-31"
+  },
+  {
+   "periodicity": "ANUAL",
+   "date": "2026-12-31",
+   "start": "2026-01-01",
+   "end": "2026-12-31"
+  },
+  {
+   "periodicity": "ANUAL",
+   "date": "2026-01-01",
+   "start": "2026-01-01",
+   "end": "2026-12-31"
+  },
+  {
+   "periodicity": "ANUAL",
+   "date": "2026-10-04",
+   "start": "2026-01-01",
+   "end": "2026-12-31"
+  },
+  {
+   "periodicity": "ANUAL",
+   "date": "2026-10-11",
+   "start": "2026-01-01",
+   "end": "2026-12-31"
+  },
+  {
+   "periodicity": "OUTRA",
+   "date": "2026-10-05",
+   "start": "2026-10-01",
+   "end": "2026-10-31"
+  },
+  {
+   "periodicity": "OUTRA",
+   "date": "2026-10-15",
+   "start": "2026-10-01",
+   "end": "2026-10-31"
+  },
+  {
+   "periodicity": "OUTRA",
+   "date": "2026-10-16",
+   "start": "2026-10-01",
+   "end": "2026-10-31"
+  },
+  {
+   "periodicity": "OUTRA",
+   "date": "2026-02-28",
+   "start": "2026-02-01",
+   "end": "2026-02-28"
+  },
+  {
+   "periodicity": "OUTRA",
+   "date": "2028-02-29",
+   "start": "2028-02-01",
+   "end": "2028-02-29"
+  },
+  {
+   "periodicity": "OUTRA",
+   "date": "2026-12-31",
+   "start": "2026-12-01",
+   "end": "2026-12-31"
+  },
+  {
+   "periodicity": "OUTRA",
+   "date": "2026-01-01",
+   "start": "2026-01-01",
+   "end": "2026-01-31"
+  },
+  {
+   "periodicity": "OUTRA",
+   "date": "2026-10-04",
+   "start": "2026-10-01",
+   "end": "2026-10-31"
+  },
+  {
+   "periodicity": "OUTRA",
+   "date": "2026-10-11",
+   "start": "2026-10-01",
+   "end": "2026-10-31"
+  }
+ ],
+ "budget": [
+  {
+   "name": "sem_pote",
+   "pots": [],
+   "spends": [],
+   "amount": 50.0,
+   "requires_confirmation": false,
+   "message": "",
+   "validations": []
+  },
+  {
+   "name": "dentro",
+   "pots": [
+    {
+     "id": 1,
+     "name": "Mercado",
+     "limit": "500.00",
+     "periodicity": "MENSAL"
+    }
+   ],
+   "spends": [
+    "-100.00"
+   ],
+   "amount": 50.0,
+   "requires_confirmation": false,
+   "message": "",
+   "validations": [
+    {
+     "id": 1,
+     "spent": 100.0,
+     "after": 150.0,
+     "percent": 30.0,
+     "exceeds": false
+    }
+   ]
+  },
+  {
+   "name": "estoura_um",
+   "pots": [
+    {
+     "id": 1,
+     "name": "Mercado",
+     "limit": "500.00",
+     "periodicity": "MENSAL"
+    }
+   ],
+   "spends": [
+    "-480.00"
+   ],
+   "amount": 50.0,
+   "requires_confirmation": true,
+   "message": "Atenção: Esta despesa ultrapassará seu limite!\n\nPote: Mercado\nLimite: R$ 500.00\nGasto atual: R$ 480.00\nApós transação: R$ 530.00 (106.0% do limite)\nExcesso: R$ 30.00\n\nDeseja prosseguir mesmo assim?",
+   "validations": [
+    {
+     "id": 1,
+     "spent": 480.0,
+     "after": 530.0,
+     "percent": 106.0,
+     "exceeds": true
+    }
+   ]
+  },
+  {
+   "name": "estoura_milhar",
+   "pots": [
+    {
+     "id": 2,
+     "name": "Lazer",
+     "limit": "1500.00",
+     "periodicity": "SEMANAL"
+    }
+   ],
+   "spends": [
+    "-1480.5"
+   ],
+   "amount": 1234.56,
+   "requires_confirmation": true,
+   "message": "Atenção: Esta despesa ultrapassará seu limite!\n\nPote: Lazer\nLimite: R$ 1,500.00\nGasto atual: R$ 1,480.50\nApós transação: R$ 2,715.06 (181.0% do limite)\nExcesso: R$ 1,215.06\n\nDeseja prosseguir mesmo assim?",
+   "validations": [
+    {
+     "id": 2,
+     "spent": 1480.5,
+     "after": 2715.06,
+     "percent": 181.0,
+     "exceeds": true
+    }
+   ]
+  },
+  {
+   "name": "dois_potes",
+   "pots": [
+    {
+     "id": 1,
+     "name": "Mercado",
+     "limit": "500.00",
+     "periodicity": "MENSAL"
+    },
+    {
+     "id": 3,
+     "name": "Alimentacao",
+     "limit": "200.00",
+     "periodicity": "QUINZENAL"
+    }
+   ],
+   "spends": [
+    "-480.00",
+    "-199.00"
+   ],
+   "amount": 50.0,
+   "requires_confirmation": true,
+   "message": "Atenção: Esta despesa ultrapassará limites em múltiplos potes!\n\n• Mercado: R$ 530.00 / R$ 500.00 (106.0%) - Excesso: R$ 30.00\n• Alimentacao: R$ 249.00 / R$ 200.00 (124.5%) - Excesso: R$ 49.00\n\nDeseja prosseguir mesmo assim?",
+   "validations": [
+    {
+     "id": 1,
+     "spent": 480.0,
+     "after": 530.0,
+     "percent": 106.0,
+     "exceeds": true
+    },
+    {
+     "id": 3,
+     "spent": 199.0,
+     "after": 249.0,
+     "percent": 124.5,
+     "exceeds": true
+    }
+   ]
+  },
+  {
+   "name": "um_estoura_um_nao",
+   "pots": [
+    {
+     "id": 1,
+     "name": "Mercado",
+     "limit": "500.00",
+     "periodicity": "MENSAL"
+    },
+    {
+     "id": 3,
+     "name": "Alimentacao",
+     "limit": "2000.00",
+     "periodicity": "ANUAL"
+    }
+   ],
+   "spends": [
+    "-480.00",
+    "-100.00"
+   ],
+   "amount": 50.0,
+   "requires_confirmation": true,
+   "message": "Atenção: Esta despesa ultrapassará seu limite!\n\nPote: Mercado\nLimite: R$ 500.00\nGasto atual: R$ 480.00\nApós transação: R$ 530.00 (106.0% do limite)\nExcesso: R$ 30.00\n\nDeseja prosseguir mesmo assim?",
+   "validations": [
+    {
+     "id": 1,
+     "spent": 480.0,
+     "after": 530.0,
+     "percent": 106.0,
+     "exceeds": true
+    },
+    {
+     "id": 3,
+     "spent": 100.0,
+     "after": 150.0,
+     "percent": 7.5,
+     "exceeds": false
+    }
+   ]
+  },
+  {
+   "name": "limite_zero",
+   "pots": [
+    {
+     "id": 4,
+     "name": "Zero",
+     "limit": "0.00",
+     "periodicity": "MENSAL"
+    }
+   ],
+   "spends": [
+    "0"
+   ],
+   "amount": 10.0,
+   "requires_confirmation": true,
+   "message": "Atenção: Esta despesa ultrapassará seu limite!\n\nPote: Zero\nLimite: R$ 0.00\nGasto atual: R$ 0.00\nApós transação: R$ 10.00 (0% do limite)\nExcesso: R$ 10.00\n\nDeseja prosseguir mesmo assim?",
+   "validations": [
+    {
+     "id": 4,
+     "spent": 0.0,
+     "after": 10.0,
+     "percent": 0,
+     "exceeds": true
+    }
+   ]
+  },
+  {
+   "name": "exato_no_limite",
+   "pots": [
+    {
+     "id": 1,
+     "name": "Mercado",
+     "limit": "500.00",
+     "periodicity": "MENSAL"
+    }
+   ],
+   "spends": [
+    "-450.00"
+   ],
+   "amount": 50.0,
+   "requires_confirmation": false,
+   "message": "",
+   "validations": [
+    {
+     "id": 1,
+     "spent": 450.0,
+     "after": 500.0,
+     "percent": 100.0,
+     "exceeds": false
+    }
+   ]
+  },
+  {
+   "name": "percentual_meio_par",
+   "pots": [
+    {
+     "id": 5,
+     "name": "Tie",
+     "limit": "3.00",
+     "periodicity": "MENSAL"
+    }
+   ],
+   "spends": [
+    "-1.00"
+   ],
+   "amount": 2.0125,
+   "requires_confirmation": true,
+   "message": "Atenção: Esta despesa ultrapassará seu limite!\n\nPote: Tie\nLimite: R$ 3.00\nGasto atual: R$ 1.00\nApós transação: R$ 3.01 (100.4% do limite)\nExcesso: R$ 0.01\n\nDeseja prosseguir mesmo assim?",
+   "validations": [
+    {
+     "id": 5,
+     "spent": 1.0,
+     "after": 3.0125,
+     "percent": 100.4,
+     "exceeds": true
+    }
+   ]
+  },
+  {
+   "name": "sem_gasto",
+   "pots": [
+    {
+     "id": 6,
+     "name": "Vazio",
+     "limit": "100.00",
+     "periodicity": "MENSAL"
+    }
+   ],
+   "spends": [
+    null
+   ],
+   "amount": 150.0,
+   "requires_confirmation": true,
+   "message": "Atenção: Esta despesa ultrapassará seu limite!\n\nPote: Vazio\nLimite: R$ 100.00\nGasto atual: R$ 0.00\nApós transação: R$ 150.00 (150.0% do limite)\nExcesso: R$ 50.00\n\nDeseja prosseguir mesmo assim?",
+   "validations": [
+    {
+     "id": 6,
+     "spent": 0.0,
+     "after": 150.0,
+     "percent": 150.0,
+     "exceeds": true
+    }
+   ]
+  }
+ ],
+ "prompts": [
+  {
+   "fn": "extract_from_notification",
+   "args": {
+    "texto": "Compra aprovada R$ 45,90 no \"MERCADO\" ç"
+   },
+   "prompt": "\n    Analise a notificação: \"Compra aprovada R$ 45,90 no \"MERCADO\" ç\"\n    Retorne APENAS JSON com: \"valor_decimal\" (sempre positivo), \"descricao_bruta\", \"tipo_fluxo\" (\"Renda\" ou \"Despesa\").\n    "
+  },
+  {
+   "fn": "categorize_transaction",
+   "args": {
+    "categories": [
+     {
+      "id": 1,
+      "nome_sub": "Supermercado",
+      "nome_macro": "Alimentação"
+     },
+     {
+      "id": 2,
+      "nome_sub": "Outros",
+      "nome_macro": "Despesas Gerais"
+     },
+     {
+      "id": 3,
+      "nome_sub": "Quitação de Empréstimos (Principal)",
+      "nome_macro": "Dívidas \"x\" \\ 😀"
+     }
+    ],
+    "descricao": "Padaria \"Pão Quente\" - 2 pães",
+    "tipo": "Despesa",
+    "fallback": 2
+   },
+   "prompt": "\n    Minhas subcategorias são: [{\"id\": 1, \"nome_sub\": \"Supermercado\", \"nome_macro\": \"Alimenta\\u00e7\\u00e3o\"}, {\"id\": 2, \"nome_sub\": \"Outros\", \"nome_macro\": \"Despesas Gerais\"}, {\"id\": 3, \"nome_sub\": \"Quita\\u00e7\\u00e3o de Empr\\u00e9stimos (Principal)\", \"nome_macro\": \"D\\u00edvidas \\\"x\\\" \\\\ \\ud83d\\ude00\"}]\n    A transação teve a descrição: \"Padaria \"Pão Quente\" - 2 pães\"; O tipo é: \"Despesa\"\n    Qual é o \"id\" da subcategoria que melhor corresponde? Se for genérico, use o \"id\" de \"Outros\" (que é 2).\n    Responda APENAS com o número do ID.\n    "
+  },
+  {
+   "fn": "categorize_transaction",
+   "args": {
+    "categories": [],
+    "descricao": "x",
+    "tipo": "Renda",
+    "fallback": null
+   },
+   "prompt": "\n    Minhas subcategorias são: []\n    A transação teve a descrição: \"x\"; O tipo é: \"Renda\"\n    Qual é o \"id\" da subcategoria que melhor corresponde? Se for genérico, use o \"id\" de \"Outros\" (que é None).\n    Responda APENAS com o número do ID.\n    "
+  },
+  {
+   "fn": "extract_transaction_details",
+   "args": {
+    "texto": "Paguei 150.5 de Conta de Água",
+    "intent": "Despesa"
+   },
+   "prompt": "Analise a mensagem: \"Paguei 150.5 de Conta de Água\"\n    O tipo é: \"Despesa\".\n\n    Extraia:\n    - \"valor_decimal\": Valor numérico mencionado (ou null se não mencionar)\n    - \"descricao_bruta\": APENAS o nome/item principal (não a frase completa)\n\n    IMPORTANTE para descrição:\n    - \"recebi meu salário\" → \"salário\"\n    - \"recebi o swile\" → \"swile\"\n    - \"paguei a conta de luz\" → \"luz\" ou \"conta de luz\"\n    - \"gastei 50 na padaria\" → \"padaria\"\n    - \"recebi 500 de freelance\" → \"freelance\"\n\n    Responda APENAS com JSON.\n    Ex: {\"valor_decimal\": 50.00, \"descricao_bruta\": \"Padaria\"}\n    Ex: {\"valor_decimal\": null, \"descricao_bruta\": \"salário\"}"
+  }
+ ],
+ "categories_json": [
+  {
+   "categories": [
+    {
+     "id": 1,
+     "nome_sub": "Supermercado",
+     "nome_macro": "Alimentação"
+    },
+    {
+     "id": 2,
+     "nome_sub": "Outros",
+     "nome_macro": "Despesas Gerais"
+    },
+    {
+     "id": 3,
+     "nome_sub": "Quitação de Empréstimos (Principal)",
+     "nome_macro": "Dívidas \"x\" \\ 😀"
+    }
+   ],
+   "json": "[{\"id\": 1, \"nome_sub\": \"Supermercado\", \"nome_macro\": \"Alimenta\\u00e7\\u00e3o\"}, {\"id\": 2, \"nome_sub\": \"Outros\", \"nome_macro\": \"Despesas Gerais\"}, {\"id\": 3, \"nome_sub\": \"Quita\\u00e7\\u00e3o de Empr\\u00e9stimos (Principal)\", \"nome_macro\": \"D\\u00edvidas \\\"x\\\" \\\\ \\ud83d\\ude00\"}]"
+  },
+  {
+   "categories": [],
+   "json": "[]"
+  }
+ ],
+ "confirmation": [
+  {
+   "name": "automate_despesa",
+   "data": {
+    "usuario_id": 1,
+    "conta_id": 3,
+    "categoria_id": 1,
+    "fatura_id": null,
+    "descricao": "Mercado Central",
+    "valor_db": -45.9,
+    "valor_original": 45.9,
+    "tipo_transacao": "Despesa",
+    "data_transacao": "2026-10-05",
+    "origem": "automate"
+   },
+   "id": "ab12cd34",
+   "text": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *Mercado Central*\n💵 *R$ 45,90*\n💸 Despesa\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+  },
+  {
+   "name": "automate_renda",
+   "data": {
+    "usuario_id": 1,
+    "conta_id": 3,
+    "categoria_id": 2,
+    "fatura_id": null,
+    "descricao": "Salario",
+    "valor_db": 3000.0,
+    "valor_original": 3000.0,
+    "tipo_transacao": "Renda",
+    "data_transacao": "2026-10-05",
+    "origem": "automate"
+   },
+   "id": "ab12cd34",
+   "text": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *Salario*\n💵 *R$ 3.000,00*\n💰 Renda\n📂 Despesas Gerais → Outros\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+  },
+  {
+   "name": "automate_categoria_desconhecida",
+   "data": {
+    "usuario_id": 1,
+    "conta_id": 3,
+    "categoria_id": 99,
+    "fatura_id": 5,
+    "descricao": "X",
+    "valor_db": -1234567.5,
+    "valor_original": 1234567.5,
+    "tipo_transacao": "Despesa",
+    "data_transacao": "2026-10-05",
+    "origem": "automate"
+   },
+   "id": "ab12cd34",
+   "text": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *X*\n💵 *R$ 1.234.567,50*\n💸 Despesa\n📂 Desconhecida\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+  },
+  {
+   "name": "api_credito_com_descricao",
+   "data": {
+    "usuario_id": 1,
+    "conta_id": 3,
+    "conta_nome": "Cartão Inter",
+    "conta_tipo": "Cartão de Crédito",
+    "categoria_id": 1,
+    "fatura_id": 9,
+    "local": "Sorveteria",
+    "descricao": "2 sorvetes",
+    "descricao_final": "Sorveteria - 2 sorvetes",
+    "valor_db": -15.9,
+    "valor_original": 15.9,
+    "tipo_transacao": "Despesa",
+    "tipo_pagamento": "credito",
+    "data_transacao": "2026-10-05",
+    "origem": "api_endpoint",
+    "budget_warning": null
+   },
+   "id": "ab12cd34",
+   "text": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *Sorveteria*\n📝 2 sorvetes\n💵 *R$ 15,90*\n💸 Despesa\n� Cartão Inter (na fatura)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+  },
+  {
+   "name": "api_debito_com_descricao",
+   "data": {
+    "usuario_id": 1,
+    "conta_id": 3,
+    "conta_nome": "Cartão Inter",
+    "conta_tipo": "Cartão de Crédito",
+    "categoria_id": 1,
+    "fatura_id": null,
+    "local": "Sorveteria",
+    "descricao": "2 sorvetes",
+    "descricao_final": "Sorveteria - 2 sorvetes",
+    "valor_db": -15.9,
+    "valor_original": 15.9,
+    "tipo_transacao": "Despesa",
+    "tipo_pagamento": "debito",
+    "data_transacao": "2026-10-05",
+    "origem": "api_endpoint",
+    "budget_warning": null
+   },
+   "id": "ab12cd34",
+   "text": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *Sorveteria*\n📝 2 sorvetes\n💵 *R$ 15,90*\n💸 Despesa\n🏦 Cartão Inter (Débito)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+  },
+  {
+   "name": "api_pix_com_descricao",
+   "data": {
+    "usuario_id": 1,
+    "conta_id": 3,
+    "conta_nome": "Cartão Inter",
+    "conta_tipo": "Cartão de Crédito",
+    "categoria_id": 1,
+    "fatura_id": null,
+    "local": "Sorveteria",
+    "descricao": "2 sorvetes",
+    "descricao_final": "Sorveteria - 2 sorvetes",
+    "valor_db": -15.9,
+    "valor_original": 15.9,
+    "tipo_transacao": "Despesa",
+    "tipo_pagamento": "pix",
+    "data_transacao": "2026-10-05",
+    "origem": "api_endpoint",
+    "budget_warning": null
+   },
+   "id": "ab12cd34",
+   "text": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *Sorveteria*\n📝 2 sorvetes\n💵 *R$ 15,90*\n💸 Despesa\n🏦 Cartão Inter (PIX)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+  },
+  {
+   "name": "api_dinheiro_com_descricao",
+   "data": {
+    "usuario_id": 1,
+    "conta_id": 3,
+    "conta_nome": "Cartão Inter",
+    "conta_tipo": "Cartão de Crédito",
+    "categoria_id": 1,
+    "fatura_id": null,
+    "local": "Sorveteria",
+    "descricao": "2 sorvetes",
+    "descricao_final": "Sorveteria - 2 sorvetes",
+    "valor_db": -15.9,
+    "valor_original": 15.9,
+    "tipo_transacao": "Despesa",
+    "tipo_pagamento": "dinheiro",
+    "data_transacao": "2026-10-05",
+    "origem": "api_endpoint",
+    "budget_warning": null
+   },
+   "id": "ab12cd34",
+   "text": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *Sorveteria*\n📝 2 sorvetes\n💵 *R$ 15,90*\n💸 Despesa\n🏦 Cartão Inter (Dinheiro)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+  },
+  {
+   "name": "api_sem_descricao_credito_sem_fatura",
+   "data": {
+    "usuario_id": 1,
+    "conta_id": 3,
+    "conta_nome": "Nubank",
+    "conta_tipo": "Conta Corrente",
+    "categoria_id": 2,
+    "fatura_id": null,
+    "local": "Padaria",
+    "descricao": null,
+    "descricao_final": "Padaria",
+    "valor_db": -8.0,
+    "valor_original": 8.0,
+    "tipo_transacao": "Despesa",
+    "tipo_pagamento": "credito",
+    "data_transacao": "2026-10-05",
+    "origem": "api_endpoint",
+    "budget_warning": null
+   },
+   "id": "ab12cd34",
+   "text": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *Padaria*\n💵 *R$ 8,00*\n💸 Despesa\n🏦 Nubank (credito)\n📂 Despesas Gerais → Outros\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+  },
+  {
+   "name": "api_com_aviso_de_orcamento",
+   "data": {
+    "usuario_id": 1,
+    "conta_id": 3,
+    "conta_nome": "Carteira",
+    "conta_tipo": "Dinheiro",
+    "categoria_id": 1,
+    "fatura_id": null,
+    "local": "Mercado",
+    "descricao": null,
+    "descricao_final": "Mercado",
+    "valor_db": -50.0,
+    "valor_original": 50.0,
+    "tipo_transacao": "Despesa",
+    "tipo_pagamento": "dinheiro",
+    "data_transacao": "2026-10-05",
+    "origem": "api_endpoint",
+    "budget_warning": "Atenção: Esta despesa ultrapassará seu limite!\n\nPote: Mercado"
+   },
+   "id": "ab12cd34",
+   "text": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *Mercado*\n💵 *R$ 50,00*\n💸 Despesa\n🏦 Carteira (Dinheiro)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n⚠️ *AVISO DE ORÇAMENTO*\n\nAtenção: Esta despesa ultrapassará seu limite!\n\nPote: Mercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+  }
+ ],
+ "bill_matching": {
+  "bills": [
+   {
+    "id": 1,
+    "descricao": "Luz",
+    "valor": "120.00"
+   },
+   {
+    "id": 2,
+    "descricao": "Aluguel",
+    "valor": "1500.00"
+   },
+   {
+    "id": 3,
+    "descricao": "Internet Vivo",
+    "valor": "99.90"
+   },
+   {
+    "id": 4,
+    "descricao": "netflix",
+    "valor": "39.90"
+   },
+   {
+    "id": 5,
+    "descricao": "Água",
+    "valor": "80.00"
+   },
+   {
+    "id": 6,
+    "descricao": "Condomínio",
+    "valor": "400.00"
+   },
+   {
+    "id": 7,
+    "descricao": "Luz",
+    "valor": "55.00"
+   }
+  ],
+  "cases": [
+   {
+    "input": "luz",
+    "result_id": 7,
+    "result_desc": "Luz"
+   },
+   {
+    "input": "Luz",
+    "result_id": 7,
+    "result_desc": "Luz"
+   },
+   {
+    "input": "LUZ",
+    "result_id": 7,
+    "result_desc": "Luz"
+   },
+   {
+    "input": "a luz",
+    "result_id": 7,
+    "result_desc": "Luz"
+   },
+   {
+    "input": "o aluguel",
+    "result_id": 2,
+    "result_desc": "Aluguel"
+   },
+   {
+    "input": "da luz",
+    "result_id": 7,
+    "result_desc": "Luz"
+   },
+   {
+    "input": "do condominio",
+    "result_id": 6,
+    "result_desc": "Condomínio"
+   },
+   {
+    "input": "de internet",
+    "result_id": 3,
+    "result_desc": "Internet Vivo"
+   },
+   {
+    "input": "conta de agua",
+    "result_id": 5,
+    "result_desc": "Água"
+   },
+   {
+    "input": "conta netflix",
+    "result_id": 4,
+    "result_desc": "netflix"
+   },
+   {
+    "input": "conta de conta de luz",
+    "result_id": 7,
+    "result_desc": "Luz"
+   },
+   {
+    "input": "  conta  ",
+    "result_id": null,
+    "result_desc": null
+   },
+   {
+    "input": "xyz",
+    "result_id": null,
+    "result_desc": null
+   },
+   {
+    "input": "internet",
+    "result_id": 3,
+    "result_desc": "Internet Vivo"
+   },
+   {
+    "input": "vivo",
+    "result_id": 3,
+    "result_desc": "Internet Vivo"
+   },
+   {
+    "input": "netflix",
+    "result_id": 4,
+    "result_desc": "netflix"
+   },
+   {
+    "input": "aluguel de apartamento",
+    "result_id": 2,
+    "result_desc": "Aluguel"
+   },
+   {
+    "input": "agua",
+    "result_id": 5,
+    "result_desc": "Água"
+   },
+   {
+    "input": "Conta de Luz",
+    "result_id": 7,
+    "result_desc": "Luz"
+   },
+   {
+    "input": "da conta de luz",
+    "result_id": 7,
+    "result_desc": "Luz"
+   },
+   {
+    "input": "conta luz",
+    "result_id": 7,
+    "result_desc": "Luz"
+   },
+   {
+    "input": "a o luz",
+    "result_id": 7,
+    "result_desc": "Luz"
+   },
+   {
+    "input": "de a luz",
+    "result_id": 7,
+    "result_desc": "Luz"
+   },
+   {
+    "input": "condomínio",
+    "result_id": 6,
+    "result_desc": "Condomínio"
+   }
+  ]
+ },
+ "paid_message": [
+  {
+   "descricao": "Luz",
+   "valor": 150.5,
+   "categoria": "Energia",
+   "text": "✅ *CONTA QUITADA!* ✅\n\n📝 Luz\n💰 R$ 150,50\n📊 Energia\n\n_Esta conta não será mais cobrada automaticamente este mês._"
+  },
+  {
+   "descricao": "Aluguel",
+   "valor": 1500,
+   "categoria": "Moradia",
+   "text": "✅ *CONTA QUITADA!* ✅\n\n📝 Aluguel\n💰 R$ 1.500,00\n📊 Moradia\n\n_Esta conta não será mais cobrada automaticamente este mês._"
+  },
+  {
+   "descricao": "Netflix",
+   "valor": 39.9,
+   "categoria": "Streaming",
+   "text": "✅ *CONTA QUITADA!* ✅\n\n📝 Netflix\n💰 R$ 39,90\n📊 Streaming\n\n_Esta conta não será mais cobrada automaticamente este mês._"
+  }
+ ]
+}
