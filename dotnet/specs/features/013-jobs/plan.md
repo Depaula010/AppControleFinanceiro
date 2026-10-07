@@ -4,7 +4,7 @@
 
 Reaproveita: `IClock`/`BrazilClock`, `ICache`, `CacheKeys` (`JobLock`, `InvoiceClosed`, `InvoiceDueWarning3d`, `NightlyCheckin*`), `IBotClient`, `ILlmClient`, `ICalendarClient`, `IWeatherClient`, `WeatherFormatter`, `CalendarAlertService` e `ICalendarAlertConfigRepository` (014), `IInvoiceService`/`IInvoiceSchedulePopulator` (004), `InvoiceCycle`/`MonthDays` (Domain 004), `IDbConnectionFactory`, `MessageChunker` (já dentro do `IBotClient`), `PyRound`, `PostgresFixture`/`RedisFixture`, `InMemoryCache`, `FakeTimeProvider`.
 
-**Arquivos compartilhados tocados (únicos):** `dotnet/Directory.Packages.props` (3 `PackageVersion`: `Quartz.Extensions.Hosting`, `ScottPlot`, `SkiaSharp.NativeAssets.Linux.NoDependencies` se o ScottPlot não trouxer), `MeuSecretario.Infrastructure.csproj` (3 `PackageReference`), `parity-deviations/README.md` (linhas no fim) e os arquivos de desvio novos. **Não** toca `Program.cs` (o módulo é descoberto por reflexão), `DependencyInjection.cs`, `PostgresFixture`, `Dockerfile` nem migrations. O módulo `JobsModule` (nome que ordena antes de `TransactionsModule`) registra o populador real **antes** do `TryAdd` da 004.
+**Arquivos compartilhados tocados (únicos):** `dotnet/Directory.Packages.props` (3 `PackageVersion`: `Quartz.Extensions.Hosting`, `ScottPlot`, `SkiaSharp.NativeAssets.Linux.NoDependencies` se o ScottPlot não trouxer), `MeuSecretario.Infrastructure.csproj` (3 `PackageReference`), `parity-deviations/README.md` (linhas no fim) e os arquivos de desvio novos. **Não** toca `Program.cs` (o módulo é descoberto por reflexão), `DependencyInjection.cs`, `PostgresFixture`, `Dockerfile` nem migrations. O populador de faturas continua sendo o da 011 (`InvoiceSchedulePopulator`); o `JobsModule` não registra outro.
 
 ## 1. Domain (`MeuSecretario.Domain/Jobs`)
 
@@ -31,7 +31,7 @@ Domain não referencia nada; sem `DateTime.Now`.
 - **Portas para 009c** (`Abstractions/JobPorts.cs`): `IScheduleMotor`, `MotorRunResult`, `IBillsNotificationJob`, `BillsJobResult`, `IDailyBriefingJob`, `DailyBriefingRunResult`, `DailyBriefingTestResult`, `IMonthlyReportJob`, `MonthlyMoment`, `MonthlyReportRunResult`, `ManualReportResult`.
 - **Infra de jobs:** `IScheduledJob`, `JobRunner` (RN-013-01 a 03), `IJobLog`, `JobSchedules` (nome, lock, cron Quartz, fuso), `JobsOptions` (`Enabled`).
 - **Portas de dados** (implementadas na Infrastructure): `IJobNotificationConfigRepository`, `IFinancialAlertsRepository`, `IBriefingDataRepository` (cidade/estado, nome), `ICheckinQueries`, `IInvoiceJobRepository`, `IScheduleExecutionRepository`, `IMonthlyReportRepository`, `IBillsReminderRepository`, `IChartRenderer`.
-- **Casos de uso / serviços** (um por responsabilidade, `ExecuteAsync`/métodos nomeados): `TaskAlertsJob`, `InvoiceProcessorJob`, `InvoiceSchedulePopulator : IInvoiceSchedulePopulator`, `ScheduleExecutor : IScheduleExecutor`, `ScheduleMotor : IScheduleMotor, IScheduledJob`, `DailyBriefingService`, `DailyBriefingJob : IDailyBriefingJob, IScheduledJob`, `BillsNotificationJob : IBillsNotificationJob`, `NightlyCheckinService`, `NightlyCheckinJob`, `MonthlyReportService`, `MonthlyReportJob : IMonthlyReportJob` e os dois `IScheduledJob` mensais (`StartOfMonthReportJob`, `EndOfMonthReportJob`).
+- **Casos de uso / serviços** (um por responsabilidade, `ExecuteAsync`/métodos nomeados): `TaskAlertsJob`, `InvoiceProcessorJob`, `ScheduleExecutor : IScheduleExecutor`, `ScheduleMotor : IScheduleMotor, IScheduledJob`, `DailyBriefingService`, `DailyBriefingJob : IDailyBriefingJob, IScheduledJob`, `BillsNotificationJob : IBillsNotificationJob`, `NightlyCheckinService`, `NightlyCheckinJob`, `MonthlyReportService`, `MonthlyReportJob : IMonthlyReportJob` e os dois `IScheduledJob` mensais (`StartOfMonthReportJob`, `EndOfMonthReportJob`).
 - Nenhuma dependência de Quartz, Npgsql, Redis ou HTTP. `ILogger` não existe aqui: `IJobLog`.
 
 ## 3. Infrastructure (`MeuSecretario.Infrastructure/Jobs`)
@@ -62,7 +62,7 @@ Nomes `Metodo_Cenario_Resultado` com `[Trait("AC","013-NN")]`; integração com 
 ## 6. Riscos e decisões
 
 - **Duplicar lançamentos antes da virada.** `JOBS_ENABLED` padrão `false` (RN-013-04). Os testes de host e o `Program` nunca ligam sozinho. Antes da virada, **nunca** ter Flask (Ofelia) e .NET com a variável ligada ao mesmo tempo (infra-deploy §4.3).
-- **Ordem dos módulos.** O populador real precisa ser registrado antes do `TryAddScoped` da 004: a descoberta ordena por `FullName` (`...Api.Jobs.JobsModule` < `...Api.Transactions.TransactionsModule`); um teste confere.
+- **Populador.** Mantido o da 011 para não quebrar os testes dela; um teste de host confere que `IInvoiceSchedulePopulator` é o da 011.
 - **`FOR UPDATE` e deadlock.** Um agendamento por transação, na ordem de `id`; o populador e o motor nunca seguram dois ao mesmo tempo.
 - **Fuso do cron.** O Quartz recebe `TimeZoneInfo` de São Paulo (`BrazilClock.TimeZone`); testes calculam `GetFireTimeAfter` com instantes UTC.
 - **Quartz sem host real nos testes unitários.** `JobsScheduler` é testado com `StdSchedulerFactory` em memória, sem `Start()`; o teste de host usa `Start()` mas com `JOBS_ENABLED` e relógio real só para o agendador subir e parar (nenhum cron dispara dentro do teste).
