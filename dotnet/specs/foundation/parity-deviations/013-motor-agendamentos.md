@@ -21,3 +21,6 @@ Aprovar. Confirmar quem dispara a rota hoje.
 
 ## Decisão do Rafael
 Aprovado em 2026-10-02 (aprovação em bloco de todos os desvios propostos). **Condição:** confirmar quem dispara `/admin/run-motor-agendamentos` hoje; o gatilho externo é desligado na virada se o Quartz assumir.
+
+## Implementação
+009c (2026-10-07): a rota `POST /admin/run-motor-agendamentos` chama `IScheduleMotor` (013) inline com o token de parada da aplicação; `AlreadyRunning` responde 200 `Agendamentos já estão em processamento.`; exceção responde 500 de texto fixo. Lock, idempotência e `LEMBRETE_VARIAVEL` são da 013.
