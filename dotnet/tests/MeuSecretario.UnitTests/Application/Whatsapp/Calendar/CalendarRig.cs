@@ -8,6 +8,7 @@ using MeuSecretario.Application.Google;
 using MeuSecretario.Application.Settings;
 using MeuSecretario.Application.Whatsapp;
 using MeuSecretario.Infrastructure.Time;
+using MeuSecretario.Infrastructure.Whatsapp;
 using MeuSecretario.UnitTests.Application.Google;
 using MeuSecretario.UnitTests.Domain.Whatsapp;
 using MeuSecretario.UnitTests.TestSupport;
@@ -83,7 +84,9 @@ internal sealed class CalendarRig
 
     public RecordingLlm Llm { get; }
 
-    public IntentContext Context(string message = "mensagem") => new(new WhatsAppUser(7, "Ana"), Number, message, null);
+    public WhatsAppUser User { get; } = new(7, "Ana");
+
+    public IntentContext Context(string message = "mensagem") => new(User, Number, message, null);
 
     public static JsonElement EmptyWorld() => JsonDocument.Parse("[]").RootElement.Clone();
 

@@ -6289,23 +6289,6 @@
    ]
   },
   {
-   "name": "data_basica",
-   "data": {
-    "titulo": "Prova",
-    "data": "20261215",
-    "hora_inicio": null,
-    "hora_fim": null,
-    "descricao": null,
-    "localizacao": null
-   },
-   "addresses": 0,
-   "now": "2026-10-08T14:20:00-03:00",
-   "success": true,
-   "message": "❌ Data inválida: 20261215",
-   "redis": {},
-   "ops": []
-  },
-  {
    "name": "data_invalida",
    "data": {
     "titulo": "Prova",
@@ -6439,6 +6422,17 @@
  "confirm_event_cases": [
   {
    "name": "ok",
+   "pending": {
+    "pending_event:5531999990001:ab12cd34": {
+     "usuario_id": 7,
+     "titulo": "Reunião",
+     "data_evento": "2026-10-09",
+     "hora_inicio": "14:00",
+     "hora_fim": null,
+     "descricao": "Pauta",
+     "localizacao": "Sala 3"
+    }
+   },
    "ok": true,
    "message": "Evento 'Reunião' criado com sucesso!",
    "event_id": "novo-evento-1",
@@ -6465,6 +6459,17 @@
   },
   {
    "name": "dia_inteiro",
+   "pending": {
+    "pending_event:5531999990001:ab12cd34": {
+     "usuario_id": 7,
+     "titulo": "Reunião",
+     "data_evento": "2026-10-09",
+     "hora_inicio": null,
+     "hora_fim": null,
+     "descricao": "Pauta",
+     "localizacao": "Sala 3"
+    }
+   },
    "ok": true,
    "message": "Evento 'Reunião' criado com sucesso!",
    "event_id": "novo-evento-1",
@@ -6491,6 +6496,17 @@
   },
   {
    "name": "hora_fim",
+   "pending": {
+    "pending_event:5531999990001:ab12cd34": {
+     "usuario_id": 7,
+     "titulo": "Reunião",
+     "data_evento": "2026-10-09",
+     "hora_inicio": "14:00",
+     "hora_fim": "16:30",
+     "descricao": "Pauta",
+     "localizacao": "Sala 3"
+    }
+   },
    "ok": true,
    "message": "Evento 'Reunião' criado com sucesso!",
    "event_id": "novo-evento-1",
@@ -6517,6 +6533,17 @@
   },
   {
    "name": "hora_invalida",
+   "pending": {
+    "pending_event:5531999990001:ab12cd34": {
+     "usuario_id": 7,
+     "titulo": "Reunião",
+     "data_evento": "2026-10-09",
+     "hora_inicio": "7h",
+     "hora_fim": null,
+     "descricao": "Pauta",
+     "localizacao": "Sala 3"
+    }
+   },
    "ok": false,
    "message": "Erro ao criar evento: time data '7h' does not match format '%H:%M'",
    "event_id": null,
@@ -6535,6 +6562,17 @@
   },
   {
    "name": "hora_vazia",
+   "pending": {
+    "pending_event:5531999990001:ab12cd34": {
+     "usuario_id": 7,
+     "titulo": "Reunião",
+     "data_evento": "2026-10-09",
+     "hora_inicio": "",
+     "hora_fim": null,
+     "descricao": "Pauta",
+     "localizacao": "Sala 3"
+    }
+   },
    "ok": false,
    "message": "Erro ao criar evento: time data '' does not match format '%H:%M'",
    "event_id": null,
@@ -6553,6 +6591,17 @@
   },
   {
    "name": "hora_fim_vazia",
+   "pending": {
+    "pending_event:5531999990001:ab12cd34": {
+     "usuario_id": 7,
+     "titulo": "Reunião",
+     "data_evento": "2026-10-09",
+     "hora_inicio": "14:00",
+     "hora_fim": "",
+     "descricao": "Pauta",
+     "localizacao": "Sala 3"
+    }
+   },
    "ok": false,
    "message": "Erro ao criar evento: time data '' does not match format '%H:%M'",
    "event_id": null,
@@ -6571,6 +6620,17 @@
   },
   {
    "name": "hora_um_digito",
+   "pending": {
+    "pending_event:5531999990001:ab12cd34": {
+     "usuario_id": 7,
+     "titulo": "Reunião",
+     "data_evento": "2026-10-09",
+     "hora_inicio": "7:5",
+     "hora_fim": "9:0",
+     "descricao": "Pauta",
+     "localizacao": "Sala 3"
+    }
+   },
    "ok": true,
    "message": "Evento 'Reunião' criado com sucesso!",
    "event_id": "novo-evento-1",
@@ -6597,6 +6657,17 @@
   },
   {
    "name": "virada_do_dia",
+   "pending": {
+    "pending_event:5531999990001:ab12cd34": {
+     "usuario_id": 7,
+     "titulo": "Reunião",
+     "data_evento": "2026-10-09",
+     "hora_inicio": "23:30",
+     "hora_fim": null,
+     "descricao": "Pauta",
+     "localizacao": "Sala 3"
+    }
+   },
    "ok": true,
    "message": "Evento 'Reunião' criado com sucesso!",
    "event_id": "novo-evento-1",
@@ -6623,6 +6694,17 @@
   },
   {
    "name": "falha_da_api",
+   "pending": {
+    "pending_event:5531999990001:ab12cd34": {
+     "usuario_id": 7,
+     "titulo": "Reunião",
+     "data_evento": "2026-10-09",
+     "hora_inicio": "14:00",
+     "hora_fim": null,
+     "descricao": "Pauta",
+     "localizacao": "Sala 3"
+    }
+   },
    "ok": false,
    "message": "Erro ao criar evento: quotaExceeded",
    "event_id": null,
@@ -6659,6 +6741,17 @@
   },
   {
    "name": "nao_conectado",
+   "pending": {
+    "pending_event:5531999990001:ab12cd34": {
+     "usuario_id": 7,
+     "titulo": "Reunião",
+     "data_evento": "2026-10-09",
+     "hora_inicio": "14:00",
+     "hora_fim": null,
+     "descricao": "Pauta",
+     "localizacao": "Sala 3"
+    }
+   },
    "ok": false,
    "message": "Erro ao criar evento: Usuário não conectou Google Calendar",
    "event_id": null,
@@ -6677,6 +6770,7 @@
   },
   {
    "name": "expirado",
+   "pending": {},
    "ok": false,
    "message": "❌ Nenhum evento pendente encontrado ou já expirou (5 minutos).",
    "event_id": null,

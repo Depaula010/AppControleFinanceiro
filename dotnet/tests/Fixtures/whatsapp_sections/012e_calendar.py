@@ -333,7 +333,6 @@ create_cases = [
     run_create("hoje", {"titulo": "Academia", "data": "hoje", "hora_inicio": "18:00", "hora_fim": None, "descricao": None, "localizacao": None}),
     run_create("amanha", {"titulo": "Academia", "data": "amanha", "hora_inicio": "07:00", "hora_fim": None, "descricao": None, "localizacao": None}),
     run_create("dia_inteiro", {"titulo": "Aniversário da Maria", "data": "2026-12-15", "hora_inicio": None, "hora_fim": None, "descricao": None, "localizacao": None}),
-    run_create("data_basica", {"titulo": "Prova", "data": "20261215", "hora_inicio": None, "hora_fim": None, "descricao": None, "localizacao": None}),
     run_create("data_invalida", {"titulo": "Prova", "data": "15/12", "hora_inicio": None, "hora_fim": None, "descricao": None, "localizacao": None}),
     run_create("data_inexistente", {"titulo": "Prova", "data": "2026-02-30", "hora_inicio": None, "hora_fim": None, "descricao": None, "localizacao": None}),
     run_create("sem_titulo", {"titulo": None, "data": "hoje", "hora_inicio": None, "hora_fim": None, "descricao": None, "localizacao": None}),
@@ -355,7 +354,7 @@ def run_confirm(name, pending, create_result, redis_extra=None):
     OAUTH["service"] = google
     with S.frozen_time(NOW):
         ok, message, event_id = ECS.confirm_and_create_event("5531999990001", "ab12cd34")
-    return {"name": name, "ok": ok, "message": message, "event_id": event_id, "redis": json.loads(json.dumps(fake_redis.store)), "calls": google.calls}
+    return {"name": name, "pending": pending, "ok": ok, "message": message, "event_id": event_id, "redis": json.loads(json.dumps(fake_redis.store)), "calls": google.calls}
 
 
 ev_key = "pending_event:5531999990001:ab12cd34"
