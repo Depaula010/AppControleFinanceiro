@@ -6204,6 +6204,4285 @@
     "redis": {},
     "redis_writes": []
    }
+  },
+  {
+   "name": "pagto_conta_fixa_valor_informado",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei 130 da internet",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"internet\"], \"valor_total\": 130.0, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei 130 da internet",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *CONTA QUITADA* ✅\n\n📝 Internet\n💰 R$ 130,00\n📊 Telecom\n\n_Esta conta não será cobrada automaticamente este mês._\n\n💡 Valor previsto era R$ 100,00 (+R$ 30,00)"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "FixedBillsService.settle_fixed_bill"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_conta_fixa_sem_valor_usa_previsto",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei a internet",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"internet\"], \"valor_total\": null, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei a internet",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *CONTA QUITADA* ✅\n\n📝 Internet\n💰 R$ 100,00\n📊 Telecom\n\n_Esta conta não será cobrada automaticamente este mês._\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "FixedBillsService.settle_fixed_bill"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_conta_fixa_valor_igual_sem_diferenca",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei 100 da internet",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"internet\"], \"valor_total\": 100, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei 100 da internet",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *CONTA QUITADA* ✅\n\n📝 Internet\n💰 R$ 100,00\n📊 Telecom\n\n_Esta conta não será cobrada automaticamente este mês._\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "FixedBillsService.settle_fixed_bill"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_conta_fixa_diferenca_menor",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei 70 da internet",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"internet\"], \"valor_total\": 70, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei 70 da internet",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *CONTA QUITADA* ✅\n\n📝 Internet\n💰 R$ 70,00\n📊 Telecom\n\n_Esta conta não será cobrada automaticamente este mês._\n\n💡 Valor previsto era R$ 100,00 (-R$ 30,00)"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "FixedBillsService.settle_fixed_bill"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_variavel_com_diferenca",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei 150 da água",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"água\"], \"valor_total\": 150, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei 150 da água",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *CONTA QUITADA* ✅\n\n📝 Água\n💰 R$ 150,00\n📊 Moradia\n\n_Esta conta não será cobrada automaticamente este mês._\n\n📊 *Lembrete Variável*\nValor previsto: R$ 80,50\nValor pago: R$ 150,00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "FixedBillsService.settle_fixed_bill"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_variavel_sem_diferenca",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei 81 da água",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"água\"], \"valor_total\": 81, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei 81 da água",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *CONTA QUITADA* ✅\n\n📝 Água\n💰 R$ 81,00\n📊 Moradia\n\n_Esta conta não será cobrada automaticamente este mês._\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "FixedBillsService.settle_fixed_bill"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_variavel_sem_valor_previsto_pede_valor",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei o seguro",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"seguro\"], \"valor_total\": null, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei o seguro",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Para processar 'Seguro', preciso do valor.\n\nExemplo: *paguei Seguro 150*"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_previsto_zero_pede_valor",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "quitei o telefone",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"telefone\"], \"valor_total\": null, \"trigger_word\": \"quitei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "quitei o telefone",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Para processar 'Telefone', preciso do valor.\n\nExemplo: *quitei Telefone 150*"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_varias_contas",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei a internet e a água",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"internet\", \"água\"], \"valor_total\": null, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei a internet e a água",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *2 CONTAS QUITADAS* ✅\n\n1. *Internet*\n   💰 R$ 100,00\n   📊 Telecom\n\n2. *Água*\n   💰 R$ 80,50\n   📊 Moradia\n   ⚠️ Variável (previsto: R$ 80,50)\n\n━━━━━━━━━━━━━━━━━━━━\n💵 *Total: R$ 180,50*\n\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "FixedBillsService.settle_fixed_bill",
+     "FixedBillsService.settle_fixed_bill"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_varias_contas_ignora_total",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei 300 da internet e da água",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"internet\", \"água\"], \"valor_total\": 300.0, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei 300 da internet e da água",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *2 CONTAS QUITADAS* ✅\n\n1. *Internet*\n   💰 R$ 100,00\n   📊 Telecom\n\n2. *Água*\n   💰 R$ 80,50\n   📊 Moradia\n   ⚠️ Variável (previsto: R$ 80,50)\n\n━━━━━━━━━━━━━━━━━━━━\n💵 *Total: R$ 180,50*\n\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "FixedBillsService.settle_fixed_bill",
+     "FixedBillsService.settle_fixed_bill"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_varias_com_uma_sem_valor",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei a internet e o seguro",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"internet\", \"seguro\"], \"valor_total\": null, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei a internet e o seguro",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *CONTA QUITADA* ✅\n\n📝 Internet\n💰 R$ 100,00\n📊 Telecom\n\n_Esta conta não será cobrada automaticamente este mês._\n\n\n⚠️ *Itens não processados* (faltou valor):\n• Seguro\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "FixedBillsService.settle_fixed_bill"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_varias_todas_sem_valor",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei o seguro e o telefone",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"seguro\", \"telefone\"], \"valor_total\": null, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei o seguro e o telefone",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Para processar 'Seguro', 'Telefone', preciso dos valores.\n\nTente informar um item por vez com o valor."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_despesa_avulsa",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei 25 de pizza",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"pizza\"], \"valor_total\": 25.0, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei 25 de pizza",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *DESPESA REGISTRADA* 💸\n\n📝 pizza\n💰 R$ 25,00\n📊 Padaria\n💳 Nubank\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_despesa_avulsa_conta_mencionada",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei 25 de pizza no cartão inter",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"pizza\"], \"valor_total\": 25.0, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei 25 de pizza no cartão inter",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *DESPESA REGISTRADA* 💸\n\n📝 pizza\n💰 R$ 25,00\n📊 Padaria\n💳 Cartão Inter\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_despesa_avulsa_conta_padrao",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei 25 de pizza",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"pizza\"], \"valor_total\": 25.0, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "default_accounts": {
+     "renda": null,
+     "despesa": 3
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei 25 de pizza",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *DESPESA REGISTRADA* 💸\n\n📝 pizza\n💰 R$ 25,00\n📊 Padaria\n💳 Carteira\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_despesa_avulsa_sem_valor",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei com pizza, zerei a conta",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"pizza\"], \"valor_total\": null, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "gastei com pizza, zerei a conta",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Para processar 'pizza', preciso do valor.\n\nExemplo: *paguei pizza 150*"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_varias_despesas_com_total",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "saldei pizza e sorvete 50",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"pizza\", \"sorvete\"], \"valor_total\": 50.0, \"trigger_word\": \"saldei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "saldei pizza e sorvete 50",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Para processar 'pizza', 'sorvete', preciso dos valores.\n\nTente informar um item por vez com o valor."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_despesa_avulsa_sem_fallback",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei 25 de pizza",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"pizza\"], \"valor_total\": 25.0, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": null,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei 25 de pizza",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Para processar 'pizza', preciso do valor.\n\nExemplo: *paguei pizza 150*"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_despesa_avulsa_sem_contas",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei 25 de pizza",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"pizza\"], \"valor_total\": 25.0, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei 25 de pizza",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Para processar 'pizza', preciso do valor.\n\nExemplo: *paguei pizza 150*"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_combinada_conta_e_despesa",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei a internet e 40 de pizza",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"internet\", \"pizza\"], \"valor_total\": 40.0, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei a internet e 40 de pizza",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *CONTA QUITADA* ✅\n\n📝 Internet\n💰 R$ 100,00\n📊 Telecom\n\n_Esta conta não será cobrada automaticamente este mês._\n\n\n⚠️ *Itens não processados* (faltou valor):\n• pizza\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "FixedBillsService.settle_fixed_bill"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_conta_e_despesa_com_total_unico_item_conta",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei 90 da internet",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"internet\"], \"valor_total\": 90, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei 90 da internet",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *CONTA QUITADA* ✅\n\n📝 Internet\n💰 R$ 90,00\n📊 Telecom\n\n_Esta conta não será cobrada automaticamente este mês._\n\n💡 Valor previsto era R$ 100,00 (-R$ 10,00)"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "FixedBillsService.settle_fixed_bill"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_erro_em_um_item_segue",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei a internet e a água",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"internet\", \"água\"], \"valor_total\": null, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       {
+        "__raise__": "falhou"
+       },
+       902
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei a internet e a água",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *CONTA QUITADA* ✅\n\n📝 Água\n💰 R$ 80,50\n📊 Moradia\n\n_Esta conta não será cobrada automaticamente este mês._\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "FixedBillsService.settle_fixed_bill",
+     "FixedBillsService.settle_fixed_bill"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_erro_no_unico_item",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei a internet",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"internet\"], \"valor_total\": null, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__raise__": "falhou"
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei a internet",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": ""
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "FixedBillsService.settle_fixed_bill"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_erro_na_despesa_avulsa",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei 25 de pizza",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"pizza\"], \"valor_total\": 25.0, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__raise__": "falhou"
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei 25 de pizza",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": ""
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_lista_vazia",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [], \"valor_total\": null, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Não consegui identificar o que você pagou. Pode reformular?"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_itens_ausentes",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": null, \"valor_total\": null, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Não consegui identificar o que você pagou. Pode reformular?"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_trigger_ausente_usa_paguei",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "liquidei o seguro",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"seguro\"], \"valor_total\": null}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "liquidei o seguro",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Para processar 'Seguro', preciso do valor.\n\nExemplo: *paguei Seguro 150*"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_artigos_removidos",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei a conta de internet",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"a conta de internet\"], \"valor_total\": null, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei a conta de internet",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *CONTA QUITADA* ✅\n\n📝 Internet\n💰 R$ 100,00\n📊 Telecom\n\n_Esta conta não será cobrada automaticamente este mês._\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "FixedBillsService.settle_fixed_bill"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_sem_contas_fixas",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei 30 de lanche",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"lanche\"], \"valor_total\": 30.0, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei 30 de lanche",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *DESPESA REGISTRADA* 💸\n\n📝 lanche\n💰 R$ 30,00\n📊 Padaria\n💳 Nubank\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_palavra_no_meio",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ontem eu paguei a internet",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"internet\"], \"valor_total\": null, \"trigger_word\": \"paguei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "ontem eu paguei a internet",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *CONTA QUITADA* ✅\n\n📝 Internet\n💰 R$ 100,00\n📊 Telecom\n\n_Esta conta não será cobrada automaticamente este mês._\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "FixedBillsService.settle_fixed_bill"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_zerei",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "zerei a internet",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"internet\"], \"valor_total\": null, \"trigger_word\": \"zerei\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "zerei a internet",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *CONTA QUITADA* ✅\n\n📝 Internet\n💰 R$ 100,00\n📊 Telecom\n\n_Esta conta não será cobrada automaticamente este mês._\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items",
+     "FixedBillsService.settle_fixed_bill"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_json_invalido",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei algo",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": "nao json",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei algo",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 500,
+    "body": {
+     "status": "erro",
+     "resposta": "Erro ao processar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_cota_do_gemini",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei algo",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "llm": {
+     "extract_payment_items": {
+      "__raise__": "429 Quota exceeded"
+     },
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei algo",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 429,
+    "body": {
+     "status": "erro",
+     "resposta": "⚠️ *Limite de IA Excedido*\n\nO sistema atingiu o limite diário de processamento de IA.\n\n🔧 *Soluções:*\n• Aguarde alguns minutos e tente novamente\n• Use comandos diretos (ex: 'gastei 50 em comida')\n• Configure sua própria chave de API do Gemini\n\n⏰ O limite é renovado automaticamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.extract_payment_items"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "pagto_tem_prioridade_sobre_confirmacao",
+   "group": "012b",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "paguei ok",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "bills": [
+     {
+      "id": 5,
+      "descricao": "Internet",
+      "valor_previsto": 100.0,
+      "dia_execucao": 10,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 1,
+      "categoria": "Telecom"
+     },
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor_previsto": 80.5,
+      "dia_execucao": 12,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 1,
+      "categoria": "Moradia"
+     },
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "tipo_agendamento": "LEMBRETE_VARIAVEL",
+      "conta_id": 3,
+      "categoria": "Seguros"
+     },
+     {
+      "id": 8,
+      "descricao": "Telefone",
+      "valor_previsto": 0,
+      "dia_execucao": 20,
+      "tipo_agendamento": "FIXO",
+      "conta_id": 3,
+      "categoria": "Telecom"
+     }
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "llm": {
+     "extract_payment_items": "{\"itens\": [\"internet\"], \"valor_total\": null, \"trigger_word\": \"paguei\"}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "FixedBillsService.settle_fixed_bill": {
+      "__seq__": [
+       901,
+       902,
+       903
+      ]
+     },
+     "finance_service.create_transaction": {
+      "__seq__": [
+       801,
+       802,
+       803
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "paguei ok",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "Comando não reconhecido. Digite: CONFIRMAR, TROCAR ou CANCELAR."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": []
+   }
   }
  ]
 }

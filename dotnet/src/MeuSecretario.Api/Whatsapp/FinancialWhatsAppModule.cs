@@ -25,6 +25,10 @@ internal static class FinancialWhatsAppModule
         services.AddScoped<IWhatsAppIntent, ExpenseIntent>();
         services.AddScoped<IWhatsAppIntent, TransferIntent>();
         services.AddScoped<IWhatsAppIntent, InvoicePaymentIntent>();
+
+        // 012b
+        services.AddScoped<IFixedBillSettler, FixedBillSettler>();
+        services.AddScoped<IWhatsAppStep, PaymentStep>();
     }
 }
 

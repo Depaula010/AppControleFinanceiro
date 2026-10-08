@@ -12,7 +12,7 @@ namespace MeuSecretario.UnitTests.Application.Whatsapp;
 public class FinancePipelineParityTests
 {
     /// <summary>Sub-entregas financeiras já implementadas; o harness traz cenários de todas.</summary>
-    private static readonly string[] ImplementedGroups = ["012a"];
+    private static readonly string[] ImplementedGroups = ["012a", "012b"];
 
     /// <summary>
     /// O Flask lê a lista de contas por SQL direto em vários pontos; só o resultado interessa, não a chamada.

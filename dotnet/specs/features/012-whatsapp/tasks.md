@@ -30,9 +30,9 @@ Retomada: o que está `[x]` está commitado; a próxima sub-entrega começa na p
 
 ## 012b — Pagamentos
 
-- [ ] **T17 — Domínio.** `PaymentExtraction`, `PaymentReply` (todas as variantes contra o Python) (AC-012-204).
-- [ ] **T18 — `PaymentHandler`** (quitação, avulsa, valor, erro por item, ordem no pipeline) (AC-012-201 a 206).
-- [ ] **T19 — Fechamento da 012b.**
+- [x] **T17 — Domínio.** `PaymentExtraction`, `PaymentReply` (todas as variantes contra o Python) (AC-012-204).
+- [x] **T18 — `PaymentHandler`** (quitação, avulsa, valor, erro por item, ordem no pipeline) (AC-012-201 a 206).
+- [x] **T19 — Fechamento da 012b.**
 
 ## 012c — Consultas financeiras
 

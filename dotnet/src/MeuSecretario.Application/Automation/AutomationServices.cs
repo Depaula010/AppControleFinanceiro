@@ -66,6 +66,14 @@ public sealed class TransactionCategorizer(IAutomationLookups lookups, ICategory
     {
         var options = await lookups.ListCategoriesAsync(userId, income, cancellationToken);
         var fallback = await categories.FindFallbackAsync(income, cancellationToken);
+        return await ChooseAsync(userId, options, fallback, description, transactionType, cancellationToken);
+    }
+
+    /// <summary><c>categorize_transaction</c> com a lista e o <c>Outros</c> já lidos pelo chamador (fluxo de pagamentos da 012b).</summary>
+    public async Task<Categorization> ChooseAsync(
+        int userId, IReadOnlyList<CategoryOption> options, int? fallback, string? description, string transactionType,
+        CancellationToken cancellationToken)
+    {
         var prompt = AutomationPrompts.Categorize(options, description, transactionType, fallback);
 
         string text;

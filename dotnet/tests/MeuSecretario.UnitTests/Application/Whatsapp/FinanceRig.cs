@@ -383,6 +383,7 @@ internal sealed class FinanceRig
         {
             new CheckinStep(new CheckinSessionState(Cache), new RecordingCheckinResponder(Cache, Calls, "RESPOSTA-DO-CHECKIN")),
             new TransactionReplyStep(transactionState, lookups, saver, feedback),
+            new PaymentStep(Llm, lookups, categories, categorizer, resolver, settler, new DirectPoster(posting), clock, new NullFinanceDiagnostics()),
             new BareCancelStep(transactionState, events),
         };
         var intents = new List<IWhatsAppIntent>
@@ -393,7 +394,6 @@ internal sealed class FinanceRig
             new TransferIntent(Llm, lookups, reader),
             new InvoicePaymentIntent(Llm, lookups, reader, posting, clock),
         };
-        ExtraSetup(steps, intents, lookups, categorizer, resolver, reader, posting, clock, settler, feedback);
 
         Router = new IntentRouter(intents, new NullDiagnostics());
         UseCase = new HandleWhatsAppMessage(new FakeUsers(userExists, Calls), steps, new IntentClassifier(Llm), Router);
@@ -416,12 +416,4 @@ internal sealed class FinanceRig
 
     public async Task SeedAsync(string key, JsonNode? value) =>
         await Cache.SetJsonAsync(key, value, TimeSpan.FromSeconds(300));
-
-    // Gancho das sub-entregas seguintes (012b e 012c acrescentam passos e intenções).
-    private static void ExtraSetup(
-        List<IWhatsAppStep> steps, List<IWhatsAppIntent> intents, WorldLookups lookups, TransactionCategorizer categorizer,
-        AccountResolver resolver, WorldFinanceReader reader, WorldPosting posting, FinanceClock clock, WorldSettler settler, WorldFeedback feedback)
-    {
-        _ = (steps, intents, lookups, categorizer, resolver, reader, posting, clock, settler, feedback);
-    }
 }
