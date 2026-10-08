@@ -1,0 +1,6209 @@
+{
+ "api_key": "chave-de-teste-0123456789abcdef0123456789",
+ "number": "5531999990001",
+ "today": "2026-10-07",
+ "scenarios": [
+  {
+   "name": "despesa_simples",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 50 na padaria",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 50.0, \"descricao_bruta\": \"padaria\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei 50 na padaria",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *padaria*\n💵 *R$ 50,00*\n💸 Despesa\n🏦 Nubank (Débito)\n📂 Alimentação → Padaria\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": null,
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_valor_inteiro_e_cerca",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 80 no mercado",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "```json\n{\"valor_decimal\": 80, \"descricao_bruta\": \"mercado\"}\n```",
+     "categorize_transaction": " `10` "
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei 80 no mercado",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *mercado*\n💵 *R$ 80,00*\n💸 Despesa\n🏦 Nubank (Débito)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 10,
+      "fatura_id": null,
+      "descricao": "mercado",
+      "descricao_final": null,
+      "valor_db": -80,
+      "valor_original": 80,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_categoria_invalida_vira_outros",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 20 no sorvete",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 20.5, \"descricao_bruta\": \"sorvete\"}",
+     "categorize_transaction": "999"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei 20 no sorvete",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *sorvete*\n💵 *R$ 20,50*\n💸 Despesa\n🏦 Nubank (Débito)\n📂 Despesas Gerais → Outros\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 59,
+      "fatura_id": null,
+      "descricao": "sorvete",
+      "descricao_final": null,
+      "valor_db": -20.5,
+      "valor_original": 20.5,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_conta_mencionada_cartao",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 30 no cartão inter",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 30, \"descricao_bruta\": \"lanche\"}",
+     "categorize_transaction": "10"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "finance_service.get_or_create_fatura": 77
+    }
+   },
+   "body": {
+    "texto": "gastei 30 no cartão inter",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *lanche*\n💵 *R$ 30,00*\n💸 Despesa\n� Cartão Inter (na fatura)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction",
+     "finance_service.get_or_create_fatura"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 2,
+      "conta_nome": "Cartão Inter",
+      "conta_tipo": "Cartão de Crédito",
+      "categoria_id": 10,
+      "fatura_id": 77,
+      "descricao": "lanche",
+      "descricao_final": null,
+      "valor_db": -30,
+      "valor_original": 30,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "credito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_cartao_sem_fatura",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 30 no cartão inter",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 30, \"descricao_bruta\": \"lanche\"}",
+     "categorize_transaction": "10"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "finance_service.get_or_create_fatura": null
+    }
+   },
+   "body": {
+    "texto": "gastei 30 no cartão inter",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *lanche*\n💵 *R$ 30,00*\n💸 Despesa\n🏦 Cartão Inter (credito)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction",
+     "finance_service.get_or_create_fatura"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 2,
+      "conta_nome": "Cartão Inter",
+      "conta_tipo": "Cartão de Crédito",
+      "categoria_id": 10,
+      "fatura_id": null,
+      "descricao": "lanche",
+      "descricao_final": null,
+      "valor_db": -30,
+      "valor_original": 30,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "credito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_conta_padrao",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 15 em pão",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "default_accounts": {
+     "renda": 1,
+     "despesa": 3
+    },
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 15, \"descricao_bruta\": \"pão\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei 15 em pão",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *pão*\n💵 *R$ 15,00*\n💸 Despesa\n🏦 Carteira (Débito)\n📂 Alimentação → Padaria\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 3,
+      "conta_nome": "Carteira",
+      "conta_tipo": "Dinheiro",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "pão",
+      "descricao_final": null,
+      "valor_db": -15,
+      "valor_original": 15,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_conta_padrao_inexistente",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 15 em pão",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "default_accounts": {
+     "renda": 1,
+     "despesa": 99
+    },
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 15, \"descricao_bruta\": \"pão\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei 15 em pão",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *pão*\n💵 *R$ 15,00*\n💸 Despesa\n🏦 Nubank (Débito)\n📂 Alimentação → Padaria\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "pão",
+      "descricao_final": null,
+      "valor_db": -15,
+      "valor_original": 15,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_mencao_sem_acerto_usa_padrao",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 15 no xyzzy",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "default_accounts": {
+     "renda": null,
+     "despesa": 3
+    },
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 15, \"descricao_bruta\": \"pão\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei 15 no xyzzy",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *pão*\n💵 *R$ 15,00*\n💸 Despesa\n🏦 Carteira (Débito)\n📂 Alimentação → Padaria\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 3,
+      "conta_nome": "Carteira",
+      "conta_tipo": "Dinheiro",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "pão",
+      "descricao_final": null,
+      "valor_db": -15,
+      "valor_original": 15,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_sem_valor",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei na padaria",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": null, \"descricao_bruta\": \"padaria\"}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei na padaria",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não consegui identificar o valor da despesa. Por favor, informe o valor."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "despesa_valor_zero",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 0",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 0, \"descricao_bruta\": \"padaria\"}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei 0",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não consegui identificar o valor da despesa. Por favor, informe o valor."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "despesa_valor_negativo",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei -5",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": -5, \"descricao_bruta\": \"padaria\"}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei -5",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não consegui identificar o valor da despesa. Por favor, informe o valor."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "despesa_valor_baixo",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 0,001",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 0.001, \"descricao_bruta\": \"padaria\"}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei 0,001",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Valor muito baixo. Verifique se informou corretamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "despesa_valor_texto",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei cinquenta",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": \"cinquenta\", \"descricao_bruta\": \"padaria\"}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei cinquenta",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Ops! Algo deu errado. Por favor, tente novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "despesa_descricao_nula",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 50",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 50, \"descricao_bruta\": null}",
+     "categorize_transaction": "59"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei 50",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *None*\n💵 *R$ 50,00*\n💸 Despesa\n🏦 Nubank (Débito)\n📂 Despesas Gerais → Outros\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 59,
+      "fatura_id": null,
+      "descricao": null,
+      "descricao_final": null,
+      "valor_db": -50,
+      "valor_original": 50,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_sem_chave_descricao",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 50",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 50}",
+     "categorize_transaction": "59"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei 50",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *Despesa*\n💵 *R$ 50,00*\n💸 Despesa\n🏦 Nubank (Débito)\n📂 Despesas Gerais → Outros\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 59,
+      "fatura_id": null,
+      "descricao": "Despesa",
+      "descricao_final": null,
+      "valor_db": -50,
+      "valor_original": 50,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_json_invalido",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 50",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "isto nao e json"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei 50",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Ops! Algo deu errado. Por favor, tente novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "despesa_parcelada",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "comprei em 3x de 90",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 90, \"descricao_bruta\": \"tenis\", \"parcelamento\": 3}",
+     "categorize_transaction": "10"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "comprei em 3x de 90",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *tenis*\n💵 *R$ 90,00* (3x de R$ 30,00)\n💸 Despesa\n🏦 Nubank (Débito)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 10,
+      "fatura_id": null,
+      "descricao": "tenis",
+      "descricao_final": null,
+      "valor_db": -30.0,
+      "valor_original": 30.0,
+      "valor_total": 90,
+      "num_parcelas": 3,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_parcelada_cartao",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "comprei no cartão inter em 3x de 90",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 90, \"descricao_bruta\": \"tenis\", \"parcelamento\": 3}",
+     "categorize_transaction": "10"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "finance_service.get_or_create_fatura": 77
+    }
+   },
+   "body": {
+    "texto": "comprei no cartão inter em 3x de 90",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *tenis*\n💵 *R$ 90,00* (3x de R$ 30,00)\n💸 Despesa\n� Cartão Inter (1ª parcela na fatura atual)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction",
+     "finance_service.get_or_create_fatura"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 2,
+      "conta_nome": "Cartão Inter",
+      "conta_tipo": "Cartão de Crédito",
+      "categoria_id": 10,
+      "fatura_id": 77,
+      "descricao": "tenis",
+      "descricao_final": null,
+      "valor_db": -30.0,
+      "valor_original": 30.0,
+      "valor_total": 90,
+      "num_parcelas": 3,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "credito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_parcelas_invalidas_um",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "comprei em parcelas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 90, \"descricao_bruta\": \"tenis\", \"parcelamento\": 1}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "comprei em parcelas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Número de parcelas inválido (deve ser entre 2 e 48)."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "despesa_parcelas_invalidas_muitas",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "comprei em parcelas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 90, \"descricao_bruta\": \"tenis\", \"parcelamento\": 49}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "comprei em parcelas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Número de parcelas inválido (deve ser entre 2 e 48)."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "despesa_parcelas_invalidas_texto",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "comprei em parcelas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 90, \"descricao_bruta\": \"tenis\", \"parcelamento\": \"3\"}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "comprei em parcelas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Número de parcelas inválido (deve ser entre 2 e 48)."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "despesa_parcelas_invalidas_decimal",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "comprei em parcelas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 90, \"descricao_bruta\": \"tenis\", \"parcelamento\": 3.0}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "comprei em parcelas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Número de parcelas inválido (deve ser entre 2 e 48)."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "despesa_parcelas_invalidas_verdadeiro",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "comprei em parcelas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 90, \"descricao_bruta\": \"tenis\", \"parcelamento\": true}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "comprei em parcelas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Número de parcelas inválido (deve ser entre 2 e 48)."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "despesa_parcelas_invalidas_lista",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "comprei em parcelas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 90, \"descricao_bruta\": \"tenis\", \"parcelamento\": [3]}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "comprei em parcelas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Número de parcelas inválido (deve ser entre 2 e 48)."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "despesa_parcelas_falsas_ignoradas",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "comprei",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 90, \"descricao_bruta\": \"tenis\", \"parcelamento\": 0}",
+     "categorize_transaction": "10"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "comprei",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *tenis*\n💵 *R$ 90,00*\n💸 Despesa\n🏦 Nubank (Débito)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 10,
+      "fatura_id": null,
+      "descricao": "tenis",
+      "descricao_final": null,
+      "valor_db": -90,
+      "valor_original": 90,
+      "valor_total": null,
+      "num_parcelas": 0,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_agendamento",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "conta de luz",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "schedule": {
+     "id": 5,
+     "descricao": "Conta de Luz",
+     "valor_previsto": 120.5,
+     "conta_id": 3,
+     "subcategoria_id": 12
+    },
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": null, \"descricao_bruta\": \"luz\"}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "conta de luz",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *luz*\n💵 *R$ 120,50*\n💸 Despesa\n🏦 Carteira (Débito)\n📂 Moradia → Luz\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 3,
+      "conta_nome": "Carteira",
+      "conta_tipo": "Dinheiro",
+      "categoria_id": 12,
+      "fatura_id": null,
+      "descricao": "luz",
+      "descricao_final": "Conta de Luz",
+      "valor_db": -120.5,
+      "valor_original": 120.5,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_agendamento_valor_zero",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "conta de luz",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "schedule": {
+     "id": 5,
+     "descricao": "Conta de Luz",
+     "valor_previsto": 0,
+     "conta_id": 3,
+     "subcategoria_id": 12
+    },
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": null, \"descricao_bruta\": \"luz\"}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "conta de luz",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não consegui identificar o valor da despesa. Por favor, informe o valor."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "despesa_agendamento_conta_cartao",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "conta de luz",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "schedule": {
+     "id": 5,
+     "descricao": "Conta de Luz",
+     "valor_previsto": 99.9,
+     "conta_id": 2,
+     "subcategoria_id": 12
+    },
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": null, \"descricao_bruta\": \"luz\"}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59,
+     "finance_service.get_or_create_fatura": 77
+    }
+   },
+   "body": {
+    "texto": "conta de luz",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *luz*\n💵 *R$ 99,90*\n💸 Despesa\n� Cartão Inter (na fatura)\n📂 Moradia → Luz\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_or_create_fatura"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 2,
+      "conta_nome": "Cartão Inter",
+      "conta_tipo": "Cartão de Crédito",
+      "categoria_id": 12,
+      "fatura_id": 77,
+      "descricao": "luz",
+      "descricao_final": "Conta de Luz",
+      "valor_db": -99.9,
+      "valor_original": 99.9,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "credito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_agendamento_conta_inexistente",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "conta de luz",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "schedule": {
+     "id": 5,
+     "descricao": "Conta de Luz",
+     "valor_previsto": 120.5,
+     "conta_id": 99,
+     "subcategoria_id": 12
+    },
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": null, \"descricao_bruta\": \"luz\"}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "conta de luz",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *luz*\n💵 *R$ 120,50*\n💸 Despesa\n🏦 Nubank (Débito)\n📂 Moradia → Luz\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 12,
+      "fatura_id": null,
+      "descricao": "luz",
+      "descricao_final": "Conta de Luz",
+      "valor_db": -120.5,
+      "valor_original": 120.5,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_sem_agendamento_sem_valor",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "conta de luz",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": null, \"descricao_bruta\": \"luz\"}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "conta de luz",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não consegui identificar o valor da despesa. Por favor, informe o valor."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "despesa_sem_contas",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 50 na padaria",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 50, \"descricao_bruta\": \"padaria\"}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei 50 na padaria",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Conta não encontrada. Por favor, especifique a conta."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "despesa_redis_fora",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 50 na padaria",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "redis_fail": true,
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 50, \"descricao_bruta\": \"padaria\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei 50 na padaria",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Erro ao criar transação pendente"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_conta_inventada_pelo_modelo",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 50 na padaria",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 50, \"descricao_bruta\": \"padaria\", \"conta\": \"com o nubank\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei 50 na padaria",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *padaria*\n💵 *R$ 50,00*\n💸 Despesa\n🏦 Nubank (Débito)\n📂 Alimentação → Padaria\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": null,
+      "valor_db": -50,
+      "valor_original": 50,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_data_inventada_pelo_modelo",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 50 na padaria",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 50, \"descricao_bruta\": \"padaria\", \"data\": \"2026-10-01\"}",
+     "categorize_transaction": "11"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei 50 na padaria",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *padaria*\n💵 *R$ 50,00*\n💸 Despesa\n🏦 Nubank (Débito)\n📂 Alimentação → Padaria\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": null,
+      "valor_db": -50,
+      "valor_original": 50,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-01",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "despesa_cota_do_gemini",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastei 50",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Despesa",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": {
+      "__raise__": "429 Quota exceeded"
+     }
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 59
+    }
+   },
+   "body": {
+    "texto": "gastei 50",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Ops! Algo deu errado. Por favor, tente novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Despesa",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "renda_simples",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "recebi 500 de freelance",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Renda",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 500.0, \"descricao_bruta\": \"freelance\"}",
+     "categorize_transaction": "71"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 70,
+       "nome_sub": "Salário",
+       "nome_macro": "Receitas"
+      },
+      {
+       "id": 71,
+       "nome_sub": "Freelance",
+       "nome_macro": "Receitas"
+      },
+      {
+       "id": 79,
+       "nome_sub": "Outros",
+       "nome_macro": "Receitas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 79
+    }
+   },
+   "body": {
+    "texto": "recebi 500 de freelance",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *freelance*\n💵 *R$ 500,00*\n💰 Renda\n🏦 Nubank (Débito)\n📂 Receitas → Freelance\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Renda",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 71,
+      "fatura_id": null,
+      "descricao": "freelance",
+      "descricao_final": null,
+      "valor_db": 500.0,
+      "valor_original": 500.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Renda",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "renda_conta_mencionada",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "recebi 1200 no nubank",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Renda",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "default_accounts": {
+     "renda": 3,
+     "despesa": null
+    },
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 1200, \"descricao_bruta\": \"salário\"}",
+     "categorize_transaction": "70"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 70,
+       "nome_sub": "Salário",
+       "nome_macro": "Receitas"
+      },
+      {
+       "id": 71,
+       "nome_sub": "Freelance",
+       "nome_macro": "Receitas"
+      },
+      {
+       "id": 79,
+       "nome_sub": "Outros",
+       "nome_macro": "Receitas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 79
+    }
+   },
+   "body": {
+    "texto": "recebi 1200 no nubank",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *salário*\n💵 *R$ 1.200,00*\n💰 Renda\n🏦 Nubank (Débito)\n📂 Receitas → Salário\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Renda",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 70,
+      "fatura_id": null,
+      "descricao": "salário",
+      "descricao_final": null,
+      "valor_db": 1200,
+      "valor_original": 1200,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Renda",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "renda_conta_padrao",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "recebi 1200",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Renda",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "default_accounts": {
+     "renda": 3,
+     "despesa": null
+    },
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 1200, \"descricao_bruta\": \"salário\"}",
+     "categorize_transaction": "70"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 70,
+       "nome_sub": "Salário",
+       "nome_macro": "Receitas"
+      },
+      {
+       "id": 71,
+       "nome_sub": "Freelance",
+       "nome_macro": "Receitas"
+      },
+      {
+       "id": 79,
+       "nome_sub": "Outros",
+       "nome_macro": "Receitas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 79
+    }
+   },
+   "body": {
+    "texto": "recebi 1200",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *salário*\n💵 *R$ 1.200,00*\n💰 Renda\n🏦 Carteira (Débito)\n📂 Receitas → Salário\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Renda",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 3,
+      "conta_nome": "Carteira",
+      "conta_tipo": "Dinheiro",
+      "categoria_id": 70,
+      "fatura_id": null,
+      "descricao": "salário",
+      "descricao_final": null,
+      "valor_db": 1200,
+      "valor_original": 1200,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Renda",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "renda_sem_valor",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "recebi",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Renda",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": null, \"descricao_bruta\": \"salário\"}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 70,
+       "nome_sub": "Salário",
+       "nome_macro": "Receitas"
+      },
+      {
+       "id": 71,
+       "nome_sub": "Freelance",
+       "nome_macro": "Receitas"
+      },
+      {
+       "id": 79,
+       "nome_sub": "Outros",
+       "nome_macro": "Receitas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 79
+    }
+   },
+   "body": {
+    "texto": "recebi",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não consegui identificar o valor da renda. Por favor, informe o valor."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Renda",
+     "gemini_service.extract_transaction_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "renda_agendamento",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "recebi meu salário",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Renda",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "schedule": {
+     "id": 8,
+     "descricao": "Salário",
+     "valor_previsto": 4500,
+     "conta_id": 1,
+     "subcategoria_id": 70
+    },
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": null, \"descricao_bruta\": \"salário\"}"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 70,
+       "nome_sub": "Salário",
+       "nome_macro": "Receitas"
+      },
+      {
+       "id": 71,
+       "nome_sub": "Freelance",
+       "nome_macro": "Receitas"
+      },
+      {
+       "id": 79,
+       "nome_sub": "Outros",
+       "nome_macro": "Receitas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 79
+    }
+   },
+   "body": {
+    "texto": "recebi meu salário",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *salário*\n💵 *R$ 4.500,00*\n💰 Renda\n🏦 Nubank (Débito)\n📂 Receitas → Salário\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Renda",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 70,
+      "fatura_id": null,
+      "descricao": "salário",
+      "descricao_final": "Salário",
+      "valor_db": 4500.0,
+      "valor_original": 4500.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Renda",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "renda_ignora_parcelamento",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "recebi 500",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Renda",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_transaction_details": "{\"valor_decimal\": 500, \"descricao_bruta\": \"freela\", \"parcelamento\": 3}",
+     "categorize_transaction": "71"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 70,
+       "nome_sub": "Salário",
+       "nome_macro": "Receitas"
+      },
+      {
+       "id": 71,
+       "nome_sub": "Freelance",
+       "nome_macro": "Receitas"
+      },
+      {
+       "id": 79,
+       "nome_sub": "Outros",
+       "nome_macro": "Receitas Gerais"
+      }
+     ],
+     "finance_service.get_fallback_category_id": 79
+    }
+   },
+   "body": {
+    "texto": "recebi 500",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *freela*\n💵 *R$ 500,00*\n💰 Renda\n🏦 Nubank (Débito)\n📂 Receitas → Freelance\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Renda",
+     "gemini_service.extract_transaction_details",
+     "finance_service.get_user_categories",
+     "finance_service.get_fallback_category_id",
+     "gemini_service.categorize_transaction"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 71,
+      "fatura_id": null,
+      "descricao": "freela",
+      "descricao_final": null,
+      "valor_db": 500,
+      "valor_original": 500,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Renda",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "last_pending:5531999990001",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "transferencia_com_contas",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "transferir 100 do nubank para a carteira",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Transferência",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ]
+   },
+   "body": {
+    "texto": "transferir 100 do nubank para a carteira",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Ops! Algo deu errado. Por favor, tente novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "transferencia_sem_contas_sem_valor",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "transferir",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Transferência",
+    "accounts": [],
+    "llm": {
+     "extract_transfer_details": "{\"valor_decimal\": null, \"conta_origem\": \"Nubank\", \"conta_destino\": \"Carteira\"}"
+    }
+   },
+   "body": {
+    "texto": "transferir",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não consegui identificar o valor da transferência."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_transfer_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "transferencia_sem_contas_sem_origem",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "transferir 10",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Transferência",
+    "accounts": [],
+    "llm": {
+     "extract_transfer_details": "{\"valor_decimal\": 10, \"conta_origem\": null, \"conta_destino\": \"Carteira\"}"
+    }
+   },
+   "body": {
+    "texto": "transferir 10",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não consegui identificar a conta de origem. Especifique de qual conta transferir."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_transfer_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "transferencia_sem_contas_sem_destino",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "transferir 10",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Transferência",
+    "accounts": [],
+    "llm": {
+     "extract_transfer_details": "{\"valor_decimal\": 10, \"conta_origem\": \"Nubank\", \"conta_destino\": \"\"}"
+    }
+   },
+   "body": {
+    "texto": "transferir 10",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não consegui identificar a conta de destino. Especifique para qual conta transferir."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_transfer_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "transferencia_sem_contas_nao_encontradas",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "transferir 10 do nubank para a carteira",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Transferência",
+    "accounts": [],
+    "llm": {
+     "extract_transfer_details": "{\"valor_decimal\": 10, \"conta_origem\": \"Nubank\", \"conta_destino\": \"Carteira\"}"
+    },
+    "returns": {
+     "finance_service.get_account_by_name": null
+    }
+   },
+   "body": {
+    "texto": "transferir 10 do nubank para a carteira",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Uma ou ambas as contas não foram encontradas."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_transfer_details",
+     "finance_service.get_account_by_name",
+     "finance_service.get_account_by_name"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_dados_incompletos",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "pagamento da fatura",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Pagamento Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_payment_details": "{\"valor_decimal\": 500, \"conta_origem\": null, \"conta_cartao\": \"Cartão Inter\"}"
+    }
+   },
+   "body": {
+    "texto": "pagamento da fatura",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Não consegui identificar todos os dados do pagamento.\n\nPor favor, informe:\n• Valor pago\n• Conta de origem\n• Cartão que foi pago\n\nExemplo: *Paguei 500 reais da fatura do Nubank com o Inter*"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_payment_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_valor_zero",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "pagamento da fatura",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Pagamento Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_payment_details": "{\"valor_decimal\": 0, \"conta_origem\": \"Nubank\", \"conta_cartao\": \"Cartão Inter\"}"
+    }
+   },
+   "body": {
+    "texto": "pagamento da fatura",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Não consegui identificar todos os dados do pagamento.\n\nPor favor, informe:\n• Valor pago\n• Conta de origem\n• Cartão que foi pago\n\nExemplo: *Paguei 500 reais da fatura do Nubank com o Inter*"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_payment_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_contas_nao_encontradas",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "pagamento 500 da fatura do inter com o nubank",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Pagamento Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_payment_details": "{\"valor_decimal\": 500, \"conta_origem\": \"Nubank\", \"conta_cartao\": \"Inter\"}"
+    },
+    "returns": {
+     "finance_service.get_account_by_name": {
+      "__seq__": [
+       1,
+       null
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "pagamento 500 da fatura do inter com o nubank",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não encontrei as contas mencionadas (Nubank → Inter)."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_payment_details",
+     "finance_service.get_account_by_name",
+     "finance_service.get_account_by_name"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_sucesso",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "pagamento 500,5 da fatura do inter com o nubank",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Pagamento Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_payment_details": "{\"valor_decimal\": 500.5, \"conta_origem\": \"Nubank\", \"conta_cartao\": \"Cartão Inter\"}"
+    },
+    "returns": {
+     "finance_service.get_account_by_name": {
+      "__seq__": [
+       1,
+       2
+      ]
+     },
+     "finance_service.create_fatura_payment": "Cartão Inter"
+    }
+   },
+   "body": {
+    "texto": "pagamento 500,5 da fatura do inter com o nubank",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Pagamento da fatura 'Cartão Inter' (R$ 500,50) registrado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_payment_details",
+     "finance_service.get_account_by_name",
+     "finance_service.get_account_by_name",
+     "finance_service.create_fatura_payment"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_valor_texto",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "pagamento 500 da fatura",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Pagamento Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_payment_details": "{\"valor_decimal\": \"500\", \"conta_origem\": \"Nubank\", \"conta_cartao\": \"Cartão Inter\"}"
+    },
+    "returns": {
+     "finance_service.get_account_by_name": {
+      "__seq__": [
+       1,
+       2
+      ]
+     },
+     "finance_service.create_fatura_payment": "Cartão Inter"
+    }
+   },
+   "body": {
+    "texto": "pagamento 500 da fatura",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Pagamento da fatura 'Cartão Inter' (R$ 500,00) registrado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_payment_details",
+     "finance_service.get_account_by_name",
+     "finance_service.get_account_by_name",
+     "finance_service.create_fatura_payment"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_cota_do_gemini",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "pagamento da fatura",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Pagamento Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_payment_details": {
+      "__raise__": "429 Quota exceeded"
+     }
+    }
+   },
+   "body": {
+    "texto": "pagamento da fatura",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 429,
+    "body": {
+     "status": "erro",
+     "resposta": "⚠️ *Limite de IA Excedido*\n\nO sistema atingiu o limite diário de processamento de IA.\n\n🔧 *Soluções:*\n• Aguarde alguns minutos e tente novamente\n• Use comandos diretos (ex: 'gastei 50 em comida')\n• Configure sua própria chave de API do Gemini\n\n⏰ O limite é renovado automaticamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_payment_details"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "resposta_ok_grava_despesa",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "OK",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "returns": {
+     "finance_service.create_transaction": 321,
+     "finance_service.create_parcelamento_agendamento": 55
+    }
+   },
+   "body": {
+    "texto": "OK",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "FEEDBACK"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "finance_service.create_transaction",
+     "feedback"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_tx:5531999990001:ab12cd34"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "resposta_ok_minusculo_com_espacos",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "  ok  ",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "returns": {
+     "finance_service.create_transaction": 321,
+     "finance_service.create_parcelamento_agendamento": 55
+    }
+   },
+   "body": {
+    "texto": "  ok  ",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "FEEDBACK"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "finance_service.create_transaction",
+     "feedback"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_tx:5531999990001:ab12cd34"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "resposta_confirmar_grava_renda",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "confirmar",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 70,
+      "fatura_id": null,
+      "descricao": "salário",
+      "descricao_final": "Salário",
+      "valor_db": 4500.0,
+      "valor_original": 4500.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Renda",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "returns": {
+     "finance_service.create_transaction": 321,
+     "finance_service.create_parcelamento_agendamento": 55
+    }
+   },
+   "body": {
+    "texto": "confirmar",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "FEEDBACK"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "finance_service.create_transaction",
+     "feedback"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_tx:5531999990001:ab12cd34"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "resposta_sim_nao_e_de_transacao",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "sim",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "intent": "Menu de Ajuda"
+   },
+   "body": {
+    "texto": "sim",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📚 *MENU DE FUNCIONALIDADES* 📚\n\n*💰 GESTÃO FINANCEIRA*\n• _\"gastei 50 em comida\"_ - Registrar despesa\n• _\"recebi 500\"_ - Registrar renda\n• _\"qual meu saldo?\"_ - Consultar saldo das contas\n• _\"quanto gastei hoje/semana/mês?\"_ - Gastos por período\n• _\"meus potes\"_ - Ver limite e gasto dos potes\n• _\"todas as minhas contas\"_ - Listar TODAS as contas recorrentes (pagas ou não)\n• _\"minhas contas fixas\"_ - Ver contas ainda não pagas no mês\n• _\"paguei água\"_ - Quitar conta fixa\n• _\"paguei a internet e comprei pizza de 50\"_ - Quitar múltiplas (híbrido)\n• _\"transferir 100 da carteira para banco\"_ - Transferência\n• _\"paguei 500 da fatura do nubank\"_ - Pagar fatura\n• _\"qual valor da fatura?\"_ - Consultar valor da fatura\n• _\"quanto gastei com comida?\"_ - Gasto por categoria\n• _\"quais contas tenho?\"_ - Listar contas cadastradas\n• _\"quanto de reserva?\"_ - Reserva de emergência (6x média)\n• _\"tenho conta que vence hoje?\"_ - Vencimentos de hoje\n• _\"tenho conta que vence amanhã?\"_ - Vencimentos de amanhã\n• _\"contas que vencem essa semana?\"_ - Vencimentos dos próximos 7 dias\n\n*📅 CALENDÁRIO & AGENDA*\n• _\"minha agenda amanhã\"_ - Ver compromissos\n• _\"criar evento academia amanhã 7h\"_ - Criar evento\n• _\"deletar reunião de hoje\"_ - Remover evento\n• _\"quando estou livre amanhã?\"_ - Horários disponíveis\n\n*📁 GOOGLE DRIVE*\n• _[Envie foto/doc] \"salvar no drive\"_ - Upload para pasta padrão\n• _[Envie foto/doc] \"salvar no drive pasta Notas\"_ - Upload para pasta específica\n• _Formatos aceitos:_ Imagens, PDFs, Docs, Planilhas, Áudio\n\n*📊 ANÁLISES & RELATÓRIOS*\n• _\"analisar meus gastos\"_ - Análise inteligente com IA\n• _\"comparar com mês anterior\"_ - Comparação mensal\n• _\"quanto vou gastar este mês\"_ - Previsão de gastos\n• _\"gráfico de gastos\"_ - Gerar gráfico visual\n\n*⚙️ CONFIGURAÇÕES*\n• _\"ativar resumo matinal\"_ - Configurar notificações\n• _\"configurar localização São Paulo\"_ - Definir cidade\n• _\"configurar relatório mensal\"_ - Agendar relatório\n• _\"configurar endereço casa\"_ - Adicionar endereço\n• _\"meus endereços\"_ - Listar endereços\n• _\"remover endereço casa\"_ - Deletar endereço\n\n*🔑 ACESSO*\n• _\"minha api key\"_ - Exibir chave de integração\n\n💡 *Dica:* Use linguagem natural! Eu entendo suas mensagens."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Menu de Ajuda"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "resposta_s_nao_e_de_transacao",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "s",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "intent": "Menu de Ajuda"
+   },
+   "body": {
+    "texto": "s",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📚 *MENU DE FUNCIONALIDADES* 📚\n\n*💰 GESTÃO FINANCEIRA*\n• _\"gastei 50 em comida\"_ - Registrar despesa\n• _\"recebi 500\"_ - Registrar renda\n• _\"qual meu saldo?\"_ - Consultar saldo das contas\n• _\"quanto gastei hoje/semana/mês?\"_ - Gastos por período\n• _\"meus potes\"_ - Ver limite e gasto dos potes\n• _\"todas as minhas contas\"_ - Listar TODAS as contas recorrentes (pagas ou não)\n• _\"minhas contas fixas\"_ - Ver contas ainda não pagas no mês\n• _\"paguei água\"_ - Quitar conta fixa\n• _\"paguei a internet e comprei pizza de 50\"_ - Quitar múltiplas (híbrido)\n• _\"transferir 100 da carteira para banco\"_ - Transferência\n• _\"paguei 500 da fatura do nubank\"_ - Pagar fatura\n• _\"qual valor da fatura?\"_ - Consultar valor da fatura\n• _\"quanto gastei com comida?\"_ - Gasto por categoria\n• _\"quais contas tenho?\"_ - Listar contas cadastradas\n• _\"quanto de reserva?\"_ - Reserva de emergência (6x média)\n• _\"tenho conta que vence hoje?\"_ - Vencimentos de hoje\n• _\"tenho conta que vence amanhã?\"_ - Vencimentos de amanhã\n• _\"contas que vencem essa semana?\"_ - Vencimentos dos próximos 7 dias\n\n*📅 CALENDÁRIO & AGENDA*\n• _\"minha agenda amanhã\"_ - Ver compromissos\n• _\"criar evento academia amanhã 7h\"_ - Criar evento\n• _\"deletar reunião de hoje\"_ - Remover evento\n• _\"quando estou livre amanhã?\"_ - Horários disponíveis\n\n*📁 GOOGLE DRIVE*\n• _[Envie foto/doc] \"salvar no drive\"_ - Upload para pasta padrão\n• _[Envie foto/doc] \"salvar no drive pasta Notas\"_ - Upload para pasta específica\n• _Formatos aceitos:_ Imagens, PDFs, Docs, Planilhas, Áudio\n\n*📊 ANÁLISES & RELATÓRIOS*\n• _\"analisar meus gastos\"_ - Análise inteligente com IA\n• _\"comparar com mês anterior\"_ - Comparação mensal\n• _\"quanto vou gastar este mês\"_ - Previsão de gastos\n• _\"gráfico de gastos\"_ - Gerar gráfico visual\n\n*⚙️ CONFIGURAÇÕES*\n• _\"ativar resumo matinal\"_ - Configurar notificações\n• _\"configurar localização São Paulo\"_ - Definir cidade\n• _\"configurar relatório mensal\"_ - Agendar relatório\n• _\"configurar endereço casa\"_ - Adicionar endereço\n• _\"meus endereços\"_ - Listar endereços\n• _\"remover endereço casa\"_ - Deletar endereço\n\n*🔑 ACESSO*\n• _\"minha api key\"_ - Exibir chave de integração\n\n💡 *Dica:* Use linguagem natural! Eu entendo suas mensagens."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Menu de Ajuda"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "resposta_ok_sem_descricao_final_falha",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": "150",
+   "texto": "OK",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": null,
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "returns": {
+     "finance_service.create_transaction": 321,
+     "finance_service.create_parcelamento_agendamento": 55
+    }
+   },
+   "body": {
+    "texto": "OK",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 500,
+    "body": {
+     "status": "erro",
+     "resposta": "Erro ao processar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_tx:5531999990001:ab12cd34"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "resposta_ok_sem_chave_descricao_final",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "OK",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "returns": {
+     "finance_service.create_transaction": 321,
+     "finance_service.create_parcelamento_agendamento": 55
+    }
+   },
+   "body": {
+    "texto": "OK",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "FEEDBACK"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "finance_service.create_transaction",
+     "feedback"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_tx:5531999990001:ab12cd34"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "resposta_ok_parcelada",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "OK",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "tenis",
+      "descricao_final": "Tênis",
+      "valor_db": -30.0,
+      "valor_original": 30.0,
+      "valor_total": 90.0,
+      "num_parcelas": 3,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "returns": {
+     "finance_service.create_transaction": 321,
+     "finance_service.create_parcelamento_agendamento": 55
+    }
+   },
+   "body": {
+    "texto": "OK",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "FEEDBACK"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "finance_service.create_transaction",
+     "finance_service.create_parcelamento_agendamento",
+     "feedback"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_tx:5531999990001:ab12cd34"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "resposta_ok_parcelada_sem_descricao_final",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": "150",
+   "texto": "OK",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "tenis",
+      "descricao_final": null,
+      "valor_db": -30.0,
+      "valor_original": 30.0,
+      "valor_total": 90.0,
+      "num_parcelas": 3,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "returns": {
+     "finance_service.create_transaction": 321,
+     "finance_service.create_parcelamento_agendamento": 55
+    }
+   },
+   "body": {
+    "texto": "OK",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 500,
+    "body": {
+     "status": "erro",
+     "resposta": "Erro ao processar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_tx:5531999990001:ab12cd34"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "resposta_trocar_despesa",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "TROCAR",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ]
+    }
+   },
+   "body": {
+    "texto": "TROCAR",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📂 *ESCOLHA A CATEGORIA CORRETA:*\n\n*Alimentação:*\n  1. Supermercado\n  2. Padaria\n\n*Moradia:*\n  3. Luz\n\n*Despesas Gerais:*\n  4. Outros\n\n━━━━━━━━━━━━━━━━━━━━\nDigite o *número* da categoria desejada\nou *CANCELAR* para descartar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "finance_service.get_user_categories"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp",
+      "awaiting_category_selection": true,
+      "categoria_map": {
+       "1": 10,
+       "2": 11,
+       "3": 12,
+       "4": 59
+      }
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "resposta_trocar_renda",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "trocar",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 70,
+      "fatura_id": null,
+      "descricao": "salário",
+      "descricao_final": "Salário",
+      "valor_db": 4500.0,
+      "valor_original": 4500.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Renda",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 70,
+       "nome_sub": "Salário",
+       "nome_macro": "Receitas"
+      },
+      {
+       "id": 71,
+       "nome_sub": "Freelance",
+       "nome_macro": "Receitas"
+      },
+      {
+       "id": 79,
+       "nome_sub": "Outros",
+       "nome_macro": "Receitas Gerais"
+      }
+     ]
+    }
+   },
+   "body": {
+    "texto": "trocar",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📂 *ESCOLHA A CATEGORIA CORRETA:*\n\n*Receitas:*\n  1. Salário\n  2. Freelance\n\n*Receitas Gerais:*\n  3. Outros\n\n━━━━━━━━━━━━━━━━━━━━\nDigite o *número* da categoria desejada\nou *CANCELAR* para descartar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "finance_service.get_user_categories"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 70,
+      "fatura_id": null,
+      "descricao": "salário",
+      "descricao_final": "Salário",
+      "valor_db": 4500.0,
+      "valor_original": 4500.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Renda",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp",
+      "awaiting_category_selection": true,
+      "categoria_map": {
+       "1": 70,
+       "2": 71,
+       "3": 79
+      }
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "resposta_trocar_com_chave_extra",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "TROCAR",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp",
+      "extra": {
+       "k": [
+        1,
+        "ç"
+       ]
+      }
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "returns": {
+     "finance_service.get_user_categories": [
+      {
+       "id": 10,
+       "nome_sub": "Supermercado",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 11,
+       "nome_sub": "Padaria",
+       "nome_macro": "Alimentação"
+      },
+      {
+       "id": 12,
+       "nome_sub": "Luz",
+       "nome_macro": "Moradia"
+      },
+      {
+       "id": 59,
+       "nome_sub": "Outros",
+       "nome_macro": "Despesas Gerais"
+      }
+     ]
+    }
+   },
+   "body": {
+    "texto": "TROCAR",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📂 *ESCOLHA A CATEGORIA CORRETA:*\n\n*Alimentação:*\n  1. Supermercado\n  2. Padaria\n\n*Moradia:*\n  3. Luz\n\n*Despesas Gerais:*\n  4. Outros\n\n━━━━━━━━━━━━━━━━━━━━\nDigite o *número* da categoria desejada\nou *CANCELAR* para descartar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "finance_service.get_user_categories"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp",
+      "extra": {
+       "k": [
+        1,
+        "ç"
+       ]
+      },
+      "awaiting_category_selection": true,
+      "categoria_map": {
+       "1": 10,
+       "2": 11,
+       "3": 12,
+       "4": 59
+      }
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": [
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ],
+     [
+      "set",
+      "pending_tx:5531999990001:ab12cd34",
+      300
+     ]
+    ]
+   }
+  },
+  {
+   "name": "resposta_numero_escolhe_categoria",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "2",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp",
+      "awaiting_category_selection": true,
+      "categoria_map": {
+       "1": 10,
+       "2": 11,
+       "3": 59
+      }
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "returns": {
+     "finance_service.create_transaction": 321,
+     "finance_service.create_parcelamento_agendamento": 55
+    }
+   },
+   "body": {
+    "texto": "2",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "FEEDBACK"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "finance_service.create_transaction",
+     "feedback"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_tx:5531999990001:ab12cd34"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "resposta_numero_com_espacos",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": " 3 ",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp",
+      "awaiting_category_selection": true,
+      "categoria_map": {
+       "1": 10,
+       "2": 11,
+       "3": 59
+      }
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "returns": {
+     "finance_service.create_transaction": 321,
+     "finance_service.create_parcelamento_agendamento": 55
+    }
+   },
+   "body": {
+    "texto": " 3 ",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "FEEDBACK"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "finance_service.create_transaction",
+     "feedback"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_tx:5531999990001:ab12cd34"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "resposta_numero_fora_do_mapa",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "9",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp",
+      "awaiting_category_selection": true,
+      "categoria_map": {
+       "1": 10,
+       "2": 11,
+       "3": 59
+      }
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    }
+   },
+   "body": {
+    "texto": "9",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "Número inválido. Escolha um número da lista ou digite CANCELAR."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp",
+      "awaiting_category_selection": true,
+      "categoria_map": {
+       "1": 10,
+       "2": 11,
+       "3": 59
+      }
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "resposta_texto_na_escolha",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "OK",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp",
+      "awaiting_category_selection": true,
+      "categoria_map": {
+       "1": 10,
+       "2": 11,
+       "3": 59
+      }
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    }
+   },
+   "body": {
+    "texto": "OK",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "Digite um número válido da lista ou CANCELAR."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp",
+      "awaiting_category_selection": true,
+      "categoria_map": {
+       "1": 10,
+       "2": 11,
+       "3": 59
+      }
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "resposta_cancelar_na_escolha",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "cancelar",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp",
+      "awaiting_category_selection": true,
+      "categoria_map": {
+       "1": 10,
+       "2": 11,
+       "3": 59
+      }
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    }
+   },
+   "body": {
+    "texto": "cancelar",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Transação cancelada."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_tx:5531999990001:ab12cd34"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "resposta_cancelar",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "CANCELAR",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    }
+   },
+   "body": {
+    "texto": "CANCELAR",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Transação cancelada."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_tx:5531999990001:ab12cd34"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ],
+     [
+      "delete",
+      "last_pending:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "resposta_cancela_minusculo",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "cancela",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    }
+   },
+   "body": {
+    "texto": "cancela",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Não entendi. Tente 'gastei 50' ou 'o que você pode fazer?'."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "resposta_nao_acentuado_e_do_evento",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "não",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "intent": "Menu de Ajuda"
+   },
+   "body": {
+    "texto": "não",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📚 *MENU DE FUNCIONALIDADES* 📚\n\n*💰 GESTÃO FINANCEIRA*\n• _\"gastei 50 em comida\"_ - Registrar despesa\n• _\"recebi 500\"_ - Registrar renda\n• _\"qual meu saldo?\"_ - Consultar saldo das contas\n• _\"quanto gastei hoje/semana/mês?\"_ - Gastos por período\n• _\"meus potes\"_ - Ver limite e gasto dos potes\n• _\"todas as minhas contas\"_ - Listar TODAS as contas recorrentes (pagas ou não)\n• _\"minhas contas fixas\"_ - Ver contas ainda não pagas no mês\n• _\"paguei água\"_ - Quitar conta fixa\n• _\"paguei a internet e comprei pizza de 50\"_ - Quitar múltiplas (híbrido)\n• _\"transferir 100 da carteira para banco\"_ - Transferência\n• _\"paguei 500 da fatura do nubank\"_ - Pagar fatura\n• _\"qual valor da fatura?\"_ - Consultar valor da fatura\n• _\"quanto gastei com comida?\"_ - Gasto por categoria\n• _\"quais contas tenho?\"_ - Listar contas cadastradas\n• _\"quanto de reserva?\"_ - Reserva de emergência (6x média)\n• _\"tenho conta que vence hoje?\"_ - Vencimentos de hoje\n• _\"tenho conta que vence amanhã?\"_ - Vencimentos de amanhã\n• _\"contas que vencem essa semana?\"_ - Vencimentos dos próximos 7 dias\n\n*📅 CALENDÁRIO & AGENDA*\n• _\"minha agenda amanhã\"_ - Ver compromissos\n• _\"criar evento academia amanhã 7h\"_ - Criar evento\n• _\"deletar reunião de hoje\"_ - Remover evento\n• _\"quando estou livre amanhã?\"_ - Horários disponíveis\n\n*📁 GOOGLE DRIVE*\n• _[Envie foto/doc] \"salvar no drive\"_ - Upload para pasta padrão\n• _[Envie foto/doc] \"salvar no drive pasta Notas\"_ - Upload para pasta específica\n• _Formatos aceitos:_ Imagens, PDFs, Docs, Planilhas, Áudio\n\n*📊 ANÁLISES & RELATÓRIOS*\n• _\"analisar meus gastos\"_ - Análise inteligente com IA\n• _\"comparar com mês anterior\"_ - Comparação mensal\n• _\"quanto vou gastar este mês\"_ - Previsão de gastos\n• _\"gráfico de gastos\"_ - Gerar gráfico visual\n\n*⚙️ CONFIGURAÇÕES*\n• _\"ativar resumo matinal\"_ - Configurar notificações\n• _\"configurar localização São Paulo\"_ - Definir cidade\n• _\"configurar relatório mensal\"_ - Agendar relatório\n• _\"configurar endereço casa\"_ - Adicionar endereço\n• _\"meus endereços\"_ - Listar endereços\n• _\"remover endereço casa\"_ - Deletar endereço\n\n*🔑 ACESSO*\n• _\"minha api key\"_ - Exibir chave de integração\n\n💡 *Dica:* Use linguagem natural! Eu entendo suas mensagens."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Menu de Ajuda"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "resposta_comando_desconhecido",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "confirmar agora",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    }
+   },
+   "body": {
+    "texto": "confirmar agora",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "Comando não reconhecido. Digite: CONFIRMAR, TROCAR ou CANCELAR."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {
+     "pending_tx:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "conta_id": 1,
+      "conta_nome": "Nubank",
+      "conta_tipo": "Conta Corrente",
+      "categoria_id": 11,
+      "fatura_id": null,
+      "descricao": "padaria",
+      "descricao_final": "Padaria do Zé",
+      "valor_db": -50.0,
+      "valor_original": 50.0,
+      "valor_total": null,
+      "num_parcelas": null,
+      "tipo_transacao": "Despesa",
+      "tipo_pagamento": "debito",
+      "data_transacao": "2026-10-07",
+      "origem": "whatsapp"
+     },
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "resposta_pendencia_expirada",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ok",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {}
+   },
+   "body": {
+    "texto": "ok",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Não encontrei nada pendente para confirmar.\n\nSe quer registrar algo, diga:\nExemplo: 'gastei 50 em comida'"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "resposta_expirada_com_last_pending",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ok",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "last_pending:5531999990001": "ab12cd34"
+    }
+   },
+   "body": {
+    "texto": "ok",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "⏱️ Esta transação expirou ou não existe mais. Registre novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {
+     "last_pending:5531999990001": "ab12cd34"
+    },
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "resposta_ok_sem_pendencia",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ok",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {},
+   "body": {
+    "texto": "ok",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Não encontrei nada pendente para confirmar.\n\nSe quer registrar algo, diga:\nExemplo: 'gastei 50 em comida'"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "resposta_confirmar_sem_pendencia",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "CONFIRMAR",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {},
+   "body": {
+    "texto": "CONFIRMAR",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Não encontrei nada pendente para confirmar.\n\nSe quer registrar algo, diga:\nExemplo: 'gastei 50 em comida'"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "resposta_cancelar_sem_pendencia_aviso",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "cancelar",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {},
+   "body": {
+    "texto": "cancelar",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não encontrei nada pendente para cancelar.\n\nSe quer deletar um evento específico, diga qual:\nExemplo: 'Deletar academia de hoje'"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "resposta_numero_sem_pendencia_vai_ao_gemini",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "5",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Menu de Ajuda"
+   },
+   "body": {
+    "texto": "5",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📚 *MENU DE FUNCIONALIDADES* 📚\n\n*💰 GESTÃO FINANCEIRA*\n• _\"gastei 50 em comida\"_ - Registrar despesa\n• _\"recebi 500\"_ - Registrar renda\n• _\"qual meu saldo?\"_ - Consultar saldo das contas\n• _\"quanto gastei hoje/semana/mês?\"_ - Gastos por período\n• _\"meus potes\"_ - Ver limite e gasto dos potes\n• _\"todas as minhas contas\"_ - Listar TODAS as contas recorrentes (pagas ou não)\n• _\"minhas contas fixas\"_ - Ver contas ainda não pagas no mês\n• _\"paguei água\"_ - Quitar conta fixa\n• _\"paguei a internet e comprei pizza de 50\"_ - Quitar múltiplas (híbrido)\n• _\"transferir 100 da carteira para banco\"_ - Transferência\n• _\"paguei 500 da fatura do nubank\"_ - Pagar fatura\n• _\"qual valor da fatura?\"_ - Consultar valor da fatura\n• _\"quanto gastei com comida?\"_ - Gasto por categoria\n• _\"quais contas tenho?\"_ - Listar contas cadastradas\n• _\"quanto de reserva?\"_ - Reserva de emergência (6x média)\n• _\"tenho conta que vence hoje?\"_ - Vencimentos de hoje\n• _\"tenho conta que vence amanhã?\"_ - Vencimentos de amanhã\n• _\"contas que vencem essa semana?\"_ - Vencimentos dos próximos 7 dias\n\n*📅 CALENDÁRIO & AGENDA*\n• _\"minha agenda amanhã\"_ - Ver compromissos\n• _\"criar evento academia amanhã 7h\"_ - Criar evento\n• _\"deletar reunião de hoje\"_ - Remover evento\n• _\"quando estou livre amanhã?\"_ - Horários disponíveis\n\n*📁 GOOGLE DRIVE*\n• _[Envie foto/doc] \"salvar no drive\"_ - Upload para pasta padrão\n• _[Envie foto/doc] \"salvar no drive pasta Notas\"_ - Upload para pasta específica\n• _Formatos aceitos:_ Imagens, PDFs, Docs, Planilhas, Áudio\n\n*📊 ANÁLISES & RELATÓRIOS*\n• _\"analisar meus gastos\"_ - Análise inteligente com IA\n• _\"comparar com mês anterior\"_ - Comparação mensal\n• _\"quanto vou gastar este mês\"_ - Previsão de gastos\n• _\"gráfico de gastos\"_ - Gerar gráfico visual\n\n*⚙️ CONFIGURAÇÕES*\n• _\"ativar resumo matinal\"_ - Configurar notificações\n• _\"configurar localização São Paulo\"_ - Definir cidade\n• _\"configurar relatório mensal\"_ - Agendar relatório\n• _\"configurar endereço casa\"_ - Adicionar endereço\n• _\"meus endereços\"_ - Listar endereços\n• _\"remover endereço casa\"_ - Deletar endereço\n\n*🔑 ACESSO*\n• _\"minha api key\"_ - Exibir chave de integração\n\n💡 *Dica:* Use linguagem natural! Eu entendo suas mensagens."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Menu de Ajuda"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "resposta_trocar_sem_pendencia_vai_ao_gemini",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "trocar",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Menu de Ajuda"
+   },
+   "body": {
+    "texto": "trocar",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📚 *MENU DE FUNCIONALIDADES* 📚\n\n*💰 GESTÃO FINANCEIRA*\n• _\"gastei 50 em comida\"_ - Registrar despesa\n• _\"recebi 500\"_ - Registrar renda\n• _\"qual meu saldo?\"_ - Consultar saldo das contas\n• _\"quanto gastei hoje/semana/mês?\"_ - Gastos por período\n• _\"meus potes\"_ - Ver limite e gasto dos potes\n• _\"todas as minhas contas\"_ - Listar TODAS as contas recorrentes (pagas ou não)\n• _\"minhas contas fixas\"_ - Ver contas ainda não pagas no mês\n• _\"paguei água\"_ - Quitar conta fixa\n• _\"paguei a internet e comprei pizza de 50\"_ - Quitar múltiplas (híbrido)\n• _\"transferir 100 da carteira para banco\"_ - Transferência\n• _\"paguei 500 da fatura do nubank\"_ - Pagar fatura\n• _\"qual valor da fatura?\"_ - Consultar valor da fatura\n• _\"quanto gastei com comida?\"_ - Gasto por categoria\n• _\"quais contas tenho?\"_ - Listar contas cadastradas\n• _\"quanto de reserva?\"_ - Reserva de emergência (6x média)\n• _\"tenho conta que vence hoje?\"_ - Vencimentos de hoje\n• _\"tenho conta que vence amanhã?\"_ - Vencimentos de amanhã\n• _\"contas que vencem essa semana?\"_ - Vencimentos dos próximos 7 dias\n\n*📅 CALENDÁRIO & AGENDA*\n• _\"minha agenda amanhã\"_ - Ver compromissos\n• _\"criar evento academia amanhã 7h\"_ - Criar evento\n• _\"deletar reunião de hoje\"_ - Remover evento\n• _\"quando estou livre amanhã?\"_ - Horários disponíveis\n\n*📁 GOOGLE DRIVE*\n• _[Envie foto/doc] \"salvar no drive\"_ - Upload para pasta padrão\n• _[Envie foto/doc] \"salvar no drive pasta Notas\"_ - Upload para pasta específica\n• _Formatos aceitos:_ Imagens, PDFs, Docs, Planilhas, Áudio\n\n*📊 ANÁLISES & RELATÓRIOS*\n• _\"analisar meus gastos\"_ - Análise inteligente com IA\n• _\"comparar com mês anterior\"_ - Comparação mensal\n• _\"quanto vou gastar este mês\"_ - Previsão de gastos\n• _\"gráfico de gastos\"_ - Gerar gráfico visual\n\n*⚙️ CONFIGURAÇÕES*\n• _\"ativar resumo matinal\"_ - Configurar notificações\n• _\"configurar localização São Paulo\"_ - Definir cidade\n• _\"configurar relatório mensal\"_ - Agendar relatório\n• _\"configurar endereço casa\"_ - Adicionar endereço\n• _\"meus endereços\"_ - Listar endereços\n• _\"remover endereço casa\"_ - Deletar endereço\n\n*🔑 ACESSO*\n• _\"minha api key\"_ - Exibir chave de integração\n\n💡 *Dica:* Use linguagem natural! Eu entendo suas mensagens."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Menu de Ajuda"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "resposta_frase_com_ok_sem_pendencia",
+   "group": "012a",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ok obrigado",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Menu de Ajuda"
+   },
+   "body": {
+    "texto": "ok obrigado",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📚 *MENU DE FUNCIONALIDADES* 📚\n\n*💰 GESTÃO FINANCEIRA*\n• _\"gastei 50 em comida\"_ - Registrar despesa\n• _\"recebi 500\"_ - Registrar renda\n• _\"qual meu saldo?\"_ - Consultar saldo das contas\n• _\"quanto gastei hoje/semana/mês?\"_ - Gastos por período\n• _\"meus potes\"_ - Ver limite e gasto dos potes\n• _\"todas as minhas contas\"_ - Listar TODAS as contas recorrentes (pagas ou não)\n• _\"minhas contas fixas\"_ - Ver contas ainda não pagas no mês\n• _\"paguei água\"_ - Quitar conta fixa\n• _\"paguei a internet e comprei pizza de 50\"_ - Quitar múltiplas (híbrido)\n• _\"transferir 100 da carteira para banco\"_ - Transferência\n• _\"paguei 500 da fatura do nubank\"_ - Pagar fatura\n• _\"qual valor da fatura?\"_ - Consultar valor da fatura\n• _\"quanto gastei com comida?\"_ - Gasto por categoria\n• _\"quais contas tenho?\"_ - Listar contas cadastradas\n• _\"quanto de reserva?\"_ - Reserva de emergência (6x média)\n• _\"tenho conta que vence hoje?\"_ - Vencimentos de hoje\n• _\"tenho conta que vence amanhã?\"_ - Vencimentos de amanhã\n• _\"contas que vencem essa semana?\"_ - Vencimentos dos próximos 7 dias\n\n*📅 CALENDÁRIO & AGENDA*\n• _\"minha agenda amanhã\"_ - Ver compromissos\n• _\"criar evento academia amanhã 7h\"_ - Criar evento\n• _\"deletar reunião de hoje\"_ - Remover evento\n• _\"quando estou livre amanhã?\"_ - Horários disponíveis\n\n*📁 GOOGLE DRIVE*\n• _[Envie foto/doc] \"salvar no drive\"_ - Upload para pasta padrão\n• _[Envie foto/doc] \"salvar no drive pasta Notas\"_ - Upload para pasta específica\n• _Formatos aceitos:_ Imagens, PDFs, Docs, Planilhas, Áudio\n\n*📊 ANÁLISES & RELATÓRIOS*\n• _\"analisar meus gastos\"_ - Análise inteligente com IA\n• _\"comparar com mês anterior\"_ - Comparação mensal\n• _\"quanto vou gastar este mês\"_ - Previsão de gastos\n• _\"gráfico de gastos\"_ - Gerar gráfico visual\n\n*⚙️ CONFIGURAÇÕES*\n• _\"ativar resumo matinal\"_ - Configurar notificações\n• _\"configurar localização São Paulo\"_ - Definir cidade\n• _\"configurar relatório mensal\"_ - Agendar relatório\n• _\"configurar endereço casa\"_ - Adicionar endereço\n• _\"meus endereços\"_ - Listar endereços\n• _\"remover endereço casa\"_ - Deletar endereço\n\n*🔑 ACESSO*\n• _\"minha api key\"_ - Exibir chave de integração\n\n💡 *Dica:* Use linguagem natural! Eu entendo suas mensagens."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Menu de Ajuda"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  }
+ ]
+}
