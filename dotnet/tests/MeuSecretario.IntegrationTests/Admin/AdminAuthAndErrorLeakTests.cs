@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MeuSecretario.IntegrationTests.Admin;
 
-/// <summary>Autenticação <c>x-api-key</c> nas 9 rotas da 009a e roteamento do id (T11). A tabela cresce com 009b e 009c.</summary>
+/// <summary>Autenticação <c>x-api-key</c> nas 33 rotas (009a, 009b e 009c) e roteamento do id (T11, T23, T30).</summary>
 [Trait("Category", "Docker")]
 public sealed class AdminAuthTests(RedisFixture redis) : IClassFixture<RedisFixture>, IAsyncLifetime
 {
@@ -40,10 +40,20 @@ public sealed class AdminAuthTests(RedisFixture redis) : IClassFixture<RedisFixt
         { "GET", "/admin/setup-budget-violations", null },
         { "GET", "/admin/oauth-config-check", null },
         { "GET", "/admin/debug-calendar", null },
+        { "POST", "/admin/run-motor-agendamentos", "{}" },
+        { "POST", "/admin/trigger-agenda-notifications", null },
+        { "POST", "/admin/trigger-bills-notifications", null },
+        { "POST", "/admin/trigger-daily-briefing", null },
+        { "POST", "/admin/trigger-monthly-reports-inicio", null },
+        { "POST", "/admin/trigger-monthly-reports-fim", null },
+        { "POST", "/admin/test-notification", """{"tipo":"contas","usuario_id":1}""" },
+        { "POST", "/admin/test-monthly-report/1", null },
+        { "POST", "/admin/test-daily-briefing", """{"usuario_id":1}""" },
     };
 
     private readonly List<SecurityTestHost> _hosts = [];
     private readonly BodyReadProbe _probe = new();
+    private readonly DependentFakes _fakes = new();
 
     public async Task InitializeAsync()
     {
@@ -62,7 +72,15 @@ public sealed class AdminAuthTests(RedisFixture redis) : IClassFixture<RedisFixt
     private SecurityTestHost Host(IReadOnlyDictionary<string, string>? settings = null)
     {
         var host = new SecurityTestHost(
-            redis.RedisUrl, redis.ConnectionString + ",allowAdmin=true", settings, services => services.AddSingleton<IStartupFilter>(_probe));
+            redis.RedisUrl,
+            redis.ConnectionString + ",allowAdmin=true",
+            settings,
+            services =>
+            {
+                // As rotas da 009c rodam contra portas falsas: nenhum job real, banco ou bot é tocado pelo teste.
+                _fakes.Install(services);
+                services.AddSingleton<IStartupFilter>(_probe);
+            });
         _hosts.Add(host);
         return host;
     }

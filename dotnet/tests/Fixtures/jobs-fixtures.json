@@ -1,0 +1,1517 @@
+{
+ "financial_alerts": [
+  {
+   "input": {
+    "hoje": [],
+    "amanha": [],
+    "faturas_hoje": [],
+    "faturas_amanha": []
+   },
+   "greeting": false,
+   "output": null
+  },
+  {
+   "input": {
+    "hoje": [],
+    "amanha": [],
+    "faturas_hoje": [],
+    "faturas_amanha": []
+   },
+   "greeting": true,
+   "output": null
+  },
+  {
+   "input": {
+    "hoje": [
+     {
+      "id": 1,
+      "descricao": "Aluguel",
+      "valor": 1500.0,
+      "categoria": "Cat",
+      "conta": "Conta",
+      "tipo": "Despesa"
+     },
+     {
+      "id": 2,
+      "descricao": "Salário",
+      "valor": 5000.5,
+      "categoria": "Cat",
+      "conta": "Conta",
+      "tipo": "Receita"
+     }
+    ],
+    "amanha": [],
+    "faturas_hoje": [
+     {
+      "cartao": "Nubank",
+      "valor": 320.456,
+      "vencimento": "2026-03-18"
+     }
+    ],
+    "faturas_amanha": []
+   },
+   "greeting": false,
+   "output": "💰 *ALERTAS FINANCEIROS*\n\n⚠️ *VENCE HOJE (Despesas):*\n• Aluguel - R$ 1500,00\n• Fatura Nubank - R$ 320,46\n\n💵 *VENCE HOJE (Receitas):*\n• Salário - R$ 5000,50"
+  },
+  {
+   "input": {
+    "hoje": [
+     {
+      "id": 1,
+      "descricao": "Aluguel",
+      "valor": 1500.0,
+      "categoria": "Cat",
+      "conta": "Conta",
+      "tipo": "Despesa"
+     },
+     {
+      "id": 2,
+      "descricao": "Salário",
+      "valor": 5000.5,
+      "categoria": "Cat",
+      "conta": "Conta",
+      "tipo": "Receita"
+     }
+    ],
+    "amanha": [],
+    "faturas_hoje": [
+     {
+      "cartao": "Nubank",
+      "valor": 320.456,
+      "vencimento": "2026-03-18"
+     }
+    ],
+    "faturas_amanha": []
+   },
+   "greeting": true,
+   "output": "🌅 *Bom dia!*\n\n💰 *ALERTAS FINANCEIROS*\n\n⚠️ *VENCE HOJE (Despesas):*\n• Aluguel - R$ 1500,00\n• Fatura Nubank - R$ 320,46\n\n💵 *VENCE HOJE (Receitas):*\n• Salário - R$ 5000,50"
+  },
+  {
+   "input": {
+    "hoje": [],
+    "amanha": [
+     {
+      "id": 3,
+      "descricao": "Internet",
+      "valor": 99.9,
+      "categoria": "Cat",
+      "conta": "Conta",
+      "tipo": "Despesa"
+     },
+     {
+      "id": 4,
+      "descricao": "Freela",
+      "valor": 800.0,
+      "categoria": "Cat",
+      "conta": "Conta",
+      "tipo": "Receita"
+     }
+    ],
+    "faturas_hoje": [],
+    "faturas_amanha": [
+     {
+      "cartao": "Inter",
+      "valor": 0.0,
+      "vencimento": "2026-03-19"
+     }
+    ]
+   },
+   "greeting": false,
+   "output": "💰 *ALERTAS FINANCEIROS*\n\n🔔 *VENCE AMANHÃ (Despesas):*\n• Internet - R$ 99,90\n• Fatura Inter - R$ 0,00\n\n💰 *VENCE AMANHÃ (Receitas):*\n• Freela - R$ 800,00"
+  },
+  {
+   "input": {
+    "hoje": [],
+    "amanha": [
+     {
+      "id": 3,
+      "descricao": "Internet",
+      "valor": 99.9,
+      "categoria": "Cat",
+      "conta": "Conta",
+      "tipo": "Despesa"
+     },
+     {
+      "id": 4,
+      "descricao": "Freela",
+      "valor": 800.0,
+      "categoria": "Cat",
+      "conta": "Conta",
+      "tipo": "Receita"
+     }
+    ],
+    "faturas_hoje": [],
+    "faturas_amanha": [
+     {
+      "cartao": "Inter",
+      "valor": 0.0,
+      "vencimento": "2026-03-19"
+     }
+    ]
+   },
+   "greeting": true,
+   "output": "🌅 *Bom dia!*\n\n💰 *ALERTAS FINANCEIROS*\n\n🔔 *VENCE AMANHÃ (Despesas):*\n• Internet - R$ 99,90\n• Fatura Inter - R$ 0,00\n\n💰 *VENCE AMANHÃ (Receitas):*\n• Freela - R$ 800,00"
+  },
+  {
+   "input": {
+    "hoje": [
+     {
+      "id": 5,
+      "descricao": "Luz",
+      "valor": 210.0,
+      "categoria": "Cat",
+      "conta": "Conta",
+      "tipo": "Despesa"
+     }
+    ],
+    "amanha": [
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor": 80.0,
+      "categoria": "Cat",
+      "conta": "Conta",
+      "tipo": "Despesa"
+     }
+    ],
+    "faturas_hoje": [],
+    "faturas_amanha": []
+   },
+   "greeting": false,
+   "output": "💰 *ALERTAS FINANCEIROS*\n\n⚠️ *VENCE HOJE (Despesas):*\n• Luz - R$ 210,00\n\n🔔 *VENCE AMANHÃ (Despesas):*\n• Água - R$ 80,00"
+  },
+  {
+   "input": {
+    "hoje": [
+     {
+      "id": 5,
+      "descricao": "Luz",
+      "valor": 210.0,
+      "categoria": "Cat",
+      "conta": "Conta",
+      "tipo": "Despesa"
+     }
+    ],
+    "amanha": [
+     {
+      "id": 6,
+      "descricao": "Água",
+      "valor": 80.0,
+      "categoria": "Cat",
+      "conta": "Conta",
+      "tipo": "Despesa"
+     }
+    ],
+    "faturas_hoje": [],
+    "faturas_amanha": []
+   },
+   "greeting": true,
+   "output": "🌅 *Bom dia!*\n\n💰 *ALERTAS FINANCEIROS*\n\n⚠️ *VENCE HOJE (Despesas):*\n• Luz - R$ 210,00\n\n🔔 *VENCE AMANHÃ (Despesas):*\n• Água - R$ 80,00"
+  }
+ ],
+ "invoice_closed": [
+  {
+   "total": 0.0,
+   "output": "💳 *FATURA FECHADA*\n\nCartão: *Nubank*\nFechamento: 10/03/2026\nVencimento: 17/03/2026\nValor Total: *R$ 0,00*\n\nℹ️ A partir de agora, novas compras entrarão na próxima fatura."
+  },
+  {
+   "total": 1234.5,
+   "output": "💳 *FATURA FECHADA*\n\nCartão: *Nubank*\nFechamento: 10/03/2026\nVencimento: 17/03/2026\nValor Total: *R$ 1234,50*\n\nℹ️ A partir de agora, novas compras entrarão na próxima fatura."
+  },
+  {
+   "total": 99.995,
+   "output": "💳 *FATURA FECHADA*\n\nCartão: *Nubank*\nFechamento: 10/03/2026\nVencimento: 17/03/2026\nValor Total: *R$ 100,00*\n\nℹ️ A partir de agora, novas compras entrarão na próxima fatura."
+  }
+ ],
+ "invoice_due": [
+  {
+   "days": 1,
+   "output": "⚠️ *VENCIMENTO PRÓXIMO*\n\nCartão: *Inter*\nVence: AMANHÃ (21/03/2026)\nValor: *R$ 456,70*\n\n💡 Não se esqueça de garantir saldo para o pagamento!"
+  },
+  {
+   "days": 2,
+   "output": "🔔 *VENCIMENTO PRÓXIMO*\n\nCartão: *Inter*\nVence: em 2 dias (21/03/2026)\nValor: *R$ 456,70*\n\n💡 Não se esqueça de garantir saldo para o pagamento!"
+  },
+  {
+   "days": 3,
+   "output": "🔔 *VENCIMENTO PRÓXIMO*\n\nCartão: *Inter*\nVence: em 3 dias (21/03/2026)\nValor: *R$ 456,70*\n\n💡 Não se esqueça de garantir saldo para o pagamento!"
+  }
+ ],
+ "briefing_prompt": [
+  {
+   "input": {
+    "eventos": [
+     {
+      "summary": "Daily",
+      "start": "2026-03-18T09:00:00-03:00",
+      "end": "2026-03-18T09:30:00-03:00",
+      "location": "https://meet.google.com/abc",
+      "description": "",
+      "all_day": false
+     },
+     {
+      "summary": "Almoço com João",
+      "start": "2026-03-18T12:30:00-03:00",
+      "end": "2026-03-18T14:00:00-03:00",
+      "location": "Restaurante X, Campinas, SP",
+      "description": "Reunião",
+      "all_day": false
+     },
+     {
+      "summary": "Feriado",
+      "start": "2026-03-18",
+      "end": "2026-03-19",
+      "location": "",
+      "description": "",
+      "all_day": true
+     }
+    ],
+    "clima_principal": {
+     "descricao_completa": "Parcialmente nublado, 24°C",
+     "chance_chuva": 45
+    },
+    "climas_adicionais": [
+     {
+      "cidade": "Campinas",
+      "estado": "SP",
+      "clima": {
+       "descricao_completa": "Sol, 28°C",
+       "chance_chuva": null
+      }
+     }
+    ],
+    "gaps": [
+     {
+      "inicio": "09:30",
+      "fim": "12:30",
+      "duracao_minutos": 180
+     },
+     {
+      "inicio": "14:00",
+      "fim": "16:45",
+      "duracao_minutos": 165
+     }
+    ],
+    "alertas_financeiros": {
+     "contas_hoje": [
+      {
+       "id": 1,
+       "descricao": "Aluguel",
+       "valor": 1500.0,
+       "categoria": "Cat",
+       "conta": "Conta",
+       "tipo": "Despesa"
+      },
+      {
+       "id": 2,
+       "descricao": "Salário",
+       "valor": 5000.0,
+       "categoria": "Cat",
+       "conta": "Conta",
+       "tipo": "Receita"
+      }
+     ],
+     "contas_amanha": [
+      {
+       "id": 3,
+       "descricao": "Internet",
+       "valor": 99.9,
+       "categoria": "Cat",
+       "conta": "Conta",
+       "tipo": "Despesa"
+      },
+      {
+       "id": 4,
+       "descricao": "Freela",
+       "valor": 800.0,
+       "categoria": "Cat",
+       "conta": "Conta",
+       "tipo": "Receita"
+      }
+     ],
+     "faturas_hoje": [
+      {
+       "cartao": "Nubank",
+       "valor": 320.45,
+       "vencimento": "2026-03-18"
+      }
+     ],
+     "faturas_amanha": [
+      {
+       "cartao": "Inter",
+       "valor": 10.0,
+       "vencimento": "2026-03-19"
+      }
+     ]
+    },
+    "data": "2026-03-18"
+   },
+   "prompt": "Você é um assistente pessoal humanizado. Gere um resumo matinal da agenda do usuário.\n\nDATA: 18/03/2026 (quarta-feira)\n\nEVENTOS DO DIA:\n1. 09:00 (30 min) - Daily [remoto]\n2. 12:30 (90 min) - Almoço com João em Restaurante X, Campinas, SP\n3. Dia inteiro - Feriado\n\nClima: Parcialmente nublado, 24°C - Chance de chuva: 45%\n\nClimas em outras cidades (você tem eventos lá):\nCampinas: Sol, 28°C\n\n\nHorários livres entre eventos:\n• 09:30-12:30 (3h)\n• 14:00-16:45 (2h45min)\n\n\nALERTAS FINANCEIROS:\nVENCE HOJE (Despesas):\n• Aluguel - R$ 1500,00\n• Fatura Nubank - R$ 320,45\n\nVENCE HOJE (Receitas):\n• Salário - R$ 5000,00\n\nVENCE AMANHÃ (Despesas):\n• Internet - R$ 99,90\n• Fatura Inter - R$ 10,00\n\nVENCE AMANHÃ (Receitas):\n• Freela - R$ 800,00\n\nINSTRUÇÕES:\n1. Comece com uma saudação amigável (ex: \"☀️ Bom dia!\", \"🌅 Olá!\")\n2. IMPORTANTE: Use o dia da semana CORRETO informado acima (quarta-feira)\n3. Resuma os compromissos de forma clara e objetiva\n4. Use emojis apropriados (mas sem exagerar)\n5. Destaque informações importantes:\n   - Se há eventos remotos vs presenciais\n   - Horários livres úteis para trabalho focado ou pausa\n   - Clima (especialmente se for chover ou temperatura extrema)\n   - ALERTAS FINANCEIROS: contas e faturas que vencem hoje ou amanhã (use ⚠️ ou 💰)\n   - Dicas úteis (ex: \"saia cedo\", \"leve guarda-chuva\", \"tempo livre para almoço\")\n6. Seja conciso mas informativo (máximo 20 linhas)\n7. Mantenha tom profissional mas amigável\n8. NÃO invente informações que não estão nos dados fornecidos\n9. Se houver alertas financeiros, destaque-os claramente no resumo\n\nFORMATAÇÃO (IMPORTANTE):\n- Use *texto* para negrito (WhatsApp)\n- Para listas, use \"•\" (bullet) ou \"-\", NUNCA use \"*\" como marcador\n- Organize seções com títulos em negrito\n- EVITE usar dois asteriscos seguidos (** ou * *)\n\nGere APENAS o texto da mensagem, sem introduções ou formatação extra.\n",
+   "fallback": "☀️ Bom dia! Sua agenda de hoje:\n\n1. 09:00 (30 min) - Daily [remoto]\n2. 12:30 (90 min) - Almoço com João em Restaurante X, Campinas, SP\n3. Dia inteiro - Feriado\n\nClima: Parcialmente nublado, 24°C - Chance de chuva: 45%\n\nHorários livres entre eventos:\n• 09:30-12:30 (3h)\n• 14:00-16:45 (2h45min)"
+  },
+  {
+   "input": {
+    "eventos": [
+     {
+      "summary": "Consulta",
+      "start": "2026-03-19T08:00:00Z",
+      "end": "2026-03-19T08:45:00Z",
+      "location": "",
+      "description": "",
+      "all_day": false
+     },
+     {
+      "summary": "Sem fim",
+      "start": "",
+      "end": "",
+      "location": "",
+      "description": null,
+      "all_day": false
+     }
+    ],
+    "clima_principal": null,
+    "climas_adicionais": [],
+    "gaps": [],
+    "alertas_financeiros": {
+     "contas_hoje": [],
+     "contas_amanha": [],
+     "faturas_hoje": [],
+     "faturas_amanha": []
+    },
+    "data": "2026-03-19"
+   },
+   "prompt": "Você é um assistente pessoal humanizado. Gere um resumo matinal da agenda do usuário.\n\nDATA: 19/03/2026 (quinta-feira)\n\nEVENTOS DO DIA:\n1. 08:00 (45 min) - Consulta\n2. Horário não especificado - Sem fim\n\n\n\n\n\n\nINSTRUÇÕES:\n1. Comece com uma saudação amigável (ex: \"☀️ Bom dia!\", \"🌅 Olá!\")\n2. IMPORTANTE: Use o dia da semana CORRETO informado acima (quinta-feira)\n3. Resuma os compromissos de forma clara e objetiva\n4. Use emojis apropriados (mas sem exagerar)\n5. Destaque informações importantes:\n   - Se há eventos remotos vs presenciais\n   - Horários livres úteis para trabalho focado ou pausa\n   - Clima (especialmente se for chover ou temperatura extrema)\n   - ALERTAS FINANCEIROS: contas e faturas que vencem hoje ou amanhã (use ⚠️ ou 💰)\n   - Dicas úteis (ex: \"saia cedo\", \"leve guarda-chuva\", \"tempo livre para almoço\")\n6. Seja conciso mas informativo (máximo 20 linhas)\n7. Mantenha tom profissional mas amigável\n8. NÃO invente informações que não estão nos dados fornecidos\n9. Se houver alertas financeiros, destaque-os claramente no resumo\n\nFORMATAÇÃO (IMPORTANTE):\n- Use *texto* para negrito (WhatsApp)\n- Para listas, use \"•\" (bullet) ou \"-\", NUNCA use \"*\" como marcador\n- Organize seções com títulos em negrito\n- EVITE usar dois asteriscos seguidos (** ou * *)\n\nGere APENAS o texto da mensagem, sem introduções ou formatação extra.\n",
+   "fallback": "☀️ Bom dia! Sua agenda de hoje:\n\n1. 08:00 (45 min) - Consulta\n2. Horário não especificado - Sem fim"
+  },
+  {
+   "input": {
+    "eventos": [
+     {
+      "summary": "Reunião",
+      "start": "2026-03-20T10:00:00-03:00",
+      "end": "2026-03-20T10:30:00-03:00",
+      "location": "Sala 3",
+      "description": "",
+      "all_day": false
+     }
+    ],
+    "clima_principal": {
+     "descricao_completa": "Chuva, 19°C",
+     "chance_chuva": 80
+    },
+    "climas_adicionais": [],
+    "gaps": [
+     {
+      "inicio": "10:30",
+      "fim": "11:00",
+      "duracao_minutos": 30
+     }
+    ],
+    "alertas_financeiros": {
+     "contas_hoje": [],
+     "contas_amanha": [
+      {
+       "id": 9,
+       "descricao": "Luz",
+       "valor": 50.0,
+       "categoria": "Cat",
+       "conta": "Conta",
+       "tipo": "Despesa"
+      }
+     ],
+     "faturas_hoje": [],
+     "faturas_amanha": []
+    },
+    "data": "2026-03-20"
+   },
+   "prompt": "Você é um assistente pessoal humanizado. Gere um resumo matinal da agenda do usuário.\n\nDATA: 20/03/2026 (sexta-feira)\n\nEVENTOS DO DIA:\n1. 10:00 (30 min) - Reunião em Sala 3\n\nClima: Chuva, 19°C - Chance de chuva: 80%\n\n\n\nHorários livres entre eventos:\n• 10:30-11:00 (30 min)\n\n\nALERTAS FINANCEIROS:\nVENCE AMANHÃ (Despesas):\n• Luz - R$ 50,00\n\nINSTRUÇÕES:\n1. Comece com uma saudação amigável (ex: \"☀️ Bom dia!\", \"🌅 Olá!\")\n2. IMPORTANTE: Use o dia da semana CORRETO informado acima (sexta-feira)\n3. Resuma os compromissos de forma clara e objetiva\n4. Use emojis apropriados (mas sem exagerar)\n5. Destaque informações importantes:\n   - Se há eventos remotos vs presenciais\n   - Horários livres úteis para trabalho focado ou pausa\n   - Clima (especialmente se for chover ou temperatura extrema)\n   - ALERTAS FINANCEIROS: contas e faturas que vencem hoje ou amanhã (use ⚠️ ou 💰)\n   - Dicas úteis (ex: \"saia cedo\", \"leve guarda-chuva\", \"tempo livre para almoço\")\n6. Seja conciso mas informativo (máximo 20 linhas)\n7. Mantenha tom profissional mas amigável\n8. NÃO invente informações que não estão nos dados fornecidos\n9. Se houver alertas financeiros, destaque-os claramente no resumo\n\nFORMATAÇÃO (IMPORTANTE):\n- Use *texto* para negrito (WhatsApp)\n- Para listas, use \"•\" (bullet) ou \"-\", NUNCA use \"*\" como marcador\n- Organize seções com títulos em negrito\n- EVITE usar dois asteriscos seguidos (** ou * *)\n\nGere APENAS o texto da mensagem, sem introduções ou formatação extra.\n",
+   "fallback": "☀️ Bom dia! Sua agenda de hoje:\n\n1. 10:00 (30 min) - Reunião em Sala 3\n\nClima: Chuva, 19°C - Chance de chuva: 80%\n\nHorários livres entre eventos:\n• 10:30-11:00 (30 min)"
+  }
+ ],
+ "briefing_clean": [
+  {
+   "input": "  Olá!\n*   *Reunião às 9h\n* *Almoço\n   * *Treino\n<blockquote>Dica</blockquote> <b>Importante</b>\nFim  ",
+   "output": "Olá!\n   • Reunião às 9h\n   • Almoço\n   • Treino\nDica Importante\nFim"
+  },
+  {
+   "input": "Texto simples sem marcadores",
+   "output": "Texto simples sem marcadores"
+  },
+  {
+   "input": "**Negrito duplo** e <br> tag e </p> outra\n*\n*  * item",
+   "output": "• Negrito duplo** e  tag e  outra\n   •   * item"
+  }
+ ],
+ "briefing_gaps": {
+  "events": [
+   {
+    "all_day": false,
+    "start": "2026-03-18T09:00:00-03:00",
+    "end": "2026-03-18T10:00:00-03:00"
+   },
+   {
+    "all_day": false,
+    "start": "2026-03-18T10:20:00-03:00",
+    "end": "2026-03-18T11:00:00-03:00"
+   },
+   {
+    "all_day": false,
+    "start": "2026-03-18T14:15:00-03:00",
+    "end": "2026-03-18T15:00:00-03:00"
+   },
+   {
+    "all_day": true,
+    "start": "2026-03-18",
+    "end": "2026-03-19"
+   },
+   {
+    "all_day": false,
+    "start": "2026-03-18T17:00:00Z",
+    "end": "2026-03-18T18:00:00Z"
+   },
+   {
+    "all_day": false,
+    "start": "2026-03-18T19:00:00-03:00",
+    "end": "2026-03-18T19:30:00-03:00"
+   },
+   {
+    "all_day": false,
+    "start": "xx",
+    "end": "2026-03-18T19:30:00-03:00"
+   }
+  ],
+  "gaps": [
+   {
+    "inicio": "11:00",
+    "fim": "14:15",
+    "duracao_minutos": 195
+   },
+   {
+    "inicio": "18:00",
+    "fim": "19:00",
+    "duracao_minutos": 240
+   }
+  ]
+ },
+ "briefing_locations": {
+  "events": [
+   {
+    "location": "Shopping Iguatemi, Campinas, SP"
+   },
+   {
+    "location": "Av. Brasil, Santos, SP"
+   },
+   {
+    "location": "Campinas, SP"
+   },
+   {
+    "location": "Sala 2"
+   },
+   {
+    "location": ""
+   },
+   {
+    "location": "Rua A, Curitiba, PR"
+   },
+   {
+    "location": "SP, Campinas, SP"
+   },
+   {
+    "location": "Centro, rj"
+   }
+  ],
+  "locations": [
+   [
+    "Campinas",
+    "SP"
+   ],
+   [
+    "Curitiba",
+    "PR"
+   ],
+   [
+    "Santos",
+    "SP"
+   ]
+  ]
+ },
+ "briefing_types": [
+  {
+   "event": {
+    "summary": "Call com cliente",
+    "description": "",
+    "location": ""
+   },
+   "type": "remoto"
+  },
+  {
+   "event": {
+    "summary": "Almoço",
+    "description": "",
+    "location": "Restaurante"
+   },
+   "type": "presencial"
+  },
+  {
+   "event": {
+    "summary": "Estudo",
+    "description": "",
+    "location": ""
+   },
+   "type": ""
+  },
+  {
+   "event": {
+    "summary": "Reunião Online",
+    "description": "",
+    "location": "Sala"
+   },
+   "type": "remoto"
+  },
+  {
+   "event": {
+    "summary": "Treino",
+    "description": "no Zoom",
+    "location": ""
+   },
+   "type": "remoto"
+  }
+ ],
+ "checkin_messages": [
+  {
+   "input": {
+    "pending": [
+     {
+      "id": 1,
+      "descricao": "Salário",
+      "valor_previsto": 5000.0,
+      "dia_execucao": 18,
+      "conta_id": 11,
+      "subcategoria_id": 21,
+      "usuario_id": 7,
+      "nome_conta": "Conta Corrente",
+      "tipo_conta": "Conta Corrente",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Renda",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-18"
+     },
+     {
+      "id": 2,
+      "descricao": "Aluguel",
+      "valor_previsto": 1500.5,
+      "dia_execucao": 17,
+      "conta_id": 12,
+      "subcategoria_id": 22,
+      "usuario_id": 7,
+      "nome_conta": "Conta Corrente",
+      "tipo_conta": "Conta Corrente",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Despesa Essencial",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-17"
+     },
+     {
+      "id": 3,
+      "descricao": "Streaming",
+      "valor_previsto": 39.9,
+      "dia_execucao": 18,
+      "conta_id": 13,
+      "subcategoria_id": 23,
+      "usuario_id": 7,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Cartão de Crédito",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Despesa",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-18"
+     },
+     {
+      "id": 4,
+      "descricao": "Curso",
+      "valor_previsto": 200.0,
+      "dia_execucao": 16,
+      "conta_id": 14,
+      "subcategoria_id": 24,
+      "usuario_id": 7,
+      "nome_conta": "Conta Corrente",
+      "tipo_conta": "Conta Corrente",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Despesa Discricionária",
+      "tipo_agendamento": "PARCELADO",
+      "parcelas_executadas": 2,
+      "total_parcelas": 10,
+      "data_vencimento_real": "2026-03-16"
+     },
+     {
+      "id": 5,
+      "descricao": "Condomínio",
+      "valor_previsto": null,
+      "dia_execucao": 12,
+      "conta_id": 15,
+      "subcategoria_id": 25,
+      "usuario_id": 7,
+      "nome_conta": "Conta Corrente",
+      "tipo_conta": "Conta Corrente",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Despesa Essencial",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-12"
+     },
+     {
+      "id": 6,
+      "descricao": "Academia",
+      "valor_previsto": 120.0,
+      "dia_execucao": 15,
+      "conta_id": 16,
+      "subcategoria_id": 26,
+      "usuario_id": 7,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Cartão de Crédito",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Despesa",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-15"
+     }
+    ],
+    "overdue": [
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": 300.0,
+      "dia_execucao": 5,
+      "conta_id": 17,
+      "subcategoria_id": 27,
+      "usuario_id": 7,
+      "nome_conta": "Conta Corrente",
+      "tipo_conta": "Conta Corrente",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Despesa Essencial",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-05"
+     },
+     {
+      "id": 8,
+      "descricao": "Aluguel garagem",
+      "valor_previsto": 250.0,
+      "dia_execucao": 3,
+      "conta_id": 18,
+      "subcategoria_id": 28,
+      "usuario_id": 7,
+      "nome_conta": "Conta Corrente",
+      "tipo_conta": "Conta Corrente",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Renda",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-03"
+     },
+     {
+      "id": 9,
+      "descricao": "Parcela carro",
+      "valor_previsto": 900.0,
+      "dia_execucao": 1,
+      "conta_id": 19,
+      "subcategoria_id": 29,
+      "usuario_id": 7,
+      "nome_conta": "Conta Corrente",
+      "tipo_conta": "Conta Corrente",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Despesa Essencial",
+      "tipo_agendamento": "PARCELADO",
+      "parcelas_executadas": 0,
+      "total_parcelas": 2,
+      "data_vencimento_real": null
+     }
+    ],
+    "overdue_invoices": [],
+    "due_today": [
+     {
+      "id": 1,
+      "nome_conta": "Inter",
+      "data_vencimento": "2026-03-18",
+      "status": "Aberta",
+      "valor_total": 777.7
+     }
+    ],
+    "checkin_id": "abcdef12"
+   },
+   "output": "🌙 *CHECK-IN NOTURNO* 🌙\n\n💳 *DÉBITO CARTÃO DE CRÉDITO*\n * Streaming - R$ 39,90 - Será debitado hoje\n\n💵 *RECEITAS PENDENTES:*\n_Valores previstos que ainda não foram recebidos - confirmáveis via check-in_\n\n1. Salário - R$ 5.000,00 - Previsto em 18/03\n2. Aluguel garagem - R$ 250,00 - Previsto em 03/03/2026\n💰 *Total:* R$ 5.250,00\n\n💸 *DESPESAS PENDENTES:*\n3. Aluguel - R$ 1.500,50 (Conta Corrente) - Venceu ontem\n4. Curso (3/10) - R$ 200,00 (Conta Corrente) - Venceu em 16/03\n5. Condomínio - R$ 0,00 (Conta Corrente) - Atrasado 6 dias\n\n🔴 *DESPESAS ATRASADAS (há mais de 7 dias):*\n6. Seguro - R$ 300,00 - Venceu em 05/03/2026 (13 dias) ⚠️\n7. Parcela carro (1/2) - R$ 900,00\n\n💸 *Total atrasado:* R$ 1.200,00\n⏰ *FATURAS QUE VENCEM HOJE:*\n_Atenção! Estas faturas devem ser pagas hoje para evitar juros._\n\n💳 Inter - R$ 777,70 - Vence HOJE\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *COMO RESPONDER:*\n\n✅ Tudo pago:\n👍 ou \"Ok\"\n\n📝 Pagamento parcial:\n\"1\" / \"1 e 3\" / \"1, 2, 4\"\n\n⏸️ Não paguei ainda:\n\"Depois\" / \"Não\"\n\n_ID: abcdef12 | Expira em 1h_"
+  },
+  {
+   "input": {
+    "pending": [
+     {
+      "id": 1,
+      "descricao": "Salário",
+      "valor_previsto": 5000.0,
+      "dia_execucao": 18,
+      "conta_id": 11,
+      "subcategoria_id": 21,
+      "usuario_id": 7,
+      "nome_conta": "Conta Corrente",
+      "tipo_conta": "Conta Corrente",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Renda",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-18"
+     },
+     {
+      "id": 2,
+      "descricao": "Aluguel",
+      "valor_previsto": 1500.5,
+      "dia_execucao": 17,
+      "conta_id": 12,
+      "subcategoria_id": 22,
+      "usuario_id": 7,
+      "nome_conta": "Conta Corrente",
+      "tipo_conta": "Conta Corrente",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Despesa Essencial",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-17"
+     },
+     {
+      "id": 3,
+      "descricao": "Streaming",
+      "valor_previsto": 39.9,
+      "dia_execucao": 18,
+      "conta_id": 13,
+      "subcategoria_id": 23,
+      "usuario_id": 7,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Cartão de Crédito",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Despesa",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-18"
+     },
+     {
+      "id": 4,
+      "descricao": "Curso",
+      "valor_previsto": 200.0,
+      "dia_execucao": 16,
+      "conta_id": 14,
+      "subcategoria_id": 24,
+      "usuario_id": 7,
+      "nome_conta": "Conta Corrente",
+      "tipo_conta": "Conta Corrente",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Despesa Discricionária",
+      "tipo_agendamento": "PARCELADO",
+      "parcelas_executadas": 2,
+      "total_parcelas": 10,
+      "data_vencimento_real": "2026-03-16"
+     },
+     {
+      "id": 5,
+      "descricao": "Condomínio",
+      "valor_previsto": null,
+      "dia_execucao": 12,
+      "conta_id": 15,
+      "subcategoria_id": 25,
+      "usuario_id": 7,
+      "nome_conta": "Conta Corrente",
+      "tipo_conta": "Conta Corrente",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Despesa Essencial",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-12"
+     },
+     {
+      "id": 6,
+      "descricao": "Academia",
+      "valor_previsto": 120.0,
+      "dia_execucao": 15,
+      "conta_id": 16,
+      "subcategoria_id": 26,
+      "usuario_id": 7,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Cartão de Crédito",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Despesa",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-15"
+     }
+    ],
+    "overdue": [
+     {
+      "id": 7,
+      "descricao": "Seguro",
+      "valor_previsto": 300.0,
+      "dia_execucao": 5,
+      "conta_id": 17,
+      "subcategoria_id": 27,
+      "usuario_id": 7,
+      "nome_conta": "Conta Corrente",
+      "tipo_conta": "Conta Corrente",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Despesa Essencial",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-05"
+     },
+     {
+      "id": 8,
+      "descricao": "Aluguel garagem",
+      "valor_previsto": 250.0,
+      "dia_execucao": 3,
+      "conta_id": 18,
+      "subcategoria_id": 28,
+      "usuario_id": 7,
+      "nome_conta": "Conta Corrente",
+      "tipo_conta": "Conta Corrente",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Renda",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-03"
+     },
+     {
+      "id": 9,
+      "descricao": "Parcela carro",
+      "valor_previsto": 900.0,
+      "dia_execucao": 1,
+      "conta_id": 19,
+      "subcategoria_id": 29,
+      "usuario_id": 7,
+      "nome_conta": "Conta Corrente",
+      "tipo_conta": "Conta Corrente",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Despesa Essencial",
+      "tipo_agendamento": "PARCELADO",
+      "parcelas_executadas": 0,
+      "total_parcelas": 2,
+      "data_vencimento_real": null
+     }
+    ],
+    "overdue_invoices": [],
+    "due_today": [
+     {
+      "id": 1,
+      "nome_conta": "Inter",
+      "data_vencimento": "2026-03-18",
+      "status": "Aberta",
+      "valor_total": 777.7
+     }
+    ],
+    "checkin_id": null
+   },
+   "output": "📊 *RESUMO FINANCEIRO* 📊\n\n💳 *DÉBITO CARTÃO DE CRÉDITO*\n * Streaming - R$ 39,90 - Será debitado hoje\n\n💵 *RECEITAS PENDENTES:*\n_Valores previstos que ainda não foram recebidos - confirmáveis via check-in_\n\n1. Salário - R$ 5.000,00 - Previsto em 18/03\n2. Aluguel garagem - R$ 250,00 - Previsto em 03/03/2026\n💰 *Total:* R$ 5.250,00\n\n💸 *DESPESAS PENDENTES:*\n3. Aluguel - R$ 1.500,50 (Conta Corrente) - Venceu ontem\n4. Curso (3/10) - R$ 200,00 (Conta Corrente) - Venceu em 16/03\n5. Condomínio - R$ 0,00 (Conta Corrente) - Atrasado 6 dias\n\n🔴 *DESPESAS ATRASADAS (há mais de 7 dias):*\n6. Seguro - R$ 300,00 - Venceu em 05/03/2026 (13 dias) ⚠️\n7. Parcela carro (1/2) - R$ 900,00\n\n💸 *Total atrasado:* R$ 1.200,00\n⏰ *FATURAS QUE VENCEM HOJE:*\n_Atenção! Estas faturas devem ser pagas hoje para evitar juros._\n\n💳 Inter - R$ 777,70 - Vence HOJE\n\n\n━━━━━━━━━━━━━━━━━━━━\n_💡 Para confirmar pagamentos, aguarde o check-in noturno automático._"
+  },
+  {
+   "input": {
+    "pending": [
+     {
+      "id": 3,
+      "descricao": "Streaming",
+      "valor_previsto": 39.9,
+      "dia_execucao": 18,
+      "conta_id": 13,
+      "subcategoria_id": 23,
+      "usuario_id": 7,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Cartão de Crédito",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Despesa",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-18"
+     }
+    ],
+    "overdue": [],
+    "overdue_invoices": [],
+    "due_today": [],
+    "checkin_id": "abcdef12"
+   },
+   "output": "🌙 *CHECK-IN NOTURNO* 🌙\n\n💳 *DÉBITO CARTÃO DE CRÉDITO*\n * Streaming - R$ 39,90 - Será debitado hoje\n\n"
+  },
+  {
+   "input": {
+    "pending": [],
+    "overdue": [],
+    "overdue_invoices": [],
+    "due_today": [
+     {
+      "id": 1,
+      "nome_conta": "Inter",
+      "data_vencimento": "2026-03-18",
+      "status": "Aberta",
+      "valor_total": 777.7
+     }
+    ],
+    "checkin_id": "abcdef12"
+   },
+   "output": "🌙 *CHECK-IN NOTURNO* 🌙\n\n⏰ *FATURAS QUE VENCEM HOJE:*\n_Atenção! Estas faturas devem ser pagas hoje para evitar juros._\n\n💳 Inter - R$ 777,70 - Vence HOJE\n\n"
+  },
+  {
+   "input": {
+    "pending": [],
+    "overdue": [],
+    "overdue_invoices": [],
+    "due_today": [],
+    "checkin_id": "abcdef12"
+   },
+   "output": null
+  },
+  {
+   "input": {
+    "pending": [
+     {
+      "id": 1,
+      "descricao": "Salário",
+      "valor_previsto": 5000.0,
+      "dia_execucao": 18,
+      "conta_id": 11,
+      "subcategoria_id": 21,
+      "usuario_id": 7,
+      "nome_conta": "Conta Corrente",
+      "tipo_conta": "Conta Corrente",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Renda",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-18"
+     }
+    ],
+    "overdue": [],
+    "overdue_invoices": [],
+    "due_today": [],
+    "checkin_id": "zz"
+   },
+   "output": "🌙 *CHECK-IN NOTURNO* 🌙\n\n💵 *RECEITAS PENDENTES:*\n_Valores previstos que ainda não foram recebidos - confirmáveis via check-in_\n\n1. Salário - R$ 5.000,00 - Previsto em 18/03\n💰 *Total:* R$ 5.000,00\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *COMO RESPONDER:*\n\n✅ Tudo pago:\n👍 ou \"Ok\"\n\n📝 Pagamento parcial:\n\"1\" / \"1 e 3\" / \"1, 2, 4\"\n\n⏸️ Não paguei ainda:\n\"Depois\" / \"Não\"\n\n_ID: zz | Expira em 1h_"
+  }
+ ],
+ "checkin_key_error": "'nome_conta'",
+ "checkin_session": {
+  "id": "abcdef12",
+  "bills": [
+   {
+    "id": 1,
+    "descricao": "Salário",
+    "valor_previsto": 5000.0,
+    "dia_execucao": 18,
+    "conta_id": 11,
+    "subcategoria_id": 21,
+    "usuario_id": 7,
+    "nome_conta": "Conta Corrente",
+    "tipo_conta": "Conta Corrente",
+    "categoria": "Cat",
+    "nome_macro": "Macro",
+    "nome_grupo": "Renda",
+    "tipo_agendamento": "FIXO",
+    "parcelas_executadas": 0,
+    "total_parcelas": null,
+    "data_vencimento_real": "2026-03-18"
+   },
+   {
+    "id": 2,
+    "descricao": "Aluguel",
+    "valor_previsto": 1500.5,
+    "dia_execucao": 17,
+    "conta_id": 12,
+    "subcategoria_id": 22,
+    "usuario_id": 7,
+    "nome_conta": "Conta Corrente",
+    "tipo_conta": "Conta Corrente",
+    "categoria": "Cat",
+    "nome_macro": "Macro",
+    "nome_grupo": "Despesa Essencial",
+    "tipo_agendamento": "FIXO",
+    "parcelas_executadas": 0,
+    "total_parcelas": null,
+    "data_vencimento_real": "2026-03-17"
+   },
+   {
+    "id": 3,
+    "descricao": "Streaming",
+    "valor_previsto": 39.9,
+    "dia_execucao": 18,
+    "conta_id": 13,
+    "subcategoria_id": 23,
+    "usuario_id": 7,
+    "nome_conta": "Nubank",
+    "tipo_conta": "Cartão de Crédito",
+    "categoria": "Cat",
+    "nome_macro": "Macro",
+    "nome_grupo": "Despesa",
+    "tipo_agendamento": "FIXO",
+    "parcelas_executadas": 0,
+    "total_parcelas": null,
+    "data_vencimento_real": "2026-03-18"
+   },
+   {
+    "id": 4,
+    "descricao": "Curso",
+    "valor_previsto": 200.0,
+    "dia_execucao": 16,
+    "conta_id": 14,
+    "subcategoria_id": 24,
+    "usuario_id": 7,
+    "nome_conta": "Conta Corrente",
+    "tipo_conta": "Conta Corrente",
+    "categoria": "Cat",
+    "nome_macro": "Macro",
+    "nome_grupo": "Despesa Discricionária",
+    "tipo_agendamento": "PARCELADO",
+    "parcelas_executadas": 2,
+    "total_parcelas": 10,
+    "data_vencimento_real": "2026-03-16"
+   },
+   {
+    "id": 5,
+    "descricao": "Condomínio",
+    "valor_previsto": null,
+    "dia_execucao": 12,
+    "conta_id": 15,
+    "subcategoria_id": 25,
+    "usuario_id": 7,
+    "nome_conta": "Conta Corrente",
+    "tipo_conta": "Conta Corrente",
+    "categoria": "Cat",
+    "nome_macro": "Macro",
+    "nome_grupo": "Despesa Essencial",
+    "tipo_agendamento": "FIXO",
+    "parcelas_executadas": 0,
+    "total_parcelas": null,
+    "data_vencimento_real": "2026-03-12"
+   },
+   {
+    "id": 6,
+    "descricao": "Academia",
+    "valor_previsto": 120.0,
+    "dia_execucao": 15,
+    "conta_id": 16,
+    "subcategoria_id": 26,
+    "usuario_id": 7,
+    "nome_conta": "Nubank",
+    "tipo_conta": "Cartão de Crédito",
+    "categoria": "Cat",
+    "nome_macro": "Macro",
+    "nome_grupo": "Despesa",
+    "tipo_agendamento": "FIXO",
+    "parcelas_executadas": 0,
+    "total_parcelas": null,
+    "data_vencimento_real": "2026-03-15"
+   },
+   {
+    "id": 7,
+    "descricao": "Seguro",
+    "valor_previsto": 300.0,
+    "dia_execucao": 5,
+    "conta_id": 17,
+    "subcategoria_id": 27,
+    "usuario_id": 7,
+    "nome_conta": "Conta Corrente",
+    "tipo_conta": "Conta Corrente",
+    "categoria": "Cat",
+    "nome_macro": "Macro",
+    "nome_grupo": "Despesa Essencial",
+    "tipo_agendamento": "FIXO",
+    "parcelas_executadas": 0,
+    "total_parcelas": null,
+    "data_vencimento_real": "2026-03-05"
+   },
+   {
+    "id": 8,
+    "descricao": "Aluguel garagem",
+    "valor_previsto": 250.0,
+    "dia_execucao": 3,
+    "conta_id": 18,
+    "subcategoria_id": 28,
+    "usuario_id": 7,
+    "nome_conta": "Conta Corrente",
+    "tipo_conta": "Conta Corrente",
+    "categoria": "Cat",
+    "nome_macro": "Macro",
+    "nome_grupo": "Renda",
+    "tipo_agendamento": "FIXO",
+    "parcelas_executadas": 0,
+    "total_parcelas": null,
+    "data_vencimento_real": "2026-03-03"
+   },
+   {
+    "id": 9,
+    "descricao": "Parcela carro",
+    "valor_previsto": 900.0,
+    "dia_execucao": 1,
+    "conta_id": 19,
+    "subcategoria_id": 29,
+    "usuario_id": 7,
+    "nome_conta": "Conta Corrente",
+    "tipo_conta": "Conta Corrente",
+    "categoria": "Cat",
+    "nome_macro": "Macro",
+    "nome_grupo": "Despesa Essencial",
+    "tipo_agendamento": "PARCELADO",
+    "parcelas_executadas": 0,
+    "total_parcelas": 2,
+    "data_vencimento_real": null
+   }
+  ],
+  "session": {
+   "items": {
+    "1": {
+     "id": 1,
+     "descricao": "Salário",
+     "valor_previsto": 5000.0,
+     "dia_execucao": 18,
+     "conta_id": 11,
+     "subcategoria_id": 21,
+     "usuario_id": 7,
+     "nome_conta": "Conta Corrente",
+     "tipo_conta": "Conta Corrente",
+     "categoria": "Cat",
+     "nome_macro": "Macro",
+     "nome_grupo": "Renda",
+     "tipo_agendamento": "FIXO",
+     "parcelas_executadas": 0,
+     "total_parcelas": null,
+     "data_vencimento_real": "2026-03-18",
+     "status_text": "Vence hoje",
+     "dias_atraso": 0
+    },
+    "2": {
+     "id": 8,
+     "descricao": "Aluguel garagem",
+     "valor_previsto": 250.0,
+     "dia_execucao": 3,
+     "conta_id": 18,
+     "subcategoria_id": 28,
+     "usuario_id": 7,
+     "nome_conta": "Conta Corrente",
+     "tipo_conta": "Conta Corrente",
+     "categoria": "Cat",
+     "nome_macro": "Macro",
+     "nome_grupo": "Renda",
+     "tipo_agendamento": "FIXO",
+     "parcelas_executadas": 0,
+     "total_parcelas": null,
+     "data_vencimento_real": "2026-03-03",
+     "status_text": "Atrasado 15 dias",
+     "dias_atraso": 15
+    },
+    "3": {
+     "id": 2,
+     "descricao": "Aluguel",
+     "valor_previsto": 1500.5,
+     "dia_execucao": 17,
+     "conta_id": 12,
+     "subcategoria_id": 22,
+     "usuario_id": 7,
+     "nome_conta": "Conta Corrente",
+     "tipo_conta": "Conta Corrente",
+     "categoria": "Cat",
+     "nome_macro": "Macro",
+     "nome_grupo": "Despesa Essencial",
+     "tipo_agendamento": "FIXO",
+     "parcelas_executadas": 0,
+     "total_parcelas": null,
+     "data_vencimento_real": "2026-03-17",
+     "status_text": "Venceu ontem",
+     "dias_atraso": 1
+    },
+    "4": {
+     "id": 4,
+     "descricao": "Curso",
+     "valor_previsto": 200.0,
+     "dia_execucao": 16,
+     "conta_id": 14,
+     "subcategoria_id": 24,
+     "usuario_id": 7,
+     "nome_conta": "Conta Corrente",
+     "tipo_conta": "Conta Corrente",
+     "categoria": "Cat",
+     "nome_macro": "Macro",
+     "nome_grupo": "Despesa Discricionária",
+     "tipo_agendamento": "PARCELADO",
+     "parcelas_executadas": 2,
+     "total_parcelas": 10,
+     "data_vencimento_real": "2026-03-16",
+     "status_text": "Venceu dia 16",
+     "dias_atraso": 2
+    },
+    "5": {
+     "id": 5,
+     "descricao": "Condomínio",
+     "valor_previsto": null,
+     "dia_execucao": 12,
+     "conta_id": 15,
+     "subcategoria_id": 25,
+     "usuario_id": 7,
+     "nome_conta": "Conta Corrente",
+     "tipo_conta": "Conta Corrente",
+     "categoria": "Cat",
+     "nome_macro": "Macro",
+     "nome_grupo": "Despesa Essencial",
+     "tipo_agendamento": "FIXO",
+     "parcelas_executadas": 0,
+     "total_parcelas": null,
+     "data_vencimento_real": "2026-03-12",
+     "status_text": "Atrasado 6 dias",
+     "dias_atraso": 6
+    },
+    "6": {
+     "id": 7,
+     "descricao": "Seguro",
+     "valor_previsto": 300.0,
+     "dia_execucao": 5,
+     "conta_id": 17,
+     "subcategoria_id": 27,
+     "usuario_id": 7,
+     "nome_conta": "Conta Corrente",
+     "tipo_conta": "Conta Corrente",
+     "categoria": "Cat",
+     "nome_macro": "Macro",
+     "nome_grupo": "Despesa Essencial",
+     "tipo_agendamento": "FIXO",
+     "parcelas_executadas": 0,
+     "total_parcelas": null,
+     "data_vencimento_real": "2026-03-05",
+     "status_text": "Atrasado 13 dias",
+     "dias_atraso": 13
+    },
+    "7": {
+     "id": 9,
+     "descricao": "Parcela carro",
+     "valor_previsto": 900.0,
+     "dia_execucao": 1,
+     "conta_id": 19,
+     "subcategoria_id": 29,
+     "usuario_id": 7,
+     "nome_conta": "Conta Corrente",
+     "tipo_conta": "Conta Corrente",
+     "categoria": "Cat",
+     "nome_macro": "Macro",
+     "nome_grupo": "Despesa Essencial",
+     "tipo_agendamento": "PARCELADO",
+     "parcelas_executadas": 0,
+     "total_parcelas": 2,
+     "data_vencimento_real": null,
+     "status_text": "Atrasado 17 dias",
+     "dias_atraso": 17
+    }
+   },
+   "created_at": "2026-03-18",
+   "total_items": 7
+  },
+  "active": "abcdef12"
+ },
+ "checkin_days": [
+  {
+   "dia": 18,
+   "hoje": "2026-03-18",
+   "dias": 0
+  },
+  {
+   "dia": 15,
+   "hoje": "2026-03-18",
+   "dias": 3
+  },
+  {
+   "dia": 28,
+   "hoje": "2026-03-03",
+   "dias": 3
+  },
+  {
+   "dia": 31,
+   "hoje": "2026-03-02",
+   "dias": -1
+  },
+  {
+   "dia": 30,
+   "hoje": "2026-01-03",
+   "dias": 4
+  },
+  {
+   "dia": 31,
+   "hoje": "2026-03-31",
+   "dias": 0
+  }
+ ],
+ "monthly_messages": [
+  {
+   "input": {
+    "mes": 2,
+    "ano": 2026,
+    "periodo": {
+     "inicio": "2026-02-01",
+     "fim": "2026-02-28"
+    },
+    "totais": {
+     "total_despesas": 4321.1,
+     "total_rendas": 12345.67,
+     "saldo_periodo": 8024.57,
+     "total_transacoes": 58
+    },
+    "top_categorias": [
+     {
+      "categoria": "Mercado",
+      "valor": 1200.5,
+      "percentual": 27.78
+     },
+     {
+      "categoria": "Transporte",
+      "valor": 300.0,
+      "percentual": 6.94
+     }
+    ],
+    "comparacao": {
+     "mes_atual": 4321.1,
+     "mes_anterior": 4000.0,
+     "variacao_valor": 321.1,
+     "variacao_percentual": 8.0275
+    },
+    "potes": [
+     {
+      "nome": "Lazer",
+      "limite": 500.0,
+      "usado": 650.0,
+      "saldo": -150.0,
+      "percentual": 130.0
+     },
+     {
+      "nome": "Comida",
+      "limite": 1500.0,
+      "usado": 1000.0,
+      "saldo": 500.0,
+      "percentual": 66.666
+     }
+    ],
+    "contas": {
+     "pagas": 20,
+     "valor_pago": 4321.1,
+     "pendentes": 3,
+     "valor_pendente": 1234.5
+    }
+   },
+   "name": "Rafael Silva",
+   "output": "📊 *RELATÓRIO MENSAL - FEVEREIRO/2026*\nOlá, Rafael Silva!\n\n💰 *RESUMO FINANCEIRO*\n• Receitas: R$ 12,345.67\n• Despesas: R$ 4,321.10\n• Saldo: R$ 8,024.57\n• Transações: 58\n\n📈 *COMPARAÇÃO COM MÊS ANTERIOR*\n• Mês anterior: R$ 4,000.00\n• Variação: R$ 321.10 (+8.0%)\n\n🏆 *TOP 5 CATEGORIAS*\n1. Mercado: R$ 1,200.50 (27.8%)\n2. Transporte: R$ 300.00 (6.9%)\n\n🎯 *POTES DE GASTOS*\n⚠️ Lazer:\n   Usado: R$ 650.00 / R$ 500.00\n   Saldo: R$ -150.00 (130.0%)\n✅ Comida:\n   Usado: R$ 1,000.00 / R$ 1,500.00\n   Saldo: R$ 500.00 (66.7%)\n\n💳 *STATUS DE CONTAS*\n✅ Pagas: 20 (R$ 4,321.10)\n⏳ Pendentes: 3 (R$ 1,234.50)\n\n_📷 Veja o gráfico de pizza anexo para visualização das categorias!_"
+  },
+  {
+   "input": {
+    "mes": 12,
+    "ano": 2025,
+    "periodo": {
+     "inicio": "2025-12-01",
+     "fim": "2025-12-28"
+    },
+    "totais": {
+     "total_despesas": -2500.25,
+     "total_rendas": 0.0,
+     "saldo_periodo": 2500.25,
+     "total_transacoes": 4
+    },
+    "top_categorias": [],
+    "comparacao": {
+     "mes_atual": -2500.25,
+     "mes_anterior": 0,
+     "variacao_valor": -2500.25,
+     "variacao_percentual": 0
+    },
+    "potes": [],
+    "contas": {
+     "pagas": 0,
+     "valor_pago": 0,
+     "pendentes": 0,
+     "valor_pendente": 0
+    }
+   },
+   "name": "Rafael Silva",
+   "output": "📊 *RELATÓRIO MENSAL - DEZEMBRO/2025*\nOlá, Rafael Silva!\n\n💰 *RESUMO FINANCEIRO*\n• Receitas: R$ 0.00\n• Despesas: R$ -2,500.25\n• Saldo: R$ 2,500.25\n• Transações: 4\n\n📉 *COMPARAÇÃO COM MÊS ANTERIOR*\n• Mês anterior: R$ 0.00\n• Variação: R$ -2,500.25 (+0.0%)\n\n💳 *STATUS DE CONTAS*\n✅ Pagas: 0 (R$ 0.00)\n⏳ Pendentes: 0 (R$ 0.00)\n\n_📷 Veja o gráfico de pizza anexo para visualização das categorias!_"
+  },
+  {
+   "input": {
+    "mes": 1,
+    "ano": 2026,
+    "periodo": {
+     "inicio": "2026-01-01",
+     "fim": "2026-01-28"
+    },
+    "totais": {
+     "total_despesas": 0.005,
+     "total_rendas": 1234567.891,
+     "saldo_periodo": 1234567.8860000002,
+     "total_transacoes": 1
+    },
+    "top_categorias": [
+     {
+      "categoria": "Outros",
+      "valor": 0.005,
+      "percentual": 100.0
+     }
+    ],
+    "comparacao": {
+     "mes_atual": 0.005,
+     "mes_anterior": 0.0,
+     "variacao_valor": 0.005,
+     "variacao_percentual": 0
+    },
+    "potes": [
+     {
+      "nome": "Vazio",
+      "limite": 0.0,
+      "usado": 0.0,
+      "saldo": 0.0,
+      "percentual": 0
+     }
+    ],
+    "contas": {
+     "pagas": 1,
+     "valor_pago": 0.005,
+     "pendentes": 1,
+     "valor_pendente": 99999.995
+    }
+   },
+   "name": "Rafael Silva",
+   "output": "📊 *RELATÓRIO MENSAL - JANEIRO/2026*\nOlá, Rafael Silva!\n\n💰 *RESUMO FINANCEIRO*\n• Receitas: R$ 1,234,567.89\n• Despesas: R$ 0.01\n• Saldo: R$ 1,234,567.89\n• Transações: 1\n\n📈 *COMPARAÇÃO COM MÊS ANTERIOR*\n• Mês anterior: R$ 0.00\n• Variação: R$ 0.01 (+0.0%)\n\n🏆 *TOP 5 CATEGORIAS*\n1. Outros: R$ 0.01 (100.0%)\n\n🎯 *POTES DE GASTOS*\n✅ Vazio:\n   Usado: R$ 0.00 / R$ 0.00\n   Saldo: R$ 0.00 (0.0%)\n\n💳 *STATUS DE CONTAS*\n✅ Pagas: 1 (R$ 0.01)\n⏳ Pendentes: 1 (R$ 99,999.99)\n\n_📷 Veja o gráfico de pizza anexo para visualização das categorias!_"
+  }
+ ]
+}

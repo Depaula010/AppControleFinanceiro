@@ -52,6 +52,41 @@ public static class AdminMessages
 
     public const string FinancialAlertsFailed = "Erro ao atualizar a configuração de alertas financeiros. Tente novamente.";
 
+    // ---- 009c: rotas dependentes ----
+    public const string FeatureNotAvailable = "Funcionalidade ainda não disponível";
+    public const string MotorProcessed = "Agendamentos processados.";
+    public const string MotorAlreadyRunning = "Agendamentos já estão em processamento.";
+    public const string MotorFailed = "Erro ao processar agendamentos. Tente novamente.";
+    public const string AgendaReplaced = "Agenda diária foi substituída pelo resumo matinal. Nada a processar.";
+    public const string BillsTriggered = "Processamento de contas a vencer concluído";
+    public const string BillsTriggerFailed = "Erro ao processar notificações de contas a vencer. Tente novamente.";
+    public const string BriefingTriggered = "Processamento de resumos matinais concluído";
+    public const string BriefingTriggerFailed = "Erro ao processar os resumos matinais. Tente novamente.";
+    public const string MonthlyTriggerFailed = "Erro ao processar os relatórios mensais. Tente novamente.";
+    public const string TestNotConnected = "Usuário não conectou Google Calendar";
+    public const string TestInvalidType = "Tipo inválido";
+    public const string TestSendFailed = "Falha ao enviar notificação";
+    public const string TestNotificationFailed = "Erro ao enviar a notificação de teste. Tente novamente.";
+    public const string MonthlyMomentInvalid = "Parâmetro 'momento' deve ser 'INICIO_MES' ou 'FIM_MES'";
+    public const string MonthlyReportSent = "Relatório mensal enviado com sucesso";
+    public const string MonthlyReportError = "Erro ao enviar relatório";
+    public const string MonthlyReportFailed = "Erro ao enviar o relatório mensal. Tente novamente.";
+    public const string BriefingPrepareFailed = "Erro ao preparar dados do briefing";
+    public const string BriefingEmptyMessage = "Falha ao gerar mensagem";
+    public const string BriefingSendFailed = "Falha ao enviar WhatsApp";
+    public const string BriefingSent = "Resumo matinal enviado com sucesso";
+    public const string BriefingTestFailed = "Erro ao enviar o resumo matinal de teste. Tente novamente.";
+
+    public static string NoBriefingUsers(string time) => $"Nenhum usuario configurado para {time}";
+
+    public static string MonthlyTriggered(string moment) => $"Processamento de relatórios mensais ({moment}) concluído";
+
+    public static string TestNotificationSent(string name) => $"Notificação de teste enviada para {name}";
+
+    public static string BriefingUserNotFound(long id) => $"Usuário {id} não encontrado";
+
+    public static string BriefingNoWhatsapp(int id) => $"Usuário {id} não tem número de WhatsApp cadastrado";
+
     public static string IpDesbloqueado(string ip) => $"IP {ip} desbloqueado";
 
     public static string BlacklistAdded(string ip) => $"IP {ip} adicionado à blacklist permanente";
@@ -76,6 +111,12 @@ internal static partial class AdminLog
 
     [LoggerMessage(EventId = 9102, Level = LogLevel.Information, Message = "[ADMIN-FIX] {Message}")]
     public static partial void AdminFix(ILogger logger, string message);
+
+    [LoggerMessage(EventId = 9103, Level = LogLevel.Information, Message = "[MOTOR] {Message}")]
+    public static partial void Motor(ILogger logger, string message);
+
+    [LoggerMessage(EventId = 9104, Level = LogLevel.Warning, Message = "Rota admin {Route} sem implementação da porta (funcionalidade ainda não disponível)")]
+    public static partial void FeatureNotAvailable(ILogger logger, string route);
 }
 
 /// <summary>
