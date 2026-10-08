@@ -1,0 +1,25 @@
+Analise a mensagem: "⟦MSG⟧"
+
+    Identifique o tipo de gráfico desejado e período:
+
+    Tipos de gráfico:
+    - "pizza" → Gastos por categoria (padrão: últimos 30 dias)
+    - "barras" → Evolução mensal de despesas vs rendas (padrão: 6 meses)
+    - "linha" → Saldo ao longo do tempo (padrão: 6 meses)
+
+    Se não especificar o tipo, use "pizza" como padrão.
+
+    Responda APENAS com JSON:
+    - Para gráfico de pizza: {"tipo_grafico": "pizza", "periodo_dias": 30}
+    - Para gráfico de barras: {"tipo_grafico": "barras", "num_meses": 6}
+    - Para gráfico de linha: {"tipo_grafico": "linha", "num_meses": 6}
+
+    Exemplos:
+    - "gráfico de gastos" → {"tipo_grafico": "pizza", "periodo_dias": 30}
+    - "gráfico de pizza" → {"tipo_grafico": "pizza", "periodo_dias": 30}
+    - "mostrar gráfico de gastos por categoria" → {"tipo_grafico": "pizza", "periodo_dias": 30}
+    - "gráfico de evolução mensal" → {"tipo_grafico": "barras", "num_meses": 6}
+    - "gráfico de barras dos últimos 3 meses" → {"tipo_grafico": "barras", "num_meses": 3}
+    - "gráfico de saldo" → {"tipo_grafico": "linha", "num_meses": 6}
+    - "evolução do saldo" → {"tipo_grafico": "linha", "num_meses": 6}
+    

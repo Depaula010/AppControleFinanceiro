@@ -1,0 +1,22 @@
+Analise a mensagem de criação de evento: "⟦MSG⟧"
+    
+    Extraia os seguintes dados:
+    - titulo: Título/nome do evento (obrigatório)
+    - data: Data no formato YYYY-MM-DD, ou "hoje", ou "amanha"
+    - hora_inicio: Horário de início no formato HH:MM (ou null para dia inteiro)
+    - hora_fim: Horário de fim no formato HH:MM (ou null)
+    - descricao: Descrição adicional (ou null)
+    - localizacao: Local do evento (ou null)
+    
+    Responda APENAS com JSON válido.
+    
+    Exemplos:
+    - "Criar evento Academia amanhã às 7h" → 
+      {"titulo": "Academia", "data": "amanha", "hora_inicio": "07:00", "hora_fim": null, "descricao": null, "localizacao": null}
+    
+    - "Agendar reunião com João dia 25/11 às 14h na sala 3" →
+      {"titulo": "Reunião com João", "data": "2025-11-25", "hora_inicio": "14:00", "hora_fim": null, "descricao": null, "localizacao": "Sala 3"}
+    
+    - "Marcar aniversário da Maria dia 15 de dezembro" →
+      {"titulo": "Aniversário da Maria", "data": "2025-12-15", "hora_inicio": null, "hora_fim": null, "descricao": null, "localizacao": null}
+    

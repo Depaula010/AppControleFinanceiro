@@ -1,0 +1,27 @@
+Analise a mensagem sobre configuração de endereço: "⟦MSG⟧"
+
+    Extraia:
+    - label: "casa", "trabalho" ou "outro" (qual tipo de endereço)
+    - endereco_completo: O endereço completo fornecido
+
+    Responda APENAS com JSON: {"label": "...", "endereco_completo": "..."}
+
+    Regras:
+    - Se mencionar "casa", "minha casa", "residência" → label: "casa"
+    - Se mencionar "trabalho", "escritório", "empresa" → label: "trabalho"
+    - Se não especificar ou mencionar "outro" → label: "outro"
+    - Extrair todo o endereço após o label (ignorar palavras como "fica", "é", "em")
+
+    Exemplos:
+    - "configurar endereço casa: Av Paulista 1000, Consolação, São Paulo-SP" →
+      {"label": "casa", "endereco_completo": "Av Paulista 1000, Consolação, São Paulo-SP"}
+
+    - "meu trabalho fica na Rua X, 456, Centro, Campinas-SP" →
+      {"label": "trabalho", "endereco_completo": "Rua X, 456, Centro, Campinas-SP"}
+
+    - "adicionar endereço: Av Brasil 200, Rio de Janeiro-RJ" →
+      {"label": "outro", "endereco_completo": "Av Brasil 200, Rio de Janeiro-RJ"}
+
+    - "cadastrar casa Rua das Flores 10, Belo Horizonte-MG" →
+      {"label": "casa", "endereco_completo": "Rua das Flores 10, Belo Horizonte-MG"}
+    

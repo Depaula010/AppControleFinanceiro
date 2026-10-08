@@ -1,0 +1,22 @@
+Analise a pergunta: "⟦MSG⟧"
+
+    Identifique o período que o usuário quer consultar:
+    - "ontem" → {"period_type": "ontem"}
+    - "hoje" → {"period_type": "hoje"}
+    - "final de semana" / "fds" → {"period_type": "final_de_semana"}
+    - "esta semana" → {"period_type": "esta_semana"}
+    - "semana passada" → {"period_type": "semana_passada"}
+    - "últimos 7 dias" → {"period_type": "ultimos_7_dias"}
+    - "este mês" → {"period_type": "este_mes"}
+    - "mês passado" → {"period_type": "mes_passado"}
+
+    Se mencionar uma categoria específica, inclua também:
+    {"period_type": "...", "categoria": "supermercado"}
+
+    Responda APENAS com JSON.
+
+    Exemplos:
+    - "quanto gastei ontem?" → {"period_type": "ontem"}
+    - "gastos do final de semana" → {"period_type": "final_de_semana"}
+    - "quanto gastei com uber esta semana?" → {"period_type": "esta_semana", "categoria": "uber"}
+    

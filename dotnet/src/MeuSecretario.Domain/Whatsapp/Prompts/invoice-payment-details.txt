@@ -1,0 +1,3 @@
+Analise a mensagem de pagamento de fatura: "⟦MSG⟧"
+    Minhas contas são: ⟦CONTAS⟧
+    Extraia "valor_decimal", "conta_origem", e "conta_cartao". Responda APENAS com JSON.

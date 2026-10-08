@@ -1,0 +1,51 @@
+📚 *MENU DE FUNCIONALIDADES* 📚
+
+*💰 GESTÃO FINANCEIRA*
+• _"gastei 50 em comida"_ - Registrar despesa
+• _"recebi 500"_ - Registrar renda
+• _"qual meu saldo?"_ - Consultar saldo das contas
+• _"quanto gastei hoje/semana/mês?"_ - Gastos por período
+• _"meus potes"_ - Ver limite e gasto dos potes
+• _"todas as minhas contas"_ - Listar TODAS as contas recorrentes (pagas ou não)
+• _"minhas contas fixas"_ - Ver contas ainda não pagas no mês
+• _"paguei água"_ - Quitar conta fixa
+• _"paguei a internet e comprei pizza de 50"_ - Quitar múltiplas (híbrido)
+• _"transferir 100 da carteira para banco"_ - Transferência
+• _"paguei 500 da fatura do nubank"_ - Pagar fatura
+• _"qual valor da fatura?"_ - Consultar valor da fatura
+• _"quanto gastei com comida?"_ - Gasto por categoria
+• _"quais contas tenho?"_ - Listar contas cadastradas
+• _"quanto de reserva?"_ - Reserva de emergência (6x média)
+• _"tenho conta que vence hoje?"_ - Vencimentos de hoje
+• _"tenho conta que vence amanhã?"_ - Vencimentos de amanhã
+• _"contas que vencem essa semana?"_ - Vencimentos dos próximos 7 dias
+
+*📅 CALENDÁRIO & AGENDA*
+• _"minha agenda amanhã"_ - Ver compromissos
+• _"criar evento academia amanhã 7h"_ - Criar evento
+• _"deletar reunião de hoje"_ - Remover evento
+• _"quando estou livre amanhã?"_ - Horários disponíveis
+
+*📁 GOOGLE DRIVE*
+• _[Envie foto/doc] "salvar no drive"_ - Upload para pasta padrão
+• _[Envie foto/doc] "salvar no drive pasta Notas"_ - Upload para pasta específica
+• _Formatos aceitos:_ Imagens, PDFs, Docs, Planilhas, Áudio
+
+*📊 ANÁLISES & RELATÓRIOS*
+• _"analisar meus gastos"_ - Análise inteligente com IA
+• _"comparar com mês anterior"_ - Comparação mensal
+• _"quanto vou gastar este mês"_ - Previsão de gastos
+• _"gráfico de gastos"_ - Gerar gráfico visual
+
+*⚙️ CONFIGURAÇÕES*
+• _"ativar resumo matinal"_ - Configurar notificações
+• _"configurar localização São Paulo"_ - Definir cidade
+• _"configurar relatório mensal"_ - Agendar relatório
+• _"configurar endereço casa"_ - Adicionar endereço
+• _"meus endereços"_ - Listar endereços
+• _"remover endereço casa"_ - Deletar endereço
+
+*🔑 ACESSO*
+• _"minha api key"_ - Exibir chave de integração
+
+💡 *Dica:* Use linguagem natural! Eu entendo suas mensagens.

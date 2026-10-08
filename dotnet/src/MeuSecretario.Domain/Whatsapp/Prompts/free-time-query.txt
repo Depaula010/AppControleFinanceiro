@@ -1,0 +1,22 @@
+Analise a pergunta sobre horários livres: "⟦MSG⟧"
+
+    Extraia:
+    - period_type: "hoje", "amanha", "esta_semana", "proxima_semana"
+    - duracao_minutos: Duração estimada da atividade em minutos (default: 60)
+    - contexto: O que o usuário quer marcar (dentista, reunião, etc.) ou null
+
+    Responda APENAS com JSON.
+
+    Exemplos:
+    - "quando estou livre amanhã?" →
+      {"period_type": "amanha", "duracao_minutos": 60, "contexto": null}
+
+    - "quando posso marcar dentista esta semana?" →
+      {"period_type": "esta_semana", "duracao_minutos": 60, "contexto": "dentista"}
+
+    - "melhor horário para reunião de 2 horas hoje" →
+      {"period_type": "hoje", "duracao_minutos": 120, "contexto": "reunião"}
+
+    - "horários livres na próxima semana" →
+      {"period_type": "proxima_semana", "duracao_minutos": 60, "contexto": null}
+    

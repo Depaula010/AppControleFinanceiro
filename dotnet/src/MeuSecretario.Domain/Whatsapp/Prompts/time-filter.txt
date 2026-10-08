@@ -1,0 +1,17 @@
+Analise a pergunta sobre agenda: "⟦MSG⟧"
+
+    Identifique se há filtro de horário:
+    - "manhã" / "de manhã" → {"time_filter": "manha"}
+    - "tarde" / "à tarde" / "da tarde" → {"time_filter": "tarde"}
+    - "noite" / "à noite" / "da noite" → {"time_filter": "noite"}
+    - "agora" / "próximas horas" / "daqui a pouco" → {"time_filter": "agora"}
+    - Sem filtro específico → {"time_filter": null}
+
+    Responda APENAS com JSON.
+
+    Exemplos:
+    - "tenho compromisso agora à tarde?" → {"time_filter": "tarde"}
+    - "eventos de manhã" → {"time_filter": "manha"}
+    - "o que tenho agora?" → {"time_filter": "agora"}
+    - "meus compromissos hoje" → {"time_filter": null}
+    

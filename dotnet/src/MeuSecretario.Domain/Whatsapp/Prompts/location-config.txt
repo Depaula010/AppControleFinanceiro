@@ -1,0 +1,15 @@
+Analise a mensagem sobre configuração de localização: "⟦MSG⟧"
+
+    Extraia a cidade e o estado (sigla de 2 letras) que o usuário deseja configurar.
+
+    Responda APENAS com JSON: {"cidade": "...", "estado": "..."}
+
+    Exemplos:
+    - "configurar localização São Paulo, SP" → {"cidade": "São Paulo", "estado": "SP"}
+    - "minha cidade é Campinas SP" → {"cidade": "Campinas", "estado": "SP"}
+    - "localização: Rio de Janeiro, RJ" → {"cidade": "Rio de Janeiro", "estado": "RJ"}
+    - "moro em Belo Horizonte MG" → {"cidade": "Belo Horizonte", "estado": "MG"}
+    - "estou em Curitiba" → {"cidade": "Curitiba", "estado": "PR"} (inferir estado conhecido)
+
+    Se não conseguir extrair o estado, retorne null para estado.
+    
