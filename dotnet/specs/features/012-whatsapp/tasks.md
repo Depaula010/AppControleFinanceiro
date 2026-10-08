@@ -1,6 +1,6 @@
 # Tasks 012 — Webhook WhatsApp e intents
 
-Regra: cada tarefa termina com testes verdes; cada sub-entrega termina com **build sem warnings**, `dotnet test dotnet/MeuSecretario.slnx` verde, este arquivo marcado e um commit. Teste primeiro, código depois. Pré-requisito: spec aprovada por delegação (só paridade e desvios já aprovados; 150 a 161 propostos e **não** implementados). **Não edita** `Program.cs`, `DependencyInjection.cs`, `Directory.Build.props`, `PostgresFixture`. Pode tocar (e relata): `UnitTests.csproj` (fixtures), `Domain.csproj` (recursos embutidos), `Directory.Packages.props` + `Infrastructure.csproj` (ScottPlot, só 012g).
+Regra: cada tarefa termina com testes verdes; cada sub-entrega termina com **build sem warnings**, `dotnet test dotnet/MeuSecretario.slnx` verde, este arquivo marcado e um commit. Teste primeiro, código depois. Pré-requisito: spec aprovada por delegação (só paridade e desvios já aprovados; 150 a 161 propostos e **não** implementados). **Não edita** `Program.cs`, `DependencyInjection.cs`, `Directory.Build.props`, `PostgresFixture`. Pode tocar (e relata): `UnitTests.csproj` (fixtures), `Domain.csproj` (recursos embutidos), nenhum pacote novo (ScottPlot veio da 013). Base atualizada com a 013 e a 009c (merge em 2026-10-08).
 
 Retomada: o que está `[x]` está commitado; a próxima sub-entrega começa na primeira tarefa `[ ]`.
 
@@ -8,15 +8,15 @@ Retomada: o que está `[x]` está commitado; a próxima sub-entrega começa na p
 
 ## 012-0 — Webhook, HMAC, roteamento e estado Redis
 
-- [ ] **T1 — Fixtures e prompts.** `generate_whatsapp_fixtures.py` (prompts renderizados por função do Flask com marcadores, menu de ajuda, `process_confirmation_response`, `extract_mentioned_account`) ⇒ `whatsapp-fixtures.json` e `Domain/Whatsapp/Prompts/*.txt`; `WhatsAppPrompts` com teste de renderização (AC-012-010, 016).
-- [ ] **T2 — Regras do roteador e textos.** `WebhookSignature`, `MessageIntent`, `WhatsAppTexts`, `PyStrings` (AC-012-003, 006, 012 a 015).
-- [ ] **T3 — `ConfirmationFlow`** contra o Python em todos os ramos (AC-012-018).
-- [ ] **T4 — Portas e estado.** `IWhatsAppUserLookup`, `IPendingTransactionState`, `IPendingEventStore`, `INightlyCheckinResponder` (+ padrão), `IWhatsAppCheckinSession`; implementações (Postgres/Redis reais na integração) (AC-012-018).
-- [ ] **T5 — `IntentClassifier` e `IntentRouter`** (template × inline, "não entendi", `Menu de Ajuda`) (AC-012-009 a 011).
-- [ ] **T6 — `HandleWhatsAppMessage`** (passos 1 a 7 e 9 da §4 com as sub-entregas ainda não habilitadas) com fakes (AC-012-005 a 009, 012 a 015).
-- [ ] **T7 — Api.** `WhatsAppModule`, `WhatsAppResponses`, `WhatsAppMessages`, `WhatsAppLog`; endpoint com leitura do corpo bruto; integração por rota (AC-012-001 a 009).
-- [ ] **T8 — Harness de paridade.** `whatsapp_handler_harness.py` + `WhatsAppPipelineParityTests` (AC-012-017).
-- [ ] **T9 — Fechamento da 012-0.** Build sem warnings, testes verdes, commit.
+- [x] **T1 — Fixtures e prompts.** `generate_whatsapp_fixtures.py` (prompts renderizados por função do Flask com marcadores, menu de ajuda, `process_confirmation_response`, `extract_mentioned_account`) ⇒ `whatsapp-fixtures.json` e `Domain/Whatsapp/Prompts/*.txt`; `WhatsAppPrompts` com teste de renderização (AC-012-010, 016).
+- [x] **T2 — Regras do roteador e textos.** `WebhookSignature`, `MessageIntent`, `WhatsAppTexts`, `PyStrings` (AC-012-003, 006, 012 a 015).
+- [x] **T3 — `ConfirmationFlow`** contra o Python em todos os ramos (AC-012-018).
+- [x] **T4 — Portas e estado.** `IWhatsAppUserLookup`, `IPendingTransactionState`, `IPendingEventStore`, `INightlyCheckinResponder` (+ padrão), `IWhatsAppCheckinSession`; implementações (Postgres/Redis reais na integração) (AC-012-018).
+- [x] **T5 — `IntentClassifier` e `IntentRouter`** (template × inline, "não entendi", `Menu de Ajuda`) (AC-012-009 a 011).
+- [x] **T6 — `HandleWhatsAppMessage`** (passos 1, 2, 5, 7 e 9 da §4 como `IWhatsAppStep`; os passos 3, 4, 6 e 8 entram nas sub-entregas 012a, 012b e 012e) com fakes (AC-012-005 a 009, 012 a 015).
+- [x] **T7 — Api.** `WhatsAppModule`, `WhatsAppResponses`, `WhatsAppMessages`, `WhatsAppLog`; endpoint com leitura do corpo bruto; integração por rota (AC-012-001 a 009).
+- [x] **T8 — Harness de paridade.** `whatsapp_handler_harness.py` + `WhatsAppPipelineParityTests` (AC-012-017).
+- [x] **T9 — Fechamento da 012-0.** Build sem warnings, testes verdes, commit.
 
 ## 012a — Transações
 
@@ -45,7 +45,9 @@ Retomada: o que está `[x]` está commitado; a próxima sub-entrega começa na p
 
 - [ ] **T24 — Domínio.** `FixedBillsMessages`, `DueDatesMessage`, `CheckinSnapshotMessage` (AC-012-401 a 403).
 - [ ] **T25 — Leituras (integração Postgres).** pendentes do mês, catálogo, vencimentos (virada de mês), snapshot do check-in (AC-012-401 a 403).
-- [ ] **T26 — Intenções** `FixedBillsIntent`, `AllBillsIntent`, `DueTodayIntent`, `DueTomorrowIntent`, `DueWeekIntent`, `OverdueIntent` (AC-012-401 a 403).
+- [ ] **T26 — Intenções** `FixedBillsIntent`, `AllBillsIntent`, `DueTodayIntent`, `DueTomorrowIntent`, `DueWeekIntent`, `OverdueIntent` (usa `NightlyCheckinService` da 013) (AC-012-401 a 403).
+- [ ] **T26b — Resposta ao check-in.** `CheckinReplyParser`, `CheckinResponder : INightlyCheckinResponder` (`process_response`, `mark_bills_as_paid` por `IScheduleExecutor`) (AC-012-404).
+
 - [ ] **T27 — Fechamento da 012d.**
 
 ## 012e — Calendário
@@ -68,7 +70,7 @@ Retomada: o que está `[x]` está commitado; a próxima sub-entrega começa na p
 - [ ] **T37 — Domínio.** `AnalyticsReport`, `ForecastReport`, `MonthlyComparison` contra o Python (AC-012-701, 702).
 - [ ] **T38 — Leituras (integração Postgres).** `IAnalyticsReader` (AC-012-701 a 703).
 - [ ] **T39 — Intenções** `AnalysisIntent`, `MonthlyComparisonIntent`, `ForecastIntent`, `ChartIntent` com `IChartRenderer` falso (AC-012-701 a 703).
-- [ ] **T40 — `ScottPlotChartRenderer`** (pacote novo; PNG válido) (AC-012-703).
+- [ ] **T40 — Barras e linha** no `ScottPlotChartRenderer` da 013 (a pizza já existe) (AC-012-703).
 - [ ] **T41 — Fechamento da 012g.**
 
 ## 012h — Drive

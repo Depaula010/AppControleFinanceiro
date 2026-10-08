@@ -3,7 +3,7 @@
 - **Estado:** aprovada por delegação do Rafael em 2026-10-07 (fluxo SDD delegado ao agente; valem só paridade com o Flask e os desvios já aprovados; achados novos ficam como `proposto` em `parity-deviations/150` a `161` e **não** são implementados)
 - **Onda:** 4
 - **Origem (Python):** `app/routes/webhooks/__init__.py:49-54` (rota), `handlers/whatsapp_handler.py:48-1584` (orquestrador), `shared/validators.py`, `intents/__init__.py:101-244` (registro e `route_intent`), `intents/base_intent.py:34-227`, `intents/{transaction,query,calendar,notification,analytics,admin,config,drive}_intents.py`, `app/services/gemini_service.py:175-374, 443-462, 536-1254 (menos 676-711 e 1137-1188, sem uso), 1509-1722, 1724-1889`, `transaction_confirmation_service.py`, `event_confirmation_service.py`, `transaction_feedback_service.py`, `finance_service.py:297-407, 457-490, 611-860, 922-1042, 1448-1690, 1695-1961`, `fixed_bills_service.py`, `period_query_service.py`, `calendar_query_service.py`, `calendar_management_service.py`, `free_time_finder_service.py`, `user_schedule_pattern_service.py`, `notification_config_service.py`, `monthly_report_config_service.py`, `location_service.py`, `user_address_service.py`, `analytics_service.py`, `forecast_service.py`, `chart_service.py`, `google_drive_service.py:37-100`, `nightly_checkin_service.py:139-246, 381-617`, `queries/agendamentos_queries.py`, `queries/faturas_queries.py`, `shared/formatters`, `shared/validators/input_sanitizer.py`, `services/redis_service.py`.
-- **Depende de:** 001a (`IClock`, `IEncryptionService`), 003 (`ICategoryLookup`), 004 (`ITransactionPosting`, `IInvoiceService`, `ITransactionsUnitOfWork`, `InvoiceLinking`), 005 (`IEmergencyReserveService`), 007 (`IFavoriteAddressRepository`), 008 (`IApiKeyValidator`; chave por usuário via `IProviderKeySelector`), 010 (`ILlmClient`, `ICache`, `IBotClient`, `ICalendarClient`, `IDriveClient`, `IGoogleAccountService`, `GoogleLinks`, `IRouteClient`, `CalendarFormatter`, `DriveFilePolicy`), 011 (`FuzzyScorer`, `BillMatching`, `BudgetPeriods`, `MoneyText`, `InputSanitizer`, `PyJsonValue`, `ConfirmationMessage`, `IPendingTransactionStore`, `TransactionCategorizer`, `DirectPoster`, `IAutomationLookups`, `IBudgetReader`), 014 (nada além da leitura de `calendaralertconfigs` por outras features). **Colide com a 013:** o check-in noturno (§7.9).
+- **Depende de:** 001a (`IClock`, `IEncryptionService`), 003 (`ICategoryLookup`), 004 (`ITransactionPosting`, `IInvoiceService`, `ITransactionsUnitOfWork`, `InvoiceLinking`), 005 (`IEmergencyReserveService`), 007 (`IFavoriteAddressRepository`), 008 (`IApiKeyValidator`; chave por usuário via `IProviderKeySelector`), 010 (`ILlmClient`, `ICache`, `IBotClient`, `ICalendarClient`, `IDriveClient`, `IGoogleAccountService`, `GoogleLinks`, `IRouteClient`, `CalendarFormatter`, `DriveFilePolicy`), 011 (`FuzzyScorer`, `BillMatching`, `BudgetPeriods`, `MoneyText`, `InputSanitizer`, `PyJsonValue`, `ConfirmationMessage`, `IPendingTransactionStore`, `TransactionCategorizer`, `DirectPoster`, `IAutomationLookups`, `IBudgetReader`), 014 (nada além da leitura de `calendaralertconfigs` por outras features). 013 (entregue): `NightlyCheckinService` (snapshot, sessão e mensagem), `IScheduleExecutor` e `IChartRenderer` (pizza); o restante do check-in (resposta) é desta feature (§7.9).
 - **Consumidores:** o bot Baileys (Node), que repassa cada mensagem recebida em `POST /webhook-whatsapp` e envia ao usuário o texto de `resposta`. O Angular e os atalhos **não** usam esta rota.
 
 ## 1. Objetivo
@@ -111,7 +111,7 @@ Origem: `whatsapp_handler.py:444-705`. `extract_payment_items` (prompt §8, sem 
 
 ### 6.d (012d) Contas fixas e vencimentos
 
-`FixedBillsService.list_pending_bills_formatted`, `list_all_bills_formatted`, `get_vencimentos_periodo` + `format_vencimentos_message` (hoje, amanhã, 7 dias), `Contas Atrasadas` (snapshot do check-in em modo somente leitura, §7.9). "Já pago no mês" continua por **igualdade de `descricao`** (o desvio 012 não vale aqui: a quitação do WhatsApp/SMS não grava `agendamento_id`; Q-012-3).
+`FixedBillsService.list_pending_bills_formatted`, `list_all_bills_formatted`, `get_vencimentos_periodo` + `format_vencimentos_message` (hoje, amanhã, 7 dias), `Contas Atrasadas` (snapshot e mensagem do `NightlyCheckinService` da 013 em modo somente leitura, §7.9) e a resposta ao check-in noturno (`parse_checkin_response`, `process_response`, `mark_bills_as_paid`). "Já pago no mês" continua por **igualdade de `descricao`** (o desvio 012 não vale aqui: a quitação do WhatsApp/SMS não grava `agendamento_id`; Q-012-3).
 
 ### 6.e (012e) Calendário
 
@@ -169,7 +169,7 @@ Prompt `get_message_intent` (§8). Resposta: JSON `{"intent": "..."}`; `null`/au
 
 ### 7.9 Check-in noturno (colisão com a 013)
 
-A 012 só **detecta** a sessão (`nightly_checkin_active:{numero}`) e a encaminha à porta `INightlyCheckinResponder` (a 013 implementa `process_response`); sem implementação registrada o padrão devolve "não tratada" e o pipeline segue (nenhuma sessão existe sem o job da 013). A intenção `Contas Atrasadas` precisa do **snapshot** e do **formatador somente leitura** do mesmo serviço: a 012 os porta em `Whatsapp/Checkin` (queries de `agendamentos_queries.py:116-230, 338-457` e `faturas_queries.py`, formatador de `nightly_checkin_service.py:381-617`); a 013 deve reutilizá-los, não duplicá-los (Q-012-6). Palavras de escape (`nightly_checkin_service.py:140-152`): `gastei`, `gasto`, `comprei`, `compra`, `paguei`, `pagamento`, `recebi`, `recebimento`, `transferi`, `transferência`, `transferencia`, `saldo`, `extrato`, `consulta`, `quanto`, `valor`, `add`, `criar`, `registrar`, `lançar`, `lancar`, `agendar`, `evento`, `compromisso`, `agenda`, `horário`, `horario`, `config`, `configurar`, `mudar`, `alterar`.
+A 013 entregou o job, o snapshot (`NightlyCheckinService.CollectSnapshotAsync`), o formatador (`FormatConsolidatedMessage`, com `checkinId` nulo = modo leitura) e a sessão no Redis (`nightly_checkin:{numero}:{id}`, formato JSON do Python). A 012 **reutiliza** esse serviço para `Contas Atrasadas` e implementa o que a 013 deixou: `INightlyCheckinResponder` (`parse_checkin_response`: `ok`/👍/✅ ⇒ todos, `não`/`depois` ⇒ nenhum e encerra, números ⇒ parcial, inválido ⇒ encerra; `process_response`; `mark_bills_as_paid` via `IScheduleExecutor`, com a data do vencimento real se o atraso é ≤ 1 dia, senão hoje; sessão sempre apagada, inclusive em exceção). Até o responder existir (012d) o padrão devolve "não tratada". Palavras de escape (`nightly_checkin_service.py:140-152`): `gastei`, `gasto`, `comprei`, `compra`, `paguei`, `pagamento`, `recebi`, `recebimento`, `transferi`, `transferência`, `transferencia`, `saldo`, `extrato`, `consulta`, `quanto`, `valor`, `add`, `criar`, `registrar`, `lançar`, `lancar`, `agendar`, `evento`, `compromisso`, `agenda`, `horário`, `horario`, `config`, `configurar`, `mudar`, `alterar`.
 
 ### 7.10 Convenções
 
@@ -302,6 +302,7 @@ Convenção: `AC-012-NNN`, faixa por sub-entrega (0xx = 012-0, 1xx = 012a, 2xx =
 - **AC-012-401** Contas fixas pendentes (despesas, cartão, receitas, totais, status por dia) e catálogo completo (periodicidades, fatores).
 - **AC-012-402** Vencimentos hoje, amanhã e 7 dias (virada de mês, anual, receitas × despesas × faturas, totais).
 - **AC-012-403** Contas atrasadas: snapshot (pendentes 7 dias, atrasadas, faturas) e texto somente leitura; vazio ⇒ `✅ Você não tem contas atrasadas! Tudo em dia! 🎉`.
+- **AC-012-404** Resposta ao check-in: `ok`/👍/✅ confirma todos; `1`, `1 e 3`, `1, 2, 4` parcial; `não`/`depois` encerra sem pagar; inválido encerra; a sessão some sempre; contas pagas viram transações com `agendamento_id` (data do vencimento real se atraso ≤ 1 dia, senão hoje).
 
 **012e — Calendário**
 - **AC-012-501** Criar evento: validação, `hoje`/`amanha`/ISO, pendência de evento, mensagem de confirmação (com/sem endereços).
@@ -332,10 +333,10 @@ Leitura: `usuarios`, `contas`, `faturas`, `transacoes`, `subcategoria`, `macroca
 ## 12. Fora de escopo
 
 - Cadastro pelo WhatsApp (código morto) e `UserRegistrationState`.
-- `check-in noturno`: criação da sessão, `process_response`, `mark_bills_as_paid` e o job (013).
 - Resumo matinal, relatórios mensais e jobs (013); `daily_briefing`.
 - Funções do Flask sem chamador: `extract_bill_payment`, `extract_parcelamento_info`, `validate_event_location_completeness`, `get_category_comparison`, `get_category_forecast`, `generate_simple_forecast_text`, `ConsultaSaldoIntent`/`ConsultaReservaIntent`/`ConsultaPotesIntent`/`ConfigurarNotificacoesIntent`/`PagamentoFaturaIntent` (classes do registro que o handler não usa).
 - Aplicar o limite diário de rotas (desvio 055).
+- Criação da sessão e o job do check-in (013, já entregues).
 
 ## 13. Divergências conhecidas em relação ao Flask
 
@@ -355,6 +356,6 @@ Leitura: `usuarios`, `contas`, `faturas`, `transacoes`, `subcategoria`, `macroca
 - **Q-012-3** A quitação por WhatsApp/SMS deve gravar `agendamento_id` (coerente com o desvio 012 e a 013)? Padrão: não.
 - **Q-012-4** Qual evento pendente é "o mais recente"? Hoje a ordem do `KEYS` decide (desvio 155).
 - **Q-012-5** Alguém usa `Transferência` pelo WhatsApp? Hoje responde "Algo deu errado" para todos.
-- **Q-012-6** Quem entrega o snapshot e o formatador do check-in (012 portou a versão somente leitura; a 013 deve adotá-la)?
+- **Q-012-6** (resolvida) A 013 entregou o snapshot e o formatador; a 012 os reutiliza e implementa só a resposta ao check-in.
 - **Q-012-7** O motivo específico dos erros do Google (`Erro ao criar evento: ...`) pode ser omitido (desvio 008) ou o produto quer uma lista de motivos permitidos?
-- **Q-012-8** A migração da matplotlib para ScottPlot é aceitável (imagem diferente, dados iguais)? Requer o pacote e as bibliotecas nativas do SkiaSharp no Dockerfile.
+- **Q-012-8** A migração da matplotlib para ScottPlot (já na 013) é aceitável para barras e linha também (imagem diferente, dados iguais)?
