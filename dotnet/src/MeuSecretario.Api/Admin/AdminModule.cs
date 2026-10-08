@@ -3,9 +3,11 @@ using MeuSecretario.Api.Contracts;
 using MeuSecretario.Api.Http;
 using MeuSecretario.Api.Modules;
 using MeuSecretario.Api.Security;
+using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Application.Admin;
 using MeuSecretario.Domain.Security;
 using MeuSecretario.Infrastructure.Admin;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MeuSecretario.Api.Admin;
 
@@ -34,6 +36,17 @@ public sealed class AdminModule : IFeatureModule
         services.AddScoped<SetFinancialAlerts>();
         services.AddScoped<GetOAuthConfigCheck>();
         services.AddScoped<RunCalendarDebug>();
+
+        // 009c: leituras de teste, casos de uso e as portas dos jobs. As portas ficam com TryAdd: a 013 (JobsModule) registra
+        // as reais com AddScoped e prevalecem; sem elas as rotas respondem 503 (AC-009-39).
+        services.AddScoped<IAdminTestDataRepository, AdminTestDataRepository>();
+        services.AddScoped<SendTestNotification>();
+        services.AddScoped<SendTestMonthlyReport>();
+        services.AddScoped<SendTestDailyBriefing>();
+        services.TryAddScoped<IScheduleMotor, UnavailableScheduleMotor>();
+        services.TryAddScoped<IBillsNotificationJob, UnavailableBillsNotificationJob>();
+        services.TryAddScoped<IDailyBriefingJob, UnavailableDailyBriefingJob>();
+        services.TryAddScoped<IMonthlyReportJob, UnavailableMonthlyReportJob>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder app)
@@ -48,9 +61,11 @@ public sealed class AdminModule : IFeatureModule
         SetupRoutes.Map(admin);
         admin.MapGet("/oauth-config-check", OAuthConfigCheckEndpoint);
         admin.MapGet("/debug-calendar", CalendarDebugAsync);
+        DependentRoutes.Map(admin);
 
         // Outros métodos na rota com id: numérico => 405 (a rota existe para GET); senão 404 HTML, antes da autenticação.
         app.Map(NotificationConfigPath, OtherMethods);
+        app.Map(DependentRoutes.MonthlyReportPath, DependentRoutes.OtherMethods);
     }
 
     private static void MapSecurityRoutes(RouteGroupBuilder admin)

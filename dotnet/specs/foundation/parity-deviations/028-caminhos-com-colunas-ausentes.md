@@ -21,3 +21,6 @@ Aprovar. Confirmar se alguém usa as rotas de agenda diária.
 
 ## Decisão do Rafael
 Aprovado em 2026-10-02 (aprovação em bloco de todos os desvios propostos).
+
+## Implementação
+009c (2026-10-07): `POST /admin/trigger-agenda-notifications` responde 200 envelope B com o aviso de substituição e contadores zerados, sem I/O. `test-notification tipo=agenda` não usa `agenda_diaria_*` no código lido e segue funcionando (Q-009-9 pendente de teste em homol). As demais partes do desvio (LGPD, log de acesso) são de outras features.
