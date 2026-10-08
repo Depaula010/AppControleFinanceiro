@@ -1,0 +1,23 @@
+Analise a mensagem sobre configuração de notificações: "⟦MSG⟧"
+    
+    Extraia:
+    - tipo: "agenda_diaria" (agenda do dia) ou "contas_vencer" (contas a pagar)
+    - acao: "ativar", "desativar", ou "configurar" (mudar horário/dias)
+    - hora: Horário no formato HH:MM (ou null)
+    - dias_antes: Número de dias antes (1, 2, 3...) (ou null, só para contas)
+    
+    Responda APENAS com JSON.
+    
+    Exemplos:
+    - "Quero receber minha agenda diária às 8h" →
+      {"tipo": "agenda_diaria", "acao": "configurar", "hora": "08:00", "dias_antes": null}
+    
+    - "Ativar notificação de contas" →
+      {"tipo": "contas_vencer", "acao": "ativar", "hora": null, "dias_antes": null}
+    
+    - "Desligar lembrete de agenda" →
+      {"tipo": "agenda_diaria", "acao": "desativar", "hora": null, "dias_antes": null}
+    
+    - "Avisar 2 dias antes das contas vencerem, às 9h" →
+      {"tipo": "contas_vencer", "acao": "configurar", "hora": "09:00", "dias_antes": 2}
+    

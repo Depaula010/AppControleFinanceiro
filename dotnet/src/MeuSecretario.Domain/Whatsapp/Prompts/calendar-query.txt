@@ -1,0 +1,24 @@
+Analise a pergunta sobre agenda: "⟦MSG⟧"
+    
+    Identifique o período que o usuário quer consultar:
+    - "hoje" → {"period_type": "hoje"}
+    - "amanhã" → {"period_type": "amanha"}
+    - "final de semana" / "fds" → {"period_type": "final_de_semana"}
+    - "esta semana" / "essa semana" → {"period_type": "esta_semana"}
+    - "próxima semana" / "semana que vem" → {"period_type": "proxima_semana"}
+    - "este mês" / "esse mês" / "mês atual" → {"period_type": "este_mes"}
+    - "mês passado" → {"period_type": "mes_passado"}
+    - "próximo mês" / "mês que vem" → {"period_type": "proximo_mes"}
+    
+    ATENÇÃO:
+    - "esse mês", "este mês", "neste mês", "no mês" → SEMPRE "este_mes"
+    - "essa semana", "esta semana", "nesta semana" → SEMPRE "esta_semana"
+    
+    Responda APENAS com JSON.
+    
+    Exemplos CRÍTICOS:
+    - "quais meus compromissos esse mês?" → {"period_type": "este_mes"}
+    - "eventos deste mês" → {"period_type": "este_mes"}
+    - "agenda do mês" → {"period_type": "este_mes"}
+    - "compromissos essa semana" → {"period_type": "esta_semana"}
+    

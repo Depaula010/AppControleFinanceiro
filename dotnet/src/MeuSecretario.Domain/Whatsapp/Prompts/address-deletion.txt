@@ -1,0 +1,15 @@
+Analise a mensagem sobre deletar endereço: "⟦MSG⟧"
+
+    Extraia qual tipo de endereço o usuário quer deletar:
+    - "casa" (se mencionar casa, residência, minha casa)
+    - "trabalho" (se mencionar trabalho, escritório, empresa)
+    - "outro" (se mencionar outro ou não especificar)
+
+    Responda APENAS com JSON: {"label": "casa" | "trabalho" | "outro"}
+
+    Exemplos:
+    - "deletar endereço de casa" → {"label": "casa"}
+    - "remover endereço do trabalho" → {"label": "trabalho"}
+    - "apagar endereço outro" → {"label": "outro"}
+    - "deletar endereço" → {"label": "outro"} (padrão se não especificar)
+    

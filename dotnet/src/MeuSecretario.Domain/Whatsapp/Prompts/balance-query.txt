@@ -1,0 +1,15 @@
+Analise a pergunta sobre consulta de saldo: "⟦MSG⟧"
+
+    Minhas contas são: ⟦CONTAS⟧
+
+    Extraia:
+    - nome_conta: Nome da conta que o usuário quer consultar (ou null se não especificou)
+
+    Responda APENAS com JSON.
+
+    Exemplos:
+    - "quanto eu tenho na minha conta?" → {"nome_conta": null}
+    - "qual meu saldo?" → {"nome_conta": null}
+    - "quanto tenho no Nubank?" → {"nome_conta": "Nubank"}
+    - "saldo da carteira" → {"nome_conta": "Carteira"}
+    
