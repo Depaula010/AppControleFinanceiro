@@ -1,1 +1,7226 @@
-{}
+{
+ "feedback_cases": [
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Padaria",
+    "valor": -50.0,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Padaria\n💵 R$ 50,00 (Nubank)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Salário",
+    "valor": 4500.125,
+    "nome_conta": "Nubank"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Salário\n💵 R$ 4500,12 (Nubank)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": null,
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": null,
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": null,
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": null,
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": null,
+    "valor": -0.005,
+    "nome_conta": "Cartão Inter"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 None\n💵 R$ 0,01 (Cartão Inter)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": null,
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": null,
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": null,
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": null,
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": null,
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ 500,00 🟢\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 500.0,
+    "percentual_usado": 0.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 150,00 🟢\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 150.0,
+    "percentual_usado": 69.99,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Quinzenal):\nRestam: R$ 120,00 🟡\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 120.0,
+    "percentual_usado": 70.0,
+    "periodicidade": "Quinzenal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Anual):\nRestam: R$ 10,01 🟡\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 10.01,
+    "percentual_usado": 89.99,
+    "periodicidade": "Anual"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Mensal):\nRestam: R$ 0,12 🔴\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": 0.125,
+    "percentual_usado": 90.0,
+    "periodicidade": "Mensal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão Inter",
+    "dia_fechamento": 15,
+    "valor_total": 1250.456,
+    "dias_ate_fechar": 3
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n💳 Fatura Cartão Inter:\nR$ 1250,46 (Fecha dia 15)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Cartão",
+    "dia_fechamento": null,
+    "valor_total": 0.0,
+    "dias_ate_fechar": 0
+   },
+   "kind": "credito",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n💳 Fatura Cartão:\nR$ 0,00 (Fecha dia None)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": null,
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": 890.505
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🏦 Saldo Nubank:\nR$ 890,50 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": true,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🎯 Pote Alimentação (Semanal):\nRestam: R$ -250,50 🔴\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  },
+  {
+   "tx": {
+    "descricao": "Tênis",
+    "valor": -1234567.891,
+    "nome_conta": "Carteira"
+   },
+   "pot": {
+    "nome_pote": "Alimentação",
+    "valor_limite": 500.0,
+    "gasto_periodo": 0.0,
+    "saldo_restante": -250.5,
+    "percentual_usado": 150.0,
+    "periodicidade": "Semanal"
+   },
+   "footer": {
+    "nome_conta": "Nubank",
+    "saldo_disponivel": -12.345
+   },
+   "kind": "corrente",
+   "show": false,
+   "text": "✅ Transação Salva!\n📝 Tênis\n💵 R$ 1234567,89 (Carteira)\n\n🏦 Saldo Nubank:\nR$ -12,35 (Disponível)\n"
+  }
+ ],
+ "emoji_cases": [
+  {
+   "pct": 0,
+   "emoji": "🟢"
+  },
+  {
+   "pct": 69.99,
+   "emoji": "🟢"
+  },
+  {
+   "pct": 70,
+   "emoji": "🟡"
+  },
+  {
+   "pct": 89.999,
+   "emoji": "🟡"
+  },
+  {
+   "pct": 90,
+   "emoji": "🔴"
+  },
+  {
+   "pct": 100,
+   "emoji": "🔴"
+  },
+  {
+   "pct": 250,
+   "emoji": "🔴"
+  }
+ ],
+ "alert_cases": [
+  {
+   "row": null,
+   "pct": 0.0,
+   "show": true
+  },
+  {
+   "row": null,
+   "pct": 69.0,
+   "show": true
+  },
+  {
+   "row": null,
+   "pct": 70.0,
+   "show": true
+  },
+  {
+   "row": null,
+   "pct": 95.5,
+   "show": true
+  },
+  {
+   "row": [
+    false,
+    0
+   ],
+   "pct": 0.0,
+   "show": false
+  },
+  {
+   "row": [
+    false,
+    0
+   ],
+   "pct": 69.0,
+   "show": false
+  },
+  {
+   "row": [
+    false,
+    0
+   ],
+   "pct": 70.0,
+   "show": false
+  },
+  {
+   "row": [
+    false,
+    0
+   ],
+   "pct": 95.5,
+   "show": false
+  },
+  {
+   "row": [
+    true,
+    0
+   ],
+   "pct": 0.0,
+   "show": true
+  },
+  {
+   "row": [
+    true,
+    0
+   ],
+   "pct": 69.0,
+   "show": true
+  },
+  {
+   "row": [
+    true,
+    0
+   ],
+   "pct": 70.0,
+   "show": true
+  },
+  {
+   "row": [
+    true,
+    0
+   ],
+   "pct": 95.5,
+   "show": true
+  },
+  {
+   "row": [
+    true,
+    70
+   ],
+   "pct": 0.0,
+   "show": false
+  },
+  {
+   "row": [
+    true,
+    70
+   ],
+   "pct": 69.0,
+   "show": false
+  },
+  {
+   "row": [
+    true,
+    70
+   ],
+   "pct": 70.0,
+   "show": true
+  },
+  {
+   "row": [
+    true,
+    70
+   ],
+   "pct": 95.5,
+   "show": true
+  },
+  {
+   "row": [
+    true,
+    90
+   ],
+   "pct": 0.0,
+   "show": false
+  },
+  {
+   "row": [
+    true,
+    90
+   ],
+   "pct": 69.0,
+   "show": false
+  },
+  {
+   "row": [
+    true,
+    90
+   ],
+   "pct": 70.0,
+   "show": false
+  },
+  {
+   "row": [
+    true,
+    90
+   ],
+   "pct": 95.5,
+   "show": true
+  },
+  {
+   "row": [
+    false,
+    90
+   ],
+   "pct": 0.0,
+   "show": false
+  },
+  {
+   "row": [
+    false,
+    90
+   ],
+   "pct": 69.0,
+   "show": false
+  },
+  {
+   "row": [
+    false,
+    90
+   ],
+   "pct": 70.0,
+   "show": false
+  },
+  {
+   "row": [
+    false,
+    90
+   ],
+   "pct": 95.5,
+   "show": false
+  }
+ ],
+ "mention_names": [
+  {
+   "message": "gastei 50 na padaria",
+   "name": "padaria"
+  },
+  {
+   "message": "paguei 30 com o nubank",
+   "name": "nubank"
+  },
+  {
+   "message": "recebi 100 no itau",
+   "name": "itau"
+  },
+  {
+   "message": "gastei com cartão",
+   "name": "cartão"
+  },
+  {
+   "message": "usando a carteira azul grande pequena",
+   "name": "carteira azul grande pequena"
+  },
+  {
+   "message": "Gastei 20 do Nubank hoje",
+   "name": "nubank hoje"
+  },
+  {
+   "message": "entrou no Nubank salario",
+   "name": "nubank salario"
+  },
+  {
+   "message": "caiu no banco",
+   "name": "banco"
+  },
+  {
+   "message": "oi",
+   "name": null
+  },
+  {
+   "message": "",
+   "name": null
+  },
+  {
+   "message": "gastei 10 pela conta do joao silva santos teixeira",
+   "name": "conta do joao silva"
+  },
+  {
+   "message": "paguei com a conta de luz do mes",
+   "name": "conta de luz do"
+  },
+  {
+   "message": "recebi 500 usando nubank",
+   "name": "nubank"
+  },
+  {
+   "message": "compra na na na",
+   "name": "na na"
+  },
+  {
+   "message": "pelo pela pelo",
+   "name": "pela pelo"
+  },
+  {
+   "message": "gastei 5 da carteira",
+   "name": "carteira"
+  }
+ ]
+}

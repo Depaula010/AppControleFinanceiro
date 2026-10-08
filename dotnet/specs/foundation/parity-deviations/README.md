@@ -135,3 +135,4 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [159](159-whatsapp-drive-erro-especifico.md) | Upload ao Drive: o motivo específico da falha nunca é mostrado | correção | 012 | proposto |
 | [160](160-whatsapp-quitar-conta-fixa-sem-handler.md) | Quitar Conta Fixa está no prompt do Gemini mas não tem ramo | correção | 012 | proposto |
 | [161](161-whatsapp-vencimentos-sem-filtro-de-usuario.md) | Vencimentos comparam a descrição sem filtrar o usuário | correção | 012 | proposto |
+| [170](170-whatsapp-feedback-pote-so-uma-subcategoria.md) | Feedback da transação soma só a subcategoria da transação no pote | correção | 012 | proposto |

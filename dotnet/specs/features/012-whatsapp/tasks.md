@@ -20,13 +20,13 @@ Retomada: o que está `[x]` está commitado; a próxima sub-entrega começa na p
 
 ## 012a — Transações
 
-- [ ] **T10 — Domínio.** `TransactionIntentRules`, `AccountMention`, `FeedbackMessage` contra o Python (AC-012-101 a 103, 107, 115).
-- [ ] **T11 — Leituras.** `IWhatsAppFinanceReader` (contas, categorias, agendamento recorrente, padrão), `IFeedbackReader` (integração Postgres) (AC-012-104, 107, 115).
-- [ ] **T12 — `AccountResolver` e `InvoiceForDate`** (AC-012-105, 107).
-- [ ] **T13 — `ExpenseIntent` e `IncomeIntent`** (AC-012-101 a 106).
-- [ ] **T14 — `TransactionReplyHandler`** (salvar, TROCAR, número, cancelar, parcelada, feedback; desvio 150) (AC-012-110 a 114).
-- [ ] **T15 — `TransferIntent` e `InvoicePaymentIntent`** (AC-012-120, 130).
-- [ ] **T16 — Fechamento da 012a.**
+- [x] **T10 — Domínio.** `TransactionIntentRules`, `AccountMention`, `FeedbackMessage` contra o Python (AC-012-101 a 103, 107, 115).
+- [x] **T11 — Leituras.** `IWhatsAppFinanceReader` (contas, categorias, agendamento recorrente, padrão), `IFeedbackReader` (integração Postgres) (AC-012-104, 107, 115).
+- [x] **T12 — `AccountResolver` e `InvoiceForDate`** (AC-012-105, 107).
+- [x] **T13 — `ExpenseIntent` e `IncomeIntent`** (AC-012-101 a 106).
+- [x] **T14 — `TransactionReplyHandler`** (salvar, TROCAR, número, cancelar, parcelada, feedback; desvio 150) (AC-012-110 a 114).
+- [x] **T15 — `TransferIntent` e `InvoicePaymentIntent`** (AC-012-120, 130).
+- [x] **T16 — Fechamento da 012a.**
 
 ## 012b — Pagamentos
 
