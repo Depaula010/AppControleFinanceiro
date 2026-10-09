@@ -144,7 +144,7 @@ public sealed class GetNotificationSettings(IUserNotificationSettingsRepository 
                 row.EveningEnabled,
                 NotificationDefaults.First5(row.EveningTime),
                 row.FinancialEnabled ?? false,
-                NotificationDefaults.ReadDaysBeforeDue(row.Threshold));
+                NotificationDefaults.ReadDaysBeforeDue(row.DaysBeforeDue));
     }
 }
 

@@ -144,4 +144,4 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [231](231-whatsapp-grafico-saldo-e-filtros.md) | Gráficos: saldo da linha ignora o histórico anterior ao período e filtros inconsistentes | correção | 012 | aprovado |
 | [232](232-whatsapp-comparacao-mensal-sinal-e-formato.md) | Comparação Mensal: totais negativos, variação invertida e números em formato inglês | correção | 012 | aprovado |
 | [233](233-whatsapp-analise-maiores-gastos-invertidos.md) | Análise Inteligente: "Maiores gastos" lista os menores e os dias da semana saem em inglês | correção | 012 | aprovado |
-| [250](250-dias-antes-vencimento-coluna-propria.md) | daysBeforeDue em coluna própria | correção | 007, 013 | aprovado |
+| [250](250-dias-antes-vencimento-coluna-propria.md) | daysBeforeDue em coluna própria | correção | 007, 013 | implementado |

@@ -58,7 +58,7 @@ public sealed record NotificationRow(
     bool EveningEnabled,
     string EveningTime,
     bool? FinancialEnabled,
-    int Threshold);
+    int DaysBeforeDue);
 
 /// <summary>Notificações como a API devolve (horas com 5 caracteres, <c>daysBeforeDue</c> já lido).</summary>
 public sealed record NotificationView(

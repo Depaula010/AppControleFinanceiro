@@ -54,7 +54,11 @@ public class MigrationRunnerTests(PostgresFixture postgres)
 
         var versions = (await connection.QueryAsync<string>("SELECT versao FROM dotnet_migrations ORDER BY versao")).ToList();
 
-        versions.ShouldBe(["0000_baseline", "0001_usuarios_api_key_varchar255", "0020_categorias_globais", "0050_transacoes_observacoes_origem"]);
+        versions.ShouldBe(
+        [
+            "0000_baseline", "0001_usuarios_api_key_varchar255", "0020_categorias_globais", "0050_transacoes_observacoes_origem",
+            "0070_notificationconfigs_dias_antes_vencimento",
+        ]);
     }
 
     [Fact]
@@ -83,7 +87,11 @@ public class MigrationRunnerTests(PostgresFixture postgres)
         // Se o baseline fosse executado, falharia com "relation already exists": o sucesso prova que foi só adotado.
         var processed = await new MigrationRunner(dataSource).RunAsync();
 
-        processed.ShouldBe(["0000_baseline", "0001_usuarios_api_key_varchar255", "0020_categorias_globais", "0050_transacoes_observacoes_origem"]);
+        processed.ShouldBe(
+        [
+            "0000_baseline", "0001_usuarios_api_key_varchar255", "0020_categorias_globais", "0050_transacoes_observacoes_origem",
+            "0070_notificationconfigs_dias_antes_vencimento",
+        ]);
         await using var check = await dataSource.OpenConnectionAsync();
         (await check.ExecuteScalarAsync<int>("SELECT count(*) FROM subcategoria WHERE usuario_id IS NULL")).ShouldBe(61);
         (await check.ExecuteScalarAsync<int>("SELECT count(*) FROM macrocategoria WHERE usuario_id IS NULL")).ShouldBe(18);

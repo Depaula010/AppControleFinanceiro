@@ -38,8 +38,8 @@ public static class NotificationDefaults
     public const string EveningTime = "19:00";
     public const int DaysBeforeDue = 3;
 
-    /// <summary>O zero guardado no banco ("sempre mostrar") é lido como o padrão (<c>or 3</c> do Flask).</summary>
-    public static int ReadDaysBeforeDue(int threshold) => threshold == 0 ? DaysBeforeDue : threshold;
+    /// <summary>O zero guardado é lido como o padrão (<c>or 3</c> do Flask).</summary>
+    public static int ReadDaysBeforeDue(int stored) => stored == 0 ? DaysBeforeDue : stored;
 
     /// <summary>Os 5 primeiros caracteres do texto da hora (<c>07:00:00</c> vira <c>07:00</c>).</summary>
     public static string First5(string time) => time.Length <= 5 ? time : time[..5];
