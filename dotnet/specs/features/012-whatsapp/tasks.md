@@ -52,18 +52,18 @@ Retomada: o que está `[x]` está commitado; a próxima sub-entrega começa na p
 
 ## 012e — Calendário
 
-- [ ] **T28 — Domínio.** `EventMessages`, `AgendaPeriods`, `AgendaTimeFilter`, `SchedulePatterns`, `FreeSlots` + `FreeSlotsMessage` (AC-012-501, 505, 506).
-- [ ] **T29 — Serviços.** `AgendaService`, `FreeTimeFinder` com `ICalendarClient` falso (AC-012-505, 506).
-- [ ] **T30 — Eventos.** `CreateEventIntent`, `EventReplyHandler`, `RouteRequestHandler`, `DeleteEventIntent` (AC-012-501 a 504).
-- [ ] **T31 — `AgendaIntent` e `FreeSlotsIntent`** (AC-012-505, 506).
-- [ ] **T32 — Fechamento da 012e.**
+- [x] **T28 — Domínio.** `EventMessages`, `AgendaPeriods`, `AgendaTimeFilter`, `SchedulePatterns`, `FreeSlots` + `FreeSlotsMessage` (AC-012-501, 505, 506).
+- [x] **T29 — Serviços.** `AgendaService`, `FreeTimeFinder` com `ICalendarClient` falso (AC-012-505, 506).
+- [x] **T30 — Eventos.** `CreateEventIntent`, `EventReplyHandler`, `RouteRequestHandler`, `DeleteEventIntent` (AC-012-501 a 504).
+- [x] **T31 — `AgendaIntent` e `FreeSlotsIntent`** (AC-012-505, 506).
+- [x] **T32 — Fechamento da 012e.** Fixtures do Flask em `whatsapp_sections/012e_calendar.py` (serviços reais com Google falso e relógio congelado), 74 cenários do handler real em `whatsapp_scenarios_efh.py` (`CalendarConfigParityTests`), desvios 062, 053, 055 e 008 aplicados; `Erro ao consultar/deletar/criar evento` sem o motivo (exceto "usuário sem Google conectado"). Divergências: busca para deletar limita a 5 por calendário no código (o cliente da 010 busca 10 e já ordena por início).
 
 ## 012f — Configurações
 
-- [ ] **T33 — Domínio.** `NotificationCommand`, `ReportConfigMessages`, `AddressMessages`, `LocationMessage`, `ApiKeyMessage` (AC-012-601 a 603).
-- [ ] **T34 — Leituras e escritas (integração Postgres).** `IWhatsAppConfigStore` (AC-012-601 a 603).
-- [ ] **T35 — Intenções** `NotificationsIntent`, `LocationIntent`, `MonthlyReportIntent`, `AddressConfigIntent`, `AddressListIntent`, `AddressDeleteIntent`, `ApiKeyIntent` (AC-012-601 a 603).
-- [ ] **T36 — Fechamento da 012f.**
+- [x] **T33 — Domínio.** `NotificationCommand`, `ReportConfigMessages`, `AddressMessages`, `LocationMessage`, `ApiKeyMessage` (AC-012-601 a 603).
+- [x] **T34 — Leituras e escritas (integração Postgres).** `IWhatsAppConfigStore` (AC-012-601 a 603).
+- [x] **T35 — Intenções** `NotificationsIntent`, `LocationIntent`, `MonthlyReportIntent`, `AddressConfigIntent`, `AddressListIntent`, `AddressDeleteIntent`, `ApiKeyIntent` (AC-012-601 a 603).
+- [x] **T36 — Fechamento da 012f.** Fixtures em `whatsapp_sections/012f_config.py` (intenções e serviços reais com banco falso); `NotificationsIntent` reproduz o Flask inclusive o desvio 152 (ramo do Gemini grava e responde 500) e os novos 190 a 192 (propostos, não implementados).
 
 ## 012g — Análises e gráfico
 
@@ -75,8 +75,8 @@ Retomada: o que está `[x]` está commitado; a próxima sub-entrega começa na p
 
 ## 012h — Drive
 
-- [ ] **T42 — `DriveFolderPath` e `DriveUploadIntent`** (AC-012-801, 802).
-- [ ] **T43 — Fechamento da 012h.**
+- [x] **T42 — `DriveFolderPath` e `DriveUploadIntent`** (AC-012-801, 802).
+- [x] **T43 — Fechamento da 012h.** Fixtures em `whatsapp_sections/012h_drive.py` (`UploadDriveIntent` real, 28 textos de pasta, 23 fluxos e 30 casos de `b64decode`); falha do upload responde sempre o texto genérico (desvio 159 proposto).
 
 ## Fechamento da feature
 

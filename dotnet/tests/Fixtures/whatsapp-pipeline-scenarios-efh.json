@@ -1,0 +1,3325 @@
+{
+ "api_key": "chave-de-teste-0123456789abcdef0123456789",
+ "signature_key": "assinatura-de-teste-0123456789abcdef",
+ "number": "5531999990001",
+ "scenarios": [
+  {
+   "name": "evento_confirma_sim",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "sim",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "create_event": [
+     true,
+     "Evento 'Reunião' criado com sucesso!",
+     "g1"
+    ]
+   },
+   "body": {
+    "texto": "sim",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Evento Criado!*\n\n📝 Reunião\nEvento 'Reunião' criado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "CalendarManagementService.create_event"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_event:5531999990001:ab12cd34"
+     ]
+    ],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "evento_confirma_sim",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "Sim",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "create_event": [
+     true,
+     "Evento 'Reunião' criado com sucesso!",
+     "g1"
+    ]
+   },
+   "body": {
+    "texto": "Sim",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Evento Criado!*\n\n📝 Reunião\nEvento 'Reunião' criado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "CalendarManagementService.create_event"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_event:5531999990001:ab12cd34"
+     ]
+    ],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "evento_confirma_confirmar",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": " confirmar ",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "create_event": [
+     true,
+     "Evento 'Reunião' criado com sucesso!",
+     "g1"
+    ]
+   },
+   "body": {
+    "texto": " confirmar ",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Evento Criado!*\n\n📝 Reunião\nEvento 'Reunião' criado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "CalendarManagementService.create_event"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_event:5531999990001:ab12cd34"
+     ]
+    ],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "evento_confirma_confirma",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "confirma",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "create_event": [
+     true,
+     "Evento 'Reunião' criado com sucesso!",
+     "g1"
+    ]
+   },
+   "body": {
+    "texto": "confirma",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Evento Criado!*\n\n📝 Reunião\nEvento 'Reunião' criado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "CalendarManagementService.create_event"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_event:5531999990001:ab12cd34"
+     ]
+    ],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "evento_confirma_ok",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "OK",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "create_event": [
+     true,
+     "Evento 'Reunião' criado com sucesso!",
+     "g1"
+    ]
+   },
+   "body": {
+    "texto": "OK",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Evento Criado!*\n\n📝 Reunião\nEvento 'Reunião' criado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "CalendarManagementService.create_event"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_event:5531999990001:ab12cd34"
+     ]
+    ],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "evento_confirma_s",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "s",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "create_event": [
+     true,
+     "Evento 'Reunião' criado com sucesso!",
+     "g1"
+    ]
+   },
+   "body": {
+    "texto": "s",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Evento Criado!*\n\n📝 Reunião\nEvento 'Reunião' criado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "CalendarManagementService.create_event"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_event:5531999990001:ab12cd34"
+     ]
+    ],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "evento_confirma_falha_da_api",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": "008",
+   "texto": "sim",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "create_event": [
+     false,
+     "Erro ao criar evento: quotaExceeded",
+     null
+    ]
+   },
+   "body": {
+    "texto": "sim",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Erro ao criar evento: quotaExceeded"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "CalendarManagementService.create_event"
+    ],
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "evento_confirma_google_nao_conectado",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "sim",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "create_event": [
+     false,
+     "Erro ao criar evento: Usuário não conectou Google Calendar",
+     null
+    ]
+   },
+   "body": {
+    "texto": "sim",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Erro ao criar evento: Usuário não conectou Google Calendar"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "CalendarManagementService.create_event"
+    ],
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "evento_cancela_não",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "não",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    }
+   },
+   "body": {
+    "texto": "não",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Evento cancelado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_event:5531999990001:ab12cd34"
+     ]
+    ],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "evento_cancela_nao",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "nao",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    }
+   },
+   "body": {
+    "texto": "nao",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Evento cancelado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_event:5531999990001:ab12cd34"
+     ]
+    ],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "evento_cancela_cancelar",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "cancelar",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    }
+   },
+   "body": {
+    "texto": "cancelar",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Evento cancelado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_event:5531999990001:ab12cd34"
+     ]
+    ],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "evento_cancela_cancela",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "cancela",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    }
+   },
+   "body": {
+    "texto": "cancela",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Evento cancelado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_event:5531999990001:ab12cd34"
+     ]
+    ],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "evento_cancela_desistir",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "desistir",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    }
+   },
+   "body": {
+    "texto": "desistir",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Evento cancelado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_event:5531999990001:ab12cd34"
+     ]
+    ],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "evento_cancela_n",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "n",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    }
+   },
+   "body": {
+    "texto": "n",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Evento cancelado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_event:5531999990001:ab12cd34"
+     ]
+    ],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "evento_cancela_não",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "NÃO",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    }
+   },
+   "body": {
+    "texto": "NÃO",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Evento cancelado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_event:5531999990001:ab12cd34"
+     ]
+    ],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "evento_dois_pendentes_pega_o_ultimo",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "sim",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:aaaaaaaa": {
+      "usuario_id": 7,
+      "titulo": "Primeiro",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     },
+     "pending_event:5531999990001:bbbbbbbb": {
+      "usuario_id": 7,
+      "titulo": "Segundo",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "create_event": [
+     true,
+     "Evento 'Segundo' criado com sucesso!",
+     "g2"
+    ]
+   },
+   "body": {
+    "texto": "sim",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Evento Criado!*\n\n📝 Segundo\nEvento 'Segundo' criado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "CalendarManagementService.create_event"
+    ],
+    "redis": {
+     "pending_event:5531999990001:aaaaaaaa": {
+      "usuario_id": 7,
+      "titulo": "Primeiro",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "redis_writes": [
+     [
+      "delete",
+      "pending_event:5531999990001:bbbbbbbb"
+     ]
+    ],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "sim_sem_evento_segue_para_o_gemini",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "sim",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Menu de Ajuda"
+   },
+   "body": {
+    "texto": "sim",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📚 *MENU DE FUNCIONALIDADES* 📚\n\n*💰 GESTÃO FINANCEIRA*\n• _\"gastei 50 em comida\"_ - Registrar despesa\n• _\"recebi 500\"_ - Registrar renda\n• _\"qual meu saldo?\"_ - Consultar saldo das contas\n• _\"quanto gastei hoje/semana/mês?\"_ - Gastos por período\n• _\"meus potes\"_ - Ver limite e gasto dos potes\n• _\"todas as minhas contas\"_ - Listar TODAS as contas recorrentes (pagas ou não)\n• _\"minhas contas fixas\"_ - Ver contas ainda não pagas no mês\n• _\"paguei água\"_ - Quitar conta fixa\n• _\"paguei a internet e comprei pizza de 50\"_ - Quitar múltiplas (híbrido)\n• _\"transferir 100 da carteira para banco\"_ - Transferência\n• _\"paguei 500 da fatura do nubank\"_ - Pagar fatura\n• _\"qual valor da fatura?\"_ - Consultar valor da fatura\n• _\"quanto gastei com comida?\"_ - Gasto por categoria\n• _\"quais contas tenho?\"_ - Listar contas cadastradas\n• _\"quanto de reserva?\"_ - Reserva de emergência (6x média)\n• _\"tenho conta que vence hoje?\"_ - Vencimentos de hoje\n• _\"tenho conta que vence amanhã?\"_ - Vencimentos de amanhã\n• _\"contas que vencem essa semana?\"_ - Vencimentos dos próximos 7 dias\n\n*📅 CALENDÁRIO & AGENDA*\n• _\"minha agenda amanhã\"_ - Ver compromissos\n• _\"criar evento academia amanhã 7h\"_ - Criar evento\n• _\"deletar reunião de hoje\"_ - Remover evento\n• _\"quando estou livre amanhã?\"_ - Horários disponíveis\n\n*📁 GOOGLE DRIVE*\n• _[Envie foto/doc] \"salvar no drive\"_ - Upload para pasta padrão\n• _[Envie foto/doc] \"salvar no drive pasta Notas\"_ - Upload para pasta específica\n• _Formatos aceitos:_ Imagens, PDFs, Docs, Planilhas, Áudio\n\n*📊 ANÁLISES & RELATÓRIOS*\n• _\"analisar meus gastos\"_ - Análise inteligente com IA\n• _\"comparar com mês anterior\"_ - Comparação mensal\n• _\"quanto vou gastar este mês\"_ - Previsão de gastos\n• _\"gráfico de gastos\"_ - Gerar gráfico visual\n\n*⚙️ CONFIGURAÇÕES*\n• _\"ativar resumo matinal\"_ - Configurar notificações\n• _\"configurar localização São Paulo\"_ - Definir cidade\n• _\"configurar relatório mensal\"_ - Agendar relatório\n• _\"configurar endereço casa\"_ - Adicionar endereço\n• _\"meus endereços\"_ - Listar endereços\n• _\"remover endereço casa\"_ - Deletar endereço\n\n*🔑 ACESSO*\n• _\"minha api key\"_ - Exibir chave de integração\n\n💡 *Dica:* Use linguagem natural! Eu entendo suas mensagens."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Menu de Ajuda"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "nao_sem_evento_segue_para_o_gemini",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "não",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Menu de Ajuda"
+   },
+   "body": {
+    "texto": "não",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📚 *MENU DE FUNCIONALIDADES* 📚\n\n*💰 GESTÃO FINANCEIRA*\n• _\"gastei 50 em comida\"_ - Registrar despesa\n• _\"recebi 500\"_ - Registrar renda\n• _\"qual meu saldo?\"_ - Consultar saldo das contas\n• _\"quanto gastei hoje/semana/mês?\"_ - Gastos por período\n• _\"meus potes\"_ - Ver limite e gasto dos potes\n• _\"todas as minhas contas\"_ - Listar TODAS as contas recorrentes (pagas ou não)\n• _\"minhas contas fixas\"_ - Ver contas ainda não pagas no mês\n• _\"paguei água\"_ - Quitar conta fixa\n• _\"paguei a internet e comprei pizza de 50\"_ - Quitar múltiplas (híbrido)\n• _\"transferir 100 da carteira para banco\"_ - Transferência\n• _\"paguei 500 da fatura do nubank\"_ - Pagar fatura\n• _\"qual valor da fatura?\"_ - Consultar valor da fatura\n• _\"quanto gastei com comida?\"_ - Gasto por categoria\n• _\"quais contas tenho?\"_ - Listar contas cadastradas\n• _\"quanto de reserva?\"_ - Reserva de emergência (6x média)\n• _\"tenho conta que vence hoje?\"_ - Vencimentos de hoje\n• _\"tenho conta que vence amanhã?\"_ - Vencimentos de amanhã\n• _\"contas que vencem essa semana?\"_ - Vencimentos dos próximos 7 dias\n\n*📅 CALENDÁRIO & AGENDA*\n• _\"minha agenda amanhã\"_ - Ver compromissos\n• _\"criar evento academia amanhã 7h\"_ - Criar evento\n• _\"deletar reunião de hoje\"_ - Remover evento\n• _\"quando estou livre amanhã?\"_ - Horários disponíveis\n\n*📁 GOOGLE DRIVE*\n• _[Envie foto/doc] \"salvar no drive\"_ - Upload para pasta padrão\n• _[Envie foto/doc] \"salvar no drive pasta Notas\"_ - Upload para pasta específica\n• _Formatos aceitos:_ Imagens, PDFs, Docs, Planilhas, Áudio\n\n*📊 ANÁLISES & RELATÓRIOS*\n• _\"analisar meus gastos\"_ - Análise inteligente com IA\n• _\"comparar com mês anterior\"_ - Comparação mensal\n• _\"quanto vou gastar este mês\"_ - Previsão de gastos\n• _\"gráfico de gastos\"_ - Gerar gráfico visual\n\n*⚙️ CONFIGURAÇÕES*\n• _\"ativar resumo matinal\"_ - Configurar notificações\n• _\"configurar localização São Paulo\"_ - Definir cidade\n• _\"configurar relatório mensal\"_ - Agendar relatório\n• _\"configurar endereço casa\"_ - Adicionar endereço\n• _\"meus endereços\"_ - Listar endereços\n• _\"remover endereço casa\"_ - Deletar endereço\n\n*🔑 ACESSO*\n• _\"minha api key\"_ - Exibir chave de integração\n\n💡 *Dica:* Use linguagem natural! Eu entendo suas mensagens."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Menu de Ajuda"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "cancelar_sem_nada",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "cancelar",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {},
+   "body": {
+    "texto": "cancelar",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não encontrei nada pendente para cancelar.\n\nSe quer deletar um evento específico, diga qual:\nExemplo: 'Deletar academia de hoje'"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "cancelar_com_evento",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "Cancelar",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    }
+   },
+   "body": {
+    "texto": "Cancelar",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Evento cancelado com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "pending_event:5531999990001:ab12cd34"
+     ]
+    ],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "texto_comum_com_evento_pendente_segue",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "quanto gastei?",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "intent": "Menu de Ajuda"
+   },
+   "body": {
+    "texto": "quanto gastei?",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📚 *MENU DE FUNCIONALIDADES* 📚\n\n*💰 GESTÃO FINANCEIRA*\n• _\"gastei 50 em comida\"_ - Registrar despesa\n• _\"recebi 500\"_ - Registrar renda\n• _\"qual meu saldo?\"_ - Consultar saldo das contas\n• _\"quanto gastei hoje/semana/mês?\"_ - Gastos por período\n• _\"meus potes\"_ - Ver limite e gasto dos potes\n• _\"todas as minhas contas\"_ - Listar TODAS as contas recorrentes (pagas ou não)\n• _\"minhas contas fixas\"_ - Ver contas ainda não pagas no mês\n• _\"paguei água\"_ - Quitar conta fixa\n• _\"paguei a internet e comprei pizza de 50\"_ - Quitar múltiplas (híbrido)\n• _\"transferir 100 da carteira para banco\"_ - Transferência\n• _\"paguei 500 da fatura do nubank\"_ - Pagar fatura\n• _\"qual valor da fatura?\"_ - Consultar valor da fatura\n• _\"quanto gastei com comida?\"_ - Gasto por categoria\n• _\"quais contas tenho?\"_ - Listar contas cadastradas\n• _\"quanto de reserva?\"_ - Reserva de emergência (6x média)\n• _\"tenho conta que vence hoje?\"_ - Vencimentos de hoje\n• _\"tenho conta que vence amanhã?\"_ - Vencimentos de amanhã\n• _\"contas que vencem essa semana?\"_ - Vencimentos dos próximos 7 dias\n\n*📅 CALENDÁRIO & AGENDA*\n• _\"minha agenda amanhã\"_ - Ver compromissos\n• _\"criar evento academia amanhã 7h\"_ - Criar evento\n• _\"deletar reunião de hoje\"_ - Remover evento\n• _\"quando estou livre amanhã?\"_ - Horários disponíveis\n\n*📁 GOOGLE DRIVE*\n• _[Envie foto/doc] \"salvar no drive\"_ - Upload para pasta padrão\n• _[Envie foto/doc] \"salvar no drive pasta Notas\"_ - Upload para pasta específica\n• _Formatos aceitos:_ Imagens, PDFs, Docs, Planilhas, Áudio\n\n*📊 ANÁLISES & RELATÓRIOS*\n• _\"analisar meus gastos\"_ - Análise inteligente com IA\n• _\"comparar com mês anterior\"_ - Comparação mensal\n• _\"quanto vou gastar este mês\"_ - Previsão de gastos\n• _\"gráfico de gastos\"_ - Gerar gráfico visual\n\n*⚙️ CONFIGURAÇÕES*\n• _\"ativar resumo matinal\"_ - Configurar notificações\n• _\"configurar localização São Paulo\"_ - Definir cidade\n• _\"configurar relatório mensal\"_ - Agendar relatório\n• _\"configurar endereço casa\"_ - Adicionar endereço\n• _\"meus endereços\"_ - Listar endereços\n• _\"remover endereço casa\"_ - Deletar endereço\n\n*🔑 ACESSO*\n• _\"minha api key\"_ - Exibir chave de integração\n\n💡 *Dica:* Use linguagem natural! Eu entendo suas mensagens."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Menu de Ajuda"
+    ],
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "rota_sem_evento_21",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "calcular rota",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {},
+   "body": {
+    "texto": "calcular rota",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não encontrei nenhum evento pendente de confirmação."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "rota_sem_evento_22",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "Sim, calcular rota",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {},
+   "body": {
+    "texto": "Sim, calcular rota",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não encontrei nenhum evento pendente de confirmação."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "rota_sem_evento_23",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "quero calcular a rota",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {},
+   "body": {
+    "texto": "quero calcular a rota",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não encontrei nenhum evento pendente de confirmação."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "rota_sem_local",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "calcular rota",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": null
+     }
+    }
+   },
+   "body": {
+    "texto": "calcular rota",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Este evento não tem localização definida, não posso calcular tempo de deslocamento."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": null
+     }
+    },
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "rota_local_vazio",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "calcular rota",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": ""
+     }
+    }
+   },
+   "body": {
+    "texto": "calcular rota",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Este evento não tem localização definida, não posso calcular tempo de deslocamento."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": ""
+     }
+    },
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "rota_sem_enderecos",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "calcular rota",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "addresses": []
+   },
+   "body": {
+    "texto": "calcular rota",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Você não tem endereços cadastrados.\n\nConfigure um endereço primeiro:\nExemplo: _'Configurar endereço casa: Av Paulista 1000, São Paulo-SP'_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "UserAddressService.get_user_addresses"
+    ],
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "rota_um_endereco",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "calcular rota",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ],
+    "geocode": [
+     -23.56,
+     -46.65,
+     "Avenida Paulista, 1000, São Paulo"
+    ],
+    "travel": {
+     "duration_minutes": 45,
+     "distance_km": 12.5,
+     "route_summary": null
+    }
+   },
+   "body": {
+    "texto": "calcular rota",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Rota Calculada!*\n\n📍 Origem: 🏠 Casa\n📍 Destino: Avenida Paulista, 1000, São Paulo\n\n⏱️ *Tempo estimado:* 45 minutos\n📏 *Distância:* 12.5 km\n\n💡 Responda *'sim'* para confirmar o evento\nou *'não'* para cancelar"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "UserAddressService.get_user_addresses",
+     "TravelTimeService.geocode_address",
+     "TravelTimeService.calculate_travel_time"
+    ],
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "rota_um_endereco_trabalho",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "calcular rota",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "addresses": [
+     {
+      "label": "trabalho",
+      "endereco": "Av B, 20",
+      "lat": -19.8,
+      "lon": -43.8
+     }
+    ],
+    "geocode": [
+     -23.56,
+     -46.65,
+     "Avenida Paulista, 1000, São Paulo"
+    ],
+    "travel": {
+     "duration_minutes": 45,
+     "distance_km": 12.5,
+     "route_summary": null
+    }
+   },
+   "body": {
+    "texto": "calcular rota",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Rota Calculada!*\n\n📍 Origem: 💼 Trabalho\n📍 Destino: Avenida Paulista, 1000, São Paulo\n\n⏱️ *Tempo estimado:* 45 minutos\n📏 *Distância:* 12.5 km\n\n💡 Responda *'sim'* para confirmar o evento\nou *'não'* para cancelar"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "UserAddressService.get_user_addresses",
+     "TravelTimeService.geocode_address",
+     "TravelTimeService.calculate_travel_time"
+    ],
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "rota_distancia_inteira",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "calcular rota",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ],
+    "geocode": [
+     -23.56,
+     -46.65,
+     "Avenida Paulista, 1000, São Paulo"
+    ],
+    "travel": {
+     "duration_minutes": 5,
+     "distance_km": 10.0,
+     "route_summary": null
+    }
+   },
+   "body": {
+    "texto": "calcular rota",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Rota Calculada!*\n\n📍 Origem: 🏠 Casa\n📍 Destino: Avenida Paulista, 1000, São Paulo\n\n⏱️ *Tempo estimado:* 5 minutos\n📏 *Distância:* 10.0 km\n\n💡 Responda *'sim'* para confirmar o evento\nou *'não'* para cancelar"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "UserAddressService.get_user_addresses",
+     "TravelTimeService.geocode_address",
+     "TravelTimeService.calculate_travel_time"
+    ],
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "rota_destino_sem_rotulo",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "calcular rota",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ],
+    "geocode": [
+     -23.56,
+     -46.65,
+     null
+    ],
+    "travel": {
+     "duration_minutes": 45,
+     "distance_km": 12.5,
+     "route_summary": null
+    }
+   },
+   "body": {
+    "texto": "calcular rota",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Rota Calculada!*\n\n📍 Origem: 🏠 Casa\n📍 Destino: Av Paulista 1000\n\n⏱️ *Tempo estimado:* 45 minutos\n📏 *Distância:* 12.5 km\n\n💡 Responda *'sim'* para confirmar o evento\nou *'não'* para cancelar"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "UserAddressService.get_user_addresses",
+     "TravelTimeService.geocode_address",
+     "TravelTimeService.calculate_travel_time"
+    ],
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "rota_destino_nao_localizado",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "calcular rota",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ],
+    "geocode": [
+     null,
+     null,
+     null
+    ]
+   },
+   "body": {
+    "texto": "calcular rota",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não consegui localizar o destino:\n'Av Paulista 1000'\n\nVerifique se o endereço está completo e tente novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "UserAddressService.get_user_addresses",
+     "TravelTimeService.geocode_address"
+    ],
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "rota_nao_calculada",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "calcular rota",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ],
+    "geocode": [
+     -23.56,
+     -46.65,
+     "Avenida Paulista, 1000, São Paulo"
+    ],
+    "travel": null
+   },
+   "body": {
+    "texto": "calcular rota",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não consegui calcular a rota.\n\nTente novamente mais tarde ou confirme o evento sem cálculo de tempo."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "UserAddressService.get_user_addresses",
+     "TravelTimeService.geocode_address",
+     "TravelTimeService.calculate_travel_time"
+    ],
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "rota_varios_enderecos",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "calcular rota",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     },
+     {
+      "label": "trabalho",
+      "endereco": "Av B, 20",
+      "lat": -19.8,
+      "lon": -43.8
+     },
+     {
+      "label": "outro",
+      "endereco": "Praça C",
+      "lat": -19.7,
+      "lon": -43.7
+     }
+    ]
+   },
+   "body": {
+    "texto": "calcular rota",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🚗 *Qual endereço usar como origem?*\n\n🏠 *Casa*: Rua A, 10, Centro\n💼 *Trabalho*: Av B, 20\n➕ *Outro*: Praça C\n\n💬 Responda com: _'casa'_, _'trabalho'_ ou _'outro'_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "UserAddressService.get_user_addresses"
+    ],
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "rota_sim_nao_confirma",
+   "group": "012e",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "sim, calcular rota",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     },
+     {
+      "label": "trabalho",
+      "endereco": "Av B, 20",
+      "lat": -19.8,
+      "lon": -43.8
+     }
+    ]
+   },
+   "body": {
+    "texto": "sim, calcular rota",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🚗 *Qual endereço usar como origem?*\n\n🏠 *Casa*: Rua A, 10, Centro\n💼 *Trabalho*: Av B, 20\n\n💬 Responda com: _'casa'_, _'trabalho'_ ou _'outro'_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "UserAddressService.get_user_addresses"
+    ],
+    "redis": {
+     "pending_event:5531999990001:ab12cd34": {
+      "usuario_id": 7,
+      "titulo": "Reunião",
+      "data_evento": "2026-10-09",
+      "hora_inicio": "14:00",
+      "hora_fim": null,
+      "descricao": "Pauta",
+      "localizacao": "Av Paulista 1000"
+     }
+    },
+    "redis_writes": [],
+    "notif": null
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "resumo_ativar_com_hora",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ativar resumo matinal às 8h",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "ativar resumo matinal às 8h",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Resumo matinal ativado e horário configurado para 08:00\n\n📱 *Resumo Matinal - Status atual:*\n• Ativo: Sim\n• Horário: 08:00\n\n💡 Configure sua localização para receber informações de clima:\n\"Configurar localização: [Cidade], [Estado]\""
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "08:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "resumo_ativar_sem_hora",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ativar o resumo matinal",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "ativar o resumo matinal",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Resumo matinal ativado\n\n📱 *Resumo Matinal - Status atual:*\n• Ativo: Sim\n• Horário: 07:00\n\n💡 Configure sua localização para receber informações de clima:\n\"Configurar localização: [Cidade], [Estado]\""
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": {
+    "resumo_matinal_ativo": false
+   },
+   "fail_update": false
+  },
+  {
+   "name": "resumo_ligar_com_minutos",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ligar o resumo matinal 7:30",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "ligar o resumo matinal 7:30",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Resumo matinal ativado e horário configurado para 07:30\n\n📱 *Resumo Matinal - Status atual:*\n• Ativo: Sim\n• Horário: 07:30\n\n💡 Configure sua localização para receber informações de clima:\n\"Configurar localização: [Cidade], [Estado]\""
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:30:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "resumo_desativar_vira_ativar",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "desativar resumo matinal",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "desativar resumo matinal",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Resumo matinal ativado\n\n📱 *Resumo Matinal - Status atual:*\n• Ativo: Sim\n• Horário: 07:00\n\n💡 Configure sua localização para receber informações de clima:\n\"Configurar localização: [Cidade], [Estado]\""
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "resumo_desligar_vira_ativar",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "desligar o resumo",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "desligar o resumo",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Resumo matinal ativado\n\n📱 *Resumo Matinal - Status atual:*\n• Ativo: Sim\n• Horário: 07:00\n\n💡 Configure sua localização para receber informações de clima:\n\"Configurar localização: [Cidade], [Estado]\""
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": {
+    "resumo_matinal_ativo": false
+   },
+   "fail_update": false
+  },
+  {
+   "name": "resumo_configurar_hora",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "mudar o resumo matinal para as 9h30",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "mudar o resumo matinal para as 9h30",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Resumo matinal ativado e horário configurado para 09:30\n\n📱 *Resumo Matinal - Status atual:*\n• Ativo: Sim\n• Horário: 09:30\n\n💡 Configure sua localização para receber informações de clima:\n\"Configurar localização: [Cidade], [Estado]\""
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "09:30:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "resumo_configurar_sem_hora",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "resumo matinal",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "resumo matinal",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Resumo matinal ativado\n\n📱 *Resumo Matinal - Status atual:*\n• Ativo: Sim\n• Horário: 06:15\n\n💡 Configure sua localização para receber informações de clima:\n\"Configurar localização: [Cidade], [Estado]\""
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "06:15:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": {
+    "resumo_matinal_ativo": false,
+    "resumo_matinal_hora": "06:15:00"
+   },
+   "fail_update": false
+  },
+  {
+   "name": "resumo_briefing",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "configurar briefing 6h",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "configurar briefing 6h",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Resumo matinal ativado e horário configurado para 06:00\n\n📱 *Resumo Matinal - Status atual:*\n• Ativo: Sim\n• Horário: 06:00\n\n💡 Configure sua localização para receber informações de clima:\n\"Configurar localização: [Cidade], [Estado]\""
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "06:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "resumo_sem_linha_cria",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ativar resumo matinal 8h",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "ativar resumo matinal 8h",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Resumo matinal ativado e horário configurado para 08:00\n\n📱 *Resumo Matinal - Status atual:*\n• Ativo: Sim\n• Horário: 08:00\n\n💡 Configure sua localização para receber informações de clima:\n\"Configurar localização: [Cidade], [Estado]\""
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "08:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "resumo_hora_invalida",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ativar resumo matinal 25h",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "ativar resumo matinal 25h",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 500,
+    "body": {
+     "status": "erro",
+     "resposta": "Erro ao processar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "resumo_minuto_invalido",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "resumo matinal 8:75",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "resumo matinal 8:75",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 500,
+    "body": {
+     "status": "erro",
+     "resposta": "Erro ao processar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "resumo_hora_de_dois_digitos",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "resumo matinal 99h",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "resumo matinal 99h",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 500,
+    "body": {
+     "status": "erro",
+     "resposta": "Erro ao processar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "resumo_banco_falha",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ativar resumo matinal 8h",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "ativar resumo matinal 8h",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Erro ao atualizar configuração: boom segredo"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": true
+  },
+  {
+   "name": "checkin_ativar_com_hora",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ativar check-in noturno às 21h",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "ativar check-in noturno às 21h",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Check-in noturno ativado e horário configurado para 21:00\n\n🌙 *Check-in Noturno - Status atual:*\n• Ativo: Sim\n• Horário: 21:00\n\n💡 O check-in envia uma lista de contas pendentes dos últimos 7 dias.\nVocê pode confirmar todas de uma vez ou parcialmente.\n\n⏰ Horário permitido: 18:00 às 23:00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "21:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "checkin_ativar_sem_hora",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ligar checkin",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "ligar checkin",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Check-in noturno ativado\n\n🌙 *Check-in Noturno - Status atual:*\n• Ativo: Sim\n• Horário: 20:00\n\n💡 O check-in envia uma lista de contas pendentes dos últimos 7 dias.\nVocê pode confirmar todas de uma vez ou parcialmente.\n\n⏰ Horário permitido: 18:00 às 23:00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": {
+    "checkin_noturno_ativo": false
+   },
+   "fail_update": false
+  },
+  {
+   "name": "checkin_desligar_vira_ativar",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "desligar o check-in noturno",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "desligar o check-in noturno",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Check-in noturno ativado\n\n🌙 *Check-in Noturno - Status atual:*\n• Ativo: Sim\n• Horário: 20:00\n\n💡 O check-in envia uma lista de contas pendentes dos últimos 7 dias.\nVocê pode confirmar todas de uma vez ou parcialmente.\n\n⏰ Horário permitido: 18:00 às 23:00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "checkin_off_desativa",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "check-in off",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "check-in off",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Check-in noturno desativado\n\n🌙 *Check-in Noturno - Status atual:*\n• Ativo: Não\n• Horário: 20:00\n\n💡 O check-in envia uma lista de contas pendentes dos últimos 7 dias.\nVocê pode confirmar todas de uma vez ou parcialmente.\n\n⏰ Horário permitido: 18:00 às 23:00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": false,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "checkin_off_com_ativar_ganha_ativar",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ativar checkin off",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "ativar checkin off",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Check-in noturno ativado\n\n🌙 *Check-in Noturno - Status atual:*\n• Ativo: Sim\n• Horário: 20:00\n\n💡 O check-in envia uma lista de contas pendentes dos últimos 7 dias.\nVocê pode confirmar todas de uma vez ou parcialmente.\n\n⏰ Horário permitido: 18:00 às 23:00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "checkin_configurar_hora",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "check in noturno 19:30",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "check in noturno 19:30",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Check-in noturno ativado e horário configurado para 19:30\n\n🌙 *Check-in Noturno - Status atual:*\n• Ativo: Sim\n• Horário: 19:30\n\n💡 O check-in envia uma lista de contas pendentes dos últimos 7 dias.\nVocê pode confirmar todas de uma vez ou parcialmente.\n\n⏰ Horário permitido: 18:00 às 23:00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "19:30:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "checkin_limite_inferior",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "checkin 18h",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "checkin 18h",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Check-in noturno ativado e horário configurado para 18:00\n\n🌙 *Check-in Noturno - Status atual:*\n• Ativo: Sim\n• Horário: 18:00\n\n💡 O check-in envia uma lista de contas pendentes dos últimos 7 dias.\nVocê pode confirmar todas de uma vez ou parcialmente.\n\n⏰ Horário permitido: 18:00 às 23:00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "18:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "checkin_limite_superior",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "checkin 23:00",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "checkin 23:00",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Check-in noturno ativado e horário configurado para 23:00\n\n🌙 *Check-in Noturno - Status atual:*\n• Ativo: Sim\n• Horário: 23:00\n\n💡 O check-in envia uma lista de contas pendentes dos últimos 7 dias.\nVocê pode confirmar todas de uma vez ou parcialmente.\n\n⏰ Horário permitido: 18:00 às 23:00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "23:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "checkin_abaixo_do_limite",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "checkin 17h",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "checkin 17h",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Horário deve estar entre 18:00 e 23:00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "checkin_acima_do_limite",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "checkin 23:30",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "checkin 23:30",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Horário deve estar entre 18:00 e 23:00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "checkin_hora_invalida",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "checkin 24h",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "checkin 24h",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 500,
+    "body": {
+     "status": "erro",
+     "resposta": "Erro ao processar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "checkin_contas_pendentes",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "contas pendentes 22h",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "contas pendentes 22h",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Check-in noturno ativado e horário configurado para 22:00\n\n🌙 *Check-in Noturno - Status atual:*\n• Ativo: Sim\n• Horário: 22:00\n\n💡 O check-in envia uma lista de contas pendentes dos últimos 7 dias.\nVocê pode confirmar todas de uma vez ou parcialmente.\n\n⏰ Horário permitido: 18:00 às 23:00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "22:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "checkin_banco_falha",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ativar checkin 21h",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "ativar checkin 21h",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Erro ao atualizar configuração: boom segredo"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": true
+  },
+  {
+   "name": "resumo_vence_checkin",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "resumo matinal e check-in noturno 8h",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "resumo matinal e check-in noturno 8h",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Resumo matinal ativado e horário configurado para 08:00\n\n📱 *Resumo Matinal - Status atual:*\n• Ativo: Sim\n• Horário: 08:00\n\n💡 Configure sua localização para receber informações de clima:\n\"Configurar localização: [Cidade], [Estado]\""
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "08:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "sem_linha_checkin_cria",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "check-in noturno 21h",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações"
+   },
+   "body": {
+    "texto": "check-in noturno 21h",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Check-in noturno ativado e horário configurado para 21:00\n\n🌙 *Check-in Noturno - Status atual:*\n• Ativo: Sim\n• Horário: 21:00\n\n💡 O check-in envia uma lista de contas pendentes dos últimos 7 dias.\nVocê pode confirmar todas de uma vez ou parcialmente.\n\n⏰ Horário permitido: 18:00 às 23:00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "21:00:00"
+    }
+   },
+   "notif_initial": "none",
+   "fail_update": false
+  },
+  {
+   "name": "gemini_agenda_ativar_grava_e_quebra",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "configurar notificação",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações",
+    "returns": {
+     "gemini_service.extract_notification_config": {
+      "tipo": "agenda_diaria",
+      "acao": "ativar",
+      "hora": null,
+      "dias_antes": null
+     }
+    }
+   },
+   "body": {
+    "texto": "configurar notificação",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 500,
+    "body": {
+     "status": "erro",
+     "resposta": "Erro ao processar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "gemini_service.extract_notification_config"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": {
+    "resumo_matinal_ativo": false
+   },
+   "fail_update": false
+  },
+  {
+   "name": "gemini_agenda_desativar_grava_e_quebra",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "configurar notificação",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações",
+    "returns": {
+     "gemini_service.extract_notification_config": {
+      "tipo": "agenda_diaria",
+      "acao": "desativar"
+     }
+    }
+   },
+   "body": {
+    "texto": "configurar notificação",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 500,
+    "body": {
+     "status": "erro",
+     "resposta": "Erro ao processar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "gemini_service.extract_notification_config"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": false,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "gemini_agenda_configurar_grava_e_quebra",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "configurar notificação",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações",
+    "returns": {
+     "gemini_service.extract_notification_config": {
+      "tipo": "agenda_diaria",
+      "acao": "configurar",
+      "hora": "08:30"
+     }
+    }
+   },
+   "body": {
+    "texto": "configurar notificação",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 500,
+    "body": {
+     "status": "erro",
+     "resposta": "Erro ao processar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "gemini_service.extract_notification_config"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "08:30:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "gemini_agenda_hora_invalida",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "configurar notificação",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações",
+    "returns": {
+     "gemini_service.extract_notification_config": {
+      "tipo": "agenda_diaria",
+      "acao": "configurar",
+      "hora": "8h"
+     }
+    }
+   },
+   "body": {
+    "texto": "configurar notificação",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 500,
+    "body": {
+     "status": "erro",
+     "resposta": "Erro ao processar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "gemini_service.extract_notification_config"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "gemini_agenda_acao_desconhecida",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "configurar notificação",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações",
+    "returns": {
+     "gemini_service.extract_notification_config": {
+      "tipo": "agenda_diaria",
+      "acao": "apagar"
+     }
+    }
+   },
+   "body": {
+    "texto": "configurar notificação",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Ação não reconhecida"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "gemini_service.extract_notification_config"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "gemini_agenda_banco_falha",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "configurar notificação",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações",
+    "returns": {
+     "gemini_service.extract_notification_config": {
+      "tipo": "agenda_diaria",
+      "acao": "ativar"
+     }
+    }
+   },
+   "body": {
+    "texto": "configurar notificação",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Erro ao atualizar configuração: boom segredo"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "gemini_service.extract_notification_config"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": true
+  },
+  {
+   "name": "gemini_contas_ativar_quebra_sem_gravar",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "configurar notificação",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações",
+    "returns": {
+     "gemini_service.extract_notification_config": {
+      "tipo": "contas_vencer",
+      "acao": "ativar"
+     }
+    }
+   },
+   "body": {
+    "texto": "configurar notificação",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 500,
+    "body": {
+     "status": "erro",
+     "resposta": "Erro ao processar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "gemini_service.extract_notification_config"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "gemini_contas_configurar_quebra_sem_gravar",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "configurar notificação",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações",
+    "returns": {
+     "gemini_service.extract_notification_config": {
+      "tipo": "contas_vencer",
+      "acao": "configurar",
+      "hora": "09:00",
+      "dias_antes": 2
+     }
+    }
+   },
+   "body": {
+    "texto": "configurar notificação",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 500,
+    "body": {
+     "status": "erro",
+     "resposta": "Erro ao processar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "gemini_service.extract_notification_config"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "gemini_contas_acao_desconhecida",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "configurar notificação",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações",
+    "returns": {
+     "gemini_service.extract_notification_config": {
+      "tipo": "contas_vencer",
+      "acao": "x"
+     }
+    }
+   },
+   "body": {
+    "texto": "configurar notificação",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Ação não reconhecida"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "gemini_service.extract_notification_config"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "gemini_tipo_desconhecido",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "configurar notificação",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações",
+    "returns": {
+     "gemini_service.extract_notification_config": {
+      "tipo": "outra",
+      "acao": "ativar"
+     }
+    }
+   },
+   "body": {
+    "texto": "configurar notificação",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Não entendi qual tipo de notificação você quer configurar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "gemini_service.extract_notification_config"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  },
+  {
+   "name": "gemini_tipo_nulo",
+   "group": "012f",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "configurar notificação",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Configurar Notificações",
+    "returns": {
+     "gemini_service.extract_notification_config": {
+      "tipo": null,
+      "acao": null
+     }
+    }
+   },
+   "body": {
+    "texto": "configurar notificação",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Não entendi qual tipo de notificação você quer configurar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "gemini_service.extract_notification_config"
+    ],
+    "redis": {},
+    "redis_writes": [],
+    "notif": {
+     "resumo_matinal_ativo": true,
+     "resumo_matinal_hora": "07:00:00",
+     "alertas_financeiros_ativos": true,
+     "checkin_noturno_ativo": true,
+     "checkin_noturno_hora": "20:00:00"
+    }
+   },
+   "notif_initial": "default",
+   "fail_update": false
+  }
+ ]
+}

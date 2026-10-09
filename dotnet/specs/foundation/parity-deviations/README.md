@@ -136,3 +136,6 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [160](160-whatsapp-quitar-conta-fixa-sem-handler.md) | Quitar Conta Fixa está no prompt do Gemini mas não tem ramo | correção | 012 | proposto |
 | [161](161-whatsapp-vencimentos-sem-filtro-de-usuario.md) | Vencimentos comparam a descrição sem filtrar o usuário | correção | 012 | proposto |
 | [170](170-whatsapp-feedback-pote-so-uma-subcategoria.md) | Feedback da transação soma só a subcategoria da transação no pote | correção | 012 | proposto |
+| [190](190-whatsapp-desativar-notificacao-vira-ativar.md) | Desativar resumo matinal ou check-in por WhatsApp ativa | correção | 012 | proposto |
+| [191](191-whatsapp-notificacoes-contas-vencer-metodo-inexistente.md) | Configurar Notificações (Gemini, contas_vencer) chama método que não existe | correção | 012 | proposto |
+| [192](192-whatsapp-deletar-evento-quando-qualquer-valor-vira-amanha.md) | Deletar Evento: qualquer valor de `quando` diferente de `hoje` vira amanhã | correção | 012 | proposto |
