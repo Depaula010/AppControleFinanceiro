@@ -45,13 +45,13 @@ public class CalendarAlertServiceTests
 
     [Fact]
     [Trait("AC", "014-40")]
-    public async Task Upcoming_AsksGoogleForTheThirtySecondWindowAroundTheTarget_InSaoPauloOffset()
+    public async Task Upcoming_AsksGoogleForTheWindowFromSixtySecondsBeforeToThirtyAfterTheTarget_InSaoPauloOffset()
     {
         Events("primary");
 
         await _service.GetUpcomingEventsAsync(UserId, 1, CancellationToken.None);
 
-        var expectedStart = new DateTimeOffset(2026, 10, 5, 17, 59, 50, TimeSpan.FromHours(-3));
+        var expectedStart = new DateTimeOffset(2026, 10, 5, 17, 59, 20, TimeSpan.FromHours(-3));
         var expectedEnd = new DateTimeOffset(2026, 10, 5, 18, 0, 50, TimeSpan.FromHours(-3));
         await _calendar.Received(1).ListEventsAsync(
             UserId,
@@ -74,6 +74,37 @@ public class CalendarAlertServiceTests
         var events = await _service.GetUpcomingEventsAsync(UserId, 1, CancellationToken.None);
 
         events.ShouldBe([new UpcomingEvent("a", "Reunião", "2026-10-05T18:00:00-03:00", "Sala 2", string.Empty, "Pessoal")]);
+    }
+
+    [Fact]
+    [Trait("AC", "014-48")]
+    public async Task Upcoming_SeesTheEventTheLastCycleMissed_AndDropsLongEventsStartedBeforeTheWindow()
+    {
+        // Desvio 121: alvo 18:00:20. 17:59:21 é do ciclo anterior (perdido); 18:00:50 é a fronteira inclusiva.
+        // O Google filtra pelo FIM do evento: um evento longo que começou às 17:30 também volta e é descartado.
+        Events(
+            "primary",
+            Timed("perdido", "Perdido", "2026-10-05T17:59:21-03:00"),
+            Timed("borda", "Borda", "2026-10-05T18:00:50-03:00"),
+            Timed("fora", "Fora", "2026-10-05T18:00:51-03:00"),
+            Timed("longo", "Longo", "2026-10-05T17:59:20-03:00"));
+
+        var events = await _service.GetUpcomingEventsAsync(UserId, 1, CancellationToken.None);
+
+        events.Select(e => e.Id).ShouldBe(["perdido", "borda"]);
+    }
+
+    [Fact]
+    [Trait("AC", "014-48")]
+    public async Task Process_TheEventMissedByTheLastCycle_IsAlertedOnce_ThenTheClaimBlocksIt()
+    {
+        Events("primary", Timed("perdido", "Perdido", "2026-10-05T17:59:21-03:00"));
+
+        var first = await _service.ProcessAlertsForUserAsync(UserId, Number, 1, CancellationToken.None);
+        var second = await _service.ProcessAlertsForUserAsync(UserId, Number, 1, CancellationToken.None);
+
+        first.ShouldBe(1);
+        second.ShouldBe(0);
     }
 
     [Fact]

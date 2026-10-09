@@ -20,14 +20,15 @@ public sealed class CalendarAlertService(
     private const string ClaimValue = "processing";
     private const string NoCalendarName = "Sem nome";
 
-    /// <summary>Eventos com horário que começam na janela alvo ± 30 s e ainda não começaram (RN-014-11 e 12).</summary>
+    /// <summary>Eventos com horário que começam na janela (alvo - 60 s, alvo + 30 s] e ainda não começaram (RN-014-11 e 12).</summary>
     public async Task<IReadOnlyList<UpcomingEvent>> GetUpcomingEventsAsync(
         int userId, int minutesBefore, CancellationToken cancellationToken)
     {
         try
         {
             var now = TimeZoneInfo.ConvertTime(clock.UtcNow, clock.TimeZone);
-            var (windowStart, windowEnd) = AlertWindow.For(now, minutesBefore);
+            var window = AlertWindow.For(now, minutesBefore);
+            var (windowStart, windowEnd) = window;
 
             var calendars = await calendar.ListSelectedCalendarsAsync(userId, cancellationToken);
             var upcoming = new List<UpcomingEvent>();
@@ -48,7 +49,7 @@ public sealed class CalendarAlertService(
                 var calendarName = string.IsNullOrEmpty(selected.Summary) ? NoCalendarName : selected.Summary;
                 foreach (var item in events)
                 {
-                    if (!item.AllDay && AlertMessage.TryParseIso(item.Start, out var start) && start > now)
+                    if (!item.AllDay && AlertMessage.TryParseIso(item.Start, out var start) && start > now && AlertWindow.Contains(window, start))
                     {
                         upcoming.Add(new UpcomingEvent(item.Id, item.Summary, item.Start, item.Location, item.Description, calendarName));
                     }

@@ -68,17 +68,12 @@ public class CalendarAlertRulesTests
 
     [Fact]
     [Trait("AC", "014-28")]
-    public void IsActivationRequested_FollowsPythonTruthiness()
+    public void ParseActive_FalsyNonBooleansAreInvalidToo()
     {
-        CalendarAlertRules.IsActivationRequested(RawValue.Bool(true)).ShouldBeTrue();
-        CalendarAlertRules.IsActivationRequested(RawValue.Whole(2)).ShouldBeTrue();
-        CalendarAlertRules.IsActivationRequested(RawValue.Text("abc")).ShouldBeTrue();
-        CalendarAlertRules.IsActivationRequested(new ListValue(1)).ShouldBeTrue();
-        CalendarAlertRules.IsActivationRequested(RawValue.Bool(false)).ShouldBeFalse();
-        CalendarAlertRules.IsActivationRequested(RawValue.Whole(0)).ShouldBeFalse();
-        CalendarAlertRules.IsActivationRequested(RawValue.Text(string.Empty)).ShouldBeFalse();
-        CalendarAlertRules.IsActivationRequested(RawValue.Null).ShouldBeFalse();
-        CalendarAlertRules.IsActivationRequested(RawValue.Absent).ShouldBeFalse();
+        // Desvio 120: 0 e "" não são booleanos JSON (o Flask os tratava como falsos e os passava ao banco).
+        CalendarAlertRules.ParseActive(RawValue.Whole(0)).State.ShouldBe(FieldState.Invalid);
+        CalendarAlertRules.ParseActive(RawValue.Text(string.Empty)).State.ShouldBe(FieldState.Invalid);
+        CalendarAlertRules.ParseActive(RawValue.Text("false")).State.ShouldBe(FieldState.Invalid);
     }
 
     [Theory]

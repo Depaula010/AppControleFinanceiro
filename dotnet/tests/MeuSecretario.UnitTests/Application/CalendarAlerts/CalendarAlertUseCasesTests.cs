@@ -130,23 +130,29 @@ public class CalendarAlertUseCasesTests
 
     [Fact]
     [Trait("AC", "014-27")]
-    public async Task Config_NonBooleanActive_IsRejectedAsUpdateFailed_AfterTheGoogleCheck()
+    public async Task Config_NonBooleanActive_IsRejectedAsInvalidActive_BeforeGoogleAndBeforeCreatingTheRow()
     {
-        var result = await Update().ExecuteAsync(UserId, Body(("ativo", RawValue.Text("abc"))), CancellationToken.None);
+        // Desvio 120: texto "true"/"false" também é recusado.
+        foreach (var value in new[] { RawValue.Text("abc"), RawValue.Text("true"), RawValue.Whole(1) })
+        {
+            var result = await Update().ExecuteAsync(UserId, Body(("ativo", value)), CancellationToken.None);
 
-        RejectionOf(result).ShouldBe(AlertRejection.UpdateFailed);
-        await _google.Received(1).IsConnectedAsync(UserId, Arg.Any<CancellationToken>());
+            RejectionOf(result).ShouldBe(AlertRejection.InvalidActive);
+        }
+
+        await _google.DidNotReceiveWithAnyArgs().IsConnectedAsync(default, default);
+        await _repository.DidNotReceiveWithAnyArgs().GetOrCreateAsync(default, default);
         await _repository.DidNotReceiveWithAnyArgs().UpdateAsync(default, default, default, default);
     }
 
     [Fact]
     [Trait("AC", "014-28")]
-    public async Task Config_FalsyNonBooleanActive_SkipsGoogleAndFails()
+    public async Task Config_FalsyNonBooleanActive_SkipsGoogleAndIsInvalidActive()
     {
         var result = await Update().ExecuteAsync(
             UserId, Body(("ativo", RawValue.Whole(0)), ("minutos_antes", RawValue.Whole(3))), CancellationToken.None);
 
-        RejectionOf(result).ShouldBe(AlertRejection.UpdateFailed);
+        RejectionOf(result).ShouldBe(AlertRejection.InvalidActive);
         await _google.DidNotReceiveWithAnyArgs().IsConnectedAsync(default, default);
     }
 

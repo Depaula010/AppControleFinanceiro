@@ -27,3 +27,4 @@ Regra: cada tarefa termina com testes verdes e um commit; testes primeiro, códi
 ## Fechamento
 
 - [x] **T9 — Contrato e desvios.** Revisar cada resposta contra o Python lido; spec §10 preenchida; build sem warnings e testes verdes; relatório com os arquivos compartilhados tocados.
+- [x] **T-D — Desvios 120 a 122 implementados** (2026-10-09): `ativo` estrito, janela `(alvo - 60 s, alvo + 30 s]`, filtro `usuarios.ativo`; AC-014-27, 28, 40, 47 e 48.
