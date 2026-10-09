@@ -9,8 +9,8 @@ using MeuSecretario.Domain.Transactions;
 namespace MeuSecretario.Application.Automation;
 
 /// <summary>
-/// Falha que o Flask deixa subir como exceção (500): quebra do <c>float()</c>, conta ausente, lançamento recusado. O texto
-/// nunca vai ao cliente nem ao log (desvio 008); só o tipo.
+/// Falha que o Flask deixa subir como exceção (500): lançamento recusado, resposta ilegível do Gemini. O texto nunca vai ao
+/// cliente nem ao log (desvio 008); só o tipo. As entradas inválidas do cliente não passam por aqui: viram 400 (desvio 097).
 /// </summary>
 public sealed class AutomationFailureException(string reason) : Exception(reason);
 
@@ -46,6 +46,9 @@ public abstract record AutomateResult
     public sealed record MissingData : AutomateResult;
 
     public sealed record Unauthorized : AutomateResult;
+
+    /// <summary>Entrada inválida (desvio 097): 400 com a mensagem em português.</summary>
+    public sealed record Invalid(string Message) : AutomateResult;
 
     /// <summary>Gravada direto (Redis fora ou pendência não gravada): <c>{"status":"sucesso"}</c>.</summary>
     public sealed record Saved : AutomateResult;
@@ -89,7 +92,10 @@ public sealed class ProcessAutomateNotification(
             return new AutomateResult.Unauthorized();
         }
 
-        var text = input.Text ?? throw new AutomationFailureException("texto não é texto");
+        if (input.Text is not { } text)
+        {
+            return new AutomateResult.Invalid(InputMessages.NotText("texto"));
+        }
 
         var raw = await llm.GenerateTextAsync(new LlmRequest(AutomationPrompts.ExtractFromNotification(text), user.UserId), cancellationToken);
         if (string.IsNullOrEmpty(raw))
@@ -97,12 +103,30 @@ public sealed class ProcessAutomateNotification(
             throw new LlmException("Falha na extração (Automate): Resposta vazia do Gemini.");
         }
 
-        var extraction = NotificationParser.Parse(raw) ?? throw new AutomationFailureException("extração inválida");
+        var parsed = NotificationParser.Parse(raw);
+        if (parsed is NotificationParse.InvalidFlow)
+        {
+            return new AutomateResult.Invalid(InputMessages.InvalidFlow);
+        }
+
+        if (parsed is NotificationParse.InvalidValue)
+        {
+            return new AutomateResult.Invalid(InputMessages.InvalidNotificationValue);
+        }
+
+        if (parsed is not NotificationParse.Ok { Extraction: var extraction })
+        {
+            throw new AutomationFailureException("extração ilegível");
+        }
+
         var today = clock.Today;
 
         var accounts = await lookups.ListActiveAccountsAsync(user.UserId, cancellationToken);
-        var account = AutomateChoice.ChooseAccount(text, extraction.FlowType, accounts)
-                      ?? throw new AutomationFailureException("usuário sem contas ativas");
+        var account = AutomateChoice.ChooseAccount(text, extraction.FlowType, accounts);
+        if (account is null)
+        {
+            return new AutomateResult.Invalid(InputMessages.NoActiveAccount);
+        }
 
         var category = await categorizer.CategorizeAsync(user.UserId, extraction.IsIncome, extraction.Description, extraction.FlowType, cancellationToken);
 
@@ -161,6 +185,9 @@ public abstract record ApiTransactionResult
 
     public sealed record Unauthorized : ApiTransactionResult;
 
+    /// <summary>Campo de texto que não é texto (desvio 097): 400 com a mensagem em português.</summary>
+    public sealed record Invalid(string Message) : ApiTransactionResult;
+
     public sealed record AccountNotFound(string Name) : ApiTransactionResult;
 
     /// <summary>Redis fora: gravada direto, com a mensagem "(Redis indisponivel)".</summary>
@@ -201,8 +228,8 @@ public sealed class RegisterApiTransaction(
         var parsed = ApiTransactionInput.Parse(root);
         switch (parsed)
         {
-            case ApiTransactionParse.UnexpectedType:
-                throw new AutomationFailureException("campo de texto com tipo inesperado");
+            case ApiTransactionParse.UnexpectedType unexpected:
+                return new ApiTransactionResult.Invalid(InputMessages.NotText(unexpected.Field));
             case ApiTransactionParse.Missing missing:
                 return new ApiTransactionResult.Missing(missing.Fields);
             case ApiTransactionParse.InvalidValue invalid:
@@ -270,6 +297,9 @@ public abstract record SmsPaymentResult
 
     public sealed record Unauthorized : SmsPaymentResult;
 
+    /// <summary>Entrada inválida (desvio 097): 400 com a mensagem em português.</summary>
+    public sealed record Invalid(string Message) : SmsPaymentResult;
+
     public sealed record Settled(string BillDescription, int TransactionId) : SmsPaymentResult;
 
     public sealed record Registered : SmsPaymentResult;
@@ -280,7 +310,6 @@ public sealed class ProcessSmsPayment(
     IDatabaseHealth health,
     IUserApiKeyAuthenticator authenticator,
     IAutomationLookups lookups,
-    ILlmClient llm,
     TransactionCategorizer categorizer,
     DirectPoster poster,
     IBotClient bot,
@@ -311,77 +340,63 @@ public sealed class ProcessSmsPayment(
             return new SmsPaymentResult.Unauthorized();
         }
 
+        // Desvio 097: o que o Flask deixava virar 500 (ou gravar lixo) agora é 400, sem tocar o banco.
         var date = clock.Today;
         if (PyJsonValue.IsTruthy(dateText) && !PyIsoDate.TryParse(dateText!.Value, out date))
         {
-            throw new AutomationFailureException("data_pagamento inválida");
+            return new SmsPaymentResult.Invalid(InputMessages.InvalidPaymentDate);
         }
 
         if (description!.Value.ValueKind != JsonValueKind.String)
         {
-            throw new AutomationFailureException("descricao_pagamento não é texto");
+            return new SmsPaymentResult.Invalid(InputMessages.NotText("descricao_pagamento"));
         }
+
+        // Desvio 098: o valor é convertido uma vez (texto numérico serve) e o número vale em todo o fluxo.
+        var parsedAmount = PaymentAmount.Parse(amount!.Value);
+        if (parsedAmount is AmountParse.Invalid invalidAmount)
+        {
+            return new SmsPaymentResult.Invalid(InputMessages.InvalidValue(invalidAmount.Reason));
+        }
+
+        var value = ((AmountParse.Ok)parsedAmount).Value;
 
         var paymentDescription = description.Value.GetString()!;
         var bills = await lookups.ListFixedBillsAsync(user.UserId, cancellationToken);
         var match = BillMatching.FindBest(BillMatching.CleanDescription(paymentDescription), bills);
 
         return match is not null
-            ? await SettleAsync(user, match, amount!.Value, date, cancellationToken)
-            : await RegisterLooseAsync(user, paymentDescription, amount!.Value, paymentAccount!.Value, date, cancellationToken);
+            ? await SettleAsync(user, match, value, date, cancellationToken)
+            : await RegisterLooseAsync(user, paymentDescription, value, paymentAccount!.Value, date, cancellationToken);
     }
 
     private async Task<SmsPaymentResult> SettleAsync(
-        AutomationUser user, FixedBill match, JsonElement amount, DateOnly date, CancellationToken cancellationToken)
+        AutomationUser user, FixedBill match, double value, DateOnly date, CancellationToken cancellationToken)
     {
-        var value = ToValue(amount);
         var target = await lookups.FindSettleTargetAsync(user.UserId, match.ScheduleId, cancellationToken)
                      ?? throw new AutomationFailureException("agendamento não encontrado");
 
         var posted = await poster.PostAsync(
             user.UserId, target.AccountId, target.SubcategoryId, TransactionKind.Expense, value, target.Description, date, cancellationToken);
 
-        await bot.SendTextAsync(
-            user.WhatsApp, AutomationTexts.BillSettled(match.Description, FormatPaid(amount), match.Category), cancellationToken);
+        await bot.SendTextAsync(user.WhatsApp, AutomationTexts.BillSettled(match.Description, MoneyText.Brl(value), match.Category), cancellationToken);
         return new SmsPaymentResult.Settled(match.Description, posted.TransactionId);
     }
 
     private async Task<SmsPaymentResult> RegisterLooseAsync(
-        AutomationUser user, string description, JsonElement amount, JsonElement paymentAccount, DateOnly date, CancellationToken cancellationToken)
+        AutomationUser user, string description, double value, JsonElement paymentAccount, DateOnly date, CancellationToken cancellationToken)
     {
-        // O Flask chama o Gemini e ignora o resultado; a falha dele derruba a rota (desvio 096).
-        var raw = await llm.GenerateTextAsync(
-            new LlmRequest(
-                AutomationPrompts.ExtractTransactionDetails($"Paguei {PyJsonValue.Str(amount)} de {description}", TransactionTypes.Expense),
-                user.UserId,
-                LlmCachePolicies.ExtractTransaction),
-            cancellationToken);
-        _ = LlmJson.Parse(raw);
-
+        // Desvio 096: o Flask chamava o Gemini (extract_transaction_details) e ignorava o resultado; a chamada saiu. Só a
+        // categorização usa a IA.
         var category = await categorizer.CategorizeAsync(user.UserId, income: false, description, TransactionTypes.Expense, cancellationToken);
         var accountId = await lookups.FindAccountIdWithFallbackAsync(user.UserId, "Carteira", cancellationToken)
                         ?? throw new AutomationFailureException("usuário sem contas ativas");
 
         var accountText = PyJsonValue.Str(paymentAccount);
         await poster.PostAsync(
-            user.UserId, accountId, category.CategoryId, TransactionKind.Expense, ToValue(amount), $"{description} ({accountText})", date, cancellationToken);
+            user.UserId, accountId, category.CategoryId, TransactionKind.Expense, value, $"{description} ({accountText})", date, cancellationToken);
 
-        await bot.SendTextAsync(user.WhatsApp, AutomationTexts.SmsRegistered(description, FormatPaid(amount), accountText), cancellationToken);
+        await bot.SendTextAsync(user.WhatsApp, AutomationTexts.SmsRegistered(description, MoneyText.Brl(value), accountText), cancellationToken);
         return new SmsPaymentResult.Registered();
     }
-
-    /// <summary><c>float(valor_pago)</c>: o que o <c>float()</c> recusa, ou que o banco não guarda, derruba a rota.</summary>
-    private static double ToValue(JsonElement amount) =>
-        PyJsonValue.ToFloat(amount) is FloatConversion.Ok ok && double.IsFinite(ok.Value)
-            ? ok.Value
-            : throw new AutomationFailureException("valor_pago inválido");
-
-    /// <summary>
-    /// <c>formatar_moeda(valor_pago)</c> com o valor como veio: texto numérico grava mas falha ao formatar, depois do
-    /// <c>commit</c> (500 sem aviso; desvio 098).
-    /// </summary>
-    private static string FormatPaid(JsonElement amount) =>
-        amount.ValueKind == JsonValueKind.String
-            ? throw new AutomationFailureException("formatar_moeda recebeu texto")
-            : MoneyText.Brl(((FloatConversion.Ok)PyJsonValue.ToFloat(amount)).Value);
 }

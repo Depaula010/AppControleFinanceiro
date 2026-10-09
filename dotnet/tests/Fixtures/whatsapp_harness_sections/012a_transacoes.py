@@ -158,7 +158,7 @@ sys.modules["app.services"].finance_service = FINANCE
 stub_module("app.services.finance_service", get_user_accounts=FINANCE.get_user_accounts)  # from app.services.finance_service import ...
 handler_ns["finance_service"] = FINANCE
 
-_fb_ns = load("fixed_bills_service.py", source("services", "fixed_bills_service.py"))
+_fb_ns = load("fixed_bills_service.py", source_fixed_bills(), {"_fold099": _fold099})
 _aq_ns = load("agendamentos_queries.py", source("services", "queries", "agendamentos_queries.py"))
 stub_module("app.services.queries")
 stub_module("app.services.queries.agendamentos_queries", AgendamentosQueries=_aq_ns["AgendamentosQueries"])

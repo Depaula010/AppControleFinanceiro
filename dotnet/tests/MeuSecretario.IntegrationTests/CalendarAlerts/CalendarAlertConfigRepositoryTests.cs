@@ -88,7 +88,8 @@ public sealed class CalendarAlertConfigRepositoryTests(PostgresFixture postgres)
         var needsReconnect = await _env.InsertUserAsync("5511900000002", "Bia");
         var noToken = await _env.InsertUserAsync("5511900000003", "Caio");
         var inactiveConfig = await _env.InsertUserAsync("5511900000004", "Duda");
-        foreach (var id in new[] { withToken, needsReconnect, noToken })
+        var inactiveUser = await _env.InsertUserAsync("5511900000005", "Edu");
+        foreach (var id in new[] { withToken, needsReconnect, noToken, inactiveUser })
         {
             await _repository.GetOrCreateAsync(id, CancellationToken.None);
             await _repository.UpdateAsync(id, true, id == withToken ? 5 : 1, CancellationToken.None);
@@ -98,6 +99,9 @@ public sealed class CalendarAlertConfigRepositoryTests(PostgresFixture postgres)
         await AddTokenAsync(withToken, needsReconnect: false);
         await AddTokenAsync(needsReconnect, needsReconnect: true);
         await AddTokenAsync(inactiveConfig, needsReconnect: false);
+        await AddTokenAsync(inactiveUser, needsReconnect: false);
+        // Desvio 122: usuário desativado com alerta ligado e Google conectado não recebe mais alertas.
+        await _env.ExecuteAsync("UPDATE usuarios SET ativo = false WHERE id = @inactiveUser", new { inactiveUser });
 
         var users = await _repository.ListUsersWithActiveAlertsAsync(CancellationToken.None);
 

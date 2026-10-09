@@ -5,16 +5,25 @@ namespace MeuSecretario.Domain.CalendarAlerts;
 /// <summary>Evento que deve gerar alerta (RN-014-12). <paramref name="Start"/> é o texto <c>dateTime</c> do Google, como veio.</summary>
 public sealed record UpcomingEvent(string Id, string Summary, string Start, string Location, string Description, string CalendarName);
 
-/// <summary>Janela de busca do ciclo: alvo (agora + minutos) ± 30 s (RN-014-11).</summary>
+/// <summary>
+/// Janela de busca do ciclo: <c>(alvo - 60 s, alvo + 30 s]</c>, com alvo = agora + minutos (RN-014-11, desvio 121). Os 60 s
+/// para trás deixam o ciclo seguinte ver o evento que o anterior perdeu (o claim de 2 h evita o aviso repetido).
+/// </summary>
 public static class AlertWindow
 {
-    public static readonly TimeSpan Half = TimeSpan.FromSeconds(30);
+    public static readonly TimeSpan Before = TimeSpan.FromSeconds(60);
+
+    public static readonly TimeSpan After = TimeSpan.FromSeconds(30);
 
     public static (DateTimeOffset Start, DateTimeOffset End) For(DateTimeOffset now, int minutesBefore)
     {
         var target = now.AddMinutes(minutesBefore);
-        return (target - Half, target + Half);
+        return (target - Before, target + After);
     }
+
+    /// <summary>Início do evento dentro da janela: limite inferior exclusivo, superior inclusivo.</summary>
+    public static bool Contains((DateTimeOffset Start, DateTimeOffset End) window, DateTimeOffset eventStart) =>
+        eventStart > window.Start && eventStart <= window.End;
 }
 
 /// <summary>Leitura do horário ISO 8601 do Google e texto do alerta (RN-014-12 e RN-014-14).</summary>

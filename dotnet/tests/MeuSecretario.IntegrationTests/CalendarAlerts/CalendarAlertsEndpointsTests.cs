@@ -279,15 +279,19 @@ public sealed class CalendarAlertsEndpointsTests(PostgresFixture postgres) : IAs
     [Theory]
     [Trait("AC", "014-27")]
     [InlineData("\"abc\"")]
+    [InlineData("\"true\"")]
+    [InlineData("\"false\"")]
     [InlineData("1")]
     [InlineData("[]")]
-    public async Task Config_NonBooleanActive_Is400FixedText_AndNothingChanges(string ativo)
+    public async Task Config_NonBooleanActive_Is400WithItsOwnText_AndNothingChanges(string ativo)
     {
+        // Desvio 120.
         var (status, body) = await Config($$"""{"ativo":{{ativo}}}""");
 
         status.ShouldBe(HttpStatusCode.BadRequest);
-        body.ShouldBe(Err("Erro ao atualizar configuração"));
-        (await _env.Http.ScalarAsync<bool>("SELECT alertas_tarefas_ativo FROM calendaralertconfigs WHERE usuario_id = @_user", new { _user })).ShouldBeFalse();
+        body.ShouldBe(Err("ativo deve ser true ou false"));
+        _env.Google.Calls.ShouldBe(0);
+        (await _env.Http.ScalarAsync<int>("SELECT count(*)::int FROM calendaralertconfigs WHERE alertas_tarefas_ativo")).ShouldBe(0);
     }
 
     [Fact]

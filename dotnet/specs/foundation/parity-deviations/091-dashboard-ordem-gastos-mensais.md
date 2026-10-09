@@ -1,6 +1,6 @@
 # Desvio 091 — Dashboard: gastos mensais em ordem decrescente de mês
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 006, 2026-10-09)
 - **Features afetadas:** 006
 - **Severidade:** correção
 

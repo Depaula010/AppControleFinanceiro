@@ -37,10 +37,7 @@ public static class CalendarAlertRules
         _ => new MinutesCheck(FieldState.Invalid, 0),
     };
 
-    /// <summary>O <c>if ativo:</c> do Python: decide se a rota consulta o Google antes de gravar.</summary>
-    public static bool IsActivationRequested(RawValue value) => PyTruth.IsTruthy(value);
-
-    /// <summary>Só <c>true</c>/<c>false</c> JSON valem (desvio 120 propõe o contrato estrito; hoje é a divergência Q-014-3).</summary>
+    /// <summary>Só <c>true</c>/<c>false</c> JSON valem (desvio 120).</summary>
     public static ActiveCheck ParseActive(RawValue value) => value switch
     {
         RawValue.AbsentValue or RawValue.NullValue => new ActiveCheck(FieldState.Absent, false),

@@ -41,14 +41,14 @@ public class NotificationsEndpointsTests(PostgresFixture postgres) : IAsyncLifet
     {
         await _env.ExecuteAsync(
             """
-            INSERT INTO notificationconfigs (usuario_id, resumo_matinal_hora, checkin_noturno_hora, alertas_financeiros_ativos, alerta_potes_threshold)
+            INSERT INTO notificationconfigs (usuario_id, resumo_matinal_hora, checkin_noturno_hora, alertas_financeiros_ativos, dias_antes_vencimento)
             VALUES (@_user, '08:30', '21:15:00', NULL, 0)
             """, new { _user });
 
         (await _env.Get(_user, Path)).Body.ShouldBe(SettingsEnv.Data(
             """{"morningBriefing":{"enabled":true,"time":"08:30"},"eveningCheckIn":{"enabled":true,"time":"21:15"},"financialAlerts":{"enabled":false,"daysBeforeDue":3}}"""));
 
-        await _env.ExecuteAsync("UPDATE notificationconfigs SET alerta_potes_threshold = 7, resumo_matinal_hora = '07:00:30.5' WHERE usuario_id = @_user", new { _user });
+        await _env.ExecuteAsync("UPDATE notificationconfigs SET dias_antes_vencimento = 7, resumo_matinal_hora = '07:00:30.5' WHERE usuario_id = @_user", new { _user });
         var body = (await _env.Get(_user, Path)).Body;
         body.ShouldContain("\"daysBeforeDue\":7");
         body.ShouldContain("\"time\":\"07:00\"");
@@ -161,8 +161,33 @@ public class NotificationsEndpointsTests(PostgresFixture postgres) : IAsyncLifet
     {
         (await _env.Put(_user, Path, $$$"""{"financialAlerts":{"daysBeforeDue":{{{sent}}}}}""")).Status.ShouldBe(HttpStatusCode.OK);
 
-        (await _env.ScalarAsync<int>("SELECT alerta_potes_threshold FROM notificationconfigs WHERE usuario_id = @_user", new { _user })).ShouldBe(sent);
+        (await _env.ScalarAsync<int>("SELECT dias_antes_vencimento FROM notificationconfigs WHERE usuario_id = @_user", new { _user })).ShouldBe(sent);
         (await _env.Get(_user, Path)).Body.ShouldContain($"\"daysBeforeDue\":{read}");
+    }
+
+    [Fact]
+    [Trait("AC", "007-48")]
+    public async Task Put_DaysBeforeDue_NeverTouchesThePotThreshold_Desvio250()
+    {
+        await _env.ExecuteAsync(
+            "INSERT INTO notificationconfigs (usuario_id, alerta_potes_threshold) VALUES (@_user, 70)", new { _user });
+
+        (await _env.Put(_user, Path, AngularBody)).Status.ShouldBe(HttpStatusCode.OK);
+
+        (await _env.ScalarAsync<int>("SELECT alerta_potes_threshold FROM notificationconfigs WHERE usuario_id = @_user", new { _user })).ShouldBe(70);
+        (await _env.ScalarAsync<int>("SELECT dias_antes_vencimento FROM notificationconfigs WHERE usuario_id = @_user", new { _user })).ShouldBe(7);
+        (await _env.Get(_user, Path)).Body.ShouldContain("\"daysBeforeDue\":7");
+    }
+
+    [Fact]
+    [Trait("AC", "007-48")]
+    public async Task Get_ExistingRowWithoutTheNewValue_ReadsTheColumnDefaultNotThePotThreshold_Desvio250()
+    {
+        // Linha antiga (como a produção, com o 1 do bug em alerta_potes_threshold): a migration não copia o valor.
+        await _env.ExecuteAsync(
+            "INSERT INTO notificationconfigs (usuario_id, alerta_potes_threshold) VALUES (@_user, 1)", new { _user });
+
+        (await _env.Get(_user, Path)).Body.ShouldContain("\"daysBeforeDue\":3");
     }
 
     [Theory]

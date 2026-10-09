@@ -1,6 +1,6 @@
-# Desvio 121 — Alertas de calendário: a janela de ±30 s perde o aviso se o ciclo atrasa
+﻿# Desvio 121 — Alertas de calendário: a janela de ±30 s perde o aviso se o ciclo atrasa
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 014, 2026-10-09; no 121 só a janela de busca, o intervalo do job é da 013)
 - **Features afetadas:** 014 (e 013, que agenda o job)
 - **Severidade:** correção
 

@@ -1,6 +1,6 @@
 # Desvio 090 — Dashboard: janela dos gastos mensais começa no meio de um mês
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 006, 2026-10-09)
 - **Features afetadas:** 006
 - **Severidade:** correção
 

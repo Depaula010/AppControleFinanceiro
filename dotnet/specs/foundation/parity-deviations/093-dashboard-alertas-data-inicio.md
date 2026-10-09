@@ -1,6 +1,6 @@
 # Desvio 093 — Dashboard: alertas MENSAL e ANUAL ignoram data_inicio
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 006, 2026-10-09)
 - **Features afetadas:** 006
 - **Severidade:** correção
 

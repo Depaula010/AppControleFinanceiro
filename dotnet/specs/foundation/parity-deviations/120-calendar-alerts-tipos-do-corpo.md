@@ -1,6 +1,6 @@
 # Desvio 120 — Alertas de calendário: tipos do corpo de /config e /ativar
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 014, 2026-10-09)
 - **Features afetadas:** 014
 - **Severidade:** correção
 

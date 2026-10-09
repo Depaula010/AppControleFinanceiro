@@ -36,7 +36,7 @@ public static class AutomationMessages
 
     public static string MissingFields(IEnumerable<string> fields) => "Campos obrigatorios faltando: " + string.Join(", ", fields);
 
-    public static string InvalidValue(string reason) => "Valor invalido: " + reason;
+    public static string InvalidValue(string reason) => InputMessages.InvalidValue(reason);
 
     public static string InvalidPaymentType() => "tipo_pagamento invalido. Use: " + PaymentType.ValidList;
 

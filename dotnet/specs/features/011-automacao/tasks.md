@@ -33,3 +33,4 @@ Regra: cada tarefa termina com testes verdes e commit. Teste primeiro (vermelho)
 - [x] **T18 — Desvios e spec.** Criar `parity-deviations/096` a `102` (estado `proposto`), atualizar `README` dos desvios (e marcar `003`, `005`, `014`, `025`, `039`: parte 011 implementada); spec atualizada para `implementada`; build sem warnings e `dotnet test dotnet/MeuSecretario.slnx` verde.
 
 Definição de pronto: `constitution.md` §10.
+- [x] **T19 — Desvios 096 a 101 implementados** (2026-10-09): Gemini inútil removido do SMS, entradas inválidas em 400, `valor_pago` texto, casamento sem caixa/acento, emoji `💳`, `SAVEPOINT` por agendamento; fixtures e harness do Python ajustados (`generate_automation_fixtures.py`, `whatsapp_handler_harness.py`). O 102 foi adiado.

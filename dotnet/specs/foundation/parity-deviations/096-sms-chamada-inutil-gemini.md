@@ -1,6 +1,6 @@
 # Desvio 096 — SMS: remover a chamada inútil ao Gemini
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 011, 2026-10-09)
 - **Features afetadas:** 011
 - **Severidade:** correção
 

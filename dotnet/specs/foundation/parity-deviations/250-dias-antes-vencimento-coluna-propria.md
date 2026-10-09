@@ -1,6 +1,6 @@
 # Desvio 250 — daysBeforeDue em coluna própria
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 007, 2026-10-09)
 - **Features afetadas:** 007, 013
 - **Severidade:** correção
 

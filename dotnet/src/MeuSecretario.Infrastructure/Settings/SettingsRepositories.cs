@@ -146,7 +146,7 @@ public sealed class UserNotificationSettingsRepository(IDbConnectionFactory conn
             """
             SELECT resumo_matinal_ativo AS MorningEnabled, resumo_matinal_hora::text AS MorningTime,
                    checkin_noturno_ativo AS EveningEnabled, checkin_noturno_hora::text AS EveningTime,
-                   alertas_financeiros_ativos AS FinancialEnabled, alerta_potes_threshold AS Threshold
+                   alertas_financeiros_ativos AS FinancialEnabled, dias_antes_vencimento AS DaysBeforeDue
             FROM notificationconfigs WHERE usuario_id = @userId
             """,
             new { userId },
@@ -157,12 +157,12 @@ public sealed class UserNotificationSettingsRepository(IDbConnectionFactory conn
     {
         await using var connection = await connections.OpenAsync(cancellationToken);
 
-        // P-007-1 rejeitada: daysBeforeDue continua gravado em alerta_potes_threshold (paridade).
+        // Desvio 250: daysBeforeDue tem coluna própria; alerta_potes_threshold (limiar do pote) não é mais tocado.
         await connection.ExecuteAsync(new CommandDefinition(
             """
             INSERT INTO notificationconfigs
                    (usuario_id, resumo_matinal_ativo, resumo_matinal_hora, checkin_noturno_ativo, checkin_noturno_hora,
-                    alertas_financeiros_ativos, alerta_potes_threshold)
+                    alertas_financeiros_ativos, dias_antes_vencimento)
             VALUES (@userId, @morningEnabled, CAST(@morningTime AS time), @eveningEnabled, CAST(@eveningTime AS time),
                     @financialEnabled, @daysBeforeDue)
             ON CONFLICT (usuario_id) DO UPDATE SET
@@ -171,7 +171,7 @@ public sealed class UserNotificationSettingsRepository(IDbConnectionFactory conn
                 checkin_noturno_ativo = EXCLUDED.checkin_noturno_ativo,
                 checkin_noturno_hora = EXCLUDED.checkin_noturno_hora,
                 alertas_financeiros_ativos = EXCLUDED.alertas_financeiros_ativos,
-                alerta_potes_threshold = EXCLUDED.alerta_potes_threshold,
+                dias_antes_vencimento = EXCLUDED.dias_antes_vencimento,
                 updated_at = now()
             """,
             new

@@ -1,6 +1,6 @@
 # Desvio 095 — Dashboard: receita aparece como conta a vencer
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 006, 2026-10-09)
 - **Features afetadas:** 006
 - **Severidade:** correção
 

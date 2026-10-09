@@ -2,8 +2,12 @@ using System.Globalization;
 
 namespace MeuSecretario.Domain.Automation;
 
-/// <summary>Estatísticas de <c>process_invoice_schedules</c> (spec 011 §7.7).</summary>
-public sealed record InvoiceScheduleStats(int Processed, int Fixed, int Installments, int Reminders, IReadOnlyList<InvoiceScheduleDetail> Details)
+/// <summary>
+/// Estatísticas de <c>process_invoice_schedules</c> (spec 011 §7.7). <paramref name="Errors"/> conta os agendamentos que
+/// falharam e foram desfeitos sozinhos (SAVEPOINT por agendamento, desvio 101); os demais seguem gravados.
+/// </summary>
+public sealed record InvoiceScheduleStats(
+    int Processed, int Fixed, int Installments, int Reminders, IReadOnlyList<InvoiceScheduleDetail> Details, int Errors = 0)
 {
     public static InvoiceScheduleStats Empty { get; } = new(0, 0, 0, 0, []);
 }

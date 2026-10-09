@@ -60,7 +60,7 @@ CHECKs: `chk_parcelado`; `chk_anual_mes` (ANUAL exige `mes_execucao`; os demais 
 - **Nenhum INSERT/UPDATE no código**: potes são criados direto no banco. Só leitura.
 
 ### Configuração por usuário (1:1)
-- `notificationconfigs`: usuario_id UNIQUE; resumo_matinal_ativo, resumo_matinal_hora time default 07:00; alertas_financeiros_ativos bool S; checkin_noturno_ativo, checkin_noturno_hora time (default 19:00 no dump; 20:00 no código); alerta_potes_ativo; alerta_potes_threshold int (0/50/70/90).
+- `notificationconfigs`: usuario_id UNIQUE; `dias_antes_vencimento` int NOT NULL default 3 (migration 0070, desvio 250: antecedência da tela; `alerta_potes_threshold` é só o limiar de % do pote); resumo_matinal_ativo, resumo_matinal_hora time default 07:00; alertas_financeiros_ativos bool S; checkin_noturno_ativo, checkin_noturno_hora time (default 19:00 no dump; 20:00 no código); alerta_potes_ativo; alerta_potes_threshold int (0/50/70/90).
 - `monthlyreportconfigs`: **PK = usuario_id**; ativo; momento_envio (`INICIO_MES`/`FIM_MES`); hora_envio; created/updated_at **timestamp sem timezone**.
 - `calendaralertconfigs`: usuario_id UNIQUE; alertas_tarefas_ativo bool default false; minutos_antes int default 1 (CHECK 1–60).
 - `googlecalendartokens`: usuario_id UNIQUE; access_token text; refresh_token text; token_expiry timestamptz; scopes; needs_reconnect bool. **Provavelmente em texto puro** (nenhuma chamada de criptografia no serviço).

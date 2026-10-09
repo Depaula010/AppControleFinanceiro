@@ -111,7 +111,21 @@ public class AutomationResponsesTests
 
         status.ShouldBe(200);
         json.ShouldBe(
-            """{"status":"sucesso","fatura_id":5,"cartao":"Cartão Inter","vencimento":"05/04/2026","status_fatura":"Aberta","stats":{"total_processados":2,"fixos":1,"parcelados":0,"lembretes":1,"detalhes":[{"tipo":"FIXO","descricao":"Netflix","valor":"49.90"},{"tipo":"LEMBRETE_VARIAVEL","descricao":"Variável","valor":0}]}}""");
+            """{"status":"sucesso","fatura_id":5,"cartao":"Cartão Inter","vencimento":"05/04/2026","status_fatura":"Aberta","stats":{"total_processados":2,"fixos":1,"parcelados":0,"lembretes":1,"erros":0,"detalhes":[{"tipo":"FIXO","descricao":"Netflix","valor":"49.90"},{"tipo":"LEMBRETE_VARIAVEL","descricao":"Variável","valor":0}]}}""");
+    }
+
+    [Fact]
+    [Trait("AC", "011-126")]
+    public async Task Reprocessed_ReportsTheSchedulesThatFailed()
+    {
+        // Desvio 101: o 200 só conta o que foi gravado e stats ganha a contagem de erros.
+        var stats = new InvoiceScheduleStats(1, 1, 0, 0, [new InvoiceScheduleDetail("FIXO", "Netflix", "49.90")], 2);
+        var result = new ReprocessInvoiceResult.Processed(new ReprocessTarget(5, 3, "Cartão Inter", new DateOnly(2026, 4, 5), "Aberta"), stats);
+
+        var (status, json) = await ResultRunner.Run(AutomationResponses.Reprocessed(result));
+
+        status.ShouldBe(200);
+        json.ShouldContain("\"total_processados\":1,\"fixos\":1,\"parcelados\":0,\"lembretes\":0,\"erros\":2,");
     }
 
     [Fact]

@@ -71,18 +71,18 @@ UPDATE chavesapiusuario SET ativo = false, atualizado_em = now() WHERE usuario_i
 -- NotificationSettingsRepository
 SELECT resumo_matinal_ativo, resumo_matinal_hora::text AS resumo_matinal_hora,
        checkin_noturno_ativo, checkin_noturno_hora::text AS checkin_noturno_hora,
-       alertas_financeiros_ativos, alerta_potes_threshold
+       alertas_financeiros_ativos, dias_antes_vencimento
 FROM notificationconfigs WHERE usuario_id = @uid;
 
 INSERT INTO notificationconfigs
        (usuario_id, resumo_matinal_ativo, resumo_matinal_hora, checkin_noturno_ativo, checkin_noturno_hora,
-        alertas_financeiros_ativos, alerta_potes_threshold)
+        alertas_financeiros_ativos, dias_antes_vencimento)
 VALUES (@uid, @matAtivo, CAST(@matHora AS time), @notAtivo, CAST(@notHora AS time), @finAtivo, @threshold)
 ON CONFLICT (usuario_id) DO UPDATE SET
     resumo_matinal_ativo = EXCLUDED.resumo_matinal_ativo, resumo_matinal_hora = EXCLUDED.resumo_matinal_hora,
     checkin_noturno_ativo = EXCLUDED.checkin_noturno_ativo, checkin_noturno_hora = EXCLUDED.checkin_noturno_hora,
     alertas_financeiros_ativos = EXCLUDED.alertas_financeiros_ativos,
-    alerta_potes_threshold = EXCLUDED.alerta_potes_threshold, updated_at = now();
+    dias_antes_vencimento = EXCLUDED.dias_antes_vencimento, updated_at = now();
 
 -- FavoriteAddressRepository
 SELECT id, label, endereco_completo AS address, latitude, longitude
@@ -145,7 +145,7 @@ Detalhes:
 ## 7. Riscos e decisões
 
 - **Hora do resumo matinal sem validação.** O contrato reproduz o Flask (aceita o que o PostgreSQL aceita; erro vira 500). A confiança de "mesma aceitação do Postgres" vem do `CAST(@x AS time)`; um teste de tabela com ~15 formatos (`7:30`, `07:00:15`, `7pm`, `25:00`, `abc`, `""`, `24:00`) fixa o comportamento.
-- **`daysBeforeDue` × `alerta_potes_threshold` (P-007-1).** Se a 013/012 passarem a ler `alerta_potes_threshold`, o valor da tela de configurações (1 a 30) será interpretado como percentual do pote. Registrar na 013 antes de implementar os alertas de pote.
+- **`daysBeforeDue` (desvio 250, implementado).** Coluna própria `dias_antes_vencimento` (migration `0070`); `alerta_potes_threshold` deixou de ser sobrescrito e ficou só para o limiar de pote da 012/013.
 - **PUT total de notificações.** Um cliente que mande só um bloco zera os outros para os padrões; o Angular manda tudo. Reproduzido; qualquer cliente novo precisa ler antes de escrever.
 - **Coordenadas apagadas pelo site (P-007-4).** Enquanto não aprovada, editar um endereço pelo site apaga lat/lng do WhatsApp; a 012 deve tratar `lat/lng` nulos (geocodificar sob demanda).
 - **Transação da chave.** O `PUT` usa uma conexão/transação própria (não reutiliza os repositórios da 008); se a 008 mudar a regra de preferência (ex.: exigir chave para `usar_chave_propria = true`), a 007 não herda. Ver Q-007-1.

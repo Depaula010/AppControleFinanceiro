@@ -1,3 +1,6 @@
+using System.Globalization;
+using System.Text;
+
 namespace MeuSecretario.Domain.Automation;
 
 /// <summary>Conta fixa ativa candidata à quitação por SMS (<c>find_matching_bill</c>).</summary>
@@ -10,7 +13,7 @@ public sealed record FixedBill(
     int AccountId,
     string Category);
 
-/// <summary>Casamento difuso da descrição do SMS com as contas fixas (<c>fixed_bills_service.py:80-145</c>, spec 011 §7.3).</summary>
+/// <summary>Casamento difuso da descrição do SMS com as contas fixas (<c>fixed_bills_service.py:80-145</c>, spec 011 §7.3; desvio 099).</summary>
 public static class BillMatching
 {
     public const double Threshold = 65;
@@ -55,7 +58,41 @@ public static class BillMatching
             byDescription[bill.Description] = bill;
         }
 
-        var match = FuzzyScorer.ExtractOne(cleanedDescription, order, Threshold);
-        return match is null ? null : byDescription[match.Choice];
+        // Desvio 099: o rapidfuzz 3.x é sensível à caixa e aos acentos; os dois lados são minúsculos e sem acento antes do WRatio.
+        // Mesma regra do extractOne (a primeira com a maior nota que alcança o corte).
+        var query = Fold(cleanedDescription);
+        string? best = null;
+        var bestScore = 0.0;
+        foreach (var description in order)
+        {
+            var score = FuzzyScorer.WRatio(query, Fold(description));
+            if (score >= Threshold && (best is null || score > bestScore))
+            {
+                best = description;
+                bestScore = score;
+                if (score >= 100)
+                {
+                    break;
+                }
+            }
+        }
+
+        return best is null ? null : byDescription[best];
+    }
+
+    /// <summary>Minúsculas e sem acentos (decomposição Unicode sem as marcas): <c>Água</c> vira <c>agua</c>.</summary>
+    public static string Fold(string text)
+    {
+        var decomposed = text.ToLowerInvariant().Normalize(NormalizationForm.FormD);
+        var sb = new StringBuilder(decomposed.Length);
+        foreach (var ch in decomposed)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark)
+            {
+                sb.Append(ch);
+            }
+        }
+
+        return sb.ToString().Normalize(NormalizationForm.FormC);
     }
 }

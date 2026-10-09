@@ -11,8 +11,11 @@ public static class ChartsWindow
 
     public static DateOnly NextMonthStart(DateOnly today) => MonthStart(today).AddMonths(1);
 
-    /// <summary><c>date(hoje.year, hoje.month, 1) - timedelta(days=30 * meses_analise)</c> (desvio 090 propõe outra janela).</summary>
-    public static DateOnly MonthlyStart(DateOnly today, int months) => MonthStart(today).AddDays(-30 * months);
+    /// <summary>
+    /// Desvio 090: dia 1 do mês de <c>hoje - (meses - 1)</c> meses, isto é, <c>meses</c> meses civis completos incluindo o
+    /// atual (o Flask usava <c>dia 1 do mês - 30 * meses</c> dias, que deixava o primeiro mês parcial).
+    /// </summary>
+    public static DateOnly MonthlyStart(DateOnly today, int months) => MonthStart(today).AddMonths(-(months - 1));
 
     /// <summary><c>CURRENT_DATE - INTERVAL '90 days'</c>, com a data de São Paulo.</summary>
     public static DateOnly WeekdayStart(DateOnly today) => today.AddDays(-90);

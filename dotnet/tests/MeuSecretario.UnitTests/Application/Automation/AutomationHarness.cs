@@ -130,7 +130,7 @@ internal sealed class AutomationHarness
     public RegisterApiTransaction ApiTransaction =>
         new(Settings, Auth, Lookups, Categorizer, InvoiceResolver, new BudgetValidator(Budget), Cache, Pending, Poster, Bot, Clock);
 
-    public ProcessSmsPayment Sms => new(Health, Auth, Lookups, Llm, Categorizer, Poster, Bot, Clock);
+    public ProcessSmsPayment Sms => new(Health, Auth, Lookups, Categorizer, Poster, Bot, Clock);
 
     /// <summary>Corpo JSON do atalho/SMS a partir de texto.</summary>
     public static JsonElement Json(string json)

@@ -205,7 +205,8 @@ fake_redis = FakeRedis()
 stub_module("app.services.redis_service", redis_service=fake_redis)
 sys.modules["app.services"].finance_service = types.ModuleType("finance_service")
 stub_module("app.utils", formatar_moeda=lambda v: "R$ %s" % v)
-confirmation = load("transaction_confirmation_service.py", source("services", "transaction_confirmation_service.py"))
+# Desvio 100: o emoji do cartao chegou corrompido (U+FFFD) no arquivo do Flask; o .NET usa o emoji do cartao.
+confirmation = load("transaction_confirmation_service.py", source("services", "transaction_confirmation_service.py").replace("\ufffd", "\U0001F4B3"))
 Confirmation = confirmation["TransactionConfirmationService"]
 
 # redefine o redis do modulo carregado

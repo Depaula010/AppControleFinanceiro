@@ -1,8 +1,8 @@
 # Tasks 006 — Dashboard
 
-Regra: cada tarefa termina com testes verdes e um commit; testes primeiro, código depois. Pré-requisito: spec aprovada por delegação (só paridade e desvios 001/007/008/009; 089 a 095 propostos e **não** implementados). Sem edição de `Program.cs`, `PostgresFixture`, `DependencyInjection.cs` nem `Directory.*.props`. Comandos: `dotnet build dotnet/MeuSecretario.slnx` e `dotnet test dotnet/MeuSecretario.slnx`. Sem migration.
+Regra: cada tarefa termina com testes verdes e um commit; testes primeiro, código depois. Pré-requisito: spec aprovada por delegação (paridade e desvios 001/007/008/009; 090 a 095 implementados em 2026-10-09, 089 rejeitado). Sem edição de `Program.cs`, `PostgresFixture`, `DependencyInjection.cs` nem `Directory.*.props`. Comandos: `dotnet build dotnet/MeuSecretario.slnx` e `dotnet test dotnet/MeuSecretario.slnx`. Sem migration.
 
-- [x] **T0 — Spec, plan, tasks e desvios 089 a 095** (estado `proposto`) e linhas no `parity-deviations/README.md`.
+- [x] **T0 — Spec, plan, tasks e desvios 089 a 095** e linhas no `parity-deviations/README.md`.
 
 ## Domain
 
@@ -26,3 +26,4 @@ Regra: cada tarefa termina com testes verdes e um commit; testes primeiro, códi
 ## Fechamento
 
 - [x] **T8 — Contrato e desvios.** Revisar cada resposta contra o Python lido; spec §10 preenchida; build sem warnings e testes verdes; relatório com os arquivos compartilhados tocados.
+- [x] **T-D — Desvios 090 a 095 implementados** (2026-10-09): janela e ordem mensais, top 10 por maior gasto, alertas com `data_inicio`, conta paga e sem receita; testes AC-006-35 e 70 a 74.

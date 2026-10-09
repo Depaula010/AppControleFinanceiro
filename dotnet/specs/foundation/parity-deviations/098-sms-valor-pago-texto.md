@@ -1,6 +1,6 @@
 # Desvio 098 — SMS: valor_pago como texto numérico deve funcionar
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 011, 2026-10-09)
 - **Features afetadas:** 011
 - **Severidade:** correção
 

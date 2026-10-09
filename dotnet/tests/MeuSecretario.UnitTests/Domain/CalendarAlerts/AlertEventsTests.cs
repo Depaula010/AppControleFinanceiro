@@ -8,13 +8,14 @@ public class AlertEventsTests
 
     [Fact]
     [Trait("AC", "014-40")]
-    public void Window_IsTheTargetPlusOrMinusThirtySeconds()
+    public void Window_IsTheTargetMinusSixtyPlusThirtySeconds()
     {
+        // Desvio 121: (alvo - 60 s, alvo + 30 s]; alvo = 18:00:20.
         var now = new DateTimeOffset(2026, 10, 5, 17, 59, 20, SaoPaulo);
 
         var (start, end) = AlertWindow.For(now, 1);
 
-        start.ShouldBe(new DateTimeOffset(2026, 10, 5, 17, 59, 50, SaoPaulo));
+        start.ShouldBe(new DateTimeOffset(2026, 10, 5, 17, 59, 20, SaoPaulo));
         end.ShouldBe(new DateTimeOffset(2026, 10, 5, 18, 0, 50, SaoPaulo));
     }
 
@@ -26,9 +27,22 @@ public class AlertEventsTests
 
         var (start, end) = AlertWindow.For(now, 60);
 
-        start.ShouldBe(new DateTimeOffset(2026, 10, 6, 0, 29, 30, SaoPaulo));
+        start.ShouldBe(new DateTimeOffset(2026, 10, 6, 0, 29, 0, SaoPaulo));
         start.Offset.ShouldBe(SaoPaulo);
         end.ShouldBe(new DateTimeOffset(2026, 10, 6, 0, 30, 30, SaoPaulo));
+    }
+
+    [Theory]
+    [Trait("AC", "014-48")]
+    [InlineData("2026-10-05T17:59:20-03:00", false)]
+    [InlineData("2026-10-05T17:59:21-03:00", true)]
+    [InlineData("2026-10-05T18:00:50-03:00", true)]
+    [InlineData("2026-10-05T18:00:51-03:00", false)]
+    public void Window_LowerBoundIsExclusive_UpperBoundIsInclusive(string eventStart, bool inside)
+    {
+        var window = AlertWindow.For(new DateTimeOffset(2026, 10, 5, 17, 59, 20, SaoPaulo), 1);
+
+        AlertWindow.Contains(window, DateTimeOffset.Parse(eventStart, System.Globalization.CultureInfo.InvariantCulture)).ShouldBe(inside);
     }
 
     [Theory]

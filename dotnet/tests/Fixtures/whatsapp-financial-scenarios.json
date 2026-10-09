@@ -398,7 +398,7 @@
     "status": 200,
     "body": {
      "status": "sucesso",
-     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *lanche*\n💵 *R$ 30,00*\n💸 Despesa\n� Cartão Inter (na fatura)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *lanche*\n💵 *R$ 30,00*\n💸 Despesa\n💳 Cartão Inter (na fatura)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
     },
     "calls": [
      "user_service.check_user_exists:5531999990001",
@@ -1744,7 +1744,7 @@
     "status": 200,
     "body": {
      "status": "sucesso",
-     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *tenis*\n💵 *R$ 90,00* (3x de R$ 30,00)\n💸 Despesa\n� Cartão Inter (1ª parcela na fatura atual)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *tenis*\n💵 *R$ 90,00* (3x de R$ 30,00)\n💸 Despesa\n💳 Cartão Inter (1ª parcela na fatura atual)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
     },
     "calls": [
      "user_service.check_user_exists:5531999990001",
@@ -2618,7 +2618,7 @@
     "status": 200,
     "body": {
      "status": "sucesso",
-     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *luz*\n💵 *R$ 99,90*\n💸 Despesa\n� Cartão Inter (na fatura)\n📂 Moradia → Luz\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+     "resposta": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *luz*\n💵 *R$ 99,90*\n💸 Despesa\n💳 Cartão Inter (na fatura)\n📂 Moradia → Luz\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
     },
     "calls": [
      "user_service.check_user_exists:5531999990001",

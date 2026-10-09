@@ -73,10 +73,13 @@ public class ChartsWindowTests
 
     [Fact]
     [Trait("AC", "006-30")]
-    public void MonthlyStart_IsFirstOfMonthMinusThirtyDaysPerMonth()
+    [Trait("AC", "006-70")]
+    public void MonthlyStart_IsFirstDayOfTheOldestWholeMonth()
     {
-        ChartsWindow.MonthlyStart(Today, 3).ShouldBe(new DateOnly(2026, 7, 3));
-        ChartsWindow.MonthlyStart(Today, 1).ShouldBe(new DateOnly(2026, 9, 1));
+        // Desvio 090: `meses` meses civis completos, incluindo o atual.
+        ChartsWindow.MonthlyStart(Today, 3).ShouldBe(new DateOnly(2026, 8, 1));
+        ChartsWindow.MonthlyStart(Today, 1).ShouldBe(new DateOnly(2026, 10, 1));
+        ChartsWindow.MonthlyStart(Today, 12).ShouldBe(new DateOnly(2025, 11, 1));
     }
 
     [Fact]
@@ -147,8 +150,9 @@ public class DashboardAlertsTests
     private static readonly DateOnly Today = new(2026, 10, 15);
 
     private static ScheduleRow Row(
-        string? periodicity = "MENSAL", int? day = 15, int? month = null, DateOnly? start = null, decimal? amount = 100m, int id = 1) =>
-        new(id, "Aluguel", amount, "FIXO", periodicity, day, month, start ?? new DateOnly(2026, 1, 1), "Aluguel / Condomínio");
+        string? periodicity = "MENSAL", int? day = 15, int? month = null, DateOnly? start = null, decimal? amount = 100m, int id = 1,
+        IReadOnlyCollection<DateOnly>? paid = null) =>
+        new(id, "Aluguel", amount, "FIXO", periodicity, day, month, start ?? new DateOnly(2026, 1, 1), "Aluguel / Condomínio", paid);
 
     private static DashboardAlert Single(ScheduleRow row, DateOnly? today = null)
     {
@@ -191,6 +195,48 @@ public class DashboardAlertsTests
 
         alert.DueDate.ShouldBe(new DateOnly(2027, 1, 3));
         alert.DaysLeft.ShouldBe(6);
+    }
+
+    [Fact]
+    [Trait("AC", "006-71")]
+    public void Monthly_NotStartedYet_GeneratesNoAlert()
+    {
+        // Desvio 093: parcela do bot com data_inicio no mês seguinte não alerta neste mês.
+        NextDue(Row(day: 18, start: new DateOnly(2026, 11, 18))).ShouldBeNull();
+        DashboardAlerts.Build([Row(day: 18, start: new DateOnly(2026, 11, 18))], Today).ShouldBeEmpty();
+        // Vencimento exatamente em data_inicio já vale (>=).
+        Single(Row(day: 18, start: new DateOnly(2026, 10, 18))).DueDate.ShouldBe(new DateOnly(2026, 10, 18));
+        // Dia passado: o próximo mês é depois do início, então segue valendo.
+        Single(Row(day: 3, start: new DateOnly(2026, 10, 20)), new DateOnly(2026, 10, 28)).DueDate.ShouldBe(new DateOnly(2026, 11, 3));
+    }
+
+    [Fact]
+    [Trait("AC", "006-71")]
+    public void Annual_NotStartedYet_GeneratesNoAlert()
+    {
+        NextDue(Row("ANUAL", day: 18, month: 10, start: new DateOnly(2026, 10, 19))).ShouldBeNull();
+        Single(Row("ANUAL", day: 18, month: 10, start: new DateOnly(2026, 10, 18))).DueDate.ShouldBe(new DateOnly(2026, 10, 18));
+    }
+
+    [Fact]
+    [Trait("AC", "006-72")]
+    public void Monthly_AlreadyPaidInTheDueMonth_GeneratesNoAlert()
+    {
+        // Desvio 094: pagamento antecipado (dia 10) da ocorrência de outubro, que vence no dia 18.
+        DashboardAlerts.Build([Row(day: 18, paid: [new DateOnly(2026, 10, 10)])], Today).ShouldBeEmpty();
+        // Pagamento de setembro não cobre a ocorrência de outubro.
+        Single(Row(day: 18, paid: [new DateOnly(2026, 9, 18)])).DueDate.ShouldBe(new DateOnly(2026, 10, 18));
+        // A ocorrência de novembro (vence em 3/11) segue alertando quando só outubro foi pago.
+        Single(Row(day: 3, paid: [new DateOnly(2026, 10, 3)]), new DateOnly(2026, 10, 28)).DueDate.ShouldBe(new DateOnly(2026, 11, 3));
+    }
+
+    [Fact]
+    [Trait("AC", "006-72")]
+    public void Weekly_PaidOnlyOnTheDueDate_IsExcluded()
+    {
+        var row = Row("SEMANAL", day: 5, start: new DateOnly(2026, 10, 5), paid: [new DateOnly(2026, 10, 12)]);
+        Single(row).DueDate.ShouldBe(new DateOnly(2026, 10, 19));
+        DashboardAlerts.Build([Row("SEMANAL", day: 5, start: new DateOnly(2026, 10, 5), paid: [new DateOnly(2026, 10, 19)])], Today).ShouldBeEmpty();
     }
 
     [Fact]

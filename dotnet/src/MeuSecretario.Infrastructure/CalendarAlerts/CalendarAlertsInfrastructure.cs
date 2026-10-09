@@ -69,6 +69,7 @@ public sealed class CalendarAlertConfigRepository(IDbConnectionFactory connectio
             JOIN usuarios u ON cac.usuario_id = u.id
             JOIN googlecalendartokens gct ON u.id = gct.usuario_id
             WHERE cac.alertas_tarefas_ativo = TRUE
+              AND u.ativo = TRUE
               AND (gct.needs_reconnect = FALSE OR gct.needs_reconnect IS NULL)
             ORDER BY u.id
             """,
