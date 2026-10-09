@@ -1,6 +1,6 @@
 # Desvio 092 — Dashboard: top 10 de categorias devolve as de menor gasto
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 006, 2026-10-09)
 - **Features afetadas:** 006
 - **Severidade:** correção
 

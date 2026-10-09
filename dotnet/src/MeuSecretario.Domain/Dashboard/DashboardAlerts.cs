@@ -2,7 +2,11 @@ using MeuSecretario.Domain.Transactions;
 
 namespace MeuSecretario.Domain.Dashboard;
 
-/// <summary>Linha de <c>agendamentos</c> (ativa) que alimenta os alertas. Campos crus: o Flask trata nulo e zero como ausente.</summary>
+/// <summary>
+/// Linha de <c>agendamentos</c> (ativa, que não seja de receita: desvio 095) que alimenta os alertas. Campos crus: o Flask
+/// trata nulo e zero como ausente. <paramref name="PaidDates"/> traz as datas de transações já ligadas ao agendamento por
+/// <c>agendamento_id</c> (ou, sem vínculo, pela mesma descrição) na janela dos alertas (desvio 094).
+/// </summary>
 public sealed record ScheduleRow(
     int Id,
     string Description,
@@ -12,7 +16,8 @@ public sealed record ScheduleRow(
     int? Day,
     int? Month,
     DateOnly? StartDate,
-    string? SubcategoryName);
+    string? SubcategoryName,
+    IReadOnlyCollection<DateOnly>? PaidDates = null);
 
 /// <summary>Um item de <c>GET /api/dashboard/alerts</c> (spec 006 §3.4).</summary>
 public sealed record DashboardAlert(
@@ -45,7 +50,7 @@ public static class DashboardAlerts
         // Ordem do SQL (dia_execucao, id); o OrderBy final é estável como o list.sort do Python.
         foreach (var row in rows.OrderBy(r => r.Day ?? 0).ThenBy(r => r.Id))
         {
-            if (NextDue(row, today) is not { } due || due > end)
+            if (NextDue(row, today) is not { } due || due > end || IsPaid(row, due))
             {
                 continue;
             }
@@ -64,6 +69,22 @@ public static class DashboardAlerts
         }
 
         return alerts.OrderBy(a => a.DaysLeft).ToList();
+    }
+
+    /// <summary>
+    /// Desvio 094: a ocorrência já virou transação. <c>MENSAL</c> e <c>ANUAL</c> contam o mês do vencimento; as periodicidades
+    /// curtas (semanal, quinzenal, diária) só contam a própria data do vencimento.
+    /// </summary>
+    public static bool IsPaid(ScheduleRow row, DateOnly due)
+    {
+        if (row.PaidDates is not { Count: > 0 } paid)
+        {
+            return false;
+        }
+
+        return row.Periodicity is "SEMANAL" or "QUINZENAL" or "DIARIA"
+            ? paid.Contains(due)
+            : paid.Any(d => d.Year == due.Year && d.Month == due.Month);
     }
 
     public static string Level(int daysLeft) => daysLeft switch
@@ -90,7 +111,7 @@ public static class DashboardAlerts
                 }
 
                 var due = MonthDays.Clamp(today.Year, month, day);
-                return due < today ? MonthDays.Clamp(today.Year + 1, month, day) : due;
+                return NotBeforeStart(due < today ? MonthDays.Clamp(today.Year + 1, month, day) : due, row.StartDate);
             }
 
             case "SEMANAL" or "QUINZENAL" or "DIARIA":
@@ -121,12 +142,15 @@ public static class DashboardAlerts
                 var thisMonth = MonthDays.Clamp(today.Year, today.Month, day);
                 if (thisMonth >= today)
                 {
-                    return thisMonth;
+                    return NotBeforeStart(thisMonth, row.StartDate);
                 }
 
                 var next = new DateOnly(today.Year, today.Month, 1).AddMonths(1);
-                return MonthDays.Clamp(next.Year, next.Month, day);
+                return NotBeforeStart(MonthDays.Clamp(next.Year, next.Month, day), row.StartDate);
             }
         }
     }
+
+    /// <summary>Desvio 093: vencimento anterior a <c>data_inicio</c> não gera alerta (o agendamento ainda não começou).</summary>
+    private static DateOnly? NotBeforeStart(DateOnly due, DateOnly? start) => start is { } s && due < s ? null : due;
 }
