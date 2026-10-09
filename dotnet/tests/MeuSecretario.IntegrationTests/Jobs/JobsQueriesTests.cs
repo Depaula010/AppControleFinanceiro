@@ -146,20 +146,30 @@ public sealed class CheckinQueriesTests(PostgresFixture postgres) : IAsyncLifeti
 
     [Fact]
     [Trait("AC", "013-43")]
-    public async Task Invoices_OverdueAndDueToday_OnlyOpenOnes_WithTheAbsoluteExpenseTotal()
+    public async Task Invoices_OverdueAndDueToday_OpenAndClosed_NeverPaid_WithTheAbsoluteExpenseTotal_Deviation131()
     {
         var card = await _env.CardAsync(_user);
+        var other = await _env.CardAsync(_user, "Inter");
         var overdue = await _env.InvoiceAsync(card, "2026-03-10", "2026-03-01");
         await _env.TransactionAsync(_user, card, "Despesa Essencial", "2026-02-20", "compra", -100m, invoiceId: overdue);
         await _env.TransactionAsync(_user, card, "Despesa Essencial", "2026-02-21", "estorno", 30m, invoiceId: overdue);
         await _env.InvoiceAsync(card, "2026-03-18", "2026-03-08");
-        await _env.InvoiceAsync(card, "2026-03-05", "2026-02-25", "Fechada");
+        var closedOverdue = await _env.InvoiceAsync(other, "2026-03-05", "2026-02-25", "Fechada");
+        await _env.TransactionAsync(_user, other, "Despesa Essencial", "2026-02-10", "compra", -45m, invoiceId: closedOverdue);
+        await _env.InvoiceAsync(other, "2026-03-18", "2026-03-08", "Fechada");
+        await _env.InvoiceAsync(card, "2026-03-04", "2026-02-24", "Paga");
+        var paidCard = await _env.CardAsync(_user, "C6");
+        await _env.InvoiceAsync(paidCard, "2026-03-18", "2026-03-08", "Paga");
         await _env.InvoiceAsync(card, "2026-01-01", "2025-12-20");
 
         var snapshot = await SnapshotAsync("2026-03-18");
 
-        snapshot.OverdueInvoices.Select(i => (i.Card, i.DueDate, i.Total)).ShouldBe([("Nubank", JobsEnv.Day("2026-03-10"), 100m)]);
-        snapshot.InvoicesDueToday.Select(i => (i.AccountName, i.Total)).ShouldBe([("Nubank", 0m)]);
+        snapshot.OverdueInvoices.Select(i => (i.Card, i.DueDate, i.Status, i.Total)).ShouldBe(
+        [
+            ("Nubank", JobsEnv.Day("2026-03-10"), "Aberta", 100m),
+            ("Inter", JobsEnv.Day("2026-03-05"), "Fechada", 45m),
+        ]);
+        snapshot.InvoicesDueToday.Select(i => (i.AccountName, i.Status, i.Total)).ShouldBe([("Inter", "Fechada", 0m), ("Nubank", "Aberta", 0m)]);
     }
 
     [Fact]
@@ -289,19 +299,22 @@ public sealed class NotificationQueriesTests(PostgresFixture postgres) : IAsyncL
 
     [Fact]
     [Trait("AC", "013-30")]
-    public async Task FinancialAlerts_InvoicesOfTodayAndTomorrow_OnlyOpen_WithTheExpenseTotal()
+    public async Task FinancialAlerts_InvoicesOfTodayAndTomorrow_OpenAndClosedButNotPaid_WithTheExpenseTotal_Deviation131()
     {
         var repository = new FinancialAlertsRepository(postgres.Connections);
         var card = await _env.CardAsync(_user);
         var today = await _env.InvoiceAsync(card, "2026-03-18", "2026-03-08");
         await _env.TransactionAsync(_user, card, "Despesa Essencial", "2026-03-01", "compra", -250.5m, invoiceId: today);
         await _env.InvoiceAsync(card, "2026-03-19", "2026-03-09");
-        var other = await _env.CardAsync(_user, "Inter");
-        await _env.InvoiceAsync(other, "2026-03-18", "2026-03-08", "Fechada");
+        var closed = await _env.CardAsync(_user, "Inter");
+        var closedToday = await _env.InvoiceAsync(closed, "2026-03-18", "2026-03-08", "Fechada");
+        await _env.TransactionAsync(_user, closed, "Despesa Essencial", "2026-03-02", "compra", -80m, invoiceId: closedToday);
+        var paid = await _env.CardAsync(_user, "C6");
+        await _env.InvoiceAsync(paid, "2026-03-18", "2026-03-08", "Paga");
 
         var alerts = await repository.GetUpcomingAsync(_user, JobsEnv.Day("2026-03-18"), CancellationToken.None);
 
-        alerts.InvoicesToday.Select(i => (i.Card, i.Value)).ShouldBe([("Nubank", 250.5)]);
+        alerts.InvoicesToday.Select(i => (i.Card, i.Value)).ShouldBe([("Inter", 80.0), ("Nubank", 250.5)], ignoreOrder: true);
         alerts.InvoicesTomorrow.Select(i => i.Card).ShouldBe(["Nubank"]);
     }
 
