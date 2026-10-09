@@ -50,6 +50,7 @@ public sealed class ScottPlotChartRenderer : IChartRenderer
             pie.SliceLabelDistance = 0.6;
             plot.Title(string.Create(CultureInfo.InvariantCulture, $"Gastos por Categoria - Últimos {days} dias"), 22);
             plot.Axes.Frameless();
+            plot.Axes.Title.IsVisible = true; // Frameless esconde o eixo do título junto com os demais
             plot.HideGrid();
             plot.ShowLegend(Alignment.MiddleRight);
             return plot.GetImageBytes(1200, 800, ImageFormat.Png);

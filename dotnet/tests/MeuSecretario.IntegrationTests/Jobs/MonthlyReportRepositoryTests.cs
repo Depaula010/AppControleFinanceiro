@@ -52,7 +52,7 @@ public sealed class MonthlyReportRepositoryTests(PostgresFixture postgres) : IAs
 
     [Fact]
     [Trait("AC", "013-71")]
-    public async Task Data_ForTheStartMoment_UsesTheLastMonth_WithThePythonSign()
+    public async Task Data_ForTheStartMoment_UsesTheLastMonth_WithExpensesAsAbsoluteValues_Deviation132()
     {
         await _env.TransactionAsync(_user, _account, "Despesa Essencial", "2026-02-05", "Mercado", -100m);
         await _env.TransactionAsync(_user, _account, "Despesa Essencial", "2026-02-10", "Transporte", -50m);
@@ -67,12 +67,40 @@ public sealed class MonthlyReportRepositoryTests(PostgresFixture postgres) : IAs
         var data = await _repository.GetDataAsync(_user, MonthlyMoment.InicioMes, JobsEnv.Day("2026-03-01"), CancellationToken.None);
 
         (data.Month, data.Year, data.PeriodStart, data.PeriodEnd).ShouldBe((2, 2026, JobsEnv.Day("2026-02-01"), JobsEnv.Day("2026-02-28")));
-        // Despesa negativa: o total de despesas é negativo e o saldo SOMA (desvio proposto 132).
-        data.Totals.ShouldBe(new ReportTotals(-100, 1000, 1100, 2));
-        data.TopCategories.Select(c => (c.Category, c.Value, c.Percent)).ShouldBe([("Sub Despesa Essencial", -100d, 100d)]);
-        data.Comparison.ShouldBe(new ReportComparison(-100, -200, 100, 0));
-        data.Accounts.ShouldBe(new ReportAccounts(1, -100, 2, 800));
+        // Desvio 132: a despesa é gravada negativa, mas o relatório a soma em valor absoluto; o saldo é rendas - despesas.
+        data.Totals.ShouldBe(new ReportTotals(100, 1000, 900, 2));
+        data.TopCategories.Select(c => (c.Category, c.Value, c.Percent)).ShouldBe([("Sub Despesa Essencial", 100d, 100d)]);
+        data.Comparison.ShouldBe(new ReportComparison(100, 200, -100, -50));
+        data.Accounts.ShouldBe(new ReportAccounts(1, 100, 2, 800));
         data.Pots.ShouldBeEmpty();
+    }
+
+    [Fact]
+    [Trait("AC", "013-71")]
+    public async Task Data_TopCategories_AreOrderedFromTheBiggestSpend_Deviation132()
+    {
+        await _env.TransactionAsync(_user, _account, "Despesa Essencial", "2026-03-05", "Pequena", -10m);
+        await _env.TransactionAsync(_user, _account, "Despesa Discricionária", "2026-03-06", "Grande", -300m);
+        await _env.TransactionAsync(_user, _account, "Despesa Discricionária", "2026-03-07", "Grande 2", -100m);
+        await _env.TransactionAsync(_user, _account, "Renda", "2026-03-08", "Salário", 5000m);
+
+        var data = await _repository.GetDataAsync(_user, MonthlyMoment.FimMes, JobsEnv.Day("2026-03-31"), CancellationToken.None);
+
+        data.TopCategories.Select(c => (c.Category, c.Value)).ShouldBe([("Sub Despesa Discricionária", 400d), ("Sub Despesa Essencial", 10d)]);
+        data.TopCategories[0].Percent.ShouldBe(400d / 410d * 100, 0.0001);
+        data.Totals.ShouldBe(new ReportTotals(410, 5000, 4590, 4));
+    }
+
+    [Fact]
+    [Trait("AC", "013-71")]
+    public async Task Data_VariationPercent_IsComputedWhenThePreviousMonthHadExpenses_Deviation132()
+    {
+        await _env.TransactionAsync(_user, _account, "Despesa Essencial", "2026-02-10", "Fevereiro", -200m);
+        await _env.TransactionAsync(_user, _account, "Despesa Essencial", "2026-03-10", "Março", -300m);
+
+        var data = await _repository.GetDataAsync(_user, MonthlyMoment.FimMes, JobsEnv.Day("2026-03-31"), CancellationToken.None);
+
+        data.Comparison.ShouldBe(new ReportComparison(300, 200, 100, 50));
     }
 
     [Fact]
@@ -89,7 +117,7 @@ public sealed class MonthlyReportRepositoryTests(PostgresFixture postgres) : IAs
 
         var data = await _repository.GetDataAsync(_user, MonthlyMoment.FimMes, JobsEnv.Day("2026-03-31"), CancellationToken.None);
 
-        data.Pots.Select(p => (p.Name, p.Limit, p.Used, p.Balance, p.Percent)).ShouldBe([("Comida", 500d, -120d, 620d, -24d)]);
+        data.Pots.Select(p => (p.Name, p.Limit, p.Used, p.Balance, p.Percent)).ShouldBe([("Comida", 500d, 120d, 380d, 24d)]);
         data.Totals.TotalTransactions.ShouldBe(1);
     }
 

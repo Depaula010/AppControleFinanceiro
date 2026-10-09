@@ -173,6 +173,12 @@ public sealed class InvoiceScheduleProcessor(IInvoiceScheduleUnitOfWork unitOfWo
 
         foreach (var schedule in await session.ListSchedulesAsync(cardAccountId, referenceDate.Month, cancellationToken))
         {
+            if (schedule.ScheduleType == InvoiceScheduleRules.Reminder)
+            {
+                // Desvio 135: conta variável não entra na fatura com o valor previsto; o usuário informa o valor real pelo bot.
+                continue;
+            }
+
             if (await session.TransactionExistsAsync(invoiceId, schedule.ScheduleId, cancellationToken))
             {
                 continue;

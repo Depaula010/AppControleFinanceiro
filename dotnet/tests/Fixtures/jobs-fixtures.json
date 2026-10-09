@@ -1027,6 +1027,60 @@
     "checkin_id": "zz"
    },
    "output": "🌙 *CHECK-IN NOTURNO* 🌙\n\n💵 *RECEITAS PENDENTES:*\n_Valores previstos que ainda não foram recebidos - confirmáveis via check-in_\n\n1. Salário - R$ 5.000,00 - Previsto em 18/03\n💰 *Total:* R$ 5.000,00\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *COMO RESPONDER:*\n\n✅ Tudo pago:\n👍 ou \"Ok\"\n\n📝 Pagamento parcial:\n\"1\" / \"1 e 3\" / \"1, 2, 4\"\n\n⏸️ Não paguei ainda:\n\"Depois\" / \"Não\"\n\n_ID: zz | Expira em 1h_"
+  },
+  {
+   "input": {
+    "pending": [
+     {
+      "id": 1,
+      "descricao": "Salário",
+      "valor_previsto": 5000.0,
+      "dia_execucao": 18,
+      "conta_id": 11,
+      "subcategoria_id": 21,
+      "usuario_id": 7,
+      "nome_conta": "Conta Corrente",
+      "tipo_conta": "Conta Corrente",
+      "categoria": "Cat",
+      "nome_macro": "Macro",
+      "nome_grupo": "Renda",
+      "tipo_agendamento": "FIXO",
+      "parcelas_executadas": 0,
+      "total_parcelas": null,
+      "data_vencimento_real": "2026-03-18"
+     }
+    ],
+    "overdue": [],
+    "checkin_id": "abcdef12",
+    "due_today": [
+     {
+      "id": 1,
+      "nome_conta": "Inter",
+      "data_vencimento": "2026-03-18",
+      "status": "Aberta",
+      "valor_total": 777.7
+     }
+    ],
+    "overdue_invoices": [
+     {
+      "id": 1,
+      "cartao": "Inter",
+      "nome_conta": "Inter",
+      "data_vencimento": "2026-03-10",
+      "status": "Aberta",
+      "valor_total": 1234.5
+     },
+     {
+      "id": 2,
+      "cartao": "Nubank",
+      "nome_conta": "Nubank",
+      "data_vencimento": "2026-02-25",
+      "status": "Fechada",
+      "valor_total": 80.0
+     }
+    ]
+   },
+   "output": "🌙 *CHECK-IN NOTURNO* 🌙\n\n💵 *RECEITAS PENDENTES:*\n_Valores previstos que ainda não foram recebidos - confirmáveis via check-in_\n\n1. Salário - R$ 5.000,00 - Previsto em 18/03\n💰 *Total:* R$ 5.000,00\n\n🔴 *FATURAS VENCIDAS:*\n• Inter - R$ 1.234,50 - Venceu em 10/03/2026\n• Nubank - R$ 80,00 - Venceu em 25/02/2026\n\n⏰ *FATURAS QUE VENCEM HOJE:*\n_Atenção! Estas faturas devem ser pagas hoje para evitar juros._\n\n💳 Inter - R$ 777,70 - Vence HOJE\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *COMO RESPONDER:*\n\n✅ Tudo pago:\n👍 ou \"Ok\"\n\n📝 Pagamento parcial:\n\"1\" / \"1 e 3\" / \"1, 2, 4\"\n\n⏸️ Não paguei ainda:\n\"Depois\" / \"Não\"\n\n_ID: abcdef12 | Expira em 1h_"
   }
  ],
  "checkin_key_error": "'nome_conta'",
@@ -1433,7 +1487,8 @@
     }
    },
    "name": "Rafael Silva",
-   "output": "📊 *RELATÓRIO MENSAL - FEVEREIRO/2026*\nOlá, Rafael Silva!\n\n💰 *RESUMO FINANCEIRO*\n• Receitas: R$ 12,345.67\n• Despesas: R$ 4,321.10\n• Saldo: R$ 8,024.57\n• Transações: 58\n\n📈 *COMPARAÇÃO COM MÊS ANTERIOR*\n• Mês anterior: R$ 4,000.00\n• Variação: R$ 321.10 (+8.0%)\n\n🏆 *TOP 5 CATEGORIAS*\n1. Mercado: R$ 1,200.50 (27.8%)\n2. Transporte: R$ 300.00 (6.9%)\n\n🎯 *POTES DE GASTOS*\n⚠️ Lazer:\n   Usado: R$ 650.00 / R$ 500.00\n   Saldo: R$ -150.00 (130.0%)\n✅ Comida:\n   Usado: R$ 1,000.00 / R$ 1,500.00\n   Saldo: R$ 500.00 (66.7%)\n\n💳 *STATUS DE CONTAS*\n✅ Pagas: 20 (R$ 4,321.10)\n⏳ Pendentes: 3 (R$ 1,234.50)\n\n_📷 Veja o gráfico de pizza anexo para visualização das categorias!_"
+   "output": "📊 *RELATÓRIO MENSAL - FEVEREIRO/2026*\nOlá, Rafael Silva!\n\n💰 *RESUMO FINANCEIRO*\n• Receitas: R$ 12,345.67\n• Despesas: R$ 4,321.10\n• Saldo: R$ 8,024.57\n• Transações: 58\n\n📈 *COMPARAÇÃO COM MÊS ANTERIOR*\n• Mês anterior: R$ 4,000.00\n• Variação: R$ 321.10 (+8.0%)\n\n🏆 *TOP 5 CATEGORIAS*\n1. Mercado: R$ 1,200.50 (27.8%)\n2. Transporte: R$ 300.00 (6.9%)\n\n🎯 *POTES DE GASTOS*\n⚠️ Lazer:\n   Usado: R$ 650.00 / R$ 500.00\n   Saldo: R$ -150.00 (130.0%)\n✅ Comida:\n   Usado: R$ 1,000.00 / R$ 1,500.00\n   Saldo: R$ 500.00 (66.7%)\n\n💳 *STATUS DE CONTAS*\n✅ Pagas: 20 (R$ 4,321.10)\n⏳ Pendentes: 3 (R$ 1,234.50)\n\n_📷 Veja o gráfico de pizza anexo para visualização das categorias!_",
+   "output_ptbr": "📊 *RELATÓRIO MENSAL - FEVEREIRO/2026*\nOlá, Rafael Silva!\n\n💰 *RESUMO FINANCEIRO*\n• Receitas: R$ 12.345,67\n• Despesas: R$ 4.321,10\n• Saldo: R$ 8.024,57\n• Transações: 58\n\n📈 *COMPARAÇÃO COM MÊS ANTERIOR*\n• Mês anterior: R$ 4.000,00\n• Variação: R$ 321,10 (+8,0%)\n\n🏆 *TOP 5 CATEGORIAS*\n1. Mercado: R$ 1.200,50 (27,8%)\n2. Transporte: R$ 300,00 (6,9%)\n\n🎯 *POTES DE GASTOS*\n⚠️ Lazer:\n   Usado: R$ 650,00 / R$ 500,00\n   Saldo: R$ -150,00 (130,0%)\n✅ Comida:\n   Usado: R$ 1.000,00 / R$ 1.500,00\n   Saldo: R$ 500,00 (66,7%)\n\n💳 *STATUS DE CONTAS*\n✅ Pagas: 20 (R$ 4.321,10)\n⏳ Pendentes: 3 (R$ 1.234,50)\n\n_📷 Veja o gráfico de pizza anexo para visualização das categorias!_"
   },
   {
    "input": {
@@ -1444,16 +1499,16 @@
      "fim": "2025-12-28"
     },
     "totais": {
-     "total_despesas": -2500.25,
+     "total_despesas": 2500.25,
      "total_rendas": 0.0,
-     "saldo_periodo": 2500.25,
+     "saldo_periodo": -2500.25,
      "total_transacoes": 4
     },
     "top_categorias": [],
     "comparacao": {
-     "mes_atual": -2500.25,
+     "mes_atual": 2500.25,
      "mes_anterior": 0,
-     "variacao_valor": -2500.25,
+     "variacao_valor": 2500.25,
      "variacao_percentual": 0
     },
     "potes": [],
@@ -1465,7 +1520,8 @@
     }
    },
    "name": "Rafael Silva",
-   "output": "📊 *RELATÓRIO MENSAL - DEZEMBRO/2025*\nOlá, Rafael Silva!\n\n💰 *RESUMO FINANCEIRO*\n• Receitas: R$ 0.00\n• Despesas: R$ -2,500.25\n• Saldo: R$ 2,500.25\n• Transações: 4\n\n📉 *COMPARAÇÃO COM MÊS ANTERIOR*\n• Mês anterior: R$ 0.00\n• Variação: R$ -2,500.25 (+0.0%)\n\n💳 *STATUS DE CONTAS*\n✅ Pagas: 0 (R$ 0.00)\n⏳ Pendentes: 0 (R$ 0.00)\n\n_📷 Veja o gráfico de pizza anexo para visualização das categorias!_"
+   "output": "📊 *RELATÓRIO MENSAL - DEZEMBRO/2025*\nOlá, Rafael Silva!\n\n💰 *RESUMO FINANCEIRO*\n• Receitas: R$ 0.00\n• Despesas: R$ 2,500.25\n• Saldo: R$ -2,500.25\n• Transações: 4\n\n📈 *COMPARAÇÃO COM MÊS ANTERIOR*\n• Mês anterior: R$ 0.00\n• Variação: R$ 2,500.25 (+0.0%)\n\n💳 *STATUS DE CONTAS*\n✅ Pagas: 0 (R$ 0.00)\n⏳ Pendentes: 0 (R$ 0.00)\n\n_📷 Veja o gráfico de pizza anexo para visualização das categorias!_",
+   "output_ptbr": "📊 *RELATÓRIO MENSAL - DEZEMBRO/2025*\nOlá, Rafael Silva!\n\n💰 *RESUMO FINANCEIRO*\n• Receitas: R$ 0,00\n• Despesas: R$ 2.500,25\n• Saldo: R$ -2.500,25\n• Transações: 4\n\n📈 *COMPARAÇÃO COM MÊS ANTERIOR*\n• Mês anterior: R$ 0,00\n• Variação: R$ 2.500,25 (+0,0%)\n\n💳 *STATUS DE CONTAS*\n✅ Pagas: 0 (R$ 0,00)\n⏳ Pendentes: 0 (R$ 0,00)\n\n_📷 Veja o gráfico de pizza anexo para visualização das categorias!_"
   },
   {
    "input": {
@@ -1511,7 +1567,60 @@
     }
    },
    "name": "Rafael Silva",
-   "output": "📊 *RELATÓRIO MENSAL - JANEIRO/2026*\nOlá, Rafael Silva!\n\n💰 *RESUMO FINANCEIRO*\n• Receitas: R$ 1,234,567.89\n• Despesas: R$ 0.01\n• Saldo: R$ 1,234,567.89\n• Transações: 1\n\n📈 *COMPARAÇÃO COM MÊS ANTERIOR*\n• Mês anterior: R$ 0.00\n• Variação: R$ 0.01 (+0.0%)\n\n🏆 *TOP 5 CATEGORIAS*\n1. Outros: R$ 0.01 (100.0%)\n\n🎯 *POTES DE GASTOS*\n✅ Vazio:\n   Usado: R$ 0.00 / R$ 0.00\n   Saldo: R$ 0.00 (0.0%)\n\n💳 *STATUS DE CONTAS*\n✅ Pagas: 1 (R$ 0.01)\n⏳ Pendentes: 1 (R$ 99,999.99)\n\n_📷 Veja o gráfico de pizza anexo para visualização das categorias!_"
+   "output": "📊 *RELATÓRIO MENSAL - JANEIRO/2026*\nOlá, Rafael Silva!\n\n💰 *RESUMO FINANCEIRO*\n• Receitas: R$ 1,234,567.89\n• Despesas: R$ 0.01\n• Saldo: R$ 1,234,567.89\n• Transações: 1\n\n📈 *COMPARAÇÃO COM MÊS ANTERIOR*\n• Mês anterior: R$ 0.00\n• Variação: R$ 0.01 (+0.0%)\n\n🏆 *TOP 5 CATEGORIAS*\n1. Outros: R$ 0.01 (100.0%)\n\n🎯 *POTES DE GASTOS*\n✅ Vazio:\n   Usado: R$ 0.00 / R$ 0.00\n   Saldo: R$ 0.00 (0.0%)\n\n💳 *STATUS DE CONTAS*\n✅ Pagas: 1 (R$ 0.01)\n⏳ Pendentes: 1 (R$ 99,999.99)\n\n_📷 Veja o gráfico de pizza anexo para visualização das categorias!_",
+   "output_ptbr": "📊 *RELATÓRIO MENSAL - JANEIRO/2026*\nOlá, Rafael Silva!\n\n💰 *RESUMO FINANCEIRO*\n• Receitas: R$ 1.234.567,89\n• Despesas: R$ 0,01\n• Saldo: R$ 1.234.567,89\n• Transações: 1\n\n📈 *COMPARAÇÃO COM MÊS ANTERIOR*\n• Mês anterior: R$ 0,00\n• Variação: R$ 0,01 (+0,0%)\n\n🏆 *TOP 5 CATEGORIAS*\n1. Outros: R$ 0,01 (100,0%)\n\n🎯 *POTES DE GASTOS*\n✅ Vazio:\n   Usado: R$ 0,00 / R$ 0,00\n   Saldo: R$ 0,00 (0,0%)\n\n💳 *STATUS DE CONTAS*\n✅ Pagas: 1 (R$ 0,01)\n⏳ Pendentes: 1 (R$ 99.999,99)\n\n_📷 Veja o gráfico de pizza anexo para visualização das categorias!_"
+  },
+  {
+   "input": {
+    "mes": 3,
+    "ano": 2026,
+    "periodo": {
+     "inicio": "2026-03-01",
+     "fim": "2026-03-28"
+    },
+    "totais": {
+     "total_despesas": 2345678.9,
+     "total_rendas": 1000.0,
+     "saldo_periodo": -2344678.9,
+     "total_transacoes": 12
+    },
+    "top_categorias": [
+     {
+      "categoria": "Moradia",
+      "valor": 2000000.0,
+      "percentual": 85.26
+     },
+     {
+      "categoria": "Lazer",
+      "valor": 345678.9,
+      "percentual": 14.74
+     }
+    ],
+    "comparacao": {
+     "mes_atual": 2345678.9,
+     "mes_anterior": 3000000.0,
+     "variacao_valor": -654321.1,
+     "variacao_percentual": -21.8107
+    },
+    "potes": [
+     {
+      "nome": "Lazer",
+      "limite": 100.0,
+      "usado": 345678.9,
+      "saldo": -345578.9,
+      "percentual": 345678.9
+     }
+    ],
+    "contas": {
+     "pagas": 10,
+     "valor_pago": 2345678.9,
+     "pendentes": 2,
+     "valor_pendente": 12.5
+    }
+   },
+   "name": "Rafael Silva",
+   "output": "📊 *RELATÓRIO MENSAL - MARÇO/2026*\nOlá, Rafael Silva!\n\n💰 *RESUMO FINANCEIRO*\n• Receitas: R$ 1,000.00\n• Despesas: R$ 2,345,678.90\n• Saldo: R$ -2,344,678.90\n• Transações: 12\n\n📉 *COMPARAÇÃO COM MÊS ANTERIOR*\n• Mês anterior: R$ 3,000,000.00\n• Variação: R$ -654,321.10 (-21.8%)\n\n🏆 *TOP 5 CATEGORIAS*\n1. Moradia: R$ 2,000,000.00 (85.3%)\n2. Lazer: R$ 345,678.90 (14.7%)\n\n🎯 *POTES DE GASTOS*\n⚠️ Lazer:\n   Usado: R$ 345,678.90 / R$ 100.00\n   Saldo: R$ -345,578.90 (345678.9%)\n\n💳 *STATUS DE CONTAS*\n✅ Pagas: 10 (R$ 2,345,678.90)\n⏳ Pendentes: 2 (R$ 12.50)\n\n_📷 Veja o gráfico de pizza anexo para visualização das categorias!_",
+   "output_ptbr": "📊 *RELATÓRIO MENSAL - MARÇO/2026*\nOlá, Rafael Silva!\n\n💰 *RESUMO FINANCEIRO*\n• Receitas: R$ 1.000,00\n• Despesas: R$ 2.345.678,90\n• Saldo: R$ -2.344.678,90\n• Transações: 12\n\n📉 *COMPARAÇÃO COM MÊS ANTERIOR*\n• Mês anterior: R$ 3.000.000,00\n• Variação: R$ -654.321,10 (-21,8%)\n\n🏆 *TOP 5 CATEGORIAS*\n1. Moradia: R$ 2.000.000,00 (85,3%)\n2. Lazer: R$ 345.678,90 (14,7%)\n\n🎯 *POTES DE GASTOS*\n⚠️ Lazer:\n   Usado: R$ 345.678,90 / R$ 100,00\n   Saldo: R$ -345.578,90 (345678,9%)\n\n💳 *STATUS DE CONTAS*\n✅ Pagas: 10 (R$ 2.345.678,90)\n⏳ Pendentes: 2 (R$ 12,50)\n\n_📷 Veja o gráfico de pizza anexo para visualização das categorias!_"
   }
  ]
 }

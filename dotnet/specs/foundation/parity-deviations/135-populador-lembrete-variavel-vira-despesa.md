@@ -1,6 +1,6 @@
 # Desvio 135 — Populador de fatura lança `LEMBRETE_VARIAVEL` como despesa
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 013, 2026-10-09); aprovado em 2026-10-09. `LEMBRETE_VARIAVEL` não é lançado no populador de fatura (decisão do Rafael: o usuário informa o valor real pelo bot); `lembretes` na resposta fica sempre 0.
 - **Features afetadas:** 013, 004, 011
 - **Severidade:** correção (decisão de produto)
 

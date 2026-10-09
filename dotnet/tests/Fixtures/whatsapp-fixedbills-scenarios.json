@@ -2208,7 +2208,7 @@
    }
   },
   {
-   "name": "atrasadas_fatura_vencida_keyerror",
+   "name": "atrasadas_fatura_vencida",
    "group": "012d",
    "layer": "pipeline",
    "deviation": "130",
@@ -2242,6 +2242,7 @@
       {
        "id": 1,
        "cartao": "Cartão Inter",
+       "nome_conta": "Cartão Inter",
        "data_vencimento": "2026-10-01",
        "status": "Aberta",
        "valor_total": 300.0
@@ -2258,7 +2259,7 @@
     "status": 200,
     "body": {
      "status": "sucesso",
-     "resposta": "❌ Ops! Algo deu errado. Por favor, tente novamente."
+     "resposta": "📊 *RESUMO FINANCEIRO* 📊\n\n💸 *DESPESAS PENDENTES:*\n1. Aluguel - R$ 1.500,00 (Nubank) - Vence hoje\n\n🔴 *FATURAS VENCIDAS:*\n• Cartão Inter - R$ 300,00 - Venceu em 01/10/2026\n\n\n━━━━━━━━━━━━━━━━━━━━\n_💡 Para confirmar pagamentos, aguarde o check-in noturno automático._"
     },
     "calls": [
      "user_service.check_user_exists:5531999990001",

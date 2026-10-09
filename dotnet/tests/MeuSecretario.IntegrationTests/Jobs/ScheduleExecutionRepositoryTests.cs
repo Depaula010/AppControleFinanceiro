@@ -219,4 +219,34 @@ public sealed class ScheduleExecutionRepositoryTests(PostgresFixture postgres) :
         candidates.Select(c => c.Id).ShouldBe([fixedToday, installmentToday, annualRight, reminder]);
         candidates[^1].WhatsappNumber.ShouldBe("5511900000001");
     }
+
+    [Fact]
+    [Trait("AC", "013-60")]
+    public async Task Candidates_OnTheLastDayOfAShortMonth_IncludeDay29To31_ButNotBefore()
+    {
+        var day31 = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Dia 31", day: 31);
+        var day30 = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Dia 30", kind: "PARCELADO", day: 30, total: 3);
+        var day29Annual = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Anual 29", periodicity: "ANUAL", month: 4, day: 29);
+        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Anual de outro mês", periodicity: "ANUAL", month: 5, day: 31);
+        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Dia 10", day: 10);
+        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Inativo 31", day: 31, active: false);
+
+        var lastDay = await _repository.ListMotorCandidatesAsync(JobsEnv.Day("2026-04-30"), CancellationToken.None);
+        var dayBefore = await _repository.ListMotorCandidatesAsync(JobsEnv.Day("2026-04-29"), CancellationToken.None);
+
+        lastDay.Select(c => c.Id).ShouldBe([day31, day30]);
+        dayBefore.Select(c => c.Id).ShouldBe([day29Annual]);
+    }
+
+    [Fact]
+    [Trait("AC", "013-60")]
+    public async Task Day31Schedule_PostedAtTheEndOfAprilAndNotAgainTheSameMonth()
+    {
+        var id = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Condomínio", 800m, day: 31);
+
+        (await RunAsync(id, "2026-04-30")).ShouldBeOfType<ScheduleExecutionOutcome.Posted>();
+        (await RunAsync(id, "2026-04-30")).ShouldBeOfType<ScheduleExecutionOutcome.Skipped>();
+
+        (await TransactionsAsync()).Count.ShouldBe(1);
+    }
 }

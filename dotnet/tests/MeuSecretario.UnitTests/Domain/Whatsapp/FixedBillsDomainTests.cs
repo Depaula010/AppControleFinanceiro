@@ -148,11 +148,13 @@ public class FixedBillsDomainTests
 
     [Fact]
     [Trait("AC", "012-403")]
-    public void Overdue_WithAnOverdueInvoice_ThrowsLikeTheFlaskKeyError()
+    public void Overdue_WithAnOverdueInvoice_ListsTheCardName_Deviation130()
     {
         var invoice = new OverdueInvoice(1, "Inter", new DateOnly(2026, 10, 1), "Aberta", 100m);
-        Should.Throw<InvalidOperationException>(() =>
-            CheckinSnapshotMessage.Format(new CheckinSnapshot([], [], [invoice], []), new DateOnly(2026, 10, 7)));
+
+        var text = CheckinSnapshotMessage.Format(new CheckinSnapshot([], [], [invoice], []), new DateOnly(2026, 10, 7));
+
+        text.ShouldContain("🔴 *FATURAS VENCIDAS:*\n• Inter - R$ 100,00 - Venceu em 01/10/2026");
     }
 
     [Fact]

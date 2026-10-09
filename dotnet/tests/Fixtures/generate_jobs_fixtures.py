@@ -252,6 +252,11 @@ checkin_cases = [
     {"pending": [], "overdue": [], "overdue_invoices": [], "due_today": due_today, "checkin_id": "abcdef12"},
     {"pending": [], "overdue": [], "overdue_invoices": [], "due_today": [], "checkin_id": "abcdef12"},
     {"pending": [pending[0]], "overdue": [], "overdue_invoices": [], "due_today": [], "checkin_id": "zz"},
+    # Desvio 130 (implementado): a seção FATURAS VENCIDAS usa o nome do cartão. O dict traz 'cartao' (o que a query devolve) e
+    # 'nome_conta' (o que o código do Flask lê), então o Python real produz o texto que o .NET passou a gerar.
+    {"pending": [pending[0]], "overdue": [], "checkin_id": "abcdef12", "due_today": due_today,
+     "overdue_invoices": [{"id": 1, "cartao": "Inter", "nome_conta": "Inter", "data_vencimento": d("2026-03-10"), "status": "Aberta", "valor_total": Decimal("1234.50")},
+                          {"id": 2, "cartao": "Nubank", "nome_conta": "Nubank", "data_vencimento": d("2026-02-25"), "status": "Fechada", "valor_total": Decimal("80.00")}]},
 ]
 
 
@@ -272,7 +277,7 @@ for case in checkin_cases:
     out = Checkin.format_consolidated_checkin_message(case["pending"], case["overdue"], [], case["overdue_invoices"], case["due_today"], case["checkin_id"])
     checkin_messages.append({"input": jsonable(case), "output": out})
 
-# KeyError do desvio 130
+# KeyError do Flask (evidência do comportamento ANTIGO, desvio 130 já implementado): a query devolve 'cartao', o código lê 'nome_conta'.
 try:
     Checkin.format_consolidated_checkin_message(
         [pending[0]], [], [], [{"id": 1, "cartao": "Inter", "data_vencimento": d("2026-03-10"), "status": "Aberta", "valor_total": Decimal("10")}], [], "abcdef12")
@@ -310,8 +315,9 @@ report_cases = [
            [{"nome": "Lazer", "limite": 500.0, "usado": 650.0, "saldo": -150.0, "percentual": 130.0},
             {"nome": "Comida", "limite": 1500.0, "usado": 1000.0, "saldo": 500.0, "percentual": 66.666}],
            {"pagas": 20, "valor_pago": 4321.1, "pendentes": 3, "valor_pendente": 1234.5}),
-    report(12, 2025, 0.0, -2500.25, 4,
-           [], {"mes_atual": -2500.25, "mes_anterior": 0, "variacao_valor": -2500.25, "variacao_percentual": 0},
+    # Desvio 132: as despesas chegam em valor absoluto (positivas).
+    report(12, 2025, 0.0, 2500.25, 4,
+           [], {"mes_atual": 2500.25, "mes_anterior": 0, "variacao_valor": 2500.25, "variacao_percentual": 0},
            [], {"pagas": 0, "valor_pago": 0, "pendentes": 0, "valor_pendente": 0}),
     report(1, 2026, 1234567.891, 0.005, 1,
            [{"categoria": "Outros", "valor": 0.005, "percentual": 100.0}],
@@ -319,8 +325,24 @@ report_cases = [
            [{"nome": "Vazio", "limite": 0.0, "usado": 0.0, "saldo": 0.0, "percentual": 0}],
            {"pagas": 1, "valor_pago": 0.005, "pendentes": 1, "valor_pendente": 99999.995}),
 ]
-monthly_messages = [{"input": jsonable(case), "name": "Rafael Silva",
-                     "output": mr_ns["format_report_message"](case, "Rafael Silva")} for case in report_cases]
+report_cases.append(
+    # Gasto maior que a renda: saldo negativo, variação negativa e pote estourado (desvio 132 com despesas positivas).
+    report(3, 2026, 1000.0, 2345678.9, 12,
+           [{"categoria": "Moradia", "valor": 2000000.0, "percentual": 85.26}, {"categoria": "Lazer", "valor": 345678.9, "percentual": 14.74}],
+           {"mes_atual": 2345678.9, "mes_anterior": 3000000.0, "variacao_valor": -654321.1, "variacao_percentual": -21.8107},
+           [{"nome": "Lazer", "limite": 100.0, "usado": 345678.9, "saldo": -345578.9, "percentual": 345678.9}],
+           {"pagas": 10, "valor_pago": 2345678.9, "pendentes": 2, "valor_pendente": 12.5}))
+
+
+def to_ptbr(text):
+    """Desvio 133: o mesmo texto do Flask com milhar '.' e decimal ',' (1,234.56 -> 1.234,56; +8.0 -> +8,0)."""
+    return re.sub(r"(\d[\d,]*)\.(\d+)", lambda m: m.group(1).replace(",", ".") + "," + m.group(2), text)
+
+
+monthly_messages = []
+for case in report_cases:
+    legacy = mr_ns["format_report_message"](case, "Rafael Silva")
+    monthly_messages.append({"input": jsonable(case), "name": "Rafael Silva", "output": legacy, "output_ptbr": to_ptbr(legacy)})
 
 output = {
     "financial_alerts": financial_alerts,

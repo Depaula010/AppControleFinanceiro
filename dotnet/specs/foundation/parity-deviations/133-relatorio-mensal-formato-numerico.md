@@ -1,6 +1,6 @@
 # Desvio 133 — Relatório mensal: formato numérico em inglês
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 013, 2026-10-09); aprovado em 2026-10-09. Relatório mensal em pt-BR (`R$ 1.234,56`, `+12,5%`).
 - **Features afetadas:** 013
 - **Severidade:** correção
 

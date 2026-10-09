@@ -1,6 +1,6 @@
 # Desvio 137 — Resumo matinal sem Google suprime os alertas financeiros
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 013, 2026-10-09); aprovado em 2026-10-09. Com o resumo ativo e sem texto (ex.: sem Google), os alertas financeiros saem mesmo assim.
 - **Features afetadas:** 013
 - **Severidade:** correção
 

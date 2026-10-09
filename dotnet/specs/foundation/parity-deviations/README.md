@@ -113,16 +113,16 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [120](120-calendar-alerts-tipos-do-corpo.md) | Alertas de calendário: tipos do corpo de /config e /ativar | correção | 014 | aprovado |
 | [121](121-calendar-alerts-janela-30s.md) | Alertas de calendário: janela de ±30 s perde o aviso se o ciclo atrasa | correção | 014 | aprovado |
 | [122](122-calendar-alerts-usuario-inativo.md) | Alertas de calendário: usuário inativo ainda recebe alertas | correção | 014 | aprovado |
-| [130](130-checkin-fatura-vencida-derruba-mensagem.md) | Check-in: fatura vencida derruba a mensagem do usuário | correção | 013, 012 | aprovado |
-| [131](131-faturas-fechadas-fora-dos-alertas.md) | Faturas `Fechada` ficam fora dos alertas de vencimento | correção | 013, 012 | aprovado |
-| [132](132-relatorio-mensal-sinal-das-despesas.md) | Relatório mensal: sinal das despesas | correção | 013, 009 | aprovado |
-| [133](133-relatorio-mensal-formato-numerico.md) | Relatório mensal: formato numérico em inglês | correção | 013 | aprovado |
-| [134](134-motor-dia-29-a-31-em-mes-curto.md) | Motor: agendamento de dia 29 a 31 não dispara em mês curto | correção | 013, 005 | aprovado |
-| [135](135-populador-lembrete-variavel-vira-despesa.md) | Populador de fatura lança `LEMBRETE_VARIAVEL` como despesa | correção | 013, 004, 011 | aprovado |
-| [136](136-horario-com-minutos-nunca-dispara.md) | Horário com minutos nunca dispara (resumo matinal e check-in) | correção | 013, 007 | aprovado |
-| [137](137-resumo-sem-google-suprime-alertas-financeiros.md) | Resumo matinal sem Google suprime os alertas financeiros | correção | 013 | aprovado |
-| [138](138-resumo-matinal-chave-do-usuario.md) | Resumo matinal usa a chave do usuário | correção | 013, 008, 010 | aprovado |
-| [139](139-checkin-nao-confere-envio.md) | Check-in não confere o envio e deixa a sessão ativa | correção | 013, 012 | aprovado |
+| [130](130-checkin-fatura-vencida-derruba-mensagem.md) | Check-in: fatura vencida derruba a mensagem do usuário | correção | 013, 012 | implementado (feature 013, 2026-10-09) |
+| [131](131-faturas-fechadas-fora-dos-alertas.md) | Faturas `Fechada` ficam fora dos alertas de vencimento | correção | 013, 012 | implementado (feature 013, 2026-10-09) |
+| [132](132-relatorio-mensal-sinal-das-despesas.md) | Relatório mensal: sinal das despesas | correção | 013, 009 | implementado (feature 013, 2026-10-09) |
+| [133](133-relatorio-mensal-formato-numerico.md) | Relatório mensal: formato numérico em inglês | correção | 013 | implementado (feature 013, 2026-10-09) |
+| [134](134-motor-dia-29-a-31-em-mes-curto.md) | Motor: agendamento de dia 29 a 31 não dispara em mês curto | correção | 013, 005 | implementado (feature 013, 2026-10-09) |
+| [135](135-populador-lembrete-variavel-vira-despesa.md) | Populador de fatura lança `LEMBRETE_VARIAVEL` como despesa | correção | 013, 004, 011 | implementado (feature 013, 2026-10-09) |
+| [136](136-horario-com-minutos-nunca-dispara.md) | Horário com minutos nunca dispara (resumo matinal e check-in) | correção | 013, 007 | implementado (feature 013, 2026-10-09) |
+| [137](137-resumo-sem-google-suprime-alertas-financeiros.md) | Resumo matinal sem Google suprime os alertas financeiros | correção | 013 | implementado (feature 013, 2026-10-09) |
+| [138](138-resumo-matinal-chave-do-usuario.md) | Resumo matinal usa a chave do usuário | correção | 013, 008, 010 | implementado (feature 013, 2026-10-09) |
+| [139](139-checkin-nao-confere-envio.md) | Check-in não confere o envio e deixa a sessão ativa | correção | 013, 012 | implementado (feature 013, 2026-10-09) |
 | [150](150-whatsapp-confirmacao-sem-descricao.md) | Confirmar despesa/renda por WhatsApp falha quando não há agendamento | correção | 012 | aprovado |
 | [151](151-whatsapp-transferencia-quebrada.md) | Transferência por WhatsApp falha sempre | correção | 012 | aprovado |
 | [152](152-whatsapp-notificacoes-gemini-500.md) | Configurar Notificações pelo ramo do Gemini grava e responde 500 | correção | 012 | aprovado |

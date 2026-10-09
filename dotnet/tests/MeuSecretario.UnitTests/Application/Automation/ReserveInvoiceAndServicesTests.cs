@@ -399,15 +399,15 @@ public class InvoiceScheduleProcessorTests
 
         var stats = await Build(session).ProcessAsync(9, 3, new DateOnly(2026, 2, 15), CancellationToken.None);
 
-        stats.Processed.ShouldBe(3);
+        // Desvio 135: o LEMBRETE_VARIAVEL não é lançado na fatura (o usuário informa o valor real pelo bot).
+        stats.Processed.ShouldBe(2);
         stats.Fixed.ShouldBe(1);
         stats.Installments.ShouldBe(1);
-        stats.Reminders.ShouldBe(1);
+        stats.Reminders.ShouldBe(0);
         stats.Details.Select(d => (d.Type, d.Description, d.Amount)).ShouldBe(
         [
             ("FIXO", "Netflix", (object)"49.90"),
             ("PARCELADO", "Notebook (3/3)", "300.00"),
-            ("LEMBRETE_VARIAVEL", "Salário", "100.00"),
         ]);
         session.RequestedMonth.ShouldBe(2);
         session.Committed.ShouldBeTrue();
@@ -419,9 +419,22 @@ public class InvoiceScheduleProcessorTests
         session.Inserted[0].InvoiceId.ShouldBe(9);
         session.Inserted[0].AccountId.ShouldBe(3);
         session.Inserted[1].Amount.ShouldBe(-300m);
-        session.Inserted[2].Amount.ShouldBe(100m);
-        session.Inserted[2].DbType.ShouldBe("Renda");
+        session.Inserted.Count.ShouldBe(2);
+        session.Inserted.ShouldNotContain(i => i.ScheduleId == 3);
         session.Advanced.ShouldBe([(2, 3, false)]);
+    }
+
+    [Fact]
+    [Trait("AC", "013-54")]
+    public async Task AVariableReminder_IsNeverPostedToTheInvoice_Deviation135()
+    {
+        var session = new FakeSession([Fixed(1, "Luz", 150m, 10, "Despesa Essencial", "LEMBRETE_VARIAVEL")]);
+
+        var stats = await Build(session).ProcessAsync(9, 3, new DateOnly(2026, 2, 15), CancellationToken.None);
+
+        stats.ShouldBe(InvoiceScheduleStats.Empty, new StatsComparer());
+        session.Inserted.ShouldBeEmpty();
+        session.Committed.ShouldBeTrue();
     }
 
     [Fact]

@@ -18,8 +18,12 @@ RUN dotnet publish src/MeuSecretario.Api/MeuSecretario.Api.csproj -c Release -o 
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 # Debian (não Alpine): ICU e tzdata completos para America/Sao_Paulo e pt-BR.
+# Gráficos (ScottPlot/SkiaSharp, relatório mensal e intents de gráfico): a imagem aspnet não traz fontes nem as bibliotecas
+# nativas que o libSkiaSharp carrega (libfontconfig1, libfreetype6). Sem elas o PNG falha (texto em branco ou exceção de
+# biblioteca nativa, e o renderizador devolve null). fonts-dejavu-core cobre os acentos do português.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl tzdata \
+    && apt-get install -y --no-install-recommends curl tzdata fontconfig libfontconfig1 libfreetype6 fonts-dejavu-core \
+    && fc-cache -f \
     && rm -rf /var/lib/apt/lists/*
 
 ENV TZ=America/Sao_Paulo \

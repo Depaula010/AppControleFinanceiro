@@ -1,6 +1,6 @@
 # Desvio 139 — Check-in não confere o envio e deixa a sessão ativa
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 013, 2026-10-09); aprovado em 2026-10-09. Falha no envio do check-in apaga a sessão e a flag ativa; o resumo registra erro em vez de "enviada".
 - **Features afetadas:** 013, 012
 - **Severidade:** correção
 

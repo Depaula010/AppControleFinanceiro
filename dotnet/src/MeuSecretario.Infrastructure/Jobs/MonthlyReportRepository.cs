@@ -9,7 +9,8 @@ namespace MeuSecretario.Infrastructure.Jobs;
 
 /// <summary>
 /// Dados do relatório mensal, portados de <c>monthly_report_service.py:48-320</c> e <c>monthly_report_config_service.py:172-231</c>.
-/// Paridade com o Flask, inclusive o sinal das despesas (somas negativas; desvio proposto 132).
+/// Desvio 132: as despesas são gravadas negativas e aqui entram em valor absoluto (totais, top, comparação, potes e contas
+/// pagas); o Python somava o valor com sinal e o saldo, a variação e os potes saíam errados.
 /// </summary>
 public sealed class MonthlyReportRepository(IDbConnectionFactory connections) : IMonthlyReportRepository
 {
@@ -54,7 +55,8 @@ public sealed class MonthlyReportRepository(IDbConnectionFactory connections) : 
 
         var totalsRows = (await connection.QueryAsync<TotalRow>(new CommandDefinition(
             """
-            SELECT tipo_transacao AS Type, SUM(valor) AS Total, COUNT(*) AS Quantity
+            SELECT tipo_transacao AS Type, SUM(CASE WHEN tipo_transacao = 'Despesa' THEN ABS(valor) ELSE valor END) AS Total,
+                   COUNT(*) AS Quantity
             FROM transacoes
             WHERE usuario_id = @uid AND data_transacao BETWEEN @start AND @end
               AND consolidada = TRUE AND tipo_transacao IN ('Despesa', 'Renda')
@@ -83,7 +85,7 @@ public sealed class MonthlyReportRepository(IDbConnectionFactory connections) : 
 
         var topRows = await connection.QueryAsync<CategoryRow>(new CommandDefinition(
             """
-            SELECT sc.nome_sub AS Category, SUM(t.valor) AS Total
+            SELECT sc.nome_sub AS Category, SUM(ABS(t.valor)) AS Total
             FROM transacoes t
             INNER JOIN subcategoria sc ON t.subcategoria_id = sc.id
             WHERE t.usuario_id = @uid AND t.data_transacao BETWEEN @start AND @end
@@ -97,8 +99,8 @@ public sealed class MonthlyReportRepository(IDbConnectionFactory connections) : 
 
         var comparison = await connection.QuerySingleAsync<ComparisonRow>(new CommandDefinition(
             """
-            SELECT SUM(CASE WHEN data_transacao BETWEEN @start AND @end THEN valor ELSE 0 END) AS CurrentValue,
-                   SUM(CASE WHEN data_transacao BETWEEN @previousStart AND @previousEnd THEN valor ELSE 0 END) AS PreviousValue
+            SELECT SUM(CASE WHEN data_transacao BETWEEN @start AND @end THEN ABS(valor) ELSE 0 END) AS CurrentValue,
+                   SUM(CASE WHEN data_transacao BETWEEN @previousStart AND @previousEnd THEN ABS(valor) ELSE 0 END) AS PreviousValue
             FROM transacoes
             WHERE usuario_id = @uid AND tipo_transacao = 'Despesa' AND consolidada = TRUE
               AND data_transacao BETWEEN @previousStart AND @end
@@ -110,7 +112,7 @@ public sealed class MonthlyReportRepository(IDbConnectionFactory connections) : 
 
         var pots = await connection.QueryAsync<PotRow>(new CommandDefinition(
             """
-            SELECT p.nome_pote AS Name, p.valor_limite AS LimitValue, COALESCE(SUM(t.valor), 0) AS Used
+            SELECT p.nome_pote AS Name, p.valor_limite AS LimitValue, COALESCE(SUM(ABS(t.valor)), 0) AS Used
             FROM potesdegastos p
             LEFT JOIN potesubcategorias psc ON p.id = psc.pote_id
             LEFT JOIN transacoes t ON psc.subcategoria_id = t.subcategoria_id
@@ -125,7 +127,7 @@ public sealed class MonthlyReportRepository(IDbConnectionFactory connections) : 
 
         var paid = await connection.QuerySingleAsync<CountRow>(new CommandDefinition(
             """
-            SELECT COUNT(*) AS Quantity, SUM(valor) AS Total
+            SELECT COUNT(*) AS Quantity, SUM(ABS(valor)) AS Total
             FROM transacoes
             WHERE usuario_id = @uid AND data_transacao BETWEEN @start AND @end
               AND tipo_transacao = 'Despesa' AND consolidada = TRUE

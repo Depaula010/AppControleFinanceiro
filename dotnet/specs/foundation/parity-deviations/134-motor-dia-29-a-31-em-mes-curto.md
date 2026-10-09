@@ -1,6 +1,6 @@
 # Desvio 134 — Motor: agendamento de dia 29 a 31 não dispara em mês curto
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 013, 2026-10-09); aprovado em 2026-10-09. No último dia do mês o motor executa também os agendamentos com `dia_execucao` maior.
 - **Features afetadas:** 013, 005
 - **Severidade:** correção
 

@@ -19,7 +19,7 @@ public sealed record ReportPot(string Name, double Limit, double Used, double Ba
 
 public sealed record ReportAccounts(int Paid, double PaidValue, int Pending, double PendingValue);
 
-/// <summary><c>generate_monthly_report_data</c> (RN-013-73). Valores em <see cref="double"/> como o <c>float</c> do Python.</summary>
+/// <summary><c>generate_monthly_report_data</c> (RN-013-73). Valores em <see cref="double"/> como o <c>float</c> do Python; despesas em valor absoluto (desvio 132).</summary>
 public sealed record MonthlyReportData(
     int Month,
     int Year,
@@ -31,7 +31,7 @@ public sealed record MonthlyReportData(
     IReadOnlyList<ReportPot> Pots,
     ReportAccounts Accounts);
 
-/// <summary>Período e cálculos do relatório mensal, com o comportamento do Flask (inclusive o sinal; desvio proposto 132).</summary>
+/// <summary>Período e cálculos do relatório mensal. Os valores de despesa chegam <b>positivos</b> (desvio 132).</summary>
 public static class MonthlyReportRules
 {
     public static readonly string[] MonthNames =
@@ -96,7 +96,10 @@ public static class MonthlyReportRules
     }
 }
 
-/// <summary><c>format_report_message</c> (<c>monthly_report_service.py:374-441</c>): texto literal, números no formato Python (desvio proposto 133).</summary>
+/// <summary>
+/// <c>format_report_message</c> (<c>monthly_report_service.py:374-441</c>): texto literal; números em pt-BR, <c>R$ 1.234,56</c> e
+/// <c>+12,5%</c> (desvio 133: o Python escrevia <c>1,234.56</c>).
+/// </summary>
 public static class MonthlyReportFormatter
 {
     public static string Format(MonthlyReportData data, string userName)
@@ -110,16 +113,16 @@ public static class MonthlyReportFormatter
         message.Append(CultureInfo.InvariantCulture, $"Olá, {userName}!\n\n");
 
         message.Append("💰 *RESUMO FINANCEIRO*\n");
-        message.Append(CultureInfo.InvariantCulture, $"• Receitas: R$ {PyNumber.Thousands(totals.TotalIncome)}\n");
-        message.Append(CultureInfo.InvariantCulture, $"• Despesas: R$ {PyNumber.Thousands(totals.TotalExpenses)}\n");
-        message.Append(CultureInfo.InvariantCulture, $"• Saldo: R$ {PyNumber.Thousands(totals.PeriodBalance)}\n");
+        message.Append(CultureInfo.InvariantCulture, $"• Receitas: R$ {PyNumber.ThousandsPtBr(totals.TotalIncome)}\n");
+        message.Append(CultureInfo.InvariantCulture, $"• Despesas: R$ {PyNumber.ThousandsPtBr(totals.TotalExpenses)}\n");
+        message.Append(CultureInfo.InvariantCulture, $"• Saldo: R$ {PyNumber.ThousandsPtBr(totals.PeriodBalance)}\n");
         message.Append(CultureInfo.InvariantCulture, $"• Transações: {totals.TotalTransactions}\n\n");
 
         var symbol = comparison.VariationValue > 0 ? "📈" : "📉";
         message.Append(CultureInfo.InvariantCulture, $"{symbol} *COMPARAÇÃO COM MÊS ANTERIOR*\n");
-        message.Append(CultureInfo.InvariantCulture, $"• Mês anterior: R$ {PyNumber.Thousands(comparison.PreviousMonth)}\n");
-        message.Append(CultureInfo.InvariantCulture, $"• Variação: R$ {PyNumber.Thousands(comparison.VariationValue)} ");
-        message.Append(CultureInfo.InvariantCulture, $"({PyNumber.WithSign(comparison.VariationPercent)}%)\n\n");
+        message.Append(CultureInfo.InvariantCulture, $"• Mês anterior: R$ {PyNumber.ThousandsPtBr(comparison.PreviousMonth)}\n");
+        message.Append(CultureInfo.InvariantCulture, $"• Variação: R$ {PyNumber.ThousandsPtBr(comparison.VariationValue)} ");
+        message.Append(CultureInfo.InvariantCulture, $"({PyNumber.WithSignPtBr(comparison.VariationPercent)}%)\n\n");
 
         if (data.TopCategories.Count > 0)
         {
@@ -128,7 +131,7 @@ public static class MonthlyReportFormatter
             foreach (var category in data.TopCategories)
             {
                 message.Append(CultureInfo.InvariantCulture,
-                    $"{index}. {category.Category}: R$ {PyNumber.Thousands(category.Value)} ({PyNumber.Fixed(category.Percent, 1)}%)\n");
+                    $"{index}. {category.Category}: R$ {PyNumber.ThousandsPtBr(category.Value)} ({PyNumber.FixedPtBr(category.Percent, 1)}%)\n");
                 index++;
             }
 
@@ -142,16 +145,16 @@ public static class MonthlyReportFormatter
             {
                 var emoji = pot.Percent <= 100 ? "✅" : "⚠️";
                 message.Append(CultureInfo.InvariantCulture, $"{emoji} {pot.Name}:\n");
-                message.Append(CultureInfo.InvariantCulture, $"   Usado: R$ {PyNumber.Thousands(pot.Used)} / R$ {PyNumber.Thousands(pot.Limit)}\n");
-                message.Append(CultureInfo.InvariantCulture, $"   Saldo: R$ {PyNumber.Thousands(pot.Balance)} ({PyNumber.Fixed(pot.Percent, 1)}%)\n");
+                message.Append(CultureInfo.InvariantCulture, $"   Usado: R$ {PyNumber.ThousandsPtBr(pot.Used)} / R$ {PyNumber.ThousandsPtBr(pot.Limit)}\n");
+                message.Append(CultureInfo.InvariantCulture, $"   Saldo: R$ {PyNumber.ThousandsPtBr(pot.Balance)} ({PyNumber.FixedPtBr(pot.Percent, 1)}%)\n");
             }
 
             message.Append('\n');
         }
 
         message.Append("💳 *STATUS DE CONTAS*\n");
-        message.Append(CultureInfo.InvariantCulture, $"✅ Pagas: {data.Accounts.Paid} (R$ {PyNumber.Thousands(data.Accounts.PaidValue)})\n");
-        message.Append(CultureInfo.InvariantCulture, $"⏳ Pendentes: {data.Accounts.Pending} (R$ {PyNumber.Thousands(data.Accounts.PendingValue)})\n\n");
+        message.Append(CultureInfo.InvariantCulture, $"✅ Pagas: {data.Accounts.Paid} (R$ {PyNumber.ThousandsPtBr(data.Accounts.PaidValue)})\n");
+        message.Append(CultureInfo.InvariantCulture, $"⏳ Pendentes: {data.Accounts.Pending} (R$ {PyNumber.ThousandsPtBr(data.Accounts.PendingValue)})\n\n");
         message.Append("_📷 Veja o gráfico de pizza anexo para visualização das categorias!_");
         return message.ToString();
     }

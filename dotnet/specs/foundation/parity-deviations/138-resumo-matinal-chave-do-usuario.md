@@ -1,6 +1,6 @@
 # Desvio 138 — Resumo matinal usa a chave do usuário
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 013, 2026-10-09); aprovado em 2026-10-09. `UserId` passado ao `ILlmClient` e ao `IWeatherClient` no resumo matinal.
 - **Features afetadas:** 013, 008, 010
 - **Severidade:** correção
 

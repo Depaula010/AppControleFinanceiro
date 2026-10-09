@@ -81,10 +81,12 @@ public static class ScheduleRules
         periodicity != "ANUAL" || scheduleMonth == month;
 
     /// <summary>
-    /// Paridade com <c>a.dia_execucao = :dia_hoje</c>: dia 29 a 31 não dispara em mês curto (desvio proposto 134, não
-    /// implementado).
+    /// O agendamento <c>FIXO</c>/<c>PARCELADO</c> é do dia de hoje? Igualdade com o dia do mês e, no <b>último dia do mês</b>,
+    /// também os de <c>dia_execucao</c> maior (desvio 134: o Python só comparava <c>a.dia_execucao = :dia_hoje</c> e as contas
+    /// de dia 29 a 31 ficavam sem lançamento em mês curto).
     /// </summary>
-    public static bool MotorDayMatches(int scheduleDay, DateOnly today) => scheduleDay == today.Day;
+    public static bool MotorDayMatches(int scheduleDay, DateOnly today) =>
+        scheduleDay == today.Day || (JobClock.IsLastDayOfMonth(today) && scheduleDay > today.Day);
 
     /// <summary>
     /// Data de vencimento a lembrar hoje, ou <c>null</c>. O lembrete cai em <c>vencimento − notificar_antes_dias</c> (desvio

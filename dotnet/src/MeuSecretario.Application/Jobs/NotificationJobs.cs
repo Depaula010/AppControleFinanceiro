@@ -46,7 +46,7 @@ public sealed class DailyBriefingService(
         BriefingWeather? main = null;
         if (!string.IsNullOrEmpty(location.City))
         {
-            main = await WeatherAsync(location.City, location.State, cancellationToken);
+            main = await WeatherAsync(location.City, location.State, userId, cancellationToken);
         }
 
         var extra = new List<BriefingExtraWeather>();
@@ -57,7 +57,7 @@ public sealed class DailyBriefingService(
                 continue;
             }
 
-            if (await WeatherAsync(city, state, cancellationToken) is { } found)
+            if (await WeatherAsync(city, state, userId, cancellationToken) is { } found)
             {
                 extra.Add(new BriefingExtraWeather(city, state, found));
             }
@@ -93,7 +93,7 @@ public sealed class DailyBriefingService(
     }
 
     /// <summary>Texto final: sem eventos, a mensagem simples; com eventos, a IA (com fallback básico).</summary>
-    public async Task<string> GenerateMessageAsync(BriefingData data, CancellationToken cancellationToken)
+    public async Task<string> GenerateMessageAsync(BriefingData data, int userId, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(data);
         if (data.TotalEvents == 0)
@@ -103,8 +103,8 @@ public sealed class DailyBriefingService(
 
         try
         {
-            // Chave do sistema (UserId nulo), como o Python (desvio proposto 138).
-            var text = await llm.GenerateTextAsync(new LlmRequest(BriefingPrompt.Build(data)), cancellationToken);
+            // Desvio 138: a chave e o uso são do usuário (o Python usava a chave do sistema).
+            var text = await llm.GenerateTextAsync(new LlmRequest(BriefingPrompt.Build(data), userId), cancellationToken);
             return BriefingPrompt.CleanResponse(text);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
@@ -114,9 +114,10 @@ public sealed class DailyBriefingService(
         }
     }
 
-    private async Task<BriefingWeather?> WeatherAsync(string city, string? state, CancellationToken cancellationToken)
+    private async Task<BriefingWeather?> WeatherAsync(string city, string? state, int userId, CancellationToken cancellationToken)
     {
-        var info = await weather.GetWeatherAsync(city, state, null, cancellationToken);
+        // Desvio 138: a chave e o uso são do usuário (o Python usava a chave do sistema).
+        var info = await weather.GetWeatherAsync(city, state, userId, cancellationToken);
         return info is null ? null : new BriefingWeather(info.FullDescription, info.Temperature, info.FeelsLike, info.RainChance);
     }
 }
@@ -181,18 +182,27 @@ public sealed class DailyBriefingJob(
 
                 if (settings.MorningSummaryActive)
                 {
-                    var data = await briefing.PrepareAsync(recipient.UserId, today, cancellationToken);
-                    if (data is null)
+                    try
                     {
-                        log.Failure(Name, $"Erro ao preparar dados para usuário {id}");
+                        var data = await briefing.PrepareAsync(recipient.UserId, today, cancellationToken);
+                        if (data is null)
+                        {
+                            log.Failure(Name, $"Erro ao preparar dados para usuário {id}");
+                        }
+                        else
+                        {
+                            summary = await briefing.GenerateMessageAsync(data, recipient.UserId, cancellationToken);
+                        }
                     }
-                    else
+                    catch (Exception ex) when (ex is not OperationCanceledException)
                     {
-                        summary = await briefing.GenerateMessageAsync(data, cancellationToken);
+                        // Desvio 137: a falha do resumo não pode levar embora os alertas financeiros.
+                        log.Failure(Name, $"Erro ao gerar o resumo do usuário {id}: {ex.GetType().Name}");
                     }
                 }
 
-                if (settings.FinancialAlertsActive && !settings.MorningSummaryActive)
+                // Desvio 137: com o resumo ativo mas sem texto (ex.: Google desconectado), os alertas saem mesmo assim.
+                if (settings.FinancialAlertsActive && (!settings.MorningSummaryActive || string.IsNullOrEmpty(summary)))
                 {
                     var upcoming = await alerts.GetUpcomingAsync(recipient.UserId, today, cancellationToken);
                     if (upcoming.Any)
@@ -212,9 +222,15 @@ public sealed class DailyBriefingJob(
                     continue;
                 }
 
-                // O retorno não é conferido e o log diz "enviada" (paridade; desvio proposto 139).
-                _ = await bot.SendTextAsync(recipient.WhatsappNumber, message, cancellationToken);
-                log.Info(Name, $"Mensagem enviada para usuário {id}");
+                // Desvio 139: o retorno do bot é conferido; falha vira erro registrado, não "enviada".
+                if (await bot.SendTextAsync(recipient.WhatsappNumber, message, cancellationToken))
+                {
+                    log.Info(Name, $"Mensagem enviada para usuário {id}");
+                }
+                else
+                {
+                    log.Failure(Name, $"Falha ao enviar a mensagem para usuário {id}");
+                }
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
@@ -248,7 +264,7 @@ public sealed class DailyBriefingJob(
                     continue;
                 }
 
-                var message = await briefing.GenerateMessageAsync(data, cancellationToken);
+                var message = await briefing.GenerateMessageAsync(data, recipient.UserId, cancellationToken);
                 if (string.IsNullOrEmpty(message))
                 {
                     errors++;
@@ -282,7 +298,7 @@ public sealed class DailyBriefingJob(
             return new DailyBriefingTestResult(DailyBriefingTestOutcome.PrepareFailed, 0, null);
         }
 
-        var message = await briefing.GenerateMessageAsync(data, cancellationToken);
+        var message = await briefing.GenerateMessageAsync(data, userId, cancellationToken);
         if (string.IsNullOrEmpty(message))
         {
             return new DailyBriefingTestResult(DailyBriefingTestOutcome.EmptyMessage, data.TotalEvents, null);
@@ -353,14 +369,25 @@ public sealed class NightlyCheckinService(ICheckinQueries queries, ICache cache,
     public Task<CheckinSnapshot> CollectSnapshotAsync(int userId, DateOnly date, CancellationToken cancellationToken) =>
         queries.GetSnapshotAsync(userId, date, cancellationToken);
 
-    /// <summary>Grava a sessão e a flag ativa (1 h); devolve o <c>checkin_id</c> (8 caracteres de um UUID).</summary>
-    public async Task<string> CreateSessionAsync(string whatsappNumber, IEnumerable<CheckinBill> bills, CancellationToken cancellationToken)
+    /// <summary><c>checkin_id</c>: 8 caracteres de um UUID.</summary>
+    public static string NewCheckinId() => Guid.NewGuid().ToString()[..8];
+
+    /// <summary>Grava a sessão e a flag ativa (1 h); devolve o <c>checkin_id</c> (<paramref name="checkinId"/> ou um novo).</summary>
+    public async Task<string> CreateSessionAsync(
+        string whatsappNumber, IEnumerable<CheckinBill> bills, CancellationToken cancellationToken, string? checkinId = null)
     {
-        var checkinId = Guid.NewGuid().ToString()[..8];
+        checkinId ??= NewCheckinId();
         var session = CheckinSession.Build(bills, clock.Today);
         await cache.SetJsonAsync(CacheKeys.NightlyCheckin(whatsappNumber, checkinId), session, SessionTtl, cancellationToken);
         await cache.SetJsonAsync(CacheKeys.NightlyCheckinActive(whatsappNumber), checkinId, SessionTtl, cancellationToken);
         return checkinId;
+    }
+
+    /// <summary>Apaga a sessão e a flag ativa (desvio 139: o envio falhou e o usuário não viu o check-in).</summary>
+    public async Task DeleteSessionAsync(string whatsappNumber, string checkinId, CancellationToken cancellationToken)
+    {
+        await cache.DeleteAsync(CacheKeys.NightlyCheckin(whatsappNumber, checkinId), cancellationToken);
+        await cache.DeleteAsync(CacheKeys.NightlyCheckinActive(whatsappNumber), cancellationToken);
     }
 
     public string? FormatConsolidatedMessage(CheckinSnapshot snapshot, string? checkinId) =>
@@ -417,9 +444,8 @@ public sealed class NightlyCheckinJob(
                     continue;
                 }
 
-                var checkinId = await checkin.CreateSessionAsync(
-                    recipient.WhatsappNumber, [.. snapshot.PendingBills, .. snapshot.OverdueBills], cancellationToken);
-
+                // Desvio 130: a mensagem é montada antes de a sessão existir (fatura vencida já não derruba o texto).
+                var checkinId = NightlyCheckinService.NewCheckinId();
                 var message = checkin.FormatConsolidatedMessage(snapshot, checkinId);
                 if (string.IsNullOrEmpty(message))
                 {
@@ -427,7 +453,29 @@ public sealed class NightlyCheckinJob(
                     continue;
                 }
 
-                _ = await bot.SendTextAsync(recipient.WhatsappNumber, message, cancellationToken);
+                await checkin.CreateSessionAsync(
+                    recipient.WhatsappNumber, [.. snapshot.PendingBills, .. snapshot.OverdueBills], cancellationToken, checkinId);
+
+                // Desvio 139: a sessão só vale se o usuário recebeu o check-in.
+                var sent = false;
+                try
+                {
+                    sent = await bot.SendTextAsync(recipient.WhatsappNumber, message, cancellationToken);
+                }
+                finally
+                {
+                    if (!sent)
+                    {
+                        await checkin.DeleteSessionAsync(recipient.WhatsappNumber, checkinId, CancellationToken.None);
+                    }
+                }
+
+                if (!sent)
+                {
+                    log.Failure(Name, $"Falha ao enviar o check-in para usuário {id}; sessão removida");
+                    continue;
+                }
+
                 log.Info(Name, $"Check-in consolidado enviado para usuário {id}: {snapshot.PendingBills.Count.ToString(CultureInfo.InvariantCulture)} pendente(s), " +
                     $"{snapshot.OverdueBills.Count.ToString(CultureInfo.InvariantCulture)} atrasada(s), {snapshot.OverdueInvoices.Count.ToString(CultureInfo.InvariantCulture)} fatura(s) vencida(s)");
             }

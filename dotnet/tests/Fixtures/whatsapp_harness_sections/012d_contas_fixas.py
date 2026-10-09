@@ -298,9 +298,11 @@ bills("atrasadas_so_cartao_vira_vazio", "contas atrasadas", intent="Contas Atras
     pending=[ck_bill(1, "Spotify", 21.9, 6, "2026-10-06", tipo_conta="Cartão de Crédito")]))
 bills("atrasadas_fatura_hoje", "contas atrasadas", intent="Contas Atrasadas", snapshot=snap(
     today_invoices=[{"id": 1, "nome_conta": "Cartão Inter", "data_vencimento": "2026-10-07", "status": "Aberta", "valor_total": 1250.5}]))
-bills("atrasadas_fatura_vencida_keyerror", "contas atrasadas", intent="Contas Atrasadas", snapshot=snap(
+# Desvio 130 (implementado): o Flask real lê fatura['nome_conta'] e a query devolve 'cartao' (KeyError). O cenário traz as duas chaves,
+# de modo que o código real do Flask produza o texto que o .NET passou a gerar (nome do cartão na seção FATURAS VENCIDAS).
+bills("atrasadas_fatura_vencida", "contas atrasadas", intent="Contas Atrasadas", snapshot=snap(
     pending=[ck_bill(1, "Aluguel", 1500.0, 7, "2026-10-07")],
-    invoices=[{"id": 1, "cartao": "Cartão Inter", "data_vencimento": "2026-10-01", "status": "Aberta", "valor_total": 300.0}]), deviation="130")
+    invoices=[{"id": 1, "cartao": "Cartão Inter", "nome_conta": "Cartão Inter", "data_vencimento": "2026-10-01", "status": "Aberta", "valor_total": 300.0}]), deviation="130")
 bills("atrasadas_erro_no_banco", "contas atrasadas", intent="Contas Atrasadas", db_fail="snapshot", snapshot=snap())
 bills("atrasadas_data_diferente", "contas atrasadas", intent="Contas Atrasadas", today="2026-03-02", snapshot=snap(pending=[
     ck_bill(1, "Aluguel", 1500.0, 28, "2026-02-28"), ck_bill(2, "Luz", 230.0, 2, "2026-03-02")]))

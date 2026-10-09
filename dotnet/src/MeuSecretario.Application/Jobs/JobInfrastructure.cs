@@ -42,10 +42,11 @@ public static class JobSchedules
 
     public static IReadOnlyList<JobSchedule> All { get; } =
     [
-        new(MorningSummary, MorningSummary, "0 0 * * * ?"),
+        // Desvio 136: a cada minuto (o Python rodava só no minuto 0 e comparava o TIME por igualdade).
+        new(MorningSummary, MorningSummary, "0 * * * * ?"),
         new(StartOfMonthReport, StartOfMonthReport, "0 0 8 1 * ?"),
         new(EndOfMonthReport, EndOfMonthReport, "0 0 23 * * ?"),
-        new(NightlyCheckin, NightlyCheckin, "0 0 18,19,20,21,22,23 * * ?"),
+        new(NightlyCheckin, NightlyCheckin, "0 * 18-23 * * ?"),
         new(TaskAlerts, TaskAlerts, "0 * * * * ?"),
         new(InvoiceProcessor, InvoiceProcessor, "0 1 0 * * ?"),
         new(ScheduleMotor, ScheduleMotor, "0 5 0 * * ?"),

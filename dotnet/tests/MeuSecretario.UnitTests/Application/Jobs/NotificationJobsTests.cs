@@ -59,6 +59,21 @@ public class DailyBriefingJobTests
         await _config.Received(1).ListMorningUsersAsync(new TimeOnly(7, 0), Arg.Any<CancellationToken>());
     }
 
+    [Theory]
+    [Trait("AC", "013-20")]
+    [InlineData(7, 30)]
+    [InlineData(6, 1)]
+    [InlineData(23, 59)]
+    public async Task Execute_SelectsByTheMinuteOfTheCycle_Deviation136(int hour, int minute)
+    {
+        _h.At(hour, minute, 15);
+        _config.GetOrCreateAsync(1, Arg.Any<CancellationToken>()).Returns(new UserNotificationConfig(true, true));
+
+        await Job().ExecuteAsync(CancellationToken.None);
+
+        await _config.Received(1).ListMorningUsersAsync(new TimeOnly(hour, minute), Arg.Any<CancellationToken>());
+    }
+
     [Fact]
     [Trait("AC", "013-20")]
     public async Task Execute_NoUsers_SendsNothing()
@@ -75,7 +90,7 @@ public class DailyBriefingJobTests
     public async Task Execute_NoEvents_SendsTheSimpleMessageWithWeatherAndAlerts()
     {
         _config.GetOrCreateAsync(1, Arg.Any<CancellationToken>()).Returns(new UserNotificationConfig(true, true));
-        _weather.GetWeatherAsync("São Paulo", "SP", null, Arg.Any<CancellationToken>()).Returns(new WeatherInfo(24, "Nublado", "☁", 24, 60, 70, "Nublado, 24°C"));
+        _weather.GetWeatherAsync("São Paulo", "SP", 1, Arg.Any<CancellationToken>()).Returns(new WeatherInfo(24, "Nublado", "☁", 24, 60, 70, "Nublado, 24°C"));
         _alerts.GetUpcomingAsync(1, Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns(OneBill());
 
         await Job().ExecuteAsync(CancellationToken.None);
@@ -88,7 +103,7 @@ public class DailyBriefingJobTests
 
     [Fact]
     [Trait("AC", "013-23")]
-    public async Task Execute_WithEvents_AsksTheModelWithTheSystemKey_AndSendsTheCleanedText()
+    public async Task Execute_WithEvents_AsksTheModelWithTheUsersKey_AndSendsTheCleanedText()
     {
         _config.GetOrCreateAsync(1, Arg.Any<CancellationToken>()).Returns(new UserNotificationConfig(true, false));
         _calendar.GetEventsInRangeAsync(1, Arg.Any<DateOnly>(), Arg.Any<DateOnly>(), Arg.Any<CancellationToken>())
@@ -98,7 +113,7 @@ public class DailyBriefingJobTests
         await Job().ExecuteAsync(CancellationToken.None);
 
         await _llm.Received(1).GenerateTextAsync(
-            Arg.Is<LlmRequest>(r => r.UserId == null && r.Cache == null && r.Prompt.Contains("1. 09:00 (30 min) - Daily", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
+            Arg.Is<LlmRequest>(r => r.UserId == 1 && r.Cache == null && r.Prompt.Contains("1. 09:00 (30 min) - Daily", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
         await _h.Bot.Received(1).SendTextAsync("5511", "Bom dia!", Arg.Any<CancellationToken>());
     }
 
@@ -118,9 +133,36 @@ public class DailyBriefingJobTests
 
     [Fact]
     [Trait("AC", "013-24")]
-    public async Task Execute_BothActiveAndGoogleDisconnected_SendsNothing_Parity137()
+    public async Task Execute_BothActiveAndGoogleDisconnected_StillSendsTheFinancialAlerts_Deviation137()
     {
         _config.GetOrCreateAsync(1, Arg.Any<CancellationToken>()).Returns(new UserNotificationConfig(true, true));
+        _calendar.GetEventsInRangeAsync(1, Arg.Any<DateOnly>(), Arg.Any<DateOnly>(), Arg.Any<CancellationToken>())
+            .Throws(new GoogleNotConnectedException("x"));
+        _alerts.GetUpcomingAsync(1, Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns(OneBill());
+
+        await Job().ExecuteAsync(CancellationToken.None);
+
+        await _h.Bot.Received(1).SendTextAsync("5511", Arg.Is<string>(m => m.StartsWith("🌅 *Bom dia!*\n\n💰 *ALERTAS FINANCEIROS*", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    [Trait("AC", "013-24")]
+    public async Task Execute_BothActiveGoogleDisconnectedAndNothingDue_SendsNothing()
+    {
+        _config.GetOrCreateAsync(1, Arg.Any<CancellationToken>()).Returns(new UserNotificationConfig(true, true));
+        _calendar.GetEventsInRangeAsync(1, Arg.Any<DateOnly>(), Arg.Any<DateOnly>(), Arg.Any<CancellationToken>())
+            .Throws(new GoogleNotConnectedException("x"));
+
+        await Job().ExecuteAsync(CancellationToken.None);
+
+        await _h.Bot.DidNotReceiveWithAnyArgs().SendTextAsync(default!, default!, default);
+    }
+
+    [Fact]
+    [Trait("AC", "013-24")]
+    public async Task Execute_SummaryActiveOnly_AndGoogleDisconnected_SendsNothing()
+    {
+        _config.GetOrCreateAsync(1, Arg.Any<CancellationToken>()).Returns(new UserNotificationConfig(true, false));
         _calendar.GetEventsInRangeAsync(1, Arg.Any<DateOnly>(), Arg.Any<DateOnly>(), Arg.Any<CancellationToken>())
             .Throws(new GoogleNotConnectedException("x"));
         _alerts.GetUpcomingAsync(1, Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns(OneBill());
@@ -132,7 +174,35 @@ public class DailyBriefingJobTests
 
     [Fact]
     [Trait("AC", "013-24")]
-    public async Task Execute_OnlyAlertsActive_SendsAlertsWithGreeting_AndIgnoresBotFailure()
+    public async Task Execute_SummaryThrowsUnexpectedly_StillSendsTheFinancialAlerts_Deviation137()
+    {
+        _config.GetOrCreateAsync(1, Arg.Any<CancellationToken>()).Returns(new UserNotificationConfig(true, true));
+        _users.GetLocationAsync(1, Arg.Any<CancellationToken>()).Throws(new InvalidOperationException("x"));
+        _alerts.GetUpcomingAsync(1, Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns(OneBill());
+
+        await Job().ExecuteAsync(CancellationToken.None);
+
+        await _h.Bot.Received(1).SendTextAsync("5511", Arg.Is<string>(m => m.Contains("ALERTAS FINANCEIROS", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    [Trait("AC", "013-24")]
+    public async Task Execute_OnlyAlertsActive_SendsAlertsWithGreeting()
+    {
+        _config.GetOrCreateAsync(1, Arg.Any<CancellationToken>()).Returns(new UserNotificationConfig(false, true));
+        _alerts.GetUpcomingAsync(1, Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns(OneBill());
+
+        await Job().ExecuteAsync(CancellationToken.None);
+
+        await _h.Bot.Received(1).SendTextAsync("5511", Arg.Is<string>(m => m.StartsWith("🌅 *Bom dia!*\n\n💰 *ALERTAS FINANCEIROS*", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
+        await _calendar.DidNotReceiveWithAnyArgs().GetEventsInRangeAsync(default, default, default, default);
+        _h.Log.Lines.ShouldNotContain(l => l.StartsWith("ERROR", StringComparison.Ordinal));
+        _h.Log.Lines.ShouldContain(l => l.Contains("Mensagem enviada", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    [Trait("AC", "013-24")]
+    public async Task Execute_BotFailure_IsLoggedAsAnError_NotAsSent_Deviation139()
     {
         _config.GetOrCreateAsync(1, Arg.Any<CancellationToken>()).Returns(new UserNotificationConfig(false, true));
         _alerts.GetUpcomingAsync(1, Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns(OneBill());
@@ -140,9 +210,8 @@ public class DailyBriefingJobTests
 
         await Job().ExecuteAsync(CancellationToken.None);
 
-        await _h.Bot.Received(1).SendTextAsync("5511", Arg.Is<string>(m => m.StartsWith("🌅 *Bom dia!*\n\n💰 *ALERTAS FINANCEIROS*", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
-        await _calendar.DidNotReceiveWithAnyArgs().GetEventsInRangeAsync(default, default, default, default);
-        _h.Log.Lines.ShouldNotContain(l => l.StartsWith("ERROR", StringComparison.Ordinal));
+        _h.Log.Lines.ShouldContain(l => l.StartsWith("ERROR", StringComparison.Ordinal) && l.Contains("Falha ao enviar", StringComparison.Ordinal));
+        _h.Log.Lines.ShouldNotContain(l => l.Contains("Mensagem enviada", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -169,8 +238,8 @@ public class DailyBriefingJobTests
             new CalendarEvent("b", "Almoço", "2026-03-18T12:00:00-03:00", "2026-03-18T13:00:00-03:00", "Rest, Campinas, SP", "", false, null),
             new CalendarEvent("c", "Reunião", "2026-03-18T14:00:00-03:00", "2026-03-18T15:00:00-03:00", "Av X, São Paulo, SP", "", false, null),
         ]);
-        _weather.GetWeatherAsync("São Paulo", "SP", null, Arg.Any<CancellationToken>()).Returns(new WeatherInfo(20, "c", "e", 20, 1, 10, "SP 20"));
-        _weather.GetWeatherAsync("Campinas", "SP", null, Arg.Any<CancellationToken>()).Returns(new WeatherInfo(25, "c", "e", 25, 1, 10, "CPS 25"));
+        _weather.GetWeatherAsync("São Paulo", "SP", 1, Arg.Any<CancellationToken>()).Returns(new WeatherInfo(20, "c", "e", 20, 1, 10, "SP 20"));
+        _weather.GetWeatherAsync("Campinas", "SP", 1, Arg.Any<CancellationToken>()).Returns(new WeatherInfo(25, "c", "e", 25, 1, 10, "CPS 25"));
         _alerts.GetUpcomingAsync(1, new DateOnly(2026, 3, 18), Arg.Any<CancellationToken>()).Returns(OneBill());
 
         var data = await Service().PrepareAsync(1, new DateOnly(2026, 3, 18), CancellationToken.None);
@@ -183,7 +252,8 @@ public class DailyBriefingJobTests
         data.RemoteEvents.ShouldBe(1);
         data.InPersonEvents.ShouldBe(2);
         data.Alerts.Any.ShouldBeTrue();
-        await _weather.Received(1).GetWeatherAsync("São Paulo", "SP", null, Arg.Any<CancellationToken>());
+        await _weather.Received(1).GetWeatherAsync("São Paulo", "SP", 1, Arg.Any<CancellationToken>());
+        await _weather.DidNotReceive().GetWeatherAsync(Arg.Any<string>(), Arg.Any<string?>(), null, Arg.Any<CancellationToken>()); // desvio 138
     }
 
     [Fact]
@@ -344,18 +414,75 @@ public class NightlyCheckinJobTests
 
     [Fact]
     [Trait("AC", "013-46")]
-    public async Task Execute_OverdueInvoice_FailsTheUserOnly_LikeThePythonKeyError()
+    public async Task Execute_OverdueInvoice_SendsTheMessageWithTheCardName_AndCreatesTheSession_Deviation130()
     {
-        _config.ListCheckinUsersAsync(Arg.Any<TimeOnly>(), Arg.Any<CancellationToken>()).Returns([new NotifiedUser(1, "5511"), new NotifiedUser(2, "5522")]);
         _queries.GetSnapshotAsync(1, Arg.Any<DateOnly>(), Arg.Any<CancellationToken>())
             .Returns(new CheckinSnapshot([Bill(1)], [], [new OverdueInvoice(1, "Inter", new DateOnly(2026, 3, 10), "Aberta", 10m)], []));
+
+        await Job().ExecuteAsync(CancellationToken.None);
+
+        await _h.Bot.Received(1).SendTextAsync("5511", Arg.Is<string>(m => m.Contains("🔴 *FATURAS VENCIDAS:*\n• Inter - R$ 10,00 - Venceu em 10/03/2026", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
+        _h.Cache.RawValue(CacheKeys.NightlyCheckinActive("5511")).ShouldNotBeNull();
+    }
+
+    [Fact]
+    [Trait("AC", "013-46")]
+    public async Task Execute_MessageFailsToBuild_NoSessionIsCreated_AndTheNextUserStillGetsTheirs_Deviation130()
+    {
+        _config.ListCheckinUsersAsync(Arg.Any<TimeOnly>(), Arg.Any<CancellationToken>()).Returns([new NotifiedUser(1, "5511"), new NotifiedUser(2, "5522")]);
+        _queries.GetSnapshotAsync(1, Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Throws(new InvalidOperationException("x"));
         _queries.GetSnapshotAsync(2, Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns(new CheckinSnapshot([Bill(2)], [], [], []));
 
         await Job().ExecuteAsync(CancellationToken.None);
 
+        _h.Cache.RawValue(CacheKeys.NightlyCheckinActive("5511")).ShouldBeNull();
         await _h.Bot.DidNotReceive().SendTextAsync("5511", Arg.Any<string>(), Arg.Any<CancellationToken>());
         await _h.Bot.Received(1).SendTextAsync("5522", Arg.Any<string>(), Arg.Any<CancellationToken>());
-        _h.Cache.RawValue(CacheKeys.NightlyCheckinActive("5511")).ShouldNotBeNull();
+        _h.Cache.RawValue(CacheKeys.NightlyCheckinActive("5522")).ShouldNotBeNull();
+    }
+
+    [Fact]
+    [Trait("AC", "013-46")]
+    public async Task Execute_SendFails_RemovesTheSessionAndTheActiveFlag_AndLogsTheFailure_Deviation139()
+    {
+        _config.ListCheckinUsersAsync(Arg.Any<TimeOnly>(), Arg.Any<CancellationToken>()).Returns([new NotifiedUser(1, "5511"), new NotifiedUser(2, "5522")]);
+        _queries.GetSnapshotAsync(Arg.Any<int>(), Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns(new CheckinSnapshot([Bill(1)], [], [], []));
+        _h.Bot.SendTextAsync("5511", Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(false);
+
+        await Job().ExecuteAsync(CancellationToken.None);
+
+        _h.Cache.RawValue(CacheKeys.NightlyCheckinActive("5511")).ShouldBeNull();
+        (await _h.Cache.KeysByPatternAsync("nightly_checkin:5511:*")).ShouldBeEmpty();
+        _h.Cache.RawValue(CacheKeys.NightlyCheckinActive("5522")).ShouldNotBeNull(); // o próximo usuário recebeu
+        _h.Log.Lines.ShouldContain(l => l.StartsWith("ERROR", StringComparison.Ordinal) && l.Contains("Falha ao enviar o check-in", StringComparison.Ordinal));
+        _h.Log.Lines.ShouldNotContain(l => l.Contains("Check-in consolidado enviado para usuário 1", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    [Trait("AC", "013-46")]
+    public async Task Execute_SendThrows_RemovesTheSession_Deviation139()
+    {
+        _queries.GetSnapshotAsync(1, Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns(new CheckinSnapshot([Bill(1)], [], [], []));
+        _h.Bot.SendTextAsync("5511", Arg.Any<string>(), Arg.Any<CancellationToken>()).Throws(new HttpRequestException("x"));
+
+        await Job().ExecuteAsync(CancellationToken.None);
+
+        _h.Cache.RawValue(CacheKeys.NightlyCheckinActive("5511")).ShouldBeNull();
+    }
+
+    [Theory]
+    [Trait("AC", "013-41")]
+    [InlineData(19, 15)]
+    [InlineData(18, 0)]
+    [InlineData(23, 59)]
+    public async Task Execute_SelectsByTheMinuteOfTheCycle_Deviation136(int hour, int minute)
+    {
+        _h.At(hour, minute, 42);
+        _queries.GetSnapshotAsync(1, Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns(new CheckinSnapshot([], [], [], []));
+
+        await Job().ExecuteAsync(CancellationToken.None);
+
+        await _config.Received(1).ListCheckinUsersAsync(new TimeOnly(hour, minute), Arg.Any<CancellationToken>());
     }
 }
 
@@ -374,8 +501,8 @@ public class MonthlyReportJobTests
     private MonthlyReportJob Job() => new(_repository, _h.Bot, _chart, _h.Clock, _h.Log);
 
     private static MonthlyReportData Data(int transactions) => new(
-        2, 2026, new DateOnly(2026, 2, 1), new DateOnly(2026, 2, 28), new ReportTotals(-10, 100, 110, transactions),
-        [new ReportCategory("Mercado", -10, 100)], new ReportComparison(-10, 0, -10, 0), [], new ReportAccounts(1, -10, 0, 0));
+        2, 2026, new DateOnly(2026, 2, 1), new DateOnly(2026, 2, 28), new ReportTotals(10, 100, 90, transactions),
+        [new ReportCategory("Mercado", 10, 100)], new ReportComparison(10, 0, 10, 0), [], new ReportAccounts(1, 10, 0, 0));
 
     private void Recipients(params ReportRecipient[] recipients) =>
         _repository.ListRecipientsAsync(Arg.Any<MonthlyMoment>(), Arg.Any<TimeOnly>(), Arg.Any<TimeOnly>(), Arg.Any<CancellationToken>()).Returns(recipients);

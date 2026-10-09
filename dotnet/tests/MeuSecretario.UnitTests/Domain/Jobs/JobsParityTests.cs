@@ -118,7 +118,9 @@ public class JobsParityTests
             var snapshot = new CheckinSnapshot(
                 [.. input.GetProperty("pending").EnumerateArray().Select(JobsFixture.CheckinBill)],
                 [.. input.GetProperty("overdue").EnumerateArray().Select(JobsFixture.CheckinBill)],
-                [],
+                [.. input.GetProperty("overdue_invoices").EnumerateArray().Select(i => new OverdueInvoice(
+                    i.GetProperty("id").GetInt32(), JobsFixture.Str(i, "cartao"), JobsFixture.Date(JobsFixture.Str(i, "data_vencimento")),
+                    JobsFixture.Str(i, "status"), (decimal)i.GetProperty("valor_total").GetDouble()))],
                 [.. input.GetProperty("due_today").EnumerateArray().Select(i => new DueTodayInvoice(
                     i.GetProperty("id").GetInt32(), JobsFixture.Str(i, "nome_conta"), JobsFixture.Date(JobsFixture.Str(i, "data_vencimento")),
                     JobsFixture.Str(i, "status"), (decimal)i.GetProperty("valor_total").GetDouble()))]);
@@ -131,14 +133,18 @@ public class JobsParityTests
 
     [Fact]
     [Trait("AC", "013-46")]
-    public void CheckinMessage_WithOverdueInvoice_ThrowsLikeThePythonKeyError()
+    public void CheckinMessage_WithOverdueInvoice_WritesTheCardName_Deviation130()
     {
+        // Evidência do comportamento antigo: o Flask lança KeyError ao ler 'nome_conta' (a query devolve 'cartao').
         JobsFixture.Section("checkin_key_error").GetString().ShouldBe("'nome_conta'");
         var pending = JobsFixture.Cases("checkin_messages")[0].GetProperty("input").GetProperty("pending")[0];
         var snapshot = new CheckinSnapshot(
             [JobsFixture.CheckinBill(pending)], [], [new OverdueInvoice(1, "Inter", new DateOnly(2026, 3, 10), "Aberta", 10m)], []);
 
-        Should.Throw<InvalidOperationException>(() => CheckinMessageFormatter.Format(snapshot, Today, "abcdef12"));
+        var message = CheckinMessageFormatter.Format(snapshot, Today, "abcdef12");
+
+        message.ShouldNotBeNull();
+        message.ShouldContain("🔴 *FATURAS VENCIDAS:*\n• Inter - R$ 10,00 - Venceu em 10/03/2026\n");
     }
 
     [Fact]
@@ -185,13 +191,26 @@ public class JobsParityTests
 
     [Fact]
     [Trait("AC", "013-72")]
-    public void MonthlyReportMessage_MatchesPython()
+    public void MonthlyReportMessage_IsThePythonTextWithPtBrNumbers_Deviation133()
     {
+        // 'output_ptbr' = a saída do formatador REAL do Flask com 1,234.56 trocado por 1.234,56 e +8.0 por +8,0.
         foreach (var c in JobsFixture.Cases("monthly_messages"))
         {
             var data = JobsFixture.Report(c.GetProperty("input"));
 
-            MonthlyReportFormatter.Format(data, c.GetProperty("name").GetString()!).ShouldBe(c.GetProperty("output").GetString());
+            MonthlyReportFormatter.Format(data, c.GetProperty("name").GetString()!).ShouldBe(c.GetProperty("output_ptbr").GetString());
+        }
+    }
+
+    [Fact]
+    [Trait("AC", "013-72")]
+    public void MonthlyReportMessage_NeverUsesTheEnglishNumberFormat()
+    {
+        foreach (var c in JobsFixture.Cases("monthly_messages"))
+        {
+            var message = MonthlyReportFormatter.Format(JobsFixture.Report(c.GetProperty("input")), "Rafael");
+
+            System.Text.RegularExpressions.Regex.IsMatch(message, @"\d,\d{3}\.\d|\d\.\d%").ShouldBeFalse(message);
         }
     }
 }
