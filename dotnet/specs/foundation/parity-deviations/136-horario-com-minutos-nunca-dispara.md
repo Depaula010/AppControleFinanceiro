@@ -1,6 +1,6 @@
 # Desvio 136 — Horário com minutos nunca dispara (resumo matinal e check-in)
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 013, 2026-10-09); aprovado em 2026-10-09. Resumo matinal (`0 * * * * ?`) e check-in (`0 * 18-23 * * ?`) rodam a cada minuto, com a igualdade de horário.
 - **Features afetadas:** 013, 007
 - **Severidade:** correção
 

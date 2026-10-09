@@ -38,6 +38,8 @@ Removidos: serviço `cron-scheduler` (jobs passam para Quartz), labels `ofelia.*
 ### Dockerfile (esboço)
 Multi-stage: `mcr.microsoft.com/dotnet/sdk:10.0` (build/publish, `--no-restore` após restore cacheado) → `mcr.microsoft.com/dotnet/aspnet:10.0` (Debian) com `curl`, `tzdata`, ICU; usuário não root; `ENTRYPOINT ["dotnet","MeuSecretario.Api.dll"]`. O contexto de build é `./dotnet`, e `.dockerignore` próprio exclui `bin/`, `obj/`, `tests/`, `specs/`.
 
+**Fontes e bibliotecas nativas (gráficos, spec 013 RN-013-75).** A imagem `aspnet` não traz fontes nem `libfontconfig`. O Dockerfile instala `fontconfig`, `libfontconfig1`, `libfreetype6` e `fonts-dejavu-core` (e roda `fc-cache -f`). Verificado em 2026-10-09 com o `ScottPlotChartRenderer` real dentro do container: na imagem `aspnet` pura o PNG sai sem nenhum texto (título, percentuais e legenda em branco) e o renderizador não acusa erro; na imagem do Dockerfile os textos saem com acentos (`Saúde`, `R$ 1.200,50`). Para repetir: publicar um console que chama `RenderPie`/`RenderBars`/`RenderLine`, montá-lo em `docker run --entrypoint dotnet meusecretario-api:<tag> /smoke/Smoke.dll /out` e abrir os PNG. Custo: cerca de 15 MB na imagem.
+
 ### Mudanças no workflow (Fase 4)
 1. **Build antes do `down`**: `docker compose build` ⇒ `docker compose up -d` (recria só o que mudou). Elimina o downtime de build.
 2. **Sem `docker system prune -f` global** (o host é compartilhado com outras stacks); usar `docker image prune -f --filter "label=app=meu-secretario"`.

@@ -1,6 +1,6 @@
 # Desvio 130 — Check-in: fatura vencida derruba a mensagem do usuário
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 013, 2026-10-09); aprovado em 2026-10-09. Check-in e intenção Contas atrasadas (012) escrevem o nome do cartão; a sessão só é criada depois de a mensagem ser montada.
 - **Features afetadas:** 013 (e 012, intenção "Contas atrasadas")
 - **Severidade:** correção
 

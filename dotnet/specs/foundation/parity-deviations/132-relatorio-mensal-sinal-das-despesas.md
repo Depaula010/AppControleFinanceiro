@@ -1,6 +1,6 @@
 # Desvio 132 — Relatório mensal: sinal das despesas
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 013, 2026-10-09); aprovado em 2026-10-09. `ABS` nas somas de despesa (totais, top 5 do maior para o menor, comparação, potes, contas pagas); vale também para `test-monthly-report` (009c).
 - **Features afetadas:** 013, 009c (`test-monthly-report`)
 - **Severidade:** correção
 

@@ -1,6 +1,6 @@
 # Desvio 131 — Faturas `Fechada` ficam fora dos alertas de vencimento
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 013, 2026-10-09); aprovado em 2026-10-09. `status IN ('Aberta','Fechada')` no check-in (vencidas e vencem hoje) e nos alertas do resumo matinal.
 - **Features afetadas:** 013 (check-in e resumo matinal), 012
 - **Severidade:** correção
 
