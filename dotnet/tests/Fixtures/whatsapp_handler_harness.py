@@ -399,6 +399,14 @@ add(scenario("checkin_ativo_ok", "012-0", "ok", redis={"nightly_checkin_active:"
 add(scenario("checkin_ativo_escape", "012-0", "quanto devo?", redis={"nightly_checkin_active:" + NUMBER: "chk00001"}, intent="Menu de Ajuda"))
 add(scenario("checkin_ativo_escape_maiusculas", "012-0", "CRIAR evento", redis={"nightly_checkin_active:" + NUMBER: "chk00001"}, intent="Menu de Ajuda"))
 
+# ---- secoes das sub-entregas (whatsapp_harness_sections/*.py): rodam neste escopo, depois dos cenarios acima, e gravam o proprio JSON
+_SECTIONS = os.path.join(HERE, "whatsapp_harness_sections")
+if os.path.isdir(_SECTIONS):
+    for _name in sorted(os.listdir(_SECTIONS)):
+        if _name.endswith(".py"):
+            with open(os.path.join(_SECTIONS, _name), encoding="utf-8") as _fh:
+                exec(compile(_fh.read(), _name, "exec"), globals())
+
 with open(OUT, "w", encoding="utf-8", newline="\n") as fh:
     json.dump({"api_key": API_KEY, "signature_key": SIGNATURE_KEY, "number": NUMBER, "scenarios": SCENARIOS}, fh, ensure_ascii=False, indent=1)
 sys.stdout = _REAL_STDOUT

@@ -20,26 +20,26 @@ Retomada: o que está `[x]` está commitado; a próxima sub-entrega começa na p
 
 ## 012a — Transações
 
-- [ ] **T10 — Domínio.** `TransactionIntentRules`, `AccountMention`, `FeedbackMessage` contra o Python (AC-012-101 a 103, 107, 115).
-- [ ] **T11 — Leituras.** `IWhatsAppFinanceReader` (contas, categorias, agendamento recorrente, padrão), `IFeedbackReader` (integração Postgres) (AC-012-104, 107, 115).
-- [ ] **T12 — `AccountResolver` e `InvoiceForDate`** (AC-012-105, 107).
-- [ ] **T13 — `ExpenseIntent` e `IncomeIntent`** (AC-012-101 a 106).
-- [ ] **T14 — `TransactionReplyHandler`** (salvar, TROCAR, número, cancelar, parcelada, feedback; desvio 150) (AC-012-110 a 114).
-- [ ] **T15 — `TransferIntent` e `InvoicePaymentIntent`** (AC-012-120, 130).
-- [ ] **T16 — Fechamento da 012a.**
+- [x] **T10 — Domínio.** `TransactionIntentRules`, `AccountMention`, `FeedbackMessage` contra o Python (AC-012-101 a 103, 107, 115).
+- [x] **T11 — Leituras.** `IWhatsAppFinanceReader` (contas, categorias, agendamento recorrente, padrão), `IFeedbackReader` (integração Postgres) (AC-012-104, 107, 115).
+- [x] **T12 — `AccountResolver` e `InvoiceForDate`** (AC-012-105, 107).
+- [x] **T13 — `ExpenseIntent` e `IncomeIntent`** (AC-012-101 a 106).
+- [x] **T14 — `TransactionReplyHandler`** (salvar, TROCAR, número, cancelar, parcelada, feedback; desvio 150) (AC-012-110 a 114).
+- [x] **T15 — `TransferIntent` e `InvoicePaymentIntent`** (AC-012-120, 130).
+- [x] **T16 — Fechamento da 012a.**
 
 ## 012b — Pagamentos
 
-- [ ] **T17 — Domínio.** `PaymentExtraction`, `PaymentReply` (todas as variantes contra o Python) (AC-012-204).
-- [ ] **T18 — `PaymentHandler`** (quitação, avulsa, valor, erro por item, ordem no pipeline) (AC-012-201 a 206).
-- [ ] **T19 — Fechamento da 012b.**
+- [x] **T17 — Domínio.** `PaymentExtraction`, `PaymentReply` (todas as variantes contra o Python) (AC-012-204).
+- [x] **T18 — `PaymentHandler`** (quitação, avulsa, valor, erro por item, ordem no pipeline) (AC-012-201 a 206).
+- [x] **T19 — Fechamento da 012b.**
 
 ## 012c — Consultas financeiras
 
-- [ ] **T20 — Domínio.** `BalanceMessages`, `ReserveMessages`, `PotMessages`, `AccountListMessage`, `InvoiceMessages`, `CategorySpendMessage`, `PeriodRange`, `PeriodMessages` (AC-012-301 a 307).
-- [ ] **T21 — Leituras (integração Postgres).** saldos, potes por período, faturas, período, categoria, ajuste de saldo (AC-012-303, 305 a 307).
-- [ ] **T22 — Intenções** `BalanceIntent`, `ReserveIntent`, `ReserveDetailsIntent`, `PotsIntent`, `ListAccountsIntent`, `AdjustBalanceIntent`, `InvoiceValueIntent`, `CategorySpendIntent`, `PeriodIntent` (AC-012-301 a 307).
-- [ ] **T23 — Fechamento da 012c.**
+- [x] **T20 — Domínio.** `BalanceMessages`, `ReserveMessages`, `PotMessages`, `AccountListMessage`, `InvoiceMessages`, `CategorySpendMessage`, `PeriodRange`, `PeriodMessages` (AC-012-301 a 307).
+- [x] **T21 — Leituras (integração Postgres).** saldos, potes por período, faturas, período, categoria, ajuste de saldo (AC-012-303, 305 a 307).
+- [x] **T22 — Intenções** `BalanceIntent`, `ReserveIntent`, `ReserveDetailsIntent`, `PotsIntent`, `ListAccountsIntent`, `AdjustBalanceIntent`, `InvoiceValueIntent`, `CategorySpendIntent`, `PeriodIntent` (AC-012-301 a 307).
+- [x] **T23 — Fechamento da 012c.**
 
 ## 012d — Contas fixas e vencimentos
 
