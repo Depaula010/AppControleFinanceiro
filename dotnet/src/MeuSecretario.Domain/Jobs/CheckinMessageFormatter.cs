@@ -9,12 +9,6 @@ namespace MeuSecretario.Domain.Jobs;
 /// </summary>
 public static class CheckinMessageFormatter
 {
-    /// <summary>
-    /// Paridade com o <c>KeyError: 'nome_conta'</c> do Python (desvio proposto 130): com fatura vencida a mensagem não sai.
-    /// Mudar para <c>false</c> (desvio aprovado) escreve o nome do cartão.
-    /// </summary>
-    public static readonly bool ReproduceOverdueInvoiceKeyError = true;
-
     private sealed record PendingItem(string Description, decimal Value, string Account, string Status, int Day);
 
     private sealed record OverdueItem(string Description, decimal Value, DateOnly? DueDate);
@@ -191,12 +185,7 @@ public static class CheckinMessageFormatter
             message.Append("🔴 *FATURAS VENCIDAS:*\n");
             foreach (var invoice in snapshot.OverdueInvoices)
             {
-                if (ReproduceOverdueInvoiceKeyError)
-                {
-                    // O Python lê fatura['nome_conta'], que a query não devolve (devolve 'cartao').
-                    throw new InvalidOperationException("Chave 'nome_conta' ausente na fatura vencida (desvio proposto 130).");
-                }
-
+                // Desvio 130: o Python lia fatura['nome_conta'] (KeyError, a query devolve 'cartao'); aqui sai o nome do cartão.
                 message.Append(CultureInfo.InvariantCulture,
                     $"• {invoice.Card} - {PtBrMoney.Format(invoice.Total)} - Venceu em {InvoiceNotificationFormatter.Date(invoice.DueDate)}\n");
             }

@@ -44,7 +44,7 @@ public static class PyNumber
     /// <summary><c>f"{value:.2f}".replace('.', ',')</c>: a forma usada nos alertas de vencimento.</summary>
     public static string FixedComma(double value) => Fixed(value, 2).Replace('.', ',');
 
-    /// <summary><c>f"{value:,.2f}"</c>: milhar com vírgula e decimal com ponto (padrão inglês; desvio proposto 133).</summary>
+    /// <summary><c>f"{value:,.2f}"</c>: milhar com vírgula e decimal com ponto (padrão inglês, só para a paridade das fixtures).</summary>
     public static string Thousands(double value, int digits = 2)
     {
         var text = Fixed(value, digits);
@@ -59,6 +59,28 @@ public static class PyNumber
         var fraction = dot < 0 ? string.Empty : text[dot..];
         return (negative ? "-" : string.Empty) + GroupThousands(integer, ",") + fraction;
     }
+
+    /// <summary>Milhar com ponto e decimal com vírgula (<c>1.234,56</c>, pt-BR; desvio 133), independente da cultura do container.</summary>
+    public static string ThousandsPtBr(double value, int digits = 2)
+    {
+        var text = Fixed(value, digits);
+        var negative = text.StartsWith('-');
+        if (negative)
+        {
+            text = text[1..];
+        }
+
+        var dot = text.IndexOf('.', StringComparison.Ordinal);
+        var integer = dot < 0 ? text : text[..dot];
+        var fraction = dot < 0 ? string.Empty : "," + text[(dot + 1)..];
+        return (negative ? "-" : string.Empty) + GroupThousands(integer, ".") + fraction;
+    }
+
+    /// <summary>Número fixo com vírgula decimal (<c>12,5</c>; desvio 133).</summary>
+    public static string FixedPtBr(double value, int digits) => Fixed(value, digits).Replace('.', ',');
+
+    /// <summary>Como <see cref="WithSign"/> com vírgula decimal (<c>+12,5</c>; desvio 133).</summary>
+    public static string WithSignPtBr(double value, int digits = 1) => WithSign(value, digits).Replace('.', ',');
 
     /// <summary><c>f"{value:+.1f}"</c>: sempre com sinal.</summary>
     public static string WithSign(double value, int digits = 1)

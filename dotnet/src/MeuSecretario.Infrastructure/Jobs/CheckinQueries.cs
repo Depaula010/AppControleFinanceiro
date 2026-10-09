@@ -187,7 +187,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
         JOIN contas c ON f.conta_id = c.id
         LEFT JOIN transacoes t ON f.id = t.fatura_id
         WHERE c.usuario_id = @uid
-          AND f.status = 'Aberta'
+          AND f.status IN ('Aberta', 'Fechada')
           AND f.data_vencimento < @hoje
           AND f.data_vencimento >= @limite_inferior
         GROUP BY f.id, c.nome_conta, f.data_vencimento, f.status
@@ -201,7 +201,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
         JOIN contas c ON f.conta_id = c.id
         LEFT JOIN transacoes t ON f.id = t.fatura_id
         WHERE c.usuario_id = @uid
-          AND f.status = 'Aberta'
+          AND f.status IN ('Aberta', 'Fechada')
           AND f.data_vencimento = @hoje
         GROUP BY f.id, c.nome_conta, f.data_vencimento, f.status
         ORDER BY c.nome_conta

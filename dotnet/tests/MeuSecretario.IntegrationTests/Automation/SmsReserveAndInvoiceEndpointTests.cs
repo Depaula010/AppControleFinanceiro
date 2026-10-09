@@ -535,7 +535,9 @@ public class ReprocessEndpointTests(PostgresFixture postgres) : IAsyncLifetime
     {
         var netflix = await _env.InsertScheduleAsync(_user, _card, "Netflix", amount: 49.90m, day: 31);
         var notebook = await _env.InsertScheduleAsync(_user, _card, "Notebook", type: "PARCELADO", total: 3, executed: 2, amount: 300.00m, day: 5);
-        var salary = await _env.InsertScheduleAsync(_user, _card, "Bônus", type: "LEMBRETE_VARIAVEL", amount: 100.00m, day: 20, subcategoryId: TransactionsTestData.IncomeSubcategory);
+        var salary = await _env.InsertScheduleAsync(_user, _card, "Bônus", amount: 100.00m, day: 20, subcategoryId: TransactionsTestData.IncomeSubcategory);
+        // Desvio 135: o lembrete variável do cartão não é lançado na fatura.
+        await _env.InsertScheduleAsync(_user, _card, "Luz", type: "LEMBRETE_VARIAVEL", amount: 150.00m, day: 10);
         await _env.ScalarAsync<int>(
             "UPDATE agendamentos SET subcategoria_id = (SELECT s.id FROM subcategoria s JOIN macrocategoria m ON s.macro_id = m.id JOIN grupocategoria g ON m.grupo_id = g.id WHERE g.nome_grupo = 'Renda' ORDER BY s.id LIMIT 1) WHERE id = @salary RETURNING id",
             new { salary });
@@ -544,7 +546,7 @@ public class ReprocessEndpointTests(PostgresFixture postgres) : IAsyncLifetime
 
         status.ShouldBe(HttpStatusCode.OK);
         body.ShouldBe(
-            """{"status":"sucesso","fatura_id":1,"cartao":"Cartão Inter","vencimento":"15/04/2026","status_fatura":"Aberta","stats":{"total_processados":3,"fixos":1,"parcelados":1,"lembretes":1,"detalhes":[{"tipo":"PARCELADO","descricao":"Notebook (3/3)","valor":"300.00"},{"tipo":"LEMBRETE_VARIAVEL","descricao":"Bônus","valor":"100.00"},{"tipo":"FIXO","descricao":"Netflix","valor":"49.90"}]}}""");
+            """{"status":"sucesso","fatura_id":1,"cartao":"Cartão Inter","vencimento":"15/04/2026","status_fatura":"Aberta","stats":{"total_processados":3,"fixos":2,"parcelados":1,"lembretes":0,"detalhes":[{"tipo":"PARCELADO","descricao":"Notebook (3/3)","valor":"300.00"},{"tipo":"FIXO","descricao":"Bônus","valor":"100.00"},{"tipo":"FIXO","descricao":"Netflix","valor":"49.90"}]}}""");
 
         var rows = await _env.QueryAsync<(string Descricao, decimal Valor, string Tipo, DateTime Data, int? Schedule, int? Fatura, bool Consolidada)>(
             "SELECT descricao, valor, tipo_transacao, data_transacao, agendamento_id, fatura_id, consolidada FROM transacoes ORDER BY id");
@@ -595,12 +597,25 @@ public class ReprocessEndpointTests(PostgresFixture postgres) : IAsyncLifetime
     [Trait("AC", "011-125")]
     public async Task AScheduleWithoutAmount_PostsZero_AndReportsTheNumberZero()
     {
-        await _env.InsertScheduleAsync(_user, _card, "Variável", type: "LEMBRETE_VARIAVEL", amount: null);
+        await _env.InsertScheduleAsync(_user, _card, "Variável", amount: null);
 
         var (_, body) = await Reprocess(_invoice);
 
-        body.ShouldContain("\"detalhes\":[{\"tipo\":\"LEMBRETE_VARIAVEL\",\"descricao\":\"Variável\",\"valor\":0}]");
+        body.ShouldContain("\"detalhes\":[{\"tipo\":\"FIXO\",\"descricao\":\"Variável\",\"valor\":0}]");
         (await _env.ScalarAsync<decimal>("SELECT valor FROM transacoes")).ShouldBe(0m);
+    }
+
+    [Fact]
+    [Trait("AC", "013-54")]
+    public async Task AVariableReminderOfTheCard_IsNotPostedToTheInvoice_Deviation135()
+    {
+        await _env.InsertScheduleAsync(_user, _card, "Variável", type: "LEMBRETE_VARIAVEL", amount: 150.00m);
+
+        var (status, body) = await Reprocess(_invoice);
+
+        status.ShouldBe(HttpStatusCode.OK);
+        body.ShouldContain("\"stats\":{\"total_processados\":0,\"fixos\":0,\"parcelados\":0,\"lembretes\":0,\"detalhes\":[]}");
+        (await _env.ScalarAsync<int>("SELECT count(*)::int FROM transacoes")).ShouldBe(0);
     }
 
     [Fact]

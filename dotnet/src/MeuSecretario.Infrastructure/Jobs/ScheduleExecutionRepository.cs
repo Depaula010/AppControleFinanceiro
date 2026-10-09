@@ -39,12 +39,13 @@ public sealed class ScheduleExecutionRepository(IDbConnectionFactory connections
             WHERE a.ativo = TRUE
               AND (
                 (a.tipo_agendamento IN ('FIXO', 'PARCELADO')
-                 AND a.dia_execucao = @day
+                 AND (a.dia_execucao = @day OR (@lastDay AND a.dia_execucao > @day))
                  AND (a.periodicidade <> 'ANUAL' OR a.mes_execucao = @month))
                 OR a.tipo_agendamento = 'LEMBRETE_VARIAVEL')
             ORDER BY a.id
             """,
-            JobSql.With(("day", today.Day, DbType.Int32), ("month", today.Month, DbType.Int32)),
+            JobSql.With(
+                ("day", today.Day, DbType.Int32), ("month", today.Month, DbType.Int32), ("lastDay", JobClock.IsLastDayOfMonth(today), DbType.Boolean)),
             cancellationToken: cancellationToken));
         return [.. rows.Select(r => r.ToInfo())];
     }

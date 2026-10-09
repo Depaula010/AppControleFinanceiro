@@ -172,7 +172,7 @@ public sealed class FinancialAlertsRepository(IDbConnectionFactory connections) 
             JOIN contas c ON f.conta_id = c.id
             LEFT JOIN transacoes t ON f.id = t.fatura_id
             WHERE c.usuario_id = @uid
-              AND f.status = 'Aberta'
+              AND f.status IN ('Aberta', 'Fechada')
               AND (f.data_vencimento = @hoje OR f.data_vencimento = @amanha)
             GROUP BY c.nome_conta, f.data_vencimento, f.status
             ORDER BY f.data_vencimento ASC

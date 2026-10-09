@@ -94,10 +94,10 @@ public class JobRunnerTests
         var all = JobSchedules.All.ToDictionary(s => s.LockName);
 
         all.Count.ShouldBe(7);
-        all["RESUMO-MATINAL"].Cron.ShouldBe("0 0 * * * ?");
+        all["RESUMO-MATINAL"].Cron.ShouldBe("0 * * * * ?"); // desvio 136: por minuto
         all["RELATORIO-INICIO-MES"].Cron.ShouldBe("0 0 8 1 * ?");
         all["RELATORIO-FIM-MES"].Cron.ShouldBe("0 0 23 * * ?");
-        all["CHECKIN-NOTURNO"].Cron.ShouldBe("0 0 18,19,20,21,22,23 * * ?");
+        all["CHECKIN-NOTURNO"].Cron.ShouldBe("0 * 18-23 * * ?"); // desvio 136: por minuto, das 18h às 23h59
         all["ALERTAS-TAREFAS"].Cron.ShouldBe("0 * * * * ?");
         all["INVOICE-PROCESSOR"].Cron.ShouldBe("0 1 0 * * ?");
         all["motor-agendamentos"].Cron.ShouldBe("0 5 0 * * ?");
@@ -105,12 +105,15 @@ public class JobRunnerTests
 
     [Theory]
     [Trait("AC", "013-02")]
-    [InlineData("RESUMO-MATINAL", "2026-03-18T06:30:00-03:00", "2026-03-18T07:00:00-03:00")]
+    [InlineData("RESUMO-MATINAL", "2026-03-18T06:30:00-03:00", "2026-03-18T06:31:00-03:00")]
+    [InlineData("RESUMO-MATINAL", "2026-03-18T07:29:30-03:00", "2026-03-18T07:30:00-03:00")]
     [InlineData("INVOICE-PROCESSOR", "2026-03-18T12:00:00-03:00", "2026-03-19T00:01:00-03:00")]
     [InlineData("RELATORIO-INICIO-MES", "2026-03-18T12:00:00-03:00", "2026-04-01T08:00:00-03:00")]
     [InlineData("RELATORIO-FIM-MES", "2026-03-18T23:00:00-03:00", "2026-03-19T23:00:00-03:00")]
-    [InlineData("CHECKIN-NOTURNO", "2026-03-18T18:30:00-03:00", "2026-03-18T19:00:00-03:00")]
-    [InlineData("CHECKIN-NOTURNO", "2026-03-18T23:30:00-03:00", "2026-03-19T18:00:00-03:00")]
+    [InlineData("CHECKIN-NOTURNO", "2026-03-18T18:30:00-03:00", "2026-03-18T18:31:00-03:00")]
+    [InlineData("CHECKIN-NOTURNO", "2026-03-18T19:14:10-03:00", "2026-03-18T19:15:00-03:00")]
+    [InlineData("CHECKIN-NOTURNO", "2026-03-18T17:59:30-03:00", "2026-03-18T18:00:00-03:00")]
+    [InlineData("CHECKIN-NOTURNO", "2026-03-18T23:59:00-03:00", "2026-03-19T18:00:00-03:00")]
     [InlineData("ALERTAS-TAREFAS", "2026-03-18T12:00:10-03:00", "2026-03-18T12:01:00-03:00")]
     [InlineData("motor-agendamentos", "2026-03-18T12:00:00-03:00", "2026-03-19T00:05:00-03:00")]
     public void Schedules_FireInTheSaoPauloTimeZone(string job, string after, string expected)
@@ -309,6 +312,37 @@ public class ScheduleMotorTests
         await _executor.Received(1).ExecuteAsync(new ScheduleExecutionRequest(2, new DateOnly(2026, 3, 18)), Arg.Any<CancellationToken>());
         await _executor.DidNotReceive().ExecuteAsync(new ScheduleExecutionRequest(3, new DateOnly(2026, 3, 18)), Arg.Any<CancellationToken>());
         _h.Cache.RawValue(CacheKeys.JobLock("motor-agendamentos")).ShouldBeNull();
+    }
+
+    [Fact]
+    [Trait("AC", "013-60")]
+    public async Task Run_OnTheLastDayOfAShortMonth_ExecutesSchedulesOfDay29To31()
+    {
+        // desvio 134: 30/04/2026 é o último dia de abril.
+        _h.SetToday(2026, 4, 30);
+        _repository.ListMotorCandidatesAsync(Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns(
+        [
+            Schedule(1, day: 31), Schedule(2, ScheduleKinds.Installment, day: 30), Schedule(3, day: 10),
+        ]);
+
+        await Motor().RunAsync(CancellationToken.None);
+
+        var april30 = new DateOnly(2026, 4, 30);
+        await _executor.Received(1).ExecuteAsync(new ScheduleExecutionRequest(1, april30), Arg.Any<CancellationToken>());
+        await _executor.Received(1).ExecuteAsync(new ScheduleExecutionRequest(2, april30), Arg.Any<CancellationToken>());
+        await _executor.DidNotReceive().ExecuteAsync(new ScheduleExecutionRequest(3, april30), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    [Trait("AC", "013-60")]
+    public async Task Run_BeforeTheLastDay_DoesNotExecuteDay31()
+    {
+        _h.SetToday(2026, 4, 29);
+        _repository.ListMotorCandidatesAsync(Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns([Schedule(1, day: 31)]);
+
+        await Motor().RunAsync(CancellationToken.None);
+
+        await _executor.DidNotReceiveWithAnyArgs().ExecuteAsync(default!, default);
     }
 
     [Fact]

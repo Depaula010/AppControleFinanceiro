@@ -75,7 +75,8 @@ public abstract record ScheduleExecutionOutcome
 public interface IScheduleExecutionRepository
 {
     /// <summary>
-    /// Candidatos do motor: <c>FIXO</c>/<c>PARCELADO</c> com <c>dia_execucao</c> = dia de hoje (ANUAL só no mês) e todos os
+    /// Candidatos do motor: <c>FIXO</c>/<c>PARCELADO</c> com <c>dia_execucao</c> = dia de hoje, ou maior no último dia do mês
+    /// (desvio 134; ANUAL só no mês), e todos os
     /// <c>LEMBRETE_VARIAVEL</c> ativos (o Domain decide o lembrete).
     /// </summary>
     Task<IReadOnlyList<ScheduleInfo>> ListMotorCandidatesAsync(DateOnly today, CancellationToken cancellationToken);

@@ -117,12 +117,27 @@ public class JobsRulesTests
         ScheduleRules.DateInMonth(DateOnly.Parse(reference, System.Globalization.CultureInfo.InvariantCulture), day)
             .ShouldBe(DateOnly.Parse(expected, System.Globalization.CultureInfo.InvariantCulture));
 
+    [Theory]
+    [Trait("AC", "013-60")]
+    [InlineData(31, "2026-04-30", true)] // desvio 134: último dia do mês pega os dias maiores
+    [InlineData(30, "2026-04-30", true)]
+    [InlineData(29, "2026-04-30", false)] // o dia 29 já disparou em 29/04
+    [InlineData(31, "2026-02-28", true)]
+    [InlineData(29, "2026-02-28", true)]
+    [InlineData(29, "2028-02-29", true)]
+    [InlineData(31, "2026-01-31", true)]
+    [InlineData(31, "2026-04-29", false)] // fora do último dia, só a igualdade
+    [InlineData(30, "2026-04-29", false)]
+    [InlineData(29, "2026-04-29", true)]
+    [InlineData(5, "2026-04-30", false)] // dia menor nunca dispara no último dia
+    [InlineData(28, "2026-02-28", true)]
+    public void MotorDayMatches_AtTheLastDayOfTheMonth_AlsoCatchesGreaterDays(int day, string today, bool expected) =>
+        ScheduleRules.MotorDayMatches(day, DateOnly.Parse(today, System.Globalization.CultureInfo.InvariantCulture)).ShouldBe(expected);
+
     [Fact]
     [Trait("AC", "013-60")]
-    public void MotorDayMatches_IsPlainEquality_SoDay31NeverFiresInApril()
+    public void MatchesMonth_AnnualOnlyInItsMonth()
     {
-        ScheduleRules.MotorDayMatches(31, new DateOnly(2026, 4, 30)).ShouldBeFalse();
-        ScheduleRules.MotorDayMatches(30, new DateOnly(2026, 4, 30)).ShouldBeTrue();
         ScheduleRules.MatchesMonth("ANUAL", 5, 5).ShouldBeTrue();
         ScheduleRules.MatchesMonth("ANUAL", 5, 6).ShouldBeFalse();
         ScheduleRules.MatchesMonth("MENSAL", null, 6).ShouldBeTrue();
