@@ -3,11 +3,13 @@ using System.Text;
 using System.Text.Json;
 using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Application.Jobs;
+using MeuSecretario.Application.Whatsapp;
 using MeuSecretario.Domain.Jobs;
+using MeuSecretario.Infrastructure.Jobs;
+using MeuSecretario.Infrastructure.Whatsapp;
 using MeuSecretario.IntegrationTests.Automation;
 using MeuSecretario.IntegrationTests.Support;
 using MeuSecretario.IntegrationTests.Transactions;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -15,8 +17,10 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace MeuSecretario.IntegrationTests.Whatsapp;
 
 /// <summary>
-/// 012d pela rota real: contas fixas, vencimentos, contas atrasadas e a resposta ao check-in noturno com o responsável de verdade
-/// (<c>CheckinResponder</c> sobre o motor de agendamentos da 013), Gemini e Redis falsos e o banco do contêiner.
+/// 012d com o banco de verdade: contas fixas, vencimentos, contas atrasadas e a resposta ao check-in noturno com o responsável real
+/// (<c>CheckinResponder</c> sobre o motor de agendamentos da 013). O pipeline é montado com as classes de Infrastructure sobre a conexão
+/// do contêiner (sem subir um host por teste: cada host guarda o próprio pool e o contêiner tem um limite de conexões); a fiação de DI e a
+/// rota ficam cobertas por um teste que sobe a API uma vez e a descarta.
 /// </summary>
 [Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
@@ -24,10 +28,14 @@ public class FixedBillsEndpointTests(PostgresFixture postgres) : IAsyncLifetime
 {
     private const string Number = "5531999990001";
 
+    // Fixa o dia: os cenários dependem de "hoje" (vence hoje, venceu ontem) e do mês corrente.
+    private static readonly DateOnly Today = new(2026, 10, 7);
+
     private readonly ScriptedGemini _llm = new();
     private readonly PatternCache _cache = new();
     private AutomationEnv _env = default!;
-    private WebApplicationFactory<Program> _factory = default!;
+    private HandleWhatsAppMessage _useCase = default!;
+    private NightlyCheckinService _checkin = default!;
     private int _user;
     private int _account;
 
@@ -37,42 +45,32 @@ public class FixedBillsEndpointTests(PostgresFixture postgres) : IAsyncLifetime
         _env = new AutomationEnv(postgres);
         _user = await _env.SeedUserAsync(Number);
         _account = await _env.Data.InsertAccountAsync(_user, "Nubank");
-        _factory = postgres.Api.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
-        {
-            services.RemoveAll<ILlmClient>();
-            services.AddSingleton<ILlmClient>(_llm);
-            services.RemoveAll<IBotClient>();
-            services.AddSingleton<IBotClient>(new RecordingBot());
-            services.RemoveAll<ICache>();
-            services.AddSingleton<ICache>(_cache);
-            services.RemoveAll<IDatabaseHealth>();
-            services.AddSingleton<IDatabaseHealth>(new ToggleDatabaseHealth());
-        }));
+
+        var clock = new FixedClock(Today);
+        var reader = new FixedBillsReader(postgres.Connections);
+        var session = new CheckinSessionState(_cache);
+        _checkin = new NightlyCheckinService(new CheckinQueries(postgres.Connections), _cache, clock);
+        var responder = new CheckinResponder(
+            _cache, session, new ScheduleExecutor(new ScheduleExecutionRepository(postgres.Connections)), clock, new NoDiagnostics());
+
+        _useCase = new HandleWhatsAppMessage(
+            new WhatsAppUserLookup(postgres.Connections),
+            [new CheckinStep(session, responder)],
+            new IntentClassifier(_llm),
+            new IntentRouter(
+                [
+                    new FixedBillsIntent(reader, clock), new AllBillsIntent(reader), new DueTodayIntent(reader, clock),
+                    new DueTomorrowIntent(reader, clock), new DueWeekIntent(reader, clock), new OverdueIntent(_checkin, clock),
+                ],
+                new NoDiagnostics()));
     }
 
     public Task DisposeAsync() => Task.CompletedTask;
 
-    private DateOnly Today => _factory.Services.GetRequiredService<IClock>().Today;
+    private Task<string> SendAsync(string text) =>
+        _useCase.ExecuteAsync(new WebhookInput(text, Number, null), CancellationToken.None);
 
-    private async Task<string> SendAsync(string text)
-    {
-        using var client = _factory.CreateClient();
-        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri("/webhook-whatsapp", UriKind.Relative))
-        {
-            Content = new ByteArrayContent(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { texto = text, numero_remetente = Number }))),
-        };
-        request.Content.Headers.TryAddWithoutValidation("Content-Type", "application/json");
-        request.Headers.TryAddWithoutValidation("x-api-key", WhatsAppEnv.ApiKey);
-        using var response = await client.SendAsync(request);
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement.GetProperty("resposta").GetString()!;
-    }
-
-    private async Task StartCheckinAsync(params CheckinBill[] bills)
-    {
-        using var scope = _factory.Services.CreateScope();
-        await scope.ServiceProvider.GetRequiredService<NightlyCheckinService>().CreateSessionAsync(Number, bills, CancellationToken.None);
-    }
+    private Task<string> StartCheckinAsync(params CheckinBill[] bills) => _checkin.CreateSessionAsync(Number, bills, CancellationToken.None);
 
     private CheckinBill BillOf(int scheduleId, string description, decimal amount, string kind = "FIXO", int executed = 0, int? total = null, DateOnly? due = null) =>
         new(scheduleId, description, amount, Today.Day, _account, TransactionsTestData.ExpenseSubcategory, _user, "Nubank", "Conta Corrente", "Moradia", "Moradia",
@@ -91,9 +89,9 @@ public class FixedBillsEndpointTests(PostgresFixture postgres) : IAsyncLifetime
 
         var reply = await SendAsync("minhas contas fixas");
 
-        reply.ShouldStartWith("📋 *CONTAS FIXAS PENDENTES - ");
-        reply.ShouldContain("Aluguel");
-        reply.ShouldContain("R$ 1.500,00");
+        reply.ShouldStartWith("📋 *CONTAS FIXAS PENDENTES - OUTUBRO/2026* 📋");
+        reply.ShouldContain("1. Aluguel\n   💰 R$ 1.500,00\n   📊 ");
+        reply.ShouldContain("\n   🔴 ATRASADO\n");
     }
 
     [Fact]
@@ -118,8 +116,29 @@ public class FixedBillsEndpointTests(PostgresFixture postgres) : IAsyncLifetime
 
         var reply = await SendAsync("o que vence hoje");
 
-        reply.ShouldContain("*CONTAS QUE VENCEM HOJE*");
-        reply.ShouldContain($"• Internet - R$ 99,90 (dia {Today.Day})");
+        reply.ShouldContain("*CONTAS QUE VENCEM HOJE* (07/10)");
+        reply.ShouldContain("• Internet - R$ 99,90 (dia 7)");
+    }
+
+    [Fact]
+    [Trait("AC", "012-402")]
+    public async Task DueThisWeek_AcrossTheMonthTurn_ListsBothSidesAndTheOpenInvoices()
+    {
+        var clock = new FixedClock(new DateOnly(2026, 10, 28));
+        var card = await _env.Data.InsertCardAsync(_user, "Inter", 10, 2);
+        await _env.Data.InsertInvoiceAsync(card, "2026-11-02", "2026-10-26");
+        await _env.InsertScheduleAsync(_user, _account, "Condomínio", day: 30, amount: 450m);
+        await _env.InsertScheduleAsync(_user, _account, "Aluguel", day: 1, amount: 1500m);
+        await _env.InsertScheduleAsync(_user, _account, "Distante", day: 15, amount: 10m);
+        var intent = new DueWeekIntent(new FixedBillsReader(postgres.Connections), clock);
+
+        var reply = await intent.HandleAsync(new IntentContext(new WhatsAppUser(_user, "Ana"), Number, "semana", null), CancellationToken.None);
+
+        reply.ShouldContain("*CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (28/10)");
+        reply.ShouldContain("• Condomínio - R$ 450,00 (dia 30)");
+        reply.ShouldContain("• Aluguel - R$ 1.500,00 (dia 1)");
+        reply.ShouldNotContain("Distante");
+        reply.ShouldContain("• Inter - R$ 0,00 (vence 02/11)");
     }
 
     [Fact]
@@ -197,7 +216,7 @@ public class FixedBillsEndpointTests(PostgresFixture postgres) : IAsyncLifetime
     public async Task CheckinReply_AlreadyPostedInTheMonth_IsNotDuplicated_ButCountsAsConfirmed()
     {
         var rent = await _env.InsertScheduleAsync(_user, _account, "Aluguel", amount: 1500m);
-        var existing = await _env.Data.InsertTransactionAsync(_user, _account, valor: -1500m, data: Today.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture), descricao: "Aluguel");
+        var existing = await _env.Data.InsertTransactionAsync(_user, _account, valor: -1500m, data: "2026-10-07", descricao: "Aluguel");
         await _env.Data.ExecuteAsync("UPDATE transacoes SET agendamento_id = @rent WHERE id = @existing", new { rent, existing });
         await StartCheckinAsync(BillOf(rent, "Aluguel", 1500m));
 
@@ -230,5 +249,68 @@ public class FixedBillsEndpointTests(PostgresFixture postgres) : IAsyncLifetime
 
         (await TransactionsAsync()).ShouldBeEmpty();
         _cache.Values.Keys.ShouldNotContain($"nightly_checkin_active:{Number}");
+    }
+
+    /// <summary>A rota de verdade, com a fiação de DI da 012d (responder real, intenções e leitor); a API é descartada no fim para soltar o pool.</summary>
+    [Fact]
+    [Trait("AC", "012-404")]
+    public async Task Route_CheckinReplyThroughTheRealDependencyInjection()
+    {
+        var rent = await _env.InsertScheduleAsync(_user, _account, "Aluguel", amount: 1500m);
+        await using var factory = postgres.Api.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
+        {
+            services.RemoveAll<ILlmClient>();
+            services.AddSingleton<ILlmClient>(_llm);
+            services.RemoveAll<IBotClient>();
+            services.AddSingleton<IBotClient>(new RecordingBot());
+            services.RemoveAll<ICache>();
+            services.AddSingleton<ICache>(_cache);
+            services.RemoveAll<IDatabaseHealth>();
+            services.AddSingleton<IDatabaseHealth>(new ToggleDatabaseHealth());
+        }));
+        var today = factory.Services.GetRequiredService<IClock>().Today;
+        using (var scope = factory.Services.CreateScope())
+        {
+            var bill = new CheckinBill(
+                rent, "Aluguel", 1500m, today.Day, _account, TransactionsTestData.ExpenseSubcategory, _user, "Nubank", "Conta Corrente", "Moradia", "Moradia",
+                "Despesa", "FIXO", 0, null, today);
+            await scope.ServiceProvider.GetRequiredService<NightlyCheckinService>().CreateSessionAsync(Number, [bill], CancellationToken.None);
+        }
+
+        using var client = factory.CreateClient();
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri("/webhook-whatsapp", UriKind.Relative))
+        {
+            Content = new ByteArrayContent(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { texto = "ok", numero_remetente = Number }))),
+        };
+        request.Content.Headers.TryAddWithoutValidation("Content-Type", "application/json");
+        request.Headers.TryAddWithoutValidation("x-api-key", WhatsAppEnv.ApiKey);
+        using var response = await client.SendAsync(request);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var reply = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement.GetProperty("resposta").GetString();
+        reply.ShouldBe("✅ *Todas as 1 contas confirmadas!*\n\n• Aluguel\n\n💚 Transações registradas com sucesso!");
+        (await TransactionsAsync()).Select(r => (r.descricao, r.agendamento_id)).ShouldBe([("Aluguel", rent)]);
+    }
+
+    private sealed class FixedClock(DateOnly today) : IClock
+    {
+        public DateTimeOffset UtcNow => new(today.ToDateTime(new TimeOnly(15, 0)), TimeSpan.Zero);
+
+        public DateTime Now => today.ToDateTime(new TimeOnly(12, 0));
+
+        public DateOnly Today => today;
+
+        public TimeZoneInfo TimeZone => TimeZoneInfo.Utc;
+    }
+
+    private sealed class NoDiagnostics : IWhatsAppDiagnostics, ICheckinDiagnostics
+    {
+        public void IntentFailed(string intent, string errorType)
+        {
+        }
+
+        public void ReplyFailed(string errorType)
+        {
+        }
     }
 }
