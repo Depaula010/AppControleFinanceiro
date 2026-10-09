@@ -67,11 +67,11 @@ Retomada: o que está `[x]` está commitado; a próxima sub-entrega começa na p
 
 ## 012g — Análises e gráfico
 
-- [ ] **T37 — Domínio.** `AnalyticsReport`, `ForecastReport`, `MonthlyComparison` contra o Python (AC-012-701, 702).
-- [ ] **T38 — Leituras (integração Postgres).** `IAnalyticsReader` (AC-012-701 a 703).
-- [ ] **T39 — Intenções** `AnalysisIntent`, `MonthlyComparisonIntent`, `ForecastIntent`, `ChartIntent` com `IChartRenderer` falso (AC-012-701 a 703).
-- [ ] **T40 — Barras e linha** no `ScottPlotChartRenderer` da 013 (a pizza já existe) (AC-012-703).
-- [ ] **T41 — Fechamento da 012g.**
+- [x] **T37 — Domínio.** `AnalyticsReport`, `ForecastReport`/`ForecastProjection`, `MonthlyComparison` e `ChartRules` contra o Python (AC-012-701, 702): prompts, textos e arredondamentos conferidos com o `analytics_service`/`forecast_service` reais pelo harness (`AnalyticsParityTests`); zero negativo (`-0.0`) com o sinal do Python.
+- [x] **T38 — Leituras (integração Postgres).** `IAnalyticsReader`/`AnalyticsReader` (AC-012-701 a 703): datas por parâmetro (`IClock`), `ORDER BY` fechados; as consultas sem uso no prompt (`gastos_mensais` da análise, `delivery`, histórico por categoria, padrão diário) não são executadas.
+- [x] **T39 — Intenções** `AnalysisIntent`, `MonthlyComparisonIntent`, `ForecastIntent`, `ChartIntent` com `IChartRenderer` falso (AC-012-701 a 703); módulo `WhatsAppAnalyticsModule`; o gráfico sai por `IBotClient.SendImageAsync` (desvio 026).
+- [x] **T40 — Barras e linha** no `ScottPlotChartRenderer` da 013 (a pizza já existe) (AC-012-703): `IChartRenderer` ganhou `RenderBars` e `RenderLine`; PNG válido, `null` sem dados ou se o desenho falha. Divergência registrada: imagem diferente do matplotlib (estilo, fonte), dados, título e legenda iguais (spec §13.1, Q-012-8).
+- [x] **T41 — Fechamento da 012g.** Harness `whatsapp_harness_sections/012g_analytics.py` (82 cenários: o `WhatsAppHandler` real com `analytics_intents.py`, `analytics_service.py`, `forecast_service.py` e `chart_service.py` reais; saída `whatsapp-analytics-scenarios.json`); desvios 158 (valores negativos, `KeyError` sem histórico) reproduzidos; novos 230 a 233 propostos e **não** implementados.
 
 ## 012h — Drive
 
