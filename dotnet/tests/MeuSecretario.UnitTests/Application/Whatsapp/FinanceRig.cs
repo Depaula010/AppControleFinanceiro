@@ -24,6 +24,9 @@ internal static class FinanceScenarios
 
     public static DateOnly Today => DateOnly.Parse(Root.GetProperty("today").GetString()!, CultureInfo.InvariantCulture);
 
+    public static JsonElement ByName(string name) =>
+        Root.GetProperty("scenarios").EnumerateArray().Single(s => s.GetProperty("name").GetString() == name);
+
     public static IEnumerable<JsonElement> All(params string[] groups) =>
         Root.GetProperty("scenarios").EnumerateArray().Where(s => groups.Contains(s.GetProperty("group").GetString()));
 
@@ -169,6 +172,9 @@ internal sealed class FinanceWorld(JsonElement config, List<string> calls)
 
     public JsonElement Config => config;
 
+    /// <summary>Descrições recebidas pelas portas de lançamento (para provar o que foi gravado, desvio 150).</summary>
+    public List<string?> PostedDescriptions { get; } = [];
+
     public void Call(string label) => calls.Add(label);
 
     /// <summary>O valor roteirizado de <c>returns[label]</c> (com <c>__seq__</c> a cada chamada); <c>null</c> se ausente.</summary>
@@ -305,6 +311,7 @@ internal sealed class WorldPosting(FinanceWorld world) : ITransactionPosting
     public Task<PostingResult<PostedTransaction>> PostSimpleAsync(PostSimpleTransaction command, CancellationToken cancellationToken)
     {
         world.Call("finance_service.create_transaction");
+        world.PostedDescriptions.Add(command.Description);
         return Task.FromResult<PostingResult<PostedTransaction>>(new PostingResult<PostedTransaction>.Ok(
             new PostedTransaction(world.ReturnedInt("finance_service.create_transaction") ?? 0, command.Amount, null, null)));
     }
@@ -323,6 +330,7 @@ internal sealed class WorldPosting(FinanceWorld world) : ITransactionPosting
     public Task<PostingResult<PostedInstallmentPurchase>> PostInstallmentPurchaseAsync(PostInstallmentPurchase command, CancellationToken cancellationToken)
     {
         world.Call("finance_service.create_transaction");
+        world.PostedDescriptions.Add(command.Description);
         var transactionId = world.ReturnedInt("finance_service.create_transaction") ?? 0;
         world.Call("finance_service.create_parcelamento_agendamento");
         return Task.FromResult<PostingResult<PostedInstallmentPurchase>>(new PostingResult<PostedInstallmentPurchase>.Ok(

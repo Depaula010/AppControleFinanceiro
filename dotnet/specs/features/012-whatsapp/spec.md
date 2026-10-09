@@ -92,7 +92,7 @@ Tudo da §3, §4 passos 1, 2, 7 e 9, o catálogo de prompts (§8) e a infraestru
 6. Pendência (`pending_tx:{numero}:{id}` + `last_pending:{numero}`, TTL 300 s, §7.2) com as chaves, na ordem: `usuario_id`, `conta_id`, `conta_nome`, `conta_tipo`, `categoria_id`, `fatura_id`, `descricao`, `descricao_final` (**a `descricao_agendamento`, nula quando não houve agendamento**), `valor_db`, `valor_original`, `valor_total`, `num_parcelas`, `tipo_transacao`, `tipo_pagamento`, `data_transacao` (`yyyy-MM-dd`), `origem` (`"whatsapp"`). Falha ao gravar ⇒ `❌ Erro ao criar transação pendente`.
 7. Resposta: mensagem de confirmação (`ConfirmationMessage`, 011 §7.5, com `U+FFFD` no cartão; desvio 100 proposto) com as categorias do passo 4.
 
-**Confirmação** (§4 passo 6, §7.2): `OK`/`CONFIRMAR`/`SIM`/`CONFIRMA` grava; `TROCAR`/`MUDAR`/`ALTERAR` lista categorias numeradas; número escolhe; `CANCELAR`/`NÃO`/`NAO`/`CANCELA` descarta. Gravar = `ITransactionPosting` (004): `Renda` ⇒ receita, qualquer outro tipo ⇒ despesa; `Amount = abs(valor_db)`; descrição `descricao_final` **se a chave existe** (mesmo nula), senão `descricao` (**descrição nula ⇒ exceção ⇒ 500**, desvio 150); `num_parcelas > 1` ⇒ `PostInstallmentPurchase` (valor da parcela = `abs(valor_db)`); depois a mensagem de feedback (§7.8). A pendência é apagada **antes** de gravar (o Flask apaga ao decidir `saved`).
+**Confirmação** (§4 passo 6, §7.2): `OK`/`CONFIRMAR`/`SIM`/`CONFIRMA` grava; `TROCAR`/`MUDAR`/`ALTERAR` lista categorias numeradas; número escolhe; `CANCELAR`/`NÃO`/`NAO`/`CANCELA` descarta. Gravar = `ITransactionPosting` (004): `Renda` ⇒ receita, qualquer outro tipo ⇒ despesa; `Amount = abs(valor_db)`; descrição `descricao_final` se preenchida, senão `descricao` (**desvio 150, implementado**: no Flask a chave existia com valor nulo, o `get` devolvia `None` e o `INSERT` violava o `NOT NULL` de `transacoes.descricao`; descrição vazia nas duas ⇒ exceção ⇒ 500); `num_parcelas > 1` ⇒ `PostInstallmentPurchase` (valor da parcela = `abs(valor_db)`); depois a mensagem de feedback (§7.8). A pendência é apagada **antes** de gravar (o Flask apaga ao decidir `saved`).
 
 **Transferência** (template; `transaction_intents.py:312-442`). `extract_transfer_params` lê `c["id"]` de `Row` do SQLAlchemy 2: `TypeError` na primeira conta ⇒ a resposta de **todo** usuário com ao menos uma conta é `❌ Ops! Algo deu errado. Por favor, tente novamente.` e o Gemini nem é chamado. Usuário sem nenhuma conta segue: Gemini (`extract_transfer_details`), validações (`❌ Não consegui identificar o valor da transferência.`, `...a conta de origem. Especifique de qual conta transferir.`, `...a conta de destino. Especifique para qual conta transferir.`), contas por nome (`❌ Uma ou ambas as contas não foram encontradas.`). Mensagens de saldo insuficiente e confirmação existem no código mas são inalcançáveis; **não são portadas** (desvio 151).
 
@@ -227,7 +227,7 @@ Numeração a partir de 150 (130+ é da 013; 120-122 da 014). Arquivos em `parit
 
 | # | Título | Recomendação |
 |---|---|---|
-| 150 | Confirmar despesa/renda por WhatsApp falha quando não há agendamento (descrição nula) | **aprovar com urgência** (é o fluxo central) |
+| 150 | Confirmar despesa/renda por WhatsApp falha quando não há agendamento (descrição nula) | **implementado** |
 | 151 | Transferência por WhatsApp falha sempre | aprovar (implementar a transferência de verdade) |
 | 152 | `Configurar Notificações` pelo ramo do Gemini grava e responde 500 | aprovar |
 | 153 | `Solicitar API Key` devolve o valor cru da coluna (cifrado para quem se cadastrou depois da 017) | aprovar (decifrar) |
@@ -275,7 +275,7 @@ Convenção: `AC-012-NNN`, faixa por sub-entrega (0xx = 012-0, 1xx = 012a, 2xx =
 - **AC-012-110** `OK` grava (`valor` com sinal pelo tipo, categoria, data, conta) e responde o feedback (fixture); a pendência e `last_pending` somem.
 - **AC-012-111** `TROCAR` lista as categorias, regrava a pendência com `awaiting_category_selection` e `categoria_map`; o número seguinte grava com a categoria escolhida; número fora do mapa e texto não numérico respondem os erros fixos.
 - **AC-012-112** `CANCELAR` descarta e responde `❌ Transação cancelada.`; pendência expirada ⇒ `⏱️ Esta transação expirou...`.
-- **AC-012-113** Pendência sem agendamento (`descricao_final` nulo) ⇒ 500 `Erro ao processar.` e nada gravado (desvio 150).
+- **AC-012-113** (desvio 150) Pendência sem agendamento (`descricao_final` nulo, ausente ou vazio) ⇒ `OK` grava com a `descricao` bruta da mensagem (`padaria`), responde o feedback e apaga a pendência; `descricao_final` preenchida vence; parcelada idem. O cenário do harness que mostra o 500 do Flask fica como evidência em `FinancePipelineParityTests.KnownDivergences`.
 - **AC-012-114** Parcelada (`num_parcelas > 1`) ⇒ `PostInstallmentPurchase` (1ª parcela + agendamento `PARCELADO`).
 - **AC-012-115** Feedback: pote (período do desvio 015, alerta por threshold), rodapé de fatura ou saldo; erro ⇒ `✅ Transação Salva com Sucesso!`.
 - **AC-012-120** `Transferência` com contas ⇒ `❌ Ops!...` sem chamar o Gemini; sem contas ⇒ cadeia de validações.
@@ -353,7 +353,7 @@ Leitura: `usuarios`, `contas`, `faturas`, `transacoes`, `subcategoria`, `macroca
 
 ## 14. Perguntas em aberto (siga o Flask até haver resposta)
 
-- **Q-012-1** O banco de produção aceita `transacoes.descricao` nula? Se sim, a confirmação por WhatsApp grava sem descrição; se não (o dump diz `NOT NULL`), todo `OK` de despesa/renda sem agendamento dá 500 (desvio 150). **Prioridade máxima.**
+- **Q-012-1** (resolvida: `NOT NULL` confirmado em produção; desvio 150 implementado) O banco de produção aceita `transacoes.descricao` nula? Se sim, a confirmação por WhatsApp grava sem descrição; se não (o dump diz `NOT NULL`), todo `OK` de despesa/renda sem agendamento dá 500 (desvio 150). **Prioridade máxima.**
 - **Q-012-2** `Solicitar API Key` deve decifrar a chave (desvio 153) ou o produto prefere um link seguro? Entregar uma chave por WhatsApp é decisão de produto.
 - **Q-012-3** A quitação por WhatsApp/SMS deve gravar `agendamento_id` (coerente com o desvio 012 e a 013)? Padrão: não.
 - **Q-012-4** Qual evento pendente é "o mais recente"? Hoje a ordem do `KEYS` decide (desvio 155).

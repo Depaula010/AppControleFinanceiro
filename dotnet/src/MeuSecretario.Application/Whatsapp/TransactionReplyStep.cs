@@ -95,8 +95,8 @@ public sealed class TransactionReplyStep(
 
 /// <summary>
 /// Grava a transação confirmada (<c>whatsapp_handler.py:324-386</c>) pelas portas da 004: <c>Renda</c> vira receita e qualquer outro
-/// tipo, despesa; valor sem sinal; descrição <c>descricao_final</c> <b>se a chave existe</b> (mesmo nula), senão <c>descricao</c>;
-/// <c>num_parcelas &gt; 1</c> usa a compra parcelada. Descrição nula não grava (desvio 150 proposto: o Flask também falha).
+/// tipo, despesa; valor sem sinal; descrição <c>descricao_final</c> se preenchida, senão <c>descricao</c> (desvio 150: o Flask
+/// gravava <c>NULL</c> quando a chave existia vazia e o INSERT falhava); <c>num_parcelas &gt; 1</c> usa a compra parcelada.
 /// </summary>
 public sealed class TransactionConfirmationSaver(DirectPoster poster, ITransactionPosting posting)
 {
@@ -109,15 +109,7 @@ public sealed class TransactionConfirmationSaver(DirectPoster poster, ITransacti
         var kind = Text(data, "tipo_transacao") == TransactionIntentRules.Income ? TransactionKind.Income : TransactionKind.Expense;
         var date = ParseDate(Text(data, "data_transacao"));
 
-        string? description;
-        if (data.ContainsKey("descricao_final"))
-        {
-            description = NullableText(data, "descricao_final");
-        }
-        else
-        {
-            description = data.ContainsKey("descricao") ? NullableText(data, "descricao") : null;
-        }
+        var description = ConfirmationDescription.Pick(NullableText(data, "descricao_final"), NullableText(data, "descricao"));
 
         var installments = data["num_parcelas"] is { } installmentNode && installmentNode.GetValueKind() == JsonValueKind.Number
                            && Number(data, "num_parcelas") is var count && count > 1
@@ -168,4 +160,11 @@ public sealed class TransactionConfirmationSaver(DirectPoster poster, ITransacti
         PyIsoDate.TryParse(JsonSerializer.SerializeToElement(text), out var date)
             ? date
             : throw new FormatException("Data inválida.");
+}
+
+/// <summary>Desvio 150: <c>descricao_final or descricao</c> (descrição vazia ou nula cai na bruta da mensagem).</summary>
+public static class ConfirmationDescription
+{
+    public static string? Pick(string? final, string? raw) =>
+        !string.IsNullOrEmpty(final) ? final : (string.IsNullOrEmpty(raw) ? null : raw);
 }

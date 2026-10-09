@@ -15,6 +15,16 @@ public class FinancePipelineParityTests
     private static readonly string[] ImplementedGroups = ["012a", "012b", "012c"];
 
     /// <summary>
+    /// Cenários do harness que gravam o comportamento ANTIGO do Flask e que um desvio aprovado já substituiu. Ficam no harness como
+    /// evidência do comportamento antigo e saem da comparação estrita; os testes de <see cref="WhatsAppDeviationTests"/> provam o novo.
+    /// </summary>
+    internal static readonly IReadOnlyDictionary<string, string> KnownDivergences = new Dictionary<string, string>
+    {
+        ["resposta_ok_sem_descricao_final_falha"] = "150",
+        ["resposta_ok_parcelada_sem_descricao_final"] = "150",
+    };
+
+    /// <summary>
     /// O Flask lê a lista de contas por SQL direto em vários pontos; só o resultado interessa, não a chamada.
     /// </summary>
     private static readonly string[] IgnoredCalls = ["finance_service.get_user_accounts"];
@@ -23,7 +33,9 @@ public class FinancePipelineParityTests
     [Trait("AC", "012-017")]
     public async Task EveryFinanceScenario_MatchesTheFlask()
     {
-        var scenarios = FinanceScenarios.All(ImplementedGroups).ToList();
+        var scenarios = FinanceScenarios.All(ImplementedGroups)
+            .Where(s => !KnownDivergences.ContainsKey(s.GetProperty("name").GetString()!))
+            .ToList();
         scenarios.Count.ShouldBeGreaterThan(40);
 
         var failures = new List<string>();
@@ -96,12 +108,10 @@ public class FinancePipelineParityTests
             failures.Add($"{name}: status {status} do Flask, exceção '{thrown.GetType().Name}' (cota: {WhatsAppTexts.IsQuotaMessage(thrown.Message)})");
         }
 
-        var skipCreate = scenario.TryGetProperty("deviation", out var deviation) && deviation.GetString() == "150";
         var expectedCalls = result.GetProperty("calls").EnumerateArray()
             .Select(c => c.GetString()!)
             .Where(c => !c.StartsWith("route_intent:", StringComparison.Ordinal) && !c.StartsWith("registry:", StringComparison.Ordinal))
             .Where(c => !IgnoredCalls.Contains(c))
-            .Where(c => !(skipCreate && c == "finance_service.create_transaction"))
             .ToList();
         if (!rig.Calls.SequenceEqual(expectedCalls))
         {

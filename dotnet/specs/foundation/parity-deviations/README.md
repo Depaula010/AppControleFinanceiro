@@ -123,7 +123,7 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [137](137-resumo-sem-google-suprime-alertas-financeiros.md) | Resumo matinal sem Google suprime os alertas financeiros | correção | 013 | implementado (feature 013, 2026-10-09) |
 | [138](138-resumo-matinal-chave-do-usuario.md) | Resumo matinal usa a chave do usuário | correção | 013, 008, 010 | implementado (feature 013, 2026-10-09) |
 | [139](139-checkin-nao-confere-envio.md) | Check-in não confere o envio e deixa a sessão ativa | correção | 013, 012 | implementado (feature 013, 2026-10-09) |
-| [150](150-whatsapp-confirmacao-sem-descricao.md) | Confirmar despesa/renda por WhatsApp falha quando não há agendamento | correção | 012 | aprovado |
+| [150](150-whatsapp-confirmacao-sem-descricao.md) | Confirmar despesa/renda por WhatsApp falha quando não há agendamento | correção | 012 | implementado (feature 012, 2026-10-09) |
 | [151](151-whatsapp-transferencia-quebrada.md) | Transferência por WhatsApp falha sempre | correção | 012 | aprovado |
 | [152](152-whatsapp-notificacoes-gemini-500.md) | Configurar Notificações pelo ramo do Gemini grava e responde 500 | correção | 012 | aprovado |
 | [153](153-whatsapp-api-key-cifrada.md) | Solicitar API Key devolve o valor cru da coluna | correção | 012 | aprovado |

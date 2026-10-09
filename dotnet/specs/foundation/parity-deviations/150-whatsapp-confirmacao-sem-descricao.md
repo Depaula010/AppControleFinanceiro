@@ -1,6 +1,6 @@
 # Desvio 150 — Confirmar despesa/renda por WhatsApp falha quando não há agendamento
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-09)
 - **Features afetadas:** 012
 - **Severidade:** correção
 

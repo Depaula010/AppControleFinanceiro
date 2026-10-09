@@ -31,7 +31,7 @@ public class TransactionFlowEndpointTests(PostgresFixture postgres) : IAsyncLife
     }
 
     [Fact]
-    [Trait("AC", "012-110")]
+    [Trait("AC", "012-113")]
     public async Task Expense_IsPendingThenSavedWithFeedback()
     {
         var account = await _env.Data.InsertAccountAsync(_user, "Nubank");
@@ -45,10 +45,15 @@ public class TransactionFlowEndpointTests(PostgresFixture postgres) : IAsyncLife
         _env.Cache.Values.Keys.ShouldContain("last_pending:" + WhatsAppEnv.Number);
         (await _env.ScalarAsync<int>("SELECT COUNT(*) FROM transacoes")).ShouldBe(0);
 
-        // pendência sem descricao_final (sem agendamento): o OK grava com o campo nulo e falha (desvio 150, como o Flask).
-        var confirmed = await _env.PostJsonAsync(new { texto = "OK", numero_remetente = WhatsAppEnv.Number });
-        confirmed.Status.ShouldBe(HttpStatusCode.InternalServerError);
-        (await _env.ScalarAsync<int>("SELECT COUNT(*) FROM transacoes")).ShouldBe(0);
+        // pendência sem descricao_final (sem agendamento): o OK grava com a descrição bruta da mensagem (desvio 150).
+        var saved = await SendAsync("OK");
+
+        saved.ShouldContain("✅ Transação Salva!");
+        saved.ShouldContain("📝 padaria");
+        (await _env.ScalarAsync<int>("SELECT COUNT(*) FROM transacoes")).ShouldBe(1);
+        (await _env.ScalarAsync<string>("SELECT descricao FROM transacoes")).ShouldBe("padaria");
+        (await _env.ScalarAsync<decimal>("SELECT valor FROM transacoes")).ShouldBe(-50m);
+        _env.Cache.Values.ShouldBeEmpty();
         _ = account;
     }
 
