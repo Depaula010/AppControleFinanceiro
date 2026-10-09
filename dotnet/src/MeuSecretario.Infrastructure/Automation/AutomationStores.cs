@@ -269,6 +269,14 @@ internal sealed class InvoiceScheduleSession(NpgsqlConnection connection, Npgsql
             transaction,
             cancellationToken: cancellationToken));
 
+    private const string ScheduleSavepoint = "invoice_schedule";
+
+    public Task BeginScheduleAsync(CancellationToken cancellationToken) => transaction.SaveAsync(ScheduleSavepoint, cancellationToken);
+
+    public Task ReleaseScheduleAsync(CancellationToken cancellationToken) => transaction.ReleaseAsync(ScheduleSavepoint, cancellationToken);
+
+    public Task RollbackScheduleAsync(CancellationToken cancellationToken) => transaction.RollbackAsync(ScheduleSavepoint, cancellationToken);
+
     public async Task CommitAsync(CancellationToken cancellationToken) => await transaction.CommitAsync(cancellationToken);
 
     public async ValueTask DisposeAsync()

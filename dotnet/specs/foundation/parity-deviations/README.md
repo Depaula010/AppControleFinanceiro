@@ -103,12 +103,12 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [093](093-dashboard-alertas-data-inicio.md) | Dashboard: alertas MENSAL e ANUAL ignoram data_inicio | correção | 006 | implementado |
 | [094](094-dashboard-alertas-conta-ja-paga.md) | Dashboard: alerta continua para a conta já paga no mês | correção | 006 | implementado |
 | [095](095-dashboard-alertas-receita.md) | Dashboard: receita aparece como conta a vencer | correção | 006 | implementado |
-| [096](096-sms-chamada-inutil-gemini.md) | SMS: remover a chamada inútil ao Gemini | correção | 011 | aprovado |
-| [097](097-automacao-entradas-invalidas-400.md) | Rotas de automação: entradas inválidas viram 400 com mensagem | correção | 011 | aprovado |
-| [098](098-sms-valor-pago-texto.md) | SMS: valor_pago como texto numérico deve funcionar | correção | 011 | aprovado |
-| [099](099-quitacao-casamento-sem-caixa.md) | Quitação por SMS: casar descrições sem diferenciar a caixa | correção | 011, 012 | aprovado |
-| [100](100-confirmacao-emoji-cartao.md) | Confirmação de transação: restaurar o emoji do cartão | correção | 011, 012 | aprovado |
-| [101](101-reprocessar-isola-erro-por-agendamento.md) | Reprocessar fatura: isolar o erro de cada agendamento | correção | 011 | aprovado |
+| [096](096-sms-chamada-inutil-gemini.md) | SMS: remover a chamada inútil ao Gemini | correção | 011 | implementado |
+| [097](097-automacao-entradas-invalidas-400.md) | Rotas de automação: entradas inválidas viram 400 com mensagem | correção | 011 | implementado |
+| [098](098-sms-valor-pago-texto.md) | SMS: valor_pago como texto numérico deve funcionar | correção | 011 | implementado |
+| [099](099-quitacao-casamento-sem-caixa.md) | Quitação por SMS: casar descrições sem diferenciar a caixa | correção | 011, 012 | implementado |
+| [100](100-confirmacao-emoji-cartao.md) | Confirmação de transação: restaurar o emoji do cartão | correção | 011, 012 | implementado |
+| [101](101-reprocessar-isola-erro-por-agendamento.md) | Reprocessar fatura: isolar o erro de cada agendamento | correção | 011 | implementado |
 | [102](102-chave-usuario-indice-cego.md) | Chave do atalho: índice cego e cabeçalho | segurança | 011 | proposto |
 | [120](120-calendar-alerts-tipos-do-corpo.md) | Alertas de calendário: tipos do corpo de /config e /ativar | correção | 014 | aprovado |
 | [121](121-calendar-alerts-janela-30s.md) | Alertas de calendário: janela de ±30 s perde o aviso se o ciclo atrasa | correção | 014 | aprovado |

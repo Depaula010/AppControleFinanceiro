@@ -115,6 +115,15 @@ public interface IInvoiceScheduleSession : IAsyncDisposable
 
     Task AdvanceInstallmentAsync(int scheduleId, int newInstallmentsExecuted, bool active, CancellationToken cancellationToken);
 
+    /// <summary><c>SAVEPOINT</c> do agendamento que vai ser processado (desvio 101).</summary>
+    Task BeginScheduleAsync(CancellationToken cancellationToken);
+
+    /// <summary><c>RELEASE SAVEPOINT</c>: o que o agendamento gravou fica na transação.</summary>
+    Task ReleaseScheduleAsync(CancellationToken cancellationToken);
+
+    /// <summary><c>ROLLBACK TO SAVEPOINT</c>: desfaz só o que o agendamento gravou e deixa a transação utilizável.</summary>
+    Task RollbackScheduleAsync(CancellationToken cancellationToken);
+
     Task CommitAsync(CancellationToken cancellationToken);
 }
 

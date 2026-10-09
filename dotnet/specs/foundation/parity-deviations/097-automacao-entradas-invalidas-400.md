@@ -1,6 +1,6 @@
 # Desvio 097 — Rotas de automação: entradas inválidas viram 400 com mensagem
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 011, 2026-10-09)
 - **Features afetadas:** 011
 - **Severidade:** correção
 

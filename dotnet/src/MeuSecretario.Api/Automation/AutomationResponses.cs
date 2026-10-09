@@ -135,6 +135,7 @@ public static class AutomationResponses
                     ["fixos"] = stats.Fixed,
                     ["parcelados"] = stats.Installments,
                     ["lembretes"] = stats.Reminders,
+                    ["erros"] = stats.Errors,
                     ["detalhes"] = stats.Details.Select(d => new Dictionary<string, object?>
                     {
                         ["tipo"] = d.Type,

@@ -1,6 +1,6 @@
 # Desvio 100 — Confirmação de transação: restaurar o emoji do cartão
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 011, 2026-10-09)
 - **Features afetadas:** 011, 012
 - **Severidade:** correção
 

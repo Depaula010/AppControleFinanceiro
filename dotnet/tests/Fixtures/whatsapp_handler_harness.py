@@ -42,6 +42,26 @@ def load(name, text, extra=None):
     return namespace
 
 
+# ------------------------------------------------------------------ desvios aprovados que o harness aplica ao codigo REAL do Flask
+def source_confirmation():
+    """Desvio 100: o emoji do cartao chegou corrompido (U+FFFD) no arquivo; o .NET usa o emoji do cartao."""
+    return source("services", "transaction_confirmation_service.py").replace("\ufffd", "\U0001F4B3")
+
+
+def _fold099(text):
+    import unicodedata
+    decomposed = unicodedata.normalize("NFD", text.lower())
+    return unicodedata.normalize("NFC", "".join(ch for ch in decomposed if unicodedata.category(ch) != "Mn"))
+
+
+def source_fixed_bills():
+    """Desvio 099: minusculas e sem acentos nos DOIS lados do WRatio (o rapidfuzz 3.x nao pre-processa)."""
+    text = source("services", "fixed_bills_service.py")
+    old = "            descricoes.keys(),\n            scorer=fuzz.WRatio,"
+    assert old in text
+    return text.replace(old, "            descricoes.keys(),\n            processor=_fold099,\n            scorer=fuzz.WRatio,")
+
+
 def stub_module(name, **attrs):
     module = types.ModuleType(name)
     for key, value in attrs.items():
@@ -278,7 +298,7 @@ class NightlyCheckinService:
 stub_module("app.services.nightly_checkin_service", NightlyCheckinService=NightlyCheckinService)
 
 # servicos reais (Redis em memoria)
-confirmation_ns = load("transaction_confirmation_service.py", source("services", "transaction_confirmation_service.py"))
+confirmation_ns = load("transaction_confirmation_service.py", source_confirmation())
 stub_module("app.services.transaction_confirmation_service", TransactionConfirmationService=confirmation_ns["TransactionConfirmationService"])
 events_ns = load("event_confirmation_service.py", source("services", "event_confirmation_service.py"))
 stub_module("app.services.event_confirmation_service", EventConfirmationService=events_ns["EventConfirmationService"])

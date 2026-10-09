@@ -62,9 +62,10 @@ public class RegisterApiTransactionTests
 
     [Fact]
     [Trait("AC", "011-041")]
-    public async Task NonTextField_Fails() =>
-        await Should.ThrowAsync<AutomationFailureException>(
-            () => Run("""{"user_api_key":"k","valor":1,"local":5,"conta":"c","tipo_pagamento":"pix"}"""));
+    public async Task NonTextField_IsAnInvalidInput_NotA500() =>
+        // Desvio 097: o Flask quebrava em sanitize_input (500).
+        (await Run("""{"user_api_key":"k","valor":1,"local":5,"conta":"c","tipo_pagamento":"pix"}""")).ShouldBeOfType<ApiTransactionResult.Invalid>()
+            .Message.ShouldBe("Campo 'local' deve ser texto");
 
     [Fact]
     [Trait("AC", "011-034")]
@@ -143,7 +144,8 @@ public class RegisterApiTransactionTests
         result.ShouldBeOfType<ApiTransactionResult.Pending>().LinkedToInvoice.ShouldBeTrue();
         _h.PendingData()["fatura_id"].ShouldBe(77);
         await _h.Invoices.Received(1).EnsureCurrentAsync(AutomationHarness.UserId, 3, Arg.Any<CancellationToken>());
-        _h.BotMessage().ShouldContain("� Cartão Inter (na fatura)");
+        // Desvio 100: o emoji do cartão no lugar do U+FFFD do Flask.
+        _h.BotMessage().ShouldContain("💳 Cartão Inter (na fatura)");
     }
 
     [Fact]
@@ -306,18 +308,17 @@ public class ProcessSmsPaymentTests
 
     [Fact]
     [Trait("AC", "011-063")]
-    public async Task NoMatch_CallsTheGeminiRegistersALooseExpenseOnTheWalletAndNotifies()
+    public async Task NoMatch_RegistersALooseExpenseOnTheWalletAndNotifies_CallingTheGeminiOnlyToCategorize()
     {
-        _h.Llm.Then("""{"valor_decimal": 80.0, "descricao_bruta": "Mercado"}""").Then("1");
+        _h.Llm.Then("1");
 
         var result = await Run("""{"user_api_key":"chave-do-atalho","descricao_pagamento":"Mercado Extra","valor_pago":80.5,"conta_pagamento":"swile"}""");
 
         result.ShouldBeOfType<SmsPaymentResult.Registered>();
-        _h.Llm.Requests.Count.ShouldBe(2);
-        _h.Llm.Requests[0].Prompt.ShouldStartWith("Analise a mensagem: \"Paguei 80.5 de Mercado Extra\"\n");
-        _h.Llm.Requests[0].Cache.ShouldBe(LlmCachePolicies.ExtractTransaction);
+        // Desvio 096: a extração inútil (extract_transaction_details) saiu; só a categorização chama o Gemini.
+        _h.Llm.Requests.Count.ShouldBe(1);
+        _h.Llm.Requests[0].Cache.ShouldBe(LlmCachePolicies.Category);
         _h.Llm.Requests[0].UserId.ShouldBe(AutomationHarness.UserId);
-        _h.Llm.Requests[1].Cache.ShouldBe(LlmCachePolicies.Category);
         var posted = _h.Posted();
         posted.AccountId.ShouldBe(1);
         posted.SubcategoryId.ShouldBe(1);
@@ -329,14 +330,14 @@ public class ProcessSmsPaymentTests
 
     [Fact]
     [Trait("AC", "011-063")]
-    public async Task TheUselessGeminiCallStillFailsTheRoute_WhenItReturnsInvalidJson()
+    public async Task NoMatch_NeverAsksTheGeminiToExtractTheTransaction()
     {
-        _h.Llm.Then("isto não é json");
+        _h.Llm.Then("1");
 
-        await Should.ThrowAsync<System.Text.Json.JsonException>(
-            () => Run("""{"user_api_key":"chave-do-atalho","descricao_pagamento":"Mercado Extra","valor_pago":80,"conta_pagamento":"swile"}"""));
+        await Run("""{"user_api_key":"chave-do-atalho","descricao_pagamento":"Mercado Extra","valor_pago":80,"conta_pagamento":"swile"}""");
 
-        await _h.Posting.DidNotReceiveWithAnyArgs().PostSimpleAsync(default!, default);
+        _h.Llm.Requests.ShouldAllBe(r => !r.Prompt.Contains("Paguei", StringComparison.Ordinal));
+        await _h.Posting.Received(1).PostSimpleAsync(Arg.Any<PostSimpleTransaction>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -344,7 +345,7 @@ public class ProcessSmsPaymentTests
     public async Task NoAccount_FailsWithoutSaving()
     {
         _h.Lookups.FindAccountIdWithFallbackAsync(AutomationHarness.UserId, "Carteira", Arg.Any<CancellationToken>()).Returns((int?)null);
-        _h.Llm.Then("{}").Then("1");
+        _h.Llm.Then("1");
 
         await Should.ThrowAsync<AutomationFailureException>(
             () => Run("""{"user_api_key":"chave-do-atalho","descricao_pagamento":"Mercado Extra","valor_pago":80,"conta_pagamento":"swile"}"""));
@@ -352,19 +353,30 @@ public class ProcessSmsPaymentTests
         await _h.Posting.DidNotReceiveWithAnyArgs().PostSimpleAsync(default!, default);
     }
 
-    [Theory]
+    [Fact]
     [Trait("AC", "011-065")]
-    [InlineData("luz")]
-    [InlineData("Mercado Extra")]
-    public async Task TextAmount_SavesAndThenFails(string description)
+    public async Task TextAmount_SettlesTheBill_AndNotifiesWithTheNumber()
     {
-        _h.Llm.Then("{}").Then("1");
+        // Desvio 098: "150.50" como texto grava, avisa o WhatsApp e responde 200 (o Flask gravava e dava 500).
+        var result = await Run("""{"user_api_key":"chave-do-atalho","descricao_pagamento":"luz","valor_pago":"150.50","conta_pagamento":"swile"}""");
 
-        await Should.ThrowAsync<AutomationFailureException>(
-            () => Run($$"""{"user_api_key":"chave-do-atalho","descricao_pagamento":"{{description}}","valor_pago":"150.50","conta_pagamento":"swile"}"""));
+        result.ShouldBeOfType<SmsPaymentResult.Settled>();
+        _h.Posted().Amount.ShouldBe(150.5m);
+        _h.BotMessage().ShouldContain("💰 R$ 150,50");
+    }
 
-        await _h.Posting.Received(1).PostSimpleAsync(Arg.Any<PostSimpleTransaction>(), Arg.Any<CancellationToken>());
-        await _h.Bot.DidNotReceiveWithAnyArgs().SendTextAsync(default!, default!, default);
+    [Fact]
+    [Trait("AC", "011-065")]
+    public async Task TextAmount_RegistersALooseExpense_AndNotifiesWithTheNumber()
+    {
+        _h.Llm.Then("1");
+
+        var result = await Run("""{"user_api_key":"chave-do-atalho","descricao_pagamento":"Mercado Extra","valor_pago":" 80.5 ","conta_pagamento":"swile"}""");
+
+        result.ShouldBeOfType<SmsPaymentResult.Registered>();
+        _h.Posted().Amount.ShouldBe(80.5m);
+        _h.BotMessage().ShouldBe(
+            "Pagamento Registrado!\n\nMercado Extra\nR$ 80,50\nswile\n\n_Nao encontrei uma conta fixa correspondente, entao registrei como despesa avulsa._");
     }
 
     [Theory]
@@ -372,11 +384,12 @@ public class ProcessSmsPaymentTests
     [InlineData("\"2026-02-30\"")]
     [InlineData("\"15/01/2026\"")]
     [InlineData("5")]
-    public async Task InvalidDate_FailsWithoutSaving(string date)
+    public async Task InvalidDate_Is400WithoutSaving(string date)
     {
-        await Should.ThrowAsync<AutomationFailureException>(
-            () => Run($$"""{"user_api_key":"chave-do-atalho","descricao_pagamento":"luz","valor_pago":10,"conta_pagamento":"swile","data_pagamento":{{date}}}"""));
+        // Desvio 097: o Flask respondia 500 com str(e).
+        var result = await Run($$"""{"user_api_key":"chave-do-atalho","descricao_pagamento":"luz","valor_pago":10,"conta_pagamento":"swile","data_pagamento":{{date}}}""");
 
+        result.ShouldBeOfType<SmsPaymentResult.Invalid>().Message.ShouldBe("data_pagamento invalida. Use o formato AAAA-MM-DD");
         await _h.Posting.DidNotReceiveWithAnyArgs().PostSimpleAsync(default!, default);
     }
 
@@ -389,16 +402,22 @@ public class ProcessSmsPaymentTests
         _h.Posted().Date.ShouldBe(new DateOnly(2026, 1, 15));
     }
 
-    [Fact]
+    [Theory]
     [Trait("AC", "011-067")]
-    public async Task NegativeAmount_IsRefusedByThePostingService()
+    [InlineData("-10", "Valor invalido: Valor deve ser positivo")]
+    [InlineData("\"-0.01\"", "Valor invalido: Valor deve ser positivo")]
+    [InlineData("\"nan\"", "Valor invalido: Valor deve ser positivo")]
+    [InlineData("\"abc\"", "Valor invalido: could not convert string to float: 'abc'")]
+    [InlineData("[1]", "Valor invalido: float() argument must be a string or a real number, not 'list'")]
+    [InlineData("1000000000.01", "Valor invalido: Valor muito alto (max: 1 bilhao)")]
+    public async Task InvalidAmount_Is400WithoutSaving(string amount, string message)
     {
-        _h.Posting.PostSimpleAsync(Arg.Any<PostSimpleTransaction>(), Arg.Any<CancellationToken>())
-            .Returns(new PostingResult<PostedTransaction>.Failed(PostingError.AmountInvalid));
-        _h.Lookups.FindAccountIdWithFallbackAsync(AutomationHarness.UserId, "Carteira", Arg.Any<CancellationToken>()).Returns(1);
+        // Desvio 097: o Flask gravava despesa positiva para valor negativo e respondia 500 nos demais casos.
+        var result = await Run($$"""{"user_api_key":"chave-do-atalho","descricao_pagamento":"luz","valor_pago":{{amount}},"conta_pagamento":"swile"}""");
 
-        await Should.ThrowAsync<AutomationFailureException>(
-            () => Run("""{"user_api_key":"chave-do-atalho","descricao_pagamento":"luz","valor_pago":-10,"conta_pagamento":"swile"}"""));
+        result.ShouldBeOfType<SmsPaymentResult.Invalid>().Message.ShouldBe(message);
+        await _h.Posting.DidNotReceiveWithAnyArgs().PostSimpleAsync(default!, default);
+        await _h.Bot.DidNotReceiveWithAnyArgs().SendTextAsync(default!, default!, default);
     }
 
     [Fact]
@@ -414,7 +433,7 @@ public class ProcessSmsPaymentTests
 
     [Fact]
     [Trait("AC", "011-061")]
-    public async Task NonTextDescription_Fails() =>
-        await Should.ThrowAsync<AutomationFailureException>(
-            () => Run("""{"user_api_key":"chave-do-atalho","descricao_pagamento":123,"valor_pago":10,"conta_pagamento":"swile"}"""));
+    public async Task NonTextDescription_Is400() =>
+        (await Run("""{"user_api_key":"chave-do-atalho","descricao_pagamento":123,"valor_pago":10,"conta_pagamento":"swile"}""")).ShouldBeOfType<SmsPaymentResult.Invalid>()
+            .Message.ShouldBe("Campo 'descricao_pagamento' deve ser texto");
 }

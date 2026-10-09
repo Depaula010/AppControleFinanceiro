@@ -224,7 +224,7 @@ public class InvoiceScheduleStoreTests(PostgresFixture postgres) : IAsyncLifetim
 
     [Fact]
     [Trait("AC", "011-126")]
-    public async Task AFailureInTheMiddle_RollsBackTheWholeInvoice()
+    public async Task AFailureInTheMiddle_RollsBackOnlyThatSchedule_AndTheOthersAreKept()
     {
         await _env.InsertScheduleAsync(_user, _card, "A", amount: 1.00m, day: 1);
         await _env.InsertScheduleAsync(_user, _card, "B", amount: 2.00m, day: 2);
@@ -242,10 +242,14 @@ public class InvoiceScheduleStoreTests(PostgresFixture postgres) : IAsyncLifetim
 
         try
         {
-            await Should.ThrowAsync<PostgresException>(() => Processor().ProcessAsync(_invoice, _card, new DateOnly(2026, 4, 15), CancellationToken.None));
+            // Desvio 101: um SAVEPOINT por agendamento. O erro de B (que o PostgreSQL abortaria para a transação toda) desfaz só B.
+            var stats = await Processor().ProcessAsync(_invoice, _card, new DateOnly(2026, 4, 15), CancellationToken.None);
 
-            (await _env.ScalarAsync<int>("SELECT count(*)::int FROM transacoes")).ShouldBe(0);
-            (await _env.ScalarAsync<int>("SELECT parcelas_executadas FROM agendamentos WHERE descricao = 'C'")).ShouldBe(0);
+            stats.Processed.ShouldBe(2);
+            stats.Errors.ShouldBe(1);
+            stats.Details.Select(d => d.Description).ShouldBe(["A", "C (1/3)"]);
+            (await _env.QueryAsync<string>("SELECT descricao FROM transacoes ORDER BY id")).ShouldBe(["A", "C (1/3)"]);
+            (await _env.ScalarAsync<int>("SELECT parcelas_executadas FROM agendamentos WHERE descricao = 'C'")).ShouldBe(1);
         }
         finally
         {

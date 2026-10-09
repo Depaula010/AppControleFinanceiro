@@ -1,10 +1,10 @@
 # Spec 011 — Automação (atalho do iPhone, Automate, SMS, reserva de emergência, reprocessar fatura)
 
-- **Estado:** aprovada por delegação do Rafael em 2026-10-05 e **implementada** na mesma data (fluxo SDD delegado ao agente; valem só paridade com o Flask e os desvios já aprovados; novos achados ficam como `proposto` em `parity-deviations/096` a `102` e **não** são implementados)
+- **Estado:** aprovada por delegação do Rafael em 2026-10-05 e **implementada** na mesma data (fluxo SDD delegado ao agente; valem só paridade com o Flask e os desvios já aprovados; os desvios **096 a 101** (aprovados em 2026-10-09) foram implementados na mesma data; o 102 foi **adiado** e não é implementado)
 - **Onda:** 3
 - **Origem (Python):** `app/routes/webhooks/__init__.py:59-75, 103-188` (rotas), `app/routes/webhooks/handlers/transaction_handler.py:38-583` (`/webhook-automate`, `/api/transacao`, `/webhook-sms-payment`), `handlers/reserve_handler.py:21-345` (`PATCH` e `GET` da reserva), `app/services/finance_service.py:251-288` (`get_user_by_api_key`), `:297-407` (contas, categorias, nomes), `:409-425` (`create_transaction`), `:943-1013` (`get_reserva_status`), `app/services/finance/invoice_service.py:590-800` (`process_invoice_schedules`), `app/services/fixed_bills_service.py:80-215, 507-515` (casamento difuso e quitação), `app/services/transaction_confirmation_service.py:9-230` (pendência no Redis e mensagem), `app/services/finance/budget_validation_service.py:1-313` (pote), `app/services/gemini_service.py:94-173, 376-420` (prompts de extração e categoria), `app/shared/validators/input_sanitizer.py`, `app/shared/formatters/currency_formatter.py`.
 - **Depende de:** 001a (`IEncryptionService`, `IClock`), 003 (`ICategoryLookup`), 004 (`ITransactionPosting`, `IInvoiceService`, `IInvoiceSchedulePopulator`, `InvoiceLinking`), 005 (`IEmergencyReserveService`), 008 (`IApiKeyValidator`/`RequireApiKey`; `IApiKeyProvider` via 010-0), 010 (`ILlmClient`, `ICache`, `IBotClient`, `IIntegrationSettings`).
-- **Desvios aplicáveis (aprovados):** 003 (`reprocessar` exige `x-api-key`), 005 (rotas alcançáveis: whitelist derivada), 008 (sem `str(e)` nem segredo em resposta ou log), 014 (reserva única, via `IEmergencyReserveService`), 015 (período do pote), 017 (chave do usuário em texto puro ou Fernet), 024 (corpo sem `Content-Type` JSON), 025 (`Cartão de Crédito` com acento), 030 (`Outros` por `ORDER BY id`), 039 (só contas ativas). Propostos novos: §9.
+- **Desvios aplicáveis (aprovados):** 003 (`reprocessar` exige `x-api-key`), 005 (rotas alcançáveis: whitelist derivada), 008 (sem `str(e)` nem segredo em resposta ou log), 014 (reserva única, via `IEmergencyReserveService`), 015 (período do pote), 017 (chave do usuário em texto puro ou Fernet), 024 (corpo sem `Content-Type` JSON), 025 (`Cartão de Crédito` com acento), 030 (`Outros` por `ORDER BY id`), 039 (só contas ativas). Implementados em 2026-10-09: 096 a 101 (§9). Adiado: 102.
 - **Consumidores:** os atalhos do iPhone (`/api/transacao`, `/webhook-sms-payment`), o Automate Android (`/webhook-automate`), scripts de reserva (`/api/agendamento*/reserva`) e a manutenção (`reprocessar`). O Angular **não** usa nenhuma destas rotas.
 
 ## 1. Objetivo
@@ -45,12 +45,12 @@ Ordem:
 | 1 | `GEMINI_API_KEY` do sistema vazia (o Flask não cria o modelo e `gemini_model` é nulo) | 503 `{"status":"erro","mensagem":"Servico nao configurado"}` |
 | 2 | `texto` ou `user_api_key` falso | 400 `"Dados faltando"` |
 | 3 | nenhuma chave casa | 401 `"API key invalida"` |
-| 4 | `texto` verdadeiro mas não texto (`5`, `[1]`) | 500 `"Erro ao processar a notificação. Tente novamente."` (o Flask quebra em `.lower()`; ver 097) |
+| 4 | `texto` verdadeiro mas não texto (`5`, `[1]`) | 400 `"Campo 'texto' deve ser texto"` (desvio 097; o Flask quebrava em `.lower()`, 500) |
 
 Passos (depois da autenticação):
 
-1. **Extração (Gemini).** Prompt `extract_from_notification` (§7.4) com `UserId` (a chave do usuário vale, desvio 063 já aprovado para chamadas com usuário; o Flask já passa `usuario_id` aqui) e **sem cache**. A resposta é `LlmJson.Parse` ⇒ objeto com `tipo_fluxo` (padrão `"Despesa"`), `descricao_bruta` (padrão `null`) e `valor_decimal` (`float()`, padrão `0`). Resposta que não é objeto, JSON inválido, `valor_decimal` `null` ou não numérico ⇒ 500 (exceção). Falha do Gemini: `LlmKeyUnavailableException` ⇒ 500 com a mensagem literal dela (o Flask mostra o texto ao usuário, ver RN-011-05); cota ⇒ 500 `"429 Quota exceeded - Gemini API rate limit reached"`; permissão ⇒ 500 `"403 Permission denied - Invalid API key or permissions"`; outras ⇒ mensagem fixa da rota.
-2. **Conta.** Contas **ativas** do usuário (`id, nome_conta, tipo_conta`, `ORDER BY id`; desvio 039). Se `tipo_fluxo == "Despesa"` e o `texto` em minúsculas contém `cartao`, `compra` ou `credit`, usa o primeiro `Cartão de Crédito` (desvio 025: o Flask comparava `Cartao de Credito` sem acento e nunca achava). Se não achou, usa a primeira `Conta Corrente`; se não há, a primeira conta da lista; lista vazia ⇒ 500 (o Flask quebra com `IndexError`; ver 097).
+1. **Extração (Gemini).** Prompt `extract_from_notification` (§7.4) com `UserId` (a chave do usuário vale, desvio 063 já aprovado para chamadas com usuário; o Flask já passa `usuario_id` aqui) e **sem cache**. A resposta é `LlmJson.Parse` ⇒ objeto com `tipo_fluxo` (padrão `"Despesa"`), `descricao_bruta` (padrão `null`) e `valor_decimal` (`float()`, padrão `0`). Resposta que não é objeto, JSON inválido ou `descricao_bruta` que não é texto ⇒ 500 (falha do Gemini). **Desvio 097:** `tipo_fluxo` fora de `Renda`/`Despesa` ⇒ 400 `"tipo_fluxo invalido na notificacao. Use: Renda ou Despesa"`; `valor_decimal` ausente, `null`, não numérico, zero, negativo, `nan` ou acima de 1 bilhão ⇒ 400 `"Valor invalido na notificacao: deve ser positivo"` (o Flask respondia 500 ou criava pendência de R$ 0,00). Nada é gravado. Falha do Gemini: `LlmKeyUnavailableException` ⇒ 500 com a mensagem literal dela (o Flask mostra o texto ao usuário, ver RN-011-05); cota ⇒ 500 `"429 Quota exceeded - Gemini API rate limit reached"`; permissão ⇒ 500 `"403 Permission denied - Invalid API key or permissions"`; outras ⇒ mensagem fixa da rota.
+2. **Conta.** Contas **ativas** do usuário (`id, nome_conta, tipo_conta`, `ORDER BY id`; desvio 039). Se `tipo_fluxo == "Despesa"` e o `texto` em minúsculas contém `cartao`, `compra` ou `credit`, usa o primeiro `Cartão de Crédito` (desvio 025: o Flask comparava `Cartao de Credito` sem acento e nunca achava). Se não achou, usa a primeira `Conta Corrente`; se não há, a primeira conta da lista; lista vazia ⇒ 400 `"Nenhuma conta ativa encontrada. Cadastre uma conta antes de usar o atalho."` (desvio 097; o Flask quebrava com `IndexError`).
 3. **Categoria.** Categorias visíveis do usuário para o tipo (`Despesa` ⇒ grupos `Despesa Essencial`, `Despesa Discricionária`, `Meta Financeira`, `Geral`; qualquer outro tipo ⇒ grupo `Renda`; globais ou do usuário, `ORDER BY s.id`), "Outros" de fallback (`ICategoryLookup.FindFallbackAsync(income: tipo == "Renda")`, desvio 030) e `categorize_transaction` (§7.4, cache `category` de 30 dias por usuário). Resposta que não é um id da lista, não numérica, vazia ou bloqueada ⇒ id do fallback.
 4. **Fatura.** Se a conta escolhida é `Cartão de Crédito`: `IInvoiceService.EnsureCurrentAsync(usuário, conta)`, depois a fatura do ciclo de **hoje** (`IClock.Today`, `InvoiceLinking`), criada se faltar, **comitada antes** de seguir (o Flask faz `conn.commit()` aqui). `fatura_id` é `null` nos demais casos e para cartão sem os dois dias.
 5. **Valor.** `valor_db = valor` se `tipo_fluxo == "Renda"`, senão `-valor`.
@@ -70,7 +70,7 @@ Ordem:
 |---|---|---|
 | 1 | `GEMINI_API_KEY` do sistema vazia | 503 `{"status":"erro","mensagem":"Servico nao configurado"}` |
 | 2 | corpo ausente, sem `Content-Type` JSON, inválido, `null` ou que não seja objeto (desvio 024) | 400 `{"erro":"JSON invalido ou ausente"}` (**sem** `status`) |
-| 3 | campos de texto verdadeiros que não são texto (`local: 5`, `tipo_pagamento: [1]`) | 500 `"Erro ao registrar a transação. Tente novamente."` (ver 097) |
+| 3 | campos de texto verdadeiros que não são texto (`local: 5`, `tipo_pagamento: [1]`) | 400 `"Campo '<campo>' deve ser texto"`, para o primeiro na ordem `local`, `descricao`, `conta`, `tipo_pagamento` (desvio 097; o Flask quebrava em `sanitize_input`, 500) |
 | 4 | algum obrigatório falso, **depois** de sanear os textos (§7.2) | 400 `"Campos obrigatorios faltando: a, b"`, na ordem `user_api_key`, `valor`, `local`, `conta`, `tipo_pagamento` |
 | 5 | `valor` não conversível por `float()` | 400 `"Valor invalido: <erro do Python>"` (§7.1) |
 | 6 | `valor <= 0` | 400 `"Valor invalido: Valor deve ser positivo"` |
@@ -79,7 +79,7 @@ Ordem:
 | 9 | nenhuma chave casa | 401 `"API key invalida"` |
 | 10 | conta não encontrada (§7.3) | 400 `"Conta '<conta>' nao encontrada. Verifique o nome exato."` (o nome já saneado) |
 
-Tratamento: `local` (≤ 100), `conta` (≤ 50), `descricao` (≤ 200, aceita caracteres especiais; `trim`; vazia ⇒ `null`) e `tipo_pagamento` (≤ 20, `trim`, minúsculas, sem acentos por NFKD) passam por `sanitize_input` (§7.2). `valor` é `float` (texto numérico serve). **O Flask aceita `valor` `nan`** (passa nas duas comparações); o .NET não consegue gravar `NaN` em `decimal`: responde o 400 do item 6 (divergência registrada em §11 e em 097).
+Tratamento: `local` (≤ 100), `conta` (≤ 50), `descricao` (≤ 200, aceita caracteres especiais; `trim`; vazia ⇒ `null`) e `tipo_pagamento` (≤ 20, `trim`, minúsculas, sem acentos por NFKD) passam por `sanitize_input` (§7.2). `valor` é `float` (texto numérico serve). O Flask aceitava `valor` `nan` (passava nas duas comparações e gravava `NaN`); desvio 097: `nan` responde o 400 do item 6.
 
 Passos (depois da autenticação e da conta):
 
@@ -105,16 +105,17 @@ Ordem:
 | 1 | banco indisponível (o `SELECT 1` falha) | 503 `{"status":"erro","resposta":"Banco de dados temporariamente indisponivel"}` |
 | 2 | algum dos quatro obrigatórios falso | 400 `{"status":"erro","mensagem":"Dados faltando"}` |
 | 3 | nenhuma chave casa | 401 `"API key invalida"` |
-| 4 | `data_pagamento` verdadeira que não é `YYYY-MM-DD` (`date.fromisoformat` do Python 3.11 também aceita `YYYYMMDD`), ou não é texto | 500 `"Erro ao processar o pagamento. Tente novamente."` (ver 097) |
+| 4 | `data_pagamento` verdadeira que não é `YYYY-MM-DD` (`date.fromisoformat` do Python 3.11 também aceita `YYYYMMDD`), ou não é texto | 400 `"data_pagamento invalida. Use o formato AAAA-MM-DD"` (desvio 097; o Flask respondia 500) |
+| 5 | `descricao_pagamento` verdadeira que não é texto | 400 `"Campo 'descricao_pagamento' deve ser texto"` (desvio 097) |
+| 6 | `valor_pago` que o `float()` recusa, `nan`, zero ou negativo (`0` já é "Dados faltando"), ou acima de 1 bilhão | 400 `"Valor invalido: <motivo>"` com os motivos da §7.1 e de `/api/transacao` (desvios 097 e 098; o Flask gravava despesa positiva para valor negativo e respondia 500 nos demais) |
 
 (O SMS **não** verifica `GEMINI_API_KEY`: não há 503 "Servico nao configurado".)
 
 Passos:
 
-1. **Conta fixa.** `find_matching_bill` (§7.3): entre os agendamentos **ativos** `FIXO` ou `LEMBRETE_VARIAVEL` do usuário, o de descrição mais parecida com `descricao_pagamento` (artigos iniciais removidos, `WRatio` ≥ 65). `descricao_pagamento` que não é texto ⇒ 500.
-2. **Achou** ⇒ `settle_fixed_bill`: despesa de `float(valor_pago)` negativo, na conta **do agendamento** (não na `conta_pagamento`), subcategoria e descrição do agendamento, data do pagamento, sem `agendamento_id` (Q-011-3), via `PostSimple` (`Expense`, origem `null`); em cartão, a fatura é a do ciclo da data (a do `PostSimple`). Avisa o WhatsApp `"✅ *CONTA QUITADA!* ✅\n\n📝 {descricao}\n💰 {R$ do valor_pago}\n📊 {categoria}\n\n_Esta conta não será mais cobrada automaticamente este mês._"` e responde **200** `{"status":"sucesso","mensagem":"Conta fixa quitada com sucesso!","conta_identificada":"<descrição do agendamento>","transaction_id":<id>}`.
-3. **Não achou** ⇒ despesa avulsa: chama o Gemini (`extract_transaction_details`, cache `extract_trans` de 24 h) cujo resultado **não é usado** mas cuja falha é 500 (Flask; desvio 096 propõe remover a chamada); categoriza a `descricao_pagamento` (categorias de `Despesa`, fallback `Despesas Gerais`/`Outros`); conta = a de nome `Carteira` (exato, ou `ILIKE '%Carteira%'`, ou a primeira conta; só ativas, `ORDER BY id`); lança `-valor` (`PostSimple`) com a descrição `"{descricao_pagamento} ({conta_pagamento})"`, tipo `Despesa` (se a conta escolhida for cartão com os dois dias, o serviço da 004 vincula a fatura do ciclo; o Flask passava `fatura_id` nulo, ver §11); avisa o WhatsApp `"Pagamento Registrado!\n\n{descricao}\n{R$}\n{conta_pagamento}\n\n_Nao encontrei uma conta fixa correspondente, entao registrei como despesa avulsa._"` e responde **200** `{"status":"sucesso","mensagem":"Despesa registrada","conta_identificada":null}`.
-4. O valor entra no `R$` como veio: **se `valor_pago` for texto numérico** (`"150.50"`), o `float()` do lançamento funciona mas a formatação de moeda do Flask falha **depois** de gravar: 500 sem aviso no WhatsApp, com a transação já gravada. Reproduzido por paridade (§11, desvio 098).
+1. **Conta fixa.** `find_matching_bill` (§7.3): entre os agendamentos **ativos** `FIXO` ou `LEMBRETE_VARIAVEL` do usuário, o de descrição mais parecida com `descricao_pagamento` (artigos iniciais removidos, minúsculas e sem acentos nos dois lados, `WRatio` ≥ 65; desvio 099). 2. **Achou** ⇒ `settle_fixed_bill`: despesa de `float(valor_pago)` negativo, na conta **do agendamento** (não na `conta_pagamento`), subcategoria e descrição do agendamento, data do pagamento, sem `agendamento_id` (Q-011-3), via `PostSimple` (`Expense`, origem `null`); em cartão, a fatura é a do ciclo da data (a do `PostSimple`). Avisa o WhatsApp `"✅ *CONTA QUITADA!* ✅\n\n📝 {descricao}\n💰 {R$ do valor_pago}\n📊 {categoria}\n\n_Esta conta não será mais cobrada automaticamente este mês._"` e responde **200** `{"status":"sucesso","mensagem":"Conta fixa quitada com sucesso!","conta_identificada":"<descrição do agendamento>","transaction_id":<id>}`.
+3. **Não achou** ⇒ despesa avulsa: **não chama** `extract_transaction_details` (o Flask chamava e ignorava o resultado, e a falha dele derrubava a rota; desvio 096); categoriza a `descricao_pagamento` (categorias de `Despesa`, fallback `Despesas Gerais`/`Outros`); conta = a de nome `Carteira` (exato, ou `ILIKE '%Carteira%'`, ou a primeira conta; só ativas, `ORDER BY id`); lança `-valor` (`PostSimple`) com a descrição `"{descricao_pagamento} ({conta_pagamento})"`, tipo `Despesa` (se a conta escolhida for cartão com os dois dias, o serviço da 004 vincula a fatura do ciclo; o Flask passava `fatura_id` nulo, ver §11); avisa o WhatsApp `"Pagamento Registrado!\n\n{descricao}\n{R$}\n{conta_pagamento}\n\n_Nao encontrei uma conta fixa correspondente, entao registrei como despesa avulsa._"` e responde **200** `{"status":"sucesso","mensagem":"Despesa registrada","conta_identificada":null}`.
+4. **Desvio 098:** o valor é convertido uma vez (`float()`, texto numérico como `"150.50"` serve) e o número vale no lançamento e na mensagem do WhatsApp. O Flask gravava e depois falhava ao formatar a moeda (500 sem aviso, transação já gravada).
 
 Erro inesperado: **500** `{"status":"erro","mensagem":"Erro ao processar o pagamento. Tente novamente."}`.
 
@@ -126,7 +127,7 @@ Origem: `reserve_handler.py:21-148`. Corpo: `incluir` (booleano) e `api_key` (a 
 |---|---|---|
 | 1 | `incluir` ausente ou `null`, ou `api_key` falsa | 400 `{"status":"erro","mensagem":"Campos 'incluir' e 'api_key' são obrigatórios"}` (`incluir: false` **é** válido: o Flask testa `is None`) |
 | 2 | nenhuma chave casa | 401 `"API key inválida"` (com acento) |
-| 3 | `incluir` que não é booleano JSON (texto, número, lista, objeto) | 500 `"Erro ao atualizar a reserva. Tente novamente."` (o Flask depende do driver; ver 097) |
+| 3 | `incluir` que não é booleano JSON (texto, número, lista, objeto), depois da autenticação e antes de procurar o agendamento | 400 `"Campo 'incluir' deve ser true ou false"` (desvio 097; o Flask dependia do driver) |
 | 4 | agendamento do usuário, **ativo**, com esse `id`, inexistente | 404 `"Agendamento não encontrado ou inativo"` |
 
 Efeito: `gasto_mensal` e `reserva_ideal` **antes** (`IEmergencyReserveService.GetStatusAsync`, desvio 014: só `FIXO` e `LEMBRETE_VARIAVEL`, `ativo`, `incluir_na_reserva`), `UPDATE agendamentos SET incluir_na_reserva = @incluir WHERE id AND usuario_id` e de novo **depois**. O `PARCELADO` pode ser marcado (a coluna muda), mas só entra no cálculo se for `FIXO`/`LEMBRETE_VARIAVEL`.
@@ -148,7 +149,7 @@ Origem: `reserve_handler.py:150-345`. Query: `api_key` (obrigatório), `incluir_
 | 1 | `api_key` ausente ou vazia | 400 `{"status":"erro","mensagem":"Parâmetro 'api_key' é obrigatório"}` |
 | 2 | nenhuma chave casa | 401 `"API key inválida"` |
 | 3 | `periodicidade` não vazia e (em maiúsculas) fora de `DIARIA`, `SEMANAL`, `QUINZENAL`, `MENSAL`, `ANUAL` | 400 `"Periodicidade inválida. Use: DIARIA, SEMANAL, QUINZENAL, MENSAL ou ANUAL"` |
-| 4 | `limit` ou `offset` que o `int()` do Python não converte, ou negativo | 500 `"Erro ao listar a reserva. Tente novamente."` (ver 097) |
+| 4 | `limit` ou `offset` que o `int()` do Python não converte, negativo ou acima de `int64`, validados (`limit` primeiro) antes da periodicidade | 400 `"Parâmetro 'limit' inválido. Use um número inteiro maior ou igual a zero"` (ou `'offset'`) (desvio 097; o Flask respondia 500) |
 
 Filtros (todos sobre `ativo = true` e o usuário): `incluir_na_reserva` presente (mesmo vazio) ⇒ `= (valor.lower() == "true")`; `periodicidade` ⇒ igual à maiúscula; `categoria` ⇒ `s.nome_sub ILIKE '%categoria%'` (os curingas `%` e `_` do cliente valem, como hoje). Ordem `valor_previsto DESC, descricao ASC`; `LIMIT`/`OFFSET`. O `total` conta com os mesmos filtros, **sem** paginação.
 
@@ -171,9 +172,9 @@ Origem: `webhooks/__init__.py:115-188`. Sem corpo. Exige `x-api-key` (desvio 003
 Efeito: `process_invoice_schedules` (§7.7) para a fatura, o cartão e o **vencimento** da fatura como data de referência, numa transação. Sucesso **200**:
 ```json
 {"status":"sucesso","fatura_id":123,"cartao":"Cartão Inter","vencimento":"15/04/2026","status_fatura":"Aberta",
- "stats":{"total_processados":2,"fixos":1,"parcelados":1,"lembretes":0,"detalhes":[{"tipo":"FIXO","descricao":"Netflix","valor":"49.90"}]}}
+ "stats":{"total_processados":2,"fixos":1,"parcelados":1,"lembretes":0,"erros":0,"detalhes":[{"tipo":"FIXO","descricao":"Netflix","valor":"49.90"}]}}
 ```
-`vencimento` é `dd/MM/yyyy`; `detalhes[].valor` sai como **texto com duas casas** (`"49.90"`: o Flask serializa o `Decimal` do banco como texto) e como `0` (número) quando o agendamento não tem `valor_previsto`. A rota é idempotente (§7.7). Erro inesperado: **500** `{"status":"erro","mensagem":"Erro ao reprocessar a fatura. Tente novamente."}`.
+`stats.erros` (desvio 101) é a contagem de agendamentos que falharam e foram desfeitos: cada agendamento roda num `SAVEPOINT`, o erro de um não perde os outros e `total_processados`/`detalhes` só contam o que foi gravado (sem erro, `"erros":0`). `vencimento` é `dd/MM/yyyy`; `detalhes[].valor` sai como **texto com duas casas** (`"49.90"`: o Flask serializa o `Decimal` do banco como texto) e como `0` (número) quando o agendamento não tem `valor_previsto`. A rota é idempotente (§7.7). Erro inesperado: **500** `{"status":"erro","mensagem":"Erro ao reprocessar a fatura. Tente novamente."}`.
 
 ## 4. Regras de negócio
 
@@ -188,7 +189,7 @@ Efeito: `process_invoice_schedules` (§7.7) para a fatura, o cartão e o **venci
 - **RN-011-09** Pendência (§7.5): `pending_tx:{whatsapp}:{id}` e `last_pending:{whatsapp}` com TTL de 300 s, formato JSON como o `redis_service` do Python (a 012 lê a mesma chave). `ICache` é fail-open: Redis fora ⇒ lançamento direto (§3.1 item 6, §3.2 item 5).
 - **RN-011-10** (desvio 014) A reserva é calculada só por `IEmergencyReserveService` (005); esta feature não repete a fórmula nem o SQL do cálculo. A listagem (§3.5) lê as linhas dos agendamentos por conta própria porque as colunas e filtros são outros.
 - **RN-011-11** (desvio 015) O período do pote é o de `budget_validation_service`: `SEMANAL` segunda a domingo, `QUINZENAL` 1–15 e 16–fim do mês, `MENSAL` mês civil, `ANUAL` ano civil, outro valor ⇒ mensal. Estourar o limite **não bloqueia** e `requer_confirmacao` só vira aviso na pendência. *Origem: `budget_validation_service.py:84-130`.*
-- **RN-011-12** `process_invoice_schedules` é **idempotente** por (`fatura_id`, `agendamento_id`) e grava sempre `agendamento_id` (§7.7). É o único lugar da 011 que incrementa parcela; a rotina única do desvio 011 (013) pode substituí-lo depois sem mudar o contrato.
+- **RN-011-12** `process_invoice_schedules` é **idempotente** por (`fatura_id`, `agendamento_id`), grava sempre `agendamento_id` e isola o erro de cada agendamento com um `SAVEPOINT` (§7.7, desvio 101). É o único lugar da 011 que incrementa parcela; a rotina única do desvio 011 (013) pode substituí-lo depois sem mudar o contrato.
 - **RN-011-13** Segredos: `user_api_key`/`api_key` nunca em log nem em mensagem. A `api_key` do `GET` vem na query string (o Flask também): o log de requisição não registra a query. *Origem: desvio 008.*
 - **RN-011-14** Populador real: esta feature registra `IInvoiceSchedulePopulator` (implementação real) **antes** do `NullInvoiceSchedulePopulator` da 004 (que usa `TryAdd`). Assim `IInvoiceService.EnsureCurrentAsync` volta a popular a fatura nova, como `ensure_current_invoice_exists` do Flask (Q-004-6: a 011 entrega o serviço que o `reprocessar` e a 013 reutilizam).
 
@@ -209,10 +210,10 @@ Cada critério vira pelo menos um teste (`[Trait("AC","011-NNN")]`). Os de integ
 - **AC-011-011** Dado Gemini devolvendo `{"valor_decimal": 45.9, "descricao_bruta": "Mercado", "tipo_fluxo": "Despesa"}` (com ou sem cerca ```` ```json ````), Redis disponível, conta corrente, então 200 `{"status":"sucesso","mensagem":"Aguardando confirmacao do usuario","transaction_id":"<8 hex>"}`; no Redis, `pending_tx:{whatsapp}:{id}` com os dados da §3.1 item 7 (TTL ≤ 300) e `last_pending:{whatsapp}` com o `id`; o bot recebe a mensagem de §7.5; **nada** é gravado em `transacoes`.
 - **AC-011-012** Dado texto com `cartao`, `compra` ou `credit` (qualquer caixa) e despesa, então a conta é o primeiro `Cartão de Crédito` ativo (desvio 025) e a pendência leva o `fatura_id` da fatura do ciclo de hoje, criada e comitada; sem cartão, cai na conta corrente.
 - **AC-011-013** Dada renda (`tipo_fluxo: "Renda"`), então a conta é a primeira `Conta Corrente` (mesmo com palavra de cartão), a categoria vem dos grupos `Renda`, o fallback é o `Outros` de `Receitas Gerais` e `valor_db` é positivo; dada despesa, `valor_db` é negativo e `valor_original` positivo.
-- **AC-011-014** Dado usuário sem `Conta Corrente`, então a primeira conta ativa (por `id`); com todas as contas inativas ou nenhuma conta, 500 `"Erro ao processar a notificação. Tente novamente."`; conta inativa nunca é escolhida (desvio 039).
+- **AC-011-014** Dado usuário sem `Conta Corrente`, então a primeira conta ativa (por `id`); com todas as contas inativas ou nenhuma conta, 400 `"Nenhuma conta ativa encontrada. Cadastre uma conta antes de usar o atalho."` (desvio 097), sem pendência nem gravação; conta inativa nunca é escolhida (desvio 039).
 - **AC-011-015** Dado Redis indisponível, então a transação é gravada (`PostSimple`, `valor` negativo, tipo `Despesa`, origem `NULL`, `fatura_id` do cartão), o bot recebe `"Transacao salva!\n\nDescricao: ...\nValor: R$ 45,90\nCategoria: Macro -> Sub"` e a resposta é 200 `{"status":"sucesso"}`.
 - **AC-011-016** Dado Redis disponível mas a gravação da pendência falhando, então a transação é gravada, o bot **não** recebe aviso e a resposta é 200 `{"status":"sucesso"}`.
-- **AC-011-017** Dado Gemini com JSON inválido, objeto sem `valor_decimal` válido (`null`, `"abc"`), resposta que não é objeto, então 500 fixo e nada gravado nem pendente; dado `tipo_fluxo` ausente, vale `Despesa`.
+- **AC-011-017** Dado Gemini com JSON inválido, resposta que não é objeto ou `descricao_bruta` que não é texto, então 500 fixo e nada gravado nem pendente; dado `tipo_fluxo` ausente, vale `Despesa`. Dado `tipo_fluxo` fora de `Renda`/`Despesa`, ou `valor_decimal` ausente, `null`, `"abc"`, zero, negativo, `nan` ou acima de 1 bilhão, então 400 com as mensagens da §3.1, sem pendência, gravação nem aviso (desvio 097).
 - **AC-011-018** Dado categorização com resposta fora da lista, não numérica, vazia ou bloqueada, então a categoria é o `Outros` de fallback; com id válido, é a escolhida; o prompt enviado ao Gemini é byte a byte o de §7.4.
 - **AC-011-019** Dado falha de chave (`LlmKeyUnavailableException`), cota e permissão, então 500 com os textos literais de RN-011-05; outras falhas do Gemini ⇒ mensagem fixa; nenhum log contém o prompt, a resposta ou a chave.
 - **AC-011-019a** Dada despesa em cartão, então `EnsureCurrentAsync` é chamado antes e a fatura do ciclo de hoje existe depois da resposta, mesmo com a pendência nunca confirmada (commit antes do Redis).
@@ -229,18 +230,18 @@ Cada critério vira pelo menos um teste (`[Trait("AC","011-NNN")]`). Os de integ
 - **AC-011-038** Dado Redis disponível e conta corrente, então 200 `{"status":"success","message":"Transacao pendente de confirmacao no WhatsApp","transaction_id":"<8 hex>","categoria_sugerida":"Macro -> Sub","conta_utilizada":"<nome real>","vinculado_fatura":false}`; pendência com os dados da §3.2 item 6 (`origem` `api_endpoint`, `tipo_pagamento` normalizado, `descricao_final`); `last_pending` regravado; mensagem de §7.5 enviada ao WhatsApp **do dono da chave**.
 - **AC-011-039** Dado Redis indisponível, então grava (`Expense`, origem `NULL`, `valor` negativo), avisa `"Transacao salva!\n\n{descricao_final}\n{R$}\n{Macro -> Sub}"` e responde 200 `{"status":"success","message":"Transacao salva com sucesso (Redis indisponivel)","categoria_sugerida":"..."}`; falha ao gravar a pendência ⇒ grava, **sem** aviso, 200 `{"status":"success","message":"Transacao salva (erro no Redis)","transaction_id":null}`.
 - **AC-011-040** Dado `local` com `<script>`, `{}`, `$`, `;`, `&` e espaços repetidos, então saneado (§7.2); `descricao` aceita os especiais; `local` com mais de 100 caracteres é cortado em 100 antes da limpeza.
-- **AC-011-041** Dado `local` ou `tipo_pagamento` verdadeiro que não é texto, então 500 fixo (nada gravado).
+- **AC-011-041** Dado `local`, `descricao`, `conta` ou `tipo_pagamento` verdadeiro que não é texto, então 400 `"Campo '<campo>' deve ser texto"` (nada gravado; desvio 097).
 - **AC-011-042** Dado `descricao` `"  "`, então `null` (descrição final = `local`); com texto, `"{local} - {descricao}"` e o texto da IA é o mesmo.
 
 **`/webhook-sms-payment`**
 - **AC-011-060** Dado banco fora, então 503 `{"status":"erro","resposta":"Banco de dados temporariamente indisponivel"}` antes de ler o corpo; dado algum dos quatro obrigatórios falso (`valor_pago: 0`), 400 `"Dados faltando"`; chave inválida, 401.
 - **AC-011-061** Dada descrição parecida com um agendamento `FIXO` ou `LEMBRETE_VARIAVEL` ativo (`WRatio` ≥ 65 do texto sem artigo contra a descrição **como está gravada**, §7.3), então uma despesa de `-valor_pago` na conta do agendamento, subcategoria e descrição do agendamento, na data de `data_pagamento` (padrão hoje), `agendamento_id` `NULL`; aviso no WhatsApp com o texto da §3.3 item 2; resposta 200 com `transaction_id`. `PARCELADO` e agendamento inativo nunca casam.
 - **AC-011-062** Dada a conta do agendamento sendo cartão, então a transação leva a fatura do ciclo de `data_pagamento`.
-- **AC-011-063** Dada descrição sem correspondência, então despesa avulsa na conta `Carteira` (ou a primeira ativa), descrição `"{descricao} ({conta_pagamento})"`, categoria do Gemini ou `Outros` (em conta de cartão com os dois dias a 004 vincula a fatura, §11); aviso e resposta 200 `{"status":"sucesso","mensagem":"Despesa registrada","conta_identificada":null}`; o Gemini é chamado para `extract_transaction_details` (prompt de §7.4) e a falha dele vira 500 sem gravar nada.
+- **AC-011-063** Dada descrição sem correspondência, então despesa avulsa na conta `Carteira` (ou a primeira ativa), descrição `"{descricao} ({conta_pagamento})"`, categoria do Gemini ou `Outros` (em conta de cartão com os dois dias a 004 vincula a fatura, §11); aviso e resposta 200 `{"status":"sucesso","mensagem":"Despesa registrada","conta_identificada":null}`. O Gemini é chamado **uma única vez**, só para categorizar (nenhum prompt `extract_transaction_details`, desvio 096); falha da categorização (que não seja bloqueio) vira 500 sem gravar nada.
 - **AC-011-064** Dada nenhuma conta ativa no ramo avulso, então 500 fixo e nada gravado.
-- **AC-011-065** Dado `valor_pago` como texto numérico, então a transação é gravada **e** a resposta é 500 fixo, sem aviso (paridade; §11).
-- **AC-011-066** Dado `data_pagamento` `"2026-02-30"`, `"15/01/2026"`, número, então 500 fixo e nada gravado; `"2026-01-15"` e `"20260115"` valem.
-- **AC-011-067** Dado `valor_pago` negativo, então 500 fixo e nada gravado (o Flask grava uma despesa positiva; §11).
+- **AC-011-065** Dado `valor_pago` como texto numérico (`"150.50"`, `" 80.5 "`), então a transação é gravada com o número, o WhatsApp recebe o aviso com `R$ 150,50` e a resposta é 200, na quitação e na despesa avulsa (desvio 098).
+- **AC-011-066** Dado `data_pagamento` `"2026-02-30"`, `"15/01/2026"`, número, então 400 `"data_pagamento invalida. Use o formato AAAA-MM-DD"` e nada gravado (desvio 097); `"2026-01-15"` e `"20260115"` valem. `descricao_pagamento` que não é texto ⇒ 400 `"Campo 'descricao_pagamento' deve ser texto"`.
+- **AC-011-067** Dado `valor_pago` negativo, `nan`, que o `float()` recusa (`"abc"`, `[1]`) ou acima de 1 bilhão, então 400 `"Valor invalido: <motivo>"`, nada gravado e nenhum aviso (desvio 097; o Flask gravava uma despesa **positiva** para o negativo).
 - **AC-011-068** Dada a transação gravada e o bot fora do ar, então a resposta continua 200 (o bot nunca falha a rota).
 
 **`PATCH /api/agendamento/<id>/reserva`**
@@ -248,7 +249,7 @@ Cada critério vira pelo menos um teste (`[Trait("AC","011-NNN")]`). Os de integ
 - **AC-011-081** Dado agendamento próprio ativo, então a coluna muda, a resposta 200 traz `agendamento` (`id`, `descricao`, `valor_previsto`, `periodicidade`, `tipo_agendamento`, `incluir_na_reserva` com o valor enviado) e `impacto` com os quatro números: anterior e novo pelo `IEmergencyReserveService`, sem arredondar; a mensagem usa `incluído` (`true`) ou `excluído` (`false`).
 - **AC-011-082** Dado agendamento inexistente, inativo ou de outro usuário, então 404 `"Agendamento não encontrado ou inativo"` e nada muda.
 - **AC-011-083** Dado `PARCELADO` marcado, então a coluna muda e `impacto` não muda (não conta na reserva); `FIXO` e `LEMBRETE_VARIAVEL` mudam o `impacto` na proporção da periodicidade (MENSAL × meses do usuário; ANUAL integral; SEMANAL × round(meses × 4,33); QUINZENAL × 2·meses; DIARIA × 30·meses).
-- **AC-011-084** Dado `incluir` texto, número, lista ou objeto, então 500 fixo e nada muda (§11).
+- **AC-011-084** Dado `incluir` texto, número, lista ou objeto (com `api_key` válida), então 400 `"Campo 'incluir' deve ser true ou false"` e nada muda (desvio 097).
 - **AC-011-085** Dado `id` > `int.MaxValue`, então 404 `"Agendamento não encontrado ou inativo"` (id tratado como inexistente).
 
 **`GET /api/agendamentos/reserva`**
@@ -257,7 +258,7 @@ Cada critério vira pelo menos um teste (`[Trait("AC","011-NNN")]`). Os de integ
 - **AC-011-102** Dado `incluir_na_reserva=true` (qualquer caixa) ⇒ só os incluídos; `false`, `abc` ou vazio ⇒ só os **não** incluídos; ausente ⇒ todos.
 - **AC-011-103** Dado `periodicidade=mensal` ⇒ só `MENSAL`; `semestral` ⇒ 400 `"Periodicidade inválida. Use: DIARIA, SEMANAL, QUINZENAL, MENSAL ou ANUAL"`; vazia ⇒ sem filtro.
 - **AC-011-104** Dado `categoria=net` ⇒ só subcategorias com `net` no nome (sem diferenciar caixa); `%` e `_` funcionam como curinga; `total` conta com os filtros e ignora `limit`/`offset`.
-- **AC-011-105** Dado `limit=2&offset=1`, então 2 itens a partir do 2º e `total` completo; `limit=0` ⇒ lista vazia; `limit=abc`, `limit=1.5`, `limit=-1`, `offset=-1` ⇒ 500 fixo; `limit=" 5 "` e `+5` valem.
+- **AC-011-105** Dado `limit=2&offset=1`, então 2 itens a partir do 2º e `total` completo; `limit=0` ⇒ lista vazia; `limit=abc`, `limit=1.5`, `limit=-1`, `offset=-1`, `offset=` ⇒ 400 `"Parâmetro '<limit|offset>' inválido. Use um número inteiro maior ou igual a zero"` (desvio 097); `limit=" 5 "` e `+5` valem.
 - **AC-011-106** Dado usuário sem agendamentos ⇒ 200 com `total: 0`, `agendamentos: []` e `resumo_reserva` zerado com `meses_configurados` do usuário (6 se nulo).
 - **AC-011-107** Dado agendamento sem `valor_previsto`, então `valor_previsto` `0` e a ordem do SQL (`NULL` primeiro no `DESC`, como o Postgres).
 
@@ -268,17 +269,18 @@ Cada critério vira pelo menos um teste (`[Trait("AC","011-NNN")]`). Os de integ
 - **AC-011-123** Dada a segunda chamada (idempotência), então 200 com `total_processados: 0` e `detalhes: []`, nenhuma transação nova e o contador do `PARCELADO` intacto.
 - **AC-011-124** Dado agendamento `ANUAL` com `mes_execucao` diferente do mês do vencimento, então ignorado; igual ⇒ processado; agendamentos de **outra conta** ou `ativo = false` nunca entram.
 - **AC-011-125** Dado agendamento sem `valor_previsto`, então a transação sai com valor `0` e o detalhe com `valor: 0` (número).
-- **AC-011-126** Dado erro ao gravar um dos agendamentos, então 500 fixo e **nada** fica gravado da fatura (uma transação do banco; o Flask engole o erro e a transação aborta, ver §11).
+- **AC-011-126** Dado erro ao gravar um dos agendamentos (ex.: gatilho que recusa o `INSERT`), então só o que ele gravou é desfeito (`ROLLBACK TO SAVEPOINT`, inclusive o avanço da parcela), os outros ficam gravados, a resposta é 200 e `stats.erros` conta a falha; `total_processados` e `detalhes` só trazem os gravados (desvio 101).
 - **AC-011-127** Dado `IInvoiceService.EnsureCurrentAsync` (004) criando uma fatura nova, então o populador real é chamado **depois do commit** e processa a fatura nova (a mesma rotina; AC-004-95 com populador real); erro da rotina é engolido.
 
 **Rotinas puras e portas**
 - **AC-011-140** `sanitize_input`: corta em `max_length` por **pontos de código**, remove controles exceto `\t\n\r`, remove `< > { } \ $ ` | ; &` quando não aceita especiais, colapsa `\s+` em espaço e faz `trim`; vazio devolve vazio; tabela gerada pelo Python.
 - **AC-011-141** `WRatio` e `extractOne` batem com o `rapidfuzz` 3.14.3 (tabela gerada pelo Python, inclusive os casos com maiúscula na descrição guardada, que **não** é normalizada).
 - **AC-011-142** `find_matching_bill` remove, nesta ordem e uma única vez cada, os prefixos `a `, `o `, `da `, `do `, `de `, `conta de `, `conta ` (da lista, em sequência, sobre o texto já reduzido) e compara com o corte 65; sem agendamentos devolve nada.
+- **AC-011-149** (desvio 099) Dado o texto do SMS e as descrições guardadas com qualquer caixa e acento, então ambos os lados são minúsculos e sem acentos antes do `WRatio` (`cemig` × `CEMIG` casa, `agua` × `Água` casa com 100); o fixture `bill_matching` traz o resultado novo e o do Flask (`legacy_result_id`), e há ao menos um caso que só casa com a correção.
 - **AC-011-143** `calcular_periodo_pote` e a mensagem de aviso (um e vários potes) batem com o Python, inclusive `R$ 1,234.50` com vírgula de milhar e ponto decimal (formato `{:,.2f}` do Python, não `pt-BR`), `percentual` arredondado a 1 casa (meio-par) e `limite <= 0` ⇒ percentual 0.
-- **AC-011-144** A mensagem de confirmação (§7.5) bate caractere a caractere com o Python para: Automate (sem `local`), `/api/transacao` com e sem `descricao`, com `credito` e fatura, `debito`, `pix`, `dinheiro`, com `budget_warning`, categoria desconhecida.
+- **AC-011-144** A mensagem de confirmação (§7.5) bate caractere a caractere com o Python (com o único ajuste do desvio 100: `💳` no lugar do U+FFFD) para: Automate (sem `local`), `/api/transacao` com e sem `descricao`, com `credito` e fatura, `debito`, `pix`, `dinheiro`, com `budget_warning`, categoria desconhecida. A linha do cartão é `💳 {conta} (na fatura)` (ou `(1ª parcela na fatura atual)`) e nenhuma mensagem contém U+FFFD.
 - **AC-011-145** `formatar_moeda`: `R$ 1.234,56`, `R$ 0,00` para nulo, arredondamento do Python (`'{:,.2f}'`), negativo `R$ -5,00` (formato do fallback).
-- **AC-011-146** `process_invoice_schedules` (§7.7) na ordem de `dia_execucao, descricao`, cada ramo do `stats`, o filtro de `ANUAL`, o dia 31 em fevereiro, o contador e a desativação.
+- **AC-011-146** `process_invoice_schedules` (§7.7) na ordem de `dia_execucao, descricao`, cada ramo do `stats`, o filtro de `ANUAL`, o dia 31 em fevereiro, o contador e a desativação; parcela com `parcelas_executadas` nulo conta como erro (o `TypeError` do Flask, desvio 101).
 - **AC-011-147** `IUserApiKeyAuthenticator` com vários usuários (cifrado e texto puro), usuário sem chave e chave que não decifra.
 - **AC-011-148** Os prompts de `extract_from_notification`, `categorize_transaction` (com a lista de categorias serializada como o `json.dumps` do Python, `ensure_ascii`, separadores `, ` e `: `) e `extract_transaction_details` batem byte a byte com os do Python.
 
@@ -306,7 +308,7 @@ Falso (`""`) ⇒ devolve como veio. Senão: corta em `max_length` pontos de cód
 
 ### 7.3 Casamento de conta e de conta fixa
 `get_account_details_by_name`: (1) `nome_conta = @nome`; (2) `nome_conta ILIKE '%nome%'`; (3) `tipo_conta ILIKE '%nome%'` — o primeiro que devolver linha, **ativas e do usuário**, `ORDER BY id LIMIT 1`. `get_account_by_name('Carteira', fallback=True)`: (1) exato; (2) `ILIKE`, com 1 ou mais resultados devolve o de menor `id`; (3) fallback: a de menor `id` do usuário; nenhuma ⇒ `null`.
-`find_matching_bill`: agendamentos `ativo` do usuário, `tipo_agendamento IN ('FIXO','LEMBRETE_VARIAVEL')`, com subcategoria (`JOIN`); `descricao_limpa = descricao_pagamento.lower().strip()`; para cada prefixo da lista `['a ', 'o ', 'da ', 'do ', 'de ', 'conta de ', 'conta ']`, nesta ordem, se o texto começa por ele remove e faz `strip()`; `process.extractOne(descricao_limpa, descrições, scorer=WRatio, score_cutoff=65)`, **sem normalizar a caixa** das descrições guardadas (o `rapidfuzz` 3.x não pré-processa; ver 099). Em empate de pontuação vale a primeira na ordem do dicionário (descrições repetidas colapsam na **última** linha, como o `dict` do Python); a ordem do dicionário é a da consulta (`ORDER BY id`, estável).
+`find_matching_bill`: agendamentos `ativo` do usuário, `tipo_agendamento IN ('FIXO','LEMBRETE_VARIAVEL')`, com subcategoria (`JOIN`); `descricao_limpa = descricao_pagamento.lower().strip()`; para cada prefixo da lista `['a ', 'o ', 'da ', 'do ', 'de ', 'conta de ', 'conta ']`, nesta ordem, se o texto começa por ele remove e faz `strip()`; `process.extractOne(fold(descricao_limpa), descrições, processor=fold, scorer=WRatio, score_cutoff=65)` com `fold` = minúsculas e sem acentos (decomposição Unicode sem as marcas), aplicado aos **dois lados** (desvio 099; o Flask não normalizava as descrições guardadas e o `rapidfuzz` 3.x é sensível à caixa). Em empate de pontuação vale a primeira na ordem do dicionário (descrições repetidas colapsam na **última** linha, como o `dict` do Python); a ordem do dicionário é a da consulta (`ORDER BY id`, estável).
 
 ### 7.4 Prompts do Gemini (copiados literalmente; recuo de 4 espaços do Python)
 `extract_from_notification` (sem cache):
@@ -317,12 +319,13 @@ Falso (`""`) ⇒ devolve como veio. Senão: corta em `max_length` pontos de cód
 `{fallback}` é o id do `Outros` ou `None` (texto `None`).
 
 ### 7.5 Pendência e mensagem de confirmação
-`create_pending_transaction` + `format_confirmation_message` (`transaction_confirmation_service.py:9-165`), com a categoria procurada na lista de categorias (`"{macro} → {sub}"`, senão `Desconhecida`). Valores monetários pelo `formatar_moeda`; o texto contém emojis e a sequência `�` (U+FFFD) **literal** antes do nome da conta de cartão (o emoji do Python chegou corrompido no arquivo; reproduzido, desvio 100 propõe corrigir). Layout, nesta ordem: `💰 *CONFIRME SUA TRANSAÇÃO*`, `📍 *{local}*` (`local`; sem `local` usa a `descricao` e zera a descrição), `📝 {descricao}` (se houver), `💵 *{R$}*`, `{💰|💸} {tipo}` (`💰` só para `Renda`), linha da conta (`� {conta} (na fatura)` se `credito` com `fatura_id`, senão `🏦 {conta} ({Débito|PIX|Dinheiro|<tipo_pagamento>})`; sem conta não há linha), `📂 {categoria}`, bloco `AVISO DE ORÇAMENTO` se houver `budget_warning`, e o rodapé de opções com `_ID: {id} | Expira em 5 min_`. O teste compara com a saída do Python.
+`create_pending_transaction` + `format_confirmation_message` (`transaction_confirmation_service.py:9-165`), com a categoria procurada na lista de categorias (`"{macro} → {sub}"`, senão `Desconhecida`). Valores monetários pelo `formatar_moeda`; o texto contém emojis e `💳` antes do nome da conta de cartão (o arquivo do Python tem U+FFFD no lugar, corrompido; desvio 100). Layout, nesta ordem: `💰 *CONFIRME SUA TRANSAÇÃO*`, `📍 *{local}*` (`local`; sem `local` usa a `descricao` e zera a descrição), `📝 {descricao}` (se houver), `💵 *{R$}*`, `{💰|💸} {tipo}` (`💰` só para `Renda`), linha da conta (`💳 {conta} (na fatura)` se `credito` com `fatura_id`, senão `🏦 {conta} ({Débito|PIX|Dinheiro|<tipo_pagamento>})`; sem conta não há linha), `📂 {categoria}`, bloco `AVISO DE ORÇAMENTO` se houver `budget_warning`, e o rodapé de opções com `_ID: {id} | Expira em 5 min_`. O teste compara com a saída do Python.
 
 ### 7.6 `validate_budget`
 Potes ativos do usuário que contêm a subcategoria (`potesdegastos` ⨝ `potesubcategorias`); período por `calcular_periodo_pote` (RN-011-11) sobre **hoje**; gasto do período = `abs(SUM(valor))` das `Despesa` do usuário nas subcategorias do pote dentro do período (inclusivo); `gasto_apos = gasto + valor`; `percentual = gasto_apos / limite * 100` (0 se `limite <= 0`) arredondado a 1 casa (meio-par do Python); ultrapassa se `gasto_apos > limite`. Mensagens de aviso (um pote e vários) copiadas de `budget_validation_service.py:262-293` com `{:,.2f}` do Python.
 
 ### 7.7 `process_invoice_schedules`
+Cada agendamento roda entre `SAVEPOINT` e `RELEASE SAVEPOINT` (desvio 101); se qualquer passo dele falha, `ROLLBACK TO SAVEPOINT`, `stats.erros` sobe e o laço segue com o próximo. Só o que foi liberado entra em `total_processados` e `detalhes`. A transação externa é uma só e é comitada no fim.
 Agendamentos `ativo` da **conta do cartão**, `FIXO`/`PARCELADO`/`LEMBRETE_VARIAVEL`, `ANUAL` só se `mes_execucao` = mês da data de referência (o vencimento da fatura), ordem `dia_execucao, descricao`. Para cada um, se já existe transação (`fatura_id`, `agendamento_id`): pula. Senão: tipo `Renda` se o grupo é `Renda`, senão `Despesa`; valor = `valor_previsto` (0 se nulo), negativo na despesa; descrição = `descricao`, ou `"{descricao} ({parcelas_executadas + 1}/{total_parcelas})"` no `PARCELADO`; data = `dia_execucao` no mês e ano da data de referência (último dia se inexistente); `INSERT` com `fatura_id`, `agendamento_id`, `consolidada = TRUE`, sem `origem`. No `PARCELADO`: `parcelas_executadas = parcelas_executadas + 1` e `ativo = NOT (total_parcelas não nulo e novo >= total_parcelas)`. `stats`: contadores por tipo e `detalhes` `{tipo, descricao, valor}` (`valor` = `abs(valor_previsto)`; texto com 2 casas se há valor, `0` se não).
 
 ## 8. Desvios aplicados
@@ -340,22 +343,22 @@ Agendamentos `ativo` da **conta do cartão**, `FIXO`/`PARCELADO`/`LEMBRETE_VARIA
 | 030 `Outros` por `ORDER BY id` | aprovado | `ICategoryLookup.FindFallbackAsync` (§3.1 item 3), AC-011-013, 018 |
 | 039 contas inativas | aprovado | RN-011-03, AC-011-014, 035 |
 | 012 `agendamento_id` em vez de descrição | aprovado (004, 005, 013) | **não** se aplica à quitação por SMS (§3.3, Q-011-3); o populador (§7.7) grava `agendamento_id` |
+| 096 a 101 | implementado (feature 011, 2026-10-09) | §3.1 a 3.6, §7.3, §7.5, §7.7; AC-011-017, 041, 063, 065 a 067, 084, 105, 126, 144, 146, 149 |
+| 102 chave do usuário (índice cego) | adiado | não implementado; segue `get_user_by_api_key` (§3.0) |
 | 011 parcelas unificadas | aprovado (013) | `process_invoice_schedules` já usa `>=` e grava `agendamento_id`; a unificação é da 013 |
 | 001 Receita × Renda | aprovado | não se aplica: estas rotas só usam `Renda`/`Despesa` do banco |
 
-## 9. Desvios propostos (novos; **não** implementados)
+## 9. Desvios 096 a 102 (decididos em 2026-10-09)
 
-Numeração a partir de 096 (089–095 são da 006). Arquivos em `parity-deviations/`, estado `proposto`.
-
-| # | Título | Atual | Proposta | Recomendação |
-|---|---|---|---|---|
-| 096 | SMS: remover a chamada inútil ao Gemini | `transaction_handler.py:541-545` chama `extract_transaction_details` e **ignora** o resultado; a falha dela (JSON inválido, bloqueio, cota) vira 500 e a chamada consome a cota da chave do usuário | não chamar | aprovar |
-| 097 | Rotas de automação: entradas inválidas viram 400 com mensagem | tipo JSON errado, `data_pagamento` inválida, `valor_pago` negativo ou `nan`, `tipo_fluxo` inesperado, `valor_decimal` zero ou nulo, usuário sem contas, `incluir` não booleano e `limit`/`offset` inválidos dão 500 (ou gravam lixo) no Flask; aqui dão 500 fixo | 400 com mensagem em português por caso | aprovar |
-| 098 | SMS: `valor_pago` como texto numérico deve funcionar | grava e depois dá 500 ao formatar a moeda (sem aviso ao usuário) | aceitar texto numérico como número | aprovar |
-| 099 | Quitação por SMS: casar descrições sem diferenciar a caixa | `descricao_limpa` vai em minúsculas e as descrições guardadas não; `rapidfuzz` 3.x é sensível à caixa: `luz` × `Luz` dá 66,7 e `agua` × `Água` 75 (corte 65): descrições capitalizadas e curtas quase não casam | pré-processar os dois lados (minúsculas e acentos) | aprovar |
-| 100 | Confirmação: restaurar o emoji `💳` | o texto leva U+FFFD (`transaction_confirmation_service.py:137, 140`) | `💳` | aprovar (a 012 compartilha o texto) |
-| 101 | Isolar o erro de cada agendamento no `reprocessar` | o `except` por agendamento engole o erro, o Postgres aborta a transação e o `commit` desfaz tudo mas a resposta diz 200 com estatísticas | `SAVEPOINT` por agendamento; erros contados em `stats` | aprovar |
-| 102 | Chave do usuário: índice cego e cabeçalho no `GET` | `get_user_by_api_key` lê todos os usuários e decifra um a um (O(n)), e o `GET` da reserva leva a chave na query string | coluna `api_key_automate_hash` (HMAC) com UNIQUE; aceitar `X-User-Api-Key` além de `api_key` | decidir depois da virada |
+| # | Título | Estado | O que mudou |
+|---|---|---|---|
+| 096 | SMS: remover a chamada inútil ao Gemini | implementado | a despesa avulsa não chama `extract_transaction_details`; só a categorização usa a IA |
+| 097 | Entradas inválidas viram 400 | implementado | mensagens em português por caso (§3.1 a 3.5); nada é gravado; `nan` e valor negativo do SMS também |
+| 098 | SMS: `valor_pago` como texto numérico | implementado | o valor é convertido uma vez e vale no lançamento e no aviso |
+| 099 | Quitação por SMS sem diferenciar a caixa | implementado | minúsculas e sem acentos nos dois lados do `WRatio` (a 012 usa a mesma função) |
+| 100 | Emoji `💳` na confirmação | implementado | substitui o U+FFFD (a 012 compartilha o texto) |
+| 101 | Reprocessar fatura: isolar o erro por agendamento | implementado | `SAVEPOINT` por agendamento; `stats.erros` |
+| 102 | Chave do usuário: índice cego e cabeçalho no `GET` | **adiado** | não implementado |
 
 ## 10. Fora de escopo
 
@@ -369,18 +372,18 @@ Numeração a partir de 096 (089–095 são da 006). Arquivos em `parity-deviati
 
 Documentadas aqui porque não dá para reproduzir (ou reproduzir seria perverso) e não bloqueiam nenhum cliente conhecido:
 
-1. **`nan`** em `valor` de `/api/transacao`: o Flask aceita e grava `NaN` no banco; o .NET responde 400 (`decimal` não tem `NaN`).
-2. **Comparação da chave do usuário** é em tempo constante (o Flask usa `==`): invisível.
-3. **Conta do `Automate` quando não há `Conta Corrente` e a primeira conta é cartão e o fluxo é `Renda`:** o Flask vincula a fatura; o `PostSimple` só vincula despesa. Só afeta o caminho sem Redis (a pendência leva `fatura_id` igual ao do Flask).
-4. **`valor_pago` negativo no SMS:** o Flask grava uma despesa **positiva**; o `PostSimple` recusa valor negativo ⇒ 500 fixo (ver 097).
-5. **Erros por agendamento no `reprocessar`:** o Flask devolve 200 e não persiste nada (transação abortada); o .NET devolve 500 e não persiste nada (ver 101).
-6. **Ordem das categorias** enviadas ao Gemini: o Flask não ordena (ordem física do Postgres); o .NET ordena por `id`. Muda o texto do prompt (e a chave de cache) só se a ordem física era outra; o cache é descartado na virada.
-7. **Despesa avulsa por SMS em conta de cartão** (só acontece sem conta `Carteira` e com um cartão como primeira conta): o Flask grava sem `fatura_id`; o `PostSimple` vincula a fatura do ciclo (a mesma regra de todo lançamento de despesa em cartão).
+1. **Comparação da chave do usuário** é em tempo constante (o Flask usa `==`): invisível.
+2. **Conta do `Automate` quando não há `Conta Corrente` e a primeira conta é cartão e o fluxo é `Renda`:** o Flask vincula a fatura; o `PostSimple` só vincula despesa. Só afeta o caminho sem Redis (a pendência leva `fatura_id` igual ao do Flask).
+3. **Ordem das categorias** enviadas ao Gemini: o Flask não ordena (ordem física do Postgres); o .NET ordena por `id`. Muda o texto do prompt (e a chave de cache) só se a ordem física era outra; o cache é descartado na virada.
+4. **Despesa avulsa por SMS em conta de cartão** (só acontece sem conta `Carteira` e com um cartão como primeira conta): o Flask grava sem `fatura_id`; o `PostSimple` vincula a fatura do ciclo (a mesma regra de todo lançamento de despesa em cartão).
+5. **Valor máximo no SMS e no Automate:** acima de 1 bilhão dá 400 (como em `/api/transacao`); o Flask só falhava no banco (500) a partir de 10^13.
+
+(As divergências antigas de `nan`, valor negativo do SMS e erros por agendamento no `reprocessar` deixaram de existir com os desvios 097 e 101.)
 
 ## 12. Perguntas em aberto (siga o Flask até haver resposta)
 
 - **Q-011-1** Quem chama `reprocessar` hoje? (Desvio 003: agora exige `x-api-key`.) Padrão: ninguém além de manutenção manual.
-- **Q-011-2** O atalho do iPhone envia `valor_pago` do SMS como número ou como texto? (Se texto, o Flask grava mas devolve 500; ver 098.) Padrão: paridade.
+- **Q-011-2** O atalho do iPhone envia `valor_pago` do SMS como número ou como texto? Resolvido pelo desvio 098: os dois funcionam.
 - **Q-011-3** A quitação por SMS deve gravar `agendamento_id` na transação (coerente com o desvio 012 e com a detecção de "já pago" da 013)? Padrão: **não** (paridade).
 - **Q-011-4** `origem` das transações dessas rotas: `null` (paridade, Q-004-3) ou `automate`/`api_endpoint`/`sms`? Padrão: `null`.
 - **Q-011-5** Os textos de falha de chave e cota do Gemini (já escritos para o usuário) podem sair como estão no 500 (RN-011-05)? Padrão: sim.

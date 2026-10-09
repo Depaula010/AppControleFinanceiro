@@ -154,7 +154,7 @@ public static class ConfirmationMessage
     private const string Line = "━━━━━━━━━━━━━━━━━━━━";
 
     /// <summary>
-    /// O texto contém o caractere U+FFFD antes do nome do cartão (o emoji do Python chegou corrompido no arquivo; desvio 100).
+    /// A linha do cartão leva o emoji de cartão (o Python tem o caractere U+FFFD no lugar, arquivo corrompido; desvio 100).
     /// </summary>
     public static string Build(
         PendingTransaction data, IReadOnlyList<CategoryOption> categories, string transactionId, int? installments = null, double? totalValue = null)
@@ -198,8 +198,8 @@ public static class ConfirmationMessage
             if (data.PaymentType == "credito" && data.InvoiceId is not null)
             {
                 sb.Append(multi
-                    ? $"\uFFFD {data.AccountName} (1ª parcela na fatura atual)\n"
-                    : $"\uFFFD {data.AccountName} (na fatura)\n");
+                    ? $"💳 {data.AccountName} (1ª parcela na fatura atual)\n"
+                    : $"💳 {data.AccountName} (na fatura)\n");
             }
             else
             {

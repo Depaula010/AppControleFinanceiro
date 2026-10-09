@@ -75,7 +75,7 @@ public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime
     {
         await _env.InsertScheduleAsync(_user, _checking, "Luz", type: "PARCELADO", total: 3, executed: 1);
         await _env.InsertScheduleAsync(_user, _checking, "Luz", active: false);
-        _env.Llm.Then("{}").Then("59");
+        _env.Llm.Then("59");
 
         var (status, body) = await _env.Post("/webhook-sms-payment", Body());
 
@@ -87,7 +87,7 @@ public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime
     [Trait("AC", "011-063")]
     public async Task NoMatch_RegistersALooseExpenseOnTheWallet()
     {
-        _env.Llm.Then("""{"valor_decimal": 80.5, "descricao_bruta": "Mercado"}""").Then("59");
+        _env.Llm.Then("59");
 
         var (status, body) = await _env.Post("/webhook-sms-payment", Body("Mercado Extra", "80.5", "swile", "2026-10-03"));
 
@@ -99,7 +99,9 @@ public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime
             .ShouldBe((-80.50m, "Mercado Extra (swile)", _wallet, 59, null, new DateOnly(2026, 10, 3)));
         _env.Bot.Sent.Single().Message.ShouldBe(
             "Pagamento Registrado!\n\nMercado Extra\nR$ 80,50\nswile\n\n_Nao encontrei uma conta fixa correspondente, entao registrei como despesa avulsa._");
-        _env.Llm.Requests[0].Prompt.ShouldStartWith("Analise a mensagem: \"Paguei 80.5 de Mercado Extra\"\n");
+        // Desvio 096: a extração que o Flask ignorava saiu; só a categorização chama o Gemini.
+        _env.Llm.Requests.Count.ShouldBe(1);
+        _env.Llm.Requests[0].Prompt.ShouldNotContain("Paguei");
     }
 
     [Fact]
@@ -107,7 +109,7 @@ public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime
     public async Task NoMatch_WithoutWalletUsesTheFirstActiveAccount()
     {
         await _env.ScalarAsync<int>("UPDATE contas SET ativa = false WHERE id = @_wallet RETURNING id", new { _wallet });
-        _env.Llm.Then("{}").Then("59");
+        _env.Llm.Then("59");
 
         await _env.Post("/webhook-sms-payment", Body("Mercado Extra"));
 
@@ -116,9 +118,10 @@ public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime
 
     [Fact]
     [Trait("AC", "011-063")]
-    public async Task TheUselessGeminiCallFailingTurnsIntoA500_WithNothingSaved()
+    public async Task TheGeminiFailingOnTheCategorization_IsStillA500_WithNothingSaved()
     {
-        _env.Llm.Then("isto não é json");
+        // Desvio 096: só a categorização usa o Gemini; falha dele (que não seja bloqueio) continua derrubando a rota.
+        _env.Llm.ThenThrow(new InvalidOperationException("falha do gemini"));
 
         var (status, body) = await _env.Post("/webhook-sms-payment", Body("Mercado Extra"));
 
@@ -129,42 +132,80 @@ public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime
 
     [Fact]
     [Trait("AC", "011-065")]
-    public async Task TextAmount_SavesAndThenAnswers500WithoutNotifying()
+    public async Task TextAmount_Settles_AndNotifiesWithTheNumber()
     {
+        // Desvio 098: o Flask gravava e respondia 500 sem avisar o WhatsApp.
         await _env.InsertScheduleAsync(_user, _checking, "Luz");
 
         var (status, body) = await _env.Post("/webhook-sms-payment", Body(value: "\"150.50\""));
 
-        status.ShouldBe(HttpStatusCode.InternalServerError);
-        body.ShouldBe("""{"status":"erro","mensagem":"Erro ao processar o pagamento. Tente novamente."}""");
+        status.ShouldBe(HttpStatusCode.OK);
+        body.ShouldContain("\"mensagem\":\"Conta fixa quitada com sucesso!\"");
+        (await _env.ScalarAsync<decimal>("SELECT valor FROM transacoes")).ShouldBe(-150.50m);
         (await _env.ScalarAsync<int>("SELECT count(*)::int FROM transacoes")).ShouldBe(1);
-        _env.Bot.Sent.ShouldBeEmpty();
+        _env.Bot.Sent.Single().Message.ShouldContain("💰 R$ 150,50");
+    }
+
+    [Fact]
+    [Trait("AC", "011-065")]
+    public async Task TextAmount_RegistersTheLooseExpense_AndNotifiesWithTheNumber()
+    {
+        _env.Llm.Then("59");
+
+        var (status, body) = await _env.Post("/webhook-sms-payment", Body("Mercado Extra", "\"80.5\""));
+
+        status.ShouldBe(HttpStatusCode.OK);
+        body.ShouldBe("""{"status":"sucesso","mensagem":"Despesa registrada","conta_identificada":null}""");
+        (await _env.ScalarAsync<decimal>("SELECT valor FROM transacoes")).ShouldBe(-80.50m);
+        _env.Bot.Sent.Single().Message.ShouldContain("R$ 80,50");
     }
 
     [Theory]
     [Trait("AC", "011-066")]
     [InlineData("2026-02-30")]
     [InlineData("15/01/2026")]
-    public async Task InvalidDate_Is500_WithNothingSaved(string date)
+    public async Task InvalidDate_Is400_WithNothingSaved(string date)
     {
+        // Desvio 097: o Flask respondia 500 com str(e).
         await _env.InsertScheduleAsync(_user, _checking, "Luz");
 
-        var (status, _) = await _env.Post("/webhook-sms-payment", Body(date: date));
+        var (status, body) = await _env.Post("/webhook-sms-payment", Body(date: date));
 
-        status.ShouldBe(HttpStatusCode.InternalServerError);
+        status.ShouldBe(HttpStatusCode.BadRequest);
+        body.ShouldBe("""{"status":"erro","mensagem":"data_pagamento invalida. Use o formato AAAA-MM-DD"}""");
+        (await _env.ScalarAsync<int>("SELECT count(*)::int FROM transacoes")).ShouldBe(0);
+    }
+
+    [Theory]
+    [Trait("AC", "011-067")]
+    [InlineData("-10", "Valor invalido: Valor deve ser positivo")]
+    [InlineData("\"abc\"", "Valor invalido: could not convert string to float: 'abc'")]
+    public async Task InvalidAmount_Is400_WithNothingSaved(string value, string message)
+    {
+        // Desvio 097: o Flask gravava uma despesa positiva para valor negativo e dava 500 para o resto.
+        await _env.InsertScheduleAsync(_user, _checking, "Luz");
+
+        var (status, body) = await _env.Post("/webhook-sms-payment", Body(value: value));
+
+        status.ShouldBe(HttpStatusCode.BadRequest);
+        body.ShouldBe($$"""{"status":"erro","mensagem":"{{message}}"}""");
         (await _env.ScalarAsync<int>("SELECT count(*)::int FROM transacoes")).ShouldBe(0);
     }
 
     [Fact]
-    [Trait("AC", "011-067")]
-    public async Task NegativeAmount_Is500_WithNothingSaved()
+    [Trait("AC", "011-149")]
+    public async Task CapitalizedAndAccentedBills_AreMatchedWithoutCaseOrAccents()
     {
-        await _env.InsertScheduleAsync(_user, _checking, "Luz");
+        // Desvio 099: "agua" × "Água" e "cemig" × "CEMIG" (o Flask não casava a caixa; "cemig" × "CEMIG" dava 0).
+        await _env.InsertScheduleAsync(_user, _checking, "CEMIG", subcategoryId: 59);
+        await _env.InsertScheduleAsync(_user, _checking, "Água", subcategoryId: 59);
 
-        var (status, _) = await _env.Post("/webhook-sms-payment", Body(value: "-10"));
+        var (_, cemig) = await _env.Post("/webhook-sms-payment", Body("cemig"));
+        var (_, water) = await _env.Post("/webhook-sms-payment", Body("conta de agua"));
 
-        status.ShouldBe(HttpStatusCode.InternalServerError);
-        (await _env.ScalarAsync<int>("SELECT count(*)::int FROM transacoes")).ShouldBe(0);
+        cemig.ShouldContain("\"conta_identificada\":\"CEMIG\"");
+        water.ShouldContain("\"conta_identificada\":\"Água\"");
+        _env.Llm.Requests.ShouldBeEmpty();
     }
 
     [Fact]
@@ -196,14 +237,14 @@ public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime
     [Trait("AC", "011-005")]
     public async Task UnexpectedError_NeverLeaksTheKey()
     {
-        await _env.InsertScheduleAsync(_user, _checking, "Luz");
+        _env.Llm.ThenThrow(new InvalidOperationException($"segredo {AutomationEnv.UserKey}"));
 
-        var (status, body) = await _env.Post("/webhook-sms-payment", Body(value: "\"abc\""));
+        var (status, body) = await _env.Post("/webhook-sms-payment", Body("Mercado Extra"));
 
         status.ShouldBe(HttpStatusCode.InternalServerError);
         body.ShouldNotContain(AutomationEnv.UserKey);
         _env.Logs.All.ShouldNotContain(AutomationEnv.UserKey);
-        _env.Logs.Entries.ShouldContain(e => e.Message.Contains("AutomationFailureException"));
+        _env.Logs.Entries.ShouldContain(e => e.Message.Contains("InvalidOperationException"));
     }
 }
 
@@ -317,14 +358,15 @@ public class ReserveEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
 
     [Fact]
     [Trait("AC", "011-084")]
-    public async Task Toggle_NonBoolean_Is500_AndNothingChanges()
+    public async Task Toggle_NonBoolean_Is400_AndNothingChanges()
     {
+        // Desvio 097: o Flask dependia do driver (500 ou conversão silenciosa).
         var netflix = await _env.InsertScheduleAsync(_user, _checking, "Netflix", includeInReserve: false);
 
         var (status, body) = await Patch(netflix, """{"incluir":"true","api_key":"chave-do-atalho-0001"}""");
 
-        status.ShouldBe(HttpStatusCode.InternalServerError);
-        body.ShouldBe("""{"status":"erro","mensagem":"Erro ao atualizar a reserva. Tente novamente."}""");
+        status.ShouldBe(HttpStatusCode.BadRequest);
+        body.ShouldBe("""{"status":"erro","mensagem":"Campo 'incluir' deve ser true ou false"}""");
         (await _env.ScalarAsync<bool>("SELECT incluir_na_reserva FROM agendamentos WHERE id = @netflix", new { netflix })).ShouldBeFalse();
     }
 
@@ -428,17 +470,18 @@ public class ReserveEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
 
     [Theory]
     [Trait("AC", "011-105")]
-    [InlineData("limit=abc")]
-    [InlineData("limit=1.5")]
-    [InlineData("limit=-1")]
-    [InlineData("offset=-1")]
-    [InlineData("offset=")]
-    public async Task List_InvalidPaging_Is500(string query)
+    [InlineData("limit=abc", "limit")]
+    [InlineData("limit=1.5", "limit")]
+    [InlineData("limit=-1", "limit")]
+    [InlineData("offset=-1", "offset")]
+    [InlineData("offset=", "offset")]
+    public async Task List_InvalidPaging_Is400(string query, string field)
     {
+        // Desvio 097: o Flask respondia 500.
         var (status, body) = await Get($"?api_key={AutomationEnv.UserKey}&{query}");
 
-        status.ShouldBe(HttpStatusCode.InternalServerError);
-        body.ShouldBe("""{"status":"erro","mensagem":"Erro ao listar a reserva. Tente novamente."}""");
+        status.ShouldBe(HttpStatusCode.BadRequest);
+        body.ShouldBe($$"""{"status":"erro","mensagem":"Parâmetro '{{field}}' inválido. Use um número inteiro maior ou igual a zero"}""");
     }
 
     [Fact]
@@ -544,7 +587,7 @@ public class ReprocessEndpointTests(PostgresFixture postgres) : IAsyncLifetime
 
         status.ShouldBe(HttpStatusCode.OK);
         body.ShouldBe(
-            """{"status":"sucesso","fatura_id":1,"cartao":"Cartão Inter","vencimento":"15/04/2026","status_fatura":"Aberta","stats":{"total_processados":3,"fixos":1,"parcelados":1,"lembretes":1,"detalhes":[{"tipo":"PARCELADO","descricao":"Notebook (3/3)","valor":"300.00"},{"tipo":"LEMBRETE_VARIAVEL","descricao":"Bônus","valor":"100.00"},{"tipo":"FIXO","descricao":"Netflix","valor":"49.90"}]}}""");
+            """{"status":"sucesso","fatura_id":1,"cartao":"Cartão Inter","vencimento":"15/04/2026","status_fatura":"Aberta","stats":{"total_processados":3,"fixos":1,"parcelados":1,"lembretes":1,"erros":0,"detalhes":[{"tipo":"PARCELADO","descricao":"Notebook (3/3)","valor":"300.00"},{"tipo":"LEMBRETE_VARIAVEL","descricao":"Bônus","valor":"100.00"},{"tipo":"FIXO","descricao":"Netflix","valor":"49.90"}]}}""");
 
         var rows = await _env.QueryAsync<(string Descricao, decimal Valor, string Tipo, DateTime Data, int? Schedule, int? Fatura, bool Consolidada)>(
             "SELECT descricao, valor, tipo_transacao, data_transacao, agendamento_id, fatura_id, consolidada FROM transacoes ORDER BY id");
@@ -570,7 +613,7 @@ public class ReprocessEndpointTests(PostgresFixture postgres) : IAsyncLifetime
         var (status, body) = await Reprocess(_invoice);
 
         status.ShouldBe(HttpStatusCode.OK);
-        body.ShouldContain("\"stats\":{\"total_processados\":0,\"fixos\":0,\"parcelados\":0,\"lembretes\":0,\"detalhes\":[]}");
+        body.ShouldContain("\"stats\":{\"total_processados\":0,\"fixos\":0,\"parcelados\":0,\"lembretes\":0,\"erros\":0,\"detalhes\":[]}");
         (await _env.ScalarAsync<int>("SELECT count(*)::int FROM transacoes")).ShouldBe(2);
         (await _env.ScalarAsync<int>("SELECT parcelas_executadas FROM agendamentos WHERE tipo_agendamento = 'PARCELADO'")).ShouldBe(2);
     }

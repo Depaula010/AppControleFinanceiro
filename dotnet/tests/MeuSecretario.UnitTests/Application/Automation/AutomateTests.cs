@@ -160,12 +160,16 @@ public class ProcessAutomateNotificationTests
 
     [Fact]
     [Trait("AC", "011-014")]
-    public async Task WithoutActiveAccounts_FailsBeforeStoringAnything()
+    public async Task WithoutActiveAccounts_Is400BeforeStoringAnything()
     {
+        // Desvio 097: o Flask quebrava com IndexError (500).
         _h.Accounts.Clear();
         _h.Llm.Then(Notification);
 
-        await Should.ThrowAsync<AutomationFailureException>(() => _h.Automate.ExecuteAsync(Input(), CancellationToken.None));
+        var result = await _h.Automate.ExecuteAsync(Input(), CancellationToken.None);
+
+        result.ShouldBeOfType<AutomateResult.Invalid>().Message.ShouldBe(
+            "Nenhuma conta ativa encontrada. Cadastre uma conta antes de usar o atalho.");
 
         await _h.Pending.DidNotReceiveWithAnyArgs().CreateAsync(default!, default!, default);
     }
@@ -222,10 +226,8 @@ public class ProcessAutomateNotificationTests
     [Trait("AC", "011-017")]
     [InlineData("não é json")]
     [InlineData("[1]")]
-    [InlineData("""{"valor_decimal": null}""")]
-    [InlineData("""{"valor_decimal": "abc"}""")]
-    [InlineData("""{"tipo_fluxo": "Receita", "valor_decimal": 1}""")]
-    public async Task InvalidExtraction_FailsAndNothingIsSavedOrPending(string response)
+    [InlineData("""{"descricao_bruta": 5, "valor_decimal": 1}""")]
+    public async Task UnreadableExtraction_FailsAndNothingIsSavedOrPending(string response)
     {
         _h.Llm.Then(response);
 
@@ -233,6 +235,29 @@ public class ProcessAutomateNotificationTests
 
         await _h.Pending.DidNotReceiveWithAnyArgs().CreateAsync(default!, default!, default);
         await _h.Posting.DidNotReceiveWithAnyArgs().PostSimpleAsync(default!, default);
+    }
+
+    [Theory]
+    [Trait("AC", "011-017")]
+    [InlineData("""{"tipo_fluxo": "Receita", "valor_decimal": 1}""", "tipo_fluxo invalido na notificacao. Use: Renda ou Despesa")]
+    [InlineData("""{"tipo_fluxo": null, "valor_decimal": 1}""", "tipo_fluxo invalido na notificacao. Use: Renda ou Despesa")]
+    [InlineData("""{"valor_decimal": null}""", "Valor invalido na notificacao: deve ser positivo")]
+    [InlineData("""{"valor_decimal": "abc"}""", "Valor invalido na notificacao: deve ser positivo")]
+    [InlineData("""{"valor_decimal": 0}""", "Valor invalido na notificacao: deve ser positivo")]
+    [InlineData("""{"descricao_bruta": "X"}""", "Valor invalido na notificacao: deve ser positivo")]
+    [InlineData("""{"valor_decimal": -5}""", "Valor invalido na notificacao: deve ser positivo")]
+    [InlineData("""{"valor_decimal": "nan"}""", "Valor invalido na notificacao: deve ser positivo")]
+    public async Task InvalidFlowOrValue_Is400AndNothingIsSavedOrPending(string response, string message)
+    {
+        // Desvio 097: o Flask respondia 500 (ou criava a pendência de R$ 0,00).
+        _h.Llm.Then(response);
+
+        var result = await _h.Automate.ExecuteAsync(Input(), CancellationToken.None);
+
+        result.ShouldBeOfType<AutomateResult.Invalid>().Message.ShouldBe(message);
+        await _h.Pending.DidNotReceiveWithAnyArgs().CreateAsync(default!, default!, default);
+        await _h.Posting.DidNotReceiveWithAnyArgs().PostSimpleAsync(default!, default);
+        await _h.Bot.DidNotReceiveWithAnyArgs().SendTextAsync(default!, default!, default);
     }
 
     [Fact]
@@ -279,9 +304,11 @@ public class ProcessAutomateNotificationTests
 
     [Fact]
     [Trait("AC", "011-014")]
-    public async Task NonTextNotification_Fails()
+    public async Task NonTextNotification_Is400()
     {
-        await Should.ThrowAsync<AutomationFailureException>(
-            () => _h.Automate.ExecuteAsync(new AutomateInput(false, AutomationHarness.Key, null), CancellationToken.None));
+        var result = await _h.Automate.ExecuteAsync(new AutomateInput(false, AutomationHarness.Key, null), CancellationToken.None);
+
+        result.ShouldBeOfType<AutomateResult.Invalid>().Message.ShouldBe("Campo 'texto' deve ser texto");
+        _h.Llm.Requests.ShouldBeEmpty();
     }
 }

@@ -50,7 +50,7 @@ _proxy.date = FrozenDate2
 handler_ns["date"] = FrozenDate2
 
 # ---------------------------------------------------------------- servicos reais
-_fbs_ns = load("fixed_bills_service.py", source("services", "fixed_bills_service.py"))
+_fbs_ns = load("fixed_bills_service.py", source_fixed_bills(), {"_fold099": _fold099})
 stub_module("app.services.fixed_bills_service", FixedBillsService=_fbs_ns["FixedBillsService"])
 
 _base_intent = _base_ns["BaseIntent"]

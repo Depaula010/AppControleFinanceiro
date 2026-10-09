@@ -78,6 +78,7 @@ public sealed class AutomationModule : IFeatureModule
                 AutomateResult.NotConfigured => AutomationResponses.BError(AutomationMessages.NotConfigured, StatusCodes.Status503ServiceUnavailable),
                 AutomateResult.MissingData => AutomationResponses.BError(AutomationMessages.MissingData, StatusCodes.Status400BadRequest),
                 AutomateResult.Unauthorized => AutomationResponses.BError(AutomationMessages.InvalidApiKey, StatusCodes.Status401Unauthorized),
+                AutomateResult.Invalid invalid => AutomationResponses.BError(invalid.Message, StatusCodes.Status400BadRequest),
                 AutomateResult.Saved => AutomationResponses.AutomateSaved(),
                 AutomateResult.Pending pending => AutomationResponses.AutomatePending(pending.TransactionId),
                 _ => throw new InvalidOperationException("Resultado do webhook-automate desconhecido."),
@@ -104,6 +105,7 @@ public sealed class AutomationModule : IFeatureModule
                 ApiTransactionResult.InvalidValue invalid => AutomationResponses.BError(AutomationMessages.InvalidValue(invalid.Reason), StatusCodes.Status400BadRequest),
                 ApiTransactionResult.InvalidPaymentType => AutomationResponses.BError(AutomationMessages.InvalidPaymentType(), StatusCodes.Status400BadRequest),
                 ApiTransactionResult.Unauthorized => AutomationResponses.BError(AutomationMessages.InvalidApiKey, StatusCodes.Status401Unauthorized),
+                ApiTransactionResult.Invalid invalid => AutomationResponses.BError(invalid.Message, StatusCodes.Status400BadRequest),
                 ApiTransactionResult.AccountNotFound notFound => AutomationResponses.BError(AutomationMessages.AccountNotFound(notFound.Name), StatusCodes.Status400BadRequest),
                 ApiTransactionResult.SavedWithoutRedis saved => AutomationResponses.ApiSuccess(
                     AutomationMessages.ApiSavedWithoutRedis, new Dictionary<string, object?> { ["categoria_sugerida"] = saved.CategoryLabel }),
@@ -139,6 +141,7 @@ public sealed class AutomationModule : IFeatureModule
                 SmsPaymentResult.DatabaseUnavailable => AutomationResponses.SmsDatabaseUnavailable(),
                 SmsPaymentResult.MissingData => AutomationResponses.BError(AutomationMessages.MissingData, StatusCodes.Status400BadRequest),
                 SmsPaymentResult.Unauthorized => AutomationResponses.BError(AutomationMessages.InvalidApiKey, StatusCodes.Status401Unauthorized),
+                SmsPaymentResult.Invalid invalid => AutomationResponses.BError(invalid.Message, StatusCodes.Status400BadRequest),
                 SmsPaymentResult.Settled settled => AutomationResponses.SmsSettled(settled.BillDescription, settled.TransactionId),
                 SmsPaymentResult.Registered => AutomationResponses.SmsRegistered(),
                 _ => throw new InvalidOperationException("Resultado do webhook-sms-payment desconhecido."),
@@ -164,6 +167,7 @@ public sealed class AutomationModule : IFeatureModule
             {
                 ToggleReserveResult.MissingFields => AutomationResponses.BError(AutomationMessages.ToggleMissingFields, StatusCodes.Status400BadRequest),
                 ToggleReserveResult.Unauthorized => AutomationResponses.BError(AutomationMessages.InvalidApiKeyAccented, StatusCodes.Status401Unauthorized),
+                ToggleReserveResult.InvalidInclude => AutomationResponses.BError(InputMessages.IncludeNotBoolean, StatusCodes.Status400BadRequest),
                 ToggleReserveResult.NotFound => AutomationResponses.BError(AutomationMessages.ScheduleNotFound, StatusCodes.Status404NotFound),
                 ToggleReserveResult.Updated updated => AutomationResponses.ToggleUpdated(updated, scheduleId),
                 _ => throw new InvalidOperationException("Resultado do PATCH da reserva desconhecido."),
@@ -190,6 +194,7 @@ public sealed class AutomationModule : IFeatureModule
                 ListReserveResult.MissingKey => AutomationResponses.BError(AutomationMessages.ListMissingKey, StatusCodes.Status400BadRequest),
                 ListReserveResult.Unauthorized => AutomationResponses.BError(AutomationMessages.InvalidApiKeyAccented, StatusCodes.Status401Unauthorized),
                 ListReserveResult.InvalidPeriodicity => AutomationResponses.BError(ReserveListQuery.PeriodicityMessage, StatusCodes.Status400BadRequest),
+                ListReserveResult.InvalidPaging paging => AutomationResponses.BError(ReserveListQuery.PagingMessage(paging.Field), StatusCodes.Status400BadRequest),
                 ListReserveResult.Listed listed => AutomationResponses.Listed(listed),
                 _ => throw new InvalidOperationException("Resultado da listagem da reserva desconhecido."),
             };
