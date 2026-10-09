@@ -68,3 +68,7 @@ Critério: qualquer falha nos itens 1–7, ou erro 5xx sustentado.
 - Conferir diariamente: faturas fechadas às 00:01, resumo matinal, check-in noturno, relatório do dia 1.
 - Rotacionar a senha do Postgres e `API_SECRET_KEY` (esta invalida JWTs: combinar com o Rafael) — a connection string de produção foi exposta em conversa de planejamento.
 - Só então iniciar a Fase 5 (remoção do Python).
+
+## Ajuste de dados antes da virada: fatura Aberta do Cartão Inter (desvio 065)
+
+Em produção (2026-10-09) a fatura Aberta do cartão 2 tem fechamento 13/10/2026 e vencimento 20/11/2026 (fórmula antiga do Flask). O .NET localiza a fatura por (conta, vencimento) e, com o desvio 065, espera 20/10/2026. Antes da virada: (1) reproduzir em homol, (2) escrever e revisar um UPDATE que acerte o vencimento das faturas Abertas conforme a regra única, sem violar a chave única (conta, vencimento), (3) rodar no mesmo dia da virada, depois do backup. Faturas Fechadas antigas não são alteradas.

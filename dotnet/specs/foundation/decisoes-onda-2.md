@@ -151,3 +151,14 @@ Respostas operacionais:
 - **Q-009-4 (UptimeRobot):** o UptimeRobot **não está mais funcionando**. Ninguém externo chama `trigger-*` de hora em hora; o Quartz (013) assume sozinho. Antes da virada, conferir se o Ofelia ainda dispara algo.
 - **V-3:** os comandos enviados foram colados como uma linha só (o `e` virou argumento do `grep`) e não geraram resultado. Sem esses dados, o rate limit nasce **desligado** (desvio 081) e os headers do Talisman serão capturados em homol.
 - **V-1 e V-2:** pendentes.
+
+## 7. Resultado do 06-conferencia-onda-2.sql em produção (2026-10-09)
+
+- **Q-004-2:** o único cartão (Cartão Inter, id 2) fecha dia 13 e vence dia 20, ou seja, **V ≥ F**: o desvio 065 vale na prática. A tabela `faturas` mostra o efeito do Flask: há pares com o mesmo fechamento e vencimentos de meses diferentes (13/02 com venc. 20/02 e 20/03; 13/08 com 20/08 e 20/09) e a fatura **Aberta** atual fecha 13/10 mas vence **20/11** (fórmula antiga, um mês a mais). O .NET procura a fatura por (conta, vencimento), então a compra de outubro iria para uma fatura nova com vencimento 20/10 e a Aberta atual ficaria separada. **Ação de virada:** script de ajuste dessa fatura Aberta (vencimento para 20/10) validado antes em homol; ver cutover-runbook.
+- **Q-005-3:** `meses_reserva_emergencia = 10`; só 1 agendamento PARCELADO ativo (id 70, 3 de 18 parcelas, fora da reserva), então o desvio 014 praticamente não muda a meta.
+- **Q-009-3:** `baileys_auth` só tem a sessão `baileys_session` (3.234 linhas): o literal mantido na 009 está correto; P-009-8 rejeitado fica confirmado.
+- **Q-007-2:** 1 usuário, ativo, com e-mail.
+- **P-007-4:** o endereço `casa` tem coordenadas; o desvio 086 evita apagá-las ao editar.
+- **P-007-1:** `alerta_potes_threshold = 1` no único usuário, valor típico de `daysBeforeDue = 1` gravado na coluna errada. Há evidência de que o limiar de pote está em 1 (%?) por causa do bug; decisão pendente com o Rafael.
+- **P-004-1/11:** as 145 despesas em cartão têm fatura; as 155 em outras contas não têm, como esperado.
+- **Contexto:** o Rafael é o único usuário do sistema, o que reduz o risco da virada e do rollback.
