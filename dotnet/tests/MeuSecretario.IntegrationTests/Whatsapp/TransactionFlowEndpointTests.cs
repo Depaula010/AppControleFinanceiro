@@ -20,7 +20,8 @@ public class TransactionFlowEndpointTests(PostgresFixture postgres) : IAsyncLife
         _user = await _env.SeedUserAsync();
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    // Solta o pool de conexões do host do teste: sem isso a suíte inteira passa do limite de conexões do contêiner.
+    public async Task DisposeAsync() => await _env.Factory.DisposeAsync();
 
     private async Task<string> SendAsync(string text)
     {

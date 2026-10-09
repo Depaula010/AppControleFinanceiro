@@ -41,6 +41,7 @@ public sealed class WhatsAppModule : IFeatureModule
         services.AddScoped<IWhatsAppIntent, HelpIntent>();
 
         FinancialWhatsAppModule.AddFinancialServices(services); // 012a, 012b, 012c
+        FixedBillsWhatsAppModule.AddFixedBillsServices(services); // 012d
     }
 
     public void MapEndpoints(IEndpointRouteBuilder app) => app.MapPost("/webhook-whatsapp", WebhookAsync);

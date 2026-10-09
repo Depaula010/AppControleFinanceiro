@@ -348,6 +348,8 @@ Leitura: `usuarios`, `contas`, `faturas`, `transacoes`, `subcategoria`, `macroca
 6. **`datetime.now()`/`date.today()` do container** e `CURRENT_DATE` do banco (UTC) viram o dia de São Paulo (constituição §7).
 7. **Estatísticas aleatórias** (`set` do Python em `get_monthly_comparison`): desempate determinístico (ordem de aparição).
 8. **Event "mais recente":** a ordem dos `KEYS` do Redis não é garantida em nenhuma das duas implementações (Q-012-4).
+9. **Check-in, confirmação em lote (012d):** cada conta confirmada vira uma transação do `IScheduleExecutor` (desvio 011, idempotente por mês); o Flask grava todas numa só transação que desfaz tudo no primeiro erro. Aqui as contas anteriores à que falhou continuam gravadas, a sessão some e a resposta é `❌ Erro ao salvar transações.` (sem `str(e)`, desvio 008). Conta já lançada no mês conta como confirmada sem duplicar.
+10. **Check-in, confirmação parcial (012d):** `list(set(indices))` do Python sai em ordem crescente para números pequenos; o .NET sempre ordena em crescente (a ordem do `set` com 8 itens ou mais depende da inserção).
 
 ## 14. Perguntas em aberto (siga o Flask até haver resposta)
 

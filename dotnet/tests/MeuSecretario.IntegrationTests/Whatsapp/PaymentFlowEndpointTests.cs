@@ -23,7 +23,8 @@ public class PaymentFlowEndpointTests(PostgresFixture postgres) : IAsyncLifetime
         _account = await _env.Data.InsertAccountAsync(_user, "Nubank");
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    // Solta o pool de conexões do host do teste: sem isso a suíte inteira passa do limite de conexões do contêiner.
+    public async Task DisposeAsync() => await _env.Factory.DisposeAsync();
 
     private async Task<string> SendAsync(string text)
     {
