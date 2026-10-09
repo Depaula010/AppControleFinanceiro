@@ -1,6 +1,3 @@
-using System.Net;
-using System.Text;
-using System.Text.Json;
 using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Application.Jobs;
 using MeuSecretario.Application.Whatsapp;
@@ -10,9 +7,7 @@ using MeuSecretario.Infrastructure.Whatsapp;
 using MeuSecretario.IntegrationTests.Automation;
 using MeuSecretario.IntegrationTests.Support;
 using MeuSecretario.IntegrationTests.Transactions;
-using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MeuSecretario.IntegrationTests.Whatsapp;
 
@@ -20,7 +15,7 @@ namespace MeuSecretario.IntegrationTests.Whatsapp;
 /// 012d com o banco de verdade: contas fixas, vencimentos, contas atrasadas e a resposta ao check-in noturno com o responsável real
 /// (<c>CheckinResponder</c> sobre o motor de agendamentos da 013). O pipeline é montado com as classes de Infrastructure sobre a conexão
 /// do contêiner (sem subir um host por teste: cada host guarda o próprio pool e o contêiner tem um limite de conexões); a fiação de DI e a
-/// rota ficam cobertas por um teste que sobe a API uma vez e a descarta.
+/// rota ficam cobertas pelos testes de rota do WhatsApp e pela resolução de DI abaixo.
 /// </summary>
 [Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
@@ -251,45 +246,24 @@ public class FixedBillsEndpointTests(PostgresFixture postgres) : IAsyncLifetime
         _cache.Values.Keys.ShouldNotContain($"nightly_checkin_active:{Number}");
     }
 
-    /// <summary>A rota de verdade, com a fiação de DI da 012d (responder real, intenções e leitor); a API é descartada no fim para soltar o pool.</summary>
+    /// <summary>
+    /// Fiação de DI da 012d no host que a API sobe de verdade (o do <c>PostgresFixture</c>, sem abrir outro): o responder real vence o
+    /// padrão "não tratada" e as seis intenções entram no despacho.
+    /// </summary>
     [Fact]
     [Trait("AC", "012-404")]
-    public async Task Route_CheckinReplyThroughTheRealDependencyInjection()
+    public void DependencyInjection_ResolvesTheRealCheckinResponderAndTheBillsIntents()
     {
-        var rent = await _env.InsertScheduleAsync(_user, _account, "Aluguel", amount: 1500m);
-        await using var factory = postgres.Api.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
+        using var scope = postgres.Api.Services.CreateScope();
+        var services = scope.ServiceProvider;
+
+        services.GetRequiredService<INightlyCheckinResponder>().ShouldBeOfType<CheckinResponder>();
+        services.GetRequiredService<IWhatsAppFixedBillsReader>().ShouldBeOfType<FixedBillsReader>();
+        var names = services.GetServices<IWhatsAppIntent>().Select(i => i.Name).ToList();
+        foreach (var name in new[] { "Consulta Contas Fixas", "Consulta Todas Contas", "Vencimentos Hoje", "Vencimentos Amanhã", "Vencimentos Essa Semana", "Contas Atrasadas" })
         {
-            services.RemoveAll<ILlmClient>();
-            services.AddSingleton<ILlmClient>(_llm);
-            services.RemoveAll<IBotClient>();
-            services.AddSingleton<IBotClient>(new RecordingBot());
-            services.RemoveAll<ICache>();
-            services.AddSingleton<ICache>(_cache);
-            services.RemoveAll<IDatabaseHealth>();
-            services.AddSingleton<IDatabaseHealth>(new ToggleDatabaseHealth());
-        }));
-        var today = factory.Services.GetRequiredService<IClock>().Today;
-        using (var scope = factory.Services.CreateScope())
-        {
-            var bill = new CheckinBill(
-                rent, "Aluguel", 1500m, today.Day, _account, TransactionsTestData.ExpenseSubcategory, _user, "Nubank", "Conta Corrente", "Moradia", "Moradia",
-                "Despesa", "FIXO", 0, null, today);
-            await scope.ServiceProvider.GetRequiredService<NightlyCheckinService>().CreateSessionAsync(Number, [bill], CancellationToken.None);
+            names.ShouldContain(name);
         }
-
-        using var client = factory.CreateClient();
-        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri("/webhook-whatsapp", UriKind.Relative))
-        {
-            Content = new ByteArrayContent(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { texto = "ok", numero_remetente = Number }))),
-        };
-        request.Content.Headers.TryAddWithoutValidation("Content-Type", "application/json");
-        request.Headers.TryAddWithoutValidation("x-api-key", WhatsAppEnv.ApiKey);
-        using var response = await client.SendAsync(request);
-
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var reply = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement.GetProperty("resposta").GetString();
-        reply.ShouldBe("✅ *Todas as 1 contas confirmadas!*\n\n• Aluguel\n\n💚 Transações registradas com sucesso!");
-        (await TransactionsAsync()).Select(r => (r.descricao, r.agendamento_id)).ShouldBe([("Aluguel", rent)]);
     }
 
     private sealed class FixedClock(DateOnly today) : IClock
