@@ -81,8 +81,14 @@ public interface IMonthlyReportJob
     Task<ManualReportResult> SendManualAsync(int userId, MonthlyMoment moment, CancellationToken cancellationToken);
 }
 
-/// <summary>Pizza em PNG (RN-013-75). <c>null</c> sem dados válidos.</summary>
+/// <summary>Pizza em PNG (RN-013-75), barras e linha (012g). <c>null</c> sem dados válidos ou se o desenho falha.</summary>
 public interface IChartRenderer
 {
     byte[]? RenderPie(IReadOnlyList<(string Label, double Value)> data, int days);
+
+    /// <summary>Despesas contra rendas por mês (<c>generate_bar_chart</c>); <c>Label</c> é o mês já formatado (<c>Oct/26</c>).</summary>
+    byte[]? RenderBars(IReadOnlyList<(string Label, double Expenses, double Income)> data);
+
+    /// <summary>Saldo ao longo do tempo (<c>generate_line_chart</c>).</summary>
+    byte[]? RenderLine(IReadOnlyList<(DateOnly Date, double Balance)> data);
 }
