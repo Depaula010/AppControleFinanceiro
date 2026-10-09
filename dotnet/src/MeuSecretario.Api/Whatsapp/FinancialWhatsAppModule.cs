@@ -29,6 +29,18 @@ internal static class FinancialWhatsAppModule
         // 012b
         services.AddScoped<IFixedBillSettler, FixedBillSettler>();
         services.AddScoped<IWhatsAppStep, PaymentStep>();
+
+        // 012c
+        services.AddScoped<IWhatsAppQueryReader, WhatsAppQueryReader>();
+        services.AddScoped<IWhatsAppIntent, BalanceIntent>();
+        services.AddScoped<IWhatsAppIntent, ReserveIntent>();
+        services.AddScoped<IWhatsAppIntent, ReserveDetailsIntent>();
+        services.AddScoped<IWhatsAppIntent, PotsIntent>();
+        services.AddScoped<IWhatsAppIntent, ListAccountsIntent>();
+        services.AddScoped<IWhatsAppIntent, AdjustBalanceIntent>();
+        services.AddScoped<IWhatsAppIntent, InvoiceValueIntent>();
+        services.AddScoped<IWhatsAppIntent, CategorySpendIntent>();
+        services.AddScoped<IWhatsAppIntent, PeriodIntent>();
     }
 }
 

@@ -36,10 +36,10 @@ Retomada: o que está `[x]` está commitado; a próxima sub-entrega começa na p
 
 ## 012c — Consultas financeiras
 
-- [ ] **T20 — Domínio.** `BalanceMessages`, `ReserveMessages`, `PotMessages`, `AccountListMessage`, `InvoiceMessages`, `CategorySpendMessage`, `PeriodRange`, `PeriodMessages` (AC-012-301 a 307).
-- [ ] **T21 — Leituras (integração Postgres).** saldos, potes por período, faturas, período, categoria, ajuste de saldo (AC-012-303, 305 a 307).
-- [ ] **T22 — Intenções** `BalanceIntent`, `ReserveIntent`, `ReserveDetailsIntent`, `PotsIntent`, `ListAccountsIntent`, `AdjustBalanceIntent`, `InvoiceValueIntent`, `CategorySpendIntent`, `PeriodIntent` (AC-012-301 a 307).
-- [ ] **T23 — Fechamento da 012c.**
+- [x] **T20 — Domínio.** `BalanceMessages`, `ReserveMessages`, `PotMessages`, `AccountListMessage`, `InvoiceMessages`, `CategorySpendMessage`, `PeriodRange`, `PeriodMessages` (AC-012-301 a 307).
+- [x] **T21 — Leituras (integração Postgres).** saldos, potes por período, faturas, período, categoria, ajuste de saldo (AC-012-303, 305 a 307).
+- [x] **T22 — Intenções** `BalanceIntent`, `ReserveIntent`, `ReserveDetailsIntent`, `PotsIntent`, `ListAccountsIntent`, `AdjustBalanceIntent`, `InvoiceValueIntent`, `CategorySpendIntent`, `PeriodIntent` (AC-012-301 a 307).
+- [x] **T23 — Fechamento da 012c.**
 
 ## 012d — Contas fixas e vencimentos
 

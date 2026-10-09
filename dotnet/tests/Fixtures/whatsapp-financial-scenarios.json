@@ -10483,6 +10483,3185 @@
     },
     "redis_writes": []
    }
+  },
+  {
+   "name": "saldo_uma_conta",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "saldo do nubank",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Saldo",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_saldo_query": "{\"nome_conta\": \"Nubank\"}"
+    },
+    "returns": {
+     "finance_service.get_account_by_name": 1,
+     "finance_service.get_saldo_contas": [
+      {
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "saldo": 1500.5
+      }
+     ]
+    }
+   },
+   "body": {
+    "texto": "saldo do nubank",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🏦 *Nubank* (Conta Corrente)\n\n💵 Saldo: *R$ 1.500,50*"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_saldo_query",
+     "finance_service.get_account_by_name",
+     "finance_service.get_saldo_contas"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "saldo_cartao_icone",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "saldo do cartão",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Saldo",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_saldo_query": "{\"nome_conta\": \"Cartão Inter\"}"
+    },
+    "returns": {
+     "finance_service.get_account_by_name": 2,
+     "finance_service.get_saldo_contas": [
+      {
+       "nome_conta": "Cartão Inter",
+       "tipo_conta": "Cartão de Crédito",
+       "saldo": -350.25
+      }
+     ]
+    }
+   },
+   "body": {
+    "texto": "saldo do cartão",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💳 *Cartão Inter* (Cartão de Crédito)\n\n💵 Saldo: *R$ -350,25*"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_saldo_query",
+     "finance_service.get_account_by_name",
+     "finance_service.get_saldo_contas"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "saldo_todas_sem_chave",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "meu saldo",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Saldo",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_saldo_query": "{\"nome_nome\": null}"
+    },
+    "returns": {
+     "finance_service.get_saldo_contas": [
+      {
+       "nome_conta": "Cartão Inter",
+       "tipo_conta": "Cartão de Crédito",
+       "saldo": -350.25
+      },
+      {
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "saldo": 1234567.891
+      },
+      {
+       "nome_conta": "Carteira",
+       "tipo_conta": "Dinheiro",
+       "saldo": 0.125
+      }
+     ]
+    }
+   },
+   "body": {
+    "texto": "meu saldo",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *Seus Saldos:*\n\n💳 *Cartão Inter*\n   R$ -350,25\n\n🏦 *Nubank*\n   R$ 1.234.567,89\n\n💰 *Carteira*\n   R$ 0,12\n\n💵 *Total Geral:* R$ 1.234.217,77"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_saldo_query",
+     "finance_service.get_saldo_contas"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "saldo_todas_nome_nulo",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "meu saldo",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Saldo",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_saldo_query": "{\"nome_conta\": null}"
+    },
+    "returns": {
+     "finance_service.get_saldo_contas": [
+      {
+       "nome_conta": "Cartão Inter",
+       "tipo_conta": "Cartão de Crédito",
+       "saldo": -350.25
+      },
+      {
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "saldo": 1234567.891
+      },
+      {
+       "nome_conta": "Carteira",
+       "tipo_conta": "Dinheiro",
+       "saldo": 0.125
+      }
+     ]
+    }
+   },
+   "body": {
+    "texto": "meu saldo",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💰 *Seus Saldos:*\n\n💳 *Cartão Inter*\n   R$ -350,25\n\n🏦 *Nubank*\n   R$ 1.234.567,89\n\n💰 *Carteira*\n   R$ 0,12\n\n💵 *Total Geral:* R$ 1.234.217,77"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_saldo_query",
+     "finance_service.get_saldo_contas"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "saldo_conta_inexistente",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "saldo do xpto",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Saldo",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_saldo_query": "{\"nome_conta\": \"Xpto\"}"
+    },
+    "returns": {
+     "finance_service.get_account_by_name": null
+    }
+   },
+   "body": {
+    "texto": "saldo do xpto",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Não encontrei uma conta chamada 'Xpto'."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_saldo_query",
+     "finance_service.get_account_by_name"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "saldo_sem_contas",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "meu saldo",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Saldo",
+    "accounts": [],
+    "llm": {
+     "extract_saldo_query": "{\"nome_conta\": null}"
+    },
+    "returns": {
+     "finance_service.get_saldo_contas": []
+    }
+   },
+   "body": {
+    "texto": "meu saldo",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Você não tem contas cadastradas."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_saldo_query",
+     "finance_service.get_saldo_contas"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "saldo_cota_do_gemini",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "meu saldo",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Saldo",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_saldo_query": {
+      "__raise__": "429 Quota exceeded"
+     }
+    }
+   },
+   "body": {
+    "texto": "meu saldo",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 429,
+    "body": {
+     "status": "erro",
+     "resposta": "⚠️ *Limite de IA Excedido*\n\nO sistema atingiu o limite diário de processamento de IA.\n\n🔧 *Soluções:*\n• Aguarde alguns minutos e tente novamente\n• Use comandos diretos (ex: 'gastei 50 em comida')\n• Configure sua própria chave de API do Gemini\n\n⏰ O limite é renovado automaticamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_saldo_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "saldo_json_invalido",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "meu saldo",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Saldo",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_saldo_query": "nao json"
+    }
+   },
+   "body": {
+    "texto": "meu saldo",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 500,
+    "body": {
+     "status": "erro",
+     "resposta": "Erro ao processar."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_saldo_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "reserva_resumo",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "minha reserva",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Reserva",
+    "returns": {
+     "finance_service.get_reserva_status": {
+      "__tuple__": [
+       2500.5,
+       15003.0,
+       6
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "minha reserva",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🆘 *Cálculo da Reserva de Emergência* 🆘\n\n💰 Gasto mensal essencial: *R$ 2.500,50*\n🎯 Reserva ideal (6 meses): *R$ 15.003,00*\n\n💡 _Digite *'detalhes da reserva'* para ver quais contas estão incluídas no cálculo_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_reserva_status"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "reserva_resumo_zero",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "minha reserva",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Reserva",
+    "returns": {
+     "finance_service.get_reserva_status": {
+      "__tuple__": [
+       0,
+       0.0,
+       12
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "minha reserva",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🆘 *Cálculo da Reserva de Emergência* 🆘\n\n💰 Gasto mensal essencial: *R$ 0,00*\n🎯 Reserva ideal (12 meses): *R$ 0,00*\n\n💡 _Digite *'detalhes da reserva'* para ver quais contas estão incluídas no cálculo_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_reserva_status"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "reserva_detalhes",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "detalhes da reserva",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Detalhes Reserva",
+    "reserve_items": [
+     {
+      "descricao": "Aluguel",
+      "valor_previsto": 1500.0,
+      "periodicidade": "MENSAL",
+      "categoria": "Moradia",
+      "impacto": 9000.0
+     },
+     {
+      "descricao": "IPTU",
+      "valor_previsto": 1200.0,
+      "periodicidade": "ANUAL",
+      "categoria": "Moradia",
+      "impacto": 1200.0
+     },
+     {
+      "descricao": "Faxina",
+      "valor_previsto": 80.0,
+      "periodicidade": "SEMANAL",
+      "categoria": "Casa",
+      "impacto": 2080.0
+     },
+     {
+      "descricao": "Mesada",
+      "valor_previsto": 50.0,
+      "periodicidade": "QUINZENAL",
+      "categoria": "Familia",
+      "impacto": 600.0
+     },
+     {
+      "descricao": "Café",
+      "valor_previsto": 5.5,
+      "periodicidade": "DIARIA",
+      "categoria": "Lazer",
+      "impacto": 990.0
+     }
+    ],
+    "returns": {
+     "finance_service.get_reserva_status": {
+      "__tuple__": [
+       2500.5,
+       15003.0,
+       6
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "detalhes da reserva",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🆘 *Detalhes da Reserva de Emergência*\n\n📊 *Resumo:*\n• Gasto mensal essencial: *R$ 2.500,50*\n• Reserva 6 meses: *R$ 15.003,00*\n\n📋 *Contas incluídas:*\n\n📅 *Aluguel*\n   └ R$ 1.500,00/mensal → R$ 9.000,00 (×6)\n🗓️ *IPTU*\n   └ R$ 1.200,00/anual → R$ 1.200,00 (integral)\n📆 *Faxina*\n   └ R$ 80,00/semanal → R$ 2.080,00 (×26)\n📋 *Mesada*\n   └ R$ 50,00/quinzenal → R$ 600,00 (×12)\n⏰ *Café*\n   └ R$ 5,50/diaria → R$ 990,00 (×180)\n\n━━━━━━━━━━━━━━━━━━\n💰 *Total: R$ 15.003,00*\n\n💡 _Use a aplicação web para editar quais contas incluir_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_reserva_status"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "reserva_detalhes_tres_meses",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "detalhes da reserva",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Detalhes Reserva",
+    "reserve_items": [
+     {
+      "descricao": "Aluguel",
+      "valor_previsto": 1500.0,
+      "periodicidade": "MENSAL",
+      "categoria": "Moradia",
+      "impacto": 9000.0
+     },
+     {
+      "descricao": "IPTU",
+      "valor_previsto": 1200.0,
+      "periodicidade": "ANUAL",
+      "categoria": "Moradia",
+      "impacto": 1200.0
+     },
+     {
+      "descricao": "Faxina",
+      "valor_previsto": 80.0,
+      "periodicidade": "SEMANAL",
+      "categoria": "Casa",
+      "impacto": 2080.0
+     },
+     {
+      "descricao": "Mesada",
+      "valor_previsto": 50.0,
+      "periodicidade": "QUINZENAL",
+      "categoria": "Familia",
+      "impacto": 600.0
+     },
+     {
+      "descricao": "Café",
+      "valor_previsto": 5.5,
+      "periodicidade": "DIARIA",
+      "categoria": "Lazer",
+      "impacto": 990.0
+     }
+    ],
+    "returns": {
+     "finance_service.get_reserva_status": {
+      "__tuple__": [
+       1000.0,
+       3000.0,
+       3
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "detalhes da reserva",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🆘 *Detalhes da Reserva de Emergência*\n\n📊 *Resumo:*\n• Gasto mensal essencial: *R$ 1.000,00*\n• Reserva 3 meses: *R$ 3.000,00*\n\n📋 *Contas incluídas:*\n\n📅 *Aluguel*\n   └ R$ 1.500,00/mensal → R$ 9.000,00 (×3)\n🗓️ *IPTU*\n   └ R$ 1.200,00/anual → R$ 1.200,00 (integral)\n📆 *Faxina*\n   └ R$ 80,00/semanal → R$ 2.080,00 (×13)\n📋 *Mesada*\n   └ R$ 50,00/quinzenal → R$ 600,00 (×6)\n⏰ *Café*\n   └ R$ 5,50/diaria → R$ 990,00 (×90)\n\n━━━━━━━━━━━━━━━━━━\n💰 *Total: R$ 3.000,00*\n\n💡 _Use a aplicação web para editar quais contas incluir_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_reserva_status"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "reserva_detalhes_vazio",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "detalhes da reserva",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Detalhes Reserva",
+    "reserve_items": [],
+    "returns": {
+     "finance_service.get_reserva_status": {
+      "__tuple__": [
+       0,
+       0.0,
+       6
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "detalhes da reserva",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🆘 *Detalhes da Reserva de Emergência*\n\n⚠️ Nenhum agendamento está incluído no cálculo da reserva.\n\n💡 _Configure seus agendamentos fixos (água, luz, aluguel, etc.)_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_reserva_status"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "reserva_detalhes_impacto_nulo",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "detalhes da reserva",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Detalhes Reserva",
+    "reserve_items": [
+     {
+      "descricao": "Anuidade",
+      "valor_previsto": 99.9,
+      "periodicidade": "BIMESTRAL",
+      "categoria": "X",
+      "impacto": null
+     }
+    ],
+    "returns": {
+     "finance_service.get_reserva_status": {
+      "__tuple__": [
+       16.65,
+       99.9,
+       6
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "detalhes da reserva",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🆘 *Detalhes da Reserva de Emergência*\n\n📊 *Resumo:*\n• Gasto mensal essencial: *R$ 16,65*\n• Reserva 6 meses: *R$ 99,90*\n\n📋 *Contas incluídas:*\n\n📌 *Anuidade*\n   └ R$ 99,90/bimestral → R$ 0,00\n\n━━━━━━━━━━━━━━━━━━\n💰 *Total: R$ 99,90*\n\n💡 _Use a aplicação web para editar quais contas incluir_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_reserva_status"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "potes_nenhum",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "meus potes",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Potes",
+    "returns": {
+     "finance_service.get_pote_status": []
+    }
+   },
+   "body": {
+    "texto": "meus potes",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "Você não tem potes configurados."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_pote_status"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "potes_varios",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "meus potes",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Potes",
+    "returns": {
+     "finance_service.get_pote_status": [
+      [
+       "Alimentação",
+       500.0,
+       -380.4
+      ],
+      [
+       "Lazer",
+       200.0,
+       0
+      ],
+      [
+       "Transporte",
+       100.0,
+       -150.0
+      ],
+      [
+       "Zero",
+       0.0,
+       -10
+      ]
+     ]
+    }
+   },
+   "body": {
+    "texto": "meus potes",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📊 *Seus Potes:*\n\n🏷️*Alimentação*\n  Gasto: R$ 380,40\n  Limite: R$ 500,00\n  Resta: R$ 119,60\n\n🏷️*Lazer*\n  Gasto: R$ -0,00\n  Limite: R$ 200,00\n  Resta: R$ 200,00\n\n🏷️*Transporte*\n  Gasto: R$ 150,00\n  Limite: R$ 100,00\n  Resta: R$ -50,00\n\n🏷️*Zero*\n  Gasto: R$ 10,00\n  Limite: R$ 0,00\n  Resta: R$ -10,00\n\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "finance_service.get_pote_status"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "contas_listar",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "quais minhas contas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Listar Contas",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     },
+     {
+      "id": 4,
+      "nome_conta": "Itaú",
+      "tipo_conta": "Conta Corrente"
+     }
+    ]
+   },
+   "body": {
+    "texto": "quais minhas contas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *Suas Contas Cadastradas:*\n\n🏦 *Conta Corrente*\n   • Nubank\n   • Itaú\n\n💳 *Cartão de Crédito*\n   • Cartão Inter\n\n💰 *Dinheiro*\n   • Carteira\n\n_Total: 4 conta(s)_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Listar Contas",
+     "finance_service.get_user_accounts"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "contas_listar_vazio",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "quais minhas contas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Listar Contas",
+    "accounts": []
+   },
+   "body": {
+    "texto": "quais minhas contas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Você não tem contas cadastradas."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Listar Contas",
+     "finance_service.get_user_accounts"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "ajuste_sucesso",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ajustar saldo inicial nubank 1.500,50",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Ajustar Saldo Inicial",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "returns": {
+     "finance_service.update_saldo_inicial": true
+    }
+   },
+   "body": {
+    "texto": "ajustar saldo inicial nubank 1.500,50",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *SALDO INICIAL ATUALIZADO* ✅\n\n🏦 *Nubank*\n💵 Novo saldo inicial: *R$ 1.500,50*\n\n_O saldo atual já reflete esta mudança._"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Ajustar Saldo Inicial",
+     "finance_service.get_user_accounts",
+     "finance_service.update_saldo_inicial"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "ajuste_cartao",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "corrigir saldo do cartão inter para 5000",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Ajustar Saldo Inicial",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "returns": {
+     "finance_service.update_saldo_inicial": true
+    }
+   },
+   "body": {
+    "texto": "corrigir saldo do cartão inter para 5000",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *SALDO INICIAL ATUALIZADO* ✅\n\n💳 *Cartão Inter*\n💵 Novo saldo inicial: *R$ 5.000,00*\n\n_O saldo atual já reflete esta mudança._"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Ajustar Saldo Inicial",
+     "finance_service.get_user_accounts",
+     "finance_service.update_saldo_inicial"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "ajuste_sem_valor",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ajustar saldo inicial nubank",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Ajustar Saldo Inicial",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ]
+   },
+   "body": {
+    "texto": "ajustar saldo inicial nubank",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Não consegui identificar o valor. Exemplo: 'ajustar saldo inicial Banco Inter 5000'"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Ajustar Saldo Inicial",
+     "finance_service.get_user_accounts"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "ajuste_sem_conta",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ajustar saldo inicial 1500",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Ajustar Saldo Inicial",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ]
+   },
+   "body": {
+    "texto": "ajustar saldo inicial 1500",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Não consegui identificar qual conta. Contas disponíveis:\n\n• Nubank\n• Cartão Inter\n• Carteira\n\nTente: 'ajustar saldo inicial [nome da conta] [valor]'"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Ajustar Saldo Inicial",
+     "finance_service.get_user_accounts"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "ajuste_sem_conta_nem_contas",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ajustar saldo inicial 1500",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Ajustar Saldo Inicial",
+    "accounts": []
+   },
+   "body": {
+    "texto": "ajustar saldo inicial 1500",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Não consegui identificar qual conta. Contas disponíveis:\n\n\nTente: 'ajustar saldo inicial [nome da conta] [valor]'"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Ajustar Saldo Inicial",
+     "finance_service.get_user_accounts"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "ajuste_falha",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ajustar saldo nubank 100",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Ajustar Saldo Inicial",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "returns": {
+     "finance_service.update_saldo_inicial": false
+    }
+   },
+   "body": {
+    "texto": "ajustar saldo nubank 100",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Erro ao atualizar o saldo inicial. Tente novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Ajustar Saldo Inicial",
+     "finance_service.get_user_accounts",
+     "finance_service.update_saldo_inicial"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "ajuste_valor_decimal_ponto",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ajustar saldo nubank 12.50",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Ajustar Saldo Inicial",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "returns": {
+     "finance_service.update_saldo_inicial": true
+    }
+   },
+   "body": {
+    "texto": "ajustar saldo nubank 12.50",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *SALDO INICIAL ATUALIZADO* ✅\n\n🏦 *Nubank*\n💵 Novo saldo inicial: *R$ 1.250,00*\n\n_O saldo atual já reflete esta mudança._"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Ajustar Saldo Inicial",
+     "finance_service.get_user_accounts",
+     "finance_service.update_saldo_inicial"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "ajuste_erro_no_banco",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ajustar saldo nubank 100",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Ajustar Saldo Inicial",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "returns": {
+     "finance_service.update_saldo_inicial": {
+      "__raise__": "boom"
+     }
+    }
+   },
+   "body": {
+    "texto": "ajustar saldo nubank 100",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Ops! Algo deu errado. Por favor, tente novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Ajustar Saldo Inicial",
+     "finance_service.get_user_accounts",
+     "finance_service.update_saldo_inicial"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_resumida_um_cartao",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "quanto está a fatura do inter",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Valor Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_query": "{\"conta_cartao\": \"Cartão Inter\"}"
+    },
+    "returns": {
+     "finance_service.get_account_by_name": 2,
+     "finance_service.get_fatura_valor": [
+      {
+       "nome_cartao": "Cartão Inter",
+       "valor_fatura": 1250.5,
+       "data_vencimento": "2026-10-17",
+       "status": "Aberta"
+      }
+     ]
+    }
+   },
+   "body": {
+    "texto": "quanto está a fatura do inter",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💳 *Fatura Cartão Inter*\n\n💰 Valor atual: *R$ 1.250,50*\n📅 Vencimento: 17/10/2026\n📊 Status: Aberta"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Valor Fatura",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_query",
+     "finance_service.get_account_by_name",
+     "finance_service.get_fatura_valor"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_resumida_todas_um",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "valor da fatura",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Valor Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_query": "{\"conta_cartao\": null}"
+    },
+    "returns": {
+     "finance_service.get_fatura_valor": [
+      {
+       "nome_cartao": "Cartão Inter",
+       "valor_fatura": 1250.5,
+       "data_vencimento": "2026-10-17",
+       "status": "Aberta"
+      }
+     ]
+    }
+   },
+   "body": {
+    "texto": "valor da fatura",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💳 *Fatura Cartão Inter*\n\n💰 Valor atual: *R$ 1.250,50*\n📅 Vencimento: 17/10/2026\n📊 Status: Aberta"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Valor Fatura",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_query",
+     "finance_service.get_fatura_valor"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_resumida_varias",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "valor das faturas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Valor Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_query": "{\"conta_cartao\": null}"
+    },
+    "returns": {
+     "finance_service.get_fatura_valor": [
+      {
+       "nome_cartao": "Cartão Inter",
+       "valor_fatura": 1250.5,
+       "data_vencimento": "2026-10-17",
+       "status": "Aberta"
+      },
+      {
+       "nome_cartao": "Nubank",
+       "valor_fatura": 99.99,
+       "data_vencimento": "2026-11-05",
+       "status": "Aberta"
+      }
+     ]
+    }
+   },
+   "body": {
+    "texto": "valor das faturas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💳 *Suas Faturas em Aberto:*\n\n🔹 *Cartão Inter*\n   💰 R$ 1.250,50 (Venc: 17/10)\n\n🔹 *Nubank*\n   💰 R$ 99,99 (Venc: 05/11)\n\n💵 *Total Geral:* R$ 1.350,49"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Valor Fatura",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_query",
+     "finance_service.get_fatura_valor"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_nenhuma",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "valor da fatura",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Valor Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_query": "{\"conta_cartao\": null}"
+    },
+    "returns": {
+     "finance_service.get_fatura_valor": []
+    }
+   },
+   "body": {
+    "texto": "valor da fatura",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Você não tem nenhuma fatura em aberto! 🎉"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Valor Fatura",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_query",
+     "finance_service.get_fatura_valor"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_nenhuma_com_cartao",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "valor da fatura do inter",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Valor Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_query": "{\"conta_cartao\": \"Cartão Inter\"}"
+    },
+    "returns": {
+     "finance_service.get_account_by_name": 2,
+     "finance_service.get_fatura_valor": []
+    }
+   },
+   "body": {
+    "texto": "valor da fatura do inter",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Você não tem faturas em aberto no cartão 'Cartão Inter'! 🎉"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Valor Fatura",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_query",
+     "finance_service.get_account_by_name",
+     "finance_service.get_fatura_valor"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_cartao_nao_encontrado",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "valor da fatura do xpto",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Valor Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_query": "{\"conta_cartao\": \"Xpto\"}"
+    },
+    "returns": {
+     "finance_service.get_account_by_name": null
+    }
+   },
+   "body": {
+    "texto": "valor da fatura do xpto",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "🤔 Não encontrei um cartão chamado 'Xpto'."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Valor Fatura",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_query",
+     "finance_service.get_account_by_name"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_detalhada",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "detalhar a fatura do inter",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Valor Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_query": "{\"conta_cartao\": \"Cartão Inter\"}"
+    },
+    "returns": {
+     "finance_service.get_account_by_name": 2,
+     "finance_service.get_fatura_detalhada": {
+      "nome_cartao": "Cartão Inter",
+      "valor_total": 400.9,
+      "data_vencimento": "2026-10-17",
+      "status": "Aberta",
+      "transacoes": [
+       {
+        "descricao": "Netflix",
+        "valor": 49.9,
+        "data": "2026-10-05",
+        "tipo_agendamento": "FIXO",
+        "parcela_info": null
+       },
+       {
+        "descricao": "Tênis",
+        "valor": 150.0,
+        "data": "2026-10-05",
+        "tipo_agendamento": "PARCELADO",
+        "parcela_info": "2/3"
+       },
+       {
+        "descricao": "Mercado",
+        "valor": 201.0,
+        "data": "2026-09-28",
+        "tipo_agendamento": null,
+        "parcela_info": null
+       }
+      ]
+     }
+    }
+   },
+   "body": {
+    "texto": "detalhar a fatura do inter",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💳 *Fatura Cartão Inter*\n\n💰 Valor atual: *R$ 400,90*\n📅 Vencimento: 17/10/2026\n📊 Status: Aberta\n\n📅 *Transações por Data:*\n\n*05/10/2026* - R$ 199,90\n  🔁 Netflix: R$ 49,90\n  📊 Tênis (2/3): R$ 150,00\n\n*28/09/2026* - R$ 201,00\n  Mercado: R$ 201,00\n\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Valor Fatura",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_query",
+     "finance_service.get_account_by_name",
+     "finance_service.get_fatura_detalhada"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_detalhada_sem_transacoes",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "itens da fatura do inter",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Valor Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_query": "{\"conta_cartao\": \"Cartão Inter\"}"
+    },
+    "returns": {
+     "finance_service.get_account_by_name": 2,
+     "finance_service.get_fatura_detalhada": {
+      "nome_cartao": "Cartão Inter",
+      "valor_total": 400.9,
+      "data_vencimento": "2026-10-17",
+      "status": "Aberta",
+      "transacoes": []
+     }
+    }
+   },
+   "body": {
+    "texto": "itens da fatura do inter",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💳 *Fatura Cartão Inter*\n\n💰 Valor atual: *R$ 400,90*\n📅 Vencimento: 17/10/2026\n📊 Status: Aberta\n\n✅ Nenhuma transação registrada nesta fatura."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Valor Fatura",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_query",
+     "finance_service.get_account_by_name",
+     "finance_service.get_fatura_detalhada"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_detalhada_inexistente",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "detalhe da fatura do inter",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Valor Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_query": "{\"conta_cartao\": \"Cartão Inter\"}"
+    },
+    "returns": {
+     "finance_service.get_account_by_name": 2,
+     "finance_service.get_fatura_detalhada": null
+    }
+   },
+   "body": {
+    "texto": "detalhe da fatura do inter",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Você não tem faturas em aberto no cartão 'Cartão Inter'! 🎉"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Valor Fatura",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_query",
+     "finance_service.get_account_by_name",
+     "finance_service.get_fatura_detalhada"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_detalhes_sem_cartao_vira_resumo",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "detalhes das faturas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Valor Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_query": "{\"conta_cartao\": null}"
+    },
+    "returns": {
+     "finance_service.get_fatura_valor": [
+      {
+       "nome_cartao": "Cartão Inter",
+       "valor_fatura": 1250.5,
+       "data_vencimento": "2026-10-17",
+       "status": "Aberta"
+      },
+      {
+       "nome_cartao": "Nubank",
+       "valor_fatura": 99.99,
+       "data_vencimento": "2026-11-05",
+       "status": "Aberta"
+      }
+     ]
+    }
+   },
+   "body": {
+    "texto": "detalhes das faturas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💳 *Suas Faturas em Aberto:*\n\n🔹 *Cartão Inter*\n   💰 R$ 1.250,50 (Venc: 17/10)\n\n🔹 *Nubank*\n   💰 R$ 99,99 (Venc: 05/11)\n\n💵 *Total Geral:* R$ 1.350,49"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Valor Fatura",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_query",
+     "finance_service.get_fatura_valor"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fatura_cota_do_gemini",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "valor da fatura",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Valor Fatura",
+    "accounts": [
+     {
+      "id": 1,
+      "nome_conta": "Nubank",
+      "tipo_conta": "Conta Corrente"
+     },
+     {
+      "id": 2,
+      "nome_conta": "Cartão Inter",
+      "tipo_conta": "Cartão de Crédito"
+     },
+     {
+      "id": 3,
+      "nome_conta": "Carteira",
+      "tipo_conta": "Dinheiro"
+     }
+    ],
+    "llm": {
+     "extract_fatura_query": {
+      "__raise__": "429 Quota exceeded"
+     }
+    }
+   },
+   "body": {
+    "texto": "valor da fatura",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Ops! Algo deu errado. Por favor, tente novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Valor Fatura",
+     "finance_service.get_user_accounts",
+     "gemini_service.extract_fatura_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "categoria_gasto",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "quanto gastei com alimentação",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Categoria Específica",
+    "llm": {
+     "extract_category_query": "{\"nome_categoria\": \"Alimentação\"}"
+    },
+    "returns": {
+     "finance_service.get_category_spending": -1234.56
+    }
+   },
+   "body": {
+    "texto": "quanto gastei com alimentação",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "ℹ️ *Consulta de Categoria (Este Mês)*\n\nVocê gastou *R$ 1.234,56* com 'Alimentação'."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Categoria Específica",
+     "gemini_service.extract_category_query",
+     "finance_service.get_category_spending"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "categoria_gasto_zero",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "quanto gastei com lazer",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Categoria Específica",
+    "llm": {
+     "extract_category_query": "{\"nome_categoria\": \"Lazer\"}"
+    },
+    "returns": {
+     "finance_service.get_category_spending": 0
+    }
+   },
+   "body": {
+    "texto": "quanto gastei com lazer",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "ℹ️ *Consulta de Categoria (Este Mês)*\n\nVocê gastou *R$ -0,00* com 'Lazer'."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Categoria Específica",
+     "gemini_service.extract_category_query",
+     "finance_service.get_category_spending"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "categoria_nao_identificada",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "quanto gastei",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Categoria Específica",
+    "llm": {
+     "extract_category_query": "{\"nome_categoria\": null}"
+    }
+   },
+   "body": {
+    "texto": "quanto gastei",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Não consegui identificar a categoria. Qual categoria quer consultar?"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Categoria Específica",
+     "gemini_service.extract_category_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "categoria_json_invalido",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "quanto gastei",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Categoria Específica",
+    "llm": {
+     "extract_category_query": "nao json"
+    }
+   },
+   "body": {
+    "texto": "quanto gastei",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Ops! Algo deu errado. Por favor, tente novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Categoria Específica",
+     "gemini_service.extract_category_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_hoje",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastos do período",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": "{\"period_type\": \"hoje\", \"categoria\": null}"
+    },
+    "period_rows": [
+     [
+      "Padaria do Zé",
+      -25.5,
+      "Padaria",
+      "2026-10-07",
+      "Alimentação"
+     ],
+     [
+      "Mercado",
+      -180.0,
+      "Supermercado",
+      "2026-10-06",
+      "Alimentação"
+     ],
+     [
+      "Uber",
+      -32.9,
+      "Transporte",
+      "2026-10-06",
+      "Mobilidade"
+     ],
+     [
+      "Cinema",
+      -60.0,
+      "Lazer",
+      "2026-10-05",
+      "Diversão"
+     ]
+    ]
+   },
+   "body": {
+    "texto": "gastos do período",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *GASTOS HOJE (07/10/2026)* 💸\n\n💰 *Total: R$ 298,40*\n\n━━━━━━━━━━━━━━━━━━━━\n📋 *Detalhamento:*\n\n🏷️ *Alimentação → Supermercado*: R$ 180,00\n   • Mercado: R$ 180,00 (06/10)\n\n🏷️ *Diversão → Lazer*: R$ 60,00\n   • Cinema: R$ 60,00 (05/10)\n\n🏷️ *Mobilidade → Transporte*: R$ 32,90\n   • Uber: R$ 32,90 (06/10)\n\n🏷️ *Alimentação → Padaria*: R$ 25,50\n   • Padaria do Zé: R$ 25,50 (07/10)"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_ontem",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastos do período",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": "{\"period_type\": \"ontem\", \"categoria\": null}"
+    },
+    "period_rows": [
+     [
+      "Padaria do Zé",
+      -25.5,
+      "Padaria",
+      "2026-10-07",
+      "Alimentação"
+     ],
+     [
+      "Mercado",
+      -180.0,
+      "Supermercado",
+      "2026-10-06",
+      "Alimentação"
+     ],
+     [
+      "Uber",
+      -32.9,
+      "Transporte",
+      "2026-10-06",
+      "Mobilidade"
+     ],
+     [
+      "Cinema",
+      -60.0,
+      "Lazer",
+      "2026-10-05",
+      "Diversão"
+     ]
+    ]
+   },
+   "body": {
+    "texto": "gastos do período",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *GASTOS ONTEM (06/10/2026)* 💸\n\n💰 *Total: R$ 298,40*\n\n━━━━━━━━━━━━━━━━━━━━\n📋 *Detalhamento:*\n\n🏷️ *Alimentação → Supermercado*: R$ 180,00\n   • Mercado: R$ 180,00 (06/10)\n\n🏷️ *Diversão → Lazer*: R$ 60,00\n   • Cinema: R$ 60,00 (05/10)\n\n🏷️ *Mobilidade → Transporte*: R$ 32,90\n   • Uber: R$ 32,90 (06/10)\n\n🏷️ *Alimentação → Padaria*: R$ 25,50\n   • Padaria do Zé: R$ 25,50 (07/10)"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_final_de_semana",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastos do período",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": "{\"period_type\": \"final_de_semana\", \"categoria\": null}"
+    },
+    "period_rows": [
+     [
+      "Padaria do Zé",
+      -25.5,
+      "Padaria",
+      "2026-10-07",
+      "Alimentação"
+     ],
+     [
+      "Mercado",
+      -180.0,
+      "Supermercado",
+      "2026-10-06",
+      "Alimentação"
+     ],
+     [
+      "Uber",
+      -32.9,
+      "Transporte",
+      "2026-10-06",
+      "Mobilidade"
+     ],
+     [
+      "Cinema",
+      -60.0,
+      "Lazer",
+      "2026-10-05",
+      "Diversão"
+     ]
+    ]
+   },
+   "body": {
+    "texto": "gastos do período",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *GASTOS NO FINAL DE SEMANA (03/10 E 04/10)* 💸\n\n💰 *Total: R$ 298,40*\n\n━━━━━━━━━━━━━━━━━━━━\n📋 *Detalhamento:*\n\n🏷️ *Alimentação → Supermercado*: R$ 180,00\n   • Mercado: R$ 180,00 (06/10)\n\n🏷️ *Diversão → Lazer*: R$ 60,00\n   • Cinema: R$ 60,00 (05/10)\n\n🏷️ *Mobilidade → Transporte*: R$ 32,90\n   • Uber: R$ 32,90 (06/10)\n\n🏷️ *Alimentação → Padaria*: R$ 25,50\n   • Padaria do Zé: R$ 25,50 (07/10)"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_esta_semana",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastos do período",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": "{\"period_type\": \"esta_semana\", \"categoria\": null}"
+    },
+    "period_rows": [
+     [
+      "Padaria do Zé",
+      -25.5,
+      "Padaria",
+      "2026-10-07",
+      "Alimentação"
+     ],
+     [
+      "Mercado",
+      -180.0,
+      "Supermercado",
+      "2026-10-06",
+      "Alimentação"
+     ],
+     [
+      "Uber",
+      -32.9,
+      "Transporte",
+      "2026-10-06",
+      "Mobilidade"
+     ],
+     [
+      "Cinema",
+      -60.0,
+      "Lazer",
+      "2026-10-05",
+      "Diversão"
+     ]
+    ]
+   },
+   "body": {
+    "texto": "gastos do período",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *GASTOS ESTA SEMANA (DESDE 05/10)* 💸\n\n💰 *Total: R$ 298,40*\n\n━━━━━━━━━━━━━━━━━━━━\n📋 *Detalhamento:*\n\n🏷️ *Alimentação → Supermercado*: R$ 180,00\n   • Mercado: R$ 180,00 (06/10)\n\n🏷️ *Diversão → Lazer*: R$ 60,00\n   • Cinema: R$ 60,00 (05/10)\n\n🏷️ *Mobilidade → Transporte*: R$ 32,90\n   • Uber: R$ 32,90 (06/10)\n\n🏷️ *Alimentação → Padaria*: R$ 25,50\n   • Padaria do Zé: R$ 25,50 (07/10)"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_semana_passada",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastos do período",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": "{\"period_type\": \"semana_passada\", \"categoria\": null}"
+    },
+    "period_rows": [
+     [
+      "Padaria do Zé",
+      -25.5,
+      "Padaria",
+      "2026-10-07",
+      "Alimentação"
+     ],
+     [
+      "Mercado",
+      -180.0,
+      "Supermercado",
+      "2026-10-06",
+      "Alimentação"
+     ],
+     [
+      "Uber",
+      -32.9,
+      "Transporte",
+      "2026-10-06",
+      "Mobilidade"
+     ],
+     [
+      "Cinema",
+      -60.0,
+      "Lazer",
+      "2026-10-05",
+      "Diversão"
+     ]
+    ]
+   },
+   "body": {
+    "texto": "gastos do período",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *GASTOS NA SEMANA PASSADA (28/09 A 04/10)* 💸\n\n💰 *Total: R$ 298,40*\n\n━━━━━━━━━━━━━━━━━━━━\n📋 *Detalhamento:*\n\n🏷️ *Alimentação → Supermercado*: R$ 180,00\n   • Mercado: R$ 180,00 (06/10)\n\n🏷️ *Diversão → Lazer*: R$ 60,00\n   • Cinema: R$ 60,00 (05/10)\n\n🏷️ *Mobilidade → Transporte*: R$ 32,90\n   • Uber: R$ 32,90 (06/10)\n\n🏷️ *Alimentação → Padaria*: R$ 25,50\n   • Padaria do Zé: R$ 25,50 (07/10)"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_ultimos_7_dias",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastos do período",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": "{\"period_type\": \"ultimos_7_dias\", \"categoria\": null}"
+    },
+    "period_rows": [
+     [
+      "Padaria do Zé",
+      -25.5,
+      "Padaria",
+      "2026-10-07",
+      "Alimentação"
+     ],
+     [
+      "Mercado",
+      -180.0,
+      "Supermercado",
+      "2026-10-06",
+      "Alimentação"
+     ],
+     [
+      "Uber",
+      -32.9,
+      "Transporte",
+      "2026-10-06",
+      "Mobilidade"
+     ],
+     [
+      "Cinema",
+      -60.0,
+      "Lazer",
+      "2026-10-05",
+      "Diversão"
+     ]
+    ]
+   },
+   "body": {
+    "texto": "gastos do período",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *GASTOS NOS ÚLTIMOS 7 DIAS (DESDE 01/10)* 💸\n\n💰 *Total: R$ 298,40*\n\n━━━━━━━━━━━━━━━━━━━━\n📋 *Detalhamento:*\n\n🏷️ *Alimentação → Supermercado*: R$ 180,00\n   • Mercado: R$ 180,00 (06/10)\n\n🏷️ *Diversão → Lazer*: R$ 60,00\n   • Cinema: R$ 60,00 (05/10)\n\n🏷️ *Mobilidade → Transporte*: R$ 32,90\n   • Uber: R$ 32,90 (06/10)\n\n🏷️ *Alimentação → Padaria*: R$ 25,50\n   • Padaria do Zé: R$ 25,50 (07/10)"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_este_mes",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastos do período",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": "{\"period_type\": \"este_mes\", \"categoria\": null}"
+    },
+    "period_rows": [
+     [
+      "Padaria do Zé",
+      -25.5,
+      "Padaria",
+      "2026-10-07",
+      "Alimentação"
+     ],
+     [
+      "Mercado",
+      -180.0,
+      "Supermercado",
+      "2026-10-06",
+      "Alimentação"
+     ],
+     [
+      "Uber",
+      -32.9,
+      "Transporte",
+      "2026-10-06",
+      "Mobilidade"
+     ],
+     [
+      "Cinema",
+      -60.0,
+      "Lazer",
+      "2026-10-05",
+      "Diversão"
+     ]
+    ]
+   },
+   "body": {
+    "texto": "gastos do período",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *GASTOS ESTE MÊS (OUTUBRO/2026)* 💸\n\n💰 *Total: R$ 298,40*\n\n━━━━━━━━━━━━━━━━━━━━\n📋 *Detalhamento:*\n\n🏷️ *Alimentação → Supermercado*: R$ 180,00\n   • Mercado: R$ 180,00 (06/10)\n\n🏷️ *Diversão → Lazer*: R$ 60,00\n   • Cinema: R$ 60,00 (05/10)\n\n🏷️ *Mobilidade → Transporte*: R$ 32,90\n   • Uber: R$ 32,90 (06/10)\n\n🏷️ *Alimentação → Padaria*: R$ 25,50\n   • Padaria do Zé: R$ 25,50 (07/10)"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_mes_passado",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastos do período",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": "{\"period_type\": \"mes_passado\", \"categoria\": null}"
+    },
+    "period_rows": [
+     [
+      "Padaria do Zé",
+      -25.5,
+      "Padaria",
+      "2026-10-07",
+      "Alimentação"
+     ],
+     [
+      "Mercado",
+      -180.0,
+      "Supermercado",
+      "2026-10-06",
+      "Alimentação"
+     ],
+     [
+      "Uber",
+      -32.9,
+      "Transporte",
+      "2026-10-06",
+      "Mobilidade"
+     ],
+     [
+      "Cinema",
+      -60.0,
+      "Lazer",
+      "2026-10-05",
+      "Diversão"
+     ]
+    ]
+   },
+   "body": {
+    "texto": "gastos do período",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *GASTOS NO MÊS PASSADO (SETEMBRO/2026)* 💸\n\n💰 *Total: R$ 298,40*\n\n━━━━━━━━━━━━━━━━━━━━\n📋 *Detalhamento:*\n\n🏷️ *Alimentação → Supermercado*: R$ 180,00\n   • Mercado: R$ 180,00 (06/10)\n\n🏷️ *Diversão → Lazer*: R$ 60,00\n   • Cinema: R$ 60,00 (05/10)\n\n🏷️ *Mobilidade → Transporte*: R$ 32,90\n   • Uber: R$ 32,90 (06/10)\n\n🏷️ *Alimentação → Padaria*: R$ 25,50\n   • Padaria do Zé: R$ 25,50 (07/10)"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_desconhecido",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastos do período",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": "{\"period_type\": \"desconhecido\", \"categoria\": null}"
+    },
+    "period_rows": [
+     [
+      "Padaria do Zé",
+      -25.5,
+      "Padaria",
+      "2026-10-07",
+      "Alimentação"
+     ],
+     [
+      "Mercado",
+      -180.0,
+      "Supermercado",
+      "2026-10-06",
+      "Alimentação"
+     ],
+     [
+      "Uber",
+      -32.9,
+      "Transporte",
+      "2026-10-06",
+      "Mobilidade"
+     ],
+     [
+      "Cinema",
+      -60.0,
+      "Lazer",
+      "2026-10-05",
+      "Diversão"
+     ]
+    ]
+   },
+   "body": {
+    "texto": "gastos do período",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *GASTOS HOJE* 💸\n\n💰 *Total: R$ 298,40*\n\n━━━━━━━━━━━━━━━━━━━━\n📋 *Detalhamento:*\n\n🏷️ *Alimentação → Supermercado*: R$ 180,00\n   • Mercado: R$ 180,00 (06/10)\n\n🏷️ *Diversão → Lazer*: R$ 60,00\n   • Cinema: R$ 60,00 (05/10)\n\n🏷️ *Mobilidade → Transporte*: R$ 32,90\n   • Uber: R$ 32,90 (06/10)\n\n🏷️ *Alimentação → Padaria*: R$ 25,50\n   • Padaria do Zé: R$ 25,50 (07/10)"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_None",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastos do período",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": "{\"period_type\": null, \"categoria\": null}"
+    },
+    "period_rows": [
+     [
+      "Padaria do Zé",
+      -25.5,
+      "Padaria",
+      "2026-10-07",
+      "Alimentação"
+     ],
+     [
+      "Mercado",
+      -180.0,
+      "Supermercado",
+      "2026-10-06",
+      "Alimentação"
+     ],
+     [
+      "Uber",
+      -32.9,
+      "Transporte",
+      "2026-10-06",
+      "Mobilidade"
+     ],
+     [
+      "Cinema",
+      -60.0,
+      "Lazer",
+      "2026-10-05",
+      "Diversão"
+     ]
+    ]
+   },
+   "body": {
+    "texto": "gastos do período",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *GASTOS HOJE* 💸\n\n💰 *Total: R$ 298,40*\n\n━━━━━━━━━━━━━━━━━━━━\n📋 *Detalhamento:*\n\n🏷️ *Alimentação → Supermercado*: R$ 180,00\n   • Mercado: R$ 180,00 (06/10)\n\n🏷️ *Diversão → Lazer*: R$ 60,00\n   • Cinema: R$ 60,00 (05/10)\n\n🏷️ *Mobilidade → Transporte*: R$ 32,90\n   • Uber: R$ 32,90 (06/10)\n\n🏷️ *Alimentação → Padaria*: R$ 25,50\n   • Padaria do Zé: R$ 25,50 (07/10)"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_sem_chave_period_type",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastos",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": "{}"
+    },
+    "period_rows": [
+     [
+      "Padaria do Zé",
+      -25.5,
+      "Padaria",
+      "2026-10-07",
+      "Alimentação"
+     ],
+     [
+      "Mercado",
+      -180.0,
+      "Supermercado",
+      "2026-10-06",
+      "Alimentação"
+     ],
+     [
+      "Uber",
+      -32.9,
+      "Transporte",
+      "2026-10-06",
+      "Mobilidade"
+     ],
+     [
+      "Cinema",
+      -60.0,
+      "Lazer",
+      "2026-10-05",
+      "Diversão"
+     ]
+    ]
+   },
+   "body": {
+    "texto": "gastos",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *GASTOS HOJE (07/10/2026)* 💸\n\n💰 *Total: R$ 298,40*\n\n━━━━━━━━━━━━━━━━━━━━\n📋 *Detalhamento:*\n\n🏷️ *Alimentação → Supermercado*: R$ 180,00\n   • Mercado: R$ 180,00 (06/10)\n\n🏷️ *Diversão → Lazer*: R$ 60,00\n   • Cinema: R$ 60,00 (05/10)\n\n🏷️ *Mobilidade → Transporte*: R$ 32,90\n   • Uber: R$ 32,90 (06/10)\n\n🏷️ *Alimentação → Padaria*: R$ 25,50\n   • Padaria do Zé: R$ 25,50 (07/10)"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_vazio",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastos de hoje",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": "{\"period_type\": \"hoje\", \"categoria\": null}"
+    },
+    "period_rows": []
+   },
+   "body": {
+    "texto": "gastos de hoje",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Você não teve gastos hoje (07/10/2026)! 🎉"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_muitos_itens",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastos do mes",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": "{\"period_type\": \"este_mes\", \"categoria\": null}"
+    },
+    "period_rows": [
+     [
+      "Item 0",
+      -1.5,
+      "Padaria",
+      "2026-10-01",
+      "Alimentação"
+     ],
+     [
+      "Item 1",
+      -3.0,
+      "Padaria",
+      "2026-10-02",
+      "Alimentação"
+     ],
+     [
+      "Item 2",
+      -4.5,
+      "Padaria",
+      "2026-10-03",
+      "Alimentação"
+     ],
+     [
+      "Item 3",
+      -6.0,
+      "Padaria",
+      "2026-10-04",
+      "Alimentação"
+     ],
+     [
+      "Item 4",
+      -7.5,
+      "Padaria",
+      "2026-10-05",
+      "Alimentação"
+     ],
+     [
+      "Item 5",
+      -9.0,
+      "Padaria",
+      "2026-10-06",
+      "Alimentação"
+     ],
+     [
+      "Item 6",
+      -10.5,
+      "Padaria",
+      "2026-10-07",
+      "Alimentação"
+     ],
+     [
+      "Item 7",
+      -12.0,
+      "Padaria",
+      "2026-10-01",
+      "Alimentação"
+     ]
+    ]
+   },
+   "body": {
+    "texto": "gastos do mes",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *GASTOS ESTE MÊS (OUTUBRO/2026)* 💸\n\n💰 *Total: R$ 54,00*\n\n━━━━━━━━━━━━━━━━━━━━\n📋 *Detalhamento:*\n\n🏷️ *Alimentação → Padaria*: R$ 54,00\n   • Item 0: R$ 1,50 (01/10)\n   • Item 1: R$ 3,00 (02/10)\n   • Item 2: R$ 4,50 (03/10)\n   • Item 3: R$ 6,00 (04/10)\n   • Item 4: R$ 7,50 (05/10)\n   ... e mais 3 transação(ões)"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_categoria",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "quanto gastei com alimentação esse mês",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": "{\"period_type\": \"este_mes\", \"categoria\": \"alimentação\"}"
+    },
+    "category_rows": [
+     [
+      "Padaria do Zé",
+      -25.5,
+      "2026-10-07"
+     ],
+     [
+      "Mercado",
+      -180.0,
+      "2026-10-06"
+     ]
+    ]
+   },
+   "body": {
+    "texto": "quanto gastei com alimentação esse mês",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *GASTOS COM ALIMENTAÇÃO* ESTE MÊS (OUTUBRO/2026)\n\n💰 Total: *R$ 205,50*\n\n📋 Transações:\n• Padaria do Zé: R$ 25,50 (07/10)\n• Mercado: R$ 180,00 (06/10)\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_categoria_vazia",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "quanto gastei com saúde",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": "{\"period_type\": \"mes_passado\", \"categoria\": \"saúde\"}"
+    },
+    "category_rows": []
+   },
+   "body": {
+    "texto": "quanto gastei com saúde",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Você não gastou nada com 'saúde' no mês passado (Setembro/2026)! 🎉"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_categoria_muitos",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "quanto gastei com padaria",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": "{\"period_type\": \"ultimos_7_dias\", \"categoria\": \"padaria\"}"
+    },
+    "category_rows": [
+     [
+      "Item 0",
+      -1.5,
+      "2026-10-01"
+     ],
+     [
+      "Item 1",
+      -3.0,
+      "2026-10-02"
+     ],
+     [
+      "Item 2",
+      -4.5,
+      "2026-10-03"
+     ],
+     [
+      "Item 3",
+      -6.0,
+      "2026-10-04"
+     ],
+     [
+      "Item 4",
+      -7.5,
+      "2026-10-05"
+     ],
+     [
+      "Item 5",
+      -9.0,
+      "2026-10-06"
+     ],
+     [
+      "Item 6",
+      -10.5,
+      "2026-10-07"
+     ],
+     [
+      "Item 7",
+      -12.0,
+      "2026-10-01"
+     ],
+     [
+      "Extra 0",
+      -1.0,
+      "2026-10-01"
+     ],
+     [
+      "Extra 1",
+      -1.0,
+      "2026-10-01"
+     ],
+     [
+      "Extra 2",
+      -1.0,
+      "2026-10-01"
+     ],
+     [
+      "Extra 3",
+      -1.0,
+      "2026-10-01"
+     ],
+     [
+      "Extra 4",
+      -1.0,
+      "2026-10-01"
+     ]
+    ]
+   },
+   "body": {
+    "texto": "quanto gastei com padaria",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "💸 *GASTOS COM PADARIA* NOS ÚLTIMOS 7 DIAS (DESDE 01/10)\n\n💰 Total: *R$ 59,00*\n\n📋 Transações:\n• Item 0: R$ 1,50 (01/10)\n• Item 1: R$ 3,00 (02/10)\n• Item 2: R$ 4,50 (03/10)\n• Item 3: R$ 6,00 (04/10)\n• Item 4: R$ 7,50 (05/10)\n• Item 5: R$ 9,00 (06/10)\n• Item 6: R$ 10,50 (07/10)\n• Item 7: R$ 12,00 (01/10)\n• Extra 0: R$ 1,00 (01/10)\n• Extra 1: R$ 1,00 (01/10)\n\n... e mais 3 transação(ões)"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "periodo_cota_do_gemini",
+   "group": "012c",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "gastos",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Período",
+    "llm": {
+     "extract_period_query": {
+      "__raise__": "429 Quota exceeded"
+     }
+    }
+   },
+   "body": {
+    "texto": "gastos",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Ops! Algo deu errado. Por favor, tente novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Período",
+     "gemini_service.extract_period_query"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
   }
  ]
 }

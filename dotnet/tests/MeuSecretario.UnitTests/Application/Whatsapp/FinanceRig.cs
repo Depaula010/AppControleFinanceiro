@@ -3,11 +3,13 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Application.Automation;
+using MeuSecretario.Application.Bills;
 using MeuSecretario.Application.Categories;
 using MeuSecretario.Application.Transactions;
 using MeuSecretario.Application.Whatsapp;
 using MeuSecretario.Domain.Automation;
 using MeuSecretario.Domain.Transactions;
+using MeuSecretario.Domain.Whatsapp;
 using MeuSecretario.Infrastructure.Automation;
 using MeuSecretario.Infrastructure.Whatsapp;
 using MeuSecretario.UnitTests.TestSupport;
@@ -346,6 +348,98 @@ internal sealed class WorldSettler(FinanceWorld world) : IFixedBillSettler
     }
 }
 
+internal sealed class WorldQueryReader(FinanceWorld world) : IWhatsAppQueryReader
+{
+    private static DateOnly Day(string text) => DateOnly.ParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+    private static JsonElement.ArrayEnumerator Items(JsonElement? value) =>
+        value is { ValueKind: JsonValueKind.Array } list ? list.EnumerateArray() : default;
+
+    public Task<IReadOnlyList<AccountBalance>> GetBalancesAsync(int userId, int? accountId, CancellationToken cancellationToken)
+    {
+        world.Call("finance_service.get_saldo_contas");
+        return Task.FromResult<IReadOnlyList<AccountBalance>>(
+            [.. Items(world.Returned("finance_service.get_saldo_contas")).Select(a => new AccountBalance(
+                a.GetProperty("nome_conta").GetString()!, a.GetProperty("tipo_conta").GetString()!, a.GetProperty("saldo").GetDouble()))]);
+    }
+
+    public Task<IReadOnlyList<PotLine>> GetPotsAsync(int userId, DateOnly today, CancellationToken cancellationToken)
+    {
+        world.Call("finance_service.get_pote_status");
+        return Task.FromResult<IReadOnlyList<PotLine>>(
+            [.. Items(world.Returned("finance_service.get_pote_status")).Select(p => new PotLine(p[0].GetString()!, p[1].GetDouble(), p[2].GetDouble()))]);
+    }
+
+    public Task<IReadOnlyList<InvoiceSummary>> GetOpenInvoicesAsync(int userId, int? cardId, CancellationToken cancellationToken)
+    {
+        world.Call("finance_service.get_fatura_valor");
+        return Task.FromResult<IReadOnlyList<InvoiceSummary>>(
+            [.. Items(world.Returned("finance_service.get_fatura_valor")).Select(i => new InvoiceSummary(
+                i.GetProperty("nome_cartao").GetString()!, i.GetProperty("valor_fatura").GetDouble(),
+                Day(i.GetProperty("data_vencimento").GetString()!), i.GetProperty("status").GetString()!))]);
+    }
+
+    public Task<InvoiceDetail?> GetInvoiceDetailAsync(int userId, int cardId, CancellationToken cancellationToken)
+    {
+        world.Call("finance_service.get_fatura_detalhada");
+        if (world.Returned("finance_service.get_fatura_detalhada") is not { ValueKind: JsonValueKind.Object } d)
+        {
+            return Task.FromResult<InvoiceDetail?>(null);
+        }
+
+        return Task.FromResult<InvoiceDetail?>(new InvoiceDetail(
+            d.GetProperty("nome_cartao").GetString()!, d.GetProperty("valor_total").GetDouble(),
+            Day(d.GetProperty("data_vencimento").GetString()!), d.GetProperty("status").GetString()!,
+            [.. d.GetProperty("transacoes").EnumerateArray().Select(t => new InvoiceLine(
+                t.GetProperty("descricao").GetString()!, t.GetProperty("valor").GetDouble(), Day(t.GetProperty("data").GetString()!),
+                t.GetProperty("tipo_agendamento").GetString(), t.GetProperty("parcela_info").GetString()))]));
+    }
+
+    public Task<bool> UpdateInitialBalanceAsync(int userId, int accountId, decimal value, CancellationToken cancellationToken)
+    {
+        world.Call("finance_service.update_saldo_inicial");
+        return Task.FromResult(world.Returned("finance_service.update_saldo_inicial") is { ValueKind: JsonValueKind.True });
+    }
+
+    public Task<double> GetCategorySpendingAsync(int userId, string categoryName, DateOnly today, CancellationToken cancellationToken)
+    {
+        world.Call("finance_service.get_category_spending");
+        return Task.FromResult(world.Returned("finance_service.get_category_spending") is { ValueKind: JsonValueKind.Number } n ? n.GetDouble() : 0);
+    }
+
+    public Task<IReadOnlyList<PeriodExpense>> ListExpensesAsync(int userId, DateOnly start, DateOnly last, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<PeriodExpense>>(world.Config.TryGetProperty("period_rows", out var rows)
+            ? [.. rows.EnumerateArray().Select(r => new PeriodExpense(r[0].GetString()!, r[1].GetDouble(), r[2].GetString()!, Day(r[3].GetString()!), r[4].GetString()!))]
+            : []);
+
+    public Task<IReadOnlyList<CategoryExpense>> ListCategoryExpensesAsync(int userId, string category, DateOnly start, DateOnly last, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<CategoryExpense>>(world.Config.TryGetProperty("category_rows", out var rows)
+            ? [.. rows.EnumerateArray().Select(r => new CategoryExpense(r[0].GetString()!, r[1].GetDouble(), Day(r[2].GetString()!)))]
+            : []);
+}
+
+internal sealed class WorldReserve(FinanceWorld world) : IEmergencyReserveService
+{
+    public Task<EmergencyReserveStatus> GetStatusAsync(int userId, CancellationToken cancellationToken)
+    {
+        world.Call("finance_service.get_reserva_status");
+        var tuple = world.Returned("finance_service.get_reserva_status")!.Value.GetProperty("__tuple__");
+        return Task.FromResult(new EmergencyReserveStatus(tuple[0].GetDouble(), tuple[1].GetDouble(), tuple[2].GetInt32()));
+    }
+
+    public Task<IReadOnlyList<EmergencyReserveItem>> GetItemsAsync(int userId, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<EmergencyReserveItem>>(world.Config.TryGetProperty("reserve_items", out var items)
+            ? [.. items.EnumerateArray().Select((i, index) => new EmergencyReserveItem(
+                index, i.GetProperty("descricao").GetString()!, i.GetProperty("valor_previsto").GetDouble(), i.GetProperty("periodicidade").GetString()!,
+                i.GetProperty("categoria").GetString(), i.GetProperty("impacto").ValueKind == JsonValueKind.Null ? 0 : i.GetProperty("impacto").GetDouble()))]
+            : []);
+}
+
+internal sealed class NoopInvoices : MeuSecretario.Application.Transactions.IInvoiceService
+{
+    public Task EnsureCurrentAsync(int userId, int? cardAccountId, CancellationToken cancellationToken) => Task.CompletedTask;
+}
+
 internal sealed class FixedPendingIds : IPendingIdGenerator
 {
     public string NewId() => "ab12cd34";
@@ -378,6 +472,8 @@ internal sealed class FinanceRig
         var feedback = new WorldFeedback(World);
         var saver = new TransactionConfirmationSaver(new DirectPoster(posting), posting);
         var settler = new WorldSettler(World);
+        var queries = new WorldQueryReader(World);
+        var reserve = new WorldReserve(World);
 
         var steps = new List<IWhatsAppStep>
         {
@@ -393,6 +489,15 @@ internal sealed class FinanceRig
             new ExpenseIntent(Llm, reader, lookups, categorizer, resolver, invoices, pendingStore, clock),
             new TransferIntent(Llm, lookups, reader),
             new InvoicePaymentIntent(Llm, lookups, reader, posting, clock),
+            new BalanceIntent(Llm, lookups, reader, queries),
+            new ReserveIntent(reserve),
+            new ReserveDetailsIntent(reserve),
+            new PotsIntent(queries, clock),
+            new ListAccountsIntent(lookups),
+            new AdjustBalanceIntent(lookups, queries),
+            new InvoiceValueIntent(Llm, lookups, reader, new NoopInvoices(), queries),
+            new CategorySpendIntent(Llm, queries, clock),
+            new PeriodIntent(Llm, queries, clock),
         };
 
         Router = new IntentRouter(intents, new NullDiagnostics());
