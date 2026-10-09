@@ -1,6 +1,6 @@
 # Desvio 099 — Quitação por SMS: casar descrições sem diferenciar a caixa
 
-- **Estado:** proposto
+- **Estado:** aprovado (2026-10-09)
 - **Features afetadas:** 011, 012
 - **Severidade:** correção
 
@@ -20,4 +20,4 @@ Manter como está (paridade estrita), que é o que a feature 011 implementa até
 Aprovar (a 012, que compartilha o casamento no "Quitar Conta Fixa", ganha o mesmo comportamento).
 
 ## Decisão do Rafael
-(pendente)
+Aprovado em 2026-10-09 ("corrija da forma que achar melhor"; recomendação de decisoes-ondas-3-e-4.md).

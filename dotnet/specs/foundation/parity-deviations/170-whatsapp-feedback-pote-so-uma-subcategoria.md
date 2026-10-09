@@ -1,6 +1,6 @@
 # Desvio 170 — Feedback da transação soma só a subcategoria da transação no pote
 
-- **Estado:** proposto
+- **Estado:** aprovado (2026-10-09)
 - **Features afetadas:** 012
 - **Severidade:** correção
 
@@ -20,4 +20,4 @@ Manter como está (paridade estrita). **É o que a feature 012 implementa até a
 Aprovar.
 
 ## Decisão do Rafael
-(pendente)
+Aprovado em 2026-10-09 ("corrija da forma que achar melhor"; recomendação de decisoes-ondas-3-e-4.md).

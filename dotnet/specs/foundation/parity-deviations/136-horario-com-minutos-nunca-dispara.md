@@ -1,6 +1,6 @@
 # Desvio 136 — Horário com minutos nunca dispara (resumo matinal e check-in)
 
-- **Estado:** proposto
+- **Estado:** aprovado (2026-10-09)
 - **Features afetadas:** 013, 007
 - **Severidade:** correção
 
@@ -20,4 +20,4 @@ Comparar só a hora (docstring): quem escolhe `07:30` receberia às `07:00`. Ou 
 Aprovar o cron por minuto.
 
 ## Decisão do Rafael
-(pendente)
+Aprovado em 2026-10-09 ("corrija da forma que achar melhor"; recomendação de decisoes-ondas-3-e-4.md).

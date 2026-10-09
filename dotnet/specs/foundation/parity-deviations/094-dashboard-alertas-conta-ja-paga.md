@@ -1,6 +1,6 @@
 # Desvio 094 — Dashboard: alerta continua para a conta já paga no mês
 
-- **Estado:** proposto
+- **Estado:** aprovado (2026-10-09)
 - **Features afetadas:** 006
 - **Severidade:** correção
 
@@ -20,4 +20,4 @@ Manter como está (paridade estrita). **É o que a feature 006 implementa até h
 Aprovar (depende da regra do desvio 012 estar na base comum de agendamentos da 013).
 
 ## Decisão do Rafael
-(pendente)
+Aprovado em 2026-10-09 ("corrija da forma que achar melhor"; recomendação de decisoes-ondas-3-e-4.md).

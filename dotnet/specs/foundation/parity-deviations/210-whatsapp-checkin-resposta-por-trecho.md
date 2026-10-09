@@ -1,6 +1,6 @@
 # Desvio 210 — Resposta ao check-in procura "ok"/"sim"/"não" como trecho de qualquer palavra
 
-- **Estado:** proposto
+- **Estado:** aprovado (2026-10-09)
 - **Features afetadas:** 012, 013
 - **Severidade:** correção
 
@@ -20,4 +20,4 @@ Manter como está (paridade estrita), que é o que a 012d implementa e o harness
 Aprovar: é o único caminho em que texto ambíguo grava dinheiro sem o usuário dizer.
 
 ## Decisão do Rafael
-(pendente)
+Aprovado em 2026-10-09 ("corrija da forma que achar melhor"; recomendação de decisoes-ondas-3-e-4.md).

@@ -1,6 +1,6 @@
 # Desvio 130 — Check-in: fatura vencida derruba a mensagem do usuário
 
-- **Estado:** proposto
+- **Estado:** aprovado (2026-10-09)
 - **Features afetadas:** 013 (e 012, intenção "Contas atrasadas")
 - **Severidade:** correção
 
@@ -20,4 +20,4 @@ Manter como está (paridade estrita): o .NET lança `InvalidOperationException` 
 Aprovar, junto com o 131.
 
 ## Decisão do Rafael
-(pendente)
+Aprovado em 2026-10-09 ("corrija da forma que achar melhor"; recomendação de decisoes-ondas-3-e-4.md).

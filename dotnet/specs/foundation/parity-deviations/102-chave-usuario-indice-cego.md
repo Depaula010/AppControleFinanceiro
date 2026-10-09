@@ -20,4 +20,4 @@ Manter como está (paridade estrita): hoje há 1 usuário e o custo é irrelevan
 Decidir depois da virada.
 
 ## Decisão do Rafael
-(pendente)
+Adiado para depois da virada (2026-10-09); continua `proposto`, não implementado.

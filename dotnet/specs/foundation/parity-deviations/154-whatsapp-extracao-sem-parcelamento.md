@@ -20,4 +20,4 @@ Manter como está (paridade estrita), que é o que a 012 implementa (campos lido
 Aprovar.
 
 ## Decisão do Rafael
-(pendente)
+Adiado para depois da virada (2026-10-09); continua `proposto`, não implementado.

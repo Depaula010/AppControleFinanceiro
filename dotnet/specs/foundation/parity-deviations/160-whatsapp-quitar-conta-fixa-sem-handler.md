@@ -20,4 +20,4 @@ Manter como está (paridade estrita: o texto do prompt é contrato), que é o qu
 Aprovar rotear `Quitar Conta Fixa` para o fluxo de pagamento.
 
 ## Decisão do Rafael
-(pendente)
+Adiado para depois da virada (2026-10-09); continua `proposto`, não implementado.

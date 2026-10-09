@@ -1,6 +1,6 @@
 # Desvio 133 — Relatório mensal: formato numérico em inglês
 
-- **Estado:** proposto
+- **Estado:** aprovado (2026-10-09)
 - **Features afetadas:** 013
 - **Severidade:** correção
 
@@ -20,4 +20,4 @@ Manter como está (paridade estrita; implementado assim).
 Aprovar com o 132.
 
 ## Decisão do Rafael
-(pendente)
+Aprovado em 2026-10-09 ("corrija da forma que achar melhor"; recomendação de decisoes-ondas-3-e-4.md).

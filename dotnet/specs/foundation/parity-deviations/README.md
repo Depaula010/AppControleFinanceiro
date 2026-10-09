@@ -96,51 +96,52 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [086](086-endereco-preserva-coordenadas.md) | Endereço preserva coordenadas quando o texto não muda | correção | 007 | implementado |
 | [087](087-endereco-faixa-coordenadas.md) | Faixa de latitude e longitude | correção | 007 | implementado |
 | [088](088-api-keys-has-key-sem-preferencia.md) | has_key reflete chave sem linha de preferência | correção | 007 | implementado |
-| [089](089-dashboard-recentes-renda-vs-receita.md) | Dashboard: tipo Renda x Receita nas transações recentes | compatibilidade | 006 | proposto |
-| [090](090-dashboard-janela-gastos-mensais.md) | Dashboard: janela dos gastos mensais começa no meio de um mês | correção | 006 | proposto |
-| [091](091-dashboard-ordem-gastos-mensais.md) | Dashboard: gastos mensais em ordem decrescente de mês | correção | 006 | proposto |
-| [092](092-dashboard-top-categorias-invertido.md) | Dashboard: top 10 de categorias devolve as de menor gasto | correção | 006 | proposto |
-| [093](093-dashboard-alertas-data-inicio.md) | Dashboard: alertas MENSAL e ANUAL ignoram data_inicio | correção | 006 | proposto |
-| [094](094-dashboard-alertas-conta-ja-paga.md) | Dashboard: alerta continua para a conta já paga no mês | correção | 006 | proposto |
-| [095](095-dashboard-alertas-receita.md) | Dashboard: receita aparece como conta a vencer | correção | 006 | proposto |
-| [096](096-sms-chamada-inutil-gemini.md) | SMS: remover a chamada inútil ao Gemini | correção | 011 | proposto |
-| [097](097-automacao-entradas-invalidas-400.md) | Rotas de automação: entradas inválidas viram 400 com mensagem | correção | 011 | proposto |
-| [098](098-sms-valor-pago-texto.md) | SMS: valor_pago como texto numérico deve funcionar | correção | 011 | proposto |
-| [099](099-quitacao-casamento-sem-caixa.md) | Quitação por SMS: casar descrições sem diferenciar a caixa | correção | 011, 012 | proposto |
-| [100](100-confirmacao-emoji-cartao.md) | Confirmação de transação: restaurar o emoji do cartão | correção | 011, 012 | proposto |
-| [101](101-reprocessar-isola-erro-por-agendamento.md) | Reprocessar fatura: isolar o erro de cada agendamento | correção | 011 | proposto |
+| [089](089-dashboard-recentes-renda-vs-receita.md) | Dashboard: tipo Renda x Receita nas transações recentes | compatibilidade | 006 | rejeitado |
+| [090](090-dashboard-janela-gastos-mensais.md) | Dashboard: janela dos gastos mensais começa no meio de um mês | correção | 006 | aprovado |
+| [091](091-dashboard-ordem-gastos-mensais.md) | Dashboard: gastos mensais em ordem decrescente de mês | correção | 006 | aprovado |
+| [092](092-dashboard-top-categorias-invertido.md) | Dashboard: top 10 de categorias devolve as de menor gasto | correção | 006 | aprovado |
+| [093](093-dashboard-alertas-data-inicio.md) | Dashboard: alertas MENSAL e ANUAL ignoram data_inicio | correção | 006 | aprovado |
+| [094](094-dashboard-alertas-conta-ja-paga.md) | Dashboard: alerta continua para a conta já paga no mês | correção | 006 | aprovado |
+| [095](095-dashboard-alertas-receita.md) | Dashboard: receita aparece como conta a vencer | correção | 006 | aprovado |
+| [096](096-sms-chamada-inutil-gemini.md) | SMS: remover a chamada inútil ao Gemini | correção | 011 | aprovado |
+| [097](097-automacao-entradas-invalidas-400.md) | Rotas de automação: entradas inválidas viram 400 com mensagem | correção | 011 | aprovado |
+| [098](098-sms-valor-pago-texto.md) | SMS: valor_pago como texto numérico deve funcionar | correção | 011 | aprovado |
+| [099](099-quitacao-casamento-sem-caixa.md) | Quitação por SMS: casar descrições sem diferenciar a caixa | correção | 011, 012 | aprovado |
+| [100](100-confirmacao-emoji-cartao.md) | Confirmação de transação: restaurar o emoji do cartão | correção | 011, 012 | aprovado |
+| [101](101-reprocessar-isola-erro-por-agendamento.md) | Reprocessar fatura: isolar o erro de cada agendamento | correção | 011 | aprovado |
 | [102](102-chave-usuario-indice-cego.md) | Chave do atalho: índice cego e cabeçalho | segurança | 011 | proposto |
-| [120](120-calendar-alerts-tipos-do-corpo.md) | Alertas de calendário: tipos do corpo de /config e /ativar | correção | 014 | proposto |
-| [121](121-calendar-alerts-janela-30s.md) | Alertas de calendário: janela de ±30 s perde o aviso se o ciclo atrasa | correção | 014 | proposto |
-| [122](122-calendar-alerts-usuario-inativo.md) | Alertas de calendário: usuário inativo ainda recebe alertas | correção | 014 | proposto |
-| [130](130-checkin-fatura-vencida-derruba-mensagem.md) | Check-in: fatura vencida derruba a mensagem do usuário | correção | 013, 012 | proposto |
-| [131](131-faturas-fechadas-fora-dos-alertas.md) | Faturas `Fechada` ficam fora dos alertas de vencimento | correção | 013, 012 | proposto |
-| [132](132-relatorio-mensal-sinal-das-despesas.md) | Relatório mensal: sinal das despesas | correção | 013, 009 | proposto |
-| [133](133-relatorio-mensal-formato-numerico.md) | Relatório mensal: formato numérico em inglês | correção | 013 | proposto |
-| [134](134-motor-dia-29-a-31-em-mes-curto.md) | Motor: agendamento de dia 29 a 31 não dispara em mês curto | correção | 013, 005 | proposto |
-| [135](135-populador-lembrete-variavel-vira-despesa.md) | Populador de fatura lança `LEMBRETE_VARIAVEL` como despesa | correção | 013, 004, 011 | proposto |
-| [136](136-horario-com-minutos-nunca-dispara.md) | Horário com minutos nunca dispara (resumo matinal e check-in) | correção | 013, 007 | proposto |
-| [137](137-resumo-sem-google-suprime-alertas-financeiros.md) | Resumo matinal sem Google suprime os alertas financeiros | correção | 013 | proposto |
-| [138](138-resumo-matinal-chave-do-usuario.md) | Resumo matinal usa a chave do usuário | correção | 013, 008, 010 | proposto |
-| [139](139-checkin-nao-confere-envio.md) | Check-in não confere o envio e deixa a sessão ativa | correção | 013, 012 | proposto |
-| [150](150-whatsapp-confirmacao-sem-descricao.md) | Confirmar despesa/renda por WhatsApp falha quando não há agendamento | correção | 012 | proposto |
-| [151](151-whatsapp-transferencia-quebrada.md) | Transferência por WhatsApp falha sempre | correção | 012 | proposto |
-| [152](152-whatsapp-notificacoes-gemini-500.md) | Configurar Notificações pelo ramo do Gemini grava e responde 500 | correção | 012 | proposto |
-| [153](153-whatsapp-api-key-cifrada.md) | Solicitar API Key devolve o valor cru da coluna | correção | 012 | proposto |
+| [120](120-calendar-alerts-tipos-do-corpo.md) | Alertas de calendário: tipos do corpo de /config e /ativar | correção | 014 | aprovado |
+| [121](121-calendar-alerts-janela-30s.md) | Alertas de calendário: janela de ±30 s perde o aviso se o ciclo atrasa | correção | 014 | aprovado |
+| [122](122-calendar-alerts-usuario-inativo.md) | Alertas de calendário: usuário inativo ainda recebe alertas | correção | 014 | aprovado |
+| [130](130-checkin-fatura-vencida-derruba-mensagem.md) | Check-in: fatura vencida derruba a mensagem do usuário | correção | 013, 012 | aprovado |
+| [131](131-faturas-fechadas-fora-dos-alertas.md) | Faturas `Fechada` ficam fora dos alertas de vencimento | correção | 013, 012 | aprovado |
+| [132](132-relatorio-mensal-sinal-das-despesas.md) | Relatório mensal: sinal das despesas | correção | 013, 009 | aprovado |
+| [133](133-relatorio-mensal-formato-numerico.md) | Relatório mensal: formato numérico em inglês | correção | 013 | aprovado |
+| [134](134-motor-dia-29-a-31-em-mes-curto.md) | Motor: agendamento de dia 29 a 31 não dispara em mês curto | correção | 013, 005 | aprovado |
+| [135](135-populador-lembrete-variavel-vira-despesa.md) | Populador de fatura lança `LEMBRETE_VARIAVEL` como despesa | correção | 013, 004, 011 | aprovado |
+| [136](136-horario-com-minutos-nunca-dispara.md) | Horário com minutos nunca dispara (resumo matinal e check-in) | correção | 013, 007 | aprovado |
+| [137](137-resumo-sem-google-suprime-alertas-financeiros.md) | Resumo matinal sem Google suprime os alertas financeiros | correção | 013 | aprovado |
+| [138](138-resumo-matinal-chave-do-usuario.md) | Resumo matinal usa a chave do usuário | correção | 013, 008, 010 | aprovado |
+| [139](139-checkin-nao-confere-envio.md) | Check-in não confere o envio e deixa a sessão ativa | correção | 013, 012 | aprovado |
+| [150](150-whatsapp-confirmacao-sem-descricao.md) | Confirmar despesa/renda por WhatsApp falha quando não há agendamento | correção | 012 | aprovado |
+| [151](151-whatsapp-transferencia-quebrada.md) | Transferência por WhatsApp falha sempre | correção | 012 | aprovado |
+| [152](152-whatsapp-notificacoes-gemini-500.md) | Configurar Notificações pelo ramo do Gemini grava e responde 500 | correção | 012 | aprovado |
+| [153](153-whatsapp-api-key-cifrada.md) | Solicitar API Key devolve o valor cru da coluna | correção | 012 | aprovado |
 | [154](154-whatsapp-extracao-sem-parcelamento.md) | A extração de despesa e renda não pede data, conta, categoria nem parcelamento | correção | 012 | proposto |
-| [155](155-whatsapp-evento-pendente-mais-recente.md) | Evento pendente "mais recente" depende da ordem do KEYS | correção | 012 | proposto |
-| [156](156-whatsapp-origem-rota-sem-tratamento.md) | Resposta casa/trabalho/outro à pergunta de origem da rota não é tratada | correção | 012 | proposto |
+| [155](155-whatsapp-evento-pendente-mais-recente.md) | Evento pendente "mais recente" depende da ordem do KEYS | correção | 012 | aprovado |
+| [156](156-whatsapp-origem-rota-sem-tratamento.md) | Resposta casa/trabalho/outro à pergunta de origem da rota não é tratada | correção | 012 | aprovado |
 | [157](157-whatsapp-pagamento-fatura-inalcancavel.md) | Pagamento Fatura é inalcançável com "paguei..." | compatibilidade | 012 | proposto |
-| [158](158-whatsapp-analise-previsao-valores-negativos-e-erros.md) | Análise e previsão: valores negativos, desempate aleatório e KeyError sem histórico | correção | 012 | proposto |
-| [159](159-whatsapp-drive-erro-especifico.md) | Upload ao Drive: o motivo específico da falha nunca é mostrado | correção | 012 | proposto |
+| [158](158-whatsapp-analise-previsao-valores-negativos-e-erros.md) | Análise e previsão: valores negativos, desempate aleatório e KeyError sem histórico | correção | 012 | aprovado |
+| [159](159-whatsapp-drive-erro-especifico.md) | Upload ao Drive: o motivo específico da falha nunca é mostrado | correção | 012 | aprovado |
 | [160](160-whatsapp-quitar-conta-fixa-sem-handler.md) | Quitar Conta Fixa está no prompt do Gemini mas não tem ramo | correção | 012 | proposto |
-| [161](161-whatsapp-vencimentos-sem-filtro-de-usuario.md) | Vencimentos comparam a descrição sem filtrar o usuário | correção | 012 | proposto |
-| [170](170-whatsapp-feedback-pote-so-uma-subcategoria.md) | Feedback da transação soma só a subcategoria da transação no pote | correção | 012 | proposto |
-| [190](190-whatsapp-desativar-notificacao-vira-ativar.md) | Desativar resumo matinal ou check-in por WhatsApp ativa | correção | 012 | proposto |
-| [191](191-whatsapp-notificacoes-contas-vencer-metodo-inexistente.md) | Configurar Notificações (Gemini, contas_vencer) chama método que não existe | correção | 012 | proposto |
-| [192](192-whatsapp-deletar-evento-quando-qualquer-valor-vira-amanha.md) | Deletar Evento: qualquer valor de `quando` diferente de `hoje` vira amanhã | correção | 012 | proposto |
-| [210](210-whatsapp-checkin-resposta-por-trecho.md) | Resposta ao check-in procura "ok"/"sim"/"não" como trecho de qualquer palavra | correção | 012, 013 | proposto |
-| [230](230-whatsapp-grafico-periodo-sem-validacao.md) | Gráfico de Gastos: período sem validação do tipo e da faixa | correção | 012 | proposto |
-| [231](231-whatsapp-grafico-saldo-e-filtros.md) | Gráficos: saldo da linha ignora o histórico anterior ao período e filtros inconsistentes | correção | 012 | proposto |
-| [232](232-whatsapp-comparacao-mensal-sinal-e-formato.md) | Comparação Mensal: totais negativos, variação invertida e números em formato inglês | correção | 012 | proposto |
-| [233](233-whatsapp-analise-maiores-gastos-invertidos.md) | Análise Inteligente: "Maiores gastos" lista os menores e os dias da semana saem em inglês | correção | 012 | proposto |
+| [161](161-whatsapp-vencimentos-sem-filtro-de-usuario.md) | Vencimentos comparam a descrição sem filtrar o usuário | correção | 012 | aprovado |
+| [170](170-whatsapp-feedback-pote-so-uma-subcategoria.md) | Feedback da transação soma só a subcategoria da transação no pote | correção | 012 | aprovado |
+| [190](190-whatsapp-desativar-notificacao-vira-ativar.md) | Desativar resumo matinal ou check-in por WhatsApp ativa | correção | 012 | aprovado |
+| [191](191-whatsapp-notificacoes-contas-vencer-metodo-inexistente.md) | Configurar Notificações (Gemini, contas_vencer) chama método que não existe | correção | 012 | aprovado |
+| [192](192-whatsapp-deletar-evento-quando-qualquer-valor-vira-amanha.md) | Deletar Evento: qualquer valor de `quando` diferente de `hoje` vira amanhã | correção | 012 | aprovado |
+| [210](210-whatsapp-checkin-resposta-por-trecho.md) | Resposta ao check-in procura "ok"/"sim"/"não" como trecho de qualquer palavra | correção | 012, 013 | aprovado |
+| [230](230-whatsapp-grafico-periodo-sem-validacao.md) | Gráfico de Gastos: período sem validação do tipo e da faixa | correção | 012 | aprovado |
+| [231](231-whatsapp-grafico-saldo-e-filtros.md) | Gráficos: saldo da linha ignora o histórico anterior ao período e filtros inconsistentes | correção | 012 | aprovado |
+| [232](232-whatsapp-comparacao-mensal-sinal-e-formato.md) | Comparação Mensal: totais negativos, variação invertida e números em formato inglês | correção | 012 | aprovado |
+| [233](233-whatsapp-analise-maiores-gastos-invertidos.md) | Análise Inteligente: "Maiores gastos" lista os menores e os dias da semana saem em inglês | correção | 012 | aprovado |
+| [250](250-dias-antes-vencimento-coluna-propria.md) | daysBeforeDue em coluna própria | correção | 007, 013 | aprovado |

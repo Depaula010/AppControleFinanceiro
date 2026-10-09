@@ -1,6 +1,6 @@
 # Desvio 135 — Populador de fatura lança `LEMBRETE_VARIAVEL` como despesa
 
-- **Estado:** proposto
+- **Estado:** aprovado (2026-10-09)
 - **Features afetadas:** 013, 004, 011
 - **Severidade:** correção (decisão de produto)
 
@@ -20,4 +20,4 @@ Manter como está (paridade estrita; implementado assim).
 Decisão de produto do Rafael: confirmar qual era a intenção.
 
 ## Decisão do Rafael
-(pendente)
+Aprovado em 2026-10-09 ("corrija da forma que achar melhor"; recomendação de decisoes-ondas-3-e-4.md).

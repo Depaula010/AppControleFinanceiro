@@ -1,6 +1,6 @@
 # Desvio 155 — Evento pendente "mais recente" depende da ordem do KEYS
 
-- **Estado:** proposto
+- **Estado:** aprovado (2026-10-09)
 - **Features afetadas:** 012
 - **Severidade:** correção
 
@@ -20,4 +20,4 @@ Manter como está (paridade estrita), que é o que a 012 implementa.
 Aprovar (ponteiro `last_pending_event`, mesmo padrão de `last_pending`).
 
 ## Decisão do Rafael
-(pendente)
+Aprovado em 2026-10-09 ("corrija da forma que achar melhor"; recomendação de decisoes-ondas-3-e-4.md).

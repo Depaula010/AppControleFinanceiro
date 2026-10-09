@@ -1,6 +1,6 @@
 # Desvio 132 — Relatório mensal: sinal das despesas
 
-- **Estado:** proposto
+- **Estado:** aprovado (2026-10-09)
 - **Features afetadas:** 013, 009c (`test-monthly-report`)
 - **Severidade:** correção
 
@@ -20,4 +20,4 @@ Manter como está (paridade estrita; implementado assim).
 Aprovar **antes** de ligar `JOBS_ENABLED` em produção.
 
 ## Decisão do Rafael
-(pendente)
+Aprovado em 2026-10-09 ("corrija da forma que achar melhor"; recomendação de decisoes-ondas-3-e-4.md).

@@ -1,6 +1,6 @@
 # Desvio 089 — Dashboard: tipo Renda x Receita nas transações recentes
 
-- **Estado:** proposto
+- **Estado:** rejeitado (2026-10-09)
 - **Features afetadas:** 006
 - **Severidade:** compatibilidade
 
@@ -20,4 +20,4 @@ Manter como está (paridade estrita). **É o que a feature 006 implementa até h
 (a): manter `Renda` nas recentes até o front mudar.
 
 ## Decisão do Rafael
-(pendente)
+Rejeitado em 2026-10-09: manter `Renda` até o Angular mudar a comparação.
