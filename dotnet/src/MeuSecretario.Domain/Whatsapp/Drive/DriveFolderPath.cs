@@ -93,6 +93,12 @@ public static class PyBase64
     /// </summary>
     public static byte[]? TryDecode(string text)
     {
+        // str.encode('ascii') acontece antes de decodificar: qualquer caractere fora do ASCII, em qualquer posição, recusa.
+        if (text.Any(ch => ch > 0x7f))
+        {
+            return null;
+        }
+
         var result = new List<byte>();
         var buffer = 0;
         var quad = 0;
@@ -100,11 +106,6 @@ public static class PyBase64
 
         foreach (var ch in text)
         {
-            if (ch > 0x7f)
-            {
-                return null;
-            }
-
             if (ch == '=')
             {
                 if (quad >= 2 && quad + ++pads >= 4)

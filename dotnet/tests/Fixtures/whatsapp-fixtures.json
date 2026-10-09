@@ -9551,5 +9551,2346 @@
    "contexto": "",
    "text": "🗓️ *Horários Livres*\n\n📅 *Sábado, 10/10*\n⭐ 09:00-10:00 _Dia livre_"
   }
+ ],
+ "location_cases": [
+  {
+   "name": "minusculo",
+   "gemini": {
+    "cidade": "Belo Horizonte",
+    "estado": "mg"
+   },
+   "setup": {},
+   "success": true,
+   "message": "✅ 📍 Localização configurada: Belo Horizonte, MG\n\nAgora você receberá informações de clima nos resumos matinais!",
+   "state": {
+    "report": null,
+    "location": {
+     "cidade": "Belo Horizonte",
+     "estado": "MG"
+    },
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "normal",
+   "gemini": {
+    "cidade": "São Paulo",
+    "estado": "SP"
+   },
+   "setup": {},
+   "success": true,
+   "message": "✅ 📍 Localização configurada: São Paulo, SP\n\nAgora você receberá informações de clima nos resumos matinais!",
+   "state": {
+    "report": null,
+    "location": {
+     "cidade": "São Paulo",
+     "estado": "SP"
+    },
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "sem_estado",
+   "gemini": {
+    "cidade": "Rio de Janeiro",
+    "estado": null
+   },
+   "setup": {},
+   "success": true,
+   "message": "✅ 📍 Localização configurada: Rio de Janeiro\n\nAgora você receberá informações de clima nos resumos matinais!",
+   "state": {
+    "report": null,
+    "location": {
+     "cidade": "Rio de Janeiro",
+     "estado": null
+    },
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "estado_ausente",
+   "gemini": {
+    "cidade": "Curitiba"
+   },
+   "setup": {},
+   "success": true,
+   "message": "✅ 📍 Localização configurada: Curitiba\n\nAgora você receberá informações de clima nos resumos matinais!",
+   "state": {
+    "report": null,
+    "location": {
+     "cidade": "Curitiba",
+     "estado": null
+    },
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "cidade_so_espacos",
+   "gemini": {
+    "cidade": "   ",
+    "estado": "SP"
+   },
+   "setup": {},
+   "success": true,
+   "message": "❌ Cidade inválida",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "sem_cidade",
+   "gemini": {
+    "cidade": null,
+    "estado": "SP"
+   },
+   "setup": {},
+   "success": false,
+   "message": "❌ Não consegui identificar a cidade.\n\nPor favor, envie no formato:\n\"Configurar localização: São Paulo, SP\"",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "estado_longo",
+   "gemini": {
+    "cidade": "Recife",
+    "estado": "PEE"
+   },
+   "setup": {},
+   "success": true,
+   "message": "❌ Estado deve ter 2 letras (ex: SP, RJ, MG)",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "estado_vazio",
+   "gemini": {
+    "cidade": "Recife",
+    "estado": ""
+   },
+   "setup": {},
+   "success": true,
+   "message": "✅ 📍 Localização configurada: Recife\n\nAgora você receberá informações de clima nos resumos matinais!",
+   "state": {
+    "report": null,
+    "location": {
+     "cidade": "Recife",
+     "estado": ""
+    },
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "estado_com_espacos",
+   "gemini": {
+    "cidade": "  Recife  ",
+    "estado": " pe "
+   },
+   "setup": {},
+   "success": true,
+   "message": "✅ 📍 Localização configurada: Recife, PE\n\nAgora você receberá informações de clima nos resumos matinais!",
+   "state": {
+    "report": null,
+    "location": {
+     "cidade": "Recife",
+     "estado": "PE"
+    },
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "estado_espaco",
+   "gemini": {
+    "cidade": "Recife",
+    "estado": "  "
+   },
+   "setup": {},
+   "success": true,
+   "message": "❌ Estado deve ter 2 letras (ex: SP, RJ, MG)",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "cidade_numero",
+   "gemini": {
+    "cidade": 5,
+    "estado": "SP"
+   },
+   "setup": {},
+   "success": false,
+   "message": "❌ Ops! Algo deu errado. Por favor, tente novamente.",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "estado_numero",
+   "gemini": {
+    "cidade": "Recife",
+    "estado": 5
+   },
+   "setup": {},
+   "success": false,
+   "message": "❌ Ops! Algo deu errado. Por favor, tente novamente.",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "banco_falha",
+   "gemini": {
+    "cidade": "Recife",
+    "estado": "PE"
+   },
+   "setup": {
+    "fail_location": true
+   },
+   "success": true,
+   "message": "❌ Erro ao salvar localização: boom segredo",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  }
+ ],
+ "report_cases": [
+  {
+   "name": "consultar_sem_config",
+   "gemini": {
+    "acao": "consultar",
+    "momento_envio": null,
+    "hora_envio": null
+   },
+   "setup": {},
+   "success": true,
+   "message": "📊 *CONFIGURAÇÃO DO RELATÓRIO MENSAL*\n\nStatus: ✅ Ativo\nMomento: Início do mês (dia 1)\nHorário: 08:00\n\n_Para alterar, envie: 'configurar relatório mensal no início do mês às 10h'_",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "INICIO_MES",
+     "hora": "08:00:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "consultar_ativo_inicio",
+   "gemini": {
+    "acao": "consultar"
+   },
+   "setup": {
+    "report": [
+     true,
+     "INICIO_MES",
+     "08:00:00"
+    ]
+   },
+   "success": true,
+   "message": "📊 *CONFIGURAÇÃO DO RELATÓRIO MENSAL*\n\nStatus: ✅ Ativo\nMomento: Início do mês (dia 1)\nHorário: 08:00\n\n_Para alterar, envie: 'configurar relatório mensal no início do mês às 10h'_",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "INICIO_MES",
+     "hora": "08:00:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "consultar_desativado_fim",
+   "gemini": {
+    "acao": "consultar"
+   },
+   "setup": {
+    "report": [
+     false,
+     "FIM_MES",
+     "10:30:00"
+    ]
+   },
+   "success": true,
+   "message": "📊 *CONFIGURAÇÃO DO RELATÓRIO MENSAL*\n\nStatus: ❌ Desativado\nMomento: Fim do mês (último dia)\nHorário: 10:30\n\n_Para alterar, envie: 'configurar relatório mensal no início do mês às 10h'_",
+   "state": {
+    "report": {
+     "ativo": false,
+     "momento": "FIM_MES",
+     "hora": "10:30:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "ativar_simples",
+   "gemini": {
+    "acao": "ativar",
+    "momento_envio": null,
+    "hora_envio": null
+   },
+   "setup": {
+    "report": [
+     false,
+     "FIM_MES",
+     "10:30:00"
+    ]
+   },
+   "success": true,
+   "message": "✅ *Relatório mensal ativado!*\n\n📅 Momento: fim do mês (último dia)\n🕐 Horário: 10:30\n\n📊 *O que você vai receber:*\n• Gastos totais do mês\n• Top 5 categorias\n• Comparação com mês anterior\n• Status dos potes de gastos\n• Contas pagas vs pendentes\n• Gráfico de pizza com categorias\n\n_Você receberá automaticamente no horário configurado!_",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "FIM_MES",
+     "hora": "10:30:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "ativar_com_dados",
+   "gemini": {
+    "acao": "ativar",
+    "momento_envio": "INICIO_MES",
+    "hora_envio": "14:00"
+   },
+   "setup": {
+    "report": [
+     false,
+     "FIM_MES",
+     "10:30:00"
+    ]
+   },
+   "success": true,
+   "message": "✅ *Relatório mensal ativado!*\n\n📅 Momento: início do mês (dia 1)\n🕐 Horário: 14:00\n\n📊 *O que você vai receber:*\n• Gastos totais do mês\n• Top 5 categorias\n• Comparação com mês anterior\n• Status dos potes de gastos\n• Contas pagas vs pendentes\n• Gráfico de pizza com categorias\n\n_Você receberá automaticamente no horário configurado!_",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "INICIO_MES",
+     "hora": "14:00:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "ativar_sem_config",
+   "gemini": {
+    "acao": "ativar"
+   },
+   "setup": {},
+   "success": true,
+   "message": "✅ *Relatório mensal ativado!*\n\n📅 Momento: início do mês (dia 1)\n🕐 Horário: 08:00\n\n📊 *O que você vai receber:*\n• Gastos totais do mês\n• Top 5 categorias\n• Comparação com mês anterior\n• Status dos potes de gastos\n• Contas pagas vs pendentes\n• Gráfico de pizza com categorias\n\n_Você receberá automaticamente no horário configurado!_",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "INICIO_MES",
+     "hora": "08:00:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "desativar",
+   "gemini": {
+    "acao": "desativar"
+   },
+   "setup": {
+    "report": [
+     true,
+     "INICIO_MES",
+     "08:00:00"
+    ]
+   },
+   "success": true,
+   "message": "✅ Relatório mensal desativado com sucesso!\n\n_Para reativar, envie: 'ativar relatório mensal'_",
+   "state": {
+    "report": {
+     "ativo": false,
+     "momento": "INICIO_MES",
+     "hora": "08:00:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "configurar_hora",
+   "gemini": {
+    "acao": "configurar",
+    "momento_envio": null,
+    "hora_envio": "14:00"
+   },
+   "setup": {
+    "report": [
+     true,
+     "INICIO_MES",
+     "08:00:00"
+    ]
+   },
+   "success": true,
+   "message": "✅ *Configuração atualizada!*\n\n📅 Momento: início do mês (dia 1)\n🕐 Horário: 14:00\n\nO relatório será enviado automaticamente no horário configurado.",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "INICIO_MES",
+     "hora": "14:00:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "configurar_hora_com_segundos",
+   "gemini": {
+    "acao": "configurar",
+    "hora_envio": "8:30:00"
+   },
+   "setup": {
+    "report": [
+     true,
+     "INICIO_MES",
+     "08:00:00"
+    ]
+   },
+   "success": true,
+   "message": "✅ *Configuração atualizada!*\n\n📅 Momento: início do mês (dia 1)\n🕐 Horário: 08:30\n\nO relatório será enviado automaticamente no horário configurado.",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "INICIO_MES",
+     "hora": "08:30:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "configurar_momento",
+   "gemini": {
+    "acao": "configurar",
+    "momento_envio": "FIM_MES",
+    "hora_envio": null
+   },
+   "setup": {
+    "report": [
+     true,
+     "INICIO_MES",
+     "08:00:00"
+    ]
+   },
+   "success": true,
+   "message": "✅ *Configuração atualizada!*\n\n📅 Momento: fim do mês (último dia)\n🕐 Horário: 08:00\n\nO relatório será enviado automaticamente no horário configurado.",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "FIM_MES",
+     "hora": "08:00:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "configurar_nada",
+   "gemini": {
+    "acao": "configurar",
+    "momento_envio": null,
+    "hora_envio": null
+   },
+   "setup": {
+    "report": [
+     true,
+     "INICIO_MES",
+     "08:00:00"
+    ]
+   },
+   "success": true,
+   "message": "❌ Não entendi o que você quer configurar.\n\nExemplos:\n• 'quero receber no início do mês às 8h'\n• 'mudar hora do relatório para 14:00'\n• 'receber no fim do mês'",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "INICIO_MES",
+     "hora": "08:00:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "momento_invalido",
+   "gemini": {
+    "acao": "configurar",
+    "momento_envio": "MEIO_MES"
+   },
+   "setup": {
+    "report": [
+     true,
+     "INICIO_MES",
+     "08:00:00"
+    ]
+   },
+   "success": false,
+   "message": "❌ Ops! Algo deu errado. Por favor, tente novamente.",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "INICIO_MES",
+     "hora": "08:00:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "hora_invalida",
+   "gemini": {
+    "acao": "configurar",
+    "hora_envio": "25:00"
+   },
+   "setup": {
+    "report": [
+     true,
+     "INICIO_MES",
+     "08:00:00"
+    ]
+   },
+   "success": false,
+   "message": "❌ Ops! Algo deu errado. Por favor, tente novamente.",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "INICIO_MES",
+     "hora": "08:00:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "hora_de_um_digito",
+   "gemini": {
+    "acao": "configurar",
+    "hora_envio": "8:30"
+   },
+   "setup": {
+    "report": [
+     true,
+     "INICIO_MES",
+     "08:00:00"
+    ]
+   },
+   "success": false,
+   "message": "❌ Ops! Algo deu errado. Por favor, tente novamente.",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "INICIO_MES",
+     "hora": "08:00:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "hora_segundos_61",
+   "gemini": {
+    "acao": "configurar",
+    "hora_envio": "08:00:61"
+   },
+   "setup": {
+    "report": [
+     true,
+     "INICIO_MES",
+     "08:00:00"
+    ]
+   },
+   "success": false,
+   "message": "❌ Ops! Algo deu errado. Por favor, tente novamente.",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "INICIO_MES",
+     "hora": "08:00:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "hora_numero",
+   "gemini": {
+    "acao": "configurar",
+    "hora_envio": 8
+   },
+   "setup": {
+    "report": [
+     true,
+     "INICIO_MES",
+     "08:00:00"
+    ]
+   },
+   "success": false,
+   "message": "❌ Ops! Algo deu errado. Por favor, tente novamente.",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "INICIO_MES",
+     "hora": "08:00:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "acao_desconhecida",
+   "gemini": {
+    "acao": "apagar"
+   },
+   "setup": {
+    "report": [
+     true,
+     "INICIO_MES",
+     "08:00:00"
+    ]
+   },
+   "success": true,
+   "message": "❌ Não entendi a ação desejada.\n\nExemplos:\n• 'ativar relatório mensal'\n• 'desativar relatório mensal'\n• 'configurar relatório mensal às 10h'\n• 'como está configurado meu relatório?'",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "INICIO_MES",
+     "hora": "08:00:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "acao_nula",
+   "gemini": {
+    "acao": null
+   },
+   "setup": {
+    "report": [
+     true,
+     "INICIO_MES",
+     "08:00:00"
+    ]
+   },
+   "success": true,
+   "message": "❌ Não entendi a ação desejada.\n\nExemplos:\n• 'ativar relatório mensal'\n• 'desativar relatório mensal'\n• 'configurar relatório mensal às 10h'\n• 'como está configurado meu relatório?'",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "INICIO_MES",
+     "hora": "08:00:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "sem_chaves",
+   "gemini": {},
+   "setup": {
+    "report": [
+     true,
+     "INICIO_MES",
+     "08:00:00"
+    ]
+   },
+   "success": true,
+   "message": "❌ Não entendi a ação desejada.\n\nExemplos:\n• 'ativar relatório mensal'\n• 'desativar relatório mensal'\n• 'configurar relatório mensal às 10h'\n• 'como está configurado meu relatório?'",
+   "state": {
+    "report": {
+     "ativo": true,
+     "momento": "INICIO_MES",
+     "hora": "08:00:00"
+    },
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  }
+ ],
+ "apikey_cases": [
+  {
+   "name": "com_chave",
+   "gemini": null,
+   "setup": {
+    "user": {
+     "api_key": "chave-ficticia-0123456789",
+     "nome": "Ana"
+    }
+   },
+   "success": true,
+   "message": "🔑 *Sua API Key*\n\nOlá Ana!\n\nSua chave de acesso:\n`chave-ficticia-0123456789`\n\n⚠️ *Importante:*\n• Não compartilhe esta chave com ninguém\n• Use-a para configurar automações no iPhone\n• Esta chave dá acesso total à sua conta\n\n📱 *Para usar no iPhone:*\n1. Copie a chave acima\n2. No atalho, cole no campo `user_api_key`\n3. Teste enviando um gasto!\n\n💡 *Endpoint:*\n`POST /api/transacao`",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "sem_nome",
+   "gemini": null,
+   "setup": {
+    "user": {
+     "api_key": "chave-ficticia-0123456789",
+     "nome": ""
+    }
+   },
+   "success": true,
+   "message": "🔑 *Sua API Key*\n\nSua chave de acesso:\n`chave-ficticia-0123456789`\n\n⚠️ *Importante:*\n• Não compartilhe esta chave com ninguém\n• Use-a para configurar automações no iPhone\n• Esta chave dá acesso total à sua conta\n\n📱 *Para usar no iPhone:*\n1. Copie a chave acima\n2. No atalho, cole no campo `user_api_key`\n3. Teste enviando um gasto!\n\n💡 *Endpoint:*\n`POST /api/transacao`",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "nome_nulo",
+   "gemini": null,
+   "setup": {
+    "user": {
+     "api_key": "chave-ficticia-0123456789",
+     "nome": null
+    }
+   },
+   "success": true,
+   "message": "🔑 *Sua API Key*\n\nSua chave de acesso:\n`chave-ficticia-0123456789`\n\n⚠️ *Importante:*\n• Não compartilhe esta chave com ninguém\n• Use-a para configurar automações no iPhone\n• Esta chave dá acesso total à sua conta\n\n📱 *Para usar no iPhone:*\n1. Copie a chave acima\n2. No atalho, cole no campo `user_api_key`\n3. Teste enviando um gasto!\n\n💡 *Endpoint:*\n`POST /api/transacao`",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "chave_nula",
+   "gemini": null,
+   "setup": {
+    "user": {
+     "api_key": null,
+     "nome": "Ana"
+    }
+   },
+   "success": true,
+   "message": "❌ Não encontrei sua API Key. Entre em contato com o suporte.",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "chave_vazia",
+   "gemini": null,
+   "setup": {
+    "user": {
+     "api_key": "",
+     "nome": "Ana"
+    }
+   },
+   "success": true,
+   "message": "❌ Não encontrei sua API Key. Entre em contato com o suporte.",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "sem_usuario",
+   "gemini": null,
+   "setup": {
+    "user": null
+   },
+   "success": true,
+   "message": "❌ Não encontrei sua API Key. Entre em contato com o suporte.",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  }
+ ],
+ "address_config_cases": [
+  {
+   "name": "salva_casa",
+   "gemini": {
+    "label": "casa",
+    "endereco_completo": "Av Paulista 1000"
+   },
+   "setup": {
+    "geocode": [
+     -23.56,
+     -46.65,
+     "Avenida Paulista, 1000, São Paulo"
+    ]
+   },
+   "success": true,
+   "message": "✅ Endereço *'Casa'* salvo com sucesso!\n\n🏠 Avenida Paulista, 1000, São Paulo\n\nVocê pode usar este endereço ao calcular tempo de deslocamento.",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Avenida Paulista, 1000, São Paulo",
+      "lat": -23.56,
+      "lon": -46.65
+     }
+    ]
+   },
+   "geocoded": [
+    "Av Paulista 1000"
+   ]
+  },
+  {
+   "name": "salva_sem_formatado",
+   "gemini": {
+    "label": "Trabalho",
+    "endereco_completo": "Rua X 5"
+   },
+   "setup": {
+    "geocode": [
+     -23.5,
+     -46.6,
+     null
+    ]
+   },
+   "success": true,
+   "message": "✅ Endereço *'Trabalho'* salvo com sucesso!\n\n💼 Rua X 5\n\nVocê pode usar este endereço ao calcular tempo de deslocamento.",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": [
+     {
+      "label": "trabalho",
+      "endereco": "Rua X 5",
+      "lat": -23.5,
+      "lon": -46.6
+     }
+    ]
+   },
+   "geocoded": [
+    "Rua X 5"
+   ]
+  },
+  {
+   "name": "atualiza_existente",
+   "gemini": {
+    "label": "casa",
+    "endereco_completo": "Rua Nova 9"
+   },
+   "setup": {
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ],
+    "geocode": [
+     -1.0,
+     -2.0,
+     "Rua Nova, 9"
+    ]
+   },
+   "success": true,
+   "message": "✅ Endereço *'Casa'* salvo com sucesso!\n\n🏠 Rua Nova, 9\n\nVocê pode usar este endereço ao calcular tempo de deslocamento.",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua Nova, 9",
+      "lat": -1.0,
+      "lon": -2.0
+     }
+    ]
+   },
+   "geocoded": [
+    "Rua Nova 9"
+   ]
+  },
+  {
+   "name": "nao_localizado",
+   "gemini": {
+    "label": "casa",
+    "endereco_completo": "Lugar nenhum"
+   },
+   "setup": {},
+   "success": true,
+   "message": "❌ Não consegui localizar o endereço:\n'Lugar nenhum'\n\nPor favor, seja mais específico e inclua:\n• Rua e número\n• Bairro\n• Cidade e Estado\n\nExemplo: Av Paulista 1000, Consolação, São Paulo-SP",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": [
+    "Lugar nenhum"
+   ]
+  },
+  {
+   "name": "lat_zero_vale",
+   "gemini": {
+    "label": "outro",
+    "endereco_completo": "Equador"
+   },
+   "setup": {
+    "geocode": [
+     0.0,
+     -50.0,
+     "Linha do Equador"
+    ]
+   },
+   "success": true,
+   "message": "✅ Endereço *'Outro'* salvo com sucesso!\n\n➕ Linha do Equador\n\nVocê pode usar este endereço ao calcular tempo de deslocamento.",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": [
+     {
+      "label": "outro",
+      "endereco": "Linha do Equador",
+      "lat": 0.0,
+      "lon": -50.0
+     }
+    ]
+   },
+   "geocoded": [
+    "Equador"
+   ]
+  },
+  {
+   "name": "label_invalido",
+   "gemini": {
+    "label": "escritorio",
+    "endereco_completo": "Rua X"
+   },
+   "setup": {
+    "geocode": [
+     1.0,
+     2.0,
+     "x"
+    ]
+   },
+   "success": true,
+   "message": "❌ Label inválido: 'escritorio'. Use: casa, trabalho ou outro",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "sem_label",
+   "gemini": {
+    "label": null,
+    "endereco_completo": "Rua X"
+   },
+   "setup": {},
+   "success": false,
+   "message": "❌ Não entendi o endereço.\n\nUse o formato:\n*'Configurar endereço casa: Rua X, 123, Bairro, Cidade-SP'*\n\nTipos de endereço:\n• Casa\n• Trabalho\n• Outro",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "sem_endereco",
+   "gemini": {
+    "label": "casa",
+    "endereco_completo": ""
+   },
+   "setup": {},
+   "success": false,
+   "message": "❌ Não entendi o endereço.\n\nUse o formato:\n*'Configurar endereço casa: Rua X, 123, Bairro, Cidade-SP'*\n\nTipos de endereço:\n• Casa\n• Trabalho\n• Outro",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "label_numero",
+   "gemini": {
+    "label": 5,
+    "endereco_completo": "Rua X"
+   },
+   "setup": {},
+   "success": true,
+   "message": "❌ Erro ao salvar endereço: 'int' object has no attribute 'lower'",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  }
+ ],
+ "address_list_cases": [
+  {
+   "name": "vazio",
+   "gemini": null,
+   "setup": {
+    "addresses": []
+   },
+   "success": true,
+   "message": "📍 *Seus Endereços Favoritos*\n\nVocê ainda não tem endereços cadastrados.\n\nPara adicionar um endereço, envie:\n*'Configurar endereço casa: [endereço completo]'*\n\nExemplo:\nConfigurar endereço casa: Av Paulista 1000, Consolação, São Paulo-SP",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "um",
+   "gemini": null,
+   "setup": {
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ]
+   },
+   "success": true,
+   "message": "📍 *Seus Endereços Favoritos*\n\n🏠 *Casa:* Rua A, 10, Centro\n\n━━━━━━━━━━━━━━━━\n\n*Para adicionar/alterar:*\nConfigurar endereço casa: [endereço]\n\n*Para remover:*\nDeletar endereço casa",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ]
+   },
+   "geocoded": []
+  },
+  {
+   "name": "tres_fora_de_ordem",
+   "gemini": null,
+   "setup": {
+    "addresses": [
+     {
+      "label": "outro",
+      "endereco": "Praça C",
+      "lat": 0,
+      "lon": null
+     },
+     {
+      "label": "trabalho",
+      "endereco": "Av B, 20",
+      "lat": -19.8,
+      "lon": -43.8
+     },
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ]
+   },
+   "success": true,
+   "message": "📍 *Seus Endereços Favoritos*\n\n🏠 *Casa:* Rua A, 10, Centro\n💼 *Trabalho:* Av B, 20\n➕ *Outro:* Praça C\n\n━━━━━━━━━━━━━━━━\n\n*Para adicionar/alterar:*\nConfigurar endereço casa: [endereço]\n\n*Para remover:*\nDeletar endereço casa",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": [
+     {
+      "label": "outro",
+      "endereco": "Praça C",
+      "lat": 0,
+      "lon": null
+     },
+     {
+      "label": "trabalho",
+      "endereco": "Av B, 20",
+      "lat": -19.8,
+      "lon": -43.8
+     },
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ]
+   },
+   "geocoded": []
+  }
+ ],
+ "address_delete_cases": [
+  {
+   "name": "remove_casa",
+   "gemini": {
+    "label": "casa"
+   },
+   "setup": {
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     },
+     {
+      "label": "trabalho",
+      "endereco": "Av B, 20",
+      "lat": -19.8,
+      "lon": -43.8
+     }
+    ]
+   },
+   "success": true,
+   "message": "✅ Endereço *'Casa'* removido com sucesso! 🏠",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": [
+     {
+      "label": "trabalho",
+      "endereco": "Av B, 20",
+      "lat": -19.8,
+      "lon": -43.8
+     }
+    ]
+   },
+   "geocoded": []
+  },
+  {
+   "name": "remove_maiusculo",
+   "gemini": {
+    "label": "TRABALHO"
+   },
+   "setup": {
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     },
+     {
+      "label": "trabalho",
+      "endereco": "Av B, 20",
+      "lat": -19.8,
+      "lon": -43.8
+     }
+    ]
+   },
+   "success": true,
+   "message": "✅ Endereço *'Trabalho'* removido com sucesso! 💼",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ]
+   },
+   "geocoded": []
+  },
+  {
+   "name": "nao_cadastrado",
+   "gemini": {
+    "label": "outro"
+   },
+   "setup": {
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ]
+   },
+   "success": true,
+   "message": "❌ Você não tem endereço 'Outro' cadastrado.",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ]
+   },
+   "geocoded": []
+  },
+  {
+   "name": "sem_label_vira_outro",
+   "gemini": {},
+   "setup": {
+    "addresses": [
+     {
+      "label": "outro",
+      "endereco": "Praça C",
+      "lat": 0,
+      "lon": null
+     }
+    ]
+   },
+   "success": true,
+   "message": "✅ Endereço *'Outro'* removido com sucesso! ➕",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": []
+   },
+   "geocoded": []
+  },
+  {
+   "name": "label_nulo",
+   "gemini": {
+    "label": null
+   },
+   "setup": {
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ]
+   },
+   "success": true,
+   "message": "❌ Erro ao deletar endereço: 'NoneType' object has no attribute 'lower'",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ]
+   },
+   "geocoded": []
+  },
+  {
+   "name": "label_desconhecido",
+   "gemini": {
+    "label": "escritorio"
+   },
+   "setup": {
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ]
+   },
+   "success": true,
+   "message": "❌ Você não tem endereço 'Escritorio' cadastrado.",
+   "state": {
+    "report": null,
+    "location": null,
+    "addresses": [
+     {
+      "label": "casa",
+      "endereco": "Rua A, 10, Centro",
+      "lat": -19.9,
+      "lon": -43.9
+     }
+    ]
+   },
+   "geocoded": []
+  }
+ ],
+ "drive_folder_cases": [
+  {
+   "text": "salvar no drive pasta Notas Fiscais",
+   "path": [
+    "Notas Fiscais"
+   ]
+  },
+  {
+   "text": "Salvar no Drive na pasta IR > IR 2026",
+   "path": [
+    "IR",
+    "IR 2026"
+   ]
+  },
+  {
+   "text": "guardar no google drive pasta IR/Comprovantes",
+   "path": [
+    "IR",
+    "Comprovantes"
+   ]
+  },
+  {
+   "text": "enviar para o drive pasta \"Contratos 2026\"",
+   "path": [
+    "Contratos 2026"
+   ]
+  },
+  {
+   "text": "subir pro drive na pasta Fotos\\Viagem",
+   "path": [
+    "Fotos",
+    "Viagem"
+   ]
+  },
+  {
+   "text": "upload em drive pasta CNPJ",
+   "path": [
+    "CNPJ"
+   ]
+  },
+  {
+   "text": "pasta Comprovantes",
+   "path": [
+    "Comprovantes"
+   ]
+  },
+  {
+   "text": "PASTA recibos de luz",
+   "path": [
+    "Recibos De Luz"
+   ]
+  },
+  {
+   "text": "salvar em Documentos",
+   "path": [
+    "Documentos"
+   ]
+  },
+  {
+   "text": "guardar na pasta",
+   "path": [
+    "Pasta"
+   ]
+  },
+  {
+   "text": "manda pra Casa",
+   "path": [
+    "WhatsApp Uploads"
+   ]
+  },
+  {
+   "text": "salvar no drive",
+   "path": [
+    "WhatsApp Uploads"
+   ]
+  },
+  {
+   "text": "oi",
+   "path": [
+    "WhatsApp Uploads"
+   ]
+  },
+  {
+   "text": "",
+   "path": [
+    "WhatsApp Uploads"
+   ]
+  },
+  {
+   "text": "   ",
+   "path": [
+    "WhatsApp Uploads"
+   ]
+  },
+  {
+   "text": "pasta IR > > IR 2026",
+   "path": [
+    "IR",
+    "IR 2026"
+   ]
+  },
+  {
+   "text": "pasta  ",
+   "path": [
+    "WhatsApp Uploads"
+   ]
+  },
+  {
+   "text": "pasta !!!",
+   "path": [
+    "WhatsApp Uploads"
+   ]
+  },
+  {
+   "text": "pasta Água & Luz",
+   "path": [
+    "Água Luz"
+   ]
+  },
+  {
+   "text": "pasta nota_fiscal.v2",
+   "path": [
+    "Nota_Fiscal.V2"
+   ]
+  },
+  {
+   "text": "pasta João da Silva/ação",
+   "path": [
+    "João da Silva",
+    "Ação"
+   ]
+  },
+  {
+   "text": "pasta aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "path": [
+    "Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   ]
+  },
+  {
+   "text": "pasta ÁREA 51 > secreta",
+   "path": [
+    "ÁREA 51",
+    "Secreta"
+   ]
+  },
+  {
+   "text": "salvar no drive pasta 'Minhas Coisas'",
+   "path": [
+    "Minhas Coisas"
+   ]
+  },
+  {
+   "text": "pasta iR 2026",
+   "path": [
+    "iR 2026"
+   ]
+  },
+  {
+   "text": "  salvar no drive pasta   Notas   Fiscais  ",
+   "path": [
+    "Notas Fiscais"
+   ]
+  },
+  {
+   "text": "pasta 1ª parte",
+   "path": [
+    "1ª Parte"
+   ]
+  },
+  {
+   "text": "pasta contas de 2026, fevereiro",
+   "path": [
+    "Contas De 2026 Fevereiro"
+   ]
+  }
+ ],
+ "drive_cases": [
+  {
+   "name": "sucesso",
+   "text": "salvar no drive pasta Notas Fiscais",
+   "data": "Y29udGV1ZG8gZG8gYXJxdWl2bw==",
+   "mime": "image/png",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "✅ *Arquivo enviado para o Google Drive!*\n\n📁 *Pasta:* Notas Fiscais\n📄 *Arquivo:* nota.png\n\n🔗 *Abrir no Drive:*\nhttps://drive.example/f1",
+   "uploaded": [
+    {
+     "filename": "nota.png",
+     "folder_path": [
+      "Notas Fiscais"
+     ],
+     "mime": "image/png",
+     "size": 19
+    }
+   ]
+  },
+  {
+   "name": "sucesso_com_prefixo",
+   "text": "pasta IR > IR 2026",
+   "data": "data:image/png;base64,Y29udGV1ZG8gZG8gYXJxdWl2bw==",
+   "mime": "image/png",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "IR 2026",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "IR > IR 2026",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "✅ *Arquivo enviado para o Google Drive!*\n\n📁 *Pasta:* IR > IR 2026\n📄 *Arquivo:* nota.png\n\n🔗 *Abrir no Drive:*\nhttps://drive.example/f1",
+   "uploaded": [
+    {
+     "filename": "nota.png",
+     "folder_path": [
+      "IR",
+      "IR 2026"
+     ],
+     "mime": "image/png",
+     "size": 19
+    }
+   ]
+  },
+  {
+   "name": "sucesso_sem_link",
+   "text": "pasta Docs",
+   "data": "Y29udGV1ZG8gZG8gYXJxdWl2bw==",
+   "mime": "application/pdf",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "doc.pdf",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": null,
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "✅ *Arquivo enviado para o Google Drive!*\n\n📁 *Pasta:* Notas Fiscais\n📄 *Arquivo:* doc.pdf\n",
+   "uploaded": [
+    {
+     "filename": "nota.png",
+     "folder_path": [
+      "Docs"
+     ],
+     "mime": "application/pdf",
+     "size": 19
+    }
+   ]
+  },
+  {
+   "name": "sucesso_so_folder_name",
+   "text": "pasta Docs",
+   "data": "Y29udGV1ZG8gZG8gYXJxdWl2bw==",
+   "mime": "application/pdf",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "filename": "a.pdf",
+    "folder_name": "Docs",
+    "web_view_link": "https://x"
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "✅ *Arquivo enviado para o Google Drive!*\n\n📁 *Pasta:* Docs\n📄 *Arquivo:* a.pdf\n\n🔗 *Abrir no Drive:*\nhttps://x",
+   "uploaded": [
+    {
+     "filename": "nota.png",
+     "folder_path": [
+      "Docs"
+     ],
+     "mime": "application/pdf",
+     "size": 19
+    }
+   ]
+  },
+  {
+   "name": "sem_nome_do_arquivo",
+   "text": "pasta Docs",
+   "data": "Y29udGV1ZG8gZG8gYXJxdWl2bw==",
+   "mime": "image/png",
+   "filename": null,
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "✅ *Arquivo enviado para o Google Drive!*\n\n📁 *Pasta:* Notas Fiscais\n📄 *Arquivo:* nota.png\n\n🔗 *Abrir no Drive:*\nhttps://drive.example/f1",
+   "uploaded": [
+    {
+     "filename": "arquivo_7",
+     "folder_path": [
+      "Docs"
+     ],
+     "mime": "image/png",
+     "size": 19
+    }
+   ]
+  },
+  {
+   "name": "sem_arquivo",
+   "text": "salvar no drive",
+   "data": null,
+   "mime": "image/png",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": false,
+   "message": "📎 Nenhum arquivo recebido.\n\nPara salvar no Google Drive, envie uma *imagem* ou *documento* junto com a mensagem.\n\nExemplo:\n[Envie uma foto]\n_salvar no drive pasta Notas Fiscais_",
+   "uploaded": []
+  },
+  {
+   "name": "arquivo_vazio_texto",
+   "text": "salvar no drive",
+   "data": "",
+   "mime": "image/png",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": false,
+   "message": "📎 Nenhum arquivo recebido.\n\nPara salvar no Google Drive, envie uma *imagem* ou *documento* junto com a mensagem.\n\nExemplo:\n[Envie uma foto]\n_salvar no drive pasta Notas Fiscais_",
+   "uploaded": []
+  },
+  {
+   "name": "sem_tipo",
+   "text": "salvar no drive",
+   "data": "Y29udGV1ZG8gZG8gYXJxdWl2bw==",
+   "mime": null,
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": false,
+   "message": "Não foi possível identificar o tipo do arquivo.",
+   "uploaded": []
+  },
+  {
+   "name": "tipo_vazio",
+   "text": "salvar no drive",
+   "data": "Y29udGV1ZG8gZG8gYXJxdWl2bw==",
+   "mime": "",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": false,
+   "message": "Não foi possível identificar o tipo do arquivo.",
+   "uploaded": []
+  },
+  {
+   "name": "sem_escopo",
+   "text": "salvar no drive",
+   "data": "Y29udGV1ZG8gZG8gYXJxdWl2bw==",
+   "mime": "image/png",
+   "filename": "nota.png",
+   "scope": false,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "🔗 *Google Drive não conectado*\n\nPara usar esta funcionalidade, conecte sua conta Google:\nhttps://proxy.example/oauth/connect-calendar/7\n\nApós conectar, envie o arquivo novamente.",
+   "uploaded": []
+  },
+  {
+   "name": "sem_escopo_sem_uri",
+   "text": "salvar no drive",
+   "data": "Y29udGV1ZG8gZG8gYXJxdWl2bw==",
+   "mime": "image/png",
+   "filename": "nota.png",
+   "scope": false,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "",
+   "success": true,
+   "message": "🔗 *Google Drive não conectado*\n\nPara usar esta funcionalidade, conecte sua conta Google:\n/connect-calendar/7\n\nApós conectar, envie o arquivo novamente.",
+   "uploaded": []
+  },
+  {
+   "name": "erro_de_autenticacao",
+   "text": "salvar no drive",
+   "data": "Y29udGV1ZG8gZG8gYXJxdWl2bw==",
+   "mime": "image/png",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": false,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "⚠️ *Erro de autenticação*\n\nNão foi possível acessar o Google Drive. Sua conexão pode ter expirado.\n\n👉 *Reconecte agora:*\nhttps://proxy.example/oauth/connect-calendar/7\n\nApós reconectar, envie o arquivo novamente.",
+   "uploaded": []
+  },
+  {
+   "name": "erro_de_autenticacao_sem_uri",
+   "text": "salvar no drive",
+   "data": "Y29udGV1ZG8gZG8gYXJxdWl2bw==",
+   "mime": "image/png",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": false,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "",
+   "success": true,
+   "message": "⚠️ *Erro de autenticação*\n\nNão foi possível acessar o Google Drive. Sua conexão pode ter expirado.\n\nReconecte sua conta Google nas configurações do app.",
+   "uploaded": []
+  },
+  {
+   "name": "base64_invalido",
+   "text": "salvar no drive",
+   "data": "isto nao e base64!",
+   "mime": "image/png",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "Não foi possível processar o arquivo enviado.",
+   "uploaded": []
+  },
+  {
+   "name": "base64_sem_preenchimento",
+   "text": "salvar no drive",
+   "data": "aGVsbG8",
+   "mime": "image/png",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "Não foi possível processar o arquivo enviado.",
+   "uploaded": []
+  },
+  {
+   "name": "base64_com_quebras",
+   "text": "salvar no drive",
+   "data": "Y29udGV1\nZG8gZG8gYXJxdWl2bw==",
+   "mime": "image/png",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "✅ *Arquivo enviado para o Google Drive!*\n\n📁 *Pasta:* Notas Fiscais\n📄 *Arquivo:* nota.png\n\n🔗 *Abrir no Drive:*\nhttps://drive.example/f1",
+   "uploaded": [
+    {
+     "filename": "nota.png",
+     "folder_path": [
+      "WhatsApp Uploads"
+     ],
+     "mime": "image/png",
+     "size": 19
+    }
+   ]
+  },
+  {
+   "name": "base64_nao_ascii",
+   "text": "salvar no drive",
+   "data": "aGVsbG8=é",
+   "mime": "image/png",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "Não foi possível processar o arquivo enviado.",
+   "uploaded": []
+  },
+  {
+   "name": "base64_so_igual",
+   "text": "salvar no drive",
+   "data": "====",
+   "mime": "image/png",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "Não foi possível processar o arquivo enviado.",
+   "uploaded": []
+  },
+  {
+   "name": "base64_vazio_depois_do_prefixo",
+   "text": "salvar no drive",
+   "data": "data:image/png;base64,",
+   "mime": "image/png",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "Não foi possível processar o arquivo enviado.",
+   "uploaded": []
+  },
+  {
+   "name": "tipo_nao_permitido",
+   "text": "salvar no drive",
+   "data": "Y29udGV1ZG8gZG8gYXJxdWl2bw==",
+   "mime": "application/zip",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "❌ Tipo de arquivo não permitido. Aceitos: imagens (JPG, PNG, GIF), documentos (PDF, DOC, DOCX), planilhas (XLS, XLSX), texto (TXT, CSV), áudio (MP3, OGG)",
+   "uploaded": []
+  },
+  {
+   "name": "tipo_com_charset",
+   "text": "salvar no drive",
+   "data": "Y29udGV1ZG8gZG8gYXJxdWl2bw==",
+   "mime": "image/png; charset=x",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "❌ Tipo de arquivo não permitido. Aceitos: imagens (JPG, PNG, GIF), documentos (PDF, DOC, DOCX), planilhas (XLS, XLSX), texto (TXT, CSV), áudio (MP3, OGG)",
+   "uploaded": []
+  },
+  {
+   "name": "tipo_maiusculo",
+   "text": "salvar no drive",
+   "data": "Y29udGV1ZG8gZG8gYXJxdWl2bw==",
+   "mime": "IMAGE/PNG",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": true,
+    "file_id": "f1",
+    "filename": "nota.png",
+    "folder_name": "Notas Fiscais",
+    "folder_path": [
+     "Notas Fiscais"
+    ],
+    "folder_path_display": "Notas Fiscais",
+    "folder_id": "d1",
+    "web_view_link": "https://drive.example/f1",
+    "web_content_link": null
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "❌ Tipo de arquivo não permitido. Aceitos: imagens (JPG, PNG, GIF), documentos (PDF, DOC, DOCX), planilhas (XLS, XLSX), texto (TXT, CSV), áudio (MP3, OGG)",
+   "uploaded": []
+  },
+  {
+   "name": "falha_no_upload",
+   "text": "salvar no drive",
+   "data": "Y29udGV1ZG8gZG8gYXJxdWl2bw==",
+   "mime": "image/png",
+   "filename": "nota.png",
+   "scope": true,
+   "service_ok": true,
+   "upload": {
+    "success": false,
+    "error": "Limite de armazenamento do Google Drive atingido."
+   },
+   "redirect": "https://proxy.example/oauth/callback",
+   "success": true,
+   "message": "❌ Erro ao enviar arquivo para o Drive.",
+   "uploaded": [
+    {
+     "filename": "nota.png",
+     "folder_path": [
+      "WhatsApp Uploads"
+     ],
+     "mime": "image/png",
+     "size": 19
+    }
+   ]
+  }
+ ],
+ "base64_cases": [
+  {
+   "text": "aGVsbG8=",
+   "bytes": [
+    104,
+    101,
+    108,
+    108,
+    111
+   ]
+  },
+  {
+   "text": "aGVsbG8",
+   "bytes": null
+  },
+  {
+   "text": "aGVsbG8==",
+   "bytes": [
+    104,
+    101,
+    108,
+    108,
+    111
+   ]
+  },
+  {
+   "text": "aGVs bG8=",
+   "bytes": [
+    104,
+    101,
+    108,
+    108,
+    111
+   ]
+  },
+  {
+   "text": "aGVs\nbG8=",
+   "bytes": [
+    104,
+    101,
+    108,
+    108,
+    111
+   ]
+  },
+  {
+   "text": "====",
+   "bytes": []
+  },
+  {
+   "text": "",
+   "bytes": []
+  },
+  {
+   "text": "a",
+   "bytes": null
+  },
+  {
+   "text": "ab",
+   "bytes": null
+  },
+  {
+   "text": "abc",
+   "bytes": null
+  },
+  {
+   "text": "abcd",
+   "bytes": [
+    105,
+    183,
+    29
+   ]
+  },
+  {
+   "text": "YQ==",
+   "bytes": [
+    97
+   ]
+  },
+  {
+   "text": "YQ=",
+   "bytes": null
+  },
+  {
+   "text": "YQ",
+   "bytes": null
+  },
+  {
+   "text": "YWJj",
+   "bytes": [
+    97,
+    98,
+    99
+   ]
+  },
+  {
+   "text": "YWJjZA==",
+   "bytes": [
+    97,
+    98,
+    99,
+    100
+   ]
+  },
+  {
+   "text": "YWJjZA=",
+   "bytes": null
+  },
+  {
+   "text": "YWJjZA",
+   "bytes": null
+  },
+  {
+   "text": "YQ==YQ==",
+   "bytes": [
+    97
+   ]
+  },
+  {
+   "text": "Y Q = =",
+   "bytes": [
+    97
+   ]
+  },
+  {
+   "text": "YW$Jj",
+   "bytes": [
+    97,
+    98,
+    99
+   ]
+  },
+  {
+   "text": "@@@@",
+   "bytes": []
+  },
+  {
+   "text": "é",
+   "bytes": null
+  },
+  {
+   "text": "YWJj=",
+   "bytes": [
+    97,
+    98,
+    99
+   ]
+  },
+  {
+   "text": "YWJj==",
+   "bytes": [
+    97,
+    98,
+    99
+   ]
+  },
+  {
+   "text": "=YWJj",
+   "bytes": [
+    97,
+    98,
+    99
+   ]
+  },
+  {
+   "text": "YQ===",
+   "bytes": [
+    97
+   ]
+  },
+  {
+   "text": "YWI=",
+   "bytes": [
+    97,
+    98
+   ]
+  },
+  {
+   "text": "YWI",
+   "bytes": null
+  },
+  {
+   "text": "YW==",
+   "bytes": [
+    97
+   ]
+  }
  ]
 }
