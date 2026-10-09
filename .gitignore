@@ -136,3 +136,5 @@ dotnet/specs/foundation/schema-prod.sql
 
 # Visual Studio
 .vs/
+
+TestResults/
