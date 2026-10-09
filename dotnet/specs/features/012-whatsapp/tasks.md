@@ -43,12 +43,12 @@ Retomada: o que está `[x]` está commitado; a próxima sub-entrega começa na p
 
 ## 012d — Contas fixas e vencimentos
 
-- [ ] **T24 — Domínio.** `FixedBillsMessages`, `DueDatesMessage`, `CheckinSnapshotMessage` (AC-012-401 a 403).
-- [ ] **T25 — Leituras (integração Postgres).** pendentes do mês, catálogo, vencimentos (virada de mês), snapshot do check-in (AC-012-401 a 403).
-- [ ] **T26 — Intenções** `FixedBillsIntent`, `AllBillsIntent`, `DueTodayIntent`, `DueTomorrowIntent`, `DueWeekIntent`, `OverdueIntent` (usa `NightlyCheckinService` da 013) (AC-012-401 a 403).
-- [ ] **T26b — Resposta ao check-in.** `CheckinReplyParser`, `CheckinResponder : INightlyCheckinResponder` (`process_response`, `mark_bills_as_paid` por `IScheduleExecutor`) (AC-012-404).
+- [x] **T24 — Domínio.** `FixedBillsMessages`, `DueDatesMessage`, `CheckinSnapshotMessage` (AC-012-401 a 403).
+- [x] **T25 — Leituras (integração Postgres).** pendentes do mês, catálogo, vencimentos (virada de mês), snapshot do check-in (AC-012-401 a 403).
+- [x] **T26 — Intenções** `FixedBillsIntent`, `AllBillsIntent`, `DueTodayIntent`, `DueTomorrowIntent`, `DueWeekIntent`, `OverdueIntent` (usa `NightlyCheckinService` da 013) (AC-012-401 a 403).
+- [x] **T26b — Resposta ao check-in.** `CheckinReplyParser`, `CheckinResponder : INightlyCheckinResponder` (`process_response`, `mark_bills_as_paid` por `IScheduleExecutor`) (AC-012-404).
 
-- [ ] **T27 — Fechamento da 012d.**
+- [x] **T27 — Fechamento da 012d.**
 
 ## 012e — Calendário
 
