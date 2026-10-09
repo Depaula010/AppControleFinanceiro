@@ -14,7 +14,11 @@ namespace MeuSecretario.IntegrationTests.Support;
 /// </summary>
 public sealed class PostgresFixture : IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:15-alpine").Build();
+    // Cada teste de ponta a ponta sobe a sua própria fábrica da API (e portanto o seu pool do Npgsql, que não é descartado
+    // entre testes); o limite padrão de 100 conexões do Postgres estoura com a suíte inteira ("53300: too many clients").
+    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:15-alpine")
+        .WithCommand("-c", "max_connections=1000")
+        .Build();
 
     public string ConnectionString => _container.GetConnectionString();
 
