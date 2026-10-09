@@ -1,0 +1,5838 @@
+{
+ "pending": [
+  {
+   "label": "vazio",
+   "today": "2026-10-07",
+   "rows": [],
+   "text": "✅ Você não tem contas fixas pendentes este mês! 🎉"
+  },
+  {
+   "label": "despesas",
+   "today": "2026-10-07",
+   "rows": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 1,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 7,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Luz",
+     "valor": "230.45",
+     "dia": 8,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Água",
+     "valor": "80.10",
+     "dia": 10,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro",
+     "valor": "310.00",
+     "dia": 11,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Condomínio",
+     "valor": "450.00",
+     "dia": 31,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 20,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - OUTUBRO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Aluguel\n   💰 R$ 1.500,00\n   📊 Moradia\n   🔴 ATRASADO\n\n2. Internet\n   💰 R$ 99,90\n   📊 Moradia\n   ⚠️ VENCE HOJE\n\n3. Luz\n   💰 R$ 230,45\n   📊 Moradia\n   🟡 Vence em 1 dias\n\n4. Água\n   💰 R$ 80,10\n   📊 Moradia\n   🟡 Vence em 3 dias\n\n5. Seguro\n   💰 R$ 310,00\n   📊 Moradia\n   🟢 Vence dia 11\n\n6. Condomínio\n   💰 R$ 450,00\n   📊 Moradia\n   🟢 Vence dia 31\n\n7. Sem valor\n   💰 R$ 0,00\n   📊 Moradia\n   🟢 Vence dia 20\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 2.670,45\n📊 Saldo Líquido: R$ -2.670,45"
+  },
+  {
+   "label": "cartao",
+   "today": "2026-10-07",
+   "rows": [
+    {
+     "descricao": "Netflix",
+     "valor": "55.90",
+     "dia": 15,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Spotify",
+     "valor": "21.90",
+     "dia": 3,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Academia",
+     "valor": "119.90",
+     "dia": 7,
+     "categoria": "Saúde",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro cartão",
+     "valor": "10.00",
+     "dia": 9,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - OUTUBRO/2026* 📋\n\n💳 *CARTÃO DE CRÉDITO (na fatura):*\n\n1. Netflix\n   💰 R$ 55,90\n   📊 Lazer\n   ℹ️ Será debitado dia 15\n\n2. Spotify\n   💰 R$ 21,90\n   📊 Lazer\n   ℹ️ Debitado dia 3\n\n3. Academia\n   💰 R$ 119,90\n   📊 Saúde\n   ℹ️ Debitado hoje\n\n4. Seguro cartão\n   💰 R$ 10,00\n   📊 Lazer\n   ℹ️ Será debitado em 2 dias\n\n━━━━━━━━━━━━━━━━━━━━\n💳 Total Cartão: R$ 207,70\n📊 Saldo Líquido: R$ -207,70"
+  },
+  {
+   "label": "receitas",
+   "today": "2026-10-07",
+   "rows": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 5,
+     "categoria": "Salário",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel recebido",
+     "valor": "1200.50",
+     "dia": 7,
+     "categoria": "Aluguel",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": "800.00",
+     "dia": 25,
+     "categoria": "Extra",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Cartão renda",
+     "valor": "1.00",
+     "dia": 20,
+     "categoria": "Extra",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Renda"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - OUTUBRO/2026* 📋\n\n💰 *RECEITAS:*\n\n1. Salário\n   💵 R$ 5.000,00\n   📊 Salário\n   🔴 ATRASADO\n\n2. Aluguel recebido\n   💵 R$ 1.200,50\n   📊 Aluguel\n   ⚠️ VENCE HOJE\n\n3. Freela\n   💵 R$ 800,00\n   📊 Extra\n   🟢 Vence dia 25\n\n4. Cartão renda\n   💵 R$ 1,00\n   📊 Extra\n   🟢 Vence dia 20\n\n━━━━━━━━━━━━━━━━━━━━\n💰 Total Receitas: R$ 7.001,50\n📊 Saldo Líquido: R$ 7.001,50"
+  },
+  {
+   "label": "tudo",
+   "today": "2026-10-07",
+   "rows": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 1,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 7,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Luz",
+     "valor": "230.45",
+     "dia": 8,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Água",
+     "valor": "80.10",
+     "dia": 10,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro",
+     "valor": "310.00",
+     "dia": 11,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Condomínio",
+     "valor": "450.00",
+     "dia": 31,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 20,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Netflix",
+     "valor": "55.90",
+     "dia": 15,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Spotify",
+     "valor": "21.90",
+     "dia": 3,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Academia",
+     "valor": "119.90",
+     "dia": 7,
+     "categoria": "Saúde",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro cartão",
+     "valor": "10.00",
+     "dia": 9,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 5,
+     "categoria": "Salário",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel recebido",
+     "valor": "1200.50",
+     "dia": 7,
+     "categoria": "Aluguel",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": "800.00",
+     "dia": 25,
+     "categoria": "Extra",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Cartão renda",
+     "valor": "1.00",
+     "dia": 20,
+     "categoria": "Extra",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Renda"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - OUTUBRO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Aluguel\n   💰 R$ 1.500,00\n   📊 Moradia\n   🔴 ATRASADO\n\n2. Internet\n   💰 R$ 99,90\n   📊 Moradia\n   ⚠️ VENCE HOJE\n\n3. Luz\n   💰 R$ 230,45\n   📊 Moradia\n   🟡 Vence em 1 dias\n\n4. Água\n   💰 R$ 80,10\n   📊 Moradia\n   🟡 Vence em 3 dias\n\n5. Seguro\n   💰 R$ 310,00\n   📊 Moradia\n   🟢 Vence dia 11\n\n6. Condomínio\n   💰 R$ 450,00\n   📊 Moradia\n   🟢 Vence dia 31\n\n7. Sem valor\n   💰 R$ 0,00\n   📊 Moradia\n   🟢 Vence dia 20\n\n💳 *CARTÃO DE CRÉDITO (na fatura):*\n\n1. Netflix\n   💰 R$ 55,90\n   📊 Lazer\n   ℹ️ Será debitado dia 15\n\n2. Spotify\n   💰 R$ 21,90\n   📊 Lazer\n   ℹ️ Debitado dia 3\n\n3. Academia\n   💰 R$ 119,90\n   📊 Saúde\n   ℹ️ Debitado hoje\n\n4. Seguro cartão\n   💰 R$ 10,00\n   📊 Lazer\n   ℹ️ Será debitado em 2 dias\n\n💰 *RECEITAS:*\n\n1. Salário\n   💵 R$ 5.000,00\n   📊 Salário\n   🔴 ATRASADO\n\n2. Aluguel recebido\n   💵 R$ 1.200,50\n   📊 Aluguel\n   ⚠️ VENCE HOJE\n\n3. Freela\n   💵 R$ 800,00\n   📊 Extra\n   🟢 Vence dia 25\n\n4. Cartão renda\n   💵 R$ 1,00\n   📊 Extra\n   🟢 Vence dia 20\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 2.670,45\n💳 Total Cartão: R$ 207,70\n💰 Total Receitas: R$ 7.001,50\n📊 Saldo Líquido: R$ 4.123,35"
+  },
+  {
+   "label": "grandes",
+   "today": "2026-10-07",
+   "rows": [
+    {
+     "descricao": "Casa",
+     "valor": "1234567.89",
+     "dia": 12,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Pequena",
+     "valor": "0.01",
+     "dia": 12,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Quase",
+     "valor": "0.005",
+     "dia": 12,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - OUTUBRO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Casa\n   💰 R$ 1.234.567,89\n   📊 Moradia\n   🟢 Vence dia 12\n\n2. Pequena\n   💰 R$ 0,01\n   📊 Moradia\n   🟢 Vence dia 12\n\n3. Quase\n   💰 R$ 0,01\n   📊 Moradia\n   🟢 Vence dia 12\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 1.234.567,90\n📊 Saldo Líquido: R$ -1.234.567,90"
+  },
+  {
+   "label": "dias_invalidos",
+   "today": "2026-10-07",
+   "rows": [
+    {
+     "descricao": "Dia zero",
+     "valor": "10.00",
+     "dia": 0,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Dia 29",
+     "valor": "10.00",
+     "dia": 29,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Dia 30",
+     "valor": "20.00",
+     "dia": 30,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Dia 31",
+     "valor": "30.00",
+     "dia": 31,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Dia 28",
+     "valor": "40.00",
+     "dia": 28,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - OUTUBRO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Dia zero\n   💰 R$ 10,00\n   📊 Moradia\n   Vence dia 0\n\n2. Dia 29\n   💰 R$ 10,00\n   📊 Moradia\n   🟢 Vence dia 29\n\n3. Dia 30\n   💰 R$ 20,00\n   📊 Moradia\n   🟢 Vence dia 30\n\n4. Dia 31\n   💰 R$ 30,00\n   📊 Moradia\n   🟢 Vence dia 31\n\n5. Dia 28\n   💰 R$ 40,00\n   📊 Moradia\n   🟢 Vence dia 28\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 110,00\n📊 Saldo Líquido: R$ -110,00"
+  },
+  {
+   "label": "receita_e_cartao",
+   "today": "2026-10-07",
+   "rows": [
+    {
+     "descricao": "Netflix",
+     "valor": "55.90",
+     "dia": 15,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Spotify",
+     "valor": "21.90",
+     "dia": 3,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Academia",
+     "valor": "119.90",
+     "dia": 7,
+     "categoria": "Saúde",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro cartão",
+     "valor": "10.00",
+     "dia": 9,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 5,
+     "categoria": "Salário",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel recebido",
+     "valor": "1200.50",
+     "dia": 7,
+     "categoria": "Aluguel",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": "800.00",
+     "dia": 25,
+     "categoria": "Extra",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Cartão renda",
+     "valor": "1.00",
+     "dia": 20,
+     "categoria": "Extra",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Renda"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - OUTUBRO/2026* 📋\n\n💳 *CARTÃO DE CRÉDITO (na fatura):*\n\n1. Netflix\n   💰 R$ 55,90\n   📊 Lazer\n   ℹ️ Será debitado dia 15\n\n2. Spotify\n   💰 R$ 21,90\n   📊 Lazer\n   ℹ️ Debitado dia 3\n\n3. Academia\n   💰 R$ 119,90\n   📊 Saúde\n   ℹ️ Debitado hoje\n\n4. Seguro cartão\n   💰 R$ 10,00\n   📊 Lazer\n   ℹ️ Será debitado em 2 dias\n\n💰 *RECEITAS:*\n\n1. Salário\n   💵 R$ 5.000,00\n   📊 Salário\n   🔴 ATRASADO\n\n2. Aluguel recebido\n   💵 R$ 1.200,50\n   📊 Aluguel\n   ⚠️ VENCE HOJE\n\n3. Freela\n   💵 R$ 800,00\n   📊 Extra\n   🟢 Vence dia 25\n\n4. Cartão renda\n   💵 R$ 1,00\n   📊 Extra\n   🟢 Vence dia 20\n\n━━━━━━━━━━━━━━━━━━━━\n💳 Total Cartão: R$ 207,70\n💰 Total Receitas: R$ 7.001,50\n📊 Saldo Líquido: R$ 6.793,80"
+  },
+  {
+   "label": "vazio",
+   "today": "2026-02-10",
+   "rows": [],
+   "text": "✅ Você não tem contas fixas pendentes este mês! 🎉"
+  },
+  {
+   "label": "despesas",
+   "today": "2026-02-10",
+   "rows": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 1,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 7,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Luz",
+     "valor": "230.45",
+     "dia": 8,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Água",
+     "valor": "80.10",
+     "dia": 10,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro",
+     "valor": "310.00",
+     "dia": 11,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Condomínio",
+     "valor": "450.00",
+     "dia": 31,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 20,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - FEVEREIRO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Aluguel\n   💰 R$ 1.500,00\n   📊 Moradia\n   🔴 ATRASADO\n\n2. Internet\n   💰 R$ 99,90\n   📊 Moradia\n   🔴 ATRASADO\n\n3. Luz\n   💰 R$ 230,45\n   📊 Moradia\n   🔴 ATRASADO\n\n4. Água\n   💰 R$ 80,10\n   📊 Moradia\n   ⚠️ VENCE HOJE\n\n5. Seguro\n   💰 R$ 310,00\n   📊 Moradia\n   🟡 Vence em 1 dias\n\n6. Condomínio\n   💰 R$ 450,00\n   📊 Moradia\n   Vence dia 31\n\n7. Sem valor\n   💰 R$ 0,00\n   📊 Moradia\n   🟢 Vence dia 20\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 2.670,45\n📊 Saldo Líquido: R$ -2.670,45"
+  },
+  {
+   "label": "cartao",
+   "today": "2026-02-10",
+   "rows": [
+    {
+     "descricao": "Netflix",
+     "valor": "55.90",
+     "dia": 15,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Spotify",
+     "valor": "21.90",
+     "dia": 3,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Academia",
+     "valor": "119.90",
+     "dia": 7,
+     "categoria": "Saúde",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro cartão",
+     "valor": "10.00",
+     "dia": 9,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - FEVEREIRO/2026* 📋\n\n💳 *CARTÃO DE CRÉDITO (na fatura):*\n\n1. Netflix\n   💰 R$ 55,90\n   📊 Lazer\n   ℹ️ Será debitado dia 15\n\n2. Spotify\n   💰 R$ 21,90\n   📊 Lazer\n   ℹ️ Debitado dia 3\n\n3. Academia\n   💰 R$ 119,90\n   📊 Saúde\n   ℹ️ Debitado dia 7\n\n4. Seguro cartão\n   💰 R$ 10,00\n   📊 Lazer\n   ℹ️ Debitado dia 9\n\n━━━━━━━━━━━━━━━━━━━━\n💳 Total Cartão: R$ 207,70\n📊 Saldo Líquido: R$ -207,70"
+  },
+  {
+   "label": "receitas",
+   "today": "2026-02-10",
+   "rows": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 5,
+     "categoria": "Salário",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel recebido",
+     "valor": "1200.50",
+     "dia": 7,
+     "categoria": "Aluguel",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": "800.00",
+     "dia": 25,
+     "categoria": "Extra",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Cartão renda",
+     "valor": "1.00",
+     "dia": 20,
+     "categoria": "Extra",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Renda"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - FEVEREIRO/2026* 📋\n\n💰 *RECEITAS:*\n\n1. Salário\n   💵 R$ 5.000,00\n   📊 Salário\n   🔴 ATRASADO\n\n2. Aluguel recebido\n   💵 R$ 1.200,50\n   📊 Aluguel\n   🔴 ATRASADO\n\n3. Freela\n   💵 R$ 800,00\n   📊 Extra\n   🟢 Vence dia 25\n\n4. Cartão renda\n   💵 R$ 1,00\n   📊 Extra\n   🟢 Vence dia 20\n\n━━━━━━━━━━━━━━━━━━━━\n💰 Total Receitas: R$ 7.001,50\n📊 Saldo Líquido: R$ 7.001,50"
+  },
+  {
+   "label": "tudo",
+   "today": "2026-02-10",
+   "rows": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 1,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 7,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Luz",
+     "valor": "230.45",
+     "dia": 8,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Água",
+     "valor": "80.10",
+     "dia": 10,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro",
+     "valor": "310.00",
+     "dia": 11,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Condomínio",
+     "valor": "450.00",
+     "dia": 31,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 20,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Netflix",
+     "valor": "55.90",
+     "dia": 15,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Spotify",
+     "valor": "21.90",
+     "dia": 3,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Academia",
+     "valor": "119.90",
+     "dia": 7,
+     "categoria": "Saúde",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro cartão",
+     "valor": "10.00",
+     "dia": 9,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 5,
+     "categoria": "Salário",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel recebido",
+     "valor": "1200.50",
+     "dia": 7,
+     "categoria": "Aluguel",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": "800.00",
+     "dia": 25,
+     "categoria": "Extra",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Cartão renda",
+     "valor": "1.00",
+     "dia": 20,
+     "categoria": "Extra",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Renda"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - FEVEREIRO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Aluguel\n   💰 R$ 1.500,00\n   📊 Moradia\n   🔴 ATRASADO\n\n2. Internet\n   💰 R$ 99,90\n   📊 Moradia\n   🔴 ATRASADO\n\n3. Luz\n   💰 R$ 230,45\n   📊 Moradia\n   🔴 ATRASADO\n\n4. Água\n   💰 R$ 80,10\n   📊 Moradia\n   ⚠️ VENCE HOJE\n\n5. Seguro\n   💰 R$ 310,00\n   📊 Moradia\n   🟡 Vence em 1 dias\n\n6. Condomínio\n   💰 R$ 450,00\n   📊 Moradia\n   Vence dia 31\n\n7. Sem valor\n   💰 R$ 0,00\n   📊 Moradia\n   🟢 Vence dia 20\n\n💳 *CARTÃO DE CRÉDITO (na fatura):*\n\n1. Netflix\n   💰 R$ 55,90\n   📊 Lazer\n   ℹ️ Será debitado dia 15\n\n2. Spotify\n   💰 R$ 21,90\n   📊 Lazer\n   ℹ️ Debitado dia 3\n\n3. Academia\n   💰 R$ 119,90\n   📊 Saúde\n   ℹ️ Debitado dia 7\n\n4. Seguro cartão\n   💰 R$ 10,00\n   📊 Lazer\n   ℹ️ Debitado dia 9\n\n💰 *RECEITAS:*\n\n1. Salário\n   💵 R$ 5.000,00\n   📊 Salário\n   🔴 ATRASADO\n\n2. Aluguel recebido\n   💵 R$ 1.200,50\n   📊 Aluguel\n   🔴 ATRASADO\n\n3. Freela\n   💵 R$ 800,00\n   📊 Extra\n   🟢 Vence dia 25\n\n4. Cartão renda\n   💵 R$ 1,00\n   📊 Extra\n   🟢 Vence dia 20\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 2.670,45\n💳 Total Cartão: R$ 207,70\n💰 Total Receitas: R$ 7.001,50\n📊 Saldo Líquido: R$ 4.123,35"
+  },
+  {
+   "label": "grandes",
+   "today": "2026-02-10",
+   "rows": [
+    {
+     "descricao": "Casa",
+     "valor": "1234567.89",
+     "dia": 12,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Pequena",
+     "valor": "0.01",
+     "dia": 12,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Quase",
+     "valor": "0.005",
+     "dia": 12,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - FEVEREIRO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Casa\n   💰 R$ 1.234.567,89\n   📊 Moradia\n   🟡 Vence em 2 dias\n\n2. Pequena\n   💰 R$ 0,01\n   📊 Moradia\n   🟡 Vence em 2 dias\n\n3. Quase\n   💰 R$ 0,01\n   📊 Moradia\n   🟡 Vence em 2 dias\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 1.234.567,90\n📊 Saldo Líquido: R$ -1.234.567,90"
+  },
+  {
+   "label": "dias_invalidos",
+   "today": "2026-02-10",
+   "rows": [
+    {
+     "descricao": "Dia zero",
+     "valor": "10.00",
+     "dia": 0,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Dia 29",
+     "valor": "10.00",
+     "dia": 29,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Dia 30",
+     "valor": "20.00",
+     "dia": 30,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Dia 31",
+     "valor": "30.00",
+     "dia": 31,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Dia 28",
+     "valor": "40.00",
+     "dia": 28,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - FEVEREIRO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Dia zero\n   💰 R$ 10,00\n   📊 Moradia\n   Vence dia 0\n\n2. Dia 29\n   💰 R$ 10,00\n   📊 Moradia\n   Vence dia 29\n\n3. Dia 30\n   💰 R$ 20,00\n   📊 Moradia\n   Vence dia 30\n\n4. Dia 31\n   💰 R$ 30,00\n   📊 Moradia\n   Vence dia 31\n\n5. Dia 28\n   💰 R$ 40,00\n   📊 Moradia\n   🟢 Vence dia 28\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 110,00\n📊 Saldo Líquido: R$ -110,00"
+  },
+  {
+   "label": "receita_e_cartao",
+   "today": "2026-02-10",
+   "rows": [
+    {
+     "descricao": "Netflix",
+     "valor": "55.90",
+     "dia": 15,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Spotify",
+     "valor": "21.90",
+     "dia": 3,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Academia",
+     "valor": "119.90",
+     "dia": 7,
+     "categoria": "Saúde",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro cartão",
+     "valor": "10.00",
+     "dia": 9,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 5,
+     "categoria": "Salário",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel recebido",
+     "valor": "1200.50",
+     "dia": 7,
+     "categoria": "Aluguel",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": "800.00",
+     "dia": 25,
+     "categoria": "Extra",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Cartão renda",
+     "valor": "1.00",
+     "dia": 20,
+     "categoria": "Extra",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Renda"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - FEVEREIRO/2026* 📋\n\n💳 *CARTÃO DE CRÉDITO (na fatura):*\n\n1. Netflix\n   💰 R$ 55,90\n   📊 Lazer\n   ℹ️ Será debitado dia 15\n\n2. Spotify\n   💰 R$ 21,90\n   📊 Lazer\n   ℹ️ Debitado dia 3\n\n3. Academia\n   💰 R$ 119,90\n   📊 Saúde\n   ℹ️ Debitado dia 7\n\n4. Seguro cartão\n   💰 R$ 10,00\n   📊 Lazer\n   ℹ️ Debitado dia 9\n\n💰 *RECEITAS:*\n\n1. Salário\n   💵 R$ 5.000,00\n   📊 Salário\n   🔴 ATRASADO\n\n2. Aluguel recebido\n   💵 R$ 1.200,50\n   📊 Aluguel\n   🔴 ATRASADO\n\n3. Freela\n   💵 R$ 800,00\n   📊 Extra\n   🟢 Vence dia 25\n\n4. Cartão renda\n   💵 R$ 1,00\n   📊 Extra\n   🟢 Vence dia 20\n\n━━━━━━━━━━━━━━━━━━━━\n💳 Total Cartão: R$ 207,70\n💰 Total Receitas: R$ 7.001,50\n📊 Saldo Líquido: R$ 6.793,80"
+  },
+  {
+   "label": "vazio",
+   "today": "2026-12-31",
+   "rows": [],
+   "text": "✅ Você não tem contas fixas pendentes este mês! 🎉"
+  },
+  {
+   "label": "despesas",
+   "today": "2026-12-31",
+   "rows": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 1,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 7,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Luz",
+     "valor": "230.45",
+     "dia": 8,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Água",
+     "valor": "80.10",
+     "dia": 10,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro",
+     "valor": "310.00",
+     "dia": 11,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Condomínio",
+     "valor": "450.00",
+     "dia": 31,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 20,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - DEZEMBRO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Aluguel\n   💰 R$ 1.500,00\n   📊 Moradia\n   🔴 ATRASADO\n\n2. Internet\n   💰 R$ 99,90\n   📊 Moradia\n   🔴 ATRASADO\n\n3. Luz\n   💰 R$ 230,45\n   📊 Moradia\n   🔴 ATRASADO\n\n4. Água\n   💰 R$ 80,10\n   📊 Moradia\n   🔴 ATRASADO\n\n5. Seguro\n   💰 R$ 310,00\n   📊 Moradia\n   🔴 ATRASADO\n\n6. Condomínio\n   💰 R$ 450,00\n   📊 Moradia\n   ⚠️ VENCE HOJE\n\n7. Sem valor\n   💰 R$ 0,00\n   📊 Moradia\n   🔴 ATRASADO\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 2.670,45\n📊 Saldo Líquido: R$ -2.670,45"
+  },
+  {
+   "label": "cartao",
+   "today": "2026-12-31",
+   "rows": [
+    {
+     "descricao": "Netflix",
+     "valor": "55.90",
+     "dia": 15,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Spotify",
+     "valor": "21.90",
+     "dia": 3,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Academia",
+     "valor": "119.90",
+     "dia": 7,
+     "categoria": "Saúde",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro cartão",
+     "valor": "10.00",
+     "dia": 9,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - DEZEMBRO/2026* 📋\n\n💳 *CARTÃO DE CRÉDITO (na fatura):*\n\n1. Netflix\n   💰 R$ 55,90\n   📊 Lazer\n   ℹ️ Debitado dia 15\n\n2. Spotify\n   💰 R$ 21,90\n   📊 Lazer\n   ℹ️ Debitado dia 3\n\n3. Academia\n   💰 R$ 119,90\n   📊 Saúde\n   ℹ️ Debitado dia 7\n\n4. Seguro cartão\n   💰 R$ 10,00\n   📊 Lazer\n   ℹ️ Debitado dia 9\n\n━━━━━━━━━━━━━━━━━━━━\n💳 Total Cartão: R$ 207,70\n📊 Saldo Líquido: R$ -207,70"
+  },
+  {
+   "label": "receitas",
+   "today": "2026-12-31",
+   "rows": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 5,
+     "categoria": "Salário",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel recebido",
+     "valor": "1200.50",
+     "dia": 7,
+     "categoria": "Aluguel",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": "800.00",
+     "dia": 25,
+     "categoria": "Extra",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Cartão renda",
+     "valor": "1.00",
+     "dia": 20,
+     "categoria": "Extra",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Renda"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - DEZEMBRO/2026* 📋\n\n💰 *RECEITAS:*\n\n1. Salário\n   💵 R$ 5.000,00\n   📊 Salário\n   🔴 ATRASADO\n\n2. Aluguel recebido\n   💵 R$ 1.200,50\n   📊 Aluguel\n   🔴 ATRASADO\n\n3. Freela\n   💵 R$ 800,00\n   📊 Extra\n   🔴 ATRASADO\n\n4. Cartão renda\n   💵 R$ 1,00\n   📊 Extra\n   🔴 ATRASADO\n\n━━━━━━━━━━━━━━━━━━━━\n💰 Total Receitas: R$ 7.001,50\n📊 Saldo Líquido: R$ 7.001,50"
+  },
+  {
+   "label": "tudo",
+   "today": "2026-12-31",
+   "rows": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 1,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 7,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Luz",
+     "valor": "230.45",
+     "dia": 8,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Água",
+     "valor": "80.10",
+     "dia": 10,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro",
+     "valor": "310.00",
+     "dia": 11,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Condomínio",
+     "valor": "450.00",
+     "dia": 31,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 20,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Netflix",
+     "valor": "55.90",
+     "dia": 15,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Spotify",
+     "valor": "21.90",
+     "dia": 3,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Academia",
+     "valor": "119.90",
+     "dia": 7,
+     "categoria": "Saúde",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro cartão",
+     "valor": "10.00",
+     "dia": 9,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 5,
+     "categoria": "Salário",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel recebido",
+     "valor": "1200.50",
+     "dia": 7,
+     "categoria": "Aluguel",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": "800.00",
+     "dia": 25,
+     "categoria": "Extra",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Cartão renda",
+     "valor": "1.00",
+     "dia": 20,
+     "categoria": "Extra",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Renda"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - DEZEMBRO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Aluguel\n   💰 R$ 1.500,00\n   📊 Moradia\n   🔴 ATRASADO\n\n2. Internet\n   💰 R$ 99,90\n   📊 Moradia\n   🔴 ATRASADO\n\n3. Luz\n   💰 R$ 230,45\n   📊 Moradia\n   🔴 ATRASADO\n\n4. Água\n   💰 R$ 80,10\n   📊 Moradia\n   🔴 ATRASADO\n\n5. Seguro\n   💰 R$ 310,00\n   📊 Moradia\n   🔴 ATRASADO\n\n6. Condomínio\n   💰 R$ 450,00\n   📊 Moradia\n   ⚠️ VENCE HOJE\n\n7. Sem valor\n   💰 R$ 0,00\n   📊 Moradia\n   🔴 ATRASADO\n\n💳 *CARTÃO DE CRÉDITO (na fatura):*\n\n1. Netflix\n   💰 R$ 55,90\n   📊 Lazer\n   ℹ️ Debitado dia 15\n\n2. Spotify\n   💰 R$ 21,90\n   📊 Lazer\n   ℹ️ Debitado dia 3\n\n3. Academia\n   💰 R$ 119,90\n   📊 Saúde\n   ℹ️ Debitado dia 7\n\n4. Seguro cartão\n   💰 R$ 10,00\n   📊 Lazer\n   ℹ️ Debitado dia 9\n\n💰 *RECEITAS:*\n\n1. Salário\n   💵 R$ 5.000,00\n   📊 Salário\n   🔴 ATRASADO\n\n2. Aluguel recebido\n   💵 R$ 1.200,50\n   📊 Aluguel\n   🔴 ATRASADO\n\n3. Freela\n   💵 R$ 800,00\n   📊 Extra\n   🔴 ATRASADO\n\n4. Cartão renda\n   💵 R$ 1,00\n   📊 Extra\n   🔴 ATRASADO\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 2.670,45\n💳 Total Cartão: R$ 207,70\n💰 Total Receitas: R$ 7.001,50\n📊 Saldo Líquido: R$ 4.123,35"
+  },
+  {
+   "label": "grandes",
+   "today": "2026-12-31",
+   "rows": [
+    {
+     "descricao": "Casa",
+     "valor": "1234567.89",
+     "dia": 12,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Pequena",
+     "valor": "0.01",
+     "dia": 12,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Quase",
+     "valor": "0.005",
+     "dia": 12,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - DEZEMBRO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Casa\n   💰 R$ 1.234.567,89\n   📊 Moradia\n   🔴 ATRASADO\n\n2. Pequena\n   💰 R$ 0,01\n   📊 Moradia\n   🔴 ATRASADO\n\n3. Quase\n   💰 R$ 0,01\n   📊 Moradia\n   🔴 ATRASADO\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 1.234.567,90\n📊 Saldo Líquido: R$ -1.234.567,90"
+  },
+  {
+   "label": "dias_invalidos",
+   "today": "2026-12-31",
+   "rows": [
+    {
+     "descricao": "Dia zero",
+     "valor": "10.00",
+     "dia": 0,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Dia 29",
+     "valor": "10.00",
+     "dia": 29,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Dia 30",
+     "valor": "20.00",
+     "dia": 30,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Dia 31",
+     "valor": "30.00",
+     "dia": 31,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Dia 28",
+     "valor": "40.00",
+     "dia": 28,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - DEZEMBRO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Dia zero\n   💰 R$ 10,00\n   📊 Moradia\n   Vence dia 0\n\n2. Dia 29\n   💰 R$ 10,00\n   📊 Moradia\n   🔴 ATRASADO\n\n3. Dia 30\n   💰 R$ 20,00\n   📊 Moradia\n   🔴 ATRASADO\n\n4. Dia 31\n   💰 R$ 30,00\n   📊 Moradia\n   ⚠️ VENCE HOJE\n\n5. Dia 28\n   💰 R$ 40,00\n   📊 Moradia\n   🔴 ATRASADO\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 110,00\n📊 Saldo Líquido: R$ -110,00"
+  },
+  {
+   "label": "receita_e_cartao",
+   "today": "2026-12-31",
+   "rows": [
+    {
+     "descricao": "Netflix",
+     "valor": "55.90",
+     "dia": 15,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Spotify",
+     "valor": "21.90",
+     "dia": 3,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Academia",
+     "valor": "119.90",
+     "dia": 7,
+     "categoria": "Saúde",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro cartão",
+     "valor": "10.00",
+     "dia": 9,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 5,
+     "categoria": "Salário",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel recebido",
+     "valor": "1200.50",
+     "dia": 7,
+     "categoria": "Aluguel",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": "800.00",
+     "dia": 25,
+     "categoria": "Extra",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Cartão renda",
+     "valor": "1.00",
+     "dia": 20,
+     "categoria": "Extra",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Renda"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - DEZEMBRO/2026* 📋\n\n💳 *CARTÃO DE CRÉDITO (na fatura):*\n\n1. Netflix\n   💰 R$ 55,90\n   📊 Lazer\n   ℹ️ Debitado dia 15\n\n2. Spotify\n   💰 R$ 21,90\n   📊 Lazer\n   ℹ️ Debitado dia 3\n\n3. Academia\n   💰 R$ 119,90\n   📊 Saúde\n   ℹ️ Debitado dia 7\n\n4. Seguro cartão\n   💰 R$ 10,00\n   📊 Lazer\n   ℹ️ Debitado dia 9\n\n💰 *RECEITAS:*\n\n1. Salário\n   💵 R$ 5.000,00\n   📊 Salário\n   🔴 ATRASADO\n\n2. Aluguel recebido\n   💵 R$ 1.200,50\n   📊 Aluguel\n   🔴 ATRASADO\n\n3. Freela\n   💵 R$ 800,00\n   📊 Extra\n   🔴 ATRASADO\n\n4. Cartão renda\n   💵 R$ 1,00\n   📊 Extra\n   🔴 ATRASADO\n\n━━━━━━━━━━━━━━━━━━━━\n💳 Total Cartão: R$ 207,70\n💰 Total Receitas: R$ 7.001,50\n📊 Saldo Líquido: R$ 6.793,80"
+  },
+  {
+   "label": "vazio",
+   "today": "2026-03-01",
+   "rows": [],
+   "text": "✅ Você não tem contas fixas pendentes este mês! 🎉"
+  },
+  {
+   "label": "despesas",
+   "today": "2026-03-01",
+   "rows": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 1,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 7,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Luz",
+     "valor": "230.45",
+     "dia": 8,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Água",
+     "valor": "80.10",
+     "dia": 10,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro",
+     "valor": "310.00",
+     "dia": 11,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Condomínio",
+     "valor": "450.00",
+     "dia": 31,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 20,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - MARÇO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Aluguel\n   💰 R$ 1.500,00\n   📊 Moradia\n   ⚠️ VENCE HOJE\n\n2. Internet\n   💰 R$ 99,90\n   📊 Moradia\n   🟢 Vence dia 7\n\n3. Luz\n   💰 R$ 230,45\n   📊 Moradia\n   🟢 Vence dia 8\n\n4. Água\n   💰 R$ 80,10\n   📊 Moradia\n   🟢 Vence dia 10\n\n5. Seguro\n   💰 R$ 310,00\n   📊 Moradia\n   🟢 Vence dia 11\n\n6. Condomínio\n   💰 R$ 450,00\n   📊 Moradia\n   🟢 Vence dia 31\n\n7. Sem valor\n   💰 R$ 0,00\n   📊 Moradia\n   🟢 Vence dia 20\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 2.670,45\n📊 Saldo Líquido: R$ -2.670,45"
+  },
+  {
+   "label": "cartao",
+   "today": "2026-03-01",
+   "rows": [
+    {
+     "descricao": "Netflix",
+     "valor": "55.90",
+     "dia": 15,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Spotify",
+     "valor": "21.90",
+     "dia": 3,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Academia",
+     "valor": "119.90",
+     "dia": 7,
+     "categoria": "Saúde",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro cartão",
+     "valor": "10.00",
+     "dia": 9,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - MARÇO/2026* 📋\n\n💳 *CARTÃO DE CRÉDITO (na fatura):*\n\n1. Netflix\n   💰 R$ 55,90\n   📊 Lazer\n   ℹ️ Será debitado dia 15\n\n2. Spotify\n   💰 R$ 21,90\n   📊 Lazer\n   ℹ️ Será debitado em 2 dias\n\n3. Academia\n   💰 R$ 119,90\n   📊 Saúde\n   ℹ️ Será debitado dia 7\n\n4. Seguro cartão\n   💰 R$ 10,00\n   📊 Lazer\n   ℹ️ Será debitado dia 9\n\n━━━━━━━━━━━━━━━━━━━━\n💳 Total Cartão: R$ 207,70\n📊 Saldo Líquido: R$ -207,70"
+  },
+  {
+   "label": "receitas",
+   "today": "2026-03-01",
+   "rows": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 5,
+     "categoria": "Salário",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel recebido",
+     "valor": "1200.50",
+     "dia": 7,
+     "categoria": "Aluguel",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": "800.00",
+     "dia": 25,
+     "categoria": "Extra",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Cartão renda",
+     "valor": "1.00",
+     "dia": 20,
+     "categoria": "Extra",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Renda"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - MARÇO/2026* 📋\n\n💰 *RECEITAS:*\n\n1. Salário\n   💵 R$ 5.000,00\n   📊 Salário\n   🟢 Vence dia 5\n\n2. Aluguel recebido\n   💵 R$ 1.200,50\n   📊 Aluguel\n   🟢 Vence dia 7\n\n3. Freela\n   💵 R$ 800,00\n   📊 Extra\n   🟢 Vence dia 25\n\n4. Cartão renda\n   💵 R$ 1,00\n   📊 Extra\n   🟢 Vence dia 20\n\n━━━━━━━━━━━━━━━━━━━━\n💰 Total Receitas: R$ 7.001,50\n📊 Saldo Líquido: R$ 7.001,50"
+  },
+  {
+   "label": "tudo",
+   "today": "2026-03-01",
+   "rows": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 1,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 7,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Luz",
+     "valor": "230.45",
+     "dia": 8,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Água",
+     "valor": "80.10",
+     "dia": 10,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro",
+     "valor": "310.00",
+     "dia": 11,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Condomínio",
+     "valor": "450.00",
+     "dia": 31,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 20,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Netflix",
+     "valor": "55.90",
+     "dia": 15,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Spotify",
+     "valor": "21.90",
+     "dia": 3,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Academia",
+     "valor": "119.90",
+     "dia": 7,
+     "categoria": "Saúde",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro cartão",
+     "valor": "10.00",
+     "dia": 9,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 5,
+     "categoria": "Salário",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel recebido",
+     "valor": "1200.50",
+     "dia": 7,
+     "categoria": "Aluguel",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": "800.00",
+     "dia": 25,
+     "categoria": "Extra",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Cartão renda",
+     "valor": "1.00",
+     "dia": 20,
+     "categoria": "Extra",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Renda"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - MARÇO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Aluguel\n   💰 R$ 1.500,00\n   📊 Moradia\n   ⚠️ VENCE HOJE\n\n2. Internet\n   💰 R$ 99,90\n   📊 Moradia\n   🟢 Vence dia 7\n\n3. Luz\n   💰 R$ 230,45\n   📊 Moradia\n   🟢 Vence dia 8\n\n4. Água\n   💰 R$ 80,10\n   📊 Moradia\n   🟢 Vence dia 10\n\n5. Seguro\n   💰 R$ 310,00\n   📊 Moradia\n   🟢 Vence dia 11\n\n6. Condomínio\n   💰 R$ 450,00\n   📊 Moradia\n   🟢 Vence dia 31\n\n7. Sem valor\n   💰 R$ 0,00\n   📊 Moradia\n   🟢 Vence dia 20\n\n💳 *CARTÃO DE CRÉDITO (na fatura):*\n\n1. Netflix\n   💰 R$ 55,90\n   📊 Lazer\n   ℹ️ Será debitado dia 15\n\n2. Spotify\n   💰 R$ 21,90\n   📊 Lazer\n   ℹ️ Será debitado em 2 dias\n\n3. Academia\n   💰 R$ 119,90\n   📊 Saúde\n   ℹ️ Será debitado dia 7\n\n4. Seguro cartão\n   💰 R$ 10,00\n   📊 Lazer\n   ℹ️ Será debitado dia 9\n\n💰 *RECEITAS:*\n\n1. Salário\n   💵 R$ 5.000,00\n   📊 Salário\n   🟢 Vence dia 5\n\n2. Aluguel recebido\n   💵 R$ 1.200,50\n   📊 Aluguel\n   🟢 Vence dia 7\n\n3. Freela\n   💵 R$ 800,00\n   📊 Extra\n   🟢 Vence dia 25\n\n4. Cartão renda\n   💵 R$ 1,00\n   📊 Extra\n   🟢 Vence dia 20\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 2.670,45\n💳 Total Cartão: R$ 207,70\n💰 Total Receitas: R$ 7.001,50\n📊 Saldo Líquido: R$ 4.123,35"
+  },
+  {
+   "label": "grandes",
+   "today": "2026-03-01",
+   "rows": [
+    {
+     "descricao": "Casa",
+     "valor": "1234567.89",
+     "dia": 12,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Pequena",
+     "valor": "0.01",
+     "dia": 12,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Quase",
+     "valor": "0.005",
+     "dia": 12,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - MARÇO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Casa\n   💰 R$ 1.234.567,89\n   📊 Moradia\n   🟢 Vence dia 12\n\n2. Pequena\n   💰 R$ 0,01\n   📊 Moradia\n   🟢 Vence dia 12\n\n3. Quase\n   💰 R$ 0,01\n   📊 Moradia\n   🟢 Vence dia 12\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 1.234.567,90\n📊 Saldo Líquido: R$ -1.234.567,90"
+  },
+  {
+   "label": "dias_invalidos",
+   "today": "2026-03-01",
+   "rows": [
+    {
+     "descricao": "Dia zero",
+     "valor": "10.00",
+     "dia": 0,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Dia 29",
+     "valor": "10.00",
+     "dia": 29,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Dia 30",
+     "valor": "20.00",
+     "dia": 30,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Dia 31",
+     "valor": "30.00",
+     "dia": 31,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Dia 28",
+     "valor": "40.00",
+     "dia": 28,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - MARÇO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Dia zero\n   💰 R$ 10,00\n   📊 Moradia\n   Vence dia 0\n\n2. Dia 29\n   💰 R$ 10,00\n   📊 Moradia\n   🟢 Vence dia 29\n\n3. Dia 30\n   💰 R$ 20,00\n   📊 Moradia\n   🟢 Vence dia 30\n\n4. Dia 31\n   💰 R$ 30,00\n   📊 Moradia\n   🟢 Vence dia 31\n\n5. Dia 28\n   💰 R$ 40,00\n   📊 Moradia\n   🟢 Vence dia 28\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 110,00\n📊 Saldo Líquido: R$ -110,00"
+  },
+  {
+   "label": "receita_e_cartao",
+   "today": "2026-03-01",
+   "rows": [
+    {
+     "descricao": "Netflix",
+     "valor": "55.90",
+     "dia": 15,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Spotify",
+     "valor": "21.90",
+     "dia": 3,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Academia",
+     "valor": "119.90",
+     "dia": 7,
+     "categoria": "Saúde",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro cartão",
+     "valor": "10.00",
+     "dia": 9,
+     "categoria": "Lazer",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 5,
+     "categoria": "Salário",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel recebido",
+     "valor": "1200.50",
+     "dia": 7,
+     "categoria": "Aluguel",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": "800.00",
+     "dia": 25,
+     "categoria": "Extra",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Cartão renda",
+     "valor": "1.00",
+     "dia": 20,
+     "categoria": "Extra",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Renda"
+    }
+   ],
+   "text": "📋 *CONTAS FIXAS PENDENTES - MARÇO/2026* 📋\n\n💳 *CARTÃO DE CRÉDITO (na fatura):*\n\n1. Netflix\n   💰 R$ 55,90\n   📊 Lazer\n   ℹ️ Será debitado dia 15\n\n2. Spotify\n   💰 R$ 21,90\n   📊 Lazer\n   ℹ️ Será debitado em 2 dias\n\n3. Academia\n   💰 R$ 119,90\n   📊 Saúde\n   ℹ️ Será debitado dia 7\n\n4. Seguro cartão\n   💰 R$ 10,00\n   📊 Lazer\n   ℹ️ Será debitado dia 9\n\n💰 *RECEITAS:*\n\n1. Salário\n   💵 R$ 5.000,00\n   📊 Salário\n   🟢 Vence dia 5\n\n2. Aluguel recebido\n   💵 R$ 1.200,50\n   📊 Aluguel\n   🟢 Vence dia 7\n\n3. Freela\n   💵 R$ 800,00\n   📊 Extra\n   🟢 Vence dia 25\n\n4. Cartão renda\n   💵 R$ 1,00\n   📊 Extra\n   🟢 Vence dia 20\n\n━━━━━━━━━━━━━━━━━━━━\n💳 Total Cartão: R$ 207,70\n💰 Total Receitas: R$ 7.001,50\n📊 Saldo Líquido: R$ 6.793,80"
+  }
+ ],
+ "catalog": [
+  {
+   "label": "vazio",
+   "rows": [],
+   "text": "📋 Você não tem contas recorrentes cadastradas."
+  },
+  {
+   "label": "mix",
+   "rows": [
+    {
+     "descricao": "Feira",
+     "valor": "120.00",
+     "dia": 6,
+     "mes": null,
+     "periodicidade": "SEMANAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Netflix semanal",
+     "valor": "10.10",
+     "dia": 2,
+     "mes": null,
+     "periodicidade": "SEMANAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Mesada",
+     "valor": "50.00",
+     "dia": 1,
+     "mes": null,
+     "periodicidade": "SEMANAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Faxina",
+     "valor": "200.00",
+     "dia": 15,
+     "mes": null,
+     "periodicidade": "QUINZENAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Streaming",
+     "valor": "33.33",
+     "dia": 10,
+     "mes": null,
+     "periodicidade": "QUINZENAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Bico",
+     "valor": "300.00",
+     "dia": 5,
+     "mes": null,
+     "periodicidade": "QUINZENAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 5,
+     "mes": null,
+     "periodicidade": "MENSAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 10,
+     "mes": null,
+     "periodicidade": "MENSAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Academia",
+     "valor": "119.90",
+     "dia": 12,
+     "mes": null,
+     "periodicidade": "MENSAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 5,
+     "mes": null,
+     "periodicidade": "MENSAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "IPTU",
+     "valor": "1200.00",
+     "dia": 10,
+     "mes": 3,
+     "periodicidade": "ANUAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Seguro",
+     "valor": "900.00",
+     "dia": 15,
+     "mes": null,
+     "periodicidade": "ANUAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Cartão de Crédito",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Bônus",
+     "valor": "2000.00",
+     "dia": 20,
+     "mes": 12,
+     "periodicidade": "ANUAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Mês zero",
+     "valor": "1.00",
+     "dia": 1,
+     "mes": 0,
+     "periodicidade": "ANUAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Mês 13",
+     "valor": "1.00",
+     "dia": 1,
+     "mes": 13,
+     "periodicidade": "ANUAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *TODAS AS SUAS CONTAS RECORRENTES* 📋\n\n*🔄 SEMANAL*\n─────────────────────\n💸 *Despesas:*\n  • Feira\n    R$ 120,00 · toda semana (dia 6)\n\n💳 *Cartão de Crédito:*\n  • Netflix semanal\n    R$ 10,10 · toda semana (dia 2)\n\n💰 *Receitas:*\n  • Mesada\n    R$ 50,00 · toda semana (dia 1)\n\n*🔄 QUINZENAL*\n─────────────────────\n💸 *Despesas:*\n  • Faxina\n    R$ 200,00 · quinzenal (dia 15)\n\n💳 *Cartão de Crédito:*\n  • Streaming\n    R$ 33,33 · quinzenal (dia 10)\n\n💰 *Receitas:*\n  • Bico\n    R$ 300,00 · quinzenal (dia 5)\n\n*📅 MENSAL*\n─────────────────────\n💸 *Despesas:*\n  • Aluguel\n    R$ 1.500,00 · dia 5\n  • Internet\n    R$ 99,90 · dia 10\n\n💳 *Cartão de Crédito:*\n  • Academia\n    R$ 119,90 · dia 12\n\n💰 *Receitas:*\n  • Salário\n    R$ 5.000,00 · dia 5\n\n*📆 ANUAL*\n─────────────────────\n💸 *Despesas:*\n  • IPTU\n    R$ 1.200,00 · Março, dia 10\n  • Mês zero\n    R$ 1,00 · ?, dia 1\n  • Mês 13\n    R$ 1,00 · 13, dia 1\n\n💳 *Cartão de Crédito:*\n  • Seguro\n    R$ 900,00 · ?, dia 15\n\n💰 *Receitas:*\n  • Bônus\n    R$ 2.000,00 · Dezembro, dia 20\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total despesas mensais: R$ 2.787,13\n_(semanais e quinzenais convertidas para média mensal; anuais ficam de fora)_"
+  },
+  {
+   "label": "sem_periodicidade",
+   "rows": [
+    {
+     "descricao": "Sem periodo",
+     "valor": "10.00",
+     "dia": 9,
+     "mes": null,
+     "periodicidade": null,
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Vazia",
+     "valor": "5.50",
+     "dia": 9,
+     "mes": null,
+     "periodicidade": "",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *TODAS AS SUAS CONTAS RECORRENTES* 📋\n\n*📅 MENSAL*\n─────────────────────\n💸 *Despesas:*\n  • Sem periodo\n    R$ 10,00 · dia 9\n  • Vazia\n    R$ 5,50 · dia 9\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total despesas mensais: R$ 15,50\n_(semanais e quinzenais convertidas para média mensal; anuais ficam de fora)_"
+  },
+  {
+   "label": "diaria_oculta",
+   "rows": [
+    {
+     "descricao": "Café",
+     "valor": "5.00",
+     "dia": 1,
+     "mes": null,
+     "periodicidade": "DIARIA",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 5,
+     "mes": null,
+     "periodicidade": "MENSAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *TODAS AS SUAS CONTAS RECORRENTES* 📋\n\n*📅 MENSAL*\n─────────────────────\n💸 *Despesas:*\n  • Aluguel\n    R$ 1.500,00 · dia 5\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total despesas mensais: R$ 1.500,00\n_(semanais e quinzenais convertidas para média mensal; anuais ficam de fora)_"
+  },
+  {
+   "label": "so_diaria",
+   "rows": [
+    {
+     "descricao": "Café",
+     "valor": "5.00",
+     "dia": 1,
+     "mes": null,
+     "periodicidade": "DIARIA",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *TODAS AS SUAS CONTAS RECORRENTES* 📋\n\n"
+  },
+  {
+   "label": "so_receitas",
+   "rows": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 5,
+     "mes": null,
+     "periodicidade": "MENSAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": "300.00",
+     "dia": 9,
+     "mes": null,
+     "periodicidade": "SEMANAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Renda"
+    }
+   ],
+   "text": "📋 *TODAS AS SUAS CONTAS RECORRENTES* 📋\n\n*🔄 SEMANAL*\n─────────────────────\n💰 *Receitas:*\n  • Freela\n    R$ 300,00 · toda semana (dia 9)\n\n*📅 MENSAL*\n─────────────────────\n💰 *Receitas:*\n  • Salário\n    R$ 5.000,00 · dia 5\n\n"
+  },
+  {
+   "label": "so_anuais",
+   "rows": [
+    {
+     "descricao": "IPTU",
+     "valor": "1200.00",
+     "dia": 10,
+     "mes": 3,
+     "periodicidade": "ANUAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *TODAS AS SUAS CONTAS RECORRENTES* 📋\n\n*📆 ANUAL*\n─────────────────────\n💸 *Despesas:*\n  • IPTU\n    R$ 1.200,00 · Março, dia 10\n\n"
+  },
+  {
+   "label": "valor_nulo",
+   "rows": [
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 3,
+     "mes": null,
+     "periodicidade": "MENSAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *TODAS AS SUAS CONTAS RECORRENTES* 📋\n\n*📅 MENSAL*\n─────────────────────\n💸 *Despesas:*\n  • Sem valor\n    R$ 0,00 · dia 3\n\n"
+  },
+  {
+   "label": "soma_flutuante",
+   "rows": [
+    {
+     "descricao": "A",
+     "valor": "0.10",
+     "dia": 1,
+     "mes": null,
+     "periodicidade": "SEMANAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "B",
+     "valor": "0.20",
+     "dia": 2,
+     "mes": null,
+     "periodicidade": "SEMANAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "C",
+     "valor": "0.30",
+     "dia": 3,
+     "mes": null,
+     "periodicidade": "QUINZENAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "D",
+     "valor": "1234567.89",
+     "dia": 4,
+     "mes": null,
+     "periodicidade": "MENSAL",
+     "categoria": "Moradia",
+     "tipo_conta": "Conta Corrente",
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "text": "📋 *TODAS AS SUAS CONTAS RECORRENTES* 📋\n\n*🔄 SEMANAL*\n─────────────────────\n💸 *Despesas:*\n  • A\n    R$ 0,10 · toda semana (dia 1)\n  • B\n    R$ 0,20 · toda semana (dia 2)\n\n*🔄 QUINZENAL*\n─────────────────────\n💸 *Despesas:*\n  • C\n    R$ 0,30 · quinzenal (dia 3)\n\n*📅 MENSAL*\n─────────────────────\n💸 *Despesas:*\n  • D\n    R$ 1.234.567,89 · dia 4\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total despesas mensais: R$ 1.234.569,84\n_(semanais e quinzenais convertidas para média mensal; anuais ficam de fora)_"
+  }
+ ],
+ "due": [
+  {
+   "label": "vazio",
+   "period": "HOJE",
+   "reference": "2026-10-07",
+   "bills": [],
+   "invoices": [],
+   "text": "✅ Nenhuma conta vence hoje!"
+  },
+  {
+   "label": "receitas",
+   "period": "HOJE",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": null,
+     "dia": 7,
+     "nome_grupo": "Renda"
+    }
+   ],
+   "invoices": [],
+   "text": "📋 *CONTAS QUE VENCEM HOJE* (07/10)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n• Freela - R$ 0,00 (dia 7)\n\n*Receitas:* R$ 5.000,00\n*Saldo Previsto:* R$ 5.000,00"
+  },
+  {
+   "label": "despesas",
+   "period": "HOJE",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [],
+   "text": "📋 *CONTAS QUE VENCEM HOJE* (07/10)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*Despesas:* R$ 1.599,90\n*Saldo Previsto:* R$ -1.599,90"
+  },
+  {
+   "label": "faturas",
+   "period": "HOJE",
+   "reference": "2026-10-07",
+   "bills": [],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM HOJE* (07/10)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -1.250,50"
+  },
+  {
+   "label": "tudo",
+   "period": "HOJE",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": null,
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM HOJE* (07/10)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n• Freela - R$ 0,00 (dia 7)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Receitas:* R$ 5.000,00\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ 2.149,60"
+  },
+  {
+   "label": "despesas_e_faturas",
+   "period": "HOJE",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM HOJE* (07/10)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -2.850,40"
+  },
+  {
+   "label": "saldo_negativo",
+   "period": "HOJE",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM HOJE* (07/10)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -2.850,40"
+  },
+  {
+   "label": "receitas_e_faturas",
+   "period": "HOJE",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM HOJE* (07/10)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n\n*Receitas:* R$ 5.000,00\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ 3.749,50"
+  },
+  {
+   "label": "vazio",
+   "period": "HOJE",
+   "reference": "2026-12-31",
+   "bills": [],
+   "invoices": [],
+   "text": "✅ Nenhuma conta vence hoje!"
+  },
+  {
+   "label": "receitas",
+   "period": "HOJE",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": null,
+     "dia": 7,
+     "nome_grupo": "Renda"
+    }
+   ],
+   "invoices": [],
+   "text": "📋 *CONTAS QUE VENCEM HOJE* (31/12)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n• Freela - R$ 0,00 (dia 7)\n\n*Receitas:* R$ 5.000,00\n*Saldo Previsto:* R$ 5.000,00"
+  },
+  {
+   "label": "despesas",
+   "period": "HOJE",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [],
+   "text": "📋 *CONTAS QUE VENCEM HOJE* (31/12)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*Despesas:* R$ 1.599,90\n*Saldo Previsto:* R$ -1.599,90"
+  },
+  {
+   "label": "faturas",
+   "period": "HOJE",
+   "reference": "2026-12-31",
+   "bills": [],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM HOJE* (31/12)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -1.250,50"
+  },
+  {
+   "label": "tudo",
+   "period": "HOJE",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": null,
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM HOJE* (31/12)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n• Freela - R$ 0,00 (dia 7)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Receitas:* R$ 5.000,00\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ 2.149,60"
+  },
+  {
+   "label": "despesas_e_faturas",
+   "period": "HOJE",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM HOJE* (31/12)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -2.850,40"
+  },
+  {
+   "label": "saldo_negativo",
+   "period": "HOJE",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM HOJE* (31/12)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -2.850,40"
+  },
+  {
+   "label": "receitas_e_faturas",
+   "period": "HOJE",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM HOJE* (31/12)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n\n*Receitas:* R$ 5.000,00\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ 3.749,50"
+  },
+  {
+   "label": "vazio",
+   "period": "AMANHÃ",
+   "reference": "2026-10-07",
+   "bills": [],
+   "invoices": [],
+   "text": "✅ Nenhuma conta vence amanhã!"
+  },
+  {
+   "label": "receitas",
+   "period": "AMANHÃ",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": null,
+     "dia": 7,
+     "nome_grupo": "Renda"
+    }
+   ],
+   "invoices": [],
+   "text": "📋 *CONTAS QUE VENCEM AMANHÃ* (07/10)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n• Freela - R$ 0,00 (dia 7)\n\n*Receitas:* R$ 5.000,00\n*Saldo Previsto:* R$ 5.000,00"
+  },
+  {
+   "label": "despesas",
+   "period": "AMANHÃ",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [],
+   "text": "📋 *CONTAS QUE VENCEM AMANHÃ* (07/10)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*Despesas:* R$ 1.599,90\n*Saldo Previsto:* R$ -1.599,90"
+  },
+  {
+   "label": "faturas",
+   "period": "AMANHÃ",
+   "reference": "2026-10-07",
+   "bills": [],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM AMANHÃ* (07/10)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -1.250,50"
+  },
+  {
+   "label": "tudo",
+   "period": "AMANHÃ",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": null,
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM AMANHÃ* (07/10)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n• Freela - R$ 0,00 (dia 7)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Receitas:* R$ 5.000,00\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ 2.149,60"
+  },
+  {
+   "label": "despesas_e_faturas",
+   "period": "AMANHÃ",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM AMANHÃ* (07/10)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -2.850,40"
+  },
+  {
+   "label": "saldo_negativo",
+   "period": "AMANHÃ",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM AMANHÃ* (07/10)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -2.850,40"
+  },
+  {
+   "label": "receitas_e_faturas",
+   "period": "AMANHÃ",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM AMANHÃ* (07/10)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n\n*Receitas:* R$ 5.000,00\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ 3.749,50"
+  },
+  {
+   "label": "vazio",
+   "period": "AMANHÃ",
+   "reference": "2026-12-31",
+   "bills": [],
+   "invoices": [],
+   "text": "✅ Nenhuma conta vence amanhã!"
+  },
+  {
+   "label": "receitas",
+   "period": "AMANHÃ",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": null,
+     "dia": 7,
+     "nome_grupo": "Renda"
+    }
+   ],
+   "invoices": [],
+   "text": "📋 *CONTAS QUE VENCEM AMANHÃ* (31/12)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n• Freela - R$ 0,00 (dia 7)\n\n*Receitas:* R$ 5.000,00\n*Saldo Previsto:* R$ 5.000,00"
+  },
+  {
+   "label": "despesas",
+   "period": "AMANHÃ",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [],
+   "text": "📋 *CONTAS QUE VENCEM AMANHÃ* (31/12)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*Despesas:* R$ 1.599,90\n*Saldo Previsto:* R$ -1.599,90"
+  },
+  {
+   "label": "faturas",
+   "period": "AMANHÃ",
+   "reference": "2026-12-31",
+   "bills": [],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM AMANHÃ* (31/12)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -1.250,50"
+  },
+  {
+   "label": "tudo",
+   "period": "AMANHÃ",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": null,
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM AMANHÃ* (31/12)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n• Freela - R$ 0,00 (dia 7)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Receitas:* R$ 5.000,00\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ 2.149,60"
+  },
+  {
+   "label": "despesas_e_faturas",
+   "period": "AMANHÃ",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM AMANHÃ* (31/12)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -2.850,40"
+  },
+  {
+   "label": "saldo_negativo",
+   "period": "AMANHÃ",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM AMANHÃ* (31/12)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -2.850,40"
+  },
+  {
+   "label": "receitas_e_faturas",
+   "period": "AMANHÃ",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM AMANHÃ* (31/12)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n\n*Receitas:* R$ 5.000,00\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ 3.749,50"
+  },
+  {
+   "label": "vazio",
+   "period": "NOS PRÓXIMOS 7 DIAS",
+   "reference": "2026-10-07",
+   "bills": [],
+   "invoices": [],
+   "text": "✅ Nenhuma conta vence nos próximos 7 dias!"
+  },
+  {
+   "label": "receitas",
+   "period": "NOS PRÓXIMOS 7 DIAS",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": null,
+     "dia": 7,
+     "nome_grupo": "Renda"
+    }
+   ],
+   "invoices": [],
+   "text": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (07/10)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n• Freela - R$ 0,00 (dia 7)\n\n*Receitas:* R$ 5.000,00\n*Saldo Previsto:* R$ 5.000,00"
+  },
+  {
+   "label": "despesas",
+   "period": "NOS PRÓXIMOS 7 DIAS",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [],
+   "text": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (07/10)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*Despesas:* R$ 1.599,90\n*Saldo Previsto:* R$ -1.599,90"
+  },
+  {
+   "label": "faturas",
+   "period": "NOS PRÓXIMOS 7 DIAS",
+   "reference": "2026-10-07",
+   "bills": [],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (07/10)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -1.250,50"
+  },
+  {
+   "label": "tudo",
+   "period": "NOS PRÓXIMOS 7 DIAS",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": null,
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (07/10)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n• Freela - R$ 0,00 (dia 7)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Receitas:* R$ 5.000,00\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ 2.149,60"
+  },
+  {
+   "label": "despesas_e_faturas",
+   "period": "NOS PRÓXIMOS 7 DIAS",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (07/10)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -2.850,40"
+  },
+  {
+   "label": "saldo_negativo",
+   "period": "NOS PRÓXIMOS 7 DIAS",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (07/10)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -2.850,40"
+  },
+  {
+   "label": "receitas_e_faturas",
+   "period": "NOS PRÓXIMOS 7 DIAS",
+   "reference": "2026-10-07",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (07/10)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n\n*Receitas:* R$ 5.000,00\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ 3.749,50"
+  },
+  {
+   "label": "vazio",
+   "period": "NOS PRÓXIMOS 7 DIAS",
+   "reference": "2026-12-31",
+   "bills": [],
+   "invoices": [],
+   "text": "✅ Nenhuma conta vence nos próximos 7 dias!"
+  },
+  {
+   "label": "receitas",
+   "period": "NOS PRÓXIMOS 7 DIAS",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": null,
+     "dia": 7,
+     "nome_grupo": "Renda"
+    }
+   ],
+   "invoices": [],
+   "text": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (31/12)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n• Freela - R$ 0,00 (dia 7)\n\n*Receitas:* R$ 5.000,00\n*Saldo Previsto:* R$ 5.000,00"
+  },
+  {
+   "label": "despesas",
+   "period": "NOS PRÓXIMOS 7 DIAS",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [],
+   "text": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (31/12)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*Despesas:* R$ 1.599,90\n*Saldo Previsto:* R$ -1.599,90"
+  },
+  {
+   "label": "faturas",
+   "period": "NOS PRÓXIMOS 7 DIAS",
+   "reference": "2026-12-31",
+   "bills": [],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (31/12)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -1.250,50"
+  },
+  {
+   "label": "tudo",
+   "period": "NOS PRÓXIMOS 7 DIAS",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Freela",
+     "valor": null,
+     "dia": 7,
+     "nome_grupo": "Renda"
+    },
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (31/12)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n• Freela - R$ 0,00 (dia 7)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Receitas:* R$ 5.000,00\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ 2.149,60"
+  },
+  {
+   "label": "despesas_e_faturas",
+   "period": "NOS PRÓXIMOS 7 DIAS",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    },
+    {
+     "nome_conta": "Nubank",
+     "valor": "0",
+     "data_vencimento": "2026-10-09"
+    },
+    {
+     "nome_conta": "Zero",
+     "valor": null,
+     "data_vencimento": "2026-10-10"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (31/12)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n• Nubank - R$ 0,00 (vence 09/10)\n• Zero - R$ 0,00 (vence 10/10)\n\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -2.850,40"
+  },
+  {
+   "label": "saldo_negativo",
+   "period": "NOS PRÓXIMOS 7 DIAS",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Aluguel",
+     "valor": "1500.00",
+     "dia": 7,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Internet",
+     "valor": "99.90",
+     "dia": 8,
+     "nome_grupo": "Despesa"
+    },
+    {
+     "descricao": "Sem valor",
+     "valor": null,
+     "dia": 9,
+     "nome_grupo": "Despesa"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (31/12)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 8)\n• Sem valor - R$ 0,00 (dia 9)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ -2.850,40"
+  },
+  {
+   "label": "receitas_e_faturas",
+   "period": "NOS PRÓXIMOS 7 DIAS",
+   "reference": "2026-12-31",
+   "bills": [
+    {
+     "descricao": "Salário",
+     "valor": "5000.00",
+     "dia": 7,
+     "nome_grupo": "Renda"
+    }
+   ],
+   "invoices": [
+    {
+     "nome_conta": "Cartão Inter",
+     "valor": "1250.50",
+     "data_vencimento": "2026-10-07"
+    }
+   ],
+   "text": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (31/12)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n\n*Receitas:* R$ 5.000,00\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ 3.749,50"
+  }
+ ],
+ "parse": [
+  {
+   "message": "ok",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "ok",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "ok",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "OK",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "OK",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "OK",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "Ok!",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "Ok!",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "Ok!",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": " ok ",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": " ok ",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": " ok ",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "👍",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "👍",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "👍",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "👌",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "👌",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "👌",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "✅",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "✅",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "✅",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "✓",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "✓",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "✓",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "☑",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "☑",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "☑",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "sim",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "sim",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "sim",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "Sim, tudo certo",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "Sim, tudo certo",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "Sim, tudo certo",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "tudo pago",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "tudo pago",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "tudo pago",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "Tudo Ok",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "Tudo Ok",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "Tudo Ok",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "tudo certo",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "tudo certo",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "tudo certo",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "confirmar",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "confirmar",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "confirmar",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "assim",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "assim",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "assim",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "okay",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "okay",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "okay",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "joaquim",
+   "total": 1,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "joaquim",
+   "total": 3,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "joaquim",
+   "total": 5,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "1",
+   "total": 1,
+   "kind": "partial",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "1",
+   "total": 3,
+   "kind": "partial",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "1",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "2",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [2]. Use 1 a 1"
+  },
+  {
+   "message": "2",
+   "total": 3,
+   "kind": "partial",
+   "payload": [
+    2
+   ]
+  },
+  {
+   "message": "2",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    2
+   ]
+  },
+  {
+   "message": "1 e 3",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [3]. Use 1 a 1"
+  },
+  {
+   "message": "1 e 3",
+   "total": 3,
+   "kind": "partial",
+   "payload": [
+    1,
+    3
+   ]
+  },
+  {
+   "message": "1 e 3",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    1,
+    3
+   ]
+  },
+  {
+   "message": "1, 2",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [2]. Use 1 a 1"
+  },
+  {
+   "message": "1, 2",
+   "total": 3,
+   "kind": "partial",
+   "payload": [
+    1,
+    2
+   ]
+  },
+  {
+   "message": "1, 2",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    1,
+    2
+   ]
+  },
+  {
+   "message": "3, 1",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [3]. Use 1 a 1"
+  },
+  {
+   "message": "3, 1",
+   "total": 3,
+   "kind": "partial",
+   "payload": [
+    1,
+    3
+   ]
+  },
+  {
+   "message": "3, 1",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    1,
+    3
+   ]
+  },
+  {
+   "message": "1, 2, 3",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [2, 3]. Use 1 a 1"
+  },
+  {
+   "message": "1, 2, 3",
+   "total": 3,
+   "kind": "partial",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "1, 2, 3",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "1 2 3",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [2, 3]. Use 1 a 1"
+  },
+  {
+   "message": "1 2 3",
+   "total": 3,
+   "kind": "partial",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "1 2 3",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "1,1,2",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [2]. Use 1 a 1"
+  },
+  {
+   "message": "1,1,2",
+   "total": 3,
+   "kind": "partial",
+   "payload": [
+    1,
+    2
+   ]
+  },
+  {
+   "message": "1,1,2",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    1,
+    2
+   ]
+  },
+  {
+   "message": "pagou 2",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [2]. Use 1 a 1"
+  },
+  {
+   "message": "pagou 2",
+   "total": 3,
+   "kind": "partial",
+   "payload": [
+    2
+   ]
+  },
+  {
+   "message": "pagou 2",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    2
+   ]
+  },
+  {
+   "message": "paguei 1 e 3",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [3]. Use 1 a 1"
+  },
+  {
+   "message": "paguei 1 e 3",
+   "total": 3,
+   "kind": "partial",
+   "payload": [
+    1,
+    3
+   ]
+  },
+  {
+   "message": "paguei 1 e 3",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    1,
+    3
+   ]
+  },
+  {
+   "message": "01",
+   "total": 1,
+   "kind": "partial",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "01",
+   "total": 3,
+   "kind": "partial",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "01",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "0",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [0]. Use 1 a 1"
+  },
+  {
+   "message": "0",
+   "total": 3,
+   "kind": "error",
+   "payload": "Números inválidos: [0]. Use 1 a 3"
+  },
+  {
+   "message": "0",
+   "total": 5,
+   "kind": "error",
+   "payload": "Números inválidos: [0]. Use 1 a 5"
+  },
+  {
+   "message": "4",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [4]. Use 1 a 1"
+  },
+  {
+   "message": "4",
+   "total": 3,
+   "kind": "error",
+   "payload": "Números inválidos: [4]. Use 1 a 3"
+  },
+  {
+   "message": "4",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    4
+   ]
+  },
+  {
+   "message": "1 e 4",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [4]. Use 1 a 1"
+  },
+  {
+   "message": "1 e 4",
+   "total": 3,
+   "kind": "error",
+   "payload": "Números inválidos: [4]. Use 1 a 3"
+  },
+  {
+   "message": "1 e 4",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    1,
+    4
+   ]
+  },
+  {
+   "message": "0 1",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [0]. Use 1 a 1"
+  },
+  {
+   "message": "0 1",
+   "total": 3,
+   "kind": "error",
+   "payload": "Números inválidos: [0]. Use 1 a 3"
+  },
+  {
+   "message": "0 1",
+   "total": 5,
+   "kind": "error",
+   "payload": "Números inválidos: [0]. Use 1 a 5"
+  },
+  {
+   "message": "1, 99",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [99]. Use 1 a 1"
+  },
+  {
+   "message": "1, 99",
+   "total": 3,
+   "kind": "error",
+   "payload": "Números inválidos: [99]. Use 1 a 3"
+  },
+  {
+   "message": "1, 99",
+   "total": 5,
+   "kind": "error",
+   "payload": "Números inválidos: [99]. Use 1 a 5"
+  },
+  {
+   "message": "99999999999999999999",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [99999999999999999999]. Use 1 a 1"
+  },
+  {
+   "message": "99999999999999999999",
+   "total": 3,
+   "kind": "error",
+   "payload": "Números inválidos: [99999999999999999999]. Use 1 a 3"
+  },
+  {
+   "message": "99999999999999999999",
+   "total": 5,
+   "kind": "error",
+   "payload": "Números inválidos: [99999999999999999999]. Use 1 a 5"
+  },
+  {
+   "message": "٣",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [3]. Use 1 a 1"
+  },
+  {
+   "message": "٣",
+   "total": 3,
+   "kind": "partial",
+   "payload": [
+    3
+   ]
+  },
+  {
+   "message": "٣",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    3
+   ]
+  },
+  {
+   "message": "1️⃣",
+   "total": 1,
+   "kind": "partial",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "1️⃣",
+   "total": 3,
+   "kind": "partial",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "1️⃣",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "2️⃣ e 3",
+   "total": 1,
+   "kind": "error",
+   "payload": "Números inválidos: [2, 3]. Use 1 a 1"
+  },
+  {
+   "message": "2️⃣ e 3",
+   "total": 3,
+   "kind": "partial",
+   "payload": [
+    2,
+    3
+   ]
+  },
+  {
+   "message": "2️⃣ e 3",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    2,
+    3
+   ]
+  },
+  {
+   "message": "não",
+   "total": 1,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "não",
+   "total": 3,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "não",
+   "total": 5,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "Não",
+   "total": 1,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "Não",
+   "total": 3,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "Não",
+   "total": 5,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "nao",
+   "total": 1,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "nao",
+   "total": 3,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "nao",
+   "total": 5,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "NÃO",
+   "total": 1,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "NÃO",
+   "total": 3,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "NÃO",
+   "total": 5,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "depois",
+   "total": 1,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "depois",
+   "total": 3,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "depois",
+   "total": 5,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "Depois",
+   "total": 1,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "Depois",
+   "total": 3,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "Depois",
+   "total": 5,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "ainda não",
+   "total": 1,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "ainda não",
+   "total": 3,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "ainda não",
+   "total": 5,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "ainda nao",
+   "total": 1,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "ainda nao",
+   "total": 3,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "ainda nao",
+   "total": 5,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "amanhã",
+   "total": 1,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "amanhã",
+   "total": 3,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "amanhã",
+   "total": 5,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "amanha",
+   "total": 1,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "amanha",
+   "total": 3,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "amanha",
+   "total": 5,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "não paguei 1",
+   "total": 1,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "não paguei 1",
+   "total": 3,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "não paguei 1",
+   "total": 5,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "1 não",
+   "total": 1,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "1 não",
+   "total": 3,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "1 não",
+   "total": 5,
+   "kind": "defer",
+   "payload": []
+  },
+  {
+   "message": "ok não",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "ok não",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "ok não",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "não ok",
+   "total": 1,
+   "kind": "full",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "não ok",
+   "total": 3,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "message": "não ok",
+   "total": 5,
+   "kind": "full",
+   "payload": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "message": "talvez",
+   "total": 1,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "talvez",
+   "total": 3,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "talvez",
+   "total": 5,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "",
+   "total": 1,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "",
+   "total": 3,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "",
+   "total": 5,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "   ",
+   "total": 1,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "   ",
+   "total": 3,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "   ",
+   "total": 5,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "abc",
+   "total": 1,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "abc",
+   "total": 3,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "abc",
+   "total": 5,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "xyz 1",
+   "total": 1,
+   "kind": "partial",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "xyz 1",
+   "total": 3,
+   "kind": "partial",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "xyz 1",
+   "total": 5,
+   "kind": "partial",
+   "payload": [
+    1
+   ]
+  },
+  {
+   "message": "pago",
+   "total": 1,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "pago",
+   "total": 3,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "pago",
+   "total": 5,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "paguei",
+   "total": 1,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "paguei",
+   "total": 3,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "paguei",
+   "total": 5,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "tudo",
+   "total": 1,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "tudo",
+   "total": 3,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "tudo",
+   "total": 5,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "hoje",
+   "total": 1,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "hoje",
+   "total": 3,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "hoje",
+   "total": 5,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "bom dia",
+   "total": 1,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "bom dia",
+   "total": 3,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  },
+  {
+   "message": "bom dia",
+   "total": 5,
+   "kind": "invalid",
+   "payload": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+  }
+ ],
+ "payment_dates": [
+  {
+   "today": "2026-10-07",
+   "real": null,
+   "day": 1,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": null,
+   "day": 5,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": null,
+   "day": 6,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-10-07",
+   "real": null,
+   "day": 7,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": null,
+   "day": 30,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": null,
+   "day": 31,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "",
+   "day": 1,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "",
+   "day": 5,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "",
+   "day": 6,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "",
+   "day": 7,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "",
+   "day": 30,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "",
+   "day": 31,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-07",
+   "day": 1,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-07",
+   "day": 5,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-07",
+   "day": 6,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-07",
+   "day": 7,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-07",
+   "day": 30,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-07",
+   "day": 31,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-06",
+   "day": 1,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-06",
+   "day": 5,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-06",
+   "day": 6,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-06",
+   "day": 7,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-06",
+   "day": 30,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-06",
+   "day": 31,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-05",
+   "day": 1,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-05",
+   "day": 5,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-05",
+   "day": 6,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-05",
+   "day": 7,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-05",
+   "day": 30,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-05",
+   "day": 31,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-08",
+   "day": 1,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-08",
+   "day": 5,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-08",
+   "day": 6,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-08",
+   "day": 7,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-08",
+   "day": 30,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-10-08",
+   "day": 31,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-09-30",
+   "day": 1,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-09-30",
+   "day": 5,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-09-30",
+   "day": 6,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-09-30",
+   "day": 7,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-09-30",
+   "day": 30,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-09-30",
+   "day": 31,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-03-31",
+   "day": 1,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-03-31",
+   "day": 5,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-03-31",
+   "day": 6,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-03-31",
+   "day": 7,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-03-31",
+   "day": 30,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-03-31",
+   "day": 31,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-03-30",
+   "day": 1,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-03-30",
+   "day": 5,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-03-30",
+   "day": 6,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-03-30",
+   "day": 7,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-03-30",
+   "day": 30,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-07",
+   "real": "2026-03-30",
+   "day": 31,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-01",
+   "real": null,
+   "day": 1,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": null,
+   "day": 5,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": null,
+   "day": 6,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": null,
+   "day": 7,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": null,
+   "day": 30,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": null,
+   "day": 31,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "",
+   "day": 1,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "",
+   "day": 5,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "",
+   "day": 6,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "",
+   "day": 7,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "",
+   "day": 30,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "",
+   "day": 31,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-07",
+   "day": 1,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-07",
+   "day": 5,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-07",
+   "day": 6,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-07",
+   "day": 7,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-07",
+   "day": 30,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-07",
+   "day": 31,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-06",
+   "day": 1,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-06",
+   "day": 5,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-06",
+   "day": 6,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-06",
+   "day": 7,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-06",
+   "day": 30,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-06",
+   "day": 31,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-05",
+   "day": 1,
+   "date": "2026-10-05"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-05",
+   "day": 5,
+   "date": "2026-10-05"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-05",
+   "day": 6,
+   "date": "2026-10-05"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-05",
+   "day": 7,
+   "date": "2026-10-05"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-05",
+   "day": 30,
+   "date": "2026-10-05"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-05",
+   "day": 31,
+   "date": "2026-10-05"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-08",
+   "day": 1,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-08",
+   "day": 5,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-08",
+   "day": 6,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-08",
+   "day": 7,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-08",
+   "day": 30,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-10-08",
+   "day": 31,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-09-30",
+   "day": 1,
+   "date": "2026-09-30"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-09-30",
+   "day": 5,
+   "date": "2026-09-30"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-09-30",
+   "day": 6,
+   "date": "2026-09-30"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-09-30",
+   "day": 7,
+   "date": "2026-09-30"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-09-30",
+   "day": 30,
+   "date": "2026-09-30"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-09-30",
+   "day": 31,
+   "date": "2026-09-30"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-03-31",
+   "day": 1,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-03-31",
+   "day": 5,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-03-31",
+   "day": 6,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-03-31",
+   "day": 7,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-03-31",
+   "day": 30,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-03-31",
+   "day": 31,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-03-30",
+   "day": 1,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-03-30",
+   "day": 5,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-03-30",
+   "day": 6,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-03-30",
+   "day": 7,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-03-30",
+   "day": 30,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-10-01",
+   "real": "2026-03-30",
+   "day": 31,
+   "date": "2026-10-01"
+  },
+  {
+   "today": "2026-03-31",
+   "real": null,
+   "day": 1,
+   "date": "2026-03-31"
+  },
+  {
+   "today": "2026-03-31",
+   "real": null,
+   "day": 5,
+   "date": "2026-03-31"
+  },
+  {
+   "today": "2026-03-31",
+   "real": null,
+   "day": 6,
+   "date": "2026-03-31"
+  },
+  {
+   "today": "2026-03-31",
+   "real": null,
+   "day": 7,
+   "date": "2026-03-31"
+  },
+  {
+   "today": "2026-03-31",
+   "real": null,
+   "day": 30,
+   "date": "2026-03-30"
+  },
+  {
+   "today": "2026-03-31",
+   "real": null,
+   "day": 31,
+   "date": "2026-03-31"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "",
+   "day": 1,
+   "date": "2026-03-31"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "",
+   "day": 5,
+   "date": "2026-03-31"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "",
+   "day": 6,
+   "date": "2026-03-31"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "",
+   "day": 7,
+   "date": "2026-03-31"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "",
+   "day": 30,
+   "date": "2026-03-30"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "",
+   "day": 31,
+   "date": "2026-03-31"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-07",
+   "day": 1,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-07",
+   "day": 5,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-07",
+   "day": 6,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-07",
+   "day": 7,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-07",
+   "day": 30,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-07",
+   "day": 31,
+   "date": "2026-10-07"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-06",
+   "day": 1,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-06",
+   "day": 5,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-06",
+   "day": 6,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-06",
+   "day": 7,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-06",
+   "day": 30,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-06",
+   "day": 31,
+   "date": "2026-10-06"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-05",
+   "day": 1,
+   "date": "2026-10-05"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-05",
+   "day": 5,
+   "date": "2026-10-05"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-05",
+   "day": 6,
+   "date": "2026-10-05"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-05",
+   "day": 7,
+   "date": "2026-10-05"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-05",
+   "day": 30,
+   "date": "2026-10-05"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-05",
+   "day": 31,
+   "date": "2026-10-05"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-08",
+   "day": 1,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-08",
+   "day": 5,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-08",
+   "day": 6,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-08",
+   "day": 7,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-08",
+   "day": 30,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-10-08",
+   "day": 31,
+   "date": "2026-10-08"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-09-30",
+   "day": 1,
+   "date": "2026-09-30"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-09-30",
+   "day": 5,
+   "date": "2026-09-30"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-09-30",
+   "day": 6,
+   "date": "2026-09-30"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-09-30",
+   "day": 7,
+   "date": "2026-09-30"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-09-30",
+   "day": 30,
+   "date": "2026-09-30"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-09-30",
+   "day": 31,
+   "date": "2026-09-30"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-03-31",
+   "day": 1,
+   "date": "2026-03-31"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-03-31",
+   "day": 5,
+   "date": "2026-03-31"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-03-31",
+   "day": 6,
+   "date": "2026-03-31"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-03-31",
+   "day": 7,
+   "date": "2026-03-31"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-03-31",
+   "day": 30,
+   "date": "2026-03-31"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-03-31",
+   "day": 31,
+   "date": "2026-03-31"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-03-30",
+   "day": 1,
+   "date": "2026-03-30"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-03-30",
+   "day": 5,
+   "date": "2026-03-30"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-03-30",
+   "day": 6,
+   "date": "2026-03-30"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-03-30",
+   "day": 7,
+   "date": "2026-03-30"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-03-30",
+   "day": 30,
+   "date": "2026-03-30"
+  },
+  {
+   "today": "2026-03-31",
+   "real": "2026-03-30",
+   "day": 31,
+   "date": "2026-03-30"
+  }
+ ]
+}

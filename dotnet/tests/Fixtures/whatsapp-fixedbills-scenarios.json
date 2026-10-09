@@ -1,0 +1,5706 @@
+{
+ "api_key": "chave-de-teste-0123456789abcdef0123456789",
+ "number": "5531999990001",
+ "today": "2026-10-07",
+ "scenarios": [
+  {
+   "name": "fixas_pendentes_misto",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "minhas contas fixas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Contas Fixas",
+    "pending_rows": [
+     {
+      "descricao": "Aluguel",
+      "valor_previsto": 1500.0,
+      "dia_execucao": 1,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Internet",
+      "valor_previsto": 99.9,
+      "dia_execucao": 7,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Luz",
+      "valor_previsto": 230.45,
+      "dia_execucao": 9,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Condomínio",
+      "valor_previsto": 450.0,
+      "dia_execucao": 31,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Sem valor",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Netflix",
+      "valor_previsto": 55.9,
+      "dia_execucao": 15,
+      "categoria": "Lazer",
+      "tipo_conta": "Cartão de Crédito",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Academia",
+      "valor_previsto": 119.9,
+      "dia_execucao": 7,
+      "categoria": "Saúde",
+      "tipo_conta": "Cartão de Crédito",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Salário",
+      "valor_previsto": 5000.0,
+      "dia_execucao": 5,
+      "categoria": "Salário",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Renda",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Freela",
+      "valor_previsto": 800.0,
+      "dia_execucao": 25,
+      "categoria": "Extra",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Renda",
+      "ja_executado": 0
+     }
+    ]
+   },
+   "body": {
+    "texto": "minhas contas fixas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *CONTAS FIXAS PENDENTES - OUTUBRO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Aluguel\n   💰 R$ 1.500,00\n   📊 Moradia\n   🔴 ATRASADO\n\n2. Internet\n   💰 R$ 99,90\n   📊 Moradia\n   ⚠️ VENCE HOJE\n\n3. Luz\n   💰 R$ 230,45\n   📊 Moradia\n   🟡 Vence em 2 dias\n\n4. Condomínio\n   💰 R$ 450,00\n   📊 Moradia\n   🟢 Vence dia 31\n\n5. Sem valor\n   💰 R$ 0,00\n   📊 Moradia\n   🟢 Vence dia 20\n\n💳 *CARTÃO DE CRÉDITO (na fatura):*\n\n1. Netflix\n   💰 R$ 55,90\n   📊 Lazer\n   ℹ️ Será debitado dia 15\n\n2. Academia\n   💰 R$ 119,90\n   📊 Saúde\n   ℹ️ Debitado hoje\n\n💰 *RECEITAS:*\n\n1. Salário\n   💵 R$ 5.000,00\n   📊 Salário\n   🔴 ATRASADO\n\n2. Freela\n   💵 R$ 800,00\n   📊 Extra\n   🟢 Vence dia 25\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 2.280,35\n💳 Total Cartão: R$ 175,80\n💰 Total Receitas: R$ 5.800,00\n📊 Saldo Líquido: R$ 3.343,85"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Contas Fixas",
+     "pendentes:2026-10-01:2026-10-31:10"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fixas_pendentes_vazio",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "contas fixas pendentes",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Contas Fixas",
+    "pending_rows": []
+   },
+   "body": {
+    "texto": "contas fixas pendentes",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Você não tem contas fixas pendentes este mês! 🎉"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Contas Fixas",
+     "pendentes:2026-10-01:2026-10-31:10"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fixas_pendentes_todas_executadas",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "contas fixas pendentes",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Contas Fixas",
+    "pending_rows": [
+     {
+      "descricao": "Aluguel",
+      "valor_previsto": 1500.0,
+      "dia_execucao": 1,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 1
+     },
+     {
+      "descricao": "Luz",
+      "valor_previsto": 230.0,
+      "dia_execucao": 9,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 2
+     }
+    ]
+   },
+   "body": {
+    "texto": "contas fixas pendentes",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Você não tem contas fixas pendentes este mês! 🎉"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Contas Fixas",
+     "pendentes:2026-10-01:2026-10-31:10"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fixas_pendentes_filtra_executadas",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "quais agendamentos tenho",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Contas Fixas",
+    "pending_rows": [
+     {
+      "descricao": "Aluguel",
+      "valor_previsto": 1500.0,
+      "dia_execucao": 1,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 1
+     },
+     {
+      "descricao": "Luz",
+      "valor_previsto": 230.0,
+      "dia_execucao": 9,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     }
+    ]
+   },
+   "body": {
+    "texto": "quais agendamentos tenho",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *CONTAS FIXAS PENDENTES - OUTUBRO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Luz\n   💰 R$ 230,00\n   📊 Moradia\n   🟡 Vence em 2 dias\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 230,00\n📊 Saldo Líquido: R$ -230,00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Contas Fixas",
+     "pendentes:2026-10-01:2026-10-31:10"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fixas_pendentes_fevereiro",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "contas fixas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Contas Fixas",
+    "today": "2026-02-10",
+    "pending_rows": [
+     {
+      "descricao": "Dia 28",
+      "valor_previsto": 10.0,
+      "dia_execucao": 28,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Dia 29",
+      "valor_previsto": 20.0,
+      "dia_execucao": 29,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Dia 30",
+      "valor_previsto": 30.0,
+      "dia_execucao": 30,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Dia 31",
+      "valor_previsto": 40.0,
+      "dia_execucao": 31,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     }
+    ]
+   },
+   "body": {
+    "texto": "contas fixas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *CONTAS FIXAS PENDENTES - FEVEREIRO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Dia 28\n   💰 R$ 10,00\n   📊 Moradia\n   🟢 Vence dia 28\n\n2. Dia 29\n   💰 R$ 20,00\n   📊 Moradia\n   Vence dia 29\n\n3. Dia 30\n   💰 R$ 30,00\n   📊 Moradia\n   Vence dia 30\n\n4. Dia 31\n   💰 R$ 40,00\n   📊 Moradia\n   Vence dia 31\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 100,00\n📊 Saldo Líquido: R$ -100,00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Contas Fixas",
+     "pendentes:2026-02-01:2026-02-28:2"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fixas_pendentes_dezembro",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "contas fixas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Contas Fixas",
+    "today": "2026-12-31",
+    "pending_rows": [
+     {
+      "descricao": "Aluguel",
+      "valor_previsto": 1500.0,
+      "dia_execucao": 1,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Internet",
+      "valor_previsto": 99.9,
+      "dia_execucao": 7,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Luz",
+      "valor_previsto": 230.45,
+      "dia_execucao": 9,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Condomínio",
+      "valor_previsto": 450.0,
+      "dia_execucao": 31,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Sem valor",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Netflix",
+      "valor_previsto": 55.9,
+      "dia_execucao": 15,
+      "categoria": "Lazer",
+      "tipo_conta": "Cartão de Crédito",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Academia",
+      "valor_previsto": 119.9,
+      "dia_execucao": 7,
+      "categoria": "Saúde",
+      "tipo_conta": "Cartão de Crédito",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Salário",
+      "valor_previsto": 5000.0,
+      "dia_execucao": 5,
+      "categoria": "Salário",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Renda",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Freela",
+      "valor_previsto": 800.0,
+      "dia_execucao": 25,
+      "categoria": "Extra",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Renda",
+      "ja_executado": 0
+     }
+    ]
+   },
+   "body": {
+    "texto": "contas fixas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *CONTAS FIXAS PENDENTES - DEZEMBRO/2026* 📋\n\n💸 *DESPESAS:*\n\n1. Aluguel\n   💰 R$ 1.500,00\n   📊 Moradia\n   🔴 ATRASADO\n\n2. Internet\n   💰 R$ 99,90\n   📊 Moradia\n   🔴 ATRASADO\n\n3. Luz\n   💰 R$ 230,45\n   📊 Moradia\n   🔴 ATRASADO\n\n4. Condomínio\n   💰 R$ 450,00\n   📊 Moradia\n   ⚠️ VENCE HOJE\n\n5. Sem valor\n   💰 R$ 0,00\n   📊 Moradia\n   🔴 ATRASADO\n\n💳 *CARTÃO DE CRÉDITO (na fatura):*\n\n1. Netflix\n   💰 R$ 55,90\n   📊 Lazer\n   ℹ️ Debitado dia 15\n\n2. Academia\n   💰 R$ 119,90\n   📊 Saúde\n   ℹ️ Debitado dia 7\n\n💰 *RECEITAS:*\n\n1. Salário\n   💵 R$ 5.000,00\n   📊 Salário\n   🔴 ATRASADO\n\n2. Freela\n   💵 R$ 800,00\n   📊 Extra\n   🔴 ATRASADO\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total Despesas: R$ 2.280,35\n💳 Total Cartão: R$ 175,80\n💰 Total Receitas: R$ 5.800,00\n📊 Saldo Líquido: R$ 3.343,85"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Contas Fixas",
+     "pendentes:2026-12-01:2026-12-31:12"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fixas_pendentes_so_receitas",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "contas fixas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Contas Fixas",
+    "pending_rows": [
+     {
+      "descricao": "Salário",
+      "valor_previsto": 5000.0,
+      "dia_execucao": 5,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Renda",
+      "ja_executado": 0
+     }
+    ]
+   },
+   "body": {
+    "texto": "contas fixas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *CONTAS FIXAS PENDENTES - OUTUBRO/2026* 📋\n\n💰 *RECEITAS:*\n\n1. Salário\n   💵 R$ 5.000,00\n   📊 Moradia\n   🔴 ATRASADO\n\n━━━━━━━━━━━━━━━━━━━━\n💰 Total Receitas: R$ 5.000,00\n📊 Saldo Líquido: R$ 5.000,00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Contas Fixas",
+     "pendentes:2026-10-01:2026-10-31:10"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "fixas_pendentes_erro_no_banco",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "contas fixas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Contas Fixas",
+    "db_fail": "pendentes",
+    "pending_rows": [
+     {
+      "descricao": "Aluguel",
+      "valor_previsto": 1500.0,
+      "dia_execucao": 1,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Internet",
+      "valor_previsto": 99.9,
+      "dia_execucao": 7,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Luz",
+      "valor_previsto": 230.45,
+      "dia_execucao": 9,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Condomínio",
+      "valor_previsto": 450.0,
+      "dia_execucao": 31,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Sem valor",
+      "valor_previsto": null,
+      "dia_execucao": 20,
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Netflix",
+      "valor_previsto": 55.9,
+      "dia_execucao": 15,
+      "categoria": "Lazer",
+      "tipo_conta": "Cartão de Crédito",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Academia",
+      "valor_previsto": 119.9,
+      "dia_execucao": 7,
+      "categoria": "Saúde",
+      "tipo_conta": "Cartão de Crédito",
+      "nome_grupo": "Despesa",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Salário",
+      "valor_previsto": 5000.0,
+      "dia_execucao": 5,
+      "categoria": "Salário",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Renda",
+      "ja_executado": 0
+     },
+     {
+      "descricao": "Freela",
+      "valor_previsto": 800.0,
+      "dia_execucao": 25,
+      "categoria": "Extra",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Renda",
+      "ja_executado": 0
+     }
+    ]
+   },
+   "body": {
+    "texto": "contas fixas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Ops! Algo deu errado. Por favor, tente novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Contas Fixas",
+     "pendentes:2026-10-01:2026-10-31:10"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "todas_catalogo",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "todas as minhas contas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Todas Contas",
+    "catalog_rows": [
+     {
+      "descricao": "Feira",
+      "valor_previsto": 120.0,
+      "dia_execucao": 6,
+      "periodicidade": "SEMANAL",
+      "categoria": "Casa",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa"
+     },
+     {
+      "descricao": "Faxina",
+      "valor_previsto": 200.0,
+      "dia_execucao": 15,
+      "periodicidade": "QUINZENAL",
+      "categoria": "Casa",
+      "tipo_conta": "Cartão de Crédito",
+      "nome_grupo": "Despesa"
+     },
+     {
+      "descricao": "Aluguel",
+      "valor_previsto": 1500.0,
+      "dia_execucao": 5,
+      "periodicidade": "MENSAL",
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa"
+     },
+     {
+      "descricao": "Salário",
+      "valor_previsto": 5000.0,
+      "dia_execucao": 5,
+      "periodicidade": "MENSAL",
+      "categoria": "Salário",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Renda"
+     },
+     {
+      "descricao": "Sem periodo",
+      "valor_previsto": null,
+      "dia_execucao": 9,
+      "periodicidade": null,
+      "categoria": "X",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa"
+     },
+     {
+      "descricao": "IPTU",
+      "valor_previsto": 1200.0,
+      "dia_execucao": 10,
+      "mes_execucao": 3,
+      "periodicidade": "ANUAL",
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa"
+     },
+     {
+      "descricao": "Bônus",
+      "valor_previsto": 2000.0,
+      "dia_execucao": 20,
+      "mes_execucao": null,
+      "periodicidade": "ANUAL",
+      "categoria": "Extra",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Renda"
+     },
+     {
+      "descricao": "Café",
+      "valor_previsto": 5.0,
+      "dia_execucao": 1,
+      "periodicidade": "DIARIA",
+      "categoria": "Lazer",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa"
+     }
+    ]
+   },
+   "body": {
+    "texto": "todas as minhas contas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *TODAS AS SUAS CONTAS RECORRENTES* 📋\n\n*🔄 SEMANAL*\n─────────────────────\n💸 *Despesas:*\n  • Feira\n    R$ 120,00 · toda semana (dia 6)\n\n*🔄 QUINZENAL*\n─────────────────────\n💳 *Cartão de Crédito:*\n  • Faxina\n    R$ 200,00 · quinzenal (dia 15)\n\n*📅 MENSAL*\n─────────────────────\n💸 *Despesas:*\n  • Aluguel\n    R$ 1.500,00 · dia 5\n  • Sem periodo\n    R$ 0,00 · dia 9\n\n💰 *Receitas:*\n  • Salário\n    R$ 5.000,00 · dia 5\n\n*📆 ANUAL*\n─────────────────────\n💸 *Despesas:*\n  • IPTU\n    R$ 1.200,00 · Março, dia 10\n\n💰 *Receitas:*\n  • Bônus\n    R$ 2.000,00 · ?, dia 20\n\n━━━━━━━━━━━━━━━━━━━━\n💸 Total despesas mensais: R$ 2.451,60\n_(semanais e quinzenais convertidas para média mensal; anuais ficam de fora)_"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Todas Contas",
+     "catalogo"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "todas_vazio",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "listar todas as contas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Todas Contas",
+    "catalog_rows": []
+   },
+   "body": {
+    "texto": "listar todas as contas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 Você não tem contas recorrentes cadastradas."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Todas Contas",
+     "catalogo"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "todas_so_receitas",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "quais contas tenho esse mês",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Todas Contas",
+    "catalog_rows": [
+     {
+      "descricao": "Salário",
+      "valor_previsto": 5000.0,
+      "dia_execucao": 5,
+      "periodicidade": "MENSAL",
+      "categoria": "Salário",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Renda"
+     }
+    ]
+   },
+   "body": {
+    "texto": "quais contas tenho esse mês",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *TODAS AS SUAS CONTAS RECORRENTES* 📋\n\n*📅 MENSAL*\n─────────────────────\n💰 *Receitas:*\n  • Salário\n    R$ 5.000,00 · dia 5\n\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Todas Contas",
+     "catalogo"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "todas_so_anuais",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "me mostra todas as contas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Todas Contas",
+    "catalog_rows": [
+     {
+      "descricao": "IPTU",
+      "valor_previsto": 1200.0,
+      "dia_execucao": 10,
+      "mes_execucao": 3,
+      "periodicidade": "ANUAL",
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa"
+     }
+    ]
+   },
+   "body": {
+    "texto": "me mostra todas as contas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *TODAS AS SUAS CONTAS RECORRENTES* 📋\n\n*📆 ANUAL*\n─────────────────────\n💸 *Despesas:*\n  • IPTU\n    R$ 1.200,00 · Março, dia 10\n\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Todas Contas",
+     "catalogo"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "todas_erro_no_banco",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "todas as contas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Consulta Todas Contas",
+    "db_fail": "catalogo",
+    "catalog_rows": [
+     {
+      "descricao": "Feira",
+      "valor_previsto": 120.0,
+      "dia_execucao": 6,
+      "periodicidade": "SEMANAL",
+      "categoria": "Casa",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa"
+     },
+     {
+      "descricao": "Faxina",
+      "valor_previsto": 200.0,
+      "dia_execucao": 15,
+      "periodicidade": "QUINZENAL",
+      "categoria": "Casa",
+      "tipo_conta": "Cartão de Crédito",
+      "nome_grupo": "Despesa"
+     },
+     {
+      "descricao": "Aluguel",
+      "valor_previsto": 1500.0,
+      "dia_execucao": 5,
+      "periodicidade": "MENSAL",
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa"
+     },
+     {
+      "descricao": "Salário",
+      "valor_previsto": 5000.0,
+      "dia_execucao": 5,
+      "periodicidade": "MENSAL",
+      "categoria": "Salário",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Renda"
+     },
+     {
+      "descricao": "Sem periodo",
+      "valor_previsto": null,
+      "dia_execucao": 9,
+      "periodicidade": null,
+      "categoria": "X",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa"
+     },
+     {
+      "descricao": "IPTU",
+      "valor_previsto": 1200.0,
+      "dia_execucao": 10,
+      "mes_execucao": 3,
+      "periodicidade": "ANUAL",
+      "categoria": "Moradia",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa"
+     },
+     {
+      "descricao": "Bônus",
+      "valor_previsto": 2000.0,
+      "dia_execucao": 20,
+      "mes_execucao": null,
+      "periodicidade": "ANUAL",
+      "categoria": "Extra",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Renda"
+     },
+     {
+      "descricao": "Café",
+      "valor_previsto": 5.0,
+      "dia_execucao": 1,
+      "periodicidade": "DIARIA",
+      "categoria": "Lazer",
+      "tipo_conta": "Conta Corrente",
+      "nome_grupo": "Despesa"
+     }
+    ]
+   },
+   "body": {
+    "texto": "todas as contas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Ops! Algo deu errado. Por favor, tente novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Consulta Todas Contas",
+     "catalogo"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "vencimentos_hoje_misto",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "o que vence hoje",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Vencimentos Hoje",
+    "due_bills": {
+     "single": [
+      {
+       "descricao": "Salário",
+       "valor_previsto": 5000.0,
+       "dia_execucao": 7,
+       "nome_grupo": "Renda"
+      },
+      {
+       "descricao": "Aluguel",
+       "valor_previsto": 1500.0,
+       "dia_execucao": 7,
+       "nome_grupo": "Despesa"
+      },
+      {
+       "descricao": "Internet",
+       "valor_previsto": 99.9,
+       "dia_execucao": 7,
+       "nome_grupo": "Despesa"
+      },
+      {
+       "descricao": "Sem valor",
+       "valor_previsto": null,
+       "dia_execucao": 7,
+       "nome_grupo": "Despesa"
+      }
+     ]
+    },
+    "due_invoices": [
+     {
+      "nome_conta": "Cartão Inter",
+      "valor_fatura": 1250.5,
+      "data_vencimento": "2026-10-07"
+     }
+    ]
+   },
+   "body": {
+    "texto": "o que vence hoje",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *CONTAS QUE VENCEM HOJE* (07/10)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 7)\n• Sem valor - R$ 0,00 (dia 7)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 07/10)\n\n*Receitas:* R$ 5.000,00\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ 2.149,60"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Vencimentos Hoje",
+     "vencimentos:single:7:7:10/2026",
+     "faturas:2026-10-07:2026-10-07"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "vencimentos_hoje_vazio",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "o que vence hoje",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Vencimentos Hoje",
+    "due_bills": {
+     "single": []
+    },
+    "due_invoices": []
+   },
+   "body": {
+    "texto": "o que vence hoje",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Nenhuma conta vence hoje!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Vencimentos Hoje",
+     "vencimentos:single:7:7:10/2026",
+     "faturas:2026-10-07:2026-10-07"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "vencimentos_hoje_so_fatura",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "contas de hoje",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Vencimentos Hoje",
+    "due_bills": {
+     "single": []
+    },
+    "due_invoices": [
+     {
+      "nome_conta": "Cartão Inter",
+      "valor_fatura": 99.99,
+      "data_vencimento": "2026-10-07"
+     }
+    ]
+   },
+   "body": {
+    "texto": "contas de hoje",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *CONTAS QUE VENCEM HOJE* (07/10)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 99,99 (vence 07/10)\n\n*Faturas:* R$ 99,99\n*Saldo Previsto:* R$ -99,99"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Vencimentos Hoje",
+     "vencimentos:single:7:7:10/2026",
+     "faturas:2026-10-07:2026-10-07"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "vencimentos_hoje_so_receita",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "contas de hoje",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Vencimentos Hoje",
+    "due_bills": {
+     "single": [
+      {
+       "descricao": "Salário",
+       "valor_previsto": 5000.0,
+       "dia_execucao": 7,
+       "nome_grupo": "Renda"
+      }
+     ]
+    },
+    "due_invoices": []
+   },
+   "body": {
+    "texto": "contas de hoje",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *CONTAS QUE VENCEM HOJE* (07/10)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n\n*Receitas:* R$ 5.000,00\n*Saldo Previsto:* R$ 5.000,00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Vencimentos Hoje",
+     "vencimentos:single:7:7:10/2026",
+     "faturas:2026-10-07:2026-10-07"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "vencimentos_hoje_erro_no_banco",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "o que vence hoje",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Vencimentos Hoje",
+    "db_fail": "vencimentos",
+    "due_bills": {
+     "single": [
+      {
+       "descricao": "Salário",
+       "valor_previsto": 5000.0,
+       "dia_execucao": 7,
+       "nome_grupo": "Renda"
+      },
+      {
+       "descricao": "Aluguel",
+       "valor_previsto": 1500.0,
+       "dia_execucao": 7,
+       "nome_grupo": "Despesa"
+      },
+      {
+       "descricao": "Internet",
+       "valor_previsto": 99.9,
+       "dia_execucao": 7,
+       "nome_grupo": "Despesa"
+      },
+      {
+       "descricao": "Sem valor",
+       "valor_previsto": null,
+       "dia_execucao": 7,
+       "nome_grupo": "Despesa"
+      }
+     ]
+    },
+    "due_invoices": []
+   },
+   "body": {
+    "texto": "o que vence hoje",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Ops! Algo deu errado. Por favor, tente novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Vencimentos Hoje",
+     "vencimentos:single:7:7:10/2026"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "vencimentos_amanha_misto",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "o que vence amanhã",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Vencimentos Amanhã",
+    "due_bills": {
+     "single": [
+      {
+       "descricao": "Aluguel",
+       "valor_previsto": 1500.0,
+       "dia_execucao": 7,
+       "nome_grupo": "Despesa"
+      },
+      {
+       "descricao": "Internet",
+       "valor_previsto": 99.9,
+       "dia_execucao": 7,
+       "nome_grupo": "Despesa"
+      }
+     ]
+    },
+    "due_invoices": [
+     {
+      "nome_conta": "Nubank",
+      "valor_fatura": 10.0,
+      "data_vencimento": "2026-10-08"
+     }
+    ]
+   },
+   "body": {
+    "texto": "o que vence amanhã",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *CONTAS QUE VENCEM AMANHÃ* (08/10)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 7)\n\n*💳 Faturas:*\n• Nubank - R$ 10,00 (vence 08/10)\n\n*Despesas:* R$ 1.599,90\n*Faturas:* R$ 10,00\n*Saldo Previsto:* R$ -1.609,90"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Vencimentos Amanhã",
+     "vencimentos:single:8:8:10/2026",
+     "faturas:2026-10-08:2026-10-08"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "vencimentos_amanha_vazio",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "o que vence amanhã",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Vencimentos Amanhã",
+    "due_bills": {
+     "single": []
+    },
+    "due_invoices": []
+   },
+   "body": {
+    "texto": "o que vence amanhã",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Nenhuma conta vence amanhã!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Vencimentos Amanhã",
+     "vencimentos:single:8:8:10/2026",
+     "faturas:2026-10-08:2026-10-08"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "vencimentos_amanha_virada_de_mes",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "o que vence amanhã",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Vencimentos Amanhã",
+    "today": "2026-10-31",
+    "due_bills": {
+     "single": [
+      {
+       "descricao": "Dia um",
+       "valor_previsto": 10.0,
+       "dia_execucao": 1,
+       "nome_grupo": "Despesa"
+      }
+     ]
+    },
+    "due_invoices": []
+   },
+   "body": {
+    "texto": "o que vence amanhã",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *CONTAS QUE VENCEM AMANHÃ* (01/11)\n\n*💰 Despesas Fixas:*\n• Dia um - R$ 10,00 (dia 1)\n\n*Despesas:* R$ 10,00\n*Saldo Previsto:* R$ -10,00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Vencimentos Amanhã",
+     "vencimentos:single:1:1:11/2026",
+     "faturas:2026-11-01:2026-11-01"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "vencimentos_amanha_virada_de_ano",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "o que vence amanhã",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Vencimentos Amanhã",
+    "today": "2026-12-31",
+    "due_bills": {
+     "single": [
+      {
+       "descricao": "Dia um",
+       "valor_previsto": 10.0,
+       "dia_execucao": 1,
+       "nome_grupo": "Despesa"
+      }
+     ]
+    },
+    "due_invoices": [
+     {
+      "nome_conta": "Nubank",
+      "valor_fatura": 5.5,
+      "data_vencimento": "2027-01-01"
+     }
+    ]
+   },
+   "body": {
+    "texto": "o que vence amanhã",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *CONTAS QUE VENCEM AMANHÃ* (01/01)\n\n*💰 Despesas Fixas:*\n• Dia um - R$ 10,00 (dia 1)\n\n*💳 Faturas:*\n• Nubank - R$ 5,50 (vence 01/01)\n\n*Despesas:* R$ 10,00\n*Faturas:* R$ 5,50\n*Saldo Previsto:* R$ -15,50"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Vencimentos Amanhã",
+     "vencimentos:single:1:1:1/2027",
+     "faturas:2027-01-01:2027-01-01"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "vencimentos_semana_mesmo_mes",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "o que vence essa semana",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Vencimentos Essa Semana",
+    "due_bills": {
+     "single": [
+      {
+       "descricao": "Salário",
+       "valor_previsto": 5000.0,
+       "dia_execucao": 7,
+       "nome_grupo": "Renda"
+      },
+      {
+       "descricao": "Aluguel",
+       "valor_previsto": 1500.0,
+       "dia_execucao": 7,
+       "nome_grupo": "Despesa"
+      },
+      {
+       "descricao": "Internet",
+       "valor_previsto": 99.9,
+       "dia_execucao": 7,
+       "nome_grupo": "Despesa"
+      },
+      {
+       "descricao": "Sem valor",
+       "valor_previsto": null,
+       "dia_execucao": 7,
+       "nome_grupo": "Despesa"
+      },
+      {
+       "descricao": "Luz",
+       "valor_previsto": 230.45,
+       "dia_execucao": 12,
+       "nome_grupo": "Despesa"
+      }
+     ]
+    },
+    "due_invoices": [
+     {
+      "nome_conta": "Cartão Inter",
+      "valor_fatura": 1250.5,
+      "data_vencimento": "2026-10-10"
+     },
+     {
+      "nome_conta": "Nubank",
+      "valor_fatura": 0,
+      "data_vencimento": "2026-10-14"
+     }
+    ]
+   },
+   "body": {
+    "texto": "o que vence essa semana",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (07/10)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 7)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 7)\n• Internet - R$ 99,90 (dia 7)\n• Sem valor - R$ 0,00 (dia 7)\n• Luz - R$ 230,45 (dia 12)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 10/10)\n• Nubank - R$ 0,00 (vence 14/10)\n\n*Receitas:* R$ 5.000,00\n*Despesas:* R$ 1.830,35\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ 1.919,15"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Vencimentos Essa Semana",
+     "vencimentos:single:7:14:10/2026",
+     "faturas:2026-10-07:2026-10-14"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "vencimentos_semana_virada_de_mes",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "o que vence essa semana",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Vencimentos Essa Semana",
+    "today": "2026-10-28",
+    "due_bills": {
+     "first": [
+      {
+       "descricao": "Condomínio",
+       "valor_previsto": 450.0,
+       "dia_execucao": 30,
+       "nome_grupo": "Despesa"
+      },
+      {
+       "descricao": "Salário",
+       "valor_previsto": 5000.0,
+       "dia_execucao": 31,
+       "nome_grupo": "Renda"
+      }
+     ],
+     "second": [
+      {
+       "descricao": "Aluguel",
+       "valor_previsto": 1500.0,
+       "dia_execucao": 1,
+       "nome_grupo": "Despesa"
+      },
+      {
+       "descricao": "Internet",
+       "valor_previsto": 99.9,
+       "dia_execucao": 3,
+       "nome_grupo": "Despesa"
+      }
+     ]
+    },
+    "due_invoices": [
+     {
+      "nome_conta": "Cartão Inter",
+      "valor_fatura": 1250.5,
+      "data_vencimento": "2026-11-02"
+     }
+    ]
+   },
+   "body": {
+    "texto": "o que vence essa semana",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (28/10)\n\n*💵 Receitas Previstas:*\n• Salário - R$ 5.000,00 (dia 31)\n\n*💰 Despesas Fixas:*\n• Condomínio - R$ 450,00 (dia 30)\n• Aluguel - R$ 1.500,00 (dia 1)\n• Internet - R$ 99,90 (dia 3)\n\n*💳 Faturas:*\n• Cartão Inter - R$ 1.250,50 (vence 02/11)\n\n*Receitas:* R$ 5.000,00\n*Despesas:* R$ 2.049,90\n*Faturas:* R$ 1.250,50\n*Saldo Previsto:* R$ 1.699,60"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Vencimentos Essa Semana",
+     "vencimentos:first:28:-:10/2026",
+     "vencimentos:second:-:4:11/2026",
+     "faturas:2026-10-28:2026-11-04"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "vencimentos_semana_virada_de_ano",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "vencimentos dos próximos dias",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Vencimentos Essa Semana",
+    "today": "2026-12-28",
+    "due_bills": {
+     "first": [
+      {
+       "descricao": "Seguro",
+       "valor_previsto": 300.0,
+       "dia_execucao": 30,
+       "nome_grupo": "Despesa"
+      }
+     ],
+     "second": [
+      {
+       "descricao": "Aluguel",
+       "valor_previsto": 1500.0,
+       "dia_execucao": 1,
+       "nome_grupo": "Despesa"
+      }
+     ]
+    },
+    "due_invoices": []
+   },
+   "body": {
+    "texto": "vencimentos dos próximos dias",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (28/12)\n\n*💰 Despesas Fixas:*\n• Seguro - R$ 300,00 (dia 30)\n• Aluguel - R$ 1.500,00 (dia 1)\n\n*Despesas:* R$ 1.800,00\n*Saldo Previsto:* R$ -1.800,00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Vencimentos Essa Semana",
+     "vencimentos:first:28:-:12/2026",
+     "vencimentos:second:-:4:1/2027",
+     "faturas:2026-12-28:2027-01-04"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "vencimentos_semana_virada_so_segundo",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "o que vence essa semana",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Vencimentos Essa Semana",
+    "today": "2026-10-25",
+    "due_bills": {
+     "first": [],
+     "second": [
+      {
+       "descricao": "Aluguel",
+       "valor_previsto": 1500.0,
+       "dia_execucao": 1,
+       "nome_grupo": "Despesa"
+      }
+     ]
+    },
+    "due_invoices": []
+   },
+   "body": {
+    "texto": "o que vence essa semana",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📋 *CONTAS QUE VENCEM NOS PRÓXIMOS 7 DIAS* (25/10)\n\n*💰 Despesas Fixas:*\n• Aluguel - R$ 1.500,00 (dia 1)\n\n*Despesas:* R$ 1.500,00\n*Saldo Previsto:* R$ -1.500,00"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Vencimentos Essa Semana",
+     "vencimentos:first:25:-:10/2026",
+     "vencimentos:second:-:1:11/2026",
+     "faturas:2026-10-25:2026-11-01"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "vencimentos_semana_vazio",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "o que vence essa semana",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Vencimentos Essa Semana",
+    "due_bills": {
+     "single": []
+    },
+    "due_invoices": []
+   },
+   "body": {
+    "texto": "o que vence essa semana",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Nenhuma conta vence nos próximos 7 dias!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Vencimentos Essa Semana",
+     "vencimentos:single:7:14:10/2026",
+     "faturas:2026-10-07:2026-10-14"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "vencimentos_semana_virada_vazio",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "o que vence essa semana",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Vencimentos Essa Semana",
+    "today": "2026-10-30",
+    "due_bills": {
+     "first": [],
+     "second": []
+    },
+    "due_invoices": []
+   },
+   "body": {
+    "texto": "o que vence essa semana",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Nenhuma conta vence nos próximos 7 dias!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Vencimentos Essa Semana",
+     "vencimentos:first:30:-:10/2026",
+     "vencimentos:second:-:6:11/2026",
+     "faturas:2026-10-30:2026-11-06"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "vencimentos_semana_erro_no_banco",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "o que vence essa semana",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Vencimentos Essa Semana",
+    "db_fail": "vencimentos",
+    "due_bills": {
+     "single": [
+      {
+       "descricao": "Salário",
+       "valor_previsto": 5000.0,
+       "dia_execucao": 7,
+       "nome_grupo": "Renda"
+      },
+      {
+       "descricao": "Aluguel",
+       "valor_previsto": 1500.0,
+       "dia_execucao": 7,
+       "nome_grupo": "Despesa"
+      },
+      {
+       "descricao": "Internet",
+       "valor_previsto": 99.9,
+       "dia_execucao": 7,
+       "nome_grupo": "Despesa"
+      },
+      {
+       "descricao": "Sem valor",
+       "valor_previsto": null,
+       "dia_execucao": 7,
+       "nome_grupo": "Despesa"
+      }
+     ]
+    },
+    "due_invoices": []
+   },
+   "body": {
+    "texto": "o que vence essa semana",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Ops! Algo deu errado. Por favor, tente novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Vencimentos Essa Semana",
+     "vencimentos:single:7:14:10/2026"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "atrasadas_vazio",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "tenho conta atrasada",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Contas Atrasadas",
+    "snapshot": {
+     "pending_bills": [],
+     "overdue_bills": [],
+     "overdue_invoices": [],
+     "invoices_due_today": []
+    }
+   },
+   "body": {
+    "texto": "tenho conta atrasada",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Você não tem contas atrasadas! Tudo em dia! 🎉"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "checkin.snapshot"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "atrasadas_pendentes",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "contas vencidas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Contas Atrasadas",
+    "snapshot": {
+     "pending_bills": [
+      {
+       "id": 1,
+       "descricao": "Aluguel",
+       "valor_previsto": 1500.0,
+       "dia_execucao": 7,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Despesa",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": "2026-10-07"
+      },
+      {
+       "id": 2,
+       "descricao": "Luz",
+       "valor_previsto": 230.45,
+       "dia_execucao": 6,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Despesa",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": "2026-10-06"
+      },
+      {
+       "id": 3,
+       "descricao": "Água",
+       "valor_previsto": 80.1,
+       "dia_execucao": 5,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Despesa",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": "2026-10-05"
+      },
+      {
+       "id": 4,
+       "descricao": "Internet",
+       "valor_previsto": 99.9,
+       "dia_execucao": 4,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Despesa",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": "2026-10-04"
+      },
+      {
+       "id": 5,
+       "descricao": "Salário",
+       "valor_previsto": 5000.0,
+       "dia_execucao": 7,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Renda",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": "2026-10-07"
+      },
+      {
+       "id": 6,
+       "descricao": "Tênis",
+       "valor_previsto": 150.0,
+       "dia_execucao": 7,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Despesa",
+       "tipo_agendamento": "PARCELADO",
+       "parcelas_executadas": 1,
+       "total_parcelas": 3,
+       "data_vencimento_real": "2026-10-07"
+      }
+     ],
+     "overdue_bills": [],
+     "overdue_invoices": [],
+     "invoices_due_today": []
+    }
+   },
+   "body": {
+    "texto": "contas vencidas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📊 *RESUMO FINANCEIRO* 📊\n\n💵 *RECEITAS PENDENTES:*\n_Valores previstos que ainda não foram recebidos - confirmáveis via check-in_\n\n1. Salário - R$ 5.000,00 - Previsto em 07/10\n💰 *Total:* R$ 5.000,00\n\n💸 *DESPESAS PENDENTES:*\n2. Aluguel - R$ 1.500,00 (Nubank) - Vence hoje\n3. Luz - R$ 230,45 (Nubank) - Venceu ontem\n4. Água - R$ 80,10 (Nubank) - Venceu em 05/10\n5. Internet - R$ 99,90 (Nubank) - Venceu em 04/10\n6. Tênis (2/3) - R$ 150,00 (Nubank) - Vence hoje\n\n\n━━━━━━━━━━━━━━━━━━━━\n_💡 Para confirmar pagamentos, aguarde o check-in noturno automático._"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "checkin.snapshot"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "atrasadas_com_atrasadas",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "o que já passou do vencimento",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Contas Atrasadas",
+    "snapshot": {
+     "pending_bills": [
+      {
+       "id": 1,
+       "descricao": "Aluguel",
+       "valor_previsto": 1500.0,
+       "dia_execucao": 7,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Despesa",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": "2026-10-07"
+      }
+     ],
+     "overdue_bills": [
+      {
+       "id": 2,
+       "descricao": "Seguro",
+       "valor_previsto": 300.0,
+       "dia_execucao": 20,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Despesa",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": "2026-09-20"
+      },
+      {
+       "id": 3,
+       "descricao": "Bônus",
+       "valor_previsto": 900.0,
+       "dia_execucao": 25,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Renda",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": "2026-09-25"
+      },
+      {
+       "id": 1,
+       "descricao": "Aluguel",
+       "valor_previsto": 1500.0,
+       "dia_execucao": 7,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Despesa",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": "2026-09-07"
+      },
+      {
+       "id": 4,
+       "descricao": "Hoje mesmo",
+       "valor_previsto": 10.0,
+       "dia_execucao": 7,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Despesa",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": "2026-10-07"
+      },
+      {
+       "id": 5,
+       "descricao": "Sem data",
+       "valor_previsto": 20.0,
+       "dia_execucao": 3,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Despesa",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": null
+      }
+     ],
+     "overdue_invoices": [],
+     "invoices_due_today": []
+    }
+   },
+   "body": {
+    "texto": "o que já passou do vencimento",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📊 *RESUMO FINANCEIRO* 📊\n\n💵 *RECEITAS PENDENTES:*\n_Valores previstos que ainda não foram recebidos - confirmáveis via check-in_\n\n1. Bônus - R$ 900,00 - Previsto em 25/09/2026\n💰 *Total:* R$ 900,00\n\n💸 *DESPESAS PENDENTES:*\n2. Aluguel - R$ 1.500,00 (Nubank) - Vence hoje\n\n🔴 *DESPESAS ATRASADAS (há mais de 7 dias):*\n3. Seguro - R$ 300,00 - Venceu em 20/09/2026 (17 dias) ⚠️\n4. Hoje mesmo - R$ 10,00 - Previsto para 07/10/2026\n5. Sem data - R$ 20,00\n\n💸 *Total atrasado:* R$ 330,00\n\n━━━━━━━━━━━━━━━━━━━━\n_💡 Para confirmar pagamentos, aguarde o check-in noturno automático._"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "checkin.snapshot"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "atrasadas_cartao_debita_hoje",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "contas atrasadas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Contas Atrasadas",
+    "snapshot": {
+     "pending_bills": [
+      {
+       "id": 1,
+       "descricao": "Netflix",
+       "valor_previsto": 55.9,
+       "dia_execucao": 7,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Cartão Inter",
+       "tipo_conta": "Cartão de Crédito",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Despesa",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": "2026-10-07"
+      },
+      {
+       "id": 2,
+       "descricao": "Spotify",
+       "valor_previsto": 21.9,
+       "dia_execucao": 6,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Cartão Inter",
+       "tipo_conta": "Cartão de Crédito",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Despesa",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": "2026-10-06"
+      }
+     ],
+     "overdue_bills": [],
+     "overdue_invoices": [],
+     "invoices_due_today": []
+    }
+   },
+   "body": {
+    "texto": "contas atrasadas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📊 *RESUMO FINANCEIRO* 📊\n\n💳 *DÉBITO CARTÃO DE CRÉDITO*\n * Netflix - R$ 55,90 - Será debitado hoje\n\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "checkin.snapshot"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "atrasadas_so_cartao_vira_vazio",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "contas atrasadas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Contas Atrasadas",
+    "snapshot": {
+     "pending_bills": [
+      {
+       "id": 1,
+       "descricao": "Spotify",
+       "valor_previsto": 21.9,
+       "dia_execucao": 6,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Cartão Inter",
+       "tipo_conta": "Cartão de Crédito",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Despesa",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": "2026-10-06"
+      }
+     ],
+     "overdue_bills": [],
+     "overdue_invoices": [],
+     "invoices_due_today": []
+    }
+   },
+   "body": {
+    "texto": "contas atrasadas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ Você não tem contas atrasadas! Tudo em dia! 🎉"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "checkin.snapshot"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "atrasadas_fatura_hoje",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "contas atrasadas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Contas Atrasadas",
+    "snapshot": {
+     "pending_bills": [],
+     "overdue_bills": [],
+     "overdue_invoices": [],
+     "invoices_due_today": [
+      {
+       "id": 1,
+       "nome_conta": "Cartão Inter",
+       "data_vencimento": "2026-10-07",
+       "status": "Aberta",
+       "valor_total": 1250.5
+      }
+     ]
+    }
+   },
+   "body": {
+    "texto": "contas atrasadas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📊 *RESUMO FINANCEIRO* 📊\n\n⏰ *FATURAS QUE VENCEM HOJE:*\n_Atenção! Estas faturas devem ser pagas hoje para evitar juros._\n\n💳 Cartão Inter - R$ 1.250,50 - Vence HOJE\n\n"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "checkin.snapshot"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "atrasadas_fatura_vencida_keyerror",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": "130",
+   "texto": "contas atrasadas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Contas Atrasadas",
+    "snapshot": {
+     "pending_bills": [
+      {
+       "id": 1,
+       "descricao": "Aluguel",
+       "valor_previsto": 1500.0,
+       "dia_execucao": 7,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Despesa",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": "2026-10-07"
+      }
+     ],
+     "overdue_bills": [],
+     "overdue_invoices": [
+      {
+       "id": 1,
+       "cartao": "Cartão Inter",
+       "data_vencimento": "2026-10-01",
+       "status": "Aberta",
+       "valor_total": 300.0
+      }
+     ],
+     "invoices_due_today": []
+    }
+   },
+   "body": {
+    "texto": "contas atrasadas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Ops! Algo deu errado. Por favor, tente novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "checkin.snapshot"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "atrasadas_erro_no_banco",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "contas atrasadas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Contas Atrasadas",
+    "db_fail": "snapshot",
+    "snapshot": {
+     "pending_bills": [],
+     "overdue_bills": [],
+     "overdue_invoices": [],
+     "invoices_due_today": []
+    }
+   },
+   "body": {
+    "texto": "contas atrasadas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Ops! Algo deu errado. Por favor, tente novamente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "checkin.snapshot"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "atrasadas_data_diferente",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "contas atrasadas",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "intent": "Contas Atrasadas",
+    "today": "2026-03-02",
+    "snapshot": {
+     "pending_bills": [
+      {
+       "id": 1,
+       "descricao": "Aluguel",
+       "valor_previsto": 1500.0,
+       "dia_execucao": 28,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Despesa",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": "2026-02-28"
+      },
+      {
+       "id": 2,
+       "descricao": "Luz",
+       "valor_previsto": 230.0,
+       "dia_execucao": 2,
+       "conta_id": 1,
+       "subcategoria_id": 10,
+       "usuario_id": 7,
+       "nome_conta": "Nubank",
+       "tipo_conta": "Conta Corrente",
+       "categoria": "Moradia",
+       "nome_macro": "Moradia",
+       "nome_grupo": "Despesa",
+       "tipo_agendamento": "FIXO",
+       "parcelas_executadas": null,
+       "total_parcelas": null,
+       "data_vencimento_real": "2026-03-02"
+      }
+     ],
+     "overdue_bills": [],
+     "overdue_invoices": [],
+     "invoices_due_today": []
+    }
+   },
+   "body": {
+    "texto": "contas atrasadas",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📊 *RESUMO FINANCEIRO* 📊\n\n💸 *DESPESAS PENDENTES:*\n1. Aluguel - R$ 1.500,00 (Nubank) - Venceu em 28/02\n2. Luz - R$ 230,00 (Nubank) - Vence hoje\n\n\n━━━━━━━━━━━━━━━━━━━━\n_💡 Para confirmar pagamentos, aguarde o check-in noturno automático._"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "checkin.snapshot"
+    ],
+    "redis": {},
+    "redis_writes": []
+   }
+  },
+  {
+   "name": "checkin_todas_ok",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ok",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "ok",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Todas as 3 contas confirmadas!*\n\n• Salário\n• Aluguel\n• Luz\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=11:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=12:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=13:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_todas_emoji",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "👍",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "👍",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Todas as 3 contas confirmadas!*\n\n• Salário\n• Aluguel\n• Luz\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=11:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=12:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=13:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_todas_sim",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "Sim",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "Sim",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Todas as 3 contas confirmadas!*\n\n• Salário\n• Aluguel\n• Luz\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=11:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=12:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=13:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_todas_tudo_pago",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "tudo pago",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "tudo pago",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Todas as 3 contas confirmadas!*\n\n• Salário\n• Aluguel\n• Luz\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=11:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=12:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=13:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_todas_assim_confirma_tudo",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "assim",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "assim",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Todas as 3 contas confirmadas!*\n\n• Salário\n• Aluguel\n• Luz\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=11:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=12:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=13:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_todas_checkmark",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "✅",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "✅",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Todas as 3 contas confirmadas!*\n\n• Salário\n• Aluguel\n• Luz\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=11:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=12:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=13:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_uma_conta_so",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ok",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 1
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "ok",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Todas as 1 contas confirmadas!*\n\n• Salário\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=11:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_parcial_um",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "1",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "1",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *1 conta(s) confirmada(s):*\n\n• Salário\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=11:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_parcial_um_e_tres",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "1 e 3",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "1 e 3",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *2 conta(s) confirmada(s):*\n\n• Salário\n• Luz\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=11:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=13:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_parcial_virgulas",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "1, 2, 3",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "1, 2, 3",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Todas as 3 contas confirmadas!*\n\n• Salário\n• Aluguel\n• Luz\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=11:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=12:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=13:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_parcial_ordem_trocada",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "3, 1",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "3, 1",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *2 conta(s) confirmada(s):*\n\n• Salário\n• Luz\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=11:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=13:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_parcial_repetido",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "2 2 2",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "2 2 2",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *1 conta(s) confirmada(s):*\n\n• Aluguel\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=12:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_parcial_texto_e_numero",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "só a 2",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "só a 2",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *1 conta(s) confirmada(s):*\n\n• Aluguel\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=12:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_nao",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "não",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "não",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "⏸️ Ok, te lembro amanhã no próximo check-in!\n\nVocê pode registrar os pagamentos manualmente a qualquer momento."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_nao_sem_acento",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "nao",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "nao",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "⏸️ Ok, te lembro amanhã no próximo check-in!\n\nVocê pode registrar os pagamentos manualmente a qualquer momento."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_depois",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "Depois",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "Depois",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "⏸️ Ok, te lembro amanhã no próximo check-in!\n\nVocê pode registrar os pagamentos manualmente a qualquer momento."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_amanha",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "amanhã",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "amanhã",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "⏸️ Ok, te lembro amanhã no próximo check-in!\n\nVocê pode registrar os pagamentos manualmente a qualquer momento."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_ok_ganha_do_nao",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ok não",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "ok não",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Todas as 3 contas confirmadas!*\n\n• Salário\n• Aluguel\n• Luz\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=11:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=12:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=13:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_invalido",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "talvez",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "talvez",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❓ Não entendi. Responda com:\n\n✅ Emoji ou \"Ok\" para tudo\n📝 Números das contas pagas (ex: \"1, 3\")\n⏸️ \"Não\" para adiar"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_numero_fora",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "5",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "5",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "Números inválidos: [5]. Use 1 a 3"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_numero_zero",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "0",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "0",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "Números inválidos: [0]. Use 1 a 3"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_numeros_misturados",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "1 e 9",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "1 e 9",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "Números inválidos: [9]. Use 1 a 3"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_numero_gigante",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "99999999999999999999",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "99999999999999999999",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "Números inválidos: [99999999999999999999]. Use 1 a 3"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_sessao_expirada",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ok",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "ok",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "⏱️ Esta sessão expirou. Aguarde o próximo check-in ou registre manualmente."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_sessao_vazia",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ok",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {},
+      "created_at": "2026-10-07",
+      "total_items": 0
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "ok",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "Não há itens recentes para confirmar. Use 'Pendencias' para ver contas antigas."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_escape_hatch_apaga_flag",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "quanto devo?",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    },
+    "intent": "Menu de Ajuda"
+   },
+   "body": {
+    "texto": "quanto devo?",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "📚 *MENU DE FUNCIONALIDADES* 📚\n\n*💰 GESTÃO FINANCEIRA*\n• _\"gastei 50 em comida\"_ - Registrar despesa\n• _\"recebi 500\"_ - Registrar renda\n• _\"qual meu saldo?\"_ - Consultar saldo das contas\n• _\"quanto gastei hoje/semana/mês?\"_ - Gastos por período\n• _\"meus potes\"_ - Ver limite e gasto dos potes\n• _\"todas as minhas contas\"_ - Listar TODAS as contas recorrentes (pagas ou não)\n• _\"minhas contas fixas\"_ - Ver contas ainda não pagas no mês\n• _\"paguei água\"_ - Quitar conta fixa\n• _\"paguei a internet e comprei pizza de 50\"_ - Quitar múltiplas (híbrido)\n• _\"transferir 100 da carteira para banco\"_ - Transferência\n• _\"paguei 500 da fatura do nubank\"_ - Pagar fatura\n• _\"qual valor da fatura?\"_ - Consultar valor da fatura\n• _\"quanto gastei com comida?\"_ - Gasto por categoria\n• _\"quais contas tenho?\"_ - Listar contas cadastradas\n• _\"quanto de reserva?\"_ - Reserva de emergência (6x média)\n• _\"tenho conta que vence hoje?\"_ - Vencimentos de hoje\n• _\"tenho conta que vence amanhã?\"_ - Vencimentos de amanhã\n• _\"contas que vencem essa semana?\"_ - Vencimentos dos próximos 7 dias\n\n*📅 CALENDÁRIO & AGENDA*\n• _\"minha agenda amanhã\"_ - Ver compromissos\n• _\"criar evento academia amanhã 7h\"_ - Criar evento\n• _\"deletar reunião de hoje\"_ - Remover evento\n• _\"quando estou livre amanhã?\"_ - Horários disponíveis\n\n*📁 GOOGLE DRIVE*\n• _[Envie foto/doc] \"salvar no drive\"_ - Upload para pasta padrão\n• _[Envie foto/doc] \"salvar no drive pasta Notas\"_ - Upload para pasta específica\n• _Formatos aceitos:_ Imagens, PDFs, Docs, Planilhas, Áudio\n\n*📊 ANÁLISES & RELATÓRIOS*\n• _\"analisar meus gastos\"_ - Análise inteligente com IA\n• _\"comparar com mês anterior\"_ - Comparação mensal\n• _\"quanto vou gastar este mês\"_ - Previsão de gastos\n• _\"gráfico de gastos\"_ - Gerar gráfico visual\n\n*⚙️ CONFIGURAÇÕES*\n• _\"ativar resumo matinal\"_ - Configurar notificações\n• _\"configurar localização São Paulo\"_ - Definir cidade\n• _\"configurar relatório mensal\"_ - Agendar relatório\n• _\"configurar endereço casa\"_ - Adicionar endereço\n• _\"meus endereços\"_ - Listar endereços\n• _\"remover endereço casa\"_ - Deletar endereço\n\n*🔑 ACESSO*\n• _\"minha api key\"_ - Exibir chave de integração\n\n💡 *Dica:* Use linguagem natural! Eu entendo suas mensagens."
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "gemini_service.get_message_intent",
+     "route_intent:Menu de Ajuda"
+    ],
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     }
+    },
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_datas_do_lancamento",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ok",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 21,
+        "descricao": "Hoje",
+        "valor_previsto": 10.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 22,
+        "descricao": "Ontem",
+        "valor_previsto": 20.0,
+        "dia_execucao": 6,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-06",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 23,
+        "descricao": "Dois dias",
+        "valor_previsto": 30.0,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "4": {
+        "id": 24,
+        "descricao": "Futuro",
+        "valor_previsto": 40.0,
+        "dia_execucao": 9,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-09",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "5": {
+        "id": 25,
+        "descricao": "Mes anterior",
+        "valor_previsto": 50.0,
+        "dia_execucao": 30,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-09-30",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "6": {
+        "id": 26,
+        "descricao": "Sem data dia 7",
+        "valor_previsto": 60.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": null,
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "7": {
+        "id": 27,
+        "descricao": "Sem data dia 6",
+        "valor_previsto": 70.0,
+        "dia_execucao": 6,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": null,
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "8": {
+        "id": 28,
+        "descricao": "Sem data dia 5",
+        "valor_previsto": 80.0,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": null,
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "9": {
+        "id": 29,
+        "descricao": "Sem data dia 20",
+        "valor_previsto": 90.0,
+        "dia_execucao": 20,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": null,
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 9
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "ok",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Todas as 9 contas confirmadas!*\n\n• Hoje\n• Ontem\n• Dois dias\n• Futuro\n• Mes anterior\n• Sem data dia 7\n• Sem data dia 6\n• Sem data dia 5\n• Sem data dia 20\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=21:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=22:data=2026-10-06",
+     "finance_service.create_transaction",
+     "create_transaction:ag=23:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=24:data=2026-10-09",
+     "finance_service.create_transaction",
+     "create_transaction:ag=25:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=26:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=27:data=2026-10-06",
+     "finance_service.create_transaction",
+     "create_transaction:ag=28:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=29:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_datas_virada_de_mes",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ok",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "today": "2026-03-01",
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 31,
+        "descricao": "Fev 28",
+        "valor_previsto": 10.0,
+        "dia_execucao": 28,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-02-28",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 32,
+        "descricao": "Mar 1",
+        "valor_previsto": 20.0,
+        "dia_execucao": 1,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-03-01",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 33,
+        "descricao": "Sem data 1",
+        "valor_previsto": 30.0,
+        "dia_execucao": 1,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": null,
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "4": {
+        "id": 34,
+        "descricao": "Sem data 31",
+        "valor_previsto": 40.0,
+        "dia_execucao": 31,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": null,
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 4
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "ok",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Todas as 4 contas confirmadas!*\n\n• Fev 28\n• Mar 1\n• Sem data 1\n• Sem data 31\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=31:data=2026-02-28",
+     "finance_service.create_transaction",
+     "create_transaction:ag=32:data=2026-03-01",
+     "finance_service.create_transaction",
+     "create_transaction:ag=33:data=2026-03-01",
+     "finance_service.create_transaction",
+     "create_transaction:ag=34:data=2026-03-01",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_cartao_e_parcelado",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": null,
+   "texto": "ok",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 41,
+        "descricao": "Salário cartão",
+        "valor_previsto": 100.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Cartão Inter",
+        "tipo_conta": "Cartão de Crédito",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 42,
+        "descricao": "Tênis",
+        "valor_previsto": 150.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "PARCELADO",
+        "parcelas_executadas": 1,
+        "total_parcelas": 3,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 43,
+        "descricao": "Última parcela",
+        "valor_previsto": 150.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "PARCELADO",
+        "parcelas_executadas": 2,
+        "total_parcelas": 3,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "ok",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "✅ *Todas as 3 contas confirmadas!*\n\n• Salário cartão\n• Tênis\n• Última parcela\n\n💚 Transações registradas com sucesso!"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "finance_service.get_or_create_fatura",
+     "create_transaction:ag=41:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=42:data=2026-10-07",
+     "finance_service.create_transaction",
+     "create_transaction:ag=43:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_erro_ao_salvar",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": "008",
+   "texto": "ok",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 11,
+        "descricao": "Salário",
+        "valor_previsto": 5000.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Renda",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "2": {
+        "id": 12,
+        "descricao": "Aluguel",
+        "valor_previsto": 1500.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-07",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       },
+       "3": {
+        "id": 13,
+        "descricao": "Luz",
+        "valor_previsto": 230.45,
+        "dia_execucao": 5,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "2026-10-05",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 3
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    },
+    "returns": {
+     "finance_service.create_transaction": {
+      "__raise__": "falha no banco"
+     }
+    }
+   },
+   "body": {
+    "texto": "ok",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Erro ao salvar transações: falha no banco"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001",
+     "create_transaction:ag=11:data=2026-10-07",
+     "finance_service.create_transaction"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "checkin_data_invalida_na_sessao",
+   "group": "012d",
+   "layer": "pipeline",
+   "deviation": "008",
+   "texto": "ok",
+   "numero": "5531999990001@s.whatsapp.net",
+   "config": {
+    "redis": {
+     "nightly_checkin:5531999990001:chk00001": {
+      "items": {
+       "1": {
+        "id": 51,
+        "descricao": "Data ruim",
+        "valor_previsto": 10.0,
+        "dia_execucao": 7,
+        "conta_id": 1,
+        "subcategoria_id": 10,
+        "usuario_id": 7,
+        "nome_conta": "Nubank",
+        "tipo_conta": "Conta Corrente",
+        "categoria": "Moradia",
+        "nome_macro": "Moradia",
+        "nome_grupo": "Despesa",
+        "tipo_agendamento": "FIXO",
+        "parcelas_executadas": null,
+        "total_parcelas": null,
+        "data_vencimento_real": "amanhã",
+        "status_text": "Vence hoje",
+        "dias_atraso": 0
+       }
+      },
+      "created_at": "2026-10-07",
+      "total_items": 1
+     },
+     "nightly_checkin_active:5531999990001": "chk00001"
+    }
+   },
+   "body": {
+    "texto": "ok",
+    "numero_remetente": "5531999990001@s.whatsapp.net"
+   },
+   "result": {
+    "status": 200,
+    "body": {
+     "status": "sucesso",
+     "resposta": "❌ Erro ao salvar transações: Invalid isoformat string: 'amanhã'"
+    },
+    "calls": [
+     "user_service.check_user_exists:5531999990001"
+    ],
+    "redis": {},
+    "redis_writes": [
+     [
+      "delete",
+      "nightly_checkin:5531999990001:chk00001"
+     ],
+     [
+      "delete",
+      "nightly_checkin_active:5531999990001"
+     ]
+    ]
+   }
+  }
+ ]
+}
