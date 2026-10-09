@@ -20,4 +20,4 @@ Manter como está (paridade estrita).
 Aprovar.
 
 ## Decisão do Rafael
-Aprovado em 2026-10-02 (aprovação em bloco de todos os desvios propostos). **Condição:** o `oauth_proxy` (Render) descarta a query string no `/connect-calendar`; ele precisa ser atualizado para repassá-la (`oauth_proxy/app.py`, já corrigido neste repositório) e **reimplantado antes da virada**, senão todo link assinado chegaria sem `t` e responderia 403.
+Aprovado em 2026-10-02 (aprovação em bloco de todos os desvios propostos). **Condição (resolvida em 2026-10-09):** o serviço real do Render (`Depaula010/meu-financeiro-proxy`, `proxy_server.py`) já repassa a query string de todas as rotas; não há redeploy a fazer. O `oauth_proxy/app.py` deste repositório é legado e sai na Fase 5.
