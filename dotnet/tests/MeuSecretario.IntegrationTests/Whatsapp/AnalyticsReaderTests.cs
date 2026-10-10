@@ -60,9 +60,27 @@ public class AnalyticsReaderTests(PostgresFixture postgres) : IAsyncLifetime
         data.Categories[0].Quantity.ShouldBe(2);
         data.Weekdays.Select(w => (w.Day, w.Total, w.Quantity)).ShouldBe([("Monday", -100d, 1), ("Wednesday", -40.5, 1), ("Thursday", -60d, 1)]);
         data.Pots.Select(p => (p.Name, p.Limit, p.Spent)).ShouldBe([("Outros", 200d, -140.5)]);
-        data.TopExpenses.Select(e => e.Description).ShouldBe(["Padaria", "Mercado"]); // ORDER BY valor DESC: o menos negativo primeiro (como no Flask)
-        data.TopExpenses[0].Date.ShouldBe(new DateOnly(2026, 10, 7));
+        data.TopExpenses.Select(e => e.Description).ShouldBe(["Mercado", "Padaria"]); // desvio 233: ABS(valor) DESC, os maiores primeiro
+        data.TopExpenses[0].Date.ShouldBe(new DateOnly(2026, 10, 5));
         data.FixedCharges.Select(c => (c.Description, c.Value, c.Periodicity)).ShouldBe([("Aluguel", 1500d, "MENSAL"), ("Netflix", 55.9, "MENSAL")]);
+    }
+
+    [Fact]
+    [Trait("AC", "012-233")]
+    public async Task SpendingAnalysis_TopExpenses_AreTheLargestByAbsoluteValue_TiesById()
+    {
+        await Expense(-10m, "2026-10-01", "Pequena");
+        await Expense(-500m, "2026-10-02", "Grande");
+        await Expense(-80m, "2026-10-03", "Media A");
+        var tieBreaker = await Expense(-80m, "2026-10-04", "Media B");
+        await Expense(-300m, "2026-10-05", "Alta");
+        await Expense(-20m, "2026-10-06", "Baixa");
+        await Expense(-5000m, "2026-09-06", "Mes anterior");
+        tieBreaker.ShouldBeGreaterThan(0);
+
+        var data = await _reader.GetSpendingAnalysisAsync(_user, Today, CancellationToken.None);
+
+        data.TopExpenses.Select(e => e.Description).ShouldBe(["Grande", "Alta", "Media A", "Media B", "Baixa"]);
     }
 
     [Fact]
@@ -118,7 +136,7 @@ public class AnalyticsReaderTests(PostgresFixture postgres) : IAsyncLifetime
 
     [Fact]
     [Trait("AC", "012-702")]
-    public async Task MonthlyComparison_GroupsByMacroAndMonth_LargestTotalFirst()
+    public async Task MonthlyComparison_GroupsByMacroAndMonth_AbsoluteTotals_LargestFirst()
     {
         await Expense(-100m, "2026-10-05");
         await Expense(-30m, "2026-09-05");
@@ -127,13 +145,13 @@ public class AnalyticsReaderTests(PostgresFixture postgres) : IAsyncLifetime
 
         var rows = await _reader.GetMonthlyComparisonAsync(_user, "2026-10", "2026-09", CancellationToken.None);
 
-        rows.Select(r => (r.Month, r.Total)).ShouldBe([("2026-09", -30d), ("2026-10", -100d)]); // ORDER BY total DESC
+        rows.Select(r => (r.Month, r.Total)).ShouldBe([("2026-10", 100d), ("2026-09", 30d)]); // desvio 232: valor absoluto, ORDER BY total DESC
         (await _reader.GetMonthlyComparisonAsync(_other, "2026-10", "2026-09", CancellationToken.None)).ShouldBeEmpty();
     }
 
     [Fact]
     [Trait("AC", "012-703")]
-    public async Task PieRows_AreAbsoluteExpensesPerMacro_FromTheStartDate_IgnoringConsolidation()
+    public async Task PieRows_AreAbsoluteConsolidatedExpensesPerMacro_FromTheStartDate()
     {
         await Expense(-100m, "2026-10-05");
         await Expense(-50m, "2026-10-06", consolidated: false);
@@ -142,7 +160,7 @@ public class AnalyticsReaderTests(PostgresFixture postgres) : IAsyncLifetime
 
         var rows = await _reader.GetPieRowsAsync(_user, new DateOnly(2026, 9, 7), CancellationToken.None);
 
-        rows.Select(r => r.Total).ShouldBe([150d]);
+        rows.Select(r => r.Total).ShouldBe([100d]); // desvio 231: a não consolidada (-50) fica fora
         rows[0].Category.ShouldNotBeNullOrEmpty();
         (await _reader.GetPieRowsAsync(_user, new DateOnly(2026, 10, 7), CancellationToken.None)).ShouldBeEmpty();
     }
@@ -155,6 +173,9 @@ public class AnalyticsReaderTests(PostgresFixture postgres) : IAsyncLifetime
         await Expense(-40m, "2026-09-01");
         await _env.Data.InsertTransactionAsync(_user, _account, tipo: "Renda", valor: 900m, data: "2026-09-15", subcategoryId: TransactionsTestData.IncomeSubcategory);
         await Expense(-1m, "2026-03-01"); // antes do início
+        await Expense(-77m, "2026-09-02", consolidated: false); // desvio 231: não consolidada fica fora
+        await _env.Data.InsertTransactionAsync(
+            _user, _account, tipo: "Renda", valor: 55m, data: "2026-09-03", subcategoryId: TransactionsTestData.IncomeSubcategory, consolidada: false);
 
         var rows = await _reader.GetBarRowsAsync(_user, new DateOnly(2026, 4, 10), CancellationToken.None);
 
@@ -162,22 +183,41 @@ public class AnalyticsReaderTests(PostgresFixture postgres) : IAsyncLifetime
     }
 
     [Fact]
-    [Trait("AC", "012-703")]
-    public async Task LineSeries_AccumulatesFromTheStart_SameDayRowsShareTheTotal_AndCarriesTheInitialBalance()
+    [Trait("AC", "012-231")]
+    public async Task LineSeries_StartsFromTheRealBalance_ActiveAccountsAndConsolidatedHistory()
     {
         await _env.Data.ExecuteAsync("UPDATE contas SET saldo_inicial = 1000 WHERE id = @account", new { account = _account });
-        await _env.Data.InsertAccountAsync(_user, "Inativa", ativa: false);
+        var inactive = await _env.Data.InsertAccountAsync(_user, "Inativa", ativa: false);
         await _env.Data.ExecuteAsync("UPDATE contas SET saldo_inicial = 5 WHERE nome_conta = 'Inativa'");
-        await Expense(-999m, "2026-03-01"); // antes do início: fora da janela
+        await Expense(-999m, "2026-03-01"); // antes do início, consolidada: entra no saldo inicial da janela
+        await Expense(-111m, "2026-03-02", consolidated: false); // antes do início, não consolidada: fora
         await Expense(-100m, "2026-08-01");
         await Expense(-20m, "2026-08-15");
+        await Expense(-33m, "2026-08-20", consolidated: false); // não consolidada: fora do acumulado
+        await Expense(-44m, "2026-08-21", account: inactive); // conta inativa: fora
         await _env.Data.InsertTransactionAsync(_user, _account, tipo: "Renda", valor: 500m, data: "2026-08-15", subcategoryId: TransactionsTestData.IncomeSubcategory);
 
         var series = await _reader.GetLineSeriesAsync(_user, new DateOnly(2026, 4, 10), CancellationToken.None);
 
-        series.InitialBalance.ShouldBe(1005); // todas as contas, ativas ou não (como o Flask)
+        // saldo_inicial das contas ativas (1000) + consolidadas anteriores à janela (-999); a conta inativa (5) não entra.
+        series.InitialBalance.ShouldBe(1);
         series.Rows.Select(r => (r.Date, r.Cumulative)).ShouldBe(
             [(new DateOnly(2026, 8, 1), -100d), (new DateOnly(2026, 8, 15), 380d), (new DateOnly(2026, 8, 15), 380d)]);
         (await _reader.GetLineSeriesAsync(_other, new DateOnly(2026, 4, 10), CancellationToken.None)).Rows.ShouldBeEmpty();
+    }
+
+    [Fact]
+    [Trait("AC", "012-231")]
+    public async Task LineSeries_FinalBalanceMatchesTheBalanceOfTheActiveAccounts()
+    {
+        await _env.Data.ExecuteAsync("UPDATE contas SET saldo_inicial = 250 WHERE id = @account", new { account = _account });
+        await Expense(-50m, "2026-01-10");
+        await Expense(-25m, "2026-08-10");
+        await _env.Data.InsertTransactionAsync(_user, _account, tipo: "Renda", valor: 300m, data: "2026-09-10", subcategoryId: TransactionsTestData.IncomeSubcategory);
+
+        var series = await _reader.GetLineSeriesAsync(_user, new DateOnly(2026, 4, 10), CancellationToken.None);
+
+        var final = series.InitialBalance + series.Rows[^1].Cumulative;
+        final.ShouldBe(250 - 50 - 25 + 300);
     }
 }

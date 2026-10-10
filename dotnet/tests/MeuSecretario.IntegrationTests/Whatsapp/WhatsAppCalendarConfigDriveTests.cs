@@ -2,6 +2,8 @@ using System.Net;
 using System.Text.Json;
 using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Infrastructure.Database;
+using MeuSecretario.Infrastructure.Security;
+using MeuSecretario.TestFixtures;
 using MeuSecretario.Infrastructure.Whatsapp;
 using MeuSecretario.IntegrationTests.Support;
 using Microsoft.Extensions.DependencyInjection;
@@ -137,17 +139,58 @@ public class WhatsAppCalendarConfigDriveRouteTests(PostgresFixture postgres) : I
     }
 
     [Fact]
-    [Trait("AC", "012-601")]
-    public async Task GeminiBranch_WritesAndAnswers500_LikeTheFlask()
+    [Trait("AC", "012-152")]
+    public async Task GeminiBranch_AgendaDiaria_WritesAndAnswersTheStatus()
     {
-        _env.Llm.Reset();
-        _env.Llm.Then("""{"intent": "Configurar Notificações"}""").Then("""{"tipo": "agenda_diaria", "acao": "desativar"}""");
+        var reply = await SendAsync(
+            "configurar notificação da agenda", """{"intent": "Configurar Notificações"}""", """{"tipo": "agenda_diaria", "acao": "desativar"}""");
 
-        var (status, body) = await _env.PostJsonAsync(new { texto = "desligar agenda diária", numero_remetente = WhatsAppEnv.Number });
-
-        status.ShouldBe(HttpStatusCode.InternalServerError);
-        body.ShouldContain("Erro ao processar.");
+        reply.ShouldBe("✅ Resumo matinal desativado\n\n📱 *Agenda Diária - Status atual:*\n• Ativa: Não\n• Horário: 07:00\n");
         (await _env.ScalarAsync<bool>("SELECT resumo_matinal_ativo FROM notificationconfigs WHERE usuario_id = @_user", new { _user })).ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("AC", "012-191")]
+    public async Task GeminiBranch_ContasVencer_WritesTheFinancialAlertsColumn()
+    {
+        var off = await SendAsync(
+            "configurar notificação de contas", """{"intent": "Configurar Notificações"}""", """{"tipo": "contas_vencer", "acao": "desativar", "dias_antes": 2}""");
+
+        off.ShouldBe(
+            "✅ Alertas financeiros desativados com sucesso\n\n📱 *Contas a Vencer - Status atual:*\n• Ativa: Não\n• Horário: junto com o resumo matinal (07:00)\n");
+        (await _env.ScalarAsync<bool>("SELECT alertas_financeiros_ativos FROM notificationconfigs WHERE usuario_id = @_user", new { _user })).ShouldBeFalse();
+
+        var on = await SendAsync(
+            "configurar notificação de contas", """{"intent": "Configurar Notificações"}""", """{"tipo": "contas_vencer", "acao": "ativar"}""");
+
+        on.ShouldContain("• Ativa: Sim");
+        (await _env.ScalarAsync<bool>("SELECT alertas_financeiros_ativos FROM notificationconfigs WHERE usuario_id = @_user", new { _user })).ShouldBeTrue();
+    }
+
+    [Fact]
+    [Trait("AC", "012-190")]
+    public async Task MorningSummary_Desativar_TurnsItOff()
+    {
+        await SendAsync("ativar resumo matinal", """{"intent": "Configurar Notificações"}""");
+
+        var reply = await SendAsync("desativar resumo matinal", """{"intent": "Configurar Notificações"}""");
+
+        reply.ShouldStartWith("✅ Resumo matinal desativado");
+        (await _env.ScalarAsync<bool>("SELECT resumo_matinal_ativo FROM notificationconfigs WHERE usuario_id = @_user", new { _user })).ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("AC", "012-153")]
+    public async Task ApiKey_StoredWithFernet_IsAnsweredDecrypted()
+    {
+        var clear = "a-chave-em-claro-0123456789012345678901234567890";
+        var token = new FernetEncryptionService(AuthFixtures.FernetKey, TimeProvider.System).Encrypt(clear);
+        await _env.QueryAsync<int>("UPDATE usuarios SET api_key_automate = @token WHERE id = @_user RETURNING id", new { token, _user });
+
+        var reply = await SendAsync("minha api key", """{"intent": "Solicitar API Key"}""");
+
+        reply.ShouldContain($"`{clear}`");
+        reply.ShouldNotContain(token);
     }
 
     [Fact]
