@@ -129,7 +129,7 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [153](153-whatsapp-api-key-cifrada.md) | Solicitar API Key devolve o valor cru da coluna | correção | 012 | aprovado |
 | [154](154-whatsapp-extracao-sem-parcelamento.md) | A extração de despesa e renda não pede data, conta, categoria nem parcelamento | correção | 012 | proposto |
 | [155](155-whatsapp-evento-pendente-mais-recente.md) | Evento pendente "mais recente" depende da ordem do KEYS | correção | 012 | implementado (feature 012, 2026-10-09) |
-| [156](156-whatsapp-origem-rota-sem-tratamento.md) | Resposta casa/trabalho/outro à pergunta de origem da rota não é tratada | correção | 012 | aprovado |
+| [156](156-whatsapp-origem-rota-sem-tratamento.md) | Resposta casa/trabalho/outro à pergunta de origem da rota não é tratada | correção | 012 | implementado (feature 012, 2026-10-09) |
 | [157](157-whatsapp-pagamento-fatura-inalcancavel.md) | Pagamento Fatura é inalcançável com "paguei..." | compatibilidade | 012 | proposto |
 | [158](158-whatsapp-analise-previsao-valores-negativos-e-erros.md) | Análise e previsão: valores negativos, desempate aleatório e KeyError sem histórico | correção | 012 | aprovado |
 | [159](159-whatsapp-drive-erro-especifico.md) | Upload ao Drive: o motivo específico da falha nunca é mostrado | correção | 012 | aprovado |

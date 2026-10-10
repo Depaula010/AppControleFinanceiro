@@ -149,7 +149,7 @@ Formato da 011 (`PendingTransactionStore`): valor JSON em `pending_tx:{numero}:{
 
 ### 7.4 Cálculo de rota
 
-Requer evento pendente: senão `❌ Não encontrei nenhum evento pendente de confirmação.`; sem `localizacao` ⇒ `❌ Este evento não tem localização definida, não posso calcular tempo de deslocamento.`; endereços do usuário (`usuario_id` do evento) ordenados `casa`, `trabalho`, `outro`: nenhum ⇒ aviso com exemplo; um ⇒ geocodifica o destino (`IRouteClient`, chave do sistema) e calcula; vários ⇒ pergunta `🚗 *Qual endereço usar como origem?*` (a resposta `casa`/`trabalho`/`outro` **não** é tratada, desvio 156). O limite diário de rotas **não** é aplicado (desvio 055).
+Requer evento pendente: senão `❌ Não encontrei nenhum evento pendente de confirmação.`; sem `localizacao` ⇒ `❌ Este evento não tem localização definida, não posso calcular tempo de deslocamento.`; endereços do usuário (`usuario_id` do evento) ordenados `casa`, `trabalho`, `outro`: nenhum ⇒ aviso com exemplo; um ⇒ geocodifica o destino (`IRouteClient`, chave do sistema) e calcula; vários ⇒ pergunta `🚗 *Qual endereço usar como origem?*` e grava `route_origin_pending:{numero}` (id do evento, TTL 300 s); a resposta `casa`/`trabalho`/`outro` (**desvio 156, implementado**), enquanto a escolha existir, calcula a rota com aquela origem e apaga a escolha; rótulo sem endereço ⇒ `❌ Você não tem um endereço *{rótulo}* salvo.` seguido da pergunta (a escolha continua); sem escolha pendente a palavra segue o pipeline. O limite diário de rotas **não** é aplicado (desvio 055).
 
 ### 7.5 Intenção (Gemini)
 
@@ -233,7 +233,7 @@ Numeração a partir de 150 (130+ é da 013; 120-122 da 014). Arquivos em `parit
 | 153 | `Solicitar API Key` devolve o valor cru da coluna (cifrado para quem se cadastrou depois da 017) | aprovar (decifrar) |
 | 154 | A extração de despesa/renda não pede data, conta, categoria nem parcelamento | aprovar |
 | 155 | Evento pendente "mais recente" depende da ordem de `KEYS` | **implementado** |
-| 156 | Resposta `casa`/`trabalho`/`outro` à pergunta de origem da rota não é tratada | aprovar |
+| 156 | Resposta `casa`/`trabalho`/`outro` à pergunta de origem da rota não é tratada | **implementado** |
 | 157 | `Pagamento Fatura` é inalcançável com "paguei..." | decidir (produto) |
 | 158 | Análise e previsão: valores de despesa negativos, desempate aleatório e `KeyError` sem histórico | aprovar |
 | 159 | Upload ao Drive: o motivo específico da falha nunca é mostrado | aprovar |
@@ -307,7 +307,7 @@ Convenção: `AC-012-NNN`, faixa por sub-entrega (0xx = 012-0, 1xx = 012a, 2xx =
 **012e — Calendário**
 - **AC-012-501** Criar evento: validação, `hoje`/`amanha`/ISO, pendência de evento, mensagem de confirmação (com/sem endereços).
 - **AC-012-502** `sim` cria, `não` cancela, falha de Google (sem conexão e outras), sem evento pendente; com dois eventos pendentes o `sim` age sobre o último criado, independentemente da ordem das chaves (desvio 155).
-- **AC-012-503** `calcular rota`: sem evento, sem local, sem endereços, um endereço (rota calculada), vários (pergunta), destino não localizado, rota falha.
+- **AC-012-503** `calcular rota`: sem evento, sem local, sem endereços, um endereço (rota calculada), vários (pergunta), destino não localizado, rota falha; (desvio 156) com vários endereços, a resposta `casa`/`trabalho`/`outro` calcula a rota com aquela origem, a escolha é consumida, rótulo inexistente repergunta e sem pergunta pendente a palavra segue o pipeline.
 - **AC-012-504** Deletar evento: não achou, um (deleta), vários (lista), filtro `hoje`/`amanha`.
 - **AC-012-505** Consultar agenda (um dia, período, filtro de horário); sem Google ⇒ mensagem de conexão.
 - **AC-012-506** Horários livres: slots, qualidade, formato da mensagem e sugestão da IA.

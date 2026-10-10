@@ -1,6 +1,6 @@
 # Desvio 156 — Resposta casa/trabalho/outro à pergunta de origem da rota não é tratada
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-09)
 - **Features afetadas:** 012
 - **Severidade:** correção
 
