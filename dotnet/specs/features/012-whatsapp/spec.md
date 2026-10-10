@@ -123,7 +123,7 @@ Criar evento (pendência de evento, TTL 300 s, confirmação/cancelamento/rota n
 
 ### 6.g (012g) Análises e gráfico
 
-`Análise Inteligente` (Gemini com `UserId`, desvio 063), `Comparação Mensal`, `Previsão de Gastos` (Gemini com `UserId`), `Gráfico de Gastos` (PNG por `IChartRenderer`, enviado por `IBotClient.SendImageAsync` — desvio 026).
+`Análise Inteligente` (Gemini com `UserId`, desvio 063; **desvio 158**: valores de despesa em módulo e em `formatar_moeda`, `R$ 1.234,50`, no prompt), `Comparação Mensal` (desvio 158: desempate das variações iguais pelo nome da categoria), `Previsão de Gastos` (Gemini com `UserId`; desvio 158: valores em módulo e `formatar_moeda`; **sem histórico** a previsão sai com média 0 em vez de `KeyError`/`❌ Ops!`), `Gráfico de Gastos` (PNG por `IChartRenderer`, enviado por `IBotClient.SendImageAsync` — desvio 026).
 
 ### 6.h (012h) Drive
 
@@ -235,7 +235,7 @@ Numeração a partir de 150 (130+ é da 013; 120-122 da 014). Arquivos em `parit
 | 155 | Evento pendente "mais recente" depende da ordem de `KEYS` | **implementado** |
 | 156 | Resposta `casa`/`trabalho`/`outro` à pergunta de origem da rota não é tratada | **implementado** |
 | 157 | `Pagamento Fatura` é inalcançável com "paguei..." | decidir (produto) |
-| 158 | Análise e previsão: valores de despesa negativos, desempate aleatório e `KeyError` sem histórico | aprovar |
+| 158 | Análise e previsão: valores de despesa negativos, desempate aleatório e `KeyError` sem histórico | **implementado** |
 | 159 | Upload ao Drive: o motivo específico da falha nunca é mostrado | aprovar |
 | 160 | `Quitar Conta Fixa` está no prompt do Gemini mas não tem ramo | aprovar (remover do prompt) |
 | 161 | Vencimentos e contas fixas pendentes comparam descrição sem filtrar o usuário | aprovar |
@@ -318,7 +318,7 @@ Convenção: `AC-012-NNN`, faixa por sub-entrega (0xx = 012-0, 1xx = 012a, 2xx =
 - **AC-012-603** Localização, relatório mensal (consultar, ativar, desativar, configurar, erros), endereços (salvar com geocodificação, listar na ordem casa/trabalho/outro, deletar), API key, menu.
 
 **012g — Análises**
-- **AC-012-701** Prompt de análise, previsão e sugestão idênticos aos do Python para dados fictícios; `UserId` passado; rodapé; erro do Gemini ⇒ `❌ Ops!...`.
+- **AC-012-701** Prompt de análise, previsão e sugestão idênticos aos do Python para dados fictícios, **exceto** o que o desvio 158 muda (valores de despesa em módulo, `R$ 1.234,50`, variação entre módulos); `UserId` passado; rodapé; erro do Gemini ⇒ `❌ Ops!...`; previsão de usuário sem histórico ⇒ responde com média 0 (os cenários antigos do harness ficam em `AnalyticsParityTests.Deviation158`).
 - **AC-012-702** Comparação mensal (variação, top 5, vazio).
 - **AC-012-703** Gráfico: pizza, barras, linha, sem dados, falha no envio; imagem PNG válida enviada pelo bot com a legenda.
 
@@ -346,7 +346,7 @@ Leitura: `usuarios`, `contas`, `faturas`, `transacoes`, `subcategoria`, `macroca
 4. **`NotACreditCard`/`SameAccount`** no `Pagamento Fatura`: o Flask aceita qualquer conta como cartão; aqui responde `Não encontrei as contas mencionadas` (desvio 071 no serviço da 004).
 5. **Ordem sem `ORDER BY`** do Flask passa a `id` (contas, agendamentos, categorias); chaves de cache dos prompts mudam só se a ordem física era outra (cache descartado na virada).
 6. **`datetime.now()`/`date.today()` do container** e `CURRENT_DATE` do banco (UTC) viram o dia de São Paulo (constituição §7).
-7. **Estatísticas aleatórias** (`set` do Python em `get_monthly_comparison`): desempate determinístico (ordem de aparição).
+7. **Estatísticas aleatórias** (`set` do Python em `get_monthly_comparison`): desempate determinístico pelo nome da categoria (desvio 158, implementado).
 8. **Event "mais recente":** o Flask depende da ordem dos `KEYS` (não garantida); o .NET usa o ponteiro `last_pending_event:{numero}` (desvio 155) e a chave extra existe só no Redis do .NET.
 9. **Check-in, confirmação em lote (012d):** cada conta confirmada vira uma transação do `IScheduleExecutor` (desvio 011, idempotente por mês); o Flask grava todas numa só transação que desfaz tudo no primeiro erro. Aqui as contas anteriores à que falhou continuam gravadas, a sessão some e a resposta é `❌ Erro ao salvar transações.` (sem `str(e)`, desvio 008). Conta já lançada no mês conta como confirmada sem duplicar.
 10. **Check-in, confirmação parcial (012d):** `list(set(indices))` do Python sai em ordem crescente para números pequenos; o .NET sempre ordena em crescente (a ordem do `set` com 8 itens ou mais depende da inserção).

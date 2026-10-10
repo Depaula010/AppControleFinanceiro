@@ -75,9 +75,8 @@ public sealed class ForecastIntent(ILlmClient llm, IAnalyticsReader reader, IClo
     {
         var data = await reader.GetForecastDataAsync(context.User.Id, clock.Today, cancellationToken);
 
-        // Sem histórico o Flask quebra com KeyError ao montar o prompt, antes de chamar o Gemini (desvio 158, proposto).
-        var projection = ForecastProjection.Calculate(data)
-            ?? throw new KeyNotFoundException("Projeção sem histórico de gastos.");
+        // Desvio 158: sem histórico o Flask quebrava com KeyError; aqui a previsão sai com média zero.
+        var projection = ForecastProjection.Calculate(data);
 
         var raw = await llm.GenerateTextAsync(new LlmRequest(ForecastReport.Prompt(data, projection), context.User.Id), cancellationToken);
         return ForecastReport.Header + raw.Trim() + ForecastReport.Footer(data);

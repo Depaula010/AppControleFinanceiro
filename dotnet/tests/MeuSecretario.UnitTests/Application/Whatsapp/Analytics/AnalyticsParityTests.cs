@@ -13,6 +13,46 @@ namespace MeuSecretario.UnitTests.Application.Whatsapp.Analytics;
 /// </summary>
 public class AnalyticsParityTests
 {
+    /// <summary>
+    /// Cenários do harness que gravam o comportamento ANTIGO do Flask nos prompts de análise e previsão (valores negativos e formato
+    /// <c>{:,.2f}</c>) e no usuário sem histórico (KeyError). O desvio 158 os substituiu; ficam como evidência e saem da comparação de prompt.
+    /// Os testes de <see cref="Deviation158Tests"/> provam o comportamento novo.
+    /// </summary>
+    internal static readonly IReadOnlySet<string> Deviation158 = new HashSet<string>(StringComparer.Ordinal)
+    {
+        "analise_completa",
+        "analise_gasto_positivo_e_arredondamento",
+        "analise_gemini_falha",
+        "analise_mes_anterior_zero",
+        "analise_resposta_com_espacos",
+        "analise_sem_dados",
+        "analise_so_mes_anterior",
+        "analise_so_mes_atual",
+        "analise_variacao_negativa",
+        "previsao_arredondamento",
+        "previsao_completa",
+        "previsao_gasto_zero",
+        "previsao_gemini_falha",
+        "previsao_historico_curto",
+        "previsao_historico_positivo",
+        "previsao_mais_de_cinco_fixas",
+        "previsao_mais_de_seis_meses",
+        "previsao_media_domina",
+        "previsao_pendentes_dominam",
+        "previsao_receita_no_cartao",
+        "previsao_resposta_com_espacos",
+        "previsao_sem_contas_fixas",
+        "previsao_sem_gasto_no_mes",
+        "previsao_sem_historico_quebra",
+        "previsao_sem_pendentes",
+        "previsao_so_cartao",
+        "previsao_so_despesas_normais",
+        "previsao_so_receitas",
+    };
+
+    /// <summary>Entre os de cima, o que no Flask quebra (KeyError) e hoje responde: resposta e chamadas também mudam.</summary>
+    internal const string Deviation158NoHistory = "previsao_sem_historico_quebra";
+
     private static readonly string[] IgnoredCallPrefixes = ["user_service.", "gemini_service.get_message_intent", "route_intent:"];
 
     [Fact]
@@ -56,7 +96,7 @@ public class AnalyticsParityTests
         var reply = await rig.Router.DispatchAsync(intent, new IntentContext(new WhatsAppUser(7, "Ana"), number, text, null), CancellationToken.None);
 
         var expectedReply = result.GetProperty("body").GetProperty("resposta").GetString();
-        if (reply != expectedReply)
+        if (reply != expectedReply && name != Deviation158NoHistory)
         {
             failures.Add($"{name}: resposta\n  esperada: {expectedReply}\n  obtida:   {reply}");
         }
@@ -64,7 +104,7 @@ public class AnalyticsParityTests
         var extra = result.GetProperty("extra");
 
         var expectedPrompts = extra.GetProperty("prompts").EnumerateArray().Select(p => p.GetProperty("prompt").GetString()!).ToList();
-        if (!rig.Llm.AnalysisPrompts.SequenceEqual(expectedPrompts))
+        if (!Deviation158.Contains(name) && !rig.Llm.AnalysisPrompts.SequenceEqual(expectedPrompts))
         {
             failures.Add($"{name}: prompt\n  esperado: {string.Join("\n--\n", expectedPrompts)}\n  obtido:   {string.Join("\n--\n", rig.Llm.AnalysisPrompts)}");
         }
@@ -81,7 +121,7 @@ public class AnalyticsParityTests
             .Select(c => c.GetString()!)
             .Where(c => !IgnoredCallPrefixes.Any(prefix => c.StartsWith(prefix, StringComparison.Ordinal)))
             .ToList();
-        if (!rig.Calls.SequenceEqual(expectedCalls))
+        if (name != Deviation158NoHistory && !rig.Calls.SequenceEqual(expectedCalls))
         {
             failures.Add($"{name}: chamadas\n  esperadas: {string.Join(", ", expectedCalls)}\n  obtidas:   {string.Join(", ", rig.Calls)}");
         }

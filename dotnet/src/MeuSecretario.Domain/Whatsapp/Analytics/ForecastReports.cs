@@ -39,17 +39,14 @@ public sealed record ForecastProjection(
     double DailyRate)
 {
     /// <summary>
-    /// <c>null</c> quando não há gasto no histórico: o Flask devolve um dicionário sem as chaves <c>gasto_ate_hoje</c>,
-    /// <c>taxa_diaria_atual</c>... e o prompt quebra com <c>KeyError</c> (desvio 158, proposto: reproduzido).
+    /// Desvio 158: sem gasto no histórico o Flask devolvia um dicionário sem <c>gasto_ate_hoje</c>, <c>taxa_diaria_atual</c>... e o prompt
+    /// quebrava com <c>KeyError</c> (usuário novo nunca recebia previsão). Aqui a média histórica é zero e o resto sai dos dados do mês.
     /// </summary>
-    public static ForecastProjection? Calculate(ForecastData data)
+    public static ForecastProjection Calculate(ForecastData data)
     {
-        if (data.MonthlyTotals.Count == 0)
-        {
-            return null;
-        }
-
-        var average = SumInOrder(data.MonthlyTotals.Select(m => m.Total)) / data.MonthlyTotals.Count;
+        var average = data.MonthlyTotals.Count == 0
+            ? 0.0
+            : SumInOrder(data.MonthlyTotals.Select(m => m.Total)) / data.MonthlyTotals.Count;
         var spent = data.SpentToDate;
         var day = data.Day;
 
@@ -95,7 +92,7 @@ public static class ForecastReport
     public static string Footer(ForecastData data) =>
         string.Create(CultureInfo.InvariantCulture, $"\n\n💬 _Baseado em: histórico de {data.HistoryMonths} meses + contas fixas_");
 
-    private static string Money(double value) => AnalyticsReport.Money(value);
+    private static string Money(double value) => AnalyticsReport.PromptMoney(value);
 
     private static string Lines(IEnumerable<PendingBill> bills) =>
         string.Join('\n', bills.Select(c => $"- {c.Description}: R$ {Money(c.Value)} (dia {(c.Day is { } d ? d.ToString(CultureInfo.InvariantCulture) : "None")})"));

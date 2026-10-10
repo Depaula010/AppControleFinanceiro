@@ -8,7 +8,7 @@ public sealed record MacroMonthTotal(string Month, string Macro, double Total);
 
 /// <summary>
 /// <c>Comparação Mensal</c> (<c>analytics_service.get_monthly_comparison</c>): mês de hoje contra o anterior, as 5 maiores variações por
-/// categoria. O desempate das variações iguais é a ordem de aparição (o Flask itera um <c>set</c>; spec §13.7).
+/// categoria. O desempate das variações iguais é o nome da categoria (desvio 158; o Flask iterava um <c>set</c>, ordem aleatória).
 /// </summary>
 public static class MonthlyComparison
 {
@@ -80,7 +80,7 @@ public static class MonthlyComparison
             variations.Add(new Variation(category, valueReference, valuePrevious, percent));
         }
 
-        foreach (var variation in variations.OrderByDescending(v => Math.Abs(v.Percent)).Take(5))
+        foreach (var variation in variations.OrderByDescending(v => Math.Abs(v.Percent)).ThenBy(v => v.Category, StringComparer.Ordinal).Take(5))
         {
             var emoji = variation.Percent > 10 ? "🔴" : variation.Percent < -10 ? "🟢" : "⚪";
             text.Append(CultureInfo.InvariantCulture, $"{emoji} *{variation.Category}:* R$ {AnalyticsReport.Money(variation.Reference)} ({AnalyticsReport.WithSign(variation.Percent)}%)\n");
