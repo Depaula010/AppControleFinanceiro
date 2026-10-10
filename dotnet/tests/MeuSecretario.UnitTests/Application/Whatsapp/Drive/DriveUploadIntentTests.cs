@@ -118,7 +118,11 @@ public class DriveUploadIntentTests
             var reply = await env.Intent.HandleAsync(context, CancellationToken.None);
 
             // O link de conexão é assinado (desvio 053); o Flask não assinava.
-            CalendarRig.WithoutToken(reply).ShouldBe(c.GetProperty("message").GetString(), name);
+            // Desvio 159 (2026-10-10): o Flask respondia sempre o genérico; o cenário antigo fica no JSON como evidência.
+            var expected = name == "falha_no_upload"
+                ? "❌ " + c.GetProperty("upload").GetProperty("error").GetString()
+                : c.GetProperty("message").GetString();
+            CalendarRig.WithoutToken(reply).ShouldBe(expected, name);
 
             var uploaded = c.GetProperty("uploaded").EnumerateArray().ToList();
             var calls = env.Drive.ReceivedCalls().Where(call => call.GetMethodInfo().Name == nameof(IDriveClient.UploadFileAsync)).ToList();
@@ -169,6 +173,37 @@ public class DriveUploadIntentTests
         var env = new Env(c);
         env.Drive.UploadFileAsync(default, default, default!, default!, default!, default)
             .ReturnsForAnyArgs<DriveUploadResult>(_ => throw new InvalidOperationException("detalhe interno"));
+
+        var reply = await env.Intent.HandleAsync(new IntentContext(env.Rig.User, CalendarRig.Number, "salvar", Media(c)), CancellationToken.None);
+
+        reply.ShouldBe("❌ Erro ao enviar arquivo para o Drive.");
+    }
+
+    [Theory]
+    [Trait("AC", "012-159")]
+    [InlineData("Limite de armazenamento do Google Drive atingido.")]
+    [InlineData("Sem permissão para acessar o Google Drive. Por favor, reconecte sua conta Google.")]
+    [InlineData("Credenciais do Google expiraram. Por favor, reconecte sua conta.")]
+    public async Task Upload_WhenTheUploadFailsWithAReason_ShowsTheReason(string reason)
+    {
+        var c = WhatsAppFixture.Cases("drive_cases").Single(x => x.GetProperty("name").GetString() == "sucesso");
+        var env = new Env(c);
+        env.Drive.UploadFileAsync(default, default, default!, default!, default!, default)
+            .ReturnsForAnyArgs(DriveUploadResult.Failure(reason));
+
+        var reply = await env.Intent.HandleAsync(new IntentContext(env.Rig.User, CalendarRig.Number, "salvar", Media(c)), CancellationToken.None);
+
+        reply.ShouldBe("❌ " + reason);
+    }
+
+    [Fact]
+    [Trait("AC", "012-159")]
+    public async Task Upload_WhenTheUploadFailsWithoutAReason_AnswersTheGenericFailure()
+    {
+        var c = WhatsAppFixture.Cases("drive_cases").Single(x => x.GetProperty("name").GetString() == "sucesso");
+        var env = new Env(c);
+        env.Drive.UploadFileAsync(default, default, default!, default!, default!, default)
+            .ReturnsForAnyArgs(DriveUploadResult.Failure(""));
 
         var reply = await env.Intent.HandleAsync(new IntentContext(env.Rig.User, CalendarRig.Number, "salvar", Media(c)), CancellationToken.None);
 

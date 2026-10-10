@@ -94,14 +94,17 @@ public sealed class DeleteEventIntent(ILlmClient llm, ICalendarClient calendar, 
 
         var searchText = GeminiFields.Text(search)!;
         var when = GeminiFields.Get(data, "quando");
-        var whenTruthy = GeminiFields.Truthy(when);
-        var whenText = whenTruthy ? GeminiFields.Text(when) : null;
+
+        // Desvio 192: só "hoje" e "amanha" filtram; qualquer outro valor é tratado como sem filtro (o Flask usava amanhã).
+        var whenValue = GeminiFields.StringOnly(when);
+        var whenTruthy = whenValue is "hoje" or "amanha";
+        var whenText = whenTruthy ? whenValue : null;
 
         var found = await FindAsync(context.User.Id, searchText, cancellationToken);
 
         if (whenTruthy && found.Count > 0)
         {
-            var target = GeminiFields.StringOnly(when) == "hoje" ? clock.Today : clock.Today.AddDays(1);
+            var target = whenValue == "hoje" ? clock.Today : clock.Today.AddDays(1);
             found = [.. found.Where(item => StartDay(item.Start) == target)];
         }
 
