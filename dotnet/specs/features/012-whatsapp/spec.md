@@ -165,7 +165,7 @@ Prompt `get_message_intent` (§8). Resposta: JSON `{"intent": "..."}`; `null`/au
 
 ### 7.8 Feedback da transação salva
 
-`gerar_feedback_transacao`: cabeçalho `✅ Transação Salva!`, bloco do pote (período do desvio 015 e só se o alerta dispara: `alerta_potes_ativo`/`alerta_potes_threshold`), rodapé de fatura (cartão) ou saldo (demais). Qualquer exceção ⇒ `✅ Transação Salva com Sucesso!`.
+`gerar_feedback_transacao`: cabeçalho `✅ Transação Salva!`, bloco do pote (período do desvio 015; **desvio 170, implementado**: o gasto é a soma de todas as subcategorias do pote no período, como o aviso de orçamento da 011, e não só a da transação; só aparece se o alerta dispara: `alerta_potes_ativo`/`alerta_potes_threshold`), rodapé de fatura (cartão) ou saldo (demais). Qualquer exceção ⇒ `✅ Transação Salva com Sucesso!`.
 
 ### 7.9 Check-in noturno (colisão com a 013)
 
@@ -277,7 +277,7 @@ Convenção: `AC-012-NNN`, faixa por sub-entrega (0xx = 012-0, 1xx = 012a, 2xx =
 - **AC-012-112** `CANCELAR` descarta e responde `❌ Transação cancelada.`; pendência expirada ⇒ `⏱️ Esta transação expirou...`.
 - **AC-012-113** (desvio 150) Pendência sem agendamento (`descricao_final` nulo, ausente ou vazio) ⇒ `OK` grava com a `descricao` bruta da mensagem (`padaria`), responde o feedback e apaga a pendência; `descricao_final` preenchida vence; parcelada idem. O cenário do harness que mostra o 500 do Flask fica como evidência em `FinancePipelineParityTests.KnownDivergences`.
 - **AC-012-114** Parcelada (`num_parcelas > 1`) ⇒ `PostInstallmentPurchase` (1ª parcela + agendamento `PARCELADO`).
-- **AC-012-115** Feedback: pote (período do desvio 015, alerta por threshold), rodapé de fatura ou saldo; erro ⇒ `✅ Transação Salva com Sucesso!`.
+- **AC-012-115** Feedback: pote (período do desvio 015, gasto de todas as subcategorias do pote pelo desvio 170, alerta por threshold), rodapé de fatura ou saldo; erro ⇒ `✅ Transação Salva com Sucesso!`.
 - **AC-012-120** (desvio 151) `Transferência`: valor/origem/destino ausentes e contas não achadas ⇒ mensagens da cadeia de validações; mesma conta e saldo insuficiente ⇒ mensagem sem pendência; sucesso ⇒ mensagem de confirmação, `OK` grava o par (origem negativa, destino positiva) e responde `✅ *Transferência realizada!*`; `TROCAR` não se aplica; `CANCELAR` descarta. O cenário `transferencia_com_contas` do harness (`❌ Ops!`) fica como evidência em `KnownDivergences`.
 - **AC-012-130** `Pagamento Fatura`: dados incompletos, contas não achadas, não cartão, sucesso (par `Pagamento Fatura`, fatura `Paga`).
 

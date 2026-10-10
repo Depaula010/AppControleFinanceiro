@@ -1,6 +1,6 @@
 # Desvio 170 — Feedback da transação soma só a subcategoria da transação no pote
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-09)
 - **Features afetadas:** 012
 - **Severidade:** correção
 

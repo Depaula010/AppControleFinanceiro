@@ -94,6 +94,25 @@ public class FinanceStoresTests(PostgresFixture postgres) : IAsyncLifetime
 
     [Fact]
     [Trait("AC", "012-115")]
+    public async Task Feedback_PotSumsAllTheSubcategoriesOfThePot_Deviation170()
+    {
+        var account = await _env.Data.InsertAccountAsync(_user, "Nubank");
+        var otherSubcategory = await _env.ScalarAsync<int>(
+            "SELECT id FROM subcategoria WHERE usuario_id IS NULL AND id <> @expense AND id <> @income ORDER BY id LIMIT 1",
+            new { expense = TransactionsTestData.ExpenseSubcategory, income = TransactionsTestData.IncomeSubcategory });
+        await _env.Data.InsertTransactionAsync(_user, account, valor: -30m, data: "2026-10-06");
+        await _env.Data.InsertTransactionAsync(_user, account, valor: -50m, data: "2026-10-05", subcategoryId: otherSubcategory);
+        await _env.InsertPotAsync(_user, "Comida", 200m, "MENSAL", TransactionsTestData.ExpenseSubcategory, otherSubcategory);
+
+        var pot = await _feedback.FindPotAsync(_user, TransactionsTestData.ExpenseSubcategory, new DateOnly(2026, 10, 7), CancellationToken.None);
+
+        // Gasto do pote = 30 + 50 (o Flask mostraria só os 30 da subcategoria da transação).
+        pot!.Remaining.ShouldBe(120d);
+        pot.PercentUsed.ShouldBe(40d);
+    }
+
+    [Fact]
+    [Trait("AC", "012-115")]
     public async Task Feedback_ReadsTransactionPotAlertAndBalance()
     {
         var account = await _env.Data.InsertAccountAsync(_user, "Nubank");
