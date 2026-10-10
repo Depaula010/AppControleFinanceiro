@@ -17,7 +17,8 @@ public sealed class TransactionReplyStep(
     IPendingTransactionState state,
     IAutomationLookups lookups,
     TransactionConfirmationSaver saver,
-    IFeedbackService feedback) : IWhatsAppStep
+    IFeedbackService feedback,
+    TransferConfirmation transfers) : IWhatsAppStep
 {
     public int Order => StepOrder.TransactionReply;
 
@@ -42,6 +43,12 @@ public sealed class TransactionReplyStep(
         }
 
         var pending = await state.GetAsync(context.Number, lastId, cancellationToken);
+        if (TransferConfirmation.IsTransfer(pending) && upper is "TROCAR" or "MUDAR" or "ALTERAR")
+        {
+            // Desvio 151: a transferência não tem categoria para trocar.
+            return TransferMessages.NoCategory;
+        }
+
         var outcome = ConfirmationFlow.Process(context.Message, lastId, pending);
         switch (outcome.Effect)
         {
@@ -57,6 +64,13 @@ public sealed class TransactionReplyStep(
         {
             case ConfirmationStatus.Saved:
             {
+                if (TransferConfirmation.IsTransfer(outcome.Data))
+                {
+                    var done = await transfers.SaveAsync(outcome.Data!, cancellationToken);
+                    await state.DeleteLastPendingAsync(context.Number, cancellationToken);
+                    return done;
+                }
+
                 var transactionId = await saver.SaveAsync(outcome.Data!, cancellationToken);
                 var reply = await feedback.GenerateAsync(transactionId, cancellationToken);
                 await state.DeleteLastPendingAsync(context.Number, cancellationToken);

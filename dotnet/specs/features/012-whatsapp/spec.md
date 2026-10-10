@@ -61,7 +61,7 @@ Exceção em qualquer passo cai na linha 7/8 da §3. Dentro das intenções do t
 | Intenção (nome do Gemini) | Tipo | Sub-entrega | Origem |
 |---|---|---|---|
 | `Renda`, `Despesa` | template | 012a | `transaction_intents.py:22-309` |
-| `Transferência` | template | 012a | `transaction_intents.py:312-442`; **falha sempre** (desvio 151) |
+| `Transferência` | template | 012a | `transaction_intents.py:312-442`; desvio 151 **implementado** (no Flask falhava sempre) |
 | `Pagamento Fatura` | inline | 012a | `whatsapp_handler.py:1071-1112` |
 | paguei/quitei... | inline | 012b | `whatsapp_handler.py:444-705` |
 | `Consulta Saldo`, `Consulta Reserva`, `Consulta Detalhes Reserva`, `Consulta Potes` | inline | 012c | `whatsapp_handler.py:758-944` |
@@ -94,7 +94,7 @@ Tudo da §3, §4 passos 1, 2, 7 e 9, o catálogo de prompts (§8) e a infraestru
 
 **Confirmação** (§4 passo 6, §7.2): `OK`/`CONFIRMAR`/`SIM`/`CONFIRMA` grava; `TROCAR`/`MUDAR`/`ALTERAR` lista categorias numeradas; número escolhe; `CANCELAR`/`NÃO`/`NAO`/`CANCELA` descarta. Gravar = `ITransactionPosting` (004): `Renda` ⇒ receita, qualquer outro tipo ⇒ despesa; `Amount = abs(valor_db)`; descrição `descricao_final` se preenchida, senão `descricao` (**desvio 150, implementado**: no Flask a chave existia com valor nulo, o `get` devolvia `None` e o `INSERT` violava o `NOT NULL` de `transacoes.descricao`; descrição vazia nas duas ⇒ exceção ⇒ 500); `num_parcelas > 1` ⇒ `PostInstallmentPurchase` (valor da parcela = `abs(valor_db)`); depois a mensagem de feedback (§7.8). A pendência é apagada **antes** de gravar (o Flask apaga ao decidir `saved`).
 
-**Transferência** (template; `transaction_intents.py:312-442`). `extract_transfer_params` lê `c["id"]` de `Row` do SQLAlchemy 2: `TypeError` na primeira conta ⇒ a resposta de **todo** usuário com ao menos uma conta é `❌ Ops! Algo deu errado. Por favor, tente novamente.` e o Gemini nem é chamado. Usuário sem nenhuma conta segue: Gemini (`extract_transfer_details`), validações (`❌ Não consegui identificar o valor da transferência.`, `...a conta de origem. Especifique de qual conta transferir.`, `...a conta de destino. Especifique para qual conta transferir.`), contas por nome (`❌ Uma ou ambas as contas não foram encontradas.`). Mensagens de saldo insuficiente e confirmação existem no código mas são inalcançáveis; **não são portadas** (desvio 151).
+**Transferência** (template; `transaction_intents.py:312-442`; **desvio 151 implementado**). O Flask lê `c["id"]` de `Row` do SQLAlchemy 2 e quebra (`TypeError`) para todo usuário com conta; o .NET segue a intenção do código morto: Gemini (`extract_transfer_details`, contas com `id`), validações (`❌ Não consegui identificar o valor da transferência.`, `...a conta de origem. Especifique de qual conta transferir.`, `...a conta de destino. Especifique para qual conta transferir.`), contas ativas por nome (`❌ Uma ou ambas as contas não foram encontradas.`), mesma conta (`❌ As contas de origem e destino devem ser diferentes.`), saldo da origem >= valor (`❌ Saldo insuficiente na conta de origem.\n\n💰 Saldo disponível: R$ x\n💸 Valor solicitado: R$ y`), e grava a pendência `pending_tx` com `tipo_transacao` `Transferência`, `conta_id` (origem), `conta_destino_id`, `valor_db` positivo, `descricao` (padrão `Transferência`) e `data_transacao` (hoje). Resposta: `🔄 *Transferência a confirmar:*` com descrição, valor, `📤 De` e `📥 Para`. `OK`/`CONFIRMAR` chama `ITransactionPosting.PostTransferAsync` e responde `✅ *Transferência realizada!*` com valor e contas; `CANCELAR` descarta; `TROCAR` responde `Transferência não tem categoria. Digite: CONFIRMAR ou CANCELAR.` e mantém a pendência.
 
 **Pagamento Fatura** (inline). Contas (ativas) em `[{"nome","tipo"}]` ⇒ `extract_fatura_payment_details`; `valor_decimal`, `conta_origem` e `conta_cartao` verdadeiros senão `🤔 Não consegui identificar todos os dados do pagamento.\n\nPor favor, informe:\n• Valor pago\n• Conta de origem\n• Cartão que foi pago\n\nExemplo: *Paguei 500 reais da fatura do Nubank com o Inter*`; contas por nome (`get_account_by_name` sem fallback); alguma não achada ⇒ `❌ Não encontrei as contas mencionadas ({origem} → {cartao}).`; `PostInvoicePayment` (004: fatura `Fechada` mais antiga, desvio 010) com data de hoje; `NotACreditCard` e `SameAccount` (desvios 071 / 004) respondem o mesmo `❌ Não encontrei as contas mencionadas`; sucesso `✅ Pagamento da fatura '{cartão}' ({R$}) registrado com sucesso!`.
 
@@ -228,7 +228,7 @@ Numeração a partir de 150 (130+ é da 013; 120-122 da 014). Arquivos em `parit
 | # | Título | Recomendação |
 |---|---|---|
 | 150 | Confirmar despesa/renda por WhatsApp falha quando não há agendamento (descrição nula) | **implementado** |
-| 151 | Transferência por WhatsApp falha sempre | aprovar (implementar a transferência de verdade) |
+| 151 | Transferência por WhatsApp falha sempre | **implementado** |
 | 152 | `Configurar Notificações` pelo ramo do Gemini grava e responde 500 | aprovar |
 | 153 | `Solicitar API Key` devolve o valor cru da coluna (cifrado para quem se cadastrou depois da 017) | aprovar (decifrar) |
 | 154 | A extração de despesa/renda não pede data, conta, categoria nem parcelamento | aprovar |
@@ -278,7 +278,7 @@ Convenção: `AC-012-NNN`, faixa por sub-entrega (0xx = 012-0, 1xx = 012a, 2xx =
 - **AC-012-113** (desvio 150) Pendência sem agendamento (`descricao_final` nulo, ausente ou vazio) ⇒ `OK` grava com a `descricao` bruta da mensagem (`padaria`), responde o feedback e apaga a pendência; `descricao_final` preenchida vence; parcelada idem. O cenário do harness que mostra o 500 do Flask fica como evidência em `FinancePipelineParityTests.KnownDivergences`.
 - **AC-012-114** Parcelada (`num_parcelas > 1`) ⇒ `PostInstallmentPurchase` (1ª parcela + agendamento `PARCELADO`).
 - **AC-012-115** Feedback: pote (período do desvio 015, alerta por threshold), rodapé de fatura ou saldo; erro ⇒ `✅ Transação Salva com Sucesso!`.
-- **AC-012-120** `Transferência` com contas ⇒ `❌ Ops!...` sem chamar o Gemini; sem contas ⇒ cadeia de validações.
+- **AC-012-120** (desvio 151) `Transferência`: valor/origem/destino ausentes e contas não achadas ⇒ mensagens da cadeia de validações; mesma conta e saldo insuficiente ⇒ mensagem sem pendência; sucesso ⇒ mensagem de confirmação, `OK` grava o par (origem negativa, destino positiva) e responde `✅ *Transferência realizada!*`; `TROCAR` não se aplica; `CANCELAR` descarta. O cenário `transferencia_com_contas` do harness (`❌ Ops!`) fica como evidência em `KnownDivergences`.
 - **AC-012-130** `Pagamento Fatura`: dados incompletos, contas não achadas, não cartão, sucesso (par `Pagamento Fatura`, fatura `Paga`).
 
 **012b — Pagamentos**
@@ -357,7 +357,7 @@ Leitura: `usuarios`, `contas`, `faturas`, `transacoes`, `subcategoria`, `macroca
 - **Q-012-2** `Solicitar API Key` deve decifrar a chave (desvio 153) ou o produto prefere um link seguro? Entregar uma chave por WhatsApp é decisão de produto.
 - **Q-012-3** A quitação por WhatsApp/SMS deve gravar `agendamento_id` (coerente com o desvio 012 e a 013)? Padrão: não.
 - **Q-012-4** Qual evento pendente é "o mais recente"? Hoje a ordem do `KEYS` decide (desvio 155).
-- **Q-012-5** Alguém usa `Transferência` pelo WhatsApp? Hoje responde "Algo deu errado" para todos.
+- **Q-012-5** (resolvida: desvio 151 implementado) Alguém usa `Transferência` pelo WhatsApp? Hoje responde "Algo deu errado" para todos.
 - **Q-012-6** (resolvida) A 013 entregou o snapshot e o formatador; a 012 os reutiliza e implementa só a resposta ao check-in.
 - **Q-012-7** O motivo específico dos erros do Google (`Erro ao criar evento: ...`) pode ser omitido (desvio 008) ou o produto quer uma lista de motivos permitidos?
 - **Q-012-8** A migração da matplotlib para ScottPlot (já na 013) é aceitável para barras e linha também (imagem diferente, dados iguais)?

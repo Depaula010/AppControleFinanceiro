@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using MeuSecretario.Application.Whatsapp;
 
@@ -7,7 +8,7 @@ namespace MeuSecretario.UnitTests.Application.Whatsapp;
 /// Comportamento NOVO dos desvios de paridade aprovados para a 012 (grupo financeiro). Os cenários do harness que gravam o
 /// comportamento antigo do Flask continuam em <see cref="FinancePipelineParityTests.KnownDivergences"/>.
 /// </summary>
-public class WhatsAppDeviationTests
+public partial class WhatsAppDeviationTests
 {
     private const string Number = "5531999990001@s.whatsapp.net";
 

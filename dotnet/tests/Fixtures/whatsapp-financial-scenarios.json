@@ -3905,7 +3905,7 @@
    "name": "transferencia_com_contas",
    "group": "012a",
    "layer": "pipeline",
-   "deviation": null,
+   "deviation": "151",
    "texto": "transferir 100 do nubank para a carteira",
    "numero": "5531999990001@s.whatsapp.net",
    "config": {

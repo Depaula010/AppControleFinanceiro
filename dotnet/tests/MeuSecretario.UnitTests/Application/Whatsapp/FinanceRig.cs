@@ -175,6 +175,8 @@ internal sealed class FinanceWorld(JsonElement config, List<string> calls)
     /// <summary>Descrições recebidas pelas portas de lançamento (para provar o que foi gravado, desvio 150).</summary>
     public List<string?> PostedDescriptions { get; } = [];
 
+    public List<PostTransfer> PostedTransfers { get; } = [];
+
     public void Call(string label) => calls.Add(label);
 
     /// <summary>O valor roteirizado de <c>returns[label]</c> (com <c>__seq__</c> a cada chamada); <c>null</c> se ausente.</summary>
@@ -316,8 +318,13 @@ internal sealed class WorldPosting(FinanceWorld world) : ITransactionPosting
             new PostedTransaction(world.ReturnedInt("finance_service.create_transaction") ?? 0, command.Amount, null, null)));
     }
 
-    public Task<PostingResult<PostedTransfer>> PostTransferAsync(PostTransfer command, CancellationToken cancellationToken) =>
-        throw new NotSupportedException();
+    public Task<PostingResult<PostedTransfer>> PostTransferAsync(PostTransfer command, CancellationToken cancellationToken)
+    {
+        world.Call("finance_service.create_transfer_pair");
+        world.PostedTransfers.Add(command);
+        return Task.FromResult<PostingResult<PostedTransfer>>(new PostingResult<PostedTransfer>.Ok(
+            new PostedTransfer(1, 2, world.Accounts.First(a => a.Id == command.FromAccountId).Name, world.Accounts.First(a => a.Id == command.ToAccountId).Name)));
+    }
 
     public Task<PostingResult<PostedInvoicePayment>> PostInvoicePaymentAsync(PostInvoicePayment command, CancellationToken cancellationToken)
     {
@@ -486,7 +493,7 @@ internal sealed class FinanceRig
         var steps = new List<IWhatsAppStep>
         {
             new CheckinStep(new CheckinSessionState(Cache), new RecordingCheckinResponder(Cache, Calls, "RESPOSTA-DO-CHECKIN")),
-            new TransactionReplyStep(transactionState, lookups, saver, feedback),
+            new TransactionReplyStep(transactionState, lookups, saver, feedback, new TransferConfirmation(posting)),
             new PaymentStep(Llm, lookups, categories, categorizer, resolver, settler, new DirectPoster(posting), clock, new NullFinanceDiagnostics()),
             new BareCancelStep(transactionState, events),
         };
@@ -495,7 +502,7 @@ internal sealed class FinanceRig
             new HelpIntent(),
             new IncomeIntent(Llm, reader, lookups, categorizer, resolver, invoices, pendingStore, clock),
             new ExpenseIntent(Llm, reader, lookups, categorizer, resolver, invoices, pendingStore, clock),
-            new TransferIntent(Llm, lookups, reader),
+            new TransferIntent(Llm, lookups, reader, queries, pendingStore, clock),
             new InvoicePaymentIntent(Llm, lookups, reader, posting, clock),
             new BalanceIntent(Llm, lookups, reader, queries),
             new ReserveIntent(reserve),

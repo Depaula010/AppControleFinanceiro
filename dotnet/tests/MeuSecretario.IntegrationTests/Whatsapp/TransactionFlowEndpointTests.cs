@@ -93,4 +93,27 @@ public class TransactionFlowEndpointTests(PostgresFixture postgres) : IAsyncLife
         _env.Cache.Values.ShouldBeEmpty();
         (await _env.ScalarAsync<int>("SELECT COUNT(*) FROM transacoes")).ShouldBe(0);
     }
+
+    [Fact]
+    [Trait("AC", "012-120")]
+    public async Task Transfer_AsksConfirmationThenPostsTheTransferPair()
+    {
+        var nubank = await _env.Data.Accounts.InsertAccountAsync(_user, "Nubank", "Conta Corrente", saldoInicial: 500m);
+        var wallet = await _env.Data.Accounts.InsertAccountAsync(_user, "Carteira", "Dinheiro", saldoInicial: 10m);
+        _env.Llm.Then("""{"intent": "Transferência"}""")
+            .Then("""{"valor_decimal": 100.0, "conta_origem": "Nubank", "conta_destino": "Carteira"}""");
+
+        var confirmation = await SendAsync("transferir 100 do nubank para a carteira");
+        confirmation.ShouldContain("Transferência a confirmar");
+        confirmation.ShouldContain("📤 De: Nubank");
+        (await _env.ScalarAsync<int>("SELECT COUNT(*) FROM transacoes")).ShouldBe(0);
+
+        var done = await SendAsync("confirmar");
+
+        done.ShouldBe("✅ *Transferência realizada!*\n\n💵 Valor: R$ 100,00\n📤 De: Nubank\n📥 Para: Carteira");
+        (await _env.ScalarAsync<int>("SELECT COUNT(*) FROM transacoes")).ShouldBe(2);
+        (await _env.ScalarAsync<int>($"SELECT COUNT(*) FROM transacoes WHERE conta_id = {nubank} AND valor = -100")).ShouldBe(1);
+        (await _env.ScalarAsync<int>($"SELECT COUNT(*) FROM transacoes WHERE conta_id = {wallet} AND valor = 100")).ShouldBe(1);
+        _env.Cache.Values.ShouldBeEmpty();
+    }
 }

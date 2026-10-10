@@ -22,6 +22,7 @@ public class FinancePipelineParityTests
     {
         ["resposta_ok_sem_descricao_final_falha"] = "150",
         ["resposta_ok_parcelada_sem_descricao_final"] = "150",
+        ["transferencia_com_contas"] = "151",
     };
 
     /// <summary>

@@ -1,6 +1,6 @@
 # Desvio 151 — Transferência por WhatsApp falha sempre
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-09)
 - **Features afetadas:** 012
 - **Severidade:** correção
 

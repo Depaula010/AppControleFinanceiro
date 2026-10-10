@@ -421,7 +421,7 @@ fin("renda_ignora_parcelamento", "012a", "recebi 500", intent="Renda", accounts=
     returns=tx_returns(income=True))
 
 # ---------------------------------------------------------------- 012a: Transferência (sempre falha para quem tem conta)
-fin("transferencia_com_contas", "012a", "transferir 100 do nubank para a carteira", intent="Transferência", accounts=ACC)
+fin("transferencia_com_contas", "012a", "transferir 100 do nubank para a carteira", intent="Transferência", accounts=ACC, deviation="151")
 fin("transferencia_sem_contas_sem_valor", "012a", "transferir", intent="Transferência", accounts=[],
     llm={"extract_transfer_details": js(valor_decimal=None, conta_origem="Nubank", conta_destino="Carteira")})
 fin("transferencia_sem_contas_sem_origem", "012a", "transferir 10", intent="Transferência", accounts=[],
