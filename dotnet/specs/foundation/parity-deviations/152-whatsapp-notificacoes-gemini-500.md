@@ -1,6 +1,6 @@
 # Desvio 152 — Configurar Notificações pelo ramo do Gemini grava e responde 500
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-10)
 - **Features afetadas:** 012
 - **Severidade:** correção
 

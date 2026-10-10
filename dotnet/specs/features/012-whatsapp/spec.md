@@ -119,11 +119,11 @@ Criar evento (pendência de evento, TTL 300 s, confirmação/cancelamento/rota n
 
 ### 6.f (012f) Configurações
 
-`Configurar Notificações` (inline, resumo matinal, check-in noturno e o ramo do Gemini), `Configurar Localização`, `Configurar Relatório Mensal`, endereços favoritos, `Solicitar API Key` (devolve o valor da coluna como está; desvio 153), `Menu de Ajuda`.
+`Configurar Notificações` (inline, resumo matinal, check-in noturno e o ramo do Gemini), `Configurar Localização`, `Configurar Relatório Mensal`, endereços favoritos, `Solicitar API Key` (decifra o valor da coluna quando parece cifrado; desvio 153, implementado), `Menu de Ajuda`.
 
 ### 6.g (012g) Análises e gráfico
 
-`Análise Inteligente` (Gemini com `UserId`, desvio 063), `Comparação Mensal`, `Previsão de Gastos` (Gemini com `UserId`), `Gráfico de Gastos` (PNG por `IChartRenderer`, enviado por `IBotClient.SendImageAsync` — desvio 026).
+`Análise Inteligente` (Gemini com `UserId`, desvio 063), `Comparação Mensal`, `Previsão de Gastos` (Gemini com `UserId`), `Gráfico de Gastos` (PNG por `IChartRenderer`, enviado por `IBotClient.SendImageAsync` — desvio 026; período validado, desvio 230; só transações consolidadas e saldo real na linha, desvio 231). `Comparação Mensal` usa despesas em valor absoluto, `formatar_moeda` e variação positiva quando o gasto aumenta (desvio 232). `Análise Inteligente` lista os maiores gastos por valor absoluto e os dias da semana em português (desvio 233).
 
 ### 6.h (012h) Drive
 
@@ -174,7 +174,7 @@ A 013 entregou o job, o snapshot (`NightlyCheckinService.CollectSnapshotAsync`),
 ### 7.10 Convenções
 
 - `date.today()`/`datetime.now()` do Python viram `IClock` (São Paulo); `CURRENT_DATE` do banco (UTC) viram parâmetro `IClock.Today` (só difere entre 21h e 24h).
-- Dinheiro: `formatar_moeda` (011 `MoneyText.Brl`); `{:,.2f}` do Python nos prompts de análise (`MoneyText.Grouped2`); nomes de dia da semana em inglês nas análises (desvio 009).
+- Dinheiro: `formatar_moeda` (011 `MoneyText.Brl`); `{:,.2f}` do Python nos prompts de análise (`MoneyText.Grouped2`); nomes de dia da semana das análises em português, traduzidos no código (desvios 009 e 233).
 - Queries de várias linhas sem `ORDER BY` no Flask ganham `ORDER BY id`.
 - Nada de `str(e)` em resposta nem em log (desvio 008); nada de número de telefone nem texto do usuário em log (`PhoneMask` da 011 no número).
 
@@ -229,16 +229,33 @@ Numeração a partir de 150 (130+ é da 013; 120-122 da 014). Arquivos em `parit
 |---|---|---|
 | 150 | Confirmar despesa/renda por WhatsApp falha quando não há agendamento (descrição nula) | **aprovar com urgência** (é o fluxo central) |
 | 151 | Transferência por WhatsApp falha sempre | aprovar (implementar a transferência de verdade) |
-| 152 | `Configurar Notificações` pelo ramo do Gemini grava e responde 500 | aprovar |
-| 153 | `Solicitar API Key` devolve o valor cru da coluna (cifrado para quem se cadastrou depois da 017) | aprovar (decifrar) |
+| 152 | `Configurar Notificações` pelo ramo do Gemini grava e responde 500 | **implementado** (2026-10-10) |
+| 153 | `Solicitar API Key` devolve o valor cru da coluna (cifrado para quem se cadastrou depois da 017) | **implementado** (2026-10-10) |
 | 154 | A extração de despesa/renda não pede data, conta, categoria nem parcelamento | aprovar |
 | 155 | Evento pendente "mais recente" depende da ordem de `KEYS` | aprovar |
 | 156 | Resposta `casa`/`trabalho`/`outro` à pergunta de origem da rota não é tratada | aprovar |
 | 157 | `Pagamento Fatura` é inalcançável com "paguei..." | decidir (produto) |
 | 158 | Análise e previsão: valores de despesa negativos, desempate aleatório e `KeyError` sem histórico | aprovar |
-| 159 | Upload ao Drive: o motivo específico da falha nunca é mostrado | aprovar |
+| 159 | Upload ao Drive: o motivo específico da falha nunca é mostrado | **implementado** (2026-10-10) |
 | 160 | `Quitar Conta Fixa` está no prompt do Gemini mas não tem ramo | aprovar (remover do prompt) |
 | 161 | Vencimentos e contas fixas pendentes comparam descrição sem filtrar o usuário | aprovar |
+
+### 9.3 Aprovados e implementados em 2026-10-10 (calendário, configurações, Drive e análises)
+
+| # | Comportamento novo | Onde |
+|---|---|---|
+| 152 | Ramo do Gemini de `Configurar Notificações`: `agenda_diaria` grava o resumo matinal e responde `✅ {msg}\n\n📱 *Agenda Diária - Status atual:*\n• Ativa: Sim/Não\n• Horário: HH:MM\n` (lê `resumo_matinal_*`); nada de 500 | `NotificationsIntent` |
+| 190 | "desativar", "desligar", "desative" (e `off` no check-in) vencem "ativar", "ligar", "ativa", "ative": a notificação é desligada e a resposta diz "desativado" | `NotificationCommand.Action` |
+| 191 | `contas_vencer` (`ativar`/`desativar`/`configurar`) grava `notificationconfigs.alertas_financeiros_ativos` e responde `✅ Alertas financeiros ativados\|desativados com sucesso\n\n📱 *Contas a Vencer - Status atual:*\n• Ativa: Sim/Não\n• Horário: junto com o resumo matinal (HH:MM)\n`; `dias_antes` e `hora` ignorados; ação desconhecida ⇒ `❌ Ação não reconhecida` sem gravar; falha do banco ⇒ `❌ Erro ao atualizar configuração.` | `NotificationsIntent`, `IWhatsAppConfigStore.UpdateFinancialAlertsAsync` |
+| 153 | `Solicitar API Key`: valor que `LooksEncrypted` é decifrado (`IEncryptionService`); texto puro legado sai como está; token ilegível ⇒ `❌ Não encontrei sua API Key...` (nunca o texto cifrado) | `ApiKeyIntent` |
+| 159 | Falha do upload: `❌ {motivo}` com os motivos fixos de `DriveUploadErrors` (cota, permissão, credenciais, genérico `Erro ao fazer upload.`); exceção inesperada continua `❌ Erro ao enviar arquivo para o Drive.` | `DriveUploadIntent`, `DriveMessages.UploadFailure` |
+| 192 | `Deletar Evento`: `quando` só filtra com `hoje` ou `amanha`; qualquer outro valor (inclusive não texto) é sem filtro e não aparece na mensagem de "não encontrei" | `DeleteEventIntent` |
+| 230 | `Gráfico de Gastos`: `periodo_dias` inteiro de 1 a 3650 (pizza) e `num_meses` inteiro de 1 a 120 (barras e linha); texto, lista, nulo, booleano, decimal, negativo, zero e fora da faixa usam o padrão (30 dias, 6 meses); um número JSON integral (`7.0`) vale; a legenda mostra sempre inteiro | `ChartIntent.Param`, `ChartRules` |
+| 231 | Linha: saldo inicial das contas **ativas** + transações consolidadas anteriores à janela + acumulado do período (só consolidadas, só contas ativas); pizza e barras: só consolidadas | `AnalyticsReader` |
+| 232 | `Comparação Mensal`: `SUM(ABS(valor))`, `formatar_moeda` (`R$ 2.555,50`), variação com vírgula decimal e positiva quando o gasto aumenta, desempate das variações iguais pelo nome da categoria | `MonthlyComparison`, `AnalyticsReader` |
+| 233 | `Análise Inteligente`: maiores gastos `ORDER BY ABS(valor) DESC, id`; dias da semana traduzidos no código (`WeekdayNames`) | `AnalyticsReader`, `AnalyticsReport` |
+
+Não implementados (adiados): 154, 157 e 160.
 
 ## 10. Critérios de aceite
 
@@ -308,13 +325,13 @@ Convenção: `AC-012-NNN`, faixa por sub-entrega (0xx = 012-0, 1xx = 012a, 2xx =
 - **AC-012-501** Criar evento: validação, `hoje`/`amanha`/ISO, pendência de evento, mensagem de confirmação (com/sem endereços).
 - **AC-012-502** `sim` cria, `não` cancela, falha de Google (sem conexão e outras), sem evento pendente.
 - **AC-012-503** `calcular rota`: sem evento, sem local, sem endereços, um endereço (rota calculada), vários (pergunta), destino não localizado, rota falha.
-- **AC-012-504** Deletar evento: não achou, um (deleta), vários (lista), filtro `hoje`/`amanha`.
+- **AC-012-504** Deletar evento: não achou, um (deleta), vários (lista), filtro `hoje`/`amanha`; outro valor de `quando` é sem filtro (desvio 192, AC-012-192).
 - **AC-012-505** Consultar agenda (um dia, período, filtro de horário); sem Google ⇒ mensagem de conexão.
 - **AC-012-506** Horários livres: slots, qualidade, formato da mensagem e sugestão da IA.
 
 **012f — Configurações**
 - **AC-012-601** Resumo matinal e check-in noturno: ativar/desativar/configurar, regex da hora, faixa 18–23, mensagens.
-- **AC-012-602** Ramo do Gemini (`agenda_diaria`, `contas_vencer`): grava e responde 500 (desvio 152); tipo desconhecido ⇒ mensagem.
+- **AC-012-602** Ramo do Gemini (`agenda_diaria`, `contas_vencer`): grava e responde o status (desvios 152 e 191); ação desconhecida ⇒ `❌ Ação não reconhecida`; tipo desconhecido ⇒ mensagem.
 - **AC-012-603** Localização, relatório mensal (consultar, ativar, desativar, configurar, erros), endereços (salvar com geocodificação, listar na ordem casa/trabalho/outro, deletar), API key, menu.
 
 **012g — Análises**
@@ -324,7 +341,19 @@ Convenção: `AC-012-NNN`, faixa por sub-entrega (0xx = 012-0, 1xx = 012a, 2xx =
 
 **012h — Drive**
 - **AC-012-801** Pasta extraída (padrões, separadores, caixa preservada, sanitização, padrão `WhatsApp Uploads`).
-- **AC-012-802** Sem arquivo, sem tipo, sem escopo do Drive (link assinado), erro de autenticação, arquivo inválido, base64 inválido, sucesso (mensagem), falha de upload (mensagem genérica, desvio 159).
+- **AC-012-802** Sem arquivo, sem tipo, sem escopo do Drive (link assinado), erro de autenticação, arquivo inválido, base64 inválido, sucesso (mensagem), falha de upload (`❌ {motivo}` fixo, desvio 159; genérico sem motivo).
+
+**Desvios implementados em 2026-10-10** (testes marcados com `[Trait("AC", "012-NNN")]` do próprio desvio)
+- **AC-012-152** Ramo do Gemini `agenda_diaria`: grava e responde o status do resumo matinal, sem 500.
+- **AC-012-153** API key cifrada (Fernet) sai decifrada; texto puro como está; token ilegível não é mostrado.
+- **AC-012-159** Falha do upload mostra o motivo fixo (cota, permissão, credenciais); sem motivo, o genérico.
+- **AC-012-190** "desativar/desligar/desative resumo matinal" e "desativar/desligar/off check-in" desligam; "ativar/ligar" seguem ligando.
+- **AC-012-191** `contas_vencer` grava `alertas_financeiros_ativos` e responde o status; ação desconhecida não grava.
+- **AC-012-192** `quando` fora de `hoje`/`amanha` é sem filtro (lista os achados e não menciona o valor).
+- **AC-012-230** Período do gráfico fora de inteiro 1–3650 (pizza) ou 1–120 (barras/linha) usa o padrão e a legenda é inteira.
+- **AC-012-231** Linha com saldo real (contas ativas + consolidadas anteriores); pizza e barras só consolidadas.
+- **AC-012-232** Comparação mensal em valor absoluto, pt-BR, variação positiva quando gasta mais, desempate por nome.
+- **AC-012-233** Maiores gastos pelos maiores valores absolutos; dias da semana em português no prompt.
 
 ## 11. Tabelas e dados tocados
 

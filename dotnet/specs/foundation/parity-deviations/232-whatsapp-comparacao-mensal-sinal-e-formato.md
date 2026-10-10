@@ -1,6 +1,6 @@
 # Desvio 232 — Comparação Mensal: totais negativos, variação invertida e números em formato inglês
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-10)
 - **Features afetadas:** 012
 - **Severidade:** correção
 

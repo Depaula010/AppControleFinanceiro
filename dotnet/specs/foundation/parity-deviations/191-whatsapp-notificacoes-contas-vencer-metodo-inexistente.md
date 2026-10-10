@@ -1,6 +1,6 @@
 # Desvio 191 — Configurar Notificações (Gemini, contas_vencer) chama método que não existe
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-10)
 - **Features afetadas:** 012
 - **Severidade:** correção
 
