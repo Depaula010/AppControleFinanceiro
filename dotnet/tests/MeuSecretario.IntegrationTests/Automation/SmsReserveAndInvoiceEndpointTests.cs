@@ -657,7 +657,7 @@ public class ReprocessEndpointTests(PostgresFixture postgres) : IAsyncLifetime
         var (status, body) = await Reprocess(_invoice);
 
         status.ShouldBe(HttpStatusCode.OK);
-        body.ShouldContain("\"stats\":{\"total_processados\":0,\"fixos\":0,\"parcelados\":0,\"lembretes\":0,\"detalhes\":[]}");
+        body.ShouldContain("\"stats\":{\"total_processados\":0,\"fixos\":0,\"parcelados\":0,\"lembretes\":0,\"erros\":0,\"detalhes\":[]}");
         (await _env.ScalarAsync<int>("SELECT count(*)::int FROM transacoes")).ShouldBe(0);
     }
 
