@@ -124,7 +124,7 @@ public class FixedBillsReaderTests(PostgresFixture postgres) : IAsyncLifetime
 
     [Fact]
     [Trait("AC", "012-402")]
-    public async Task DueBills_PaidInTheReferenceMonth_ByDescription_EvenFromAnotherUser_Deviation161()
+    public async Task DueBills_PaidInTheReferenceMonth_ByDescription_OnlyByTheSameUser_Deviation161()
     {
         await _env.InsertScheduleAsync(_user, _account, "Pago por mim", day: 7);
         await _env.InsertScheduleAsync(_user, _account, "Pago por outro", day: 7);
@@ -135,8 +135,9 @@ public class FixedBillsReaderTests(PostgresFixture postgres) : IAsyncLifetime
 
         var bills = await _reader.ListDueBillsAsync(_user, new DueSlice(7, 7, 10, 2026), CancellationToken.None);
 
-        // Paridade com o Flask: a checagem de "já pago" não filtra o usuário (desvio 161, proposto), então a transação alheia esconde a conta.
-        bills.Select(b => b.Description).ShouldBe(["Pago em setembro"]);
+        // Desvio 161: a checagem de "já pago" filtra o usuário; a transação de outro usuário com a mesma descrição não esconde a conta
+        // (o Flask a escondia e devolvia só "Pago em setembro").
+        bills.Select(b => b.Description).ShouldBe(["Pago por outro", "Pago em setembro"]);
     }
 
     [Fact]

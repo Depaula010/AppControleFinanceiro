@@ -156,6 +156,7 @@ public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsA
               AND NOT EXISTS (
                   SELECT 1 FROM transacoes t
                   WHERE t.descricao = a.descricao
+                    AND t.usuario_id = a.usuario_id
                     AND EXTRACT(MONTH FROM t.data_transacao) = @month
                     AND EXTRACT(YEAR FROM t.data_transacao) = @year
               )

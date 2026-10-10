@@ -238,7 +238,7 @@ Numeração a partir de 150 (130+ é da 013; 120-122 da 014). Arquivos em `parit
 | 158 | Análise e previsão: valores de despesa negativos, desempate aleatório e `KeyError` sem histórico | **implementado** |
 | 159 | Upload ao Drive: o motivo específico da falha nunca é mostrado | aprovar |
 | 160 | `Quitar Conta Fixa` está no prompt do Gemini mas não tem ramo | aprovar (remover do prompt) |
-| 161 | Vencimentos e contas fixas pendentes comparam descrição sem filtrar o usuário | aprovar |
+| 161 | Vencimentos e contas fixas pendentes comparam descrição sem filtrar o usuário | **implementado** |
 
 ## 10. Critérios de aceite
 
@@ -300,7 +300,7 @@ Convenção: `AC-012-NNN`, faixa por sub-entrega (0xx = 012-0, 1xx = 012a, 2xx =
 
 **012d — Contas fixas e vencimentos**
 - **AC-012-401** Contas fixas pendentes (despesas, cartão, receitas, totais, status por dia) e catálogo completo (periodicidades, fatores).
-- **AC-012-402** Vencimentos hoje, amanhã e 7 dias (virada de mês, anual, receitas × despesas × faturas, totais).
+- **AC-012-402** Vencimentos hoje, amanhã e 7 dias (virada de mês, anual, receitas × despesas × faturas, totais); (desvio 161) a checagem de "já pago no mês" por descrição considera só transações do mesmo usuário (`t.usuario_id = a.usuario_id`): a transação de outro usuário com a mesma descrição não esconde a conta.
 - **AC-012-403** Contas atrasadas: snapshot (pendentes 7 dias, atrasadas, faturas) e texto somente leitura; vazio ⇒ `✅ Você não tem contas atrasadas! Tudo em dia! 🎉`.
 - **AC-012-404** Resposta ao check-in: `ok`/👍/✅ confirma todos; `1`, `1 e 3`, `1, 2, 4` parcial; `não`/`depois` encerra sem pagar; inválido encerra; a sessão some sempre; contas pagas viram transações com `agendamento_id` (data do vencimento real se atraso ≤ 1 dia, senão hoje).
 
