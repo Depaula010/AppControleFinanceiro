@@ -24,18 +24,18 @@ public static partial class NotificationCommand
     public static bool IsNightCheckin(string lower) => CheckinWords.Any(word => lower.Contains(word, StringComparison.Ordinal));
 
     /// <summary>
-    /// <c>ativar</c> vence <c>desativar</c>: o Flask testa "ativar/ligar/ativa/ative" por <c>in</c> primeiro e essas palavras estão dentro de
-    /// "desativar", "desligar" e "desative" (desvio 190, proposto). Só <c>off</c> (check-in) chega ao ramo de desativar.
+    /// As palavras de desativar vencem as de ativar (desvio 190): "desativar", "desligar" e "desative" contêm "ativar", "ligar" e
+    /// "ative", então testar ativar primeiro (como o Flask) ativava quando o usuário pedia para desligar.
     /// </summary>
     public static string Action(string lower, bool checkin)
     {
-        if (EnableWords.Any(word => lower.Contains(word, StringComparison.Ordinal)))
+        var disable = checkin ? CheckinDisableWords : MorningDisableWords;
+        if (disable.Any(word => lower.Contains(word, StringComparison.Ordinal)))
         {
-            return "ativar";
+            return "desativar";
         }
 
-        var disable = checkin ? CheckinDisableWords : MorningDisableWords;
-        return disable.Any(word => lower.Contains(word, StringComparison.Ordinal)) ? "desativar" : "configurar";
+        return EnableWords.Any(word => lower.Contains(word, StringComparison.Ordinal)) ? "ativar" : "configurar";
     }
 
     /// <summary><c>re.search(r'(\d{1,2})[h:](\d{2})?', texto)</c> e <c>f"{h:02d}:{m:02d}"</c>; <c>null</c> sem hora.</summary>
@@ -85,6 +85,22 @@ public static partial class NotificationCommand
         "💡 O check-in envia uma lista de contas pendentes dos últimos 7 dias.\n" +
         "Você pode confirmar todas de uma vez ou parcialmente.\n\n" +
         "⏰ Horário permitido: 18:00 às 23:00";
+
+    /// <summary>Status do ramo do Gemini, tipo <c>agenda_diaria</c> (desvio 152): lê as colunas do resumo matinal.</summary>
+    public static string DailyAgendaStatus(string message, bool active, TimeOnly time) =>
+        $"✅ {message}\n\n" +
+        "📱 *Agenda Diária - Status atual:*\n" +
+        $"• Ativa: {(active ? "Sim" : "Não")}\n" +
+        $"• Horário: {time.ToString("HH:mm", CultureInfo.InvariantCulture)}\n";
+
+    public static string FinancialAlertsMessage(bool active) => $"Alertas financeiros {(active ? "ativados" : "desativados")} com sucesso";
+
+    /// <summary>Status do ramo do Gemini, tipo <c>contas_vencer</c> (desvios 152 e 191): o horário é o do resumo matinal.</summary>
+    public static string FinancialAlertsStatus(string message, bool active, TimeOnly morningTime) =>
+        $"✅ {message}\n\n" +
+        "📱 *Contas a Vencer - Status atual:*\n" +
+        $"• Ativa: {(active ? "Sim" : "Não")}\n" +
+        $"• Horário: junto com o resumo matinal ({morningTime.ToString("HH:mm", CultureInfo.InvariantCulture)})\n";
 
     public static string Failure(string message) => "❌ " + message;
 
@@ -244,7 +260,7 @@ public static class AddressMessages
     }
 }
 
-/// <summary><c>SolicitarApiKeyIntent</c>: a chave sai do jeito que está na coluna (desvio 153, proposto).</summary>
+/// <summary><c>SolicitarApiKeyIntent</c>: a chave já decifrada pela intenção (desvio 153).</summary>
 public static class ApiKeyMessage
 {
     public const string NotFound = "❌ Não encontrei sua API Key. Entre em contato com o suporte.";
