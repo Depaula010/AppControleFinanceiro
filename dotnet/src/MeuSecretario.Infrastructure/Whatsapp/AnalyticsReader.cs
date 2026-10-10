@@ -196,7 +196,7 @@ public sealed class AnalyticsReader(IDbConnectionFactory connections) : IAnalyti
               AND t.tipo_transacao = 'Despesa'
               AND t.consolidada = true
               AND TO_CHAR(t.data_transacao, 'YYYY-MM') = @currentMonth
-            ORDER BY t.valor DESC, t.id
+            ORDER BY ABS(t.valor) DESC, t.id
             LIMIT 5
             """,
             new { userId, currentMonth },
@@ -309,7 +309,7 @@ public sealed class AnalyticsReader(IDbConnectionFactory connections) : IAnalyti
         await using var connection = await connections.OpenAsync(cancellationToken);
         var rows = await connection.QueryAsync<MacroRow>(new CommandDefinition(
             """
-            SELECT TO_CHAR(t.data_transacao, 'YYYY-MM') AS Mes, mc.nome_macro AS NomeMacro, SUM(t.valor) AS Total
+            SELECT TO_CHAR(t.data_transacao, 'YYYY-MM') AS Mes, mc.nome_macro AS NomeMacro, SUM(ABS(t.valor)) AS Total
             FROM transacoes t
             JOIN subcategoria sc ON t.subcategoria_id = sc.id
             JOIN macrocategoria mc ON sc.macro_id = mc.id
@@ -336,6 +336,7 @@ public sealed class AnalyticsReader(IDbConnectionFactory connections) : IAnalyti
             LEFT JOIN macrocategoria mc ON sc.macro_id = mc.id
             WHERE t.usuario_id = @userId
               AND t.tipo_transacao = 'Despesa'
+              AND t.consolidada = true
               AND t.data_transacao >= @start
             GROUP BY mc.nome_macro
             ORDER BY Total DESC, Categoria
@@ -355,6 +356,7 @@ public sealed class AnalyticsReader(IDbConnectionFactory connections) : IAnalyti
                    SUM(CASE WHEN tipo_transacao = 'Renda' THEN valor ELSE 0 END) AS Rendas
             FROM transacoes
             WHERE usuario_id = @userId
+              AND consolidada = true
               AND data_transacao >= @start
             GROUP BY DATE_TRUNC('month', data_transacao)
             ORDER BY Mes
@@ -367,19 +369,30 @@ public sealed class AnalyticsReader(IDbConnectionFactory connections) : IAnalyti
     public async Task<LineSeries> GetLineSeriesAsync(int userId, DateOnly start, CancellationToken cancellationToken)
     {
         await using var connection = await connections.OpenAsync(cancellationToken);
+        // Desvio 231: saldo inicial das contas ativas + transações consolidadas anteriores à janela (o saldo do "Consulta Saldo").
         var initial = await connection.ExecuteScalarAsync<decimal?>(new CommandDefinition(
-            "SELECT COALESCE(SUM(saldo_inicial), 0) FROM contas WHERE usuario_id = @userId",
-            new { userId },
+            """
+            SELECT COALESCE(SUM(c.saldo_inicial), 0)
+                 + COALESCE((SELECT SUM(t.valor) FROM transacoes t
+                             JOIN contas ca ON ca.id = t.conta_id
+                             WHERE ca.usuario_id = @userId AND ca.ativa = true
+                               AND t.consolidada = true AND t.data_transacao < @start), 0)
+            FROM contas c WHERE c.usuario_id = @userId AND c.ativa = true
+            """,
+            new { userId, start },
             cancellationToken: cancellationToken));
 
         // O acumulado usa a janela padrão (RANGE até a linha corrente): transações do mesmo dia dividem o mesmo total.
         var rows = await connection.QueryAsync<LineDbRow>(new CommandDefinition(
             """
-            SELECT data_transacao AS DataTransacao, SUM(valor) OVER (ORDER BY data_transacao) AS SaldoAcumulado
-            FROM transacoes
-            WHERE usuario_id = @userId
-              AND data_transacao >= @start
-            ORDER BY data_transacao
+            SELECT t.data_transacao AS DataTransacao, SUM(t.valor) OVER (ORDER BY t.data_transacao) AS SaldoAcumulado
+            FROM transacoes t
+            JOIN contas c ON c.id = t.conta_id
+            WHERE t.usuario_id = @userId
+              AND c.ativa = true
+              AND t.consolidada = true
+              AND t.data_transacao >= @start
+            ORDER BY t.data_transacao
             """,
             new { userId, start },
             cancellationToken: cancellationToken));

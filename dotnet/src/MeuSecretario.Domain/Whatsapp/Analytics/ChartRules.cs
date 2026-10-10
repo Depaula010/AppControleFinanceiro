@@ -28,6 +28,12 @@ public static class ChartRules
 
     public const string NoNumber = "❌ Não foi possível identificar seu número para enviar o gráfico.";
 
+    /// <summary>Faixa aceita do período da pizza em dias (desvio 230).</summary>
+    public const int MaxPieDays = 3650;
+
+    /// <summary>Faixa aceita de meses de barras e linha (desvio 230).</summary>
+    public const int MaxMonths = 120;
+
     /// <summary>Limite do <c>timedelta</c> do Python em dias.</summary>
     private const double MaxDays = 999_999_999;
 

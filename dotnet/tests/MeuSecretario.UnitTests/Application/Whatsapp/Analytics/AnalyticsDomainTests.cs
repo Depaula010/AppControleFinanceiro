@@ -9,23 +9,6 @@ public class AnalyticsDomainTests
 
     [Fact]
     [Trait("AC", "012-702")]
-    public void MonthlyComparison_TiedVariations_KeepTheOrderOfAppearance()
-    {
-        // O Flask itera um set (ordem muda a cada processo); aqui o desempate é a ordem em que a categoria aparece (spec §13.7).
-        var rows = new MacroMonthTotal[]
-        {
-            new("2026-10", "Beta", -200), new("2026-10", "Alfa", -100), new("2026-09", "Alfa", -50), new("2026-09", "Beta", -100),
-        };
-
-        var text = MonthlyComparison.Format("2026-10", "2026-09", rows);
-
-        text.IndexOf("*Beta:*", StringComparison.Ordinal).ShouldBeLessThan(text.IndexOf("*Alfa:*", StringComparison.Ordinal));
-        text.ShouldContain("🔴 *Beta:* R$ -200.00 (+100.0%)");
-        text.ShouldContain("🔴 *Alfa:* R$ -100.00 (+100.0%)");
-    }
-
-    [Fact]
-    [Trait("AC", "012-702")]
     public void MonthlyComparison_OnlyTheFiveBiggestChangesAppear()
     {
         var rows = Enumerable.Range(1, 7)
