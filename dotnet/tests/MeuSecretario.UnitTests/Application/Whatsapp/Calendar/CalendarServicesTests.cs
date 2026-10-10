@@ -291,6 +291,34 @@ public class CalendarServicesTests
         }
     }
 
+    [Theory]
+    [Trait("AC", "012-192")]
+    [InlineData("semana")]
+    [InlineData("depois")]
+    public async Task DeleteEventIntent_UnexpectedWhen_IsTreatedAsNoFilter(string when)
+    {
+        // Flask: qualquer valor diferente de "hoje" virava amanhã e apagava só o d2; agora não há filtro e os 4 são listados.
+        var rig = new CalendarRig("2026-10-08T14:20:00-03:00", WhatsAppFixture.Section("delete_world"));
+        rig.Llm.Then($$"""{"titulo_busca": "academia", "quando": "{{when}}"}""");
+
+        var reply = await new DeleteEventIntent(rig.Llm, rig.Client, rig.Clock).HandleAsync(rig.Context("deletar"), CancellationToken.None);
+
+        reply.ShouldStartWith("📋 Encontrei 4 eventos:");
+        rig.Client.Deleted.ShouldBeEmpty();
+    }
+
+    [Fact]
+    [Trait("AC", "012-192")]
+    public async Task DeleteEventIntent_UnexpectedWhen_NotFound_DoesNotMentionIt()
+    {
+        var rig = new CalendarRig("2026-10-08T14:20:00-03:00", WhatsAppFixture.Section("delete_world"));
+        rig.Llm.Then("""{"titulo_busca": "yoga", "quando": "semana"}""");
+
+        var reply = await new DeleteEventIntent(rig.Llm, rig.Client, rig.Clock).HandleAsync(rig.Context("deletar"), CancellationToken.None);
+
+        reply.ShouldBe("🤔 Não encontrei eventos com 'yoga'.\n\nTente buscar com outras palavras.");
+    }
+
     [Fact]
     [Trait("AC", "012-504")]
     public async Task DeleteEventIntent_KeepsOnlyTheFirstFivePerCalendar()

@@ -120,7 +120,7 @@ public class CalendarConfigParityTests
 
         public HandleWhatsAppMessage UseCase { get; }
 
-        private static WhatsAppNotificationConfig Defaults() => new(true, new TimeOnly(7, 0), true, new TimeOnly(20, 0));
+        private static WhatsAppNotificationConfig Defaults() => new(true, new TimeOnly(7, 0), true, new TimeOnly(20, 0), true);
     }
 
     private static TimeOnly Time(string text) => TimeOnly.Parse(text, CultureInfo.InvariantCulture);
@@ -149,6 +149,17 @@ public class CalendarConfigParityTests
                 ? "❌ Erro ao atualizar configuração."
                 : expected;
 
+    /// <summary>
+    /// Cenários que embutem o comportamento antigo do Flask e ficam no JSON como evidência; o comportamento novo (desvios 152, 190 e 191,
+    /// feature 012, 2026-10-10) é provado em <c>NotificationDeviationTests</c>.
+    /// </summary>
+    private static readonly HashSet<string> SupersededByDeviations =
+    [
+        "resumo_desativar_vira_ativar", "resumo_desligar_vira_ativar", "checkin_desligar_vira_ativar", "checkin_off_com_ativar_ganha_ativar",
+        "gemini_agenda_ativar_grava_e_quebra", "gemini_agenda_desativar_grava_e_quebra", "gemini_agenda_configurar_grava_e_quebra",
+        "gemini_contas_ativar_quebra_sem_gravar", "gemini_contas_configurar_quebra_sem_gravar",
+    ];
+
     [Fact]
     [Trait("AC", "012-017")]
     public async Task EveryScenario_MatchesTheFlask()
@@ -159,6 +170,11 @@ public class CalendarConfigParityTests
         foreach (var scenario in scenarios)
         {
             var name = scenario.GetProperty("name").GetString()!;
+            if (SupersededByDeviations.Contains(name))
+            {
+                continue;
+            }
+
             var result = scenario.GetProperty("result");
             var pipeline = new Pipeline(scenario);
 

@@ -1,6 +1,6 @@
 # Desvio 159 — Upload ao Drive: o motivo específico da falha nunca é mostrado
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-10)
 - **Features afetadas:** 012
 - **Severidade:** correção
 

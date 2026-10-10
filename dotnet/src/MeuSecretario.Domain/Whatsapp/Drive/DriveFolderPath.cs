@@ -172,8 +172,14 @@ public static class DriveMessages
 
     public const string InvalidData = "Não foi possível processar o arquivo enviado.";
 
-    /// <summary>O motivo específico do upload nunca chega ao usuário (desvio 159, proposto): o Flask lê a chave errada.</summary>
+    /// <summary>Sem motivo conhecido (ou exceção inesperada): o texto genérico do Flask.</summary>
     public const string UploadFailed = "❌ Erro ao enviar arquivo para o Drive.";
+
+    /// <summary>
+    /// Desvio 159: mostra o motivo fixo do upload (cota, permissão, credenciais) em vez do genérico. O motivo vem de
+    /// <c>DriveUploadErrors</c> (textos fixos, nunca <c>str(e)</c>).
+    /// </summary>
+    public static string UploadFailure(string? reason) => string.IsNullOrWhiteSpace(reason) ? UploadFailed : "❌ " + reason;
 
     public static string NotConnected(string connectUrl) =>
         "🔗 *Google Drive não conectado*\n\n" +

@@ -1,6 +1,6 @@
 # Desvio 190 — Desativar resumo matinal ou check-in por WhatsApp ativa
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-10)
 - **Features afetadas:** 012
 - **Severidade:** correção
 

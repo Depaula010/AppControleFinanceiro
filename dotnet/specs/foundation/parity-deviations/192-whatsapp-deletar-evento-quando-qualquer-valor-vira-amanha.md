@@ -1,6 +1,6 @@
 # Desvio 192 — Deletar Evento: qualquer valor de `quando` diferente de `hoje` vira amanhã
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-10)
 - **Features afetadas:** 012
 - **Severidade:** correção
 

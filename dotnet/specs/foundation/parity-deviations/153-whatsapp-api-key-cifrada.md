@@ -1,6 +1,6 @@
 # Desvio 153 — Solicitar API Key devolve o valor cru da coluna
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-10)
 - **Features afetadas:** 012
 - **Severidade:** correção
 
