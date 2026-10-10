@@ -28,7 +28,7 @@ internal sealed class MemoryConfigStore : IWhatsAppConfigStore
 
     public Task<WhatsAppNotificationConfig> GetOrCreateNotificationAsync(int userId, CancellationToken cancellationToken)
     {
-        Notification ??= new WhatsAppNotificationConfig(true, new TimeOnly(7, 0), true, new TimeOnly(20, 0));
+        Notification ??= new WhatsAppNotificationConfig(true, new TimeOnly(7, 0), true, new TimeOnly(20, 0), true);
         return Task.FromResult(Notification);
     }
 
@@ -53,6 +53,18 @@ internal sealed class MemoryConfigStore : IWhatsAppConfigStore
 
         Writes.Add($"checkin {active} {time}");
         Notification = Notification! with { CheckinActive = active ?? Notification.CheckinActive, CheckinTime = time ?? Notification.CheckinTime };
+        return Task.FromResult(Notification);
+    }
+
+    public Task<WhatsAppNotificationConfig> UpdateFinancialAlertsAsync(int userId, bool active, CancellationToken cancellationToken)
+    {
+        if (FailNotificationUpdate)
+        {
+            throw new InvalidOperationException("banco fora com segredo");
+        }
+
+        Writes.Add($"alerts {active}");
+        Notification = Notification! with { FinancialAlertsActive = active };
         return Task.FromResult(Notification);
     }
 
@@ -217,7 +229,7 @@ public class ConfigIntentsTests
                     : (user.GetProperty("api_key").GetString(), user.GetProperty("nome").ValueKind == JsonValueKind.Null ? null : user.GetProperty("nome").GetString()),
             };
 
-            (await Run(NewRig(), new ApiKeyIntent(store))).ShouldBe(c.GetProperty("message").GetString(), name);
+            (await Run(NewRig(), new ApiKeyIntent(store, Substitute.For<IEncryptionService>()))).ShouldBe(c.GetProperty("message").GetString(), name);
         }
     }
 
