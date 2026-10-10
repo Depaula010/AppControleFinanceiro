@@ -15,6 +15,9 @@ public static class CacheKeys
 
     public static string PendingEventPattern(string whatsapp) => $"pending_event:{whatsapp}:*";
 
+    /// <summary>Ponteiro para o evento pendente mais recente (desvio 155; o Flask não tem esta chave).</summary>
+    public static string LastPendingEvent(string whatsapp) => $"last_pending_event:{whatsapp}";
+
     public static string NightlyCheckin(string whatsapp, string id) => $"nightly_checkin:{whatsapp}:{id}";
 
     public static string NightlyCheckinActive(string whatsapp) => $"nightly_checkin_active:{whatsapp}";

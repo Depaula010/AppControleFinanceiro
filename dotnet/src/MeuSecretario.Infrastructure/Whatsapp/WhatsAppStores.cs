@@ -2,6 +2,7 @@ using System.Text.Json.Nodes;
 using Dapper;
 using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Application.Automation;
+using MeuSecretario.Application.Caching;
 using MeuSecretario.Application.Whatsapp;
 using MeuSecretario.Infrastructure.Database;
 
@@ -63,11 +64,29 @@ public sealed class PendingEventStore(ICache cache, IPendingIdGenerator ids) : I
     public async Task<string?> CreateAsync(string number, PendingEvent data, CancellationToken cancellationToken)
     {
         var id = ids.NewId();
-        return await cache.SetJsonAsync($"pending_event:{number}:{id}", data, Ttl, cancellationToken) ? id : null;
+        if (!await cache.SetJsonAsync($"pending_event:{number}:{id}", data, Ttl, cancellationToken))
+        {
+            return null;
+        }
+
+        // Desvio 155: o "mais recente" é o último criado, não a última chave do KEYS (a ordem do Redis não é garantida).
+        await cache.SetJsonAsync(CacheKeys.LastPendingEvent(number), id, Ttl, cancellationToken);
+        return id;
     }
 
     public async Task<LatestPendingEvent> GetLatestAsync(string number, CancellationToken cancellationToken)
     {
+        var pointer = await cache.GetJsonAsync<string>(CacheKeys.LastPendingEvent(number), cancellationToken);
+        if (!string.IsNullOrEmpty(pointer))
+        {
+            var pointed = await cache.GetJsonAsync<PendingEvent>($"pending_event:{number}:{pointer}", cancellationToken);
+            if (pointed is not null)
+            {
+                return new LatestPendingEvent(pointer, pointed);
+            }
+        }
+
+        // Sem ponteiro (pendência anterior à virada ou ponteiro expirado/apagado): a última chave, como no Flask.
         var keys = await cache.KeysByPatternAsync($"pending_event:{number}:*", cancellationToken);
         if (keys.Count == 0)
         {
@@ -82,8 +101,14 @@ public sealed class PendingEventStore(ICache cache, IPendingIdGenerator ids) : I
     public Task<PendingEvent?> GetAsync(string number, string id, CancellationToken cancellationToken) =>
         cache.GetJsonAsync<PendingEvent>($"pending_event:{number}:{id}", cancellationToken);
 
-    public async Task DeleteAsync(string number, string id, CancellationToken cancellationToken) =>
+    public async Task DeleteAsync(string number, string id, CancellationToken cancellationToken)
+    {
         await cache.DeleteAsync($"pending_event:{number}:{id}", cancellationToken);
+        if (await cache.GetJsonAsync<string>(CacheKeys.LastPendingEvent(number), cancellationToken) == id)
+        {
+            await cache.DeleteAsync(CacheKeys.LastPendingEvent(number), cancellationToken);
+        }
+    }
 }
 
 /// <summary><c>nightly_checkin_active:{numero}</c>: o valor é o id da sessão (JSON de texto).</summary>

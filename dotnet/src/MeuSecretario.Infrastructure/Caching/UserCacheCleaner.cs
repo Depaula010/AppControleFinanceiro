@@ -25,7 +25,7 @@ public sealed class UserCacheCleaner(IDbConnectionFactory connections, ICache ca
             return;
         }
 
-        var keys = new List<string> { CacheKeys.LastPending(number), CacheKeys.NightlyCheckinActive(number) };
+        var keys = new List<string> { CacheKeys.LastPending(number), CacheKeys.LastPendingEvent(number), CacheKeys.NightlyCheckinActive(number) };
         keys.AddRange(await cache.KeysByPatternAsync(CacheKeys.PendingTx(number, "*"), cancellationToken));
         keys.AddRange(await cache.KeysByPatternAsync(CacheKeys.PendingEventPattern(number), cancellationToken));
         keys.AddRange(await cache.KeysByPatternAsync(CacheKeys.NightlyCheckin(number, "*"), cancellationToken));

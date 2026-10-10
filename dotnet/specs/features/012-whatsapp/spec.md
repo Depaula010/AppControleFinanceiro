@@ -145,7 +145,7 @@ Formato da 011 (`PendingTransactionStore`): valor JSON em `pending_tx:{numero}:{
 
 ### 7.3 Evento pendente
 
-`pending_event:{numero}:{id}` (JSON, TTL 300 s, sem `last_pending`). "Mais recente" = **última** chave devolvida pelo `KEYS pending_event:{numero}:*` (ordem do Redis, não garantida; desvio 155). Confirmar: lê de novo, cria o evento (`ICalendarClient.InsertEventAsync`), apaga a pendência só se criou. Textos: `✅ *Evento Criado!*\n\n📝 {titulo}\nEvento '{titulo}' criado com sucesso!`; falha `❌ Erro ao criar evento: {motivo}` (motivo só para "usuário sem Google conectado", o texto literal da 010; qualquer outro erro vira `❌ Erro ao criar evento.`, desvio 008); cancelar `✅ Evento cancelado com sucesso!`.
+`pending_event:{numero}:{id}` (JSON, TTL 300 s, sem `last_pending`). "Mais recente" = o id guardado em `last_pending_event:{numero}` (TTL 300 s, gravado a cada criação e apagado junto com o evento que ele aponta; **desvio 155, implementado**). Sem ponteiro (pendência anterior à virada, ponteiro expirado) cai na **última** chave do `KEYS pending_event:{numero}:*`, como o Flask. Confirmar: lê de novo, cria o evento (`ICalendarClient.InsertEventAsync`), apaga a pendência só se criou. Textos: `✅ *Evento Criado!*\n\n📝 {titulo}\nEvento '{titulo}' criado com sucesso!`; falha `❌ Erro ao criar evento: {motivo}` (motivo só para "usuário sem Google conectado", o texto literal da 010; qualquer outro erro vira `❌ Erro ao criar evento.`, desvio 008); cancelar `✅ Evento cancelado com sucesso!`.
 
 ### 7.4 Cálculo de rota
 
@@ -232,7 +232,7 @@ Numeração a partir de 150 (130+ é da 013; 120-122 da 014). Arquivos em `parit
 | 152 | `Configurar Notificações` pelo ramo do Gemini grava e responde 500 | aprovar |
 | 153 | `Solicitar API Key` devolve o valor cru da coluna (cifrado para quem se cadastrou depois da 017) | aprovar (decifrar) |
 | 154 | A extração de despesa/renda não pede data, conta, categoria nem parcelamento | aprovar |
-| 155 | Evento pendente "mais recente" depende da ordem de `KEYS` | aprovar |
+| 155 | Evento pendente "mais recente" depende da ordem de `KEYS` | **implementado** |
 | 156 | Resposta `casa`/`trabalho`/`outro` à pergunta de origem da rota não é tratada | aprovar |
 | 157 | `Pagamento Fatura` é inalcançável com "paguei..." | decidir (produto) |
 | 158 | Análise e previsão: valores de despesa negativos, desempate aleatório e `KeyError` sem histórico | aprovar |
@@ -306,7 +306,7 @@ Convenção: `AC-012-NNN`, faixa por sub-entrega (0xx = 012-0, 1xx = 012a, 2xx =
 
 **012e — Calendário**
 - **AC-012-501** Criar evento: validação, `hoje`/`amanha`/ISO, pendência de evento, mensagem de confirmação (com/sem endereços).
-- **AC-012-502** `sim` cria, `não` cancela, falha de Google (sem conexão e outras), sem evento pendente.
+- **AC-012-502** `sim` cria, `não` cancela, falha de Google (sem conexão e outras), sem evento pendente; com dois eventos pendentes o `sim` age sobre o último criado, independentemente da ordem das chaves (desvio 155).
 - **AC-012-503** `calcular rota`: sem evento, sem local, sem endereços, um endereço (rota calculada), vários (pergunta), destino não localizado, rota falha.
 - **AC-012-504** Deletar evento: não achou, um (deleta), vários (lista), filtro `hoje`/`amanha`.
 - **AC-012-505** Consultar agenda (um dia, período, filtro de horário); sem Google ⇒ mensagem de conexão.
@@ -347,7 +347,7 @@ Leitura: `usuarios`, `contas`, `faturas`, `transacoes`, `subcategoria`, `macroca
 5. **Ordem sem `ORDER BY`** do Flask passa a `id` (contas, agendamentos, categorias); chaves de cache dos prompts mudam só se a ordem física era outra (cache descartado na virada).
 6. **`datetime.now()`/`date.today()` do container** e `CURRENT_DATE` do banco (UTC) viram o dia de São Paulo (constituição §7).
 7. **Estatísticas aleatórias** (`set` do Python em `get_monthly_comparison`): desempate determinístico (ordem de aparição).
-8. **Event "mais recente":** a ordem dos `KEYS` do Redis não é garantida em nenhuma das duas implementações (Q-012-4).
+8. **Event "mais recente":** o Flask depende da ordem dos `KEYS` (não garantida); o .NET usa o ponteiro `last_pending_event:{numero}` (desvio 155) e a chave extra existe só no Redis do .NET.
 9. **Check-in, confirmação em lote (012d):** cada conta confirmada vira uma transação do `IScheduleExecutor` (desvio 011, idempotente por mês); o Flask grava todas numa só transação que desfaz tudo no primeiro erro. Aqui as contas anteriores à que falhou continuam gravadas, a sessão some e a resposta é `❌ Erro ao salvar transações.` (sem `str(e)`, desvio 008). Conta já lançada no mês conta como confirmada sem duplicar.
 10. **Check-in, confirmação parcial (012d):** `list(set(indices))` do Python sai em ordem crescente para números pequenos; o .NET sempre ordena em crescente (a ordem do `set` com 8 itens ou mais depende da inserção).
 
@@ -356,7 +356,7 @@ Leitura: `usuarios`, `contas`, `faturas`, `transacoes`, `subcategoria`, `macroca
 - **Q-012-1** (resolvida: `NOT NULL` confirmado em produção; desvio 150 implementado) O banco de produção aceita `transacoes.descricao` nula? Se sim, a confirmação por WhatsApp grava sem descrição; se não (o dump diz `NOT NULL`), todo `OK` de despesa/renda sem agendamento dá 500 (desvio 150). **Prioridade máxima.**
 - **Q-012-2** `Solicitar API Key` deve decifrar a chave (desvio 153) ou o produto prefere um link seguro? Entregar uma chave por WhatsApp é decisão de produto.
 - **Q-012-3** A quitação por WhatsApp/SMS deve gravar `agendamento_id` (coerente com o desvio 012 e a 013)? Padrão: não.
-- **Q-012-4** Qual evento pendente é "o mais recente"? Hoje a ordem do `KEYS` decide (desvio 155).
+- **Q-012-4** (resolvida: desvio 155 implementado, ponteiro `last_pending_event`) Qual evento pendente é "o mais recente"? Hoje a ordem do `KEYS` decide (desvio 155).
 - **Q-012-5** (resolvida: desvio 151 implementado) Alguém usa `Transferência` pelo WhatsApp? Hoje responde "Algo deu errado" para todos.
 - **Q-012-6** (resolvida) A 013 entregou o snapshot e o formatador; a 012 os reutiliza e implementa só a resposta ao check-in.
 - **Q-012-7** O motivo específico dos erros do Google (`Erro ao criar evento: ...`) pode ser omitido (desvio 008) ou o produto quer uma lista de motivos permitidos?

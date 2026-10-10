@@ -60,7 +60,7 @@ public interface IPendingEventStore
     /// <summary>Grava com TTL de 300 s e devolve o id (8 hexadecimais); <c>null</c> se o Redis não gravou.</summary>
     Task<string?> CreateAsync(string number, PendingEvent data, CancellationToken cancellationToken);
 
-    /// <summary>A <b>última</b> chave de <c>KEYS pending_event:{numero}:*</c> (a ordem do Redis; desvio 155).</summary>
+    /// <summary>O último evento criado (<c>last_pending_event</c>, desvio 155); sem ponteiro, a última chave do <c>KEYS</c> como o Flask.</summary>
     Task<LatestPendingEvent> GetLatestAsync(string number, CancellationToken cancellationToken);
 
     Task<PendingEvent?> GetAsync(string number, string id, CancellationToken cancellationToken);
