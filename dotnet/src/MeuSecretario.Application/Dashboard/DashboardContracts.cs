@@ -38,10 +38,10 @@ public interface IDashboardRepository
     /// <summary>Soma por tipo das transações consolidadas com data entre <paramref name="firstDay"/> e <paramref name="lastDay"/>, inclusive.</summary>
     Task<IReadOnlyList<TypeTotal>> SumByTypeAsync(int userId, DateOnly firstDay, DateOnly lastDay, CancellationToken cancellationToken);
 
-    /// <summary>Despesas consolidadas desde <paramref name="from"/>, por mês, do mais novo para o mais antigo.</summary>
+    /// <summary>Despesas consolidadas desde <paramref name="from"/>, por mês, do mais antigo para o mais novo (desvio 091).</summary>
     Task<IReadOnlyList<MonthlyExpense>> MonthlyExpensesAsync(int userId, DateOnly from, CancellationToken cancellationToken);
 
-    /// <summary>Despesas consolidadas no intervalo semiaberto, por macro e subcategoria, <c>ORDER BY total DESC LIMIT 10</c> (soma negativa, desvio 092).</summary>
+    /// <summary>Despesas consolidadas no intervalo semiaberto, por macro e subcategoria, <c>ORDER BY total ASC LIMIT 10</c> (soma negativa: maior gasto primeiro, desvio 092).</summary>
     Task<IReadOnlyList<CategoryExpense>> CategoryExpensesAsync(
         int userId, DateOnly from, DateOnly toExclusive, CancellationToken cancellationToken);
 
@@ -51,6 +51,10 @@ public interface IDashboardRepository
     /// <summary>As 10 últimas transações (data e <c>created_at</c> decrescentes), de qualquer tipo.</summary>
     Task<IReadOnlyList<RecentTransaction>> ListRecentAsync(int userId, CancellationToken cancellationToken);
 
-    /// <summary>Agendamentos com <c>ativo = true</c>, <c>ORDER BY dia_execucao, id</c>.</summary>
-    Task<IReadOnlyList<ScheduleRow>> ListActiveSchedulesAsync(int userId, CancellationToken cancellationToken);
+    /// <summary>
+    /// Agendamentos de despesa com <c>ativo = true</c> (receita fica fora, desvio 095), <c>ORDER BY dia_execucao, id</c>, cada um
+    /// com as datas de transação já ligadas a ele no intervalo semiaberto <paramref name="paidFrom"/>..<paramref name="paidToExclusive"/> (desvio 094).
+    /// </summary>
+    Task<IReadOnlyList<ScheduleRow>> ListActiveSchedulesAsync(
+        int userId, DateOnly paidFrom, DateOnly paidToExclusive, CancellationToken cancellationToken);
 }

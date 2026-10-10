@@ -1,6 +1,6 @@
 # Desvio 122 — Alertas de calendário: usuário inativo ainda recebe alertas
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 014, 2026-10-09)
 - **Features afetadas:** 014 (e 013)
 - **Severidade:** correção
 

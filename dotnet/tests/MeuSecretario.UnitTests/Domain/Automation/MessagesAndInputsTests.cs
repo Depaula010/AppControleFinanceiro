@@ -66,7 +66,7 @@ public class ConfirmationMessageTests
         var pending = new PendingTransaction(1, 3, 1, 9, -33.33, 33.33, "Despesa", "2026-10-05", "api_endpoint", null, "Loja", "Cartão", "Cartão de Crédito", "Loja", "credito");
         var text = ConfirmationMessage.Build(pending, [new CategoryOption(1, "Sub", "Macro")], "id", installments: 3, totalValue: 99.99);
         text.ShouldContain("💵 *R$ 99,99* (3x de R$ 33,33)\n");
-        text.ShouldContain("� Cartão (1ª parcela na fatura atual)\n");
+        text.ShouldContain("💳 Cartão (1ª parcela na fatura atual)\n");
     }
 
     [Fact]
@@ -209,6 +209,15 @@ public class ApiTransactionInputTests
     [InlineData("""{"user_api_key":"k","valor":1,"local":"x","conta":"c","tipo_pagamento":"pix","descricao":7}""")]
     public void UnexpectedType_ComesBeforeTheMissingList(string json) => Parse(json).ShouldBeOfType<ApiTransactionParse.UnexpectedType>();
 
+    [Theory]
+    [Trait("AC", "011-041")]
+    [InlineData("""{"user_api_key":"k","valor":1,"local":5,"conta":"c","tipo_pagamento":"pix"}""", "local")]
+    [InlineData("""{"user_api_key":"k","valor":1,"local":"x","conta":"c","tipo_pagamento":"pix","descricao":7}""", "descricao")]
+    [InlineData("""{"user_api_key":"k","valor":1,"local":"x","conta":{"a":1},"tipo_pagamento":"pix"}""", "conta")]
+    [InlineData("""{"user_api_key":"k","valor":1,"local":"x","conta":"c","tipo_pagamento":[1]}""", "tipo_pagamento")]
+    public void UnexpectedType_NamesTheField(string json, string field) =>
+        Parse(json).ShouldBeOfType<ApiTransactionParse.UnexpectedType>().Field.ShouldBe(field);
+
     [Fact]
     [Trait("AC", "011-041")]
     public void FalsyNonTextFieldsAreJustMissing() =>
@@ -233,11 +242,10 @@ public class NotificationParserTests
     [Trait("AC", "011-017")]
     [InlineData("""{"valor_decimal": 45.9, "descricao_bruta": "Mercado", "tipo_fluxo": "Despesa"}""", "Despesa", "Mercado", 45.9)]
     [InlineData("```json\n{\"valor_decimal\": \"12.5\", \"descricao_bruta\": null, \"tipo_fluxo\": \"Renda\"}\n```", "Renda", null, 12.5)]
-    [InlineData("""{"descricao_bruta": "X"}""", "Despesa", "X", 0)]
     [InlineData("""{"valor_decimal": true}""", "Despesa", null, 1)]
     public void Valid(string text, string flow, string? description, double value)
     {
-        var parsed = NotificationParser.Parse(text).ShouldNotBeNull();
+        var parsed = NotificationParser.Parse(text).ShouldBeOfType<NotificationParse.Ok>().Extraction;
         parsed.FlowType.ShouldBe(flow);
         parsed.Description.ShouldBe(description);
         parsed.Value.ShouldBe(value);
@@ -249,14 +257,27 @@ public class NotificationParserTests
     [InlineData("não é json")]
     [InlineData("[1]")]
     [InlineData("1")]
+    [InlineData("""{"descricao_bruta": 5, "valor_decimal": 1}""")]
+    public void Unreadable(string text) => NotificationParser.Parse(text).ShouldBeOfType<NotificationParse.Unreadable>();
+
+    [Theory]
+    [Trait("AC", "011-017")]
+    [InlineData("""{"tipo_fluxo": null, "valor_decimal": 1}""")]
+    [InlineData("""{"tipo_fluxo": "Receita", "valor_decimal": 1}""")]
+    [InlineData("""{"tipo_fluxo": 5}""")]
+    public void InvalidFlow_Is400(string text) => NotificationParser.Parse(text).ShouldBeOfType<NotificationParse.InvalidFlow>();
+
+    [Theory]
+    [Trait("AC", "011-017")]
+    [InlineData("""{"descricao_bruta": "X"}""")]
     [InlineData("""{"valor_decimal": null}""")]
     [InlineData("""{"valor_decimal": "abc"}""")]
     [InlineData("""{"valor_decimal": [1]}""")]
     [InlineData("""{"valor_decimal": "nan"}""")]
-    [InlineData("""{"tipo_fluxo": null}""")]
-    [InlineData("""{"tipo_fluxo": "Receita"}""")]
-    [InlineData("""{"descricao_bruta": 5}""")]
-    public void Invalid(string text) => NotificationParser.Parse(text).ShouldBeNull();
+    [InlineData("""{"valor_decimal": 0}""")]
+    [InlineData("""{"valor_decimal": -3.5}""")]
+    [InlineData("""{"valor_decimal": 1e10}""")]
+    public void InvalidValue_Is400(string text) => NotificationParser.Parse(text).ShouldBeOfType<NotificationParse.InvalidValue>();
 }
 
 public class AutomateChoiceTests
@@ -379,20 +400,22 @@ public class ReserveListQueryTests
     [InlineData("")]
     [InlineData("-1")]
     [InlineData("9223372036854775808")]
-    public void InvalidLimit(string limit) => ReserveListQuery.Parse(null, null, null, limit, null).ShouldBeOfType<ReserveListParse.InvalidPaging>();
+    public void InvalidLimit(string limit) =>
+        ReserveListQuery.Parse(null, null, null, limit, null).ShouldBeOfType<ReserveListParse.InvalidPaging>().Field.ShouldBe("limit");
 
     [Fact]
     [Trait("AC", "011-105")]
-    public void InvalidOffset() => ReserveListQuery.Parse(null, null, null, null, "-1").ShouldBeOfType<ReserveListParse.InvalidPaging>();
+    public void InvalidOffset() =>
+        ReserveListQuery.Parse(null, null, null, null, "-1").ShouldBeOfType<ReserveListParse.InvalidPaging>().Field.ShouldBe("offset");
 
     [Fact]
     [Trait("AC", "011-105")]
-    public void ConversionFailureComesBeforeThePeriodicityCheck()
+    public void PagingComesBeforeThePeriodicityCheck()
     {
-        // O Flask lê limit/offset com int() antes de validar a periodicidade.
+        // Desvio 097: toda paginação inválida (conversão ou negativo) é 400 e vem antes da periodicidade.
         ReserveListQuery.Parse(null, "semestral", null, "abc", null).ShouldBeOfType<ReserveListParse.InvalidPaging>();
-        // Negativo só falha no SQL, depois da validação da periodicidade.
-        ReserveListQuery.Parse(null, "semestral", null, "-1", null).ShouldBeOfType<ReserveListParse.InvalidPeriodicity>();
+        ReserveListQuery.Parse(null, "semestral", null, "-1", null).ShouldBeOfType<ReserveListParse.InvalidPaging>();
+        ReserveListQuery.Parse(null, "semestral", null, null, null).ShouldBeOfType<ReserveListParse.InvalidPeriodicity>();
     }
 }
 

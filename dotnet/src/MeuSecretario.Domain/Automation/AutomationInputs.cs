@@ -24,8 +24,8 @@ public abstract record ApiTransactionParse
 {
     public sealed record Ok(ApiTransactionData Data) : ApiTransactionParse;
 
-    /// <summary>Campo de texto verdadeiro que não é texto: o Flask quebra em <c>sanitize_input</c> (500, desvio 097).</summary>
-    public sealed record UnexpectedType : ApiTransactionParse;
+    /// <summary>Campo de texto verdadeiro que não é texto: o Flask quebra em <c>sanitize_input</c> (500); desvio 097: 400 <c>Campo 'x' deve ser texto</c>.</summary>
+    public sealed record UnexpectedType(string Field) : ApiTransactionParse;
 
     /// <summary>Obrigatórios falsos depois do saneamento, na ordem do Flask.</summary>
     public sealed record Missing(IReadOnlyList<string> Fields) : ApiTransactionParse;
@@ -36,23 +36,87 @@ public abstract record ApiTransactionParse
     public sealed record InvalidPaymentType : ApiTransactionParse;
 }
 
-/// <summary>Validação do corpo de <c>/api/transacao</c> na ordem do Flask (spec 011 §3.2, linhas 3 a 8).</summary>
-public static class ApiTransactionInput
+/// <summary>
+/// Textos dos 400 do desvio 097 (o Flask respondia 500 com <c>str(e)</c> ou gravava lixo). Sem acento nas rotas de webhook,
+/// como as demais mensagens delas.
+/// </summary>
+public static class InputMessages
+{
+    public const string InvalidFlow = "tipo_fluxo invalido na notificacao. Use: Renda ou Despesa";
+    public const string InvalidNotificationValue = "Valor invalido na notificacao: deve ser positivo";
+    public const string NoActiveAccount = "Nenhuma conta ativa encontrada. Cadastre uma conta antes de usar o atalho.";
+    public const string InvalidPaymentDate = "data_pagamento invalida. Use o formato AAAA-MM-DD";
+    public const string IncludeNotBoolean = "Campo 'incluir' deve ser true ou false";
+
+    public static string InvalidValue(string reason) => "Valor invalido: " + reason;
+
+    public static string NotText(string field) => $"Campo '{field}' deve ser texto";
+}
+
+public abstract record AmountParse
+{
+    public sealed record Ok(double Value) : AmountParse;
+
+    /// <summary>Texto depois de <c>"Valor invalido: "</c>.</summary>
+    public sealed record Invalid(string Reason) : AmountParse;
+}
+
+/// <summary>
+/// Valor em reais de <c>/api/transacao</c> e do SMS: <c>float()</c> do Python, positivo e até 1 bilhão. O Flask deixava
+/// <c>nan</c> e valor negativo do SMS passarem e gravarem lixo (desvio 097: 400).
+/// </summary>
+public static class PaymentAmount
 {
     public const string MaxValueReason = "Valor muito alto (max: 1 bilhao)";
     public const string NotPositiveReason = "Valor deve ser positivo";
+
+    public static AmountParse Parse(JsonElement element)
+    {
+        var converted = PyJsonValue.ToFloat(element);
+        if (converted is FloatConversion.Failed failed)
+        {
+            return new AmountParse.Invalid(failed.Message);
+        }
+
+        var number = ((FloatConversion.Ok)converted).Value;
+        if (double.IsNaN(number) || number <= 0)
+        {
+            return new AmountParse.Invalid(NotPositiveReason);
+        }
+
+        return number > 1_000_000_000 ? new AmountParse.Invalid(MaxValueReason) : new AmountParse.Ok(number);
+    }
+}
+
+/// <summary>Validação do corpo de <c>/api/transacao</c> na ordem do Flask (spec 011 §3.2, linhas 3 a 8).</summary>
+public static class ApiTransactionInput
+{
+    public const string MaxValueReason = PaymentAmount.MaxValueReason;
+    public const string NotPositiveReason = PaymentAmount.NotPositiveReason;
 
     public static ApiTransactionParse Parse(JsonElement body)
     {
         var key = body.TryGetProperty("user_api_key", out var keyElement) ? keyElement : (JsonElement?)null;
         var valueElement = body.TryGetProperty("valor", out var v) ? v : (JsonElement?)null;
 
-        if (!TryText(body, "local", 100, false, out var local)
-            || !TryText(body, "descricao", 200, true, out var description)
-            || !TryText(body, "conta", 50, false, out var account)
-            || !TryPaymentType(body, out var paymentType))
+        if (!TryText(body, "local", 100, false, out var local))
         {
-            return new ApiTransactionParse.UnexpectedType();
+            return new ApiTransactionParse.UnexpectedType("local");
+        }
+
+        if (!TryText(body, "descricao", 200, true, out var description))
+        {
+            return new ApiTransactionParse.UnexpectedType("descricao");
+        }
+
+        if (!TryText(body, "conta", 50, false, out var account))
+        {
+            return new ApiTransactionParse.UnexpectedType("conta");
+        }
+
+        if (!TryPaymentType(body, out var paymentType))
+        {
+            return new ApiTransactionParse.UnexpectedType("tipo_pagamento");
         }
 
         var missing = new List<string>();
@@ -86,23 +150,13 @@ public static class ApiTransactionInput
             return new ApiTransactionParse.Missing(missing);
         }
 
-        var converted = PyJsonValue.ToFloat(valueElement!.Value);
-        if (converted is FloatConversion.Failed failed)
+        var amount = PaymentAmount.Parse(valueElement!.Value);
+        if (amount is AmountParse.Invalid invalid)
         {
-            return new ApiTransactionParse.InvalidValue(failed.Message);
+            return new ApiTransactionParse.InvalidValue(invalid.Reason);
         }
 
-        var number = ((FloatConversion.Ok)converted).Value;
-        if (double.IsNaN(number) || number <= 0)
-        {
-            // O Flask deixa passar `nan`; o decimal do banco não o representa (spec 011 §11, desvio 097).
-            return new ApiTransactionParse.InvalidValue(NotPositiveReason);
-        }
-
-        if (number > 1_000_000_000)
-        {
-            return new ApiTransactionParse.InvalidValue(MaxValueReason);
-        }
+        var number = ((AmountParse.Ok)amount).Value;
 
         if (!PaymentType.IsValid(paymentType!))
         {
@@ -150,13 +204,28 @@ public sealed record NotificationExtraction(string FlowType, string? Description
     public bool IsIncome => FlowType == "Renda";
 }
 
+public abstract record NotificationParse
+{
+    public sealed record Ok(NotificationExtraction Extraction) : NotificationParse;
+
+    /// <summary><c>tipo_fluxo</c> que não é <c>Renda</c> nem <c>Despesa</c> (desvio 097: 400).</summary>
+    public sealed record InvalidFlow : NotificationParse;
+
+    /// <summary><c>valor_decimal</c> ausente, nulo, não numérico, zero, negativo ou fora da faixa (desvio 097: 400).</summary>
+    public sealed record InvalidValue : NotificationParse;
+
+    /// <summary>Resposta ilegível (JSON inválido, não objeto, <c>descricao_bruta</c> que não é texto): falha do Gemini, 500.</summary>
+    public sealed record Unreadable : NotificationParse;
+}
+
 public static class NotificationParser
 {
     /// <summary>
     /// <c>json.loads</c> e <c>get('tipo_fluxo','Despesa')</c>, <c>get('descricao_bruta')</c>, <c>float(get('valor_decimal',0))</c>.
-    /// <c>null</c> = o Flask quebraria (JSON inválido, não objeto, valor que o <c>float()</c> recusa) ou o tipo é desconhecido (desvio 097).
+    /// O Flask gravava pendência de R$ 0,00 para valor ausente ou zero e quebrava com 500 para os demais casos inválidos;
+    /// desvio 097: tipo de fluxo e valor inválidos viram 400.
     /// </summary>
-    public static NotificationExtraction? Parse(string geminiText)
+    public static NotificationParse Parse(string geminiText)
     {
         JsonElement root;
         try
@@ -165,12 +234,12 @@ public static class NotificationParser
         }
         catch (JsonException)
         {
-            return null;
+            return new NotificationParse.Unreadable();
         }
 
         if (root.ValueKind != JsonValueKind.Object)
         {
-            return null;
+            return new NotificationParse.Unreadable();
         }
 
         var flow = "Despesa";
@@ -178,7 +247,7 @@ public static class NotificationParser
         {
             if (flowElement.ValueKind != JsonValueKind.String)
             {
-                return null;
+                return new NotificationParse.InvalidFlow();
             }
 
             flow = flowElement.GetString()!;
@@ -186,7 +255,7 @@ public static class NotificationParser
 
         if (flow is not ("Renda" or "Despesa"))
         {
-            return null;
+            return new NotificationParse.InvalidFlow();
         }
 
         string? description = null;
@@ -194,24 +263,20 @@ public static class NotificationParser
         {
             if (descriptionElement.ValueKind != JsonValueKind.String)
             {
-                return null;
+                return new NotificationParse.Unreadable();
             }
 
             description = descriptionElement.GetString();
         }
 
-        var value = 0.0;
-        if (root.TryGetProperty("valor_decimal", out var valueElement))
+        if (!root.TryGetProperty("valor_decimal", out var valueElement)
+            || valueElement.ValueKind == JsonValueKind.Null
+            || PaymentAmount.Parse(valueElement) is not AmountParse.Ok amount)
         {
-            if (PyJsonValue.ToFloat(valueElement) is not FloatConversion.Ok ok || !double.IsFinite(ok.Value))
-            {
-                return null;
-            }
-
-            value = ok.Value;
+            return new NotificationParse.InvalidValue();
         }
 
-        return new NotificationExtraction(flow, description, value);
+        return new NotificationParse.Ok(new NotificationExtraction(flow, description, amount.Value));
     }
 }
 
@@ -294,13 +359,19 @@ public abstract record ReserveListParse
 
     public sealed record InvalidPeriodicity : ReserveListParse;
 
-    /// <summary><c>int()</c> do Python recusa, ou o PostgreSQL recusa o <c>LIMIT</c>/<c>OFFSET</c> (negativo ou acima de <c>int64</c>).</summary>
-    public sealed record InvalidPaging : ReserveListParse;
+    /// <summary>
+    /// <c>int()</c> do Python recusa, ou o PostgreSQL recusaria o <c>LIMIT</c>/<c>OFFSET</c> (negativo ou acima de <c>int64</c>);
+    /// desvio 097: 400 em vez de 500. <paramref name="Field"/> é <c>limit</c> ou <c>offset</c>.
+    /// </summary>
+    public sealed record InvalidPaging(string Field) : ReserveListParse;
 }
 
 public static class ReserveListQuery
 {
     public const string PeriodicityMessage = "Periodicidade inválida. Use: DIARIA, SEMANAL, QUINZENAL, MENSAL ou ANUAL";
+
+    public static string PagingMessage(string field) =>
+        $"Parâmetro '{field}' inválido. Use um número inteiro maior ou igual a zero";
 
     private static readonly string[] Periodicities = ["DIARIA", "SEMANAL", "QUINZENAL", "MENSAL", "ANUAL"];
 
@@ -309,10 +380,15 @@ public static class ReserveListQuery
     {
         bool? includeFlag = include is null ? null : string.Equals(include, "true", StringComparison.OrdinalIgnoreCase);
 
-        // O Flask lê limit e offset (int()) antes de montar o SQL: falha de conversão é erro inesperado e vem antes da periodicidade.
-        if (!PyInt.TryParse(limit, 100, out var limitNumber) || !PyInt.TryParse(offset, 0, out var offsetNumber))
+        // Desvio 097: a paginação inválida (o Flask quebrava no int() ou no SQL, 500) é validada antes da periodicidade.
+        if (!PyInt.TryParse(limit, 100, out var limitNumber) || limitNumber.Sign < 0 || limitNumber > long.MaxValue)
         {
-            return new ReserveListParse.InvalidPaging();
+            return new ReserveListParse.InvalidPaging("limit");
+        }
+
+        if (!PyInt.TryParse(offset, 0, out var offsetNumber) || offsetNumber.Sign < 0 || offsetNumber > long.MaxValue)
+        {
+            return new ReserveListParse.InvalidPaging("offset");
         }
 
         string? periodicityUpper = null;
@@ -323,12 +399,6 @@ public static class ReserveListQuery
             {
                 return new ReserveListParse.InvalidPeriodicity();
             }
-        }
-
-        // O PostgreSQL recusa LIMIT/OFFSET negativos e acima de int64 só na execução, depois da validação acima.
-        if (limitNumber.Sign < 0 || offsetNumber.Sign < 0 || limitNumber > long.MaxValue || offsetNumber > long.MaxValue)
-        {
-            return new ReserveListParse.InvalidPaging();
         }
 
         return new ReserveListParse.Ok(new ReserveListFilter(
@@ -380,7 +450,7 @@ public abstract record ReserveToggleParse
     public sealed record MissingFields : ReserveToggleParse;
 
     /// <param name="ApiKey">Nulo quando a chave verdadeira não é texto (nunca autentica).</param>
-    /// <param name="Include">Nulo quando <c>incluir</c> não é booleano (500 depois da checagem do agendamento, desvio 097).</param>
+    /// <param name="Include">Nulo quando <c>incluir</c> não é booleano (desvio 097: 400 depois da autenticação).</param>
     public sealed record Ok(string? ApiKey, bool? Include) : ReserveToggleParse;
 }
 

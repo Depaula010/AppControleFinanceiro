@@ -11,6 +11,9 @@ public abstract record ToggleReserveResult
 
     public sealed record NotFound : ToggleReserveResult;
 
+    /// <summary><c>incluir</c> que não é booleano JSON (desvio 097): 400.</summary>
+    public sealed record InvalidInclude : ToggleReserveResult;
+
     public sealed record Updated(
         ReserveScheduleRow Schedule, bool Include, EmergencyReserveStatus Before, EmergencyReserveStatus After) : ToggleReserveResult;
 }
@@ -32,6 +35,12 @@ public sealed class ToggleReserveSchedule(
             return new ToggleReserveResult.Unauthorized();
         }
 
+        // O Flask passa `incluir` ao driver sem checar o tipo (o resultado dependia do driver); desvio 097: 400.
+        if (input.Include is not { } include)
+        {
+            return new ToggleReserveResult.InvalidInclude();
+        }
+
         var before = await reserve.GetStatusAsync(user.UserId, cancellationToken);
         var schedule = await store.FindActiveScheduleAsync(user.UserId, scheduleId, cancellationToken);
         if (schedule is null)
@@ -39,8 +48,6 @@ public sealed class ToggleReserveSchedule(
             return new ToggleReserveResult.NotFound();
         }
 
-        // O Flask passa `incluir` ao driver sem checar o tipo: o que não é booleano falha no UPDATE (desvio 097).
-        var include = input.Include ?? throw new AutomationFailureException("incluir não é booleano");
         await store.SetIncludeInReserveAsync(user.UserId, scheduleId, include, cancellationToken);
         var after = await reserve.GetStatusAsync(user.UserId, cancellationToken);
         return new ToggleReserveResult.Updated(schedule, include, before, after);
@@ -54,6 +61,9 @@ public abstract record ListReserveResult
     public sealed record Unauthorized : ListReserveResult;
 
     public sealed record InvalidPeriodicity : ListReserveResult;
+
+    /// <summary><c>limit</c>/<c>offset</c> inválido (desvio 097): 400.</summary>
+    public sealed record InvalidPaging(string Field) : ListReserveResult;
 
     public sealed record Listed(ReserveListFilter Filter, ReserveListPage Page, EmergencyReserveStatus Status) : ListReserveResult;
 }
@@ -83,8 +93,8 @@ public sealed class ListReserveSchedules(
         {
             case ReserveListParse.InvalidPeriodicity:
                 return new ListReserveResult.InvalidPeriodicity();
-            case ReserveListParse.InvalidPaging:
-                throw new AutomationFailureException("limit/offset inválidos");
+            case ReserveListParse.InvalidPaging paging:
+                return new ListReserveResult.InvalidPaging(paging.Field);
         }
 
         var filter = ((ReserveListParse.Ok)parsed).Filter;

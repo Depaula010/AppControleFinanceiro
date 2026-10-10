@@ -285,7 +285,10 @@ sys.modules["app.services"].finance_service = types.ModuleType("finance_service"
 utils = types.ModuleType("app.utils")
 utils.formatar_moeda = formatar_moeda
 sys.modules["app.utils"] = utils
-confirmation = load("transaction_confirmation_service.py", source("services", "transaction_confirmation_service.py"))
+# Desvio 100: o emoji do cartao chegou corrompido (U+FFFD) no arquivo do Flask; o .NET usa o emoji do cartao.
+confirmation_src = source("services", "transaction_confirmation_service.py")
+assert confirmation_src.count("\ufffd") == 2
+confirmation = load("transaction_confirmation_service.py", confirmation_src.replace("\ufffd", "\U0001F4B3"))
 fmt = confirmation["TransactionConfirmationService"].format_confirmation_message
 
 cats = [{"id": 1, "nome_sub": "Supermercado", "nome_macro": "Alimentação"}, {"id": 2, "nome_sub": "Outros", "nome_macro": "Despesas Gerais"}]
@@ -324,6 +327,22 @@ sys.modules["_fb_utils"] = fb_utils
 fixed = load("fixed_bills_service.py", fb_src)
 FixedBillsService = fixed["FixedBillsService"]
 
+# Desvio 099: o rapidfuzz 3.x e sensivel a caixa e aos acentos e a descricao guardada nao era normalizada. O .NET minusculiza
+# e tira os acentos dos DOIS lados antes do WRatio; aqui a mesma regra entra no find_matching_bill real por um `processor`.
+# `legacy_*` guarda o resultado do Flask sem a correcao, so para provar a diferenca nos casos que mudam.
+import unicodedata
+
+
+def _fold099(text):
+    decomposed = unicodedata.normalize("NFD", text.lower())
+    return unicodedata.normalize("NFC", "".join(ch for ch in decomposed if unicodedata.category(ch) != "Mn"))
+
+
+_old_call = "            descricoes.keys(),\n            scorer=fuzz.WRatio,"
+assert _old_call in fb_src
+fixed_099 = load("fixed_bills_service_099.py", fb_src.replace(_old_call, "            descricoes.keys(),\n            processor=_fold099,\n            scorer=fuzz.WRatio,"), {"_fold099": _fold099})
+FixedBillsService099 = fixed_099["FixedBillsService"]
+
 
 class _Row:
     def __init__(self, id, descricao, valor_previsto, dia_execucao, tipo_agendamento, conta_id, categoria):
@@ -342,14 +361,17 @@ class _BillsConn:
 bills = [_Row(1, "Luz", Decimal("120.00"), 10, "FIXO", 2, "Energia"), _Row(2, "Aluguel", Decimal("1500.00"), 5, "FIXO", 2, "Moradia"),
          _Row(3, "Internet Vivo", Decimal("99.90"), 15, "LEMBRETE_VARIAVEL", 3, "Internet"), _Row(4, "netflix", Decimal("39.90"), 20, "FIXO", 3, "Streaming"),
          _Row(5, "Água", Decimal("80.00"), 12, "FIXO", 2, "Água"), _Row(6, "Condomínio", Decimal("400.00"), 7, "FIXO", 2, "Moradia"),
-         _Row(7, "Luz", Decimal("55.00"), 11, "FIXO", 2, "Energia")]
+         _Row(7, "Luz", Decimal("55.00"), 11, "FIXO", 2, "Energia"), _Row(8, "Net", Decimal("120.00"), 25, "FIXO", 3, "Internet"),
+         _Row(9, "CEMIG", Decimal("210.00"), 9, "FIXO", 2, "Energia")]
 match_inputs = ["luz", "Luz", "LUZ", "a luz", "o aluguel", "da luz", "do condominio", "de internet", "conta de agua", "conta netflix", "conta de conta de luz",
                 "  conta  ", "xyz", "internet", "vivo", "netflix", "aluguel de apartamento", "agua", "Conta de Luz", "da conta de luz", "conta luz", "a o luz",
-                "de a luz", "condomínio"]
+                "de a luz", "condomínio", "net", "Net", "cemig", "conta de cemig", "agua", "AGUA", "água", "condominio"]
 match_cases = []
 for q in match_inputs:
-    m = FixedBillsService.find_matching_bill(_BillsConn(bills), 1, q)
-    match_cases.append({"input": q, "result_id": None if m is None else m[0], "result_desc": None if m is None else m[1]})
+    m = FixedBillsService099.find_matching_bill(_BillsConn(bills), 1, q)
+    legacy = FixedBillsService.find_matching_bill(_BillsConn(bills), 1, q)
+    match_cases.append({"input": q, "result_id": None if m is None else m[0], "result_desc": None if m is None else m[1],
+                        "legacy_result_id": None if legacy is None else legacy[0]})
 paid_cases = [{"descricao": d, "valor": v, "categoria": c, "text": FixedBillsService.mark_bill_as_paid_response(d, v, c)}
               for d, v, c in [("Luz", 150.5, "Energia"), ("Aluguel", 1500, "Moradia"), ("Netflix", 39.9, "Streaming")]]
 

@@ -81,9 +81,12 @@ public class ToggleReserveScheduleTests
 
     [Fact]
     [Trait("AC", "011-084")]
-    public async Task NonBoolean_FailsAndNothingChanges()
+    public async Task NonBoolean_Is400AndNothingChanges()
     {
-        await Should.ThrowAsync<AutomationFailureException>(() => _useCase.ExecuteAsync(Body("""{"incluir":"true","api_key":"k"}"""), 7, CancellationToken.None));
+        // Desvio 097: o Flask dependia do driver (500 ou conversão silenciosa).
+        var result = await _useCase.ExecuteAsync(Body("""{"incluir":"true","api_key":"k"}"""), 7, CancellationToken.None);
+
+        result.ShouldBeOfType<ToggleReserveResult.InvalidInclude>();
 
         await _store.DidNotReceiveWithAnyArgs().SetIncludeInReserveAsync(default, default, default, default);
     }
@@ -123,9 +126,15 @@ public class ListReserveSchedulesTests
 
     [Fact]
     [Trait("AC", "011-105")]
-    public async Task InvalidPaging_Fails() =>
-        await Should.ThrowAsync<AutomationFailureException>(
-            () => _useCase.ExecuteAsync(new ListReserveInput("k", null, null, null, "abc", null), CancellationToken.None));
+    public async Task InvalidPaging_Is400NamingTheField()
+    {
+        // Desvio 097: o Flask respondia 500.
+        (await _useCase.ExecuteAsync(new ListReserveInput("k", null, null, null, "abc", null), CancellationToken.None))
+            .ShouldBeOfType<ListReserveResult.InvalidPaging>().Field.ShouldBe("limit");
+        (await _useCase.ExecuteAsync(new ListReserveInput("k", null, null, null, null, "-1"), CancellationToken.None))
+            .ShouldBeOfType<ListReserveResult.InvalidPaging>().Field.ShouldBe("offset");
+        await _store.DidNotReceiveWithAnyArgs().ListAsync(default, default!, default);
+    }
 
     [Fact]
     [Trait("AC", "011-101")]
@@ -339,7 +348,16 @@ public class InvoiceScheduleProcessorTests
 
         public int? RequestedMonth { get; private set; }
 
+        /// <summary>Número da tentativa de INSERT (1, 2, ...) que falha; 0 = nenhuma.</summary>
         public int FailOnInsert { get; set; }
+
+        public int InsertAttempts { get; private set; }
+
+        public int Released { get; private set; }
+
+        public int RolledBack { get; private set; }
+
+        private (int Inserted, int Advanced) _savepoint;
 
         public Task<IReadOnlyList<ScheduleToPost>> ListSchedulesAsync(int cardAccountId, int referenceMonth, CancellationToken cancellationToken)
         {
@@ -352,7 +370,8 @@ public class InvoiceScheduleProcessorTests
 
         public Task InsertTransactionAsync(NewScheduledTransaction row, CancellationToken cancellationToken)
         {
-            if (FailOnInsert > 0 && Inserted.Count + 1 == FailOnInsert)
+            InsertAttempts++;
+            if (FailOnInsert > 0 && InsertAttempts == FailOnInsert)
             {
                 throw new InvalidOperationException("falha injetada");
             }
@@ -364,6 +383,26 @@ public class InvoiceScheduleProcessorTests
         public Task AdvanceInstallmentAsync(int scheduleId, int newInstallmentsExecuted, bool active, CancellationToken cancellationToken)
         {
             Advanced.Add((scheduleId, newInstallmentsExecuted, active));
+            return Task.CompletedTask;
+        }
+
+        public Task BeginScheduleAsync(CancellationToken cancellationToken)
+        {
+            _savepoint = (Inserted.Count, Advanced.Count);
+            return Task.CompletedTask;
+        }
+
+        public Task ReleaseScheduleAsync(CancellationToken cancellationToken)
+        {
+            Released++;
+            return Task.CompletedTask;
+        }
+
+        public Task RollbackScheduleAsync(CancellationToken cancellationToken)
+        {
+            RolledBack++;
+            Inserted.RemoveRange(_savepoint.Inserted, Inserted.Count - _savepoint.Inserted);
+            Advanced.RemoveRange(_savepoint.Advanced, Advanced.Count - _savepoint.Advanced);
             return Task.CompletedTask;
         }
 
@@ -478,25 +517,52 @@ public class InvoiceScheduleProcessorTests
 
     [Fact]
     [Trait("AC", "011-146")]
-    public async Task AnInstallmentWithoutCounter_IsSkippedLikeTheFlaskTypeError()
+    public async Task AnInstallmentWithoutCounter_IsSkippedLikeTheFlaskTypeError_AndCountedAsError()
     {
         var session = new FakeSession([new ScheduleToPost(2, 42, "PARCELADO", "Notebook", 300m, 5, 31, 3, null, "Despesa Essencial")]);
 
         var stats = await Build(session).ProcessAsync(9, 3, new DateOnly(2026, 4, 15), CancellationToken.None);
 
         stats.Processed.ShouldBe(0);
+        stats.Errors.ShouldBe(1);
         session.Inserted.ShouldBeEmpty();
+        session.RolledBack.ShouldBe(1);
     }
 
     [Fact]
     [Trait("AC", "011-126")]
-    public async Task AFailure_PropagatesAndNothingIsCommitted()
+    public async Task AFailingSchedule_IsRolledBackToItsSavepoint_AndTheOthersAreKept()
     {
-        var session = new FakeSession([Fixed(1, "A", 1m), Fixed(2, "B", 2m)]) { FailOnInsert = 2 };
+        // Desvio 101: B falha, só o que B gravou é desfeito; A e C seguem e o erro é contado.
+        var session = new FakeSession(
+        [
+            Fixed(1, "A", 1m),
+            new ScheduleToPost(2, 42, "PARCELADO", "B", 2m, 5, 31, 3, 0, "Despesa Essencial"),
+            Fixed(3, "C", 3m),
+        ])
+        { FailOnInsert = 2 };
 
-        await Should.ThrowAsync<InvalidOperationException>(() => Build(session).ProcessAsync(9, 3, new DateOnly(2026, 4, 15), CancellationToken.None));
+        var stats = await Build(session).ProcessAsync(9, 3, new DateOnly(2026, 4, 15), CancellationToken.None);
 
-        session.Committed.ShouldBeFalse();
+        stats.Processed.ShouldBe(2);
+        stats.Errors.ShouldBe(1);
+        stats.Details.Select(d => d.Description).ShouldBe(["A", "C"]);
+        session.Inserted.Select(i => i.ScheduleId).ShouldBe([1, 3]);
+        session.RolledBack.ShouldBe(1);
+        session.Released.ShouldBe(2);
+        session.Committed.ShouldBeTrue();
+    }
+
+    [Fact]
+    [Trait("AC", "011-126")]
+    public async Task AnInstallmentCounterAdvancedBeforeAFailure_IsUndoneWithTheSavepoint()
+    {
+        var session = new FakeSession([new ScheduleToPost(2, 42, "PARCELADO", "B", 2m, 5, 31, 3, 0, "Despesa Essencial")]) { FailOnInsert = 1 };
+
+        var stats = await Build(session).ProcessAsync(9, 3, new DateOnly(2026, 4, 15), CancellationToken.None);
+
+        stats.Errors.ShouldBe(1);
+        session.Advanced.ShouldBeEmpty();
     }
 
     [Fact]

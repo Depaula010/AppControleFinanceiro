@@ -130,13 +130,13 @@ A chave **nunca** é gravada, logada nem devolvida; o `GET` do Gemini leva a cha
 ```sql
 SELECT resumo_matinal_ativo, resumo_matinal_hora::text AS resumo_matinal_hora,
        checkin_noturno_ativo, checkin_noturno_hora::text AS checkin_noturno_hora,
-       alertas_financeiros_ativos, alerta_potes_threshold
+       alertas_financeiros_ativos, dias_antes_vencimento
 FROM notificationconfigs WHERE usuario_id = @uid
 ```
 **200** `{"status":"success","data":{"morningBriefing":{"enabled":true,"time":"07:00"},"eveningCheckIn":{"enabled":true,"time":"19:00"},"financialAlerts":{"enabled":true,"daysBeforeDue":3}}}` (camelCase).
 - **Sem linha**: exatamente o exemplo acima (padrões do código, que coincidem com os defaults do banco: `07:00`, `19:00`; a linha **não** é criada pelo GET).
-- **Com linha**: `enabled` de cada bloco = coluna (`morningBriefing` ⇐ `resumo_matinal_ativo`, `eveningCheckIn` ⇐ `checkin_noturno_ativo`, `financialAlerts` ⇐ `alertas_financeiros_ativos` com `NULL` ⇒ `false`); `time` = os **5 primeiros caracteres** do texto da hora (`07:00:00` ⇒ `07:00`; `19:30:00.5` ⇒ `19:30`); `daysBeforeDue` = `alerta_potes_threshold` **ou 3 se for 0** (zero vira o padrão; o banco guarda 0 como padrão "sempre mostrar").
-Atenção (P-007-1): `daysBeforeDue` é guardado na coluna `alerta_potes_threshold`, cujo significado no banco é outro (limiar de % do pote: 0 = sempre, 50/70/90).
+- **Com linha**: `enabled` de cada bloco = coluna (`morningBriefing` ⇐ `resumo_matinal_ativo`, `eveningCheckIn` ⇐ `checkin_noturno_ativo`, `financialAlerts` ⇐ `alertas_financeiros_ativos` com `NULL` ⇒ `false`); `time` = os **5 primeiros caracteres** do texto da hora (`07:00:00` ⇒ `07:00`; `19:30:00.5` ⇒ `19:30`); `daysBeforeDue` = `dias_antes_vencimento` **ou 3 se for 0** (desvio 250: coluna própria, default 3) (zero vira o padrão; o banco guarda 0 como padrão "sempre mostrar").
+Desvio 250 (aprovado e implementado em 2026-10-09, reabrindo a P-007-1): `daysBeforeDue` tem coluna própria, `dias_antes_vencimento` (inteiro, `NOT NULL DEFAULT 3`, migration `0070`). O Flask o gravava em `alerta_potes_threshold` (limiar de % do pote: 0 = sempre, 50/70/90), que agora **nunca** é lido nem escrito por esta feature.
 500: `Erro ao buscar notificações`. *Origem: `api.py:2683-2727`.*
 
 ### 3.7 `PUT /api/user/notifications`
@@ -245,7 +245,8 @@ Uma resposta com o que as rotas 1, 3, 6 e 8 devolvem, lidos com a **mesma** lóg
 - **AC-007-43** — **Dado** `eveningCheckIn.time` `"17:59"`, `"24:00"`, `"7:00"` **Então** 400 `Horário do check-in noturno deve ser entre 18:00 e 23:00`; `"abc"`, `"19"`, `"19:00:00"`, `null`, `1900` ⇒ 400 `Formato de horário inválido (use HH:MM)`; `"18:00"` e `"23:30"` passam (gravados).
 - **AC-007-44** — **Dado** corpo `{}` **Então** 200 e grava os padrões (`true`/`07:00`, `true`/`19:00`, `true`/`3`): não preserva o que havia (PUT total).
 - **AC-007-45** — **Dado** `morningBriefing.time` `"25:00"`, `"abc"`, `null` ou `"18:75"` no check-in **Então** 500 `Erro ao salvar notificações`, nada gravado; `"7:30"` e `"07:00:15"` são aceitos como o PostgreSQL aceita.
-- **AC-007-46** — **Dado** `financialAlerts.daysBeforeDue` `0`, `-5`, `45` **Então** gravados como estão (sem faixa) e o `GET` mostra `3`, `-5`, `45`.
+- **AC-007-46** — **Dado** `financialAlerts.daysBeforeDue` `0`, `-5`, `45` **Então** gravados como estão (sem faixa) em `dias_antes_vencimento` e o `GET` mostra `3`, `-5`, `45`.
+- **AC-007-48** (desvio 250) — **Dado** linha com `alerta_potes_threshold = 70` **Quando** `PUT` com `daysBeforeDue: 7` **Então** `dias_antes_vencimento = 7` e `alerta_potes_threshold` continua 70; **Dado** linha antiga só com `alerta_potes_threshold = 1` **Então** o `GET` mostra `daysBeforeDue: 3`; a migration `0070` é idempotente, dá 3 às linhas existentes e não copia o limiar.
 - **AC-007-47** — **Dado** `enabled: "x"`, bloco `"financialAlerts": null`, `daysBeforeDue: null` **Então** 500 `Erro ao salvar notificações` (sem aprovação da P-007-2).
 - **AC-007-50** — **Dado** dois usuários com endereços **Quando** `GET /api/user/addresses` **Então** só os do token, ordenados `casa`, `outro`, `trabalho`; `coordinates` só quando lat e lng existem; sem endereços `data:[]`.
 - **AC-007-51** — **Dado** `POST /api/user/addresses` `{"label":" CASA ","address":" Rua A, 10 "}` **Então** 201, linha com `label:"casa"` e `endereco_completo:"Rua A, 10"`; repetir com outro texto atualiza a mesma linha (201, sem duplicar).
@@ -270,7 +271,7 @@ Uma resposta com o que as rotas 1, 3, 6 e 8 devolvem, lidos com a **mesma** lóg
 | `preferenciaschaveapi` | `GET` | upsert | UNIQUE (`usuario_id`, `provedor`) |
 | `chavesapiusuario` | `GET` (`has_key`) | upsert / desativação | UNIQUE (`usuario_id`, `provedor`); `chave_api_criptografada` TEXT; `ativo` anulável |
 
-Tenant: toda leitura e escrita filtra por `usuario_id = <user_id do token>`. **Migrations: nenhuma** (faixa 0070–0079 reservada; só nasceria uma se a P-007-1 fosse aprovada com coluna nova, o que a recomendação é não fazer).
+Tenant: toda leitura e escrita filtra por `usuario_id = <user_id do token>`. **Migration `0070_notificationconfigs_dias_antes_vencimento`** (desvio 250): `ALTER TABLE notificationconfigs ADD COLUMN IF NOT EXISTS dias_antes_vencimento integer NOT NULL DEFAULT 3`, idempotente; o valor atual de `alerta_potes_threshold` **não** é copiado (em produção é 1, lixo do bug); linhas existentes ficam em 3.
 
 ## 7. O que o Angular espera × o que o Flask devolve
 
@@ -281,7 +282,7 @@ Fonte: `meusecretariofront/src/app/core/services/settings.service.ts`, `core/mod
 - `validateApiKey` transforma **qualquer** falha (inclusive o 503) em `false` ⇒ toast "Chave inválida ou sem permissão"; um timeout do provedor é indistinguível de chave errada. Divergência do Angular, não do backend.
 - O Angular envia `key` só quando `useOwnKey`; manda o formulário de perfil inteiro (inclui `id` e `numero_whatsapp`, ignorados); `meses_reserva_emergencia` por `+$event` (campo vazio ⇒ `0` ⇒ 400 de faixa; `NaN` ⇒ `null`).
 - `saveAddress` envia `{label, address}` **sem `coordinates`** ⇒ toda edição pela tela apaga as coordenadas guardadas (inclusive as geocodificadas pelo WhatsApp). Ver P-007-4.
-- `daysBeforeDue` (campo 1 a 30 na tela) vai para a coluna do limiar de pote (P-007-1); a hora do check-in tem `min="18:00" max="23:00"` só no HTML.
+- `daysBeforeDue` (campo 1 a 30 na tela) vai para `dias_antes_vencimento` (desvio 250); a hora do check-in tem `min="18:00" max="23:00"` só no HTML.
 - O modelo do Angular lê `k.provedor ?? k.type` e `k.usar_chave_propria ?? k.useOwnKey`: a resposta de `settings` usa `provedor`/`usar_chave_propria`/`has_key` (snake_case) e o `PUT` usa camelCase; o Angular já faz esse mapeamento (`_mapServerSettings`); **não** padronizar.
 - Em `saveApiKey` o Angular só marca `hasKey` localmente, não reconsulta; depois de um erro 500 a tela fica inconsistente com o servidor até recarregar.
 
@@ -305,7 +306,7 @@ Sem aprovação, o .NET reproduz o Flask; onde a reprodução exata não é poss
 
 | Id | Atual (arquivo:linha) | Proposta | Impacto | Recomendação |
 |---|---|---|---|---|
-| **P-007-1** | `daysBeforeDue` ("dias antes do vencimento", 1 a 30 na tela) é gravado em `alerta_potes_threshold` e lido com `or 3` (`api.py:2720, 2773`); a coluna é o limiar de % do pote (0 = sempre, 50/70/90; `feature_migrations.py:284`). Nenhum consumidor da coluna foi achado hoje (`grep` em `app/`), e os alertas financeiros "sempre verificam hoje e amanhã" (`notification_config_service.py:166-169`): o campo da tela não faz nada | manter como está; **não** criar coluna nova enquanto a 013 não decidir se haverá janela configurável | nenhum | **Rejeitar** a mudança (manter paridade); registrar o risco: quando os alertas de pote (013/012) passarem a ler a coluna, valores 1 a 30 virarão limiares de % |
+| **P-007-1** (reaberta: desvio 250, implementado) | `daysBeforeDue` ("dias antes do vencimento", 1 a 30 na tela) é gravado em `alerta_potes_threshold` e lido com `or 3` (`api.py:2720, 2773`); a coluna é o limiar de % do pote (0 = sempre, 50/70/90; `feature_migrations.py:284`). Nenhum consumidor da coluna foi achado hoje (`grep` em `app/`), e os alertas financeiros "sempre verificam hoje e amanhã" (`notification_config_service.py:166-169`): o campo da tela não faz nada | manter como está; **não** criar coluna nova enquanto a 013 não decidir se haverá janela configurável | nenhum | **Rejeitar** a mudança (manter paridade); registrar o risco: quando os alertas de pote (013/012) passarem a ler a coluna, valores 1 a 30 virarão limiares de % |
 | **P-007-2** | Tipos JSON inesperados dão 500 (ou coerção do banco): `key` não-texto (`api.py:2587`), `label`/`address` não-texto (`:2834-2835`), bloco de notificação não-objeto (`:2731-2733`), `enabled`/`daysBeforeDue` fora do tipo, `coordinates` não-objeto (`:2837`), campos de perfil não-texto (`:2487, 2496`) | 400 no lugar do 500: com a mensagem **da própria rota** quando existe uma que descreve o erro (`key` não-texto ⇒ `Chave API obrigatória quando usar_chave_propria=true` no PUT e `Campos 'type' e 'key' são obrigatórios` no validate; `label` não-texto ⇒ `Label inválido. Use: casa, outro, trabalho`; `address` não-texto ⇒ `Endereço é obrigatório`; `eveningCheckIn.time` já tem 400) e com a mensagem **nova** `Dados inválidos` para os demais (bloco de notificação não-objeto, `enabled`/`daysBeforeDue` de tipo errado, `coordinates` não-objeto, campos de perfil não-texto, `useOwnKey` presente que não seja booleano nem nulo; ausente e `null` continuam valendo falso) | clientes que mandavam tipo errado recebem 400 (nenhum cliente conhecido; o Angular manda os tipos certos); `useOwnKey: "false"` deixa de ser tratado como verdadeiro | Aprovar |
 | **P-007-3** | Perfil: e-mail repetido e textos longos viram 500 e o `str(e)` do Flask incluía o valor duplicado (`api.py:2514`); `nome` gravado sem `trim` (`:2486-2489, 2503`); `fuso_horario` aceita qualquer texto (nenhum consumidor), `null` dá 500; `morningBriefing.time` sem validação (500 para `25:00`) e minutos do check-in sem validação | (a) e-mail já existente (outro usuário) ⇒ **409** `E-mail já cadastrado`; (b) textos acima dos limites das colunas ⇒ 400 `<Campo> deve ter no máximo <n> caracteres` (nome 255, email 255, cidade 100, fuso 50); (c) `fuso_horario` precisa ser um id de fuso conhecido (`TimeZoneInfo.FindSystemTimeZoneById`) ⇒ 400 `Fuso horário inválido`, e `null` ⇒ o mesmo 400; (d) `nome` gravado com `trim`; (e) `morningBriefing.time` e minutos do check-in validados (`HH:MM`, 00 a 59) com `Formato de horário inválido (use HH:MM)` | muda 500 por 400/409; e-mail com espaços ou fuso inexistente passam a ser recusados | Aprovar (a) e (c) a (e); (b) opcional |
 | **P-007-4** | `POST /api/user/addresses` sem `coordinates` grava `NULL` em `latitude`/`longitude` (`api.py:2840-2858`); o Angular nunca manda coordenadas ⇒ toda edição pelo site apaga as coordenadas geocodificadas pelo WhatsApp (`user_address_service.py:60-72`) | se a chave `coordinates` **não vier** (ou vier vazia): manter as coordenadas já gravadas **quando o texto do endereço não mudou**, e gravar `NULL` quando mudou (a coordenada deixaria de valer); com `coordinates` presente, comporta-se como hoje | só afeta quem edita pelo site | Aprovar |
@@ -322,7 +323,7 @@ Sem aprovação, o .NET reproduz o Flask; onde a reprodução exata não é poss
 
 ## 12. Registro da implementação (2026-10-05)
 
-- P-007-1 rejeitada (paridade): daysBeforeDue continua gravado em lerta_potes_threshold; a 013 deve tratar o risco (valores 1 a 30 seriam lidos como % de pote).
+- P-007-1 **reaberta e aprovada como desvio 250** (2026-10-09, após a consulta 10 do `06-conferencia-onda-2.sql`): `daysBeforeDue` em coluna própria, `alerta_potes_threshold` intocado. Rafael deve acertar `alerta_potes_threshold` direto no banco se quiser outro valor que não 1.
 - Desvios 084 a 088 implementados; onde §3 diz sem aprovação/500, vale o 400 do desvio 084 (Dados inválidos ou a mensagem da própria rota).
 - Desvio 085: ordem após as 5 validações da §3.2: tipos, limites (nome 255, e-mail 255, cidade 100), fuso IANA (Fuso horário inválido, 
 ull incluído); 409 E-mail já cadastrado; resumo matinal e minutos do check-in exigem HH:MM (hora 0-23, minuto 0-59, senão Formato de horário inválido (use HH:MM)); horas gravadas em forma canônica HH:MM.

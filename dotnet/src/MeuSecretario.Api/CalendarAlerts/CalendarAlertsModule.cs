@@ -17,6 +17,7 @@ public static class CalendarAlertsMessages
     public const string NoParameters = "Nenhum parâmetro fornecido. Use 'ativo' e/ou 'minutos_antes'";
     public const string NotConnected = "Você precisa conectar o Google Calendar primeiro para ativar alertas de tarefas";
     public const string InvalidMinutes = "minutos_antes deve ser um número entre 1 e 60";
+    public const string InvalidActive = "ativo deve ser true ou false";
     public const string UpdateFailed = "Erro ao atualizar configuração";
     public const string Forbidden = "Acesso negado";
     public const string GetFailed = "Erro ao obter configuração de alertas";
@@ -29,6 +30,7 @@ public static class CalendarAlertsMessages
         AlertRejection.NoParameters => NoParameters,
         AlertRejection.NotConnected => NotConnected,
         AlertRejection.InvalidMinutes => InvalidMinutes,
+        AlertRejection.InvalidActive => InvalidActive,
         AlertRejection.UpdateFailed => UpdateFailed,
         _ => throw new InvalidOperationException("Motivo de rejeição desconhecido."),
     };

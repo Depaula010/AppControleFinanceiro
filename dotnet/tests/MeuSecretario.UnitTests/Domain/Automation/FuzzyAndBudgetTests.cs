@@ -100,6 +100,53 @@ public class BillMatchingTests
         }
     }
 
+    [Fact]
+    [Trait("AC", "011-149")]
+    public void FindBest_FixesTheCaseAndAccentSensitivity_ThatTheLegacyFixtureStillShows()
+    {
+        var section = AutomationFixture.Section("bill_matching");
+        var bills = section.GetProperty("bills").EnumerateArray()
+            .Select(b => new FixedBill(
+                b.GetProperty("id").GetInt32(), b.GetProperty("descricao").GetString()!,
+                decimal.Parse(b.GetProperty("valor").GetString()!, CultureInfo.InvariantCulture), 1, "FIXO", 2, "cat"))
+            .ToList();
+
+        // Casos em que o resultado do Flask (legacy_*) difere do novo: o .NET segue o novo (desvio 099).
+        var changed = section.GetProperty("cases").EnumerateArray()
+            .Where(c => c.GetProperty("legacy_result_id").ValueKind == JsonValueKind.Null
+                        && c.GetProperty("result_id").ValueKind != JsonValueKind.Null)
+            .ToList();
+        changed.ShouldNotBeEmpty();
+        foreach (var c in changed)
+        {
+            var input = c.GetProperty("input").GetString()!;
+            BillMatching.FindBest(BillMatching.CleanDescription(input), bills)!.ScheduleId.ShouldBe(c.GetProperty("result_id").GetInt32(), input);
+        }
+    }
+
+    [Theory]
+    [Trait("AC", "011-149")]
+    [InlineData("cemig", "CEMIG")]
+    [InlineData("conta de cemig", "CEMIG")]
+    [InlineData("agua", "Água")]
+    [InlineData("AGUA", "Água")]
+    [InlineData("condominio", "Condomínio")]
+    [InlineData("luz", "Luz")]
+    public void FindBest_IgnoresCaseAndAccentsOnBothSides(string input, string stored)
+    {
+        FixedBill[] bills = [new(1, stored, 10m, 1, "FIXO", 2, "cat"), new(2, "Aluguel", 1500m, 5, "FIXO", 2, "cat")];
+
+        BillMatching.FindBest(BillMatching.CleanDescription(input), bills)!.Description.ShouldBe(stored);
+    }
+
+    [Theory]
+    [Trait("AC", "011-149")]
+    [InlineData("Água", "agua")]
+    [InlineData("CONDOMÍNIO", "condominio")]
+    [InlineData("Ação", "acao")]
+    [InlineData("já", "ja")]
+    public void Fold_LowercasesAndStripsAccents(string input, string expected) => BillMatching.Fold(input).ShouldBe(expected);
+
     [Theory]
     [Trait("AC", "011-142")]
     [InlineData("  Conta de Luz ", "luz")]

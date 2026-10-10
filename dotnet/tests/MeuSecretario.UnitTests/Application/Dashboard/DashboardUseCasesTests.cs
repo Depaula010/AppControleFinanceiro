@@ -39,7 +39,7 @@ public class DashboardUseCasesTests
     [Trait("AC", "006-30")]
     public async Task Charts_UseTheWindowsFromTheClock_AndTakeMagnitudes()
     {
-        _repository.MonthlyExpensesAsync(7, new DateOnly(2026, 7, 3), Arg.Any<CancellationToken>())
+        _repository.MonthlyExpensesAsync(7, new DateOnly(2026, 8, 1), Arg.Any<CancellationToken>())
             .Returns([new MonthlyExpense("2026-10", -30.5m)]);
         _repository.CategoryExpensesAsync(7, new DateOnly(2026, 10, 1), new DateOnly(2026, 11, 1), Arg.Any<CancellationToken>())
             .Returns([new CategoryExpense("Alimentação", "Mercado", -12m, 2)]);
@@ -59,7 +59,7 @@ public class DashboardUseCasesTests
     {
         await new GetDashboardCharts(_repository, _clock).ExecuteAsync(7, 12, CancellationToken.None);
 
-        await _repository.Received(1).MonthlyExpensesAsync(7, new DateOnly(2025, 10, 6), Arg.Any<CancellationToken>());
+        await _repository.Received(1).MonthlyExpensesAsync(7, new DateOnly(2025, 11, 1), Arg.Any<CancellationToken>());
         await _repository.Received(1).CategoryExpensesAsync(7, new DateOnly(2026, 10, 1), new DateOnly(2026, 11, 1), Arg.Any<CancellationToken>());
         await _repository.Received(1).WeekdayExpensesAsync(7, new DateOnly(2026, 7, 17), Arg.Any<CancellationToken>());
     }
@@ -68,12 +68,24 @@ public class DashboardUseCasesTests
     [Trait("AC", "006-61")]
     public async Task Alerts_UseTodayFromTheClock()
     {
-        _repository.ListActiveSchedulesAsync(7, Arg.Any<CancellationToken>()).Returns(
+        _repository.ListActiveSchedulesAsync(7, new DateOnly(2026, 10, 1), new DateOnly(2026, 11, 1), Arg.Any<CancellationToken>()).Returns(
             [new ScheduleRow(1, "Aluguel", 10m, "FIXO", "MENSAL", 15, null, new DateOnly(2026, 1, 1), null)]);
 
         var alerts = await new GetDashboardAlerts(_repository, _clock).ExecuteAsync(7, CancellationToken.None);
 
         alerts.Single().DaysLeft.ShouldBe(0);
+    }
+
+    [Fact]
+    [Trait("AC", "006-72")]
+    public async Task Alerts_PaidWindowCoversTheMonthOfTodayAndOfTodayPlusSevenDays()
+    {
+        _clock.Today.Returns(new DateOnly(2026, 10, 28));
+        _repository.ListActiveSchedulesAsync(7, new DateOnly(2026, 10, 1), new DateOnly(2026, 12, 1), Arg.Any<CancellationToken>()).Returns(
+            [new ScheduleRow(1, "Luz", 10m, "FIXO", "MENSAL", 3, null, new DateOnly(2026, 1, 1), null, [new DateOnly(2026, 11, 2)])]);
+
+        // A ocorrência de 3/11 já foi paga (2/11, vínculo por agendamento_id): nenhum alerta.
+        (await new GetDashboardAlerts(_repository, _clock).ExecuteAsync(7, CancellationToken.None)).ShouldBeEmpty();
     }
 
     [Fact]

@@ -1,10 +1,10 @@
 # Spec 006 — Dashboard (resumo, gráficos, transações recentes e alertas)
 
-- **Estado:** aprovada por delegação do Rafael (2026-10-04, "prossiga para a implementação sem esperar"). Implementa **só paridade com o Flask** mais os desvios já aprovados (001, 007, 009 e 008). Os desvios novos 089 a 095 estão **propostos e não implementados**; as dúvidas de fato ambíguo seguem o Flask e estão em §13.
+- **Estado:** aprovada por delegação do Rafael (2026-10-04, "prossiga para a implementação sem esperar"). Implementa paridade com o Flask mais os desvios aprovados (001, 007, 008, 009) e os **implementados em 2026-10-09: 090 a 095** (§9). O 089 foi **rejeitado** (as recentes seguem devolvendo `Renda`). As dúvidas de fato ambíguo seguem o Flask e estão em §13.
 - **Onda:** 3
 - **Origem (Python):** `app/routes/api.py:34-90` (`token_required`), `:97-171` (`_get_dashboard_summary_impl`), `:174-178` (`/dashboard/summary`), `:181-280` (`/dashboard/charts`), `:927-952` (`/dashboard/resumo`), `:955-1014` (`_get_transacoes_recentes_impl`, `/transacoes/recentes`), `:1070-1095` (`/dashboard/stats`), `:1098-1127` (`/transactions/recent`), `:1130-1159` (`/dashboard/recent`), `:1162-1298` (`/dashboard/alerts`); `app/services/analytics_service.py:17-290` (`get_spending_analysis`, só os blocos 1, 2 e 3 chegam à rota); `app/services/finance_service.py:782-838` (`get_saldo_contas`).
 - **Depende de:** 001a (`RequireUser`, `ICurrentUser`, `IDbConnectionFactory`, `Envelopes`, `IClock`), 002 (tabela `contas`), 003 (macros), 004 (`TransactionTypes`, `MonthDays`; a rota `/api/transactions/recent` convive com `/api/transactions/{id}` do módulo da 004). **Sem migration.**
-- **Desvios aplicáveis:** 001 (só `Renda` no resumo; ver 089 para as recentes), 007 (um só saldo, consolidado: o Flask já faz isso no dashboard), 008 (500 com texto fixo e log sem segredo), 009 (nome do dia da semana calculado no código). Propostos: 089 a 095 (§9).
+- **Desvios aplicáveis:** 001 (só `Renda` no resumo; ver 089 para as recentes), 007 (um só saldo, consolidado: o Flask já faz isso no dashboard), 008 (500 com texto fixo e log sem segredo), 009 (nome do dia da semana calculado no código). Implementados: 090 a 095. Rejeitado: 089 (§9).
 - **Consumidores:** Angular `features/dashboard` (`dashboard.service.ts`: `/api/dashboard/summary`, `/charts`, `/recent`, `/alerts`). Bot e atalhos não usam estas rotas.
 
 ## 1. Objetivo
@@ -55,8 +55,8 @@ Sucesso: **200**
 {"status":"success","data":{"gastos_mensais":[{"mes":"2026-10","total":3200.5}],"gastos_categoria":[{"macro_categoria":"Alimentação","subcategoria":"Supermercado","total":1200.0,"quantidade":45}],"gastos_dia_semana":[{"dia":"Monday","total":450.0,"quantidade":12}]}}
 ```
 Todos os blocos usam só `tipo_transacao = 'Despesa'` e `consolidada = true`, e saem com `abs(total)`.
-- **`gastos_mensais`** `{mes, total}`: transações com `data_transacao >= (dia 1 do mês de hoje) − 30 × meses dias` (sem limite superior), agrupadas por `YYYY-MM` (`TO_CHAR`), **ordem decrescente de `mes`** (mais novo primeiro). A janela de 30 dias por mês faz o primeiro mês sair **parcial** (desvio 090 proposto) e a ordem decrescente faz o gráfico do Angular mostrar o mês mais novo à esquerda (091 proposto).
-- **`gastos_categoria`** `{macro_categoria, subcategoria, total, quantidade}`: despesas do **mês de hoje** (dia 1 até o fim do mês, qualquer dia do mês), agrupadas por `nome_macro` e `nome_sub`, `quantidade` = `COUNT(*)`. **`ORDER BY total DESC LIMIT 10`** sobre a soma **negativa**: sai primeiro a categoria que menos gastou, e o `LIMIT` leva as 10 de **menor** gasto (desvio 092 proposto; reproduzido). Desempate (sem mudar contrato): `nome_macro`, `nome_sub`.
+- **`gastos_mensais`** `{mes, total}`: transações com `data_transacao >= dia 1 do mês de (hoje − (meses − 1) meses)` (sem limite superior), ou seja, `meses` meses civis completos incluindo o atual (`meses=1` é só o mês atual; **desvio 090**), agrupadas por `YYYY-MM` (`TO_CHAR`), em **ordem crescente de `mes`** (mais antigo à esquerda; **desvio 091**). O Flask usava `dia 1 do mês − 30 × meses dias` (primeiro mês parcial) e `ORDER BY mes DESC`.
+- **`gastos_categoria`** `{macro_categoria, subcategoria, total, quantidade}`: despesas do **mês de hoje** (dia 1 até o fim do mês, qualquer dia do mês), agrupadas por `nome_macro` e `nome_sub`, `quantidade` = `COUNT(*)`. **`ORDER BY total ASC LIMIT 10`** sobre a soma **negativa**: sai primeiro a categoria de **maior** gasto e o `LIMIT` leva as 10 maiores (**desvio 092**; o Flask usava `DESC` e devolvia as 10 de menor gasto). Desempate (sem mudar contrato): `nome_macro`, `nome_sub`.
 - **`gastos_dia_semana`** `{dia, total, quantidade}`: despesas com `data_transacao >= hoje − 90 dias` (sem limite superior), agrupadas por dia da semana (`EXTRACT(DOW)`, domingo = 0), ordenadas por esse número. `dia` é o nome **em inglês, sem preenchimento** (`Sunday`, `Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday`, `Saturday`): o Flask devolve o `TO_CHAR(..., 'Day')` com `lc_time = C` (confirmado em produção) e `.strip()`. O desvio 009 (aprovado) pede o cálculo no código mantendo essa grafia. Dia sem despesa não aparece.
 - `meses` só altera `gastos_mensais`; categoria é sempre o mês de hoje e dia da semana são sempre 90 dias (§13, Q-006-3).
 - Bloco sem linhas: `[]`.
@@ -83,10 +83,12 @@ Origem: `api.py:1162-1298`. Sem corpo nem query. **200**
 ```json
 {"status":"success","data":[{"id":"42","descricao":"Aluguel","subcategoria":"Aluguel / Condomínio","valor_previsto":1200.0,"dia_execucao":5,"dias_restantes":2,"data_vencimento":"2026-10-06","tipo":"warning","tipo_agendamento":"FIXO"}]}
 ```
-Origem dos dados: `agendamentos` do usuário com `ativo = true` (`LEFT JOIN subcategoria`), `ORDER BY dia_execucao` (desempate `id`). Sem filtro de tipo, de conta ativa nem de receita. Para cada um, o vencimento `due` é calculado (todos os cálculos com `hoje` e `fim = hoje + 7 dias`):
+Origem dos dados: `agendamentos` do usuário com `ativo = true` (`LEFT JOIN subcategoria`), `ORDER BY dia_execucao` (desempate `id`). Sem filtro de tipo nem de conta ativa. **Agendamentos de receita ficam fora** (grupo `Renda` ou macro `Receitas Gerais` do grupo `Geral`; **desvio 095**). Para cada um, o vencimento `due` é calculado (todos os cálculos com `hoje` e `fim = hoje + 7 dias`):
 - **`ANUAL`**: sem `dia_execucao` ou sem `mes_execucao` ⇒ ignorado. `due = (ano de hoje, mes, min(dia, último dia do mês))`; se `due < hoje`, o mesmo no **ano seguinte** (também com o corte do último dia). Mês fora de 1..12 ⇒ ignorado (o Python captura `ValueError`).
 - **`SEMANAL`, `QUINZENAL`, `DIARIA`** (intervalos 7, 14, 1): sem `data_inicio` ⇒ ignorado. `due = data_inicio`; se `due < hoje`, `due += ceil((hoje − due) / intervalo) × intervalo` dias. `data_inicio` futura vale como está (e só entra se cair na janela). `DIARIA` sempre cai em hoje.
-- **`MENSAL`** (e qualquer outro texto; periodicidade nula também é `MENSAL`): sem `dia_execucao` ⇒ ignorado. `due = (mês de hoje, min(dia, último dia do mês))`; se `due < hoje`, `(mês seguinte, min(dia, último dia do mês seguinte))`, virando o ano em dezembro. **`data_inicio` não é considerada** (desvio 093).
+- **`MENSAL`** (e qualquer outro texto; periodicidade nula também é `MENSAL`): sem `dia_execucao` ⇒ ignorado. `due = (mês de hoje, min(dia, último dia do mês))`; se `due < hoje`, `(mês seguinte, min(dia, último dia do mês seguinte))`, virando o ano em dezembro.
+- **`data_inicio` em `MENSAL` e `ANUAL`** (**desvio 093**): se o `due` calculado é anterior a `data_inicio`, o agendamento não gera alerta (ainda não começou). `due == data_inicio` vale. As periodicidades curtas já partem de `data_inicio`.
+- **Conta já paga** (**desvio 094**): depois de calcular o `due`, o alerta é omitido se a ocorrência já virou transação do usuário, ligada por `agendamento_id` ou, sem vínculo (`agendamento_id` nulo), de mesma `descricao` (desvio 012). Em `MENSAL`/`ANUAL` basta uma transação no **mês do vencimento** (pagamento antecipado conta); em `SEMANAL`/`QUINZENAL`/`DIARIA`, só uma transação na **própria data do vencimento**. Não filtra por `consolidada` nem por tipo (como as consultas da 013).
 - Se `due > hoje + 7`, o agendamento sai. `dias_restantes = due − hoje` (0 a 7). `tipo`: `0` ⇒ `danger`, `1` ou `2` ⇒ `warning`, `3` a `7` ⇒ `info`.
 - Campos: `id` **string**, `descricao`, `subcategoria` (`nome_sub` ou `null`), `valor_previsto` (número, ou `null` se NULL **ou zero**: `float(v) if v else None`), `dia_execucao` (o inteiro da coluna, mesmo em `ANUAL`/`SEMANAL`), `dias_restantes`, `data_vencimento` (`YYYY-MM-DD`), `tipo`, `tipo_agendamento` (`FIXO`, `PARCELADO`, `LEMBRETE_VARIAVEL`). `notificar_antes_dias` é lido e ignorado: a janela é sempre 7 dias. Ordem final: `dias_restantes` crescente, **estável** sobre `dia_execucao, id`.
 - Nenhum item: 200 `{"status":"success","data":[]}`.
@@ -134,16 +136,19 @@ Cada critério vira pelo menos um teste (`[Trait("AC","006-NN")]`); os de integr
 - **AC-006-20** Dado conta de cartão com saldo negativo (compras), então entra no `saldo_total` com o sinal.
 
 **Gráficos**
-- **AC-006-30** Dado sem `meses`, então vale 3 (janela do `gastos_mensais`: dia 1 do mês de hoje − 90 dias).
+- **AC-006-30** Dado sem `meses`, então vale 3 (janela do `gastos_mensais`: dia 1 do mês de hoje − 2 meses, desvio 090).
 - **AC-006-31** Dado `meses=1` e `meses=12`, então 200; dado `0`, `13`, `-1`, `99999999999999999999`, então 400 `"Parâmetro 'meses' deve estar entre 1 e 12"`.
 - **AC-006-32** Dado `meses=abc`, `meses=`, `meses=2.5`, então vale 3 (200); `meses=%205`, `+5` e `1_0` valem 5, 5 e 10; `meses=2&meses=9` vale 2.
-- **AC-006-33** Dadas despesas consolidadas em vários meses, então `gastos_mensais` traz `{mes, total}` em ordem decrescente de mês, com `total` em módulo, só `Despesa` consolidada, e a fronteira da janela inclusiva (`>=`).
+- **AC-006-33** Dadas despesas consolidadas em vários meses, então `gastos_mensais` traz `{mes, total}` em ordem **crescente** de mês (desvio 091), com `total` em módulo, só `Despesa` consolidada, e a fronteira da janela inclusiva (`>=`).
 - **AC-006-34** Dadas despesas do mês de hoje, então `gastos_categoria` agrupa por macro e subcategoria, com `quantidade`; despesa de outro mês fica fora.
-- **AC-006-35** Dadas 12 categorias com gastos diferentes no mês, então saem 10, **da de menor gasto para a de maior** (comportamento do Flask, desvio 092), com o desempate por nomes.
+- **AC-006-35** Dadas 12 categorias com gastos diferentes no mês, então saem as 10 de **maior gasto, do maior para o menor** (desvio 092), com o desempate por nomes.
 - **AC-006-36** Dadas despesas dos últimos 90 dias, então `gastos_dia_semana` sai de domingo a sábado, com nomes ingleses sem espaço, `total` em módulo e `quantidade`; despesa com 91 dias fica fora; dia sem despesa não aparece.
 - **AC-006-37** Dado 2026-10-04 (domingo), então o dia sai `Sunday`, independentemente do `lc_time` do banco (desvio 009).
 - **AC-006-38** Dado `meses=12`, então só `gastos_mensais` muda; `gastos_categoria` e `gastos_dia_semana` iguais aos de `meses=1`.
 - **AC-006-39** Dado usuário sem despesas, então os três blocos saem `[]`.
+
+- **AC-006-70** Dado hoje 2026-10-15, então a janela começa em 2026-08-01 para `meses=3`, 2026-10-01 para `meses=1` e 2025-11-01 para `meses=12`; despesa de 2026-07-31 fica fora de `meses=3` e a do dia 1 do mês inicial entra (desvio 090).
+- **AC-006-73** Dadas as 10 maiores categorias e outras menores, então as menores não aparecem (desvio 092; coberto por AC-006-35).
 
 **Recentes**
 - **AC-006-40** Dadas 12 transações, então saem as 10 mais novas, ordenadas por data decrescente, depois `created_at` decrescente, depois `id` decrescente.
@@ -165,6 +170,9 @@ Cada critério vira pelo menos um teste (`[Trait("AC","006-NN")]`); os de integr
 - **AC-006-60** Dado hoje 2026-12-28 e `MENSAL` dia 3, então `data_vencimento 2027-01-03`, `dias_restantes 6`.
 - **AC-006-61** Dado o relógio às 23:30 de São Paulo, então "hoje" é a data de São Paulo.
 - **AC-006-62** Dado usuário sem agendamentos ativos, então `{"status":"success","data":[]}`.
+- **AC-006-71** Dado `MENSAL` ou `ANUAL` cujo vencimento calculado é anterior a `data_inicio`, então não há alerta; com o vencimento igual a `data_inicio`, há (desvio 093).
+- **AC-006-72** Dada a ocorrência do mês de vencimento já paga (transação com `agendamento_id`, ou sem vínculo com a mesma descrição, do mesmo usuário), então não há alerta; transação de outro mês, de outro usuário ou de outro agendamento não esconde; a ocorrência do mês seguinte segue alertando; em periodicidade curta só a data do vencimento conta (desvio 094).
+- **AC-006-74** Dado agendamento de receita (grupo `Renda` ou macro `Receitas Gerais`), então não aparece; o de despesa aparece (desvio 095).
 
 ## 6. Tabelas e dados tocados
 
@@ -185,6 +193,8 @@ Cada critério vira pelo menos um teste (`[Trait("AC","006-NN")]`); os de integr
 | 007 | aprovado | `saldo_total` já é consolidado e de contas ativas; nada muda aqui (a 002 alinhou `GET /api/accounts`) |
 | 008 | aprovado | os 4 erros 500 usam texto fixo; log só com tipo (AC-006-05) |
 | 009 | aprovado | nome do dia da semana calculado no código, em inglês e sem preenchimento (AC-006-36, 37) |
+| 090 a 095 | implementado (feature 006, 2026-10-09) | janela mensal por meses civis, ordem crescente, top 10 por maior gasto, alertas respeitam `data_inicio`, conta paga e receita (AC-006-35, 70 a 74) |
+| 089 | rejeitado | as recentes mantêm `Renda` |
 | 024 | n/a | as rotas não leem corpo |
 
 ## 8. Decisões de desenho
@@ -193,21 +203,21 @@ Cada critério vira pelo menos um teste (`[Trait("AC","006-NN")]`); os de integr
 - Repositório Dapper próprio (`DashboardRepository`), sem tocar nos repositórios da 002, 004 e 005.
 - O vencimento dos alertas é uma função pura recebendo uma linha crua e `hoje`; sem `IClock` no Domain.
 
-## 9. Desvios propostos (não implementados; sem aprovação o .NET reproduz o Flask)
+## 9. Desvios 089 a 095 (decididos em 2026-10-09)
 
-| Id | Atual (arquivo:linha) | Proposta | Recomendação |
-|---|---|---|---|
-| **089** Recentes: `Renda` × `Receita` | `api.py:981` devolve o `tipo_transacao` cru (`Renda`); o desvio 001 aprovado manda `Renda ⇒ Receita` na saída; o Angular compara `'Renda'` (`dashboard.component.ts:289-302`, `dashboard.model.ts:49`) | decidir: (a) manter `Renda` nas recentes (excluir esta rota do 001) ou (b) mudar para `Receita` junto com o Angular | **(a)** até o front mudar |
-| **090** Janela dos gastos mensais | `analytics_service.py:32`: `dia 1 do mês − 30 × meses` dias; para `meses=3` em outubro começa em 3 de julho: o primeiro mês sai parcial | início = dia 1 do mês de `hoje − (meses − 1)` meses ⇒ `meses` meses civis completos incluindo o atual (para `meses=1`: só o mês atual) | **Aprovar** |
-| **091** Ordem dos gastos mensais | `analytics_service.py:45`: `ORDER BY mes DESC`; o Angular desenha na ordem recebida (`dashboard.component.ts:199-200`), então o mês mais novo fica à esquerda | ordem crescente | **Aprovar** (ou o front inverte) |
-| **092** Top 10 de categorias invertido | `analytics_service.py:69-70`: `ORDER BY total DESC LIMIT 10` com soma negativa devolve as 10 categorias de **menor** gasto | `ORDER BY total ASC` (maior gasto primeiro); nenhum campo muda | **Aprovar** (o Angular de hoje não exibe este bloco) |
-| **093** Alertas ignoram `data_inicio` em `MENSAL` e `ANUAL` | `api.py:1252-1269`: agendamento que começa no futuro (ex.: parcela do bot com `data_inicio` no mês seguinte) já alerta neste mês | só considerar vencimentos `>= data_inicio` | **Aprovar** |
-| **094** Alerta de conta já paga | `api.py:1212-1286`: não olha se a ocorrência do mês já virou transação; a conta paga continua em `warning`/`danger` até o dia | excluir a ocorrência com transação ligada por `agendamento_id` no mês (regra do desvio 012) | **Aprovar** |
-| **095** Receita no alerta de "contas a vencer" | `api.py:1176-1196`: agendamento de grupo `Renda` aparece como alerta vermelho | excluir agendamentos de receita (mesmo predicado da 005/075) | **Aprovar** |
+| Id | Estado | O que mudou |
+|---|---|---|
+| **089** Recentes: `Renda` × `Receita` | **rejeitado** | as recentes continuam devolvendo `Renda` (o Angular compara `'Renda'`) |
+| **090** Janela dos gastos mensais | implementado | início = dia 1 do mês de `hoje − (meses − 1)` meses (Flask: `dia 1 − 30 × meses` dias) |
+| **091** Ordem dos gastos mensais | implementado | ordem crescente de mês (Flask: decrescente) |
+| **092** Top 10 de categorias | implementado | `ORDER BY total ASC` sobre a soma negativa: as 10 maiores (Flask: as 10 menores) |
+| **093** `data_inicio` em `MENSAL`/`ANUAL` | implementado | vencimento anterior a `data_inicio` não alerta |
+| **094** Conta já paga | implementado | exclui a ocorrência com transação ligada por `agendamento_id` (fallback `descricao`) |
+| **095** Receita nos alertas | implementado | exclui grupo `Renda` e macro `Receitas Gerais` |
 
 ## 10. Como ficou na implementação
 
-1. **Paridade total, sem desvio implementado.** Os desvios 089 a 095 seguem `proposto`; nenhum alterou o código. Recentes devolvem `Renda` (Q-006-1); gráficos reproduzem a janela de 30 dias, a ordem decrescente e o top 10 de menor gasto; alertas ignoram `data_inicio` em `MENSAL`/`ANUAL`, conta paga e receita.
+1. **Paridade mais os desvios 090 a 095** (implementados em 2026-10-09). Recentes devolvem `Renda` (089 rejeitado, Q-006-1). O repositório de alertas recebe a janela de datas de pagamento (`paidFrom`, `paidToExclusive`: mês de hoje até o mês de hoje + 7 dias) e devolve em cada `ScheduleRow` as datas das transações já ligadas (`PaidDates`); a regra do vencimento fica em `DashboardAlerts` (puro). Receita sai na consulta (predicado da 005).
 2. **Roteamento:** 8 `MapGet` com `RequireUser`; 405 nos outros métodos vem do roteamento (testado em POST/PUT/DELETE nos 8 caminhos, inclusive `/api/transactions/recent`, que convive com o `{id}` da 004). Caminho desconhecido e barra final dão 404 (sem corpo HTML do Flask garantido pelo `UnmatchedRoute` da 009).
 3. **Janela de datas:** todas as janelas usam `IClock.Today`; a de categorias é `[dia 1, dia 1 do mês seguinte)` (equivale ao `TO_CHAR = mes` do Flask). O resumo filtra por `data <= hoje`.
 4. **Soma do saldo:** `decimal` exato convertido para `double` antes do `PyRound` (Q-006-7).
@@ -219,8 +229,8 @@ Cada critério vira pelo menos um teste (`[Trait("AC","006-NN")]`); os de integr
 Lido em `meusecretariofront/src/app/features/dashboard/` (`dashboard.service.ts`, `models/dashboard.model.ts`, `dashboard.component.ts`).
 1. **Usa 4 rotas:** `/api/dashboard/summary`, `/charts?meses=` (padrão do serviço **6**), `/recent`, `/alerts`; os aliases não são chamados.
 2. **Resumo e alertas batem** com os modelos (`DashboardSummary`, `UpcomingAlert`, incluindo `id` string).
-3. **Gráfico mensal** usa só `gastos_mensais` e na ordem recebida (mais novo à esquerda, 091); `gastos_categoria` e `gastos_dia_semana` estão declarados no modelo mas **não são exibidos**.
-4. **Recentes** comparam `tipo` com `'Renda'` e `'Despesa'` (ícone e cor); com `Receita` todo ícone ficaria neutro (089).
+3. **Gráfico mensal** usa só `gastos_mensais` e na ordem recebida (com o 091, mais antigo à esquerda); `gastos_categoria` e `gastos_dia_semana` estão declarados no modelo mas **não são exibidos**.
+4. **Recentes** comparam `tipo` com `'Renda'` e `'Despesa'` (ícone e cor); com `Receita` todo ícone ficaria neutro (089, rejeitado: segue `Renda`).
 5. O front trata qualquer erro como falha genérica (`handleError`); nenhuma mensagem do backend é exibida em 5xx.
 
 ## 12. Fora de escopo
@@ -231,7 +241,7 @@ Lido em `meusecretariofront/src/app/features/dashboard/` (`dashboard.service.ts`
 
 ## 13. Perguntas em aberto
 
-- **Q-006-1** Recentes devolvem `Renda` (Flask) ou `Receita` (desvio 001, aprovado em bloco)? Implementado: **`Renda`** (o front quebraria). Ver 089.
+- **Q-006-1** Recentes devolvem `Renda` (Flask) ou `Receita` (desvio 001, aprovado em bloco)? Decidido: **`Renda`** (089 rejeitado em 2026-10-09).
 - **Q-006-2** O `meses` padrão do serviço do Angular é 6 e o do Flask é 3; sem efeito no contrato (o front sempre envia o parâmetro). Manter o 3.
 - **Q-006-3** `meses` só afeta `gastos_mensais`; `gastos_categoria` (mês de hoje) e `gastos_dia_semana` (90 dias) ignoram o parâmetro. É a intenção? Implementado como o Flask.
 - **Q-006-4** `valor_previsto = 0` sai `null` nos alertas (documentado em `api-contract.md` §4). Implementado como o Flask.

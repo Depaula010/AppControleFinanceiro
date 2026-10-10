@@ -1,6 +1,6 @@
 # Desvio 101 — Reprocessar fatura: isolar o erro de cada agendamento
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 011, 2026-10-09)
 - **Features afetadas:** 011
 - **Severidade:** correção
 

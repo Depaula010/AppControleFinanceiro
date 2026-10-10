@@ -257,7 +257,8 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
     [Trait("AC", "006-34")]
     [Trait("AC", "006-36")]
     [Trait("AC", "006-37")]
-    public async Task Charts_Default_ReproducesTheFlaskBlocks()
+    [Trait("AC", "006-70")]
+    public async Task Charts_Default_ReproducesTheBlocks_WithWholeMonthsInAscendingOrder()
     {
         await SeedChartsAsync();
 
@@ -265,7 +266,7 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
 
         status.ShouldBe(HttpStatusCode.OK);
         body.ShouldBe(DashboardTestKit.Ok(
-            """{"gastos_mensais":[{"mes":"2026-10","total":150},{"mes":"2026-09","total":200},{"mes":"2026-07","total":30}]""" +
+            """{"gastos_mensais":[{"mes":"2026-09","total":200},{"mes":"2026-10","total":150}]""" +
             ""","gastos_categoria":[{"macro_categoria":"Despesas Gerais","subcategoria":"Outros","total":150,"quantidade":2}]""" +
             ""","gastos_dia_semana":[{"dia":"Sunday","total":200,"quantidade":1},{"dia":"Monday","total":100,"quantidade":1},{"dia":"Saturday","total":50,"quantidade":1}]}"""));
     }
@@ -279,8 +280,9 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
         var (_, one) = await _kit.SendAsync("/api/dashboard/charts?meses=1", _user);
         var (_, twelve) = await _kit.SendAsync("/api/dashboard/charts?meses=12", _user);
 
-        Blocks(one).Monthly.ShouldBe(["2026-10", "2026-09"]);
-        Blocks(twelve).Monthly.ShouldBe(["2026-10", "2026-09", "2026-07"]);
+        // Desvio 090: `meses=1` é só o mês atual; desvio 091: do mais antigo para o mais novo.
+        Blocks(one).Monthly.ShouldBe(["2026-10"]);
+        Blocks(twelve).Monthly.ShouldBe(["2026-07", "2026-09", "2026-10"]);
         Blocks(twelve).Others.ShouldBe(Blocks(one).Others);
     }
 
@@ -299,29 +301,30 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
     }
 
     [Theory]
-    [InlineData("meses=abc", 3)]
-    [InlineData("meses=", 3)]
-    [InlineData("meses=2.5", 3)]
-    [InlineData("meses=%205", 5)]
+    [InlineData("meses=abc", 2)]
+    [InlineData("meses=", 2)]
+    [InlineData("meses=2.5", 2)]
+    [InlineData("meses=%205", 3)]
     [InlineData("meses=%2B1", 1)]
     [InlineData("meses=1&meses=12", 1)]
-    [InlineData("meses=12&meses=1", 12)]
+    [InlineData("meses=12&meses=1", 3)]
     [InlineData("meses=1", 1)]
     [Trait("AC", "006-31")]
     [Trait("AC", "006-32")]
-    public async Task Charts_MesesParsing_FollowsPython(string query, int effectiveMonths)
+    public async Task Charts_MesesParsing_FollowsPython(string query, int expectedMonthsWithData)
     {
         await SeedChartsAsync();
-        // 1 mês ⇒ janela começa em 2026-09-01 (2 meses com dados); 3 ou 12 ⇒ os 3 meses.
+        // Padrão 3 ⇒ janela desde 2026-08-01 (set e out); 5 ou mais ⇒ desde jun ou antes (jul, set e out); 1 ⇒ só out.
         var (status, body) = await _kit.SendAsync("/api/dashboard/charts?" + query, _user);
 
         status.ShouldBe(HttpStatusCode.OK);
-        Blocks(body).Monthly.Count.ShouldBe(effectiveMonths == 1 ? 2 : 3);
+        Blocks(body).Monthly.Count.ShouldBe(expectedMonthsWithData);
     }
 
     [Fact]
     [Trait("AC", "006-35")]
-    public async Task Charts_Categories_AreTheTenSmallestFirst()
+    [Trait("AC", "006-73")]
+    public async Task Charts_Categories_AreTheTenLargestFirst()
     {
         var subcategories = (await _kit.Bills.QueryAsync<int>("SELECT id FROM subcategoria ORDER BY id LIMIT 12")).ToList();
         for (var i = 0; i < subcategories.Count; i++)
@@ -335,7 +338,8 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
         using var document = JsonDocument.Parse(body);
         var totals = document.RootElement.GetProperty("data").GetProperty("gastos_categoria").EnumerateArray()
             .Select(item => item.GetProperty("total").GetDouble()).ToList();
-        totals.ShouldBe([10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+        // Desvio 092: maior gasto primeiro; as duas menores (10 e 20) ficam de fora do top 10.
+        totals.ShouldBe([120, 110, 100, 90, 80, 70, 60, 50, 40, 30]);
     }
 
     [Fact]
@@ -473,6 +477,69 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
         body.ShouldContain("Da antiga");
     }
 
+    private async Task<List<string>> AlertNamesAsync()
+    {
+        var (status, body) = await _kit.SendAsync("/api/dashboard/alerts", _user);
+        status.ShouldBe(HttpStatusCode.OK);
+        using var document = JsonDocument.Parse(body);
+        return document.RootElement.GetProperty("data").EnumerateArray()
+            .Select(item => item.GetProperty("descricao").GetString()!).ToList();
+    }
+
+    [Fact]
+    [Trait("AC", "006-71")]
+    public async Task Alerts_ScheduleThatHasNotStarted_DoesNotAppear()
+    {
+        // Desvio 093: parcela do bot que só começa no mês seguinte.
+        await _kit.Bills.InsertScheduleAsync(_user, _account, "Ainda não começou", dia: 18, dataInicio: "2026-11-18");
+        await _kit.Bills.InsertScheduleAsync(_user, _account, "Anual futura", periodicidade: "ANUAL", dia: 18, mes: 10, dataInicio: "2026-10-19");
+        await _kit.Bills.InsertScheduleAsync(_user, _account, "Começa no dia", dia: 18, dataInicio: "2026-10-18");
+
+        (await AlertNamesAsync()).ShouldBe(["Começa no dia"]);
+    }
+
+    [Fact]
+    [Trait("AC", "006-72")]
+    public async Task Alerts_BillAlreadyPaidInTheMonth_DoesNotAppear()
+    {
+        // Desvio 094: vínculo por agendamento_id; descrição só como fallback para transação antiga sem vínculo.
+        var linked = await _kit.Bills.InsertScheduleAsync(_user, _account, "Paga com vínculo", dia: 18);
+        await _kit.Bills.InsertScheduleAsync(_user, _account, "Paga sem vínculo", dia: 19);
+        await _kit.Bills.InsertScheduleAsync(_user, _account, "Pendente", dia: 20);
+        var otherMonth = await _kit.Bills.InsertScheduleAsync(_user, _account, "Paga mês passado", dia: 21);
+        var paid = await _kit.Transactions.InsertTransactionAsync(_user, _account, "Despesa", -10m, "2026-10-12", "qualquer nome");
+        await _kit.Bills.ExecuteAsync("UPDATE transacoes SET agendamento_id = @id WHERE id = @paid", new { id = linked, paid });
+        await _kit.Transactions.InsertTransactionAsync(_user, _account, "Despesa", -10m, "2026-10-13", "Paga sem vínculo");
+        var old = await _kit.Transactions.InsertTransactionAsync(_user, _account, "Despesa", -10m, "2026-09-21", "x");
+        await _kit.Bills.ExecuteAsync("UPDATE transacoes SET agendamento_id = @id WHERE id = @old", new { id = otherMonth, old });
+
+        (await AlertNamesAsync()).ShouldBe(["Pendente", "Paga mês passado"]);
+    }
+
+    [Fact]
+    [Trait("AC", "006-72")]
+    public async Task Alerts_OtherUsersTransactionWithSameDescription_DoesNotHideTheBill()
+    {
+        await _kit.Bills.InsertScheduleAsync(_user, _account, "Luz", dia: 18);
+        var other = await _kit.Transactions.InsertUserAsync("5511666666666", "Outro");
+        var otherAccount = await _kit.Transactions.InsertAccountAsync(other, "Conta B");
+        await _kit.Transactions.InsertTransactionAsync(other, otherAccount, "Despesa", -10m, "2026-10-12", "Luz");
+
+        (await AlertNamesAsync()).ShouldBe(["Luz"]);
+    }
+
+    [Fact]
+    [Trait("AC", "006-74")]
+    public async Task Alerts_IncomeSchedules_DoNotAppear()
+    {
+        // Desvio 095: grupo Renda e macro Receitas Gerais saem; despesa segue.
+        await _kit.Bills.InsertScheduleAsync(
+            _user, _account, "Salário", dia: 15, subcategoryId: TransactionsTestData.IncomeSubcategory);
+        await _kit.Bills.InsertScheduleAsync(_user, _account, "Aluguel", dia: 15);
+
+        (await AlertNamesAsync()).ShouldBe(["Aluguel"]);
+    }
+
     [Fact]
     [Trait("AC", "006-62")]
     public async Task Alerts_WithoutSchedules_AreEmpty()
@@ -558,7 +625,7 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
 
         public Task<IReadOnlyList<RecentTransaction>> ListRecentAsync(int userId, CancellationToken cancellationToken) => throw Failure();
 
-        public Task<IReadOnlyList<ScheduleRow>> ListActiveSchedulesAsync(int userId, CancellationToken cancellationToken) => throw Failure();
+        public Task<IReadOnlyList<ScheduleRow>> ListActiveSchedulesAsync(int userId, DateOnly paidFrom, DateOnly paidToExclusive, CancellationToken cancellationToken) => throw Failure();
     }
 
     private sealed class CapturingLogger : ILogger<DashboardModule>

@@ -6154,7 +6154,7 @@
     "budget_warning": null
    },
    "id": "ab12cd34",
-   "text": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *Sorveteria*\n📝 2 sorvetes\n💵 *R$ 15,90*\n💸 Despesa\n� Cartão Inter (na fatura)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
+   "text": "💰 *CONFIRME SUA TRANSAÇÃO*\n\n📍 *Sorveteria*\n📝 2 sorvetes\n💵 *R$ 15,90*\n💸 Despesa\n💳 Cartão Inter (na fatura)\n📂 Alimentação → Supermercado\n\n━━━━━━━━━━━━━━━━━━━━\n🔹 *OPÇÕES:*\n\n✅ *OK* para confirmar\n✏️ *TROCAR* para mudar categoria\n❌ *CANCELAR* para descartar\n\n_ID: ab12cd34 | Expira em 5 min_"
   },
   {
    "name": "api_debito_com_descricao",
@@ -6308,128 +6308,210 @@
     "id": 7,
     "descricao": "Luz",
     "valor": "55.00"
+   },
+   {
+    "id": 8,
+    "descricao": "Net",
+    "valor": "120.00"
+   },
+   {
+    "id": 9,
+    "descricao": "CEMIG",
+    "valor": "210.00"
    }
   ],
   "cases": [
    {
     "input": "luz",
     "result_id": 7,
-    "result_desc": "Luz"
+    "result_desc": "Luz",
+    "legacy_result_id": 7
    },
    {
     "input": "Luz",
     "result_id": 7,
-    "result_desc": "Luz"
+    "result_desc": "Luz",
+    "legacy_result_id": 7
    },
    {
     "input": "LUZ",
     "result_id": 7,
-    "result_desc": "Luz"
+    "result_desc": "Luz",
+    "legacy_result_id": 7
    },
    {
     "input": "a luz",
     "result_id": 7,
-    "result_desc": "Luz"
+    "result_desc": "Luz",
+    "legacy_result_id": 7
    },
    {
     "input": "o aluguel",
     "result_id": 2,
-    "result_desc": "Aluguel"
+    "result_desc": "Aluguel",
+    "legacy_result_id": 2
    },
    {
     "input": "da luz",
     "result_id": 7,
-    "result_desc": "Luz"
+    "result_desc": "Luz",
+    "legacy_result_id": 7
    },
    {
     "input": "do condominio",
     "result_id": 6,
-    "result_desc": "Condomínio"
+    "result_desc": "Condomínio",
+    "legacy_result_id": 6
    },
    {
     "input": "de internet",
     "result_id": 3,
-    "result_desc": "Internet Vivo"
+    "result_desc": "Internet Vivo",
+    "legacy_result_id": 3
    },
    {
     "input": "conta de agua",
     "result_id": 5,
-    "result_desc": "Água"
+    "result_desc": "Água",
+    "legacy_result_id": 5
    },
    {
     "input": "conta netflix",
     "result_id": 4,
-    "result_desc": "netflix"
+    "result_desc": "netflix",
+    "legacy_result_id": 4
    },
    {
     "input": "conta de conta de luz",
     "result_id": 7,
-    "result_desc": "Luz"
+    "result_desc": "Luz",
+    "legacy_result_id": 7
    },
    {
     "input": "  conta  ",
-    "result_id": null,
-    "result_desc": null
+    "result_id": 6,
+    "result_desc": "Condomínio",
+    "legacy_result_id": null
    },
    {
     "input": "xyz",
     "result_id": null,
-    "result_desc": null
+    "result_desc": null,
+    "legacy_result_id": null
    },
    {
     "input": "internet",
     "result_id": 3,
-    "result_desc": "Internet Vivo"
+    "result_desc": "Internet Vivo",
+    "legacy_result_id": 3
    },
    {
     "input": "vivo",
     "result_id": 3,
-    "result_desc": "Internet Vivo"
+    "result_desc": "Internet Vivo",
+    "legacy_result_id": 3
    },
    {
     "input": "netflix",
     "result_id": 4,
-    "result_desc": "netflix"
+    "result_desc": "netflix",
+    "legacy_result_id": 4
    },
    {
     "input": "aluguel de apartamento",
     "result_id": 2,
-    "result_desc": "Aluguel"
+    "result_desc": "Aluguel",
+    "legacy_result_id": 2
    },
    {
     "input": "agua",
     "result_id": 5,
-    "result_desc": "Água"
+    "result_desc": "Água",
+    "legacy_result_id": 5
    },
    {
     "input": "Conta de Luz",
     "result_id": 7,
-    "result_desc": "Luz"
+    "result_desc": "Luz",
+    "legacy_result_id": 7
    },
    {
     "input": "da conta de luz",
     "result_id": 7,
-    "result_desc": "Luz"
+    "result_desc": "Luz",
+    "legacy_result_id": 7
    },
    {
     "input": "conta luz",
     "result_id": 7,
-    "result_desc": "Luz"
+    "result_desc": "Luz",
+    "legacy_result_id": 7
    },
    {
     "input": "a o luz",
     "result_id": 7,
-    "result_desc": "Luz"
+    "result_desc": "Luz",
+    "legacy_result_id": 7
    },
    {
     "input": "de a luz",
     "result_id": 7,
-    "result_desc": "Luz"
+    "result_desc": "Luz",
+    "legacy_result_id": 7
    },
    {
     "input": "condomínio",
     "result_id": 6,
-    "result_desc": "Condomínio"
+    "result_desc": "Condomínio",
+    "legacy_result_id": 6
+   },
+   {
+    "input": "net",
+    "result_id": 8,
+    "result_desc": "Net",
+    "legacy_result_id": 3
+   },
+   {
+    "input": "Net",
+    "result_id": 8,
+    "result_desc": "Net",
+    "legacy_result_id": 3
+   },
+   {
+    "input": "cemig",
+    "result_id": 9,
+    "result_desc": "CEMIG",
+    "legacy_result_id": null
+   },
+   {
+    "input": "conta de cemig",
+    "result_id": 9,
+    "result_desc": "CEMIG",
+    "legacy_result_id": null
+   },
+   {
+    "input": "agua",
+    "result_id": 5,
+    "result_desc": "Água",
+    "legacy_result_id": 5
+   },
+   {
+    "input": "AGUA",
+    "result_id": 5,
+    "result_desc": "Água",
+    "legacy_result_id": 5
+   },
+   {
+    "input": "água",
+    "result_id": 5,
+    "result_desc": "Água",
+    "legacy_result_id": 5
+   },
+   {
+    "input": "condominio",
+    "result_id": 6,
+    "result_desc": "Condomínio",
+    "legacy_result_id": 6
    }
   ]
  },

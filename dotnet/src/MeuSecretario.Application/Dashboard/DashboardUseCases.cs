@@ -51,6 +51,13 @@ public sealed class GetRecentTransactions(IDashboardRepository repository)
 /// <summary><c>GET /api/dashboard/alerts</c> (<c>api.py:1162-1298</c>).</summary>
 public sealed class GetDashboardAlerts(IDashboardRepository repository, IClock clock)
 {
-    public async Task<IReadOnlyList<DashboardAlert>> ExecuteAsync(int userId, CancellationToken cancellationToken) =>
-        DashboardAlerts.Build(await repository.ListActiveSchedulesAsync(userId, cancellationToken), clock.Today);
+    public async Task<IReadOnlyList<DashboardAlert>> ExecuteAsync(int userId, CancellationToken cancellationToken)
+    {
+        // Os vencimentos caem entre hoje e hoje + 7: as transações pagas só interessam nos meses dessas duas datas.
+        var today = clock.Today;
+        var from = ChartsWindow.MonthStart(today);
+        var toExclusive = ChartsWindow.NextMonthStart(today.AddDays(DashboardAlerts.WindowDays));
+        return DashboardAlerts.Build(
+            await repository.ListActiveSchedulesAsync(userId, from, toExclusive, cancellationToken), today);
+    }
 }

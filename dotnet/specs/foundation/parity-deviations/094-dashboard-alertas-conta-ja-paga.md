@@ -1,6 +1,6 @@
 # Desvio 094 — Dashboard: alerta continua para a conta já paga no mês
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 006, 2026-10-09)
 - **Features afetadas:** 006
 - **Severidade:** correção
 

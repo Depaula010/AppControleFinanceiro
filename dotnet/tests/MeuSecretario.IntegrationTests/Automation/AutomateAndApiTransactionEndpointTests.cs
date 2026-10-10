@@ -207,8 +207,8 @@ public class AutomateEndpointTests(PostgresFixture postgres) : IAsyncLifetime
     [Theory]
     [Trait("AC", "011-005")]
     [InlineData("isto não é json")]
-    [InlineData("""{"valor_decimal": null}""")]
-    public async Task InvalidExtraction_Is500WithTheFixedText_AndNothingLeaks(string response)
+    [InlineData("""{"descricao_bruta": 5, "valor_decimal": 1}""")]
+    public async Task UnreadableExtraction_Is500WithTheFixedText_AndNothingLeaks(string response)
     {
         _env.Llm.Then(response);
 
@@ -223,6 +223,25 @@ public class AutomateEndpointTests(PostgresFixture postgres) : IAsyncLifetime
         _env.Logs.Entries.ShouldContain(e => e.Message.Contains("Erro no /webhook-automate"));
         (await _env.ScalarAsync<int>("SELECT count(*)::int FROM transacoes")).ShouldBe(0);
         _env.Cache.Values.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [Trait("AC", "011-017")]
+    [InlineData("""{"valor_decimal": null}""", "Valor invalido na notificacao: deve ser positivo")]
+    [InlineData("""{"valor_decimal": 0, "descricao_bruta": "X"}""", "Valor invalido na notificacao: deve ser positivo")]
+    [InlineData("""{"valor_decimal": 5, "tipo_fluxo": "Receita"}""", "tipo_fluxo invalido na notificacao. Use: Renda ou Despesa")]
+    public async Task InvalidFlowOrValue_Is400_WithNothingSavedOrPending(string response, string message)
+    {
+        // Desvio 097: o Flask respondia 500 (ou criava a pendência de R$ 0,00).
+        _env.Llm.Then(response);
+
+        var (status, body) = await _env.Post("/webhook-automate", Body());
+
+        status.ShouldBe(HttpStatusCode.BadRequest);
+        body.ShouldBe($$"""{"status":"erro","mensagem":"{{message}}"}""");
+        (await _env.ScalarAsync<int>("SELECT count(*)::int FROM transacoes")).ShouldBe(0);
+        _env.Cache.Values.ShouldBeEmpty();
+        _env.Bot.Sent.ShouldBeEmpty();
     }
 
     [Fact]
@@ -491,12 +510,13 @@ public class ApiTransacaoEndpointTests(PostgresFixture postgres) : IAsyncLifetim
 
     [Fact]
     [Trait("AC", "011-041")]
-    public async Task NonTextField_Is500WithTheFixedText()
+    public async Task NonTextField_Is400()
     {
+        // Desvio 097: o Flask quebrava em sanitize_input (500).
         var (status, body) = await _env.Post("/api/transacao", Body().Replace("\"Sorveteria\"", "5", StringComparison.Ordinal));
 
-        status.ShouldBe(HttpStatusCode.InternalServerError);
-        body.ShouldBe("""{"status":"erro","mensagem":"Erro ao registrar a transação. Tente novamente."}""");
+        status.ShouldBe(HttpStatusCode.BadRequest);
+        body.ShouldBe("""{"status":"erro","mensagem":"Campo 'local' deve ser texto"}""");
     }
 
     [Fact]

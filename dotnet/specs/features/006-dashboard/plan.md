@@ -48,7 +48,7 @@ Nomes `Metodo_Cenario_Resultado` com `[Trait("AC","006-NN")]`; integração com 
 ## 6. Riscos e decisões
 
 - **Colisão de roteamento com a 004:** `/api/transactions/{id}` (`Map`, todos os métodos) e o literal `/api/transactions/recent` (GET): o literal vence; teste obrigatório (AC-006-02, 04).
-- **Recentes `Renda`:** o front depende dele (089); `TransactionTypes.ToApi` **não** é usado aqui.
+- **Recentes `Renda`:** o front depende dele (089, rejeitado); `TransactionTypes.ToApi` **não** é usado aqui.
 - **`double` do resumo:** soma em `decimal` exato e conversão antes do `PyRound` (parcelas de 2 casas ⇒ mesmo resultado que o `sum` de `float` do Python depois do `round`).
 - **Relógio:** todas as janelas saem do `IClock.Today`, não do `CURRENT_DATE` do banco (UTC).
 - **Cobertura:** Domain ≥ 90% e Application ≥ 80%.

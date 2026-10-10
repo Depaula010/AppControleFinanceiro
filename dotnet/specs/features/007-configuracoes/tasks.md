@@ -38,3 +38,4 @@ As duas entregas podem sair no mesmo PR; a ordem interna é a das tarefas. O `GE
 - [ ] **T16 — Contrato e desvios.** Revisar cada resposta contra o código Python lido (corpo exato dos testes de integração): isolamento de tenant com dois usuários nas 11 rotas (AC-007-81), 500 sem sentinela no corpo nem no log (AC-007-80), desvios 008, 019, 024 e 028 marcados como `implementado` neste escopo; criar os arquivos `parity-deviations/` dos `P-007-N` aprovados; registrar no `parity-deviations/` o achado "`daysBeforeDue` grava em `alerta_potes_threshold`" (P-007-1, mesmo que rejeitado, para a 013); avisar a 012 sobre `IFavoriteAddressRepository` e sobre coordenadas nulas; spec atualizada para `aprovada`/`implementada`; PR aberto.
 
 Definição de pronto: `constitution.md` §10.
+- [x] **T-250 — Desvio 250 implementado** (2026-10-09): coluna `dias_antes_vencimento` (migration 0070), repositório e leitura ajustados; AC-007-48.

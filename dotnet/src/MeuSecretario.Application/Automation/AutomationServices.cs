@@ -156,8 +156,10 @@ public sealed class BudgetValidator(IBudgetReader reader)
 }
 
 /// <summary>
-/// <c>process_invoice_schedules</c> (spec 011 §7.7) numa transação do banco. Erro de um agendamento derruba tudo (500 na rota;
-/// o Flask engole o erro e a transação aborta, desvio 101). Idempotente por (fatura, agendamento).
+/// <c>process_invoice_schedules</c> (spec 011 §7.7) numa transação do banco. Cada agendamento roda dentro de um SAVEPOINT
+/// (desvio 101): o erro de um desfaz só o que ele gravou, o laço segue e <c>stats.erros</c> conta as falhas. O Flask engolia
+/// o erro, o PostgreSQL abortava a transação inteira e a rota respondia 200 com lançamentos que não existiam. Idempotente por
+/// (fatura, agendamento).
 /// </summary>
 public sealed class InvoiceScheduleProcessor(IInvoiceScheduleUnitOfWork unitOfWork) : IInvoiceScheduleProcessor
 {
@@ -169,6 +171,7 @@ public sealed class InvoiceScheduleProcessor(IInvoiceScheduleUnitOfWork unitOfWo
         var fixedCount = 0;
         var installments = 0;
         var reminders = 0;
+        var errors = 0;
         var details = new List<InvoiceScheduleDetail>();
 
         foreach (var schedule in await session.ListSchedulesAsync(cardAccountId, referenceDate.Month, cancellationToken))
@@ -179,35 +182,50 @@ public sealed class InvoiceScheduleProcessor(IInvoiceScheduleUnitOfWork unitOfWo
                 continue;
             }
 
-            if (await session.TransactionExistsAsync(invoiceId, schedule.ScheduleId, cancellationToken))
-            {
-                continue;
-            }
-
             var isInstallment = schedule.ScheduleType == InvoiceScheduleRules.Installment;
-            if (isInstallment && schedule.InstallmentsExecuted is null)
+            InvoiceScheduleDetail detail;
+            await session.BeginScheduleAsync(cancellationToken);
+            try
             {
-                // O Flask soma None + 1 ao montar a descrição (TypeError engolido): o agendamento é pulado.
-                continue;
+                if (await session.TransactionExistsAsync(invoiceId, schedule.ScheduleId, cancellationToken))
+                {
+                    await session.ReleaseScheduleAsync(cancellationToken);
+                    continue;
+                }
+
+                if (isInstallment && schedule.InstallmentsExecuted is null)
+                {
+                    // O Flask soma None + 1 ao montar a descrição (TypeError capturado por agendamento): conta como erro.
+                    throw new AutomationFailureException("parcelas executadas nulas");
+                }
+
+                var income = schedule.GroupName == "Renda";
+                var description = InvoiceScheduleRules.Description(
+                    schedule.Description, schedule.ScheduleType, schedule.InstallmentsExecuted.GetValueOrDefault(), schedule.TotalInstallments);
+
+                await session.InsertTransactionAsync(
+                    new NewScheduledTransaction(
+                        schedule.UserId, cardAccountId, schedule.SubcategoryId, invoiceId, schedule.ScheduleId, description,
+                        InvoiceScheduleRules.SignedAmount(schedule.ExpectedAmount, income),
+                        income ? "Renda" : "Despesa",
+                        InvoiceScheduleRules.TransactionDate(referenceDate, schedule.DayOfMonth)),
+                    cancellationToken);
+
+                if (isInstallment)
+                {
+                    var next = schedule.InstallmentsExecuted!.Value + 1;
+                    await session.AdvanceInstallmentAsync(
+                        schedule.ScheduleId, next, !InvoiceScheduleRules.IsLastInstallment(next, schedule.TotalInstallments), cancellationToken);
+                }
+
+                await session.ReleaseScheduleAsync(cancellationToken);
+                detail = new InvoiceScheduleDetail(schedule.ScheduleType, description, InvoiceScheduleRules.DetailAmount(schedule.ExpectedAmount));
             }
-
-            var income = schedule.GroupName == "Renda";
-            var description = InvoiceScheduleRules.Description(
-                schedule.Description, schedule.ScheduleType, schedule.InstallmentsExecuted.GetValueOrDefault(), schedule.TotalInstallments);
-
-            await session.InsertTransactionAsync(
-                new NewScheduledTransaction(
-                    schedule.UserId, cardAccountId, schedule.SubcategoryId, invoiceId, schedule.ScheduleId, description,
-                    InvoiceScheduleRules.SignedAmount(schedule.ExpectedAmount, income),
-                    income ? "Renda" : "Despesa",
-                    InvoiceScheduleRules.TransactionDate(referenceDate, schedule.DayOfMonth)),
-                cancellationToken);
-
-            if (isInstallment)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                var next = schedule.InstallmentsExecuted!.Value + 1;
-                await session.AdvanceInstallmentAsync(
-                    schedule.ScheduleId, next, !InvoiceScheduleRules.IsLastInstallment(next, schedule.TotalInstallments), cancellationToken);
+                await session.RollbackScheduleAsync(cancellationToken);
+                errors++;
+                continue;
             }
 
             processed++;
@@ -224,11 +242,11 @@ public sealed class InvoiceScheduleProcessor(IInvoiceScheduleUnitOfWork unitOfWo
                     break;
             }
 
-            details.Add(new InvoiceScheduleDetail(schedule.ScheduleType, description, InvoiceScheduleRules.DetailAmount(schedule.ExpectedAmount)));
+            details.Add(detail);
         }
 
         await session.CommitAsync(cancellationToken);
-        return new InvoiceScheduleStats(processed, fixedCount, installments, reminders, details);
+        return new InvoiceScheduleStats(processed, fixedCount, installments, reminders, details, errors);
     }
 }
 

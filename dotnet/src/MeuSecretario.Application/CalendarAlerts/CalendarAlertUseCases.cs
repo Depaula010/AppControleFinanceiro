@@ -9,6 +9,9 @@ public enum AlertRejection
     NoParameters,
     NotConnected,
     InvalidMinutes,
+
+    /// <summary><c>ativo</c> que não é <c>true</c>/<c>false</c> JSON (desvio 120).</summary>
+    InvalidActive,
     UpdateFailed,
 }
 
@@ -72,7 +75,12 @@ public sealed class UpdateCalendarAlertConfig(
             return new AlertConfigResult.Rejected(AlertRejection.NoParameters);
         }
 
-        if (CalendarAlertRules.IsActivationRequested(activeRaw) && !await google.IsConnectedAsync(userId, cancellationToken))
+        if (active.State == FieldState.Invalid)
+        {
+            return new AlertConfigResult.Rejected(AlertRejection.InvalidActive);
+        }
+
+        if (active is { State: FieldState.Valid, Value: true } && !await google.IsConnectedAsync(userId, cancellationToken))
         {
             return new AlertConfigResult.Rejected(AlertRejection.NotConnected);
         }
@@ -82,11 +90,6 @@ public sealed class UpdateCalendarAlertConfig(
         if (minutes.State == FieldState.Invalid)
         {
             return new AlertConfigResult.Rejected(AlertRejection.InvalidMinutes);
-        }
-
-        if (active.State == FieldState.Invalid)
-        {
-            return new AlertConfigResult.Rejected(AlertRejection.UpdateFailed);
         }
 
         return await AlertConfigWriter.ApplyAsync(
