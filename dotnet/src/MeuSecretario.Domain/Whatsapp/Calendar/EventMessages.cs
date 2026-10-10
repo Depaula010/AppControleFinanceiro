@@ -165,7 +165,7 @@ public static partial class EventMessages
         "💡 Responda *'sim'* para confirmar o evento\n" +
         "ou *'não'* para cancelar";
 
-    /// <summary>A resposta <c>casa</c>/<c>trabalho</c>/<c>outro</c> a esta pergunta não é tratada (desvio 156, proposto).</summary>
+    /// <summary>A resposta <c>casa</c>/<c>trabalho</c>/<c>outro</c> a esta pergunta é tratada pelo passo de rota (desvio 156).</summary>
     public static string RouteAskOrigin(IReadOnlyList<UserAddress> addresses)
     {
         var message = new StringBuilder("🚗 *Qual endereço usar como origem?*\n\n");
@@ -177,6 +177,10 @@ public static partial class EventMessages
         message.Append("\n💬 Responda com: _'casa'_, _'trabalho'_ ou _'outro'_");
         return message.ToString();
     }
+
+    /// <summary>Resposta à pergunta de origem com um rótulo que o usuário não tem cadastrado (desvio 156).</summary>
+    public static string RouteOriginUnknown(string label, IReadOnlyList<UserAddress> addresses) =>
+        $"❌ Você não tem um endereço *{label}* salvo.\n\n" + RouteAskOrigin(addresses);
 
     public static string DeleteNothingFound(string search, string? when)
     {

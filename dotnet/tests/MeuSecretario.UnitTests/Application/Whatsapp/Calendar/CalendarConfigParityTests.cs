@@ -100,7 +100,7 @@ public class CalendarConfigParityTests
             var steps = new List<IWhatsAppStep>
             {
                 new EventReplyStep(Rig.Events, Rig.Client),
-                new RouteRequestStep(Rig.Events, new UserAddresses(Addresses), Routes),
+                new RouteRequestStep(Rig.Events, new UserAddresses(Addresses), Routes, new MeuSecretario.Infrastructure.Whatsapp.RouteOriginChoiceStore(Rig.Cache)),
                 new BareCancelStep(transactions, Rig.Events),
             };
             var intents = new List<IWhatsAppIntent> { new HelpIntent(), new NotificationsIntent(Rig.Llm, Store) };
@@ -182,8 +182,10 @@ public class CalendarConfigParityTests
             }
 
             var cache = pipeline.Rig.Cache;
-            (await cache.KeysByPatternAsync("*")).Order(StringComparer.Ordinal).ShouldBe(
-                result.GetProperty("redis").EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal), name);
+            // Desvio 156: a chave route_origin_pending (escolha da origem da rota) só existe no .NET e é conferida em EventStepsTests.
+            (await cache.KeysByPatternAsync("*")).Where(k => !k.StartsWith("route_origin_pending:", StringComparison.Ordinal))
+                .Order(StringComparer.Ordinal).ShouldBe(
+                    result.GetProperty("redis").EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal), name);
             foreach (var entry in result.GetProperty("redis").EnumerateObject())
             {
                 JsonNode.DeepEquals(JsonNode.Parse(cache.RawValue(entry.Name)!), JsonNode.Parse(entry.Value.GetRawText())).ShouldBeTrue($"{name}: {entry.Name}");

@@ -68,6 +68,19 @@ public interface IPendingEventStore
     Task DeleteAsync(string number, string id, CancellationToken cancellationToken);
 }
 
+/// <summary>
+/// Escolha de origem da rota pendente (desvio 156): <c>route_origin_pending:{numero}</c> guarda o id do evento pendente enquanto o
+/// usuário não responde <c>casa</c>/<c>trabalho</c>/<c>outro</c>. TTL de 300 s, como o evento.
+/// </summary>
+public interface IRouteOriginChoice
+{
+    Task SetAsync(string number, string eventId, CancellationToken cancellationToken);
+
+    Task<string?> GetAsync(string number, CancellationToken cancellationToken);
+
+    Task ClearAsync(string number, CancellationToken cancellationToken);
+}
+
 /// <summary>Sessão de check-in noturno ativa (<c>nightly_checkin_active:{numero}</c>), criada pelo job da 013.</summary>
 public interface ICheckinSession
 {

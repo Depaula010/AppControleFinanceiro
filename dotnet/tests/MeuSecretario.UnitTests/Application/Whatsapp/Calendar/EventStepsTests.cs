@@ -7,7 +7,7 @@ using NSubstitute;
 
 namespace MeuSecretario.UnitTests.Application.Whatsapp.Calendar;
 
-public class EventStepsTests
+public partial class EventStepsTests
 {
     private const string Key = "pending_event:5531999990001:ab12cd34";
 
@@ -147,7 +147,7 @@ public class EventStepsTests
 
     // ---------------------------------------------------------------- calcular rota
 
-    private static RouteRequestStep Route(CalendarRig rig, IRouteClient routes) => new(rig.Events, rig.UserAddresses, routes);
+    private static RouteRequestStep Route(CalendarRig rig, IRouteClient routes) => new(rig.Events, rig.UserAddresses, routes, new MeuSecretario.Infrastructure.Whatsapp.RouteOriginChoiceStore(rig.Cache));
 
     private static string EventJson(string? location) =>
         $$"""{"usuario_id":7,"titulo":"Reunião","data_evento":"2026-10-09","hora_inicio":"14:00","hora_fim":null,"descricao":null,"localizacao":{{(location is null ? "null" : "\"" + location + "\"")}}}""";

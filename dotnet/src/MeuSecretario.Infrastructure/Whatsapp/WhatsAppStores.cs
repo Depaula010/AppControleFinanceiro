@@ -111,6 +111,21 @@ public sealed class PendingEventStore(ICache cache, IPendingIdGenerator ids) : I
     }
 }
 
+/// <summary><c>route_origin_pending:{numero}</c> (desvio 156): id do evento que aguarda a escolha da origem da rota.</summary>
+public sealed class RouteOriginChoiceStore(ICache cache) : IRouteOriginChoice
+{
+    private static readonly TimeSpan Ttl = TimeSpan.FromSeconds(300);
+
+    public async Task SetAsync(string number, string eventId, CancellationToken cancellationToken) =>
+        await cache.SetJsonAsync($"route_origin_pending:{number}", eventId, Ttl, cancellationToken);
+
+    public Task<string?> GetAsync(string number, CancellationToken cancellationToken) =>
+        cache.GetJsonAsync<string>($"route_origin_pending:{number}", cancellationToken);
+
+    public async Task ClearAsync(string number, CancellationToken cancellationToken) =>
+        await cache.DeleteAsync($"route_origin_pending:{number}", cancellationToken);
+}
+
 /// <summary><c>nightly_checkin_active:{numero}</c>: o valor é o id da sessão (JSON de texto).</summary>
 public sealed class CheckinSessionState(ICache cache) : ICheckinSession
 {
