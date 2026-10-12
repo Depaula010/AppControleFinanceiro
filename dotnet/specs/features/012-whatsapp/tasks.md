@@ -80,6 +80,7 @@ Retomada: o que está `[x]` está commitado; a próxima sub-entrega começa na p
 
 ## Fechamento da feature
 
+- [x] **T45 — Desvios aprovados do grupo financeiro (2026-10-09).** 150 (descrição bruta quando não há agendamento), 151 (transferência: `TransferIntent` + `TransferConfirmation`), 155 (`last_pending_event`), 156 (`route_origin_pending`), 158 (prompts de análise/previsão em módulo e `formatar_moeda`, previsão sem histórico, desempate por nome), 161 (`t.usuario_id = a.usuario_id` nos vencimentos), 170 (gasto do pote soma todas as subcategorias) e 210 (palavra inteira e adiamento primeiro no check-in). Cenários antigos do harness mantidos como evidência em `KnownDivergences`/`Deviation158`/`Deviation210`.
 - [ ] **T44 — Desvios e spec.** Criar `parity-deviations/150` a `161` (estado `proposto`), atualizar `README` (só linhas no fim; marcar 014, 026, 039, 062, 063: parte 012 implementada), spec atualizada para `implementada`, relatório com arquivos compartilhados tocados.
 
 Definição de pronto: `constitution.md` §10.

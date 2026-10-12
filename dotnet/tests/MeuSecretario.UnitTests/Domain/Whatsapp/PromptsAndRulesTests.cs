@@ -233,7 +233,7 @@ public class MessageIntentTests
     [InlineData("1,2", false)]
     [InlineData("depois", false)]
     [Trait("AC", "012-015")]
-    public void HasEscapeKeyword_IsASubstringTest(string text, bool expected) => MessageIntent.HasEscapeKeyword(text).ShouldBe(expected);
+    public void HasEscapeKeyword_IsAWholeWordTest(string text, bool expected) => MessageIntent.HasEscapeKeyword(text).ShouldBe(expected);
 
     [Fact]
     [Trait("AC", "012-015")]

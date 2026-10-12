@@ -1,6 +1,6 @@
 # Desvio 210 — Resposta ao check-in procura "ok"/"sim"/"não" como trecho de qualquer palavra
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-09)
 - **Features afetadas:** 012, 013
 - **Severidade:** correção
 

@@ -157,6 +157,40 @@ public class FixedBillsDomainTests
         text.ShouldContain("🔴 *FATURAS VENCIDAS:*\n• Inter - R$ 100,00 - Venceu em 01/10/2026");
     }
 
+    private static readonly HashSet<string> Deviation210Messages = new(StringComparer.Ordinal) { "assim", "okay", "ok não", "não ok" };
+
+    [Theory]
+    [Trait("AC", "012-404")]
+    [InlineData("assim", CheckinReplyKind.Invalid)]
+    [InlineData("okay", CheckinReplyKind.Invalid)]
+    [InlineData("joaquim", CheckinReplyKind.Invalid)]
+    [InlineData("tokyo", CheckinReplyKind.Invalid)]
+    [InlineData("ok não", CheckinReplyKind.Defer)]
+    [InlineData("não ok", CheckinReplyKind.Defer)]
+    [InlineData("não, ok", CheckinReplyKind.Defer)]
+    [InlineData("ainda não", CheckinReplyKind.Defer)]
+    [InlineData("ok", CheckinReplyKind.Full)]
+    [InlineData("Ok!", CheckinReplyKind.Full)]
+    [InlineData("sim, tudo certo", CheckinReplyKind.Full)]
+    [InlineData("tudo pago", CheckinReplyKind.Full)]
+    [InlineData("👍", CheckinReplyKind.Full)]
+    [InlineData("1 e 3", CheckinReplyKind.Partial)]
+    [InlineData("não sei", CheckinReplyKind.Defer)]
+    public void Deviation210_WholeWordsAndDeferPriority(string message, CheckinReplyKind expected) =>
+        CheckinReplyParser.Parse(message, 3).Kind.ShouldBe(expected);
+
+    [Theory]
+    [Trait("AC", "012-015")]
+    [InlineData("valorizar", false)]
+    [InlineData("o valor", true)]
+    [InlineData("meus gastos", true)]
+    [InlineData("os valores", true)]
+    [InlineData("agendar", true)]
+    [InlineData("reagendar", false)]
+    [InlineData("1, 2", false)]
+    public void Deviation210_EscapeKeywordsAreWholeWords(string message, bool expected) =>
+        MessageIntent.HasEscapeKeyword(message).ShouldBe(expected);
+
     [Fact]
     [Trait("AC", "012-404")]
     public void CheckinReplyParser_MatchesTheFlask()
@@ -167,6 +201,13 @@ public class FixedBillsDomainTests
         {
             var message = c.GetProperty("message").GetString()!;
             var total = c.GetProperty("total").GetInt32();
+
+            // Desvio 210: o Flask confirmava tudo por trecho ("assim", "okay") ou com "ok" mesmo junto de "não"; ver Deviation210_*.
+            if (Deviation210Messages.Contains(message))
+            {
+                continue;
+            }
+
             var reply = CheckinReplyParser.Parse(message, total);
             var label = $"'{message}' / {total}";
 

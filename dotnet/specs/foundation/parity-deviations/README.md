@@ -139,7 +139,7 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [190](190-whatsapp-desativar-notificacao-vira-ativar.md) | Desativar resumo matinal ou check-in por WhatsApp ativa | correção | 012 | aprovado |
 | [191](191-whatsapp-notificacoes-contas-vencer-metodo-inexistente.md) | Configurar Notificações (Gemini, contas_vencer) chama método que não existe | correção | 012 | aprovado |
 | [192](192-whatsapp-deletar-evento-quando-qualquer-valor-vira-amanha.md) | Deletar Evento: qualquer valor de `quando` diferente de `hoje` vira amanhã | correção | 012 | aprovado |
-| [210](210-whatsapp-checkin-resposta-por-trecho.md) | Resposta ao check-in procura "ok"/"sim"/"não" como trecho de qualquer palavra | correção | 012, 013 | aprovado |
+| [210](210-whatsapp-checkin-resposta-por-trecho.md) | Resposta ao check-in procura "ok"/"sim"/"não" como trecho de qualquer palavra | correção | 012, 013 | implementado (feature 012, 2026-10-09) |
 | [230](230-whatsapp-grafico-periodo-sem-validacao.md) | Gráfico de Gastos: período sem validação do tipo e da faixa | correção | 012 | aprovado |
 | [231](231-whatsapp-grafico-saldo-e-filtros.md) | Gráficos: saldo da linha ignora o histórico anterior ao período e filtros inconsistentes | correção | 012 | aprovado |
 | [232](232-whatsapp-comparacao-mensal-sinal-e-formato.md) | Comparação Mensal: totais negativos, variação invertida e números em formato inglês | correção | 012 | aprovado |

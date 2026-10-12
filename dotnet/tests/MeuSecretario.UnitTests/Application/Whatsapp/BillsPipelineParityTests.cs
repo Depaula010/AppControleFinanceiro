@@ -10,6 +10,13 @@ namespace MeuSecretario.UnitTests.Application.Whatsapp;
 /// </summary>
 public class BillsPipelineParityTests
 {
+    /// <summary>
+    /// Cenários do harness com o comportamento ANTIGO do Flask que o desvio 210 substituiu ("assim" e "ok não" confirmavam tudo).
+    /// Ficam no harness como evidência; <see cref="Deviation210_WordMatchingAndDeferWins"/> prova o novo.
+    /// </summary>
+    internal static readonly IReadOnlySet<string> Deviation210 =
+        new HashSet<string>(StringComparer.Ordinal) { "checkin_todas_assim_confirma_tudo", "checkin_ok_ganha_do_nao" };
+
     /// <summary>Resolver a fatura do cartão é detalhe do motor de agendamentos (013); o rótulo do Flask não tem equivalente aqui.</summary>
     private static readonly string[] IgnoredCalls = ["finance_service.get_or_create_fatura"];
 
@@ -17,7 +24,7 @@ public class BillsPipelineParityTests
     [Trait("AC", "012-017")]
     public async Task EveryBillsScenario_MatchesTheFlask()
     {
-        var scenarios = BillsScenarios.All.ToList();
+        var scenarios = BillsScenarios.All.Where(s => !Deviation210.Contains(s.GetProperty("name").GetString()!)).ToList();
         scenarios.Count.ShouldBeGreaterThan(60);
 
         var failures = new List<string>();
@@ -35,6 +42,30 @@ public class BillsPipelineParityTests
         }
 
         failures.ShouldBeEmpty(string.Join("\n", failures));
+    }
+
+    [Theory]
+    [Trait("AC", "012-404")]
+    [InlineData("checkin_todas_assim_confirma_tudo", false)]
+    [InlineData("checkin_ok_ganha_do_nao", true)]
+    public async Task Deviation210_WordMatchingAndDeferWins(string scenarioName, bool deferred)
+    {
+        var scenario = BillsScenarios.All.Single(s => s.GetProperty("name").GetString() == scenarioName);
+        scenario.GetProperty("deviation").GetString().ShouldBe("210");
+        var config = scenario.GetProperty("config");
+        var rig = new BillsRig(config);
+        foreach (var entry in config.GetProperty("redis").EnumerateObject())
+        {
+            await rig.SeedAsync(entry.Name, JsonNode.Parse(entry.Value.GetRawText()));
+        }
+
+        var body = scenario.GetProperty("body");
+        var reply = await rig.SendAsync(body.GetProperty("texto").GetString()!, body.GetProperty("numero_remetente").GetString()!);
+
+        // Nenhuma conta é paga e a sessão some, seja por adiamento ou por texto sem relação com o check-in.
+        reply.ShouldBe(deferred ? CheckinReplyTexts.Deferred : CheckinReplyParser.Unrecognized);
+        rig.Calls.ShouldNotContain("FixedBillsService.settle_fixed_bill");
+        (await rig.Cache.KeysByPatternAsync("nightly_checkin*")).ShouldBeEmpty();
     }
 
     private static async Task RunAsync(JsonElement scenario, string name, List<string> failures)
