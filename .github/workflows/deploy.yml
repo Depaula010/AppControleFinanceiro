@@ -93,7 +93,7 @@ jobs:
             echo "🗄️ Subindo Redis e aplicando migrations do .NET (aditivas, idempotentes)..."
             docker compose up -d redis
             sleep 3
-            docker compose run --rm --no-deps web --migrate
+            docker compose run --rm -T --no-deps web --migrate < /dev/null
 
             echo "🧹 Limpando chaves do Redis específicas do Flask (dedupe invoice_*/calendar_* é mantido)..."
             docker compose exec -T redis sh -c 'for p in "pending_*" "nightly_checkin*" "security:*" "gemini_cache:*"; do redis-cli --scan --pattern "$p" | xargs -r redis-cli del > /dev/null; done'
