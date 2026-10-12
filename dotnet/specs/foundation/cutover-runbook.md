@@ -69,6 +69,10 @@ Critério: qualquer falha nos itens 1–7, ou erro 5xx sustentado.
 - Rotacionar a senha do Postgres e `API_SECRET_KEY` (esta invalida JWTs: combinar com o Rafael) — a connection string de produção foi exposta em conversa de planejamento.
 - Só então iniciar a Fase 5 (remoção do Python).
 
-## Ajuste de dados antes da virada: fatura Aberta do Cartão Inter (desvio 065)
+## Ajuste de dados da virada: faturas de cartão deslocadas (desvio 065)
 
-Em produção (2026-10-09) a fatura Aberta do cartão 2 tem fechamento 13/10/2026 e vencimento 20/11/2026 (fórmula antiga do Flask). O .NET localiza a fatura por (conta, vencimento) e, com o desvio 065, espera 20/10/2026. Antes da virada: (1) reproduzir em homol, (2) escrever e revisar um UPDATE que acerte o vencimento das faturas Abertas conforme a regra única, sem violar a chave única (conta, vencimento), (3) rodar no mesmo dia da virada, depois do backup. Faturas Fechadas antigas não são alteradas.
+Em produção (export de 2026-10-02) o cartão 2 fecha dia 13 e vence dia 20, e o Flask deixou faturas com vencimento no mês seguinte ao do fechamento (a Aberta fecha 13/10 e vence 20/11) e pares do mesmo ciclo (fevereiro e agosto). O .NET localiza a fatura por (conta, vencimento) com a regra única do desvio 065; sem o ajuste, as compras novas caem no ciclo errado.
+
+**Script:** `dotnet/scripts/cutover/ajuste-faturas-cartao.sql` (idempotente, numa transação). Funde as faturas duplicadas do mesmo ciclo (move as transações) e corrige o vencimento das deslocadas para o mês do fechamento. Validado em 2026-10-12 num banco local com os dados reais do export (12 faturas viraram 10; a Aberta passou a 13/10 → 20/10; uma compra de 12/10 foi para ela e uma de 14/10 criou a de 13/11 → 20/11).
+
+**Na virada:** (1) backup do banco; (2) rodar o script em `bot_whatsapp_prod` pelo HeidiSQL e conferir o `SELECT` final; (3) só então subir o .NET. Rodar também em homol antes, para ensaio.
