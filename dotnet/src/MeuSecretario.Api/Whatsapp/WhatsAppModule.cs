@@ -61,15 +61,18 @@ public sealed class WhatsAppModule : IFeatureModule
         {
             if (!(await database.CheckAsync(cancellationToken)).Connected)
             {
+                WhatsAppLog.Unavailable(logger, "banco de dados indisponível");
                 return Envelopes.E.Error(WhatsAppMessages.DatabaseUnavailable, StatusCodes.Status503ServiceUnavailable);
             }
 
             if (string.IsNullOrEmpty(settings.GeminiApiKey))
             {
+                WhatsAppLog.Unavailable(logger, "GEMINI_API_KEY do sistema vazia");
                 return Envelopes.B.Error(WhatsAppMessages.NotConfigured, StatusCodes.Status503ServiceUnavailable);
             }
 
             var raw = await ReadBytesAsync(request, cancellationToken);
+            WhatsAppLog.Received(logger, raw.Length);
 
             var signature = request.Headers["X-Webhook-Signature"].FirstOrDefault()?.Trim();
             if (string.IsNullOrEmpty(signature))
@@ -90,9 +93,9 @@ public sealed class WhatsAppModule : IFeatureModule
 
             return Parse(raw) switch
             {
-                InputParse.Missing => Envelopes.E.BadRequest(WhatsAppMessages.MissingData),
+                InputParse.Missing => MissingDataResult(logger, raw),
                 InputParse.WrongType => Envelopes.E.Error(WhatsAppMessages.ProcessingFailed, StatusCodes.Status500InternalServerError),
-                InputParse.Valid valid => Envelopes.E.Success(await useCase.ExecuteAsync(valid.Input, cancellationToken)),
+                InputParse.Valid valid => await ProcessedResultAsync(useCase, valid, logger, cancellationToken),
                 _ => throw new InvalidOperationException("Resultado do parse desconhecido."),
             };
         }
@@ -107,6 +110,38 @@ public sealed class WhatsAppModule : IFeatureModule
             WhatsAppLog.QuotaExceeded(logger);
             return Envelopes.E.Error(WhatsAppTexts.AiLimit, StatusCodes.Status429TooManyRequests);
         }
+    }
+
+    private static async Task<IResult> ProcessedResultAsync(
+        HandleWhatsAppMessage useCase,
+        InputParse.Valid valid,
+        ILogger logger,
+        CancellationToken cancellationToken)
+    {
+        var reply = await useCase.ExecuteAsync(valid.Input, cancellationToken);
+        WhatsAppLog.Processed(logger);
+        return Envelopes.E.Success(reply);
+    }
+
+    /// <summary>400 "Dados faltando": registra só os NOMES das chaves recebidas (nunca valores) para diagnosticar contrato do bot.</summary>
+    private static IResult MissingDataResult(ILogger logger, byte[] raw)
+    {
+        var keys = "(corpo vazio ou inválido)";
+        try
+        {
+            using var doc = JsonDocument.Parse(raw);
+            if (doc.RootElement.ValueKind == JsonValueKind.Object)
+            {
+                keys = string.Join(",", doc.RootElement.EnumerateObject().Take(12).Select(p => p.Name.Length > 40 ? p.Name[..40] : p.Name));
+            }
+        }
+        catch (JsonException)
+        {
+            // corpo não é JSON: mantém o texto padrão.
+        }
+
+        WhatsAppLog.MissingFields(logger, keys);
+        return Envelopes.E.BadRequest(WhatsAppMessages.MissingData);
     }
 
     private static async Task<byte[]> ReadBytesAsync(HttpRequest request, CancellationToken cancellationToken)

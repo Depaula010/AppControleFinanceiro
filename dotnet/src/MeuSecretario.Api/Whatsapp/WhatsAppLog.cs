@@ -25,6 +25,18 @@ internal static partial class WhatsAppLog
 
     [LoggerMessage(EventId = 12006, Level = LogLevel.Warning, Message = "Limite do Gemini atingido no /webhook-whatsapp")]
     public static partial void QuotaExceeded(ILogger logger);
+
+    [LoggerMessage(EventId = 12007, Level = LogLevel.Information, Message = "Webhook do WhatsApp recebido ({Bytes} bytes)")]
+    public static partial void Received(ILogger logger, int bytes);
+
+    [LoggerMessage(EventId = 12008, Level = LogLevel.Information, Message = "Webhook do WhatsApp processado com sucesso")]
+    public static partial void Processed(ILogger logger);
+
+    [LoggerMessage(EventId = 12010, Level = LogLevel.Warning, Message = "Webhook do WhatsApp respondeu 503: {Reason}")]
+    public static partial void Unavailable(ILogger logger, string reason);
+
+    [LoggerMessage(EventId = 12009, Level = LogLevel.Warning, Message = "Webhook do WhatsApp sem texto ou numero_remetente; chaves recebidas: {Keys}")]
+    public static partial void MissingFields(ILogger logger, string keys);
 }
 
 /// <summary>Implementa a porta de diagnóstico da Application com o logger da Api.</summary>
