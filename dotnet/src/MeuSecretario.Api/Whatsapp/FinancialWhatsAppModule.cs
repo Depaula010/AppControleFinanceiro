@@ -18,6 +18,7 @@ internal static class FinancialWhatsAppModule
         services.AddScoped<IInvoiceForDate, InvoiceForDate>();
         services.AddScoped<AccountResolver>();
         services.AddScoped<TransactionConfirmationSaver>();
+        services.AddScoped<TransferConfirmation>();
 
         // 012a
         services.AddScoped<IWhatsAppStep, TransactionReplyStep>();

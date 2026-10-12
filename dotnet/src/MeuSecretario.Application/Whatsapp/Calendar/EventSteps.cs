@@ -124,10 +124,10 @@ public sealed class EventReplyStep(IPendingEventStore events, ICalendarClient ca
 
 /// <summary>
 /// "calcular rota" (<c>whatsapp_handler.py:176-266</c>): tempo de deslocamento do endereço favorito até o local do evento pendente.
-/// Sempre responde. Com vários endereços pergunta a origem, mas a resposta não é tratada (desvio 156, proposto). O limite diário de
+/// Sempre responde. Com vários endereços pergunta a origem e guarda a escolha pendente; a resposta <c>casa</c>/<c>trabalho</c>/<c>outro</c> calcula a rota (desvio 156). O limite diário de
 /// rotas não é aplicado (desvio 055).
 /// </summary>
-public sealed class RouteRequestStep(IPendingEventStore events, UserAddresses addresses, IRouteClient routes) : IWhatsAppStep
+public sealed class RouteRequestStep(IPendingEventStore events, UserAddresses addresses, IRouteClient routes, IRouteOriginChoice originChoice) : IWhatsAppStep
 {
     public int Order => StepOrder.RouteRequest;
 
@@ -135,7 +135,7 @@ public sealed class RouteRequestStep(IPendingEventStore events, UserAddresses ad
     {
         if (!MessageIntent.WantsRoute(context.Lower))
         {
-            return null;
+            return await HandleOriginAnswerAsync(context, cancellationToken);
         }
 
         var latest = await events.GetLatestAsync(context.Number, cancellationToken);
@@ -157,16 +157,58 @@ public sealed class RouteRequestStep(IPendingEventStore events, UserAddresses ad
 
         if (list.Count > 1)
         {
+            if (latest.Id is { } pendingId)
+            {
+                await originChoice.SetAsync(context.Number, pendingId, cancellationToken);
+            }
+
             return EventMessages.RouteAskOrigin(list);
         }
 
-        var origin = list[0];
+        return await CalculateAsync(pending, list[0], cancellationToken);
+    }
 
+    /// <summary>Desvio 156: <c>casa</c>/<c>trabalho</c>/<c>outro</c> logo após a pergunta de origem.</summary>
+    private async Task<string?> HandleOriginAnswerAsync(PipelineContext context, CancellationToken cancellationToken)
+    {
+        var label = context.Lower.Trim();
+        if (label is not ("casa" or "trabalho" or "outro"))
+        {
+            return null;
+        }
+
+        var eventId = await originChoice.GetAsync(context.Number, cancellationToken);
+        if (string.IsNullOrEmpty(eventId))
+        {
+            return null;
+        }
+
+        var pending = await events.GetAsync(context.Number, eventId, cancellationToken);
+        if (pending is null || string.IsNullOrEmpty(pending.Location))
+        {
+            await originChoice.ClearAsync(context.Number, cancellationToken);
+            return null;
+        }
+
+        var list = await addresses.GetAsync(pending.UserId, cancellationToken);
+        var chosen = list.FirstOrDefault(a => a.Label == label);
+        if (chosen is null)
+        {
+            return EventMessages.RouteOriginUnknown(label, list);
+        }
+
+        await originChoice.ClearAsync(context.Number, cancellationToken);
+        return await CalculateAsync(pending, chosen, cancellationToken);
+    }
+
+    private async Task<string> CalculateAsync(PendingEvent pending, UserAddress origin, CancellationToken cancellationToken)
+    {
+        var location = pending.Location ?? string.Empty;
         // Chave do sistema (sem usuário), como o TravelTimeService.geocode_address do Flask.
-        var destination = await routes.GeocodeAsync(pending.Location, null, cancellationToken);
+        var destination = await routes.GeocodeAsync(location, null, cancellationToken);
         if (destination is null || destination.Lat == 0 || destination.Lon == 0)
         {
-            return EventMessages.RouteDestinationNotFound(pending.Location);
+            return EventMessages.RouteDestinationNotFound(location);
         }
 
         // Endereço sem coordenadas: o OpenRouteService recusa a rota e o Flask responde que não conseguiu calcular.
@@ -184,7 +226,7 @@ public sealed class RouteRequestStep(IPendingEventStore events, UserAddresses ad
 
         return EventMessages.RouteCalculated(
             origin.Label,
-            string.IsNullOrEmpty(destination.Label) ? pending.Location : destination.Label,
+            string.IsNullOrEmpty(destination.Label) ? location : destination.Label,
             travel.DurationMinutes,
             PyFloat.Repr(travel.DistanceKm));
     }

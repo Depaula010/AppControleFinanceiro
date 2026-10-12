@@ -1,6 +1,6 @@
 # Desvio 158 — Análise e previsão: valores negativos, desempate aleatório e KeyError sem histórico
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-09)
 - **Features afetadas:** 012
 - **Severidade:** correção
 

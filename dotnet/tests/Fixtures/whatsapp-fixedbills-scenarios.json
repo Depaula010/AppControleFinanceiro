@@ -2823,7 +2823,7 @@
    "name": "checkin_todas_assim_confirma_tudo",
    "group": "012d",
    "layer": "pipeline",
-   "deviation": null,
+   "deviation": "210",
    "texto": "assim",
    "numero": "5531999990001@s.whatsapp.net",
    "config": {
@@ -4169,7 +4169,7 @@
    "name": "checkin_ok_ganha_do_nao",
    "group": "012d",
    "layer": "pipeline",
-   "deviation": null,
+   "deviation": "210",
    "texto": "ok não",
    "numero": "5531999990001@s.whatsapp.net",
    "config": {

@@ -394,7 +394,11 @@ public class CalendarServicesTests
             rig.Llm.Requests.Single().UserId.ShouldBe(7, name);
 
             var expectedKeys = c.GetProperty("redis").EnumerateObject().Select(p => p.Name).ToList();
-            var keys = (await rig.Cache.KeysByPatternAsync("*")).ToList();
+            var allKeys = (await rig.Cache.KeysByPatternAsync("*")).ToList();
+
+            // Desvio 155: a chave extra last_pending_event aponta para o evento recém-criado (o Flask não a grava).
+            var keys = allKeys.Where(k => !k.StartsWith("last_pending_event:", StringComparison.Ordinal)).ToList();
+            allKeys.Count(k => k.StartsWith("last_pending_event:", StringComparison.Ordinal)).ShouldBe(expectedKeys.Count, name);
             keys.ShouldBe(expectedKeys, name);
             foreach (var entry in c.GetProperty("redis").EnumerateObject())
             {

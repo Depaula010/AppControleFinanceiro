@@ -212,17 +212,17 @@ public sealed class FeedbackReader(IDbConnectionFactory connections) : IFeedback
 
         var (start, end) = BudgetPeriods.For(pot.Periodicidade, today);
 
-        // O Flask junta o pote a UMA subcategoria (a da transação): o gasto é só dela, não de todas as do pote.
+        // Desvio 170: o gasto é o de TODAS as subcategorias do pote (como o aviso de orçamento da 011); o Flask somava só a da transação.
         var spent = await connection.ExecuteScalarAsync<decimal>(new CommandDefinition(
             """
             SELECT COALESCE(SUM(ABS(t.valor)), 0)
             FROM transacoes t
-            WHERE t.subcategoria_id = @subcategoryId
+            WHERE t.subcategoria_id IN (SELECT subcategoria_id FROM potesubcategorias WHERE pote_id = @potId)
               AND t.usuario_id = @userId
               AND t.tipo_transacao = 'Despesa'
               AND t.data_transacao >= @start AND t.data_transacao <= @end
             """,
-            new { userId, subcategoryId, start, end },
+            new { userId, potId = pot.Id, start, end },
             cancellationToken: cancellationToken));
 
         var limit = (double)pot.ValorLimite;

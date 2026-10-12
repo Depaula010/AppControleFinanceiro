@@ -27,8 +27,9 @@ public enum CheckinReplyKind
 public sealed record CheckinReply(CheckinReplyKind Kind, IReadOnlyList<int> Indices, string? Text);
 
 /// <summary>
-/// <c>NightlyCheckinService.parse_checkin_response</c> (<c>nightly_checkin_service.py:430-480</c>), porte literal: as palavras são
-/// procuradas como trecho do texto (por isso "assim" confirma tudo, pois contém "sim") e a confirmação vem antes do adiamento.
+/// <c>NightlyCheckinService.parse_checkin_response</c> (<c>nightly_checkin_service.py:430-480</c>) com o desvio 210 (implementado):
+/// as palavras são procuradas como PALAVRA inteira (o Flask procurava trecho: "assim" e "joaquim" confirmavam tudo) e o adiamento tem
+/// prioridade sobre a confirmação ("ok não" adia). Emojis de confirmação continuam valendo em qualquer parte; números, como antes.
 /// </summary>
 public static partial class CheckinReplyParser
 {
@@ -46,15 +47,16 @@ public static partial class CheckinReplyParser
         ArgumentNullException.ThrowIfNull(message);
         var lower = message.Trim().ToLowerInvariant();
 
-        if (ConfirmEmojis.Any(e => message.Contains(e, StringComparison.Ordinal))
-            || ConfirmWords.Any(w => lower.Contains(w, StringComparison.Ordinal)))
-        {
-            return new CheckinReply(CheckinReplyKind.Full, [.. Enumerable.Range(1, Math.Max(totalItems, 0))], null);
-        }
-
-        if (DeferWords.Any(w => lower.Contains(w, StringComparison.Ordinal)))
+        // Desvio 210: adiamento primeiro; depois a confirmação, ambos por palavra inteira.
+        if (DeferWords.Any(w => ContainsWord(lower, w)))
         {
             return new CheckinReply(CheckinReplyKind.Defer, [], null);
+        }
+
+        if (ConfirmEmojis.Any(e => message.Contains(e, StringComparison.Ordinal))
+            || ConfirmWords.Any(w => ContainsWord(lower, w)))
+        {
+            return new CheckinReply(CheckinReplyKind.Full, [.. Enumerable.Range(1, Math.Max(totalItems, 0))], null);
         }
 
         var numbers = Numbers(message);
@@ -73,6 +75,37 @@ public static partial class CheckinReplyParser
 
         return new CheckinReply(CheckinReplyKind.Invalid, [], Unrecognized);
     }
+
+    /// <summary>
+    /// A palavra (ou frase) <paramref name="word"/> como palavra inteira: não pode ter letra, dígito ou <c>_</c> colado antes nem depois
+    /// (o <c>\b</c> do <c>re</c>). Desvio 210.
+    /// </summary>
+    internal static bool ContainsWord(string text, string word)
+    {
+        var from = 0;
+        while (from <= text.Length - word.Length)
+        {
+            var index = text.IndexOf(word, from, StringComparison.Ordinal);
+            if (index < 0)
+            {
+                return false;
+            }
+
+            var before = index == 0 || !IsWordChar(text[index - 1]);
+            var end = index + word.Length;
+            var after = end >= text.Length || !IsWordChar(text[end]);
+            if (before && after)
+            {
+                return true;
+            }
+
+            from = index + 1;
+        }
+
+        return false;
+    }
+
+    private static bool IsWordChar(char c) => char.IsLetterOrDigit(c) || c == '_';
 
     /// <summary><c>re.findall(r'\d+')</c> seguido de <c>int()</c>: dígitos Unicode contam e o número não tem limite.</summary>
     private static List<BigInteger> Numbers(string message) =>

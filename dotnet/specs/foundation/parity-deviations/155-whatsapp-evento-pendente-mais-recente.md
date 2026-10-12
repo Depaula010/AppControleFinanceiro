@@ -1,6 +1,6 @@
 # Desvio 155 — Evento pendente "mais recente" depende da ordem do KEYS
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-09)
 - **Features afetadas:** 012
 - **Severidade:** correção
 

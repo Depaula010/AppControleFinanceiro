@@ -1,6 +1,6 @@
 # Spec 012 — Webhook WhatsApp e intents
 
-- **Estado:** aprovada por delegação do Rafael em 2026-10-07 (fluxo SDD delegado ao agente; valem só paridade com o Flask e os desvios já aprovados; achados novos ficam como `proposto` em `parity-deviations/150` a `161` e **não** são implementados)
+- **Estado:** aprovada por delegação do Rafael em 2026-10-07 (fluxo SDD delegado ao agente; valem só paridade com o Flask e os desvios já aprovados; achados novos ficam como `proposto` em `parity-deviations/150` a `161`; em 2026-10-09 foram implementados os desvios aprovados do grupo financeiro: **150, 151, 155, 156, 158, 161, 170 e 210**; 154, 157 e 160 seguem adiados e 152, 153, 159, 190 a 192 e 230 a 233 pertencem a outra entrega)
 - **Onda:** 4
 - **Origem (Python):** `app/routes/webhooks/__init__.py:49-54` (rota), `handlers/whatsapp_handler.py:48-1584` (orquestrador), `shared/validators.py`, `intents/__init__.py:101-244` (registro e `route_intent`), `intents/base_intent.py:34-227`, `intents/{transaction,query,calendar,notification,analytics,admin,config,drive}_intents.py`, `app/services/gemini_service.py:175-374, 443-462, 536-1254 (menos 676-711 e 1137-1188, sem uso), 1509-1722, 1724-1889`, `transaction_confirmation_service.py`, `event_confirmation_service.py`, `transaction_feedback_service.py`, `finance_service.py:297-407, 457-490, 611-860, 922-1042, 1448-1690, 1695-1961`, `fixed_bills_service.py`, `period_query_service.py`, `calendar_query_service.py`, `calendar_management_service.py`, `free_time_finder_service.py`, `user_schedule_pattern_service.py`, `notification_config_service.py`, `monthly_report_config_service.py`, `location_service.py`, `user_address_service.py`, `analytics_service.py`, `forecast_service.py`, `chart_service.py`, `google_drive_service.py:37-100`, `nightly_checkin_service.py:139-246, 381-617`, `queries/agendamentos_queries.py`, `queries/faturas_queries.py`, `shared/formatters`, `shared/validators/input_sanitizer.py`, `services/redis_service.py`.
 - **Depende de:** 001a (`IClock`, `IEncryptionService`), 003 (`ICategoryLookup`), 004 (`ITransactionPosting`, `IInvoiceService`, `ITransactionsUnitOfWork`, `InvoiceLinking`), 005 (`IEmergencyReserveService`), 007 (`IFavoriteAddressRepository`), 008 (`IApiKeyValidator`; chave por usuário via `IProviderKeySelector`), 010 (`ILlmClient`, `ICache`, `IBotClient`, `ICalendarClient`, `IDriveClient`, `IGoogleAccountService`, `GoogleLinks`, `IRouteClient`, `CalendarFormatter`, `DriveFilePolicy`), 011 (`FuzzyScorer`, `BillMatching`, `BudgetPeriods`, `MoneyText`, `InputSanitizer`, `PyJsonValue`, `ConfirmationMessage`, `IPendingTransactionStore`, `TransactionCategorizer`, `DirectPoster`, `IAutomationLookups`, `IBudgetReader`), 014 (nada além da leitura de `calendaralertconfigs` por outras features). 013 (entregue): `NightlyCheckinService` (snapshot, sessão e mensagem), `IScheduleExecutor` e `IChartRenderer` (pizza); o restante do check-in (resposta) é desta feature (§7.9).
@@ -61,7 +61,7 @@ Exceção em qualquer passo cai na linha 7/8 da §3. Dentro das intenções do t
 | Intenção (nome do Gemini) | Tipo | Sub-entrega | Origem |
 |---|---|---|---|
 | `Renda`, `Despesa` | template | 012a | `transaction_intents.py:22-309` |
-| `Transferência` | template | 012a | `transaction_intents.py:312-442`; **falha sempre** (desvio 151) |
+| `Transferência` | template | 012a | `transaction_intents.py:312-442`; desvio 151 **implementado** (no Flask falhava sempre) |
 | `Pagamento Fatura` | inline | 012a | `whatsapp_handler.py:1071-1112` |
 | paguei/quitei... | inline | 012b | `whatsapp_handler.py:444-705` |
 | `Consulta Saldo`, `Consulta Reserva`, `Consulta Detalhes Reserva`, `Consulta Potes` | inline | 012c | `whatsapp_handler.py:758-944` |
@@ -92,9 +92,9 @@ Tudo da §3, §4 passos 1, 2, 7 e 9, o catálogo de prompts (§8) e a infraestru
 6. Pendência (`pending_tx:{numero}:{id}` + `last_pending:{numero}`, TTL 300 s, §7.2) com as chaves, na ordem: `usuario_id`, `conta_id`, `conta_nome`, `conta_tipo`, `categoria_id`, `fatura_id`, `descricao`, `descricao_final` (**a `descricao_agendamento`, nula quando não houve agendamento**), `valor_db`, `valor_original`, `valor_total`, `num_parcelas`, `tipo_transacao`, `tipo_pagamento`, `data_transacao` (`yyyy-MM-dd`), `origem` (`"whatsapp"`). Falha ao gravar ⇒ `❌ Erro ao criar transação pendente`.
 7. Resposta: mensagem de confirmação (`ConfirmationMessage`, 011 §7.5, com `U+FFFD` no cartão; desvio 100 proposto) com as categorias do passo 4.
 
-**Confirmação** (§4 passo 6, §7.2): `OK`/`CONFIRMAR`/`SIM`/`CONFIRMA` grava; `TROCAR`/`MUDAR`/`ALTERAR` lista categorias numeradas; número escolhe; `CANCELAR`/`NÃO`/`NAO`/`CANCELA` descarta. Gravar = `ITransactionPosting` (004): `Renda` ⇒ receita, qualquer outro tipo ⇒ despesa; `Amount = abs(valor_db)`; descrição `descricao_final` **se a chave existe** (mesmo nula), senão `descricao` (**descrição nula ⇒ exceção ⇒ 500**, desvio 150); `num_parcelas > 1` ⇒ `PostInstallmentPurchase` (valor da parcela = `abs(valor_db)`); depois a mensagem de feedback (§7.8). A pendência é apagada **antes** de gravar (o Flask apaga ao decidir `saved`).
+**Confirmação** (§4 passo 6, §7.2): `OK`/`CONFIRMAR`/`SIM`/`CONFIRMA` grava; `TROCAR`/`MUDAR`/`ALTERAR` lista categorias numeradas; número escolhe; `CANCELAR`/`NÃO`/`NAO`/`CANCELA` descarta. Gravar = `ITransactionPosting` (004): `Renda` ⇒ receita, qualquer outro tipo ⇒ despesa; `Amount = abs(valor_db)`; descrição `descricao_final` se preenchida, senão `descricao` (**desvio 150, implementado**: no Flask a chave existia com valor nulo, o `get` devolvia `None` e o `INSERT` violava o `NOT NULL` de `transacoes.descricao`; descrição vazia nas duas ⇒ exceção ⇒ 500); `num_parcelas > 1` ⇒ `PostInstallmentPurchase` (valor da parcela = `abs(valor_db)`); depois a mensagem de feedback (§7.8). A pendência é apagada **antes** de gravar (o Flask apaga ao decidir `saved`).
 
-**Transferência** (template; `transaction_intents.py:312-442`). `extract_transfer_params` lê `c["id"]` de `Row` do SQLAlchemy 2: `TypeError` na primeira conta ⇒ a resposta de **todo** usuário com ao menos uma conta é `❌ Ops! Algo deu errado. Por favor, tente novamente.` e o Gemini nem é chamado. Usuário sem nenhuma conta segue: Gemini (`extract_transfer_details`), validações (`❌ Não consegui identificar o valor da transferência.`, `...a conta de origem. Especifique de qual conta transferir.`, `...a conta de destino. Especifique para qual conta transferir.`), contas por nome (`❌ Uma ou ambas as contas não foram encontradas.`). Mensagens de saldo insuficiente e confirmação existem no código mas são inalcançáveis; **não são portadas** (desvio 151).
+**Transferência** (template; `transaction_intents.py:312-442`; **desvio 151 implementado**). O Flask lê `c["id"]` de `Row` do SQLAlchemy 2 e quebra (`TypeError`) para todo usuário com conta; o .NET segue a intenção do código morto: Gemini (`extract_transfer_details`, contas com `id`), validações (`❌ Não consegui identificar o valor da transferência.`, `...a conta de origem. Especifique de qual conta transferir.`, `...a conta de destino. Especifique para qual conta transferir.`), contas ativas por nome (`❌ Uma ou ambas as contas não foram encontradas.`), mesma conta (`❌ As contas de origem e destino devem ser diferentes.`), saldo da origem >= valor (`❌ Saldo insuficiente na conta de origem.\n\n💰 Saldo disponível: R$ x\n💸 Valor solicitado: R$ y`), e grava a pendência `pending_tx` com `tipo_transacao` `Transferência`, `conta_id` (origem), `conta_destino_id`, `valor_db` positivo, `descricao` (padrão `Transferência`) e `data_transacao` (hoje). Resposta: `🔄 *Transferência a confirmar:*` com descrição, valor, `📤 De` e `📥 Para`. `OK`/`CONFIRMAR` chama `ITransactionPosting.PostTransferAsync` e responde `✅ *Transferência realizada!*` com valor e contas; `CANCELAR` descarta; `TROCAR` responde `Transferência não tem categoria. Digite: CONFIRMAR ou CANCELAR.` e mantém a pendência.
 
 **Pagamento Fatura** (inline). Contas (ativas) em `[{"nome","tipo"}]` ⇒ `extract_fatura_payment_details`; `valor_decimal`, `conta_origem` e `conta_cartao` verdadeiros senão `🤔 Não consegui identificar todos os dados do pagamento.\n\nPor favor, informe:\n• Valor pago\n• Conta de origem\n• Cartão que foi pago\n\nExemplo: *Paguei 500 reais da fatura do Nubank com o Inter*`; contas por nome (`get_account_by_name` sem fallback); alguma não achada ⇒ `❌ Não encontrei as contas mencionadas ({origem} → {cartao}).`; `PostInvoicePayment` (004: fatura `Fechada` mais antiga, desvio 010) com data de hoje; `NotACreditCard` e `SameAccount` (desvios 071 / 004) respondem o mesmo `❌ Não encontrei as contas mencionadas`; sucesso `✅ Pagamento da fatura '{cartão}' ({R$}) registrado com sucesso!`.
 
@@ -123,7 +123,7 @@ Criar evento (pendência de evento, TTL 300 s, confirmação/cancelamento/rota n
 
 ### 6.g (012g) Análises e gráfico
 
-`Análise Inteligente` (Gemini com `UserId`, desvio 063), `Comparação Mensal`, `Previsão de Gastos` (Gemini com `UserId`), `Gráfico de Gastos` (PNG por `IChartRenderer`, enviado por `IBotClient.SendImageAsync` — desvio 026; período validado, desvio 230; só transações consolidadas e saldo real na linha, desvio 231). `Comparação Mensal` usa despesas em valor absoluto, `formatar_moeda` e variação positiva quando o gasto aumenta (desvio 232). `Análise Inteligente` lista os maiores gastos por valor absoluto e os dias da semana em português (desvio 233).
+`Análise Inteligente` (Gemini com `UserId`, desvio 063; **desvio 158**: valores de despesa em módulo e em `formatar_moeda`, `R$ 1.234,50`, no prompt), `Comparação Mensal` (desvio 158: desempate das variações iguais pelo nome da categoria), `Previsão de Gastos` (Gemini com `UserId`; desvio 158: valores em módulo e `formatar_moeda`; **sem histórico** a previsão sai com média 0 em vez de `KeyError`/`❌ Ops!`), `Gráfico de Gastos` (PNG por `IChartRenderer`, enviado por `IBotClient.SendImageAsync` — desvio 026; período validado, desvio 230; só transações consolidadas e saldo real na linha, desvio 231). `Comparação Mensal` usa despesas em valor absoluto, `formatar_moeda` e variação positiva quando o gasto aumenta (desvio 232). `Análise Inteligente` lista os maiores gastos por valor absoluto e os dias da semana em português (desvio 233).
 
 ### 6.h (012h) Drive
 
@@ -145,11 +145,11 @@ Formato da 011 (`PendingTransactionStore`): valor JSON em `pending_tx:{numero}:{
 
 ### 7.3 Evento pendente
 
-`pending_event:{numero}:{id}` (JSON, TTL 300 s, sem `last_pending`). "Mais recente" = **última** chave devolvida pelo `KEYS pending_event:{numero}:*` (ordem do Redis, não garantida; desvio 155). Confirmar: lê de novo, cria o evento (`ICalendarClient.InsertEventAsync`), apaga a pendência só se criou. Textos: `✅ *Evento Criado!*\n\n📝 {titulo}\nEvento '{titulo}' criado com sucesso!`; falha `❌ Erro ao criar evento: {motivo}` (motivo só para "usuário sem Google conectado", o texto literal da 010; qualquer outro erro vira `❌ Erro ao criar evento.`, desvio 008); cancelar `✅ Evento cancelado com sucesso!`.
+`pending_event:{numero}:{id}` (JSON, TTL 300 s, sem `last_pending`). "Mais recente" = o id guardado em `last_pending_event:{numero}` (TTL 300 s, gravado a cada criação e apagado junto com o evento que ele aponta; **desvio 155, implementado**). Sem ponteiro (pendência anterior à virada, ponteiro expirado) cai na **última** chave do `KEYS pending_event:{numero}:*`, como o Flask. Confirmar: lê de novo, cria o evento (`ICalendarClient.InsertEventAsync`), apaga a pendência só se criou. Textos: `✅ *Evento Criado!*\n\n📝 {titulo}\nEvento '{titulo}' criado com sucesso!`; falha `❌ Erro ao criar evento: {motivo}` (motivo só para "usuário sem Google conectado", o texto literal da 010; qualquer outro erro vira `❌ Erro ao criar evento.`, desvio 008); cancelar `✅ Evento cancelado com sucesso!`.
 
 ### 7.4 Cálculo de rota
 
-Requer evento pendente: senão `❌ Não encontrei nenhum evento pendente de confirmação.`; sem `localizacao` ⇒ `❌ Este evento não tem localização definida, não posso calcular tempo de deslocamento.`; endereços do usuário (`usuario_id` do evento) ordenados `casa`, `trabalho`, `outro`: nenhum ⇒ aviso com exemplo; um ⇒ geocodifica o destino (`IRouteClient`, chave do sistema) e calcula; vários ⇒ pergunta `🚗 *Qual endereço usar como origem?*` (a resposta `casa`/`trabalho`/`outro` **não** é tratada, desvio 156). O limite diário de rotas **não** é aplicado (desvio 055).
+Requer evento pendente: senão `❌ Não encontrei nenhum evento pendente de confirmação.`; sem `localizacao` ⇒ `❌ Este evento não tem localização definida, não posso calcular tempo de deslocamento.`; endereços do usuário (`usuario_id` do evento) ordenados `casa`, `trabalho`, `outro`: nenhum ⇒ aviso com exemplo; um ⇒ geocodifica o destino (`IRouteClient`, chave do sistema) e calcula; vários ⇒ pergunta `🚗 *Qual endereço usar como origem?*` e grava `route_origin_pending:{numero}` (id do evento, TTL 300 s); a resposta `casa`/`trabalho`/`outro` (**desvio 156, implementado**), enquanto a escolha existir, calcula a rota com aquela origem e apaga a escolha; rótulo sem endereço ⇒ `❌ Você não tem um endereço *{rótulo}* salvo.` seguido da pergunta (a escolha continua); sem escolha pendente a palavra segue o pipeline. O limite diário de rotas **não** é aplicado (desvio 055).
 
 ### 7.5 Intenção (Gemini)
 
@@ -165,11 +165,11 @@ Prompt `get_message_intent` (§8). Resposta: JSON `{"intent": "..."}`; `null`/au
 
 ### 7.8 Feedback da transação salva
 
-`gerar_feedback_transacao`: cabeçalho `✅ Transação Salva!`, bloco do pote (período do desvio 015 e só se o alerta dispara: `alerta_potes_ativo`/`alerta_potes_threshold`), rodapé de fatura (cartão) ou saldo (demais). Qualquer exceção ⇒ `✅ Transação Salva com Sucesso!`.
+`gerar_feedback_transacao`: cabeçalho `✅ Transação Salva!`, bloco do pote (período do desvio 015; **desvio 170, implementado**: o gasto é a soma de todas as subcategorias do pote no período, como o aviso de orçamento da 011, e não só a da transação; só aparece se o alerta dispara: `alerta_potes_ativo`/`alerta_potes_threshold`), rodapé de fatura (cartão) ou saldo (demais). Qualquer exceção ⇒ `✅ Transação Salva com Sucesso!`.
 
 ### 7.9 Check-in noturno (colisão com a 013)
 
-A 013 entregou o job, o snapshot (`NightlyCheckinService.CollectSnapshotAsync`), o formatador (`FormatConsolidatedMessage`, com `checkinId` nulo = modo leitura) e a sessão no Redis (`nightly_checkin:{numero}:{id}`, formato JSON do Python). A 012 **reutiliza** esse serviço para `Contas Atrasadas` e implementa o que a 013 deixou: `INightlyCheckinResponder` (`parse_checkin_response`: `ok`/👍/✅ ⇒ todos, `não`/`depois` ⇒ nenhum e encerra, números ⇒ parcial, inválido ⇒ encerra; `process_response`; `mark_bills_as_paid` via `IScheduleExecutor`, com a data do vencimento real se o atraso é ≤ 1 dia, senão hoje; sessão sempre apagada, inclusive em exceção). Até o responder existir (012d) o padrão devolve "não tratada". Palavras de escape (`nightly_checkin_service.py:140-152`): `gastei`, `gasto`, `comprei`, `compra`, `paguei`, `pagamento`, `recebi`, `recebimento`, `transferi`, `transferência`, `transferencia`, `saldo`, `extrato`, `consulta`, `quanto`, `valor`, `add`, `criar`, `registrar`, `lançar`, `lancar`, `agendar`, `evento`, `compromisso`, `agenda`, `horário`, `horario`, `config`, `configurar`, `mudar`, `alterar`.
+A 013 entregou o job, o snapshot (`NightlyCheckinService.CollectSnapshotAsync`), o formatador (`FormatConsolidatedMessage`, com `checkinId` nulo = modo leitura) e a sessão no Redis (`nightly_checkin:{numero}:{id}`, formato JSON do Python). A 012 **reutiliza** esse serviço para `Contas Atrasadas` e implementa o que a 013 deixou: `INightlyCheckinResponder` (`parse_checkin_response`; **desvio 210, implementado**: palavras de confirmação e de adiamento por **palavra inteira** ("assim", "okay", "joaquim" não confirmam) e o adiamento tem prioridade ("ok não" adia): `ok`/👍/✅ ⇒ todos, `não`/`depois` ⇒ nenhum e encerra, números ⇒ parcial, inválido ⇒ encerra; `process_response`; `mark_bills_as_paid` via `IScheduleExecutor`, com a data do vencimento real se o atraso é ≤ 1 dia, senão hoje; sessão sempre apagada, inclusive em exceção). Até o responder existir (012d) o padrão devolve "não tratada". Palavras de escape (`nightly_checkin_service.py:140-152`): `gastei`, `gasto`, `comprei`, `compra`, `paguei`, `pagamento`, `recebi`, `recebimento`, `transferi`, `transferência`, `transferencia`, `saldo`, `extrato`, `consulta`, `quanto`, `valor`, `add`, `criar`, `registrar`, `lançar`, `lancar`, `agendar`, `evento`, `compromisso`, `agenda`, `horário`, `horario`, `config`, `configurar`, `mudar`, `alterar` (desvio 210: casadas como palavra inteira, aceitando o plural simples `s`/`es`; "valorizar" não escapa, "gastos" e "valores" escapam).
 
 ### 7.10 Convenções
 
@@ -227,18 +227,18 @@ Numeração a partir de 150 (130+ é da 013; 120-122 da 014). Arquivos em `parit
 
 | # | Título | Recomendação |
 |---|---|---|
-| 150 | Confirmar despesa/renda por WhatsApp falha quando não há agendamento (descrição nula) | **aprovar com urgência** (é o fluxo central) |
-| 151 | Transferência por WhatsApp falha sempre | aprovar (implementar a transferência de verdade) |
+| 150 | Confirmar despesa/renda por WhatsApp falha quando não há agendamento (descrição nula) | **implementado** |
+| 151 | Transferência por WhatsApp falha sempre | **implementado** |
 | 152 | `Configurar Notificações` pelo ramo do Gemini grava e responde 500 | **implementado** (2026-10-10) |
 | 153 | `Solicitar API Key` devolve o valor cru da coluna (cifrado para quem se cadastrou depois da 017) | **implementado** (2026-10-10) |
 | 154 | A extração de despesa/renda não pede data, conta, categoria nem parcelamento | aprovar |
-| 155 | Evento pendente "mais recente" depende da ordem de `KEYS` | aprovar |
-| 156 | Resposta `casa`/`trabalho`/`outro` à pergunta de origem da rota não é tratada | aprovar |
+| 155 | Evento pendente "mais recente" depende da ordem de `KEYS` | **implementado** |
+| 156 | Resposta `casa`/`trabalho`/`outro` à pergunta de origem da rota não é tratada | **implementado** |
 | 157 | `Pagamento Fatura` é inalcançável com "paguei..." | decidir (produto) |
-| 158 | Análise e previsão: valores de despesa negativos, desempate aleatório e `KeyError` sem histórico | aprovar |
+| 158 | Análise e previsão: valores de despesa negativos, desempate aleatório e `KeyError` sem histórico | **implementado** |
 | 159 | Upload ao Drive: o motivo específico da falha nunca é mostrado | **implementado** (2026-10-10) |
 | 160 | `Quitar Conta Fixa` está no prompt do Gemini mas não tem ramo | aprovar (remover do prompt) |
-| 161 | Vencimentos e contas fixas pendentes comparam descrição sem filtrar o usuário | aprovar |
+| 161 | Vencimentos e contas fixas pendentes comparam descrição sem filtrar o usuário | **implementado** |
 
 ### 9.3 Aprovados e implementados em 2026-10-10 (calendário, configurações, Drive e análises)
 
@@ -276,7 +276,7 @@ Convenção: `AC-012-NNN`, faixa por sub-entrega (0xx = 012-0, 1xx = 012a, 2xx =
 - **AC-012-012** Dado `cancelar` sem pendência de transação e sem evento, então o aviso de cancelamento; com pendência, segue a confirmação.
 - **AC-012-013** Dado resposta de confirmação (`OK`, `ok`, `CONFIRMAR`) sem `last_pending`, então o aviso `Não encontrei nada pendente para confirmar...`; `TROCAR` ou dígitos sem pendência seguem para o Gemini.
 - **AC-012-014** Dado `sim`/`s`/`não`/`n`/`desistir`, então a confirmação de **transação** nunca roda (só a de evento).
-- **AC-012-015** Dado `nightly_checkin_active` e palavra de escape no texto, então a chave é apagada e o pipeline continua; sem palavra de escape o responsável pelo check-in decide a resposta.
+- **AC-012-015** Dado `nightly_checkin_active` e palavra de escape (palavra inteira, desvio 210) no texto, então a chave é apagada e o pipeline continua; sem palavra de escape o responsável pelo check-in decide a resposta.
 - **AC-012-016** Prompts de todas as chamadas desta feature renderizam idênticos ao Python (fixtures), com `UserId` e política de cache da §8.
 - **AC-012-017** O pipeline reproduz o Flask nos cenários do harness (ordem dos passos, respostas e chamadas).
 - **AC-012-018** Estado Redis: pendência lida e regravada preserva chaves desconhecidas; `process_confirmation_response` bate com o Python em todos os ramos (fixtures).
@@ -292,10 +292,10 @@ Convenção: `AC-012-NNN`, faixa por sub-entrega (0xx = 012-0, 1xx = 012a, 2xx =
 - **AC-012-110** `OK` grava (`valor` com sinal pelo tipo, categoria, data, conta) e responde o feedback (fixture); a pendência e `last_pending` somem.
 - **AC-012-111** `TROCAR` lista as categorias, regrava a pendência com `awaiting_category_selection` e `categoria_map`; o número seguinte grava com a categoria escolhida; número fora do mapa e texto não numérico respondem os erros fixos.
 - **AC-012-112** `CANCELAR` descarta e responde `❌ Transação cancelada.`; pendência expirada ⇒ `⏱️ Esta transação expirou...`.
-- **AC-012-113** Pendência sem agendamento (`descricao_final` nulo) ⇒ 500 `Erro ao processar.` e nada gravado (desvio 150).
+- **AC-012-113** (desvio 150) Pendência sem agendamento (`descricao_final` nulo, ausente ou vazio) ⇒ `OK` grava com a `descricao` bruta da mensagem (`padaria`), responde o feedback e apaga a pendência; `descricao_final` preenchida vence; parcelada idem. O cenário do harness que mostra o 500 do Flask fica como evidência em `FinancePipelineParityTests.KnownDivergences`.
 - **AC-012-114** Parcelada (`num_parcelas > 1`) ⇒ `PostInstallmentPurchase` (1ª parcela + agendamento `PARCELADO`).
-- **AC-012-115** Feedback: pote (período do desvio 015, alerta por threshold), rodapé de fatura ou saldo; erro ⇒ `✅ Transação Salva com Sucesso!`.
-- **AC-012-120** `Transferência` com contas ⇒ `❌ Ops!...` sem chamar o Gemini; sem contas ⇒ cadeia de validações.
+- **AC-012-115** Feedback: pote (período do desvio 015, gasto de todas as subcategorias do pote pelo desvio 170, alerta por threshold), rodapé de fatura ou saldo; erro ⇒ `✅ Transação Salva com Sucesso!`.
+- **AC-012-120** (desvio 151) `Transferência`: valor/origem/destino ausentes e contas não achadas ⇒ mensagens da cadeia de validações; mesma conta e saldo insuficiente ⇒ mensagem sem pendência; sucesso ⇒ mensagem de confirmação, `OK` grava o par (origem negativa, destino positiva) e responde `✅ *Transferência realizada!*`; `TROCAR` não se aplica; `CANCELAR` descarta. O cenário `transferencia_com_contas` do harness (`❌ Ops!`) fica como evidência em `KnownDivergences`.
 - **AC-012-130** `Pagamento Fatura`: dados incompletos, contas não achadas, não cartão, sucesso (par `Pagamento Fatura`, fatura `Paga`).
 
 **012b — Pagamentos**
@@ -317,14 +317,14 @@ Convenção: `AC-012-NNN`, faixa por sub-entrega (0xx = 012-0, 1xx = 012a, 2xx =
 
 **012d — Contas fixas e vencimentos**
 - **AC-012-401** Contas fixas pendentes (despesas, cartão, receitas, totais, status por dia) e catálogo completo (periodicidades, fatores).
-- **AC-012-402** Vencimentos hoje, amanhã e 7 dias (virada de mês, anual, receitas × despesas × faturas, totais).
+- **AC-012-402** Vencimentos hoje, amanhã e 7 dias (virada de mês, anual, receitas × despesas × faturas, totais); (desvio 161) a checagem de "já pago no mês" por descrição considera só transações do mesmo usuário (`t.usuario_id = a.usuario_id`): a transação de outro usuário com a mesma descrição não esconde a conta.
 - **AC-012-403** Contas atrasadas: snapshot (pendentes 7 dias, atrasadas, faturas) e texto somente leitura; vazio ⇒ `✅ Você não tem contas atrasadas! Tudo em dia! 🎉`.
-- **AC-012-404** Resposta ao check-in: `ok`/👍/✅ confirma todos; `1`, `1 e 3`, `1, 2, 4` parcial; `não`/`depois` encerra sem pagar; inválido encerra; a sessão some sempre; contas pagas viram transações com `agendamento_id` (data do vencimento real se atraso ≤ 1 dia, senão hoje).
+- **AC-012-404** (desvio 210: palavra inteira, adiamento antes da confirmação; "assim"/"okay" ⇒ inválido e "ok não" ⇒ adia, sem pagar nada; os cenários antigos do harness ficam em `BillsPipelineParityTests.Deviation210`) Resposta ao check-in: `ok`/👍/✅ confirma todos; `1`, `1 e 3`, `1, 2, 4` parcial; `não`/`depois` encerra sem pagar; inválido encerra; a sessão some sempre; contas pagas viram transações com `agendamento_id` (data do vencimento real se atraso ≤ 1 dia, senão hoje).
 
 **012e — Calendário**
 - **AC-012-501** Criar evento: validação, `hoje`/`amanha`/ISO, pendência de evento, mensagem de confirmação (com/sem endereços).
-- **AC-012-502** `sim` cria, `não` cancela, falha de Google (sem conexão e outras), sem evento pendente.
-- **AC-012-503** `calcular rota`: sem evento, sem local, sem endereços, um endereço (rota calculada), vários (pergunta), destino não localizado, rota falha.
+- **AC-012-502** `sim` cria, `não` cancela, falha de Google (sem conexão e outras), sem evento pendente; com dois eventos pendentes o `sim` age sobre o último criado, independentemente da ordem das chaves (desvio 155).
+- **AC-012-503** `calcular rota`: sem evento, sem local, sem endereços, um endereço (rota calculada), vários (pergunta), destino não localizado, rota falha; (desvio 156) com vários endereços, a resposta `casa`/`trabalho`/`outro` calcula a rota com aquela origem, a escolha é consumida, rótulo inexistente repergunta e sem pergunta pendente a palavra segue o pipeline.
 - **AC-012-504** Deletar evento: não achou, um (deleta), vários (lista), filtro `hoje`/`amanha`; outro valor de `quando` é sem filtro (desvio 192, AC-012-192).
 - **AC-012-505** Consultar agenda (um dia, período, filtro de horário); sem Google ⇒ mensagem de conexão.
 - **AC-012-506** Horários livres: slots, qualidade, formato da mensagem e sugestão da IA.
@@ -335,7 +335,7 @@ Convenção: `AC-012-NNN`, faixa por sub-entrega (0xx = 012-0, 1xx = 012a, 2xx =
 - **AC-012-603** Localização, relatório mensal (consultar, ativar, desativar, configurar, erros), endereços (salvar com geocodificação, listar na ordem casa/trabalho/outro, deletar), API key, menu.
 
 **012g — Análises**
-- **AC-012-701** Prompt de análise, previsão e sugestão idênticos aos do Python para dados fictícios; `UserId` passado; rodapé; erro do Gemini ⇒ `❌ Ops!...`.
+- **AC-012-701** Prompt de análise, previsão e sugestão idênticos aos do Python para dados fictícios, **exceto** o que o desvio 158 muda (valores de despesa em módulo, `R$ 1.234,50`, variação entre módulos); `UserId` passado; rodapé; erro do Gemini ⇒ `❌ Ops!...`; previsão de usuário sem histórico ⇒ responde com média 0 (os cenários antigos do harness ficam em `AnalyticsParityTests.Deviation158`).
 - **AC-012-702** Comparação mensal (variação, top 5, vazio).
 - **AC-012-703** Gráfico: pizza, barras, linha, sem dados, falha no envio; imagem PNG válida enviada pelo bot com a legenda.
 
@@ -375,18 +375,18 @@ Leitura: `usuarios`, `contas`, `faturas`, `transacoes`, `subcategoria`, `macroca
 4. **`NotACreditCard`/`SameAccount`** no `Pagamento Fatura`: o Flask aceita qualquer conta como cartão; aqui responde `Não encontrei as contas mencionadas` (desvio 071 no serviço da 004).
 5. **Ordem sem `ORDER BY`** do Flask passa a `id` (contas, agendamentos, categorias); chaves de cache dos prompts mudam só se a ordem física era outra (cache descartado na virada).
 6. **`datetime.now()`/`date.today()` do container** e `CURRENT_DATE` do banco (UTC) viram o dia de São Paulo (constituição §7).
-7. **Estatísticas aleatórias** (`set` do Python em `get_monthly_comparison`): desempate determinístico (ordem de aparição).
-8. **Event "mais recente":** a ordem dos `KEYS` do Redis não é garantida em nenhuma das duas implementações (Q-012-4).
+7. **Estatísticas aleatórias** (`set` do Python em `get_monthly_comparison`): desempate determinístico pelo nome da categoria (desvio 158, implementado).
+8. **Event "mais recente":** o Flask depende da ordem dos `KEYS` (não garantida); o .NET usa o ponteiro `last_pending_event:{numero}` (desvio 155) e a chave extra existe só no Redis do .NET.
 9. **Check-in, confirmação em lote (012d):** cada conta confirmada vira uma transação do `IScheduleExecutor` (desvio 011, idempotente por mês); o Flask grava todas numa só transação que desfaz tudo no primeiro erro. Aqui as contas anteriores à que falhou continuam gravadas, a sessão some e a resposta é `❌ Erro ao salvar transações.` (sem `str(e)`, desvio 008). Conta já lançada no mês conta como confirmada sem duplicar.
 10. **Check-in, confirmação parcial (012d):** `list(set(indices))` do Python sai em ordem crescente para números pequenos; o .NET sempre ordena em crescente (a ordem do `set` com 8 itens ou mais depende da inserção).
 
 ## 14. Perguntas em aberto (siga o Flask até haver resposta)
 
-- **Q-012-1** O banco de produção aceita `transacoes.descricao` nula? Se sim, a confirmação por WhatsApp grava sem descrição; se não (o dump diz `NOT NULL`), todo `OK` de despesa/renda sem agendamento dá 500 (desvio 150). **Prioridade máxima.**
+- **Q-012-1** (resolvida: `NOT NULL` confirmado em produção; desvio 150 implementado) O banco de produção aceita `transacoes.descricao` nula? Se sim, a confirmação por WhatsApp grava sem descrição; se não (o dump diz `NOT NULL`), todo `OK` de despesa/renda sem agendamento dá 500 (desvio 150). **Prioridade máxima.**
 - **Q-012-2** `Solicitar API Key` deve decifrar a chave (desvio 153) ou o produto prefere um link seguro? Entregar uma chave por WhatsApp é decisão de produto.
 - **Q-012-3** A quitação por WhatsApp/SMS deve gravar `agendamento_id` (coerente com o desvio 012 e a 013)? Padrão: não.
-- **Q-012-4** Qual evento pendente é "o mais recente"? Hoje a ordem do `KEYS` decide (desvio 155).
-- **Q-012-5** Alguém usa `Transferência` pelo WhatsApp? Hoje responde "Algo deu errado" para todos.
+- **Q-012-4** (resolvida: desvio 155 implementado, ponteiro `last_pending_event`) Qual evento pendente é "o mais recente"? Hoje a ordem do `KEYS` decide (desvio 155).
+- **Q-012-5** (resolvida: desvio 151 implementado) Alguém usa `Transferência` pelo WhatsApp? Hoje responde "Algo deu errado" para todos.
 - **Q-012-6** (resolvida) A 013 entregou o snapshot e o formatador; a 012 os reutiliza e implementa só a resposta ao check-in.
 - **Q-012-7** O motivo específico dos erros do Google (`Erro ao criar evento: ...`) pode ser omitido (desvio 008) ou o produto quer uma lista de motivos permitidos?
 - **Q-012-8** A migração da matplotlib para ScottPlot (já na 013) é aceitável para barras e linha também (imagem diferente, dados iguais)?

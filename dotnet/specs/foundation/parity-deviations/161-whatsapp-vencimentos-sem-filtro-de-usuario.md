@@ -1,6 +1,6 @@
 # Desvio 161 — Vencimentos comparam a descrição sem filtrar o usuário
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-09)
 - **Features afetadas:** 012
 - **Severidade:** correção
 

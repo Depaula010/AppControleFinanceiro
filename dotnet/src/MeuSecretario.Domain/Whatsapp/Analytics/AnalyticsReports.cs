@@ -34,8 +34,8 @@ public sealed record SpendingAnalysis(
     IReadOnlyList<FixedCharge> FixedCharges);
 
 /// <summary>
-/// Texto de <c>Análise Inteligente</c> (<c>analytics_service.generate_ai_insights</c>). Reproduz o Flask, inclusive os valores de despesa
-/// negativos no prompt e o formato <c>{:,.2f}</c> (desvio 158, proposto: não implementado).
+/// Texto de <c>Análise Inteligente</c> (<c>analytics_service.generate_ai_insights</c>). Desvio 158 (implementado): o prompt usa valores
+/// absolutos de despesa e <c>formatar_moeda</c> (<c>R$ 1.234,50</c>); o Flask mandava <c>R$ -1,234.50</c> ao Gemini.
 /// </summary>
 public static class AnalyticsReport
 {
@@ -49,13 +49,18 @@ public static class AnalyticsReport
     /// <summary><c>f"{x:+.1f}"</c>. O zero negativo (<c>-0.0</c>) sai com o sinal de menos, como no Python.</summary>
     public static string WithSign(double value) => value == 0 && double.IsNegative(value) ? "-0.0" : PyNumber.WithSign(value);
 
+    /// <summary>Valor para o prompt (desvio 158): módulo no formato de <c>formatar_moeda</c>, sem o prefixo (<c>1.234,50</c>).</summary>
+    public static string PromptMoney(double value) => MoneyText.Brl(Math.Abs(value))["R$ ".Length..];
+
     public static string Prompt(SpendingAnalysis data)
     {
         // dict.get(mes_atual, 0) e o primeiro valor das outras chaves (no máximo uma: o SQL só traz o mês atual e o anterior).
         var current = data.Comparison.Where(m => m.Month == data.CurrentMonth).Select(m => m.Total).DefaultIfEmpty(0.0).Last();
         var previous = data.Comparison.Where(m => m.Month != data.CurrentMonth).Select(m => m.Total).FirstOrDefault();
 
-        var variation = previous != 0 ? PyFloat.Round((current - previous) / previous * 100, 1) : 0.0;
+        // Desvio 158: a variação é entre gastos (módulos); as despesas chegam negativas do banco.
+        var variation = previous != 0 ? PyFloat.Round((Math.Abs(current) - Math.Abs(previous)) / Math.Abs(previous) * 100, 1) : 0.0;
+        static string Money(double value) => PromptMoney(value);
 
         var categories = string.Join('\n', data.Categories.Take(5).Select(c =>
             $"- {c.Category} / {c.Subcategory}: R$ {Money(c.Total)} ({c.Quantity.ToString(CultureInfo.InvariantCulture)} transações)"));

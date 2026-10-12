@@ -330,7 +330,7 @@ def checkin_redis(items):
 
 THREE = [sess_item(11, "Salário", 5000.0, 7, "2026-10-07", "Renda"), sess_item(12, "Aluguel", 1500.0, 7, "2026-10-07"), sess_item(13, "Luz", 230.45, 5, "2026-10-05")]
 for _name, _text in [("ok", "ok"), ("emoji", "👍"), ("sim", "Sim"), ("tudo_pago", "tudo pago"), ("assim_confirma_tudo", "assim"), ("checkmark", "✅")]:
-    bills("checkin_todas_" + _name, _text, redis=checkin_redis(THREE))
+    bills("checkin_todas_" + _name, _text, redis=checkin_redis(THREE), deviation="210" if _name == "assim_confirma_tudo" else None)
 bills("checkin_uma_conta_so", "ok", redis=checkin_redis(THREE[:1]))
 bills("checkin_parcial_um", "1", redis=checkin_redis(THREE))
 bills("checkin_parcial_um_e_tres", "1 e 3", redis=checkin_redis(THREE))
@@ -342,7 +342,7 @@ bills("checkin_nao", "não", redis=checkin_redis(THREE))
 bills("checkin_nao_sem_acento", "nao", redis=checkin_redis(THREE))
 bills("checkin_depois", "Depois", redis=checkin_redis(THREE))
 bills("checkin_amanha", "amanhã", redis=checkin_redis(THREE))
-bills("checkin_ok_ganha_do_nao", "ok não", redis=checkin_redis(THREE))
+bills("checkin_ok_ganha_do_nao", "ok não", redis=checkin_redis(THREE), deviation="210")
 bills("checkin_invalido", "talvez", redis=checkin_redis(THREE))
 bills("checkin_numero_fora", "5", redis=checkin_redis(THREE))
 bills("checkin_numero_zero", "0", redis=checkin_redis(THREE))

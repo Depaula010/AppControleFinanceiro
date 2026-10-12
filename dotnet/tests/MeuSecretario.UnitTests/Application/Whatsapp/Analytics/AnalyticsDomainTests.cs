@@ -32,11 +32,13 @@ public class AnalyticsDomainTests
 
     [Fact]
     [Trait("AC", "012-701")]
-    public void Forecast_WithoutHistory_HasNoProjection()
+    public void Forecast_WithoutHistory_IsAllZeros_InsteadOfFailing()
     {
         var data = new ForecastData(Today, 31, 6, [], [], 0, []);
 
-        ForecastProjection.Calculate(data).ShouldBeNull();
+        var projection = ForecastProjection.Calculate(data);
+
+        (projection.FinalProjection, projection.HistoricalAverage, projection.SpentToDate, projection.DailyRate).ShouldBe((0.0, 0.0, 0.0, 0.0));
     }
 
     [Fact]

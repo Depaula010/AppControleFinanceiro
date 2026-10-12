@@ -60,12 +60,25 @@ public interface IPendingEventStore
     /// <summary>Grava com TTL de 300 s e devolve o id (8 hexadecimais); <c>null</c> se o Redis não gravou.</summary>
     Task<string?> CreateAsync(string number, PendingEvent data, CancellationToken cancellationToken);
 
-    /// <summary>A <b>última</b> chave de <c>KEYS pending_event:{numero}:*</c> (a ordem do Redis; desvio 155).</summary>
+    /// <summary>O último evento criado (<c>last_pending_event</c>, desvio 155); sem ponteiro, a última chave do <c>KEYS</c> como o Flask.</summary>
     Task<LatestPendingEvent> GetLatestAsync(string number, CancellationToken cancellationToken);
 
     Task<PendingEvent?> GetAsync(string number, string id, CancellationToken cancellationToken);
 
     Task DeleteAsync(string number, string id, CancellationToken cancellationToken);
+}
+
+/// <summary>
+/// Escolha de origem da rota pendente (desvio 156): <c>route_origin_pending:{numero}</c> guarda o id do evento pendente enquanto o
+/// usuário não responde <c>casa</c>/<c>trabalho</c>/<c>outro</c>. TTL de 300 s, como o evento.
+/// </summary>
+public interface IRouteOriginChoice
+{
+    Task SetAsync(string number, string eventId, CancellationToken cancellationToken);
+
+    Task<string?> GetAsync(string number, CancellationToken cancellationToken);
+
+    Task ClearAsync(string number, CancellationToken cancellationToken);
 }
 
 /// <summary>Sessão de check-in noturno ativa (<c>nightly_checkin_active:{numero}</c>), criada pelo job da 013.</summary>

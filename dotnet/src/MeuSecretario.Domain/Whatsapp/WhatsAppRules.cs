@@ -92,10 +92,17 @@ public static class MessageIntent
     public static bool IsBareCancel(string lower, string message) =>
         (lower is "cancelar" or "cancela") && message.Trim().Split(default(char[]), StringSplitOptions.RemoveEmptyEntries).Length == 1;
 
+    /// <summary>
+    /// Desvio 210: palavra inteira, aceitando o plural simples (<c>gastos</c>, <c>eventos</c>, <c>valores</c>); o Flask procurava trecho
+    /// ("valor" casava com "valorizar").
+    /// </summary>
     public static bool HasEscapeKeyword(string message)
     {
         var lower = message.ToLowerInvariant();
-        return EscapeKeywords.Any(word => lower.Contains(word, StringComparison.Ordinal));
+        return EscapeKeywords.Any(word =>
+            CheckinReplyParser.ContainsWord(lower, word)
+            || CheckinReplyParser.ContainsWord(lower, word + "s")
+            || CheckinReplyParser.ContainsWord(lower, word + "es"));
     }
 }
 

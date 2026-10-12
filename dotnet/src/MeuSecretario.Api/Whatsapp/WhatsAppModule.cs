@@ -28,6 +28,7 @@ public sealed class WhatsAppModule : IFeatureModule
         services.AddScoped<IPendingTransactionState, PendingTransactionState>();
         services.AddScoped<IPendingEventStore, PendingEventStore>();
         services.AddScoped<ICheckinSession, CheckinSessionState>();
+        services.AddScoped<IRouteOriginChoice, RouteOriginChoiceStore>();
         services.TryAddScoped<INightlyCheckinResponder, NullNightlyCheckinResponder>();
         services.AddSingleton<IWhatsAppDiagnostics, WhatsAppDiagnostics>();
 
