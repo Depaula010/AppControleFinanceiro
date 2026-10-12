@@ -94,7 +94,7 @@ public sealed class CalendarAlertConfigRepository(IDbConnectionFactory connectio
     }
 }
 
-/// <summary>Logs da 014 (EventIds 14001 a 14006): só id numérico e tipo da exceção; nunca WhatsApp, título nem local de evento.</summary>
+/// <summary>Logs da 014 (EventIds 14001 a 14007): só id numérico e tipo da exceção; nunca WhatsApp, título nem local de evento.</summary>
 internal static partial class CalendarAlertLog
 {
     [LoggerMessage(EventId = 14001, Level = LogLevel.Error, Message = "Erro ao atualizar a configuração de alertas do usuário {UserId}: {Error}")]
@@ -114,6 +114,9 @@ internal static partial class CalendarAlertLog
 
     [LoggerMessage(EventId = 14006, Level = LogLevel.Warning, Message = "Redis indisponível: alerta do usuário {UserId} segue sem lock (fail-open)")]
     public static partial void RedisUnavailable(ILogger logger, int userId);
+
+    [LoggerMessage(EventId = 14007, Level = LogLevel.Information, Message = "Alertas do usuário {UserId}: {InWindow} evento(s) na janela, {Sent} enviado(s), {Failed} falha(s)")]
+    public static partial void AlertCycle(ILogger logger, int userId, int inWindow, int sent, int failed);
 }
 
 public sealed class CalendarAlertDiagnostics(ILogger<CalendarAlertDiagnostics> logger) : ICalendarAlertDiagnostics
@@ -129,6 +132,8 @@ public sealed class CalendarAlertDiagnostics(ILogger<CalendarAlertDiagnostics> l
     public void ProcessFailed(int userId, Exception exception) => CalendarAlertLog.ProcessFailed(logger, userId, Describe(exception));
 
     public void RedisUnavailable(int userId) => CalendarAlertLog.RedisUnavailable(logger, userId);
+
+    public void AlertCycle(int userId, int inWindow, int sent, int failed) => CalendarAlertLog.AlertCycle(logger, userId, inWindow, sent, failed);
 
     /// <summary>Só o tipo (e o código SQL ou HTTP): a mensagem pode ter dado pessoal.</summary>
     private static string Describe(Exception exception) => exception switch

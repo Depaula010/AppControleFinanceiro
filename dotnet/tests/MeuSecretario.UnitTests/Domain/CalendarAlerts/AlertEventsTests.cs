@@ -15,7 +15,7 @@ public class AlertEventsTests
 
         var (start, end) = AlertWindow.For(now, 1);
 
-        start.ShouldBe(new DateTimeOffset(2026, 10, 5, 17, 59, 20, SaoPaulo));
+        start.ShouldBe(new DateTimeOffset(2026, 10, 5, 17, 56, 20, SaoPaulo));
         end.ShouldBe(new DateTimeOffset(2026, 10, 5, 18, 0, 50, SaoPaulo));
     }
 
@@ -27,15 +27,15 @@ public class AlertEventsTests
 
         var (start, end) = AlertWindow.For(now, 60);
 
-        start.ShouldBe(new DateTimeOffset(2026, 10, 6, 0, 29, 0, SaoPaulo));
+        start.ShouldBe(new DateTimeOffset(2026, 10, 6, 0, 26, 0, SaoPaulo));
         start.Offset.ShouldBe(SaoPaulo);
         end.ShouldBe(new DateTimeOffset(2026, 10, 6, 0, 30, 30, SaoPaulo));
     }
 
     [Theory]
     [Trait("AC", "014-48")]
-    [InlineData("2026-10-05T17:59:20-03:00", false)]
-    [InlineData("2026-10-05T17:59:21-03:00", true)]
+    [InlineData("2026-10-05T17:56:20-03:00", false)]
+    [InlineData("2026-10-05T17:56:21-03:00", true)]
     [InlineData("2026-10-05T18:00:50-03:00", true)]
     [InlineData("2026-10-05T18:00:51-03:00", false)]
     public void Window_LowerBoundIsExclusive_UpperBoundIsInclusive(string eventStart, bool inside)
@@ -43,6 +43,21 @@ public class AlertEventsTests
         var window = AlertWindow.For(new DateTimeOffset(2026, 10, 5, 17, 59, 20, SaoPaulo), 1);
 
         AlertWindow.Contains(window, DateTimeOffset.Parse(eventStart, System.Globalization.CultureInfo.InvariantCulture)).ShouldBe(inside);
+    }
+
+    [Theory]
+    [Trait("AC", "014-49")]
+    [InlineData("2026-10-05T18:00:00-03:00", 1, 1)]
+    [InlineData("2026-10-05T18:14:30-03:00", 15, 15)]
+    [InlineData("2026-10-05T18:15:20-03:00", 15, 15)]
+    [InlineData("2026-10-05T18:07:00-03:00", 15, 7)]
+    [InlineData("2026-10-05T18:00:10-03:00", 15, 1)]
+    public void RemainingMinutes_IsRoundedAndClampedBetweenOneAndTheConfiguredValue(string eventStart, int configured, int expected)
+    {
+        var now = new DateTimeOffset(2026, 10, 5, 18, 0, 0, SaoPaulo);
+
+        AlertWindow.RemainingMinutes(now, DateTimeOffset.Parse(eventStart, System.Globalization.CultureInfo.InvariantCulture), configured)
+            .ShouldBe(expected);
     }
 
     [Theory]

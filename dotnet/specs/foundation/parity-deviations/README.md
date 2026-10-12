@@ -113,6 +113,7 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [120](120-calendar-alerts-tipos-do-corpo.md) | Alertas de calendário: tipos do corpo de /config e /ativar | correção | 014 | implementado |
 | [121](121-calendar-alerts-janela-30s.md) | Alertas de calendário: janela de ±30 s perde o aviso se o ciclo atrasa | correção | 014 | implementado |
 | [122](122-calendar-alerts-usuario-inativo.md) | Alertas de calendário: usuário inativo ainda recebe alertas | correção | 014 | implementado |
+| [123](123-calendar-alerts-retentativa-de-envio.md) | Alertas de calendário: falha de envio perde o aviso sem nova tentativa | correção | 014, 013 | implementado |
 | [130](130-checkin-fatura-vencida-derruba-mensagem.md) | Check-in: fatura vencida derruba a mensagem do usuário | correção | 013, 012 | aprovado |
 | [131](131-faturas-fechadas-fora-dos-alertas.md) | Faturas `Fechada` ficam fora dos alertas de vencimento | correção | 013, 012 | aprovado |
 | [132](132-relatorio-mensal-sinal-das-despesas.md) | Relatório mensal: sinal das despesas | correção | 013, 009 | aprovado |

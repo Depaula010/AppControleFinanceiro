@@ -15,10 +15,23 @@ public static class AlertWindow
 
     public static readonly TimeSpan After = TimeSpan.FromSeconds(30);
 
+    /// <summary>Desvio 123: tolerância de ciclos perdidos; o evento segue visível por mais 3 min antes do início.</summary>
+    public static readonly TimeSpan Grace = TimeSpan.FromMinutes(3);
+
     public static (DateTimeOffset Start, DateTimeOffset End) For(DateTimeOffset now, int minutesBefore)
     {
         var target = now.AddMinutes(minutesBefore);
-        return (target - Before, target + After);
+        return (target - Before - Grace, target + After);
+    }
+
+    /// <summary>
+    /// Minutos que o texto do alerta anuncia (desvio 123): os que de fato restam, entre 1 e o configurado. No ciclo normal
+    /// o resto arredondado é o próprio <paramref name="minutesBefore"/>.
+    /// </summary>
+    public static int RemainingMinutes(DateTimeOffset now, DateTimeOffset eventStart, int minutesBefore)
+    {
+        var remaining = (int)Math.Round((eventStart - now).TotalMinutes, MidpointRounding.AwayFromZero);
+        return Math.Clamp(remaining, 1, Math.Max(1, minutesBefore));
     }
 
     /// <summary>Início do evento dentro da janela: limite inferior exclusivo, superior inclusivo.</summary>
