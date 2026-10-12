@@ -1,140 +1,36 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-# Pipfile.lock
-
-# PEP 582; __pypackages__
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
+# --- Segredos e ambiente ---
 .env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+.env.*
+!.env.example
 
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
+# --- Dados de produção e estrutura exportada (somente local; NUNCA commitar) ---
 migrations/schema.sql
-AI_RULES.md
-app/routes/webhooks/intents/admin_intents.py
-
-# .NET rewrite
+dotnet/specs/foundation/schema-prod.sql
 dotnet/scripts/homol/out/
+*.dump
+backups/
+
+# --- .NET ---
 dotnet/**/bin/
 dotnet/**/obj/
-
-# Estrutura do banco de producao (somente local; gerada a partir de migrations/schema.sql)
-dotnet/specs/foundation/schema-prod.sql
-
-# Visual Studio
-.vs/
-
 TestResults/
+*.trx
+.vs/
+*.user
+*.suo
+
+# --- Python (geradores de fixtures em dotnet/tests/Fixtures) ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# --- Logs e temporários ---
+logs/
+*.log
+nginx/logs/
+nginx/ssl/
+
+# --- Ferramentas locais ---
+.claude/worktrees/
+AI_RULES.md
