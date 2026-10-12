@@ -31,4 +31,7 @@ public interface ICalendarAlertDiagnostics
     void ProcessFailed(int userId, Exception exception);
 
     void RedisUnavailable(int userId);
+
+    /// <summary>Resumo do ciclo, só quando havia evento na janela (desvio 123).</summary>
+    void AlertCycle(int userId, int inWindow, int sent, int failed);
 }

@@ -14,13 +14,18 @@ public sealed class CalendarAlertService(
     ICache cache,
     IBotClient bot,
     IClock clock,
-    ICalendarAlertDiagnostics diagnostics)
+    ICalendarAlertDiagnostics diagnostics,
+    TimeSpan? retryDelay = null)
 {
+    private static readonly TimeSpan DefaultRetryDelay = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan ClaimTtl = TimeSpan.FromSeconds(7200);
     private const string ClaimValue = "processing";
     private const string NoCalendarName = "Sem nome";
 
-    /// <summary>Eventos com horário que começam na janela (alvo - 60 s, alvo + 30 s] e ainda não começaram (RN-014-11 e 12).</summary>
+    /// <summary>
+    /// Eventos com horário que começam na janela (alvo - 60 s - 3 min, alvo + 30 s] e ainda não começaram (RN-014-11 e 12;
+    /// os 3 min são a tolerância do desvio 123).
+    /// </summary>
     public async Task<IReadOnlyList<UpcomingEvent>> GetUpcomingEventsAsync(
         int userId, int minutesBefore, CancellationToken cancellationToken)
     {
@@ -90,6 +95,7 @@ public sealed class CalendarAlertService(
         {
             var events = await GetUpcomingEventsAsync(userId, minutesBefore, cancellationToken);
             var sent = 0;
+            var failed = 0;
             foreach (var upcoming in events)
             {
                 if (!await TryClaimAsync(userId, upcoming, cancellationToken))
@@ -97,14 +103,30 @@ public sealed class CalendarAlertService(
                     continue;
                 }
 
-                if (await SendEventAlertAsync(whatsappNumber, upcoming, minutesBefore, userId, cancellationToken))
+                var minutes = RemainingMinutes(upcoming, minutesBefore);
+                var delivered = await SendEventAlertAsync(whatsappNumber, upcoming, minutes, userId, cancellationToken);
+                if (!delivered)
+                {
+                    // Desvio 123: uma nova tentativa no mesmo ciclo (com minutos_antes = 1 não há ciclo seguinte).
+                    await Task.Delay(retryDelay ?? DefaultRetryDelay, cancellationToken);
+                    minutes = RemainingMinutes(upcoming, minutesBefore);
+                    delivered = await SendEventAlertAsync(whatsappNumber, upcoming, minutes, userId, cancellationToken);
+                }
+
+                if (delivered)
                 {
                     sent++;
                 }
                 else
                 {
+                    failed++;
                     await ReleaseClaimAsync(userId, upcoming, cancellationToken);
                 }
+            }
+
+            if (events.Count > 0)
+            {
+                diagnostics.AlertCycle(userId, events.Count, sent, failed);
             }
 
             return sent;
@@ -114,6 +136,15 @@ public sealed class CalendarAlertService(
             diagnostics.ProcessFailed(userId, ex);
             return 0;
         }
+    }
+
+    /// <summary>Minutos do texto (desvio 123); com hora ilegível, o configurado.</summary>
+    private int RemainingMinutes(UpcomingEvent upcoming, int minutesBefore)
+    {
+        var now = TimeZoneInfo.ConvertTime(clock.UtcNow, clock.TimeZone);
+        return AlertMessage.TryParseIso(upcoming.Start, out var start)
+            ? AlertWindow.RemainingMinutes(now, start, minutesBefore)
+            : minutesBefore;
     }
 
     /// <summary><c>SET NX EX 7200</c>; sem Redis prossegue sem lock (fail-open, como o Python).</summary>

@@ -28,7 +28,7 @@ public class CalendarAlertServiceTests
     public CalendarAlertServiceTests()
     {
         _cache = new InMemoryCache(_time);
-        _service = new CalendarAlertService(_calendar, _cache, _bot, new BrazilClock(_time), _diagnostics);
+        _service = new CalendarAlertService(_calendar, _cache, _bot, new BrazilClock(_time), _diagnostics, TimeSpan.Zero);
         _calendar.ListSelectedCalendarsAsync(UserId, Arg.Any<CancellationToken>())
             .Returns([new CalendarInfo("primary", "Pessoal", true)]);
         _bot.SendTextAsync(Number, Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(true);
@@ -45,13 +45,14 @@ public class CalendarAlertServiceTests
 
     [Fact]
     [Trait("AC", "014-40")]
-    public async Task Upcoming_AsksGoogleForTheWindowFromSixtySecondsBeforeToThirtyAfterTheTarget_InSaoPauloOffset()
+    public async Task Upcoming_AsksGoogleForTheWindowFromFourMinutesBeforeToThirtySecondsAfterTheTarget_InSaoPauloOffset()
     {
         Events("primary");
 
         await _service.GetUpcomingEventsAsync(UserId, 1, CancellationToken.None);
 
-        var expectedStart = new DateTimeOffset(2026, 10, 5, 17, 59, 20, TimeSpan.FromHours(-3));
+        // Alvo 18:00:20; limite inferior = alvo − 60 s − 3 min de tolerância (desvio 123).
+        var expectedStart = new DateTimeOffset(2026, 10, 5, 17, 56, 20, TimeSpan.FromHours(-3));
         var expectedEnd = new DateTimeOffset(2026, 10, 5, 18, 0, 50, TimeSpan.FromHours(-3));
         await _calendar.Received(1).ListEventsAsync(
             UserId,
@@ -105,6 +106,22 @@ public class CalendarAlertServiceTests
 
         first.ShouldBe(1);
         second.ShouldBe(0);
+    }
+
+    [Fact]
+    [Trait("AC", "014-49")]
+    public async Task Upcoming_Grace_KeepsTheEventForThreeMoreMinutes_BeforeItStarts()
+    {
+        // Desvio 123: 10 min antes, alvo 18:09:20. O limite inferior é 18:05:20 (exclusivo): 18:06:00 ainda entra.
+        Events(
+            "primary",
+            Timed("tolerado", "Tolerado", "2026-10-05T18:06:00-03:00"),
+            Timed("limite", "Limite", "2026-10-05T18:05:20-03:00"),
+            Timed("antigo", "Antigo", "2026-10-05T18:05:00-03:00"));
+
+        var events = await _service.GetUpcomingEventsAsync(UserId, 10, CancellationToken.None);
+
+        events.Select(e => e.Id).ShouldBe(["tolerado"]);
     }
 
     [Fact]
@@ -199,7 +216,8 @@ public class CalendarAlertServiceTests
     public async Task Process_FailedSend_ReleasesTheClaim_SoTheNextCycleRetries()
     {
         Events("primary", Timed("a", "Reunião", "2026-10-05T18:00:00-03:00"));
-        _bot.SendTextAsync(Number, Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(false, true);
+        // Duas falhas no ciclo (envio e nova tentativa); o ciclo seguinte envia.
+        _bot.SendTextAsync(Number, Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(false, false, true);
 
         var first = await _service.ProcessAlertsForUserAsync(UserId, Number, 1, CancellationToken.None);
         _cache.RawValue(CacheKeys.CalendarAlert(UserId, "a", "2026-10-05T18:00:00-03:00")).ShouldBeNull();
@@ -207,7 +225,36 @@ public class CalendarAlertServiceTests
 
         first.ShouldBe(0);
         second.ShouldBe(1);
+        await _bot.Received(3).SendTextAsync(Number, Arg.Any<string>(), Arg.Any<CancellationToken>());
+        _diagnostics.Received(1).AlertCycle(UserId, 1, 0, 1);
+        _diagnostics.Received(1).AlertCycle(UserId, 1, 1, 0);
+    }
+
+    [Fact]
+    [Trait("AC", "014-49")]
+    public async Task Process_FailedSend_IsRetriedOnceInTheSameCycle()
+    {
+        Events("primary", Timed("a", "Reunião", "2026-10-05T18:00:00-03:00"));
+        _bot.SendTextAsync(Number, Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(false, true);
+
+        var sent = await _service.ProcessAlertsForUserAsync(UserId, Number, 1, CancellationToken.None);
+
+        sent.ShouldBe(1);
         await _bot.Received(2).SendTextAsync(Number, Arg.Any<string>(), Arg.Any<CancellationToken>());
+        _cache.RawValue(CacheKeys.CalendarAlert(UserId, "a", "2026-10-05T18:00:00-03:00")).ShouldBe("processing");
+        _diagnostics.Received(1).AlertCycle(UserId, 1, 1, 0);
+    }
+
+    [Fact]
+    [Trait("AC", "014-49")]
+    public async Task Process_LateEvent_AnnouncesTheMinutesThatReallyRemain()
+    {
+        // 10 min antes, mas o evento (18:06:00) está a 6 min 40 s: o texto diz 7 min, não 10.
+        Events("primary", Timed("a", "Reunião", "2026-10-05T18:06:00-03:00"));
+
+        (await _service.ProcessAlertsForUserAsync(UserId, Number, 10, CancellationToken.None)).ShouldBe(1);
+
+        await _bot.Received(1).SendTextAsync(Number, "⚠️ Faltam 7 min: Reunião\n🕒 18:06", Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -226,7 +273,7 @@ public class CalendarAlertServiceTests
         sent.ShouldBe(1);
         _cache.RawValue(CacheKeys.CalendarAlert(UserId, "a", "2026-10-05T18:00:00-03:00")).ShouldBeNull();
         _cache.RawValue(CacheKeys.CalendarAlert(UserId, "b", "2026-10-05T18:00:10-03:00")).ShouldBe("processing");
-        _diagnostics.Received(1).AlertSendFailed(UserId, Arg.Any<HttpRequestException>());
+        _diagnostics.Received(2).AlertSendFailed(UserId, Arg.Any<HttpRequestException>());
     }
 
     [Fact]

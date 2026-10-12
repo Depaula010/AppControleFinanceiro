@@ -69,7 +69,7 @@ public sealed class CalendarAlertServiceRedisTests(RedisFixture redis) : IClassF
         // 17:59:20 em São Paulo.
         var time = new FakeTimeProvider(new DateTimeOffset(2026, 10, 5, 20, 59, 20, TimeSpan.Zero));
         return new CalendarAlertService(
-            new OneEventCalendar(), _cache, _bot, new BrazilClock(time), new NullDiagnostics());
+            new OneEventCalendar(), _cache, _bot, new BrazilClock(time), new NullDiagnostics(), TimeSpan.Zero);
     }
 
     [Fact]
@@ -115,6 +115,10 @@ public sealed class CalendarAlertServiceRedisTests(RedisFixture redis) : IClassF
         }
 
         public void RedisUnavailable(int userId)
+        {
+        }
+
+        public void AlertCycle(int userId, int inWindow, int sent, int failed)
         {
         }
     }
