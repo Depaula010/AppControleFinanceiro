@@ -5,6 +5,13 @@ on:
     branches:
       - main
       - master
+    # Mudanças só de documentação não derrubam nem recriam os containers.
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "dotnet/specs/**"
+      - ".claude/**"
+      - "postman/**"
   workflow_dispatch:  # Permite trigger manual
 
 env:
