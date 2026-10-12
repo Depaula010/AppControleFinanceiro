@@ -1,0 +1,2430 @@
+{
+ "translations": [
+  {
+   "english": "Sunny",
+   "portuguese": "Ensolarado",
+   "emoji": "☀️"
+  },
+  {
+   "english": "Clear",
+   "portuguese": "Céu limpo",
+   "emoji": "🌙"
+  },
+  {
+   "english": "Partly cloudy",
+   "portuguese": "Parcialmente nublado",
+   "emoji": "⛅"
+  },
+  {
+   "english": "Cloudy",
+   "portuguese": "Nublado",
+   "emoji": "☁️"
+  },
+  {
+   "english": "Overcast",
+   "portuguese": "Encoberto",
+   "emoji": "☁️"
+  },
+  {
+   "english": "Patchy rain possible",
+   "portuguese": "Possível chuva",
+   "emoji": "🌦️"
+  },
+  {
+   "english": "Light rain",
+   "portuguese": "Chuva leve",
+   "emoji": "🌧️"
+  },
+  {
+   "english": "Moderate rain",
+   "portuguese": "Chuva moderada",
+   "emoji": "🌧️"
+  },
+  {
+   "english": "Heavy rain",
+   "portuguese": "Chuva forte",
+   "emoji": "🌧️"
+  },
+  {
+   "english": "Torrential rain shower",
+   "portuguese": "Chuva torrencial",
+   "emoji": "⛈️"
+  },
+  {
+   "english": "Thundery outbreaks possible",
+   "portuguese": "Possível trovoada",
+   "emoji": "⛈️"
+  },
+  {
+   "english": "Patchy light rain with thunder",
+   "portuguese": "Chuva leve com trovoada",
+   "emoji": "⛈️"
+  },
+  {
+   "english": "Moderate or heavy rain with thunder",
+   "portuguese": "Chuva forte com trovoada",
+   "emoji": "⛈️"
+  },
+  {
+   "english": "Mist",
+   "portuguese": "Névoa",
+   "emoji": "🌫️"
+  },
+  {
+   "english": "Fog",
+   "portuguese": "Neblina",
+   "emoji": "🌫️"
+  },
+  {
+   "english": "Freezing fog",
+   "portuguese": "Neblina congelante",
+   "emoji": "🌫️"
+  },
+  {
+   "english": "Patchy snow possible",
+   "portuguese": "Possível neve",
+   "emoji": "🌨️"
+  },
+  {
+   "english": "Light snow",
+   "portuguese": "Neve leve",
+   "emoji": "❄️"
+  },
+  {
+   "english": "Heavy snow",
+   "portuguese": "Neve forte",
+   "emoji": "❄️"
+  },
+  {
+   "english": "Ice pellets",
+   "portuguese": "Granizo",
+   "emoji": "🧊"
+  },
+  {
+   "english": "Light sleet",
+   "portuguese": "Granizo leve",
+   "emoji": "🧊"
+  },
+  {
+   "english": "Moderate or heavy sleet",
+   "portuguese": "Granizo forte",
+   "emoji": "🧊"
+  }
+ ],
+ "formats": [
+  {
+   "input": {
+    "temperatura": 24,
+    "condicao": "Ensolarado",
+    "emoji": "☀️",
+    "sensacao_termica": 24,
+    "umidade": 65,
+    "chance_chuva": null,
+    "descricao_completa": "24°C, Ensolarado ☀️"
+   },
+   "output": "🌡️ Clima: 24°C, Ensolarado ☀️"
+  },
+  {
+   "input": {
+    "temperatura": 24,
+    "condicao": "Ensolarado",
+    "emoji": "☀️",
+    "sensacao_termica": 26,
+    "umidade": 65,
+    "chance_chuva": null,
+    "descricao_completa": "24°C, Ensolarado ☀️"
+   },
+   "output": "🌡️ Clima: 24°C, Ensolarado ☀️"
+  },
+  {
+   "input": {
+    "temperatura": 24,
+    "condicao": "Ensolarado",
+    "emoji": "☀️",
+    "sensacao_termica": 27,
+    "umidade": 65,
+    "chance_chuva": null,
+    "descricao_completa": "24°C, Ensolarado ☀️"
+   },
+   "output": "🌡️ Clima: 24°C, Ensolarado ☀️ (sensação de 27°C)"
+  },
+  {
+   "input": {
+    "temperatura": 24,
+    "condicao": "Ensolarado",
+    "emoji": "☀️",
+    "sensacao_termica": 21,
+    "umidade": 65,
+    "chance_chuva": null,
+    "descricao_completa": "24°C, Ensolarado ☀️"
+   },
+   "output": "🌡️ Clima: 24°C, Ensolarado ☀️ (sensação de 21°C)"
+  },
+  {
+   "input": {
+    "temperatura": 24,
+    "condicao": "Ensolarado",
+    "emoji": "☀️",
+    "sensacao_termica": 20,
+    "umidade": 65,
+    "chance_chuva": null,
+    "descricao_completa": "24°C, Ensolarado ☀️"
+   },
+   "output": "🌡️ Clima: 24°C, Ensolarado ☀️ (sensação de 20°C)"
+  },
+  {
+   "input": {
+    "temperatura": 24,
+    "condicao": "Ensolarado",
+    "emoji": "☀️",
+    "sensacao_termica": 24,
+    "umidade": 65,
+    "chance_chuva": 0,
+    "descricao_completa": "24°C, Ensolarado ☀️"
+   },
+   "output": "🌡️ Clima: 24°C, Ensolarado ☀️"
+  },
+  {
+   "input": {
+    "temperatura": 24,
+    "condicao": "Ensolarado",
+    "emoji": "☀️",
+    "sensacao_termica": 24,
+    "umidade": 65,
+    "chance_chuva": 29,
+    "descricao_completa": "24°C, Ensolarado ☀️"
+   },
+   "output": "🌡️ Clima: 24°C, Ensolarado ☀️"
+  },
+  {
+   "input": {
+    "temperatura": 24,
+    "condicao": "Ensolarado",
+    "emoji": "☀️",
+    "sensacao_termica": 24,
+    "umidade": 65,
+    "chance_chuva": 30,
+    "descricao_completa": "24°C, Ensolarado ☀️"
+   },
+   "output": "🌡️ Clima: 24°C, Ensolarado ☀️\n🌦️ Possível chuva (30%)"
+  },
+  {
+   "input": {
+    "temperatura": 24,
+    "condicao": "Ensolarado",
+    "emoji": "☀️",
+    "sensacao_termica": 24,
+    "umidade": 65,
+    "chance_chuva": 59,
+    "descricao_completa": "24°C, Ensolarado ☀️"
+   },
+   "output": "🌡️ Clima: 24°C, Ensolarado ☀️\n🌦️ Possível chuva (59%)"
+  },
+  {
+   "input": {
+    "temperatura": 24,
+    "condicao": "Ensolarado",
+    "emoji": "☀️",
+    "sensacao_termica": 24,
+    "umidade": 65,
+    "chance_chuva": 60,
+    "descricao_completa": "24°C, Ensolarado ☀️"
+   },
+   "output": "🌡️ Clima: 24°C, Ensolarado ☀️\n☔ Alta chance de chuva (60%)"
+  },
+  {
+   "input": {
+    "temperatura": 24,
+    "condicao": "Ensolarado",
+    "emoji": "☀️",
+    "sensacao_termica": 24,
+    "umidade": 65,
+    "chance_chuva": 100,
+    "descricao_completa": "24°C, Ensolarado ☀️"
+   },
+   "output": "🌡️ Clima: 24°C, Ensolarado ☀️\n☔ Alta chance de chuva (100%)"
+  },
+  {
+   "input": {
+    "temperatura": 24,
+    "condicao": "Ensolarado",
+    "emoji": "☀️",
+    "sensacao_termica": 30,
+    "umidade": 65,
+    "chance_chuva": 60,
+    "descricao_completa": "24°C, Ensolarado ☀️"
+   },
+   "output": "🌡️ Clima: 24°C, Ensolarado ☀️ (sensação de 30°C)\n☔ Alta chance de chuva (60%)"
+  },
+  {
+   "input": {
+    "temperatura": -2,
+    "condicao": "Ensolarado",
+    "emoji": "☀️",
+    "sensacao_termica": -6,
+    "umidade": 65,
+    "chance_chuva": 45,
+    "descricao_completa": "-2°C, Neblina 🌫️"
+   },
+   "output": "🌡️ Clima: -2°C, Neblina 🌫️ (sensação de -6°C)\n🌦️ Possível chuva (45%)"
+  },
+  {
+   "input": null,
+   "output": ""
+  },
+  {
+   "input": {},
+   "output": ""
+  }
+ ],
+ "truncation": [
+  {
+   "value": 24.9,
+   "int": 24
+  },
+  {
+   "value": -0.5,
+   "int": 0
+  },
+  {
+   "value": 0,
+   "int": 0
+  },
+  {
+   "value": 0.99,
+   "int": 0
+  },
+  {
+   "value": -3.7,
+   "int": -3
+  },
+  {
+   "value": 30.0,
+   "int": 30
+  },
+  {
+   "value": -0.0,
+   "int": 0
+  },
+  {
+   "value": 12.5,
+   "int": 12
+  },
+  {
+   "value": 100.4,
+   "int": 100
+  }
+ ],
+ "distance_rounding": [
+  {
+   "meters": 0,
+   "km": 0.0
+  },
+  {
+   "meters": 1,
+   "km": 0.0
+  },
+  {
+   "meters": 49,
+   "km": 0.0
+  },
+  {
+   "meters": 50,
+   "km": 0.1
+  },
+  {
+   "meters": 51,
+   "km": 0.1
+  },
+  {
+   "meters": 12549,
+   "km": 12.5
+  },
+  {
+   "meters": 12450,
+   "km": 12.4
+  },
+  {
+   "meters": 12550,
+   "km": 12.6
+  },
+  {
+   "meters": 12350,
+   "km": 12.3
+  },
+  {
+   "meters": 12650,
+   "km": 12.7
+  },
+  {
+   "meters": 100,
+   "km": 0.1
+  },
+  {
+   "meters": 150,
+   "km": 0.1
+  },
+  {
+   "meters": 250,
+   "km": 0.2
+  },
+  {
+   "meters": 350,
+   "km": 0.3
+  },
+  {
+   "meters": 450,
+   "km": 0.5
+  },
+  {
+   "meters": 550,
+   "km": 0.6
+  },
+  {
+   "meters": 650,
+   "km": 0.7
+  },
+  {
+   "meters": 2759,
+   "km": 2.8
+  },
+  {
+   "meters": 999999,
+   "km": 1000.0
+  },
+  {
+   "meters": 599159,
+   "km": 599.2
+  },
+  {
+   "meters": 34167,
+   "km": 34.2
+  },
+  {
+   "meters": 449722,
+   "km": 449.7
+  },
+  {
+   "meters": 506002,
+   "km": 506.0
+  },
+  {
+   "meters": 606172,
+   "km": 606.2
+  },
+  {
+   "meters": 15552,
+   "km": 15.6
+  },
+  {
+   "meters": 216109,
+   "km": 216.1
+  },
+  {
+   "meters": 485050,
+   "km": 485.1
+  },
+  {
+   "meters": 852829,
+   "km": 852.8
+  },
+  {
+   "meters": 515161,
+   "km": 515.2
+  },
+  {
+   "meters": 863595,
+   "km": 863.6
+  },
+  {
+   "meters": 291001,
+   "km": 291.0
+  },
+  {
+   "meters": 685215,
+   "km": 685.2
+  },
+  {
+   "meters": 849995,
+   "km": 850.0
+  },
+  {
+   "meters": 168012,
+   "km": 168.0
+  },
+  {
+   "meters": 36074,
+   "km": 36.1
+  },
+  {
+   "meters": 545961,
+   "km": 546.0
+  },
+  {
+   "meters": 513891,
+   "km": 513.9
+  },
+  {
+   "meters": 343694,
+   "km": 343.7
+  },
+  {
+   "meters": 79785,
+   "km": 79.8
+  },
+  {
+   "meters": 262140,
+   "km": 262.1
+  },
+  {
+   "meters": 781762,
+   "km": 781.8
+  },
+  {
+   "meters": 378702,
+   "km": 378.7
+  },
+  {
+   "meters": 46720,
+   "km": 46.7
+  },
+  {
+   "meters": 440817,
+   "km": 440.8
+  },
+  {
+   "meters": 145426,
+   "km": 145.4
+  },
+  {
+   "meters": 632491,
+   "km": 632.5
+  },
+  {
+   "meters": 372330,
+   "km": 372.3
+  },
+  {
+   "meters": 400142,
+   "km": 400.1
+  },
+  {
+   "meters": 441727,
+   "km": 441.7
+  },
+  {
+   "meters": 297395,
+   "km": 297.4
+  },
+  {
+   "meters": 867013,
+   "km": 867.0
+  },
+  {
+   "meters": 707751,
+   "km": 707.8
+  },
+  {
+   "meters": 275063,
+   "km": 275.1
+  },
+  {
+   "meters": 479022,
+   "km": 479.0
+  },
+  {
+   "meters": 183155,
+   "km": 183.2
+  },
+  {
+   "meters": 719177,
+   "km": 719.2
+  },
+  {
+   "meters": 317828,
+   "km": 317.8
+  },
+  {
+   "meters": 693996,
+   "km": 694.0
+  },
+  {
+   "meters": 380200,
+   "km": 380.2
+  },
+  {
+   "meters": 139437,
+   "km": 139.4
+  },
+  {
+   "meters": 479124,
+   "km": 479.1
+  },
+  {
+   "meters": 805136,
+   "km": 805.1
+  },
+  {
+   "meters": 251008,
+   "km": 251.0
+  },
+  {
+   "meters": 461004,
+   "km": 461.0
+  },
+  {
+   "meters": 643119,
+   "km": 643.1
+  },
+  {
+   "meters": 393470,
+   "km": 393.5
+  },
+  {
+   "meters": 46410,
+   "km": 46.4
+  },
+  {
+   "meters": 611248,
+   "km": 611.2
+  },
+  {
+   "meters": 4252,
+   "km": 4.3
+  },
+  {
+   "meters": 247101,
+   "km": 247.1
+  },
+  {
+   "meters": 140480,
+   "km": 140.5
+  },
+  {
+   "meters": 204423,
+   "km": 204.4
+  },
+  {
+   "meters": 317572,
+   "km": 317.6
+  },
+  {
+   "meters": 562398,
+   "km": 562.4
+  },
+  {
+   "meters": 383931,
+   "km": 383.9
+  },
+  {
+   "meters": 809558,
+   "km": 809.6
+  },
+  {
+   "meters": 251849,
+   "km": 251.8
+  },
+  {
+   "meters": 329634,
+   "km": 329.6
+  },
+  {
+   "meters": 699075,
+   "km": 699.1
+  },
+  {
+   "meters": 575649,
+   "km": 575.6
+  },
+  {
+   "meters": 472512,
+   "km": 472.5
+  },
+  {
+   "meters": 457211,
+   "km": 457.2
+  },
+  {
+   "meters": 492803,
+   "km": 492.8
+  },
+  {
+   "meters": 68151,
+   "km": 68.2
+  },
+  {
+   "meters": 684696,
+   "km": 684.7
+  },
+  {
+   "meters": 612941,
+   "km": 612.9
+  },
+  {
+   "meters": 340460,
+   "km": 340.5
+  },
+  {
+   "meters": 885069,
+   "km": 885.1
+  },
+  {
+   "meters": 526298,
+   "km": 526.3
+  },
+  {
+   "meters": 164017,
+   "km": 164.0
+  },
+  {
+   "meters": 883084,
+   "km": 883.1
+  },
+  {
+   "meters": 235194,
+   "km": 235.2
+  },
+  {
+   "meters": 432925,
+   "km": 432.9
+  },
+  {
+   "meters": 249953,
+   "km": 250.0
+  },
+  {
+   "meters": 38718,
+   "km": 38.7
+  },
+  {
+   "meters": 33288,
+   "km": 33.3
+  },
+  {
+   "meters": 520726,
+   "km": 520.7
+  },
+  {
+   "meters": 315793,
+   "km": 315.8
+  },
+  {
+   "meters": 857717,
+   "km": 857.7
+  },
+  {
+   "meters": 636147,
+   "km": 636.1
+  },
+  {
+   "meters": 689848,
+   "km": 689.8
+  },
+  {
+   "meters": 75533,
+   "km": 75.5
+  },
+  {
+   "meters": 559398,
+   "km": 559.4
+  },
+  {
+   "meters": 896664,
+   "km": 896.7
+  },
+  {
+   "meters": 84881,
+   "km": 84.9
+  },
+  {
+   "meters": 156959,
+   "km": 157.0
+  },
+  {
+   "meters": 403092,
+   "km": 403.1
+  },
+  {
+   "meters": 594789,
+   "km": 594.8
+  },
+  {
+   "meters": 392350,
+   "km": 392.4
+  },
+  {
+   "meters": 630513,
+   "km": 630.5
+  },
+  {
+   "meters": 156931,
+   "km": 156.9
+  },
+  {
+   "meters": 118400,
+   "km": 118.4
+  },
+  {
+   "meters": 813184,
+   "km": 813.2
+  },
+  {
+   "meters": 810694,
+   "km": 810.7
+  },
+  {
+   "meters": 101298,
+   "km": 101.3
+  },
+  {
+   "meters": 462999,
+   "km": 463.0
+  },
+  {
+   "meters": 174445,
+   "km": 174.4
+  },
+  {
+   "meters": 846672,
+   "km": 846.7
+  },
+  {
+   "meters": 200200,
+   "km": 200.2
+  },
+  {
+   "meters": 365618,
+   "km": 365.6
+  },
+  {
+   "meters": 454276,
+   "km": 454.3
+  },
+  {
+   "meters": 434195,
+   "km": 434.2
+  },
+  {
+   "meters": 467253,
+   "km": 467.3
+  },
+  {
+   "meters": 257406,
+   "km": 257.4
+  },
+  {
+   "meters": 713859,
+   "km": 713.9
+  },
+  {
+   "meters": 288047,
+   "km": 288.0
+  },
+  {
+   "meters": 150484,
+   "km": 150.5
+  },
+  {
+   "meters": 647236,
+   "km": 647.2
+  },
+  {
+   "meters": 547206,
+   "km": 547.2
+  },
+  {
+   "meters": 187129,
+   "km": 187.1
+  },
+  {
+   "meters": 125286,
+   "km": 125.3
+  },
+  {
+   "meters": 279998,
+   "km": 280.0
+  },
+  {
+   "meters": 477872,
+   "km": 477.9
+  },
+  {
+   "meters": 317267,
+   "km": 317.3
+  },
+  {
+   "meters": 172949,
+   "km": 172.9
+  },
+  {
+   "meters": 692502,
+   "km": 692.5
+  },
+  {
+   "meters": 680237,
+   "km": 680.2
+  },
+  {
+   "meters": 860939,
+   "km": 860.9
+  },
+  {
+   "meters": 182775,
+   "km": 182.8
+  },
+  {
+   "meters": 815279,
+   "km": 815.3
+  },
+  {
+   "meters": 184643,
+   "km": 184.6
+  },
+  {
+   "meters": 503456,
+   "km": 503.5
+  },
+  {
+   "meters": 810391,
+   "km": 810.4
+  },
+  {
+   "meters": 364454,
+   "km": 364.5
+  },
+  {
+   "meters": 343999,
+   "km": 344.0
+  },
+  {
+   "meters": 455827,
+   "km": 455.8
+  },
+  {
+   "meters": 234530,
+   "km": 234.5
+  },
+  {
+   "meters": 5251,
+   "km": 5.3
+  },
+  {
+   "meters": 571317,
+   "km": 571.3
+  },
+  {
+   "meters": 747187,
+   "km": 747.2
+  },
+  {
+   "meters": 45794,
+   "km": 45.8
+  },
+  {
+   "meters": 347767,
+   "km": 347.8
+  },
+  {
+   "meters": 334939,
+   "km": 334.9
+  },
+  {
+   "meters": 254408,
+   "km": 254.4
+  },
+  {
+   "meters": 83807,
+   "km": 83.8
+  },
+  {
+   "meters": 274482,
+   "km": 274.5
+  },
+  {
+   "meters": 469820,
+   "km": 469.8
+  },
+  {
+   "meters": 424455,
+   "km": 424.5
+  },
+  {
+   "meters": 611161,
+   "km": 611.2
+  },
+  {
+   "meters": 165918,
+   "km": 165.9
+  },
+  {
+   "meters": 409560,
+   "km": 409.6
+  },
+  {
+   "meters": 519842,
+   "km": 519.8
+  },
+  {
+   "meters": 706062,
+   "km": 706.1
+  },
+  {
+   "meters": 253134,
+   "km": 253.1
+  },
+  {
+   "meters": 772088,
+   "km": 772.1
+  },
+  {
+   "meters": 550873,
+   "km": 550.9
+  },
+  {
+   "meters": 284890,
+   "km": 284.9
+  },
+  {
+   "meters": 545374,
+   "km": 545.4
+  },
+  {
+   "meters": 506037,
+   "km": 506.0
+  },
+  {
+   "meters": 631352,
+   "km": 631.4
+  },
+  {
+   "meters": 524162,
+   "km": 524.2
+  },
+  {
+   "meters": 65822,
+   "km": 65.8
+  },
+  {
+   "meters": 174387,
+   "km": 174.4
+  },
+  {
+   "meters": 513158,
+   "km": 513.2
+  },
+  {
+   "meters": 707049,
+   "km": 707.0
+  },
+  {
+   "meters": 483856,
+   "km": 483.9
+  },
+  {
+   "meters": 420615,
+   "km": 420.6
+  },
+  {
+   "meters": 142355,
+   "km": 142.4
+  },
+  {
+   "meters": 440858,
+   "km": 440.9
+  },
+  {
+   "meters": 567586,
+   "km": 567.6
+  },
+  {
+   "meters": 613348,
+   "km": 613.3
+  },
+  {
+   "meters": 366194,
+   "km": 366.2
+  },
+  {
+   "meters": 564833,
+   "km": 564.8
+  },
+  {
+   "meters": 406659,
+   "km": 406.7
+  },
+  {
+   "meters": 513692,
+   "km": 513.7
+  },
+  {
+   "meters": 735843,
+   "km": 735.8
+  },
+  {
+   "meters": 173850,
+   "km": 173.8
+  },
+  {
+   "meters": 585860,
+   "km": 585.9
+  },
+  {
+   "meters": 462785,
+   "km": 462.8
+  },
+  {
+   "meters": 103443,
+   "km": 103.4
+  },
+  {
+   "meters": 435341,
+   "km": 435.3
+  },
+  {
+   "meters": 869339,
+   "km": 869.3
+  },
+  {
+   "meters": 37033,
+   "km": 37.0
+  },
+  {
+   "meters": 2967,
+   "km": 3.0
+  },
+  {
+   "meters": 459882,
+   "km": 459.9
+  },
+  {
+   "meters": 561426,
+   "km": 561.4
+  },
+  {
+   "meters": 68095,
+   "km": 68.1
+  },
+  {
+   "meters": 53029,
+   "km": 53.0
+  },
+  {
+   "meters": 366621,
+   "km": 366.6
+  },
+  {
+   "meters": 97248,
+   "km": 97.2
+  },
+  {
+   "meters": 159396,
+   "km": 159.4
+  },
+  {
+   "meters": 114039,
+   "km": 114.0
+  },
+  {
+   "meters": 637767,
+   "km": 637.8
+  },
+  {
+   "meters": 476135,
+   "km": 476.1
+  },
+  {
+   "meters": 873937,
+   "km": 873.9
+  },
+  {
+   "meters": 838363,
+   "km": 838.4
+  },
+  {
+   "meters": 508617,
+   "km": 508.6
+  },
+  {
+   "meters": 146066,
+   "km": 146.1
+  },
+  {
+   "meters": 480919,
+   "km": 480.9
+  },
+  {
+   "meters": 457714,
+   "km": 457.7
+  },
+  {
+   "meters": 812228,
+   "km": 812.2
+  },
+  {
+   "meters": 525454,
+   "km": 525.5
+  },
+  {
+   "meters": 468805,
+   "km": 468.8
+  },
+  {
+   "meters": 359902,
+   "km": 359.9
+  },
+  {
+   "meters": 761491,
+   "km": 761.5
+  },
+  {
+   "meters": 271708,
+   "km": 271.7
+  },
+  {
+   "meters": 827043,
+   "km": 827.0
+  },
+  {
+   "meters": 731770,
+   "km": 731.8
+  },
+  {
+   "meters": 480505,
+   "km": 480.5
+  },
+  {
+   "meters": 443873,
+   "km": 443.9
+  },
+  {
+   "meters": 344326,
+   "km": 344.3
+  },
+  {
+   "meters": 681080,
+   "km": 681.1
+  },
+  {
+   "meters": 544907,
+   "km": 544.9
+  },
+  {
+   "meters": 548813,
+   "km": 548.8
+  },
+  {
+   "meters": 161089,
+   "km": 161.1
+  },
+  {
+   "meters": 775570,
+   "km": 775.6
+  },
+  {
+   "meters": 248871,
+   "km": 248.9
+  },
+  {
+   "meters": 338754,
+   "km": 338.8
+  },
+  {
+   "meters": 649185,
+   "km": 649.2
+  },
+  {
+   "meters": 34497,
+   "km": 34.5
+  },
+  {
+   "meters": 720392,
+   "km": 720.4
+  },
+  {
+   "meters": 205078,
+   "km": 205.1
+  },
+  {
+   "meters": 673815,
+   "km": 673.8
+  },
+  {
+   "meters": 617116,
+   "km": 617.1
+  },
+  {
+   "meters": 603265,
+   "km": 603.3
+  },
+  {
+   "meters": 869713,
+   "km": 869.7
+  },
+  {
+   "meters": 658955,
+   "km": 659.0
+  },
+  {
+   "meters": 502208,
+   "km": 502.2
+  },
+  {
+   "meters": 26112,
+   "km": 26.1
+  },
+  {
+   "meters": 846818,
+   "km": 846.8
+  },
+  {
+   "meters": 122028,
+   "km": 122.0
+  },
+  {
+   "meters": 310672,
+   "km": 310.7
+  },
+  {
+   "meters": 456504,
+   "km": 456.5
+  },
+  {
+   "meters": 892563,
+   "km": 892.6
+  },
+  {
+   "meters": 258516,
+   "km": 258.5
+  },
+  {
+   "meters": 753131,
+   "km": 753.1
+  },
+  {
+   "meters": 303364,
+   "km": 303.4
+  },
+  {
+   "meters": 93372,
+   "km": 93.4
+  },
+  {
+   "meters": 48481,
+   "km": 48.5
+  },
+  {
+   "meters": 626257,
+   "km": 626.3
+  },
+  {
+   "meters": 577367,
+   "km": 577.4
+  },
+  {
+   "meters": 804088,
+   "km": 804.1
+  },
+  {
+   "meters": 110733,
+   "km": 110.7
+  },
+  {
+   "meters": 856386,
+   "km": 856.4
+  },
+  {
+   "meters": 299353,
+   "km": 299.4
+  },
+  {
+   "meters": 170533,
+   "km": 170.5
+  },
+  {
+   "meters": 702547,
+   "km": 702.5
+  },
+  {
+   "meters": 500512,
+   "km": 500.5
+  },
+  {
+   "meters": 148136,
+   "km": 148.1
+  },
+  {
+   "meters": 378519,
+   "km": 378.5
+  },
+  {
+   "meters": 624041,
+   "km": 624.0
+  },
+  {
+   "meters": 420132,
+   "km": 420.1
+  },
+  {
+   "meters": 825071,
+   "km": 825.1
+  },
+  {
+   "meters": 201298,
+   "km": 201.3
+  },
+  {
+   "meters": 366863,
+   "km": 366.9
+  },
+  {
+   "meters": 191411,
+   "km": 191.4
+  },
+  {
+   "meters": 83619,
+   "km": 83.6
+  },
+  {
+   "meters": 620205,
+   "km": 620.2
+  },
+  {
+   "meters": 204111,
+   "km": 204.1
+  },
+  {
+   "meters": 447476,
+   "km": 447.5
+  },
+  {
+   "meters": 217792,
+   "km": 217.8
+  },
+  {
+   "meters": 100664,
+   "km": 100.7
+  },
+  {
+   "meters": 717620,
+   "km": 717.6
+  },
+  {
+   "meters": 323489,
+   "km": 323.5
+  },
+  {
+   "meters": 486287,
+   "km": 486.3
+  },
+  {
+   "meters": 779828,
+   "km": 779.8
+  },
+  {
+   "meters": 787912,
+   "km": 787.9
+  },
+  {
+   "meters": 729008,
+   "km": 729.0
+  },
+  {
+   "meters": 867525,
+   "km": 867.5
+  },
+  {
+   "meters": 547833,
+   "km": 547.8
+  },
+  {
+   "meters": 757569,
+   "km": 757.6
+  },
+  {
+   "meters": 444058,
+   "km": 444.1
+  },
+  {
+   "meters": 469366,
+   "km": 469.4
+  },
+  {
+   "meters": 696331,
+   "km": 696.3
+  },
+  {
+   "meters": 779558,
+   "km": 779.6
+  },
+  {
+   "meters": 582504,
+   "km": 582.5
+  },
+  {
+   "meters": 218635,
+   "km": 218.6
+  },
+  {
+   "meters": 278805,
+   "km": 278.8
+  },
+  {
+   "meters": 626556,
+   "km": 626.6
+  },
+  {
+   "meters": 382023,
+   "km": 382.0
+  },
+  {
+   "meters": 121558,
+   "km": 121.6
+  },
+  {
+   "meters": 657736,
+   "km": 657.7
+  },
+  {
+   "meters": 820788,
+   "km": 820.8
+  },
+  {
+   "meters": 657592,
+   "km": 657.6
+  },
+  {
+   "meters": 8123,
+   "km": 8.1
+  },
+  {
+   "meters": 219774,
+   "km": 219.8
+  },
+  {
+   "meters": 444468,
+   "km": 444.5
+  },
+  {
+   "meters": 639393,
+   "km": 639.4
+  },
+  {
+   "meters": 428304,
+   "km": 428.3
+  },
+  {
+   "meters": 400391,
+   "km": 400.4
+  },
+  {
+   "meters": 851563,
+   "km": 851.6
+  },
+  {
+   "meters": 683947,
+   "km": 683.9
+  },
+  {
+   "meters": 209443,
+   "km": 209.4
+  },
+  {
+   "meters": 73581,
+   "km": 73.6
+  },
+  {
+   "meters": 809790,
+   "km": 809.8
+  },
+  {
+   "meters": 444090,
+   "km": 444.1
+  },
+  {
+   "meters": 835840,
+   "km": 835.8
+  },
+  {
+   "meters": 93346,
+   "km": 93.3
+  },
+  {
+   "meters": 863907,
+   "km": 863.9
+  },
+  {
+   "meters": 57933,
+   "km": 57.9
+  },
+  {
+   "meters": 364909,
+   "km": 364.9
+  },
+  {
+   "meters": 267070,
+   "km": 267.1
+  },
+  {
+   "meters": 377720,
+   "km": 377.7
+  },
+  {
+   "meters": 479066,
+   "km": 479.1
+  },
+  {
+   "meters": 444775,
+   "km": 444.8
+  },
+  {
+   "meters": 796288,
+   "km": 796.3
+  },
+  {
+   "meters": 203025,
+   "km": 203.0
+  },
+  {
+   "meters": 659388,
+   "km": 659.4
+  },
+  {
+   "meters": 785851,
+   "km": 785.9
+  },
+  {
+   "meters": 296206.4666809417,
+   "km": 296.2
+  },
+  {
+   "meters": 308282.50650696084,
+   "km": 308.3
+  },
+  {
+   "meters": 532183.9080363159,
+   "km": 532.2
+  },
+  {
+   "meters": 424211.44164568663,
+   "km": 424.2
+  },
+  {
+   "meters": 358115.3489792103,
+   "km": 358.1
+  },
+  {
+   "meters": 290519.4825965308,
+   "km": 290.5
+  },
+  {
+   "meters": 468467.8532763904,
+   "km": 468.5
+  },
+  {
+   "meters": 615710.4799113726,
+   "km": 615.7
+  },
+  {
+   "meters": 723138.539807094,
+   "km": 723.1
+  },
+  {
+   "meters": 384846.8010969737,
+   "km": 384.8
+  },
+  {
+   "meters": 424942.9108775094,
+   "km": 424.9
+  },
+  {
+   "meters": 176694.9647259459,
+   "km": 176.7
+  },
+  {
+   "meters": 435939.72065560194,
+   "km": 435.9
+  },
+  {
+   "meters": 68669.5955341149,
+   "km": 68.7
+  },
+  {
+   "meters": 769181.8364569717,
+   "km": 769.2
+  },
+  {
+   "meters": 17110.59177247679,
+   "km": 17.1
+  },
+  {
+   "meters": 683102.3220972201,
+   "km": 683.1
+  },
+  {
+   "meters": 776409.3965356246,
+   "km": 776.4
+  },
+  {
+   "meters": 392149.28232204623,
+   "km": 392.1
+  },
+  {
+   "meters": 195418.24084738022,
+   "km": 195.4
+  },
+  {
+   "meters": 322671.0954532292,
+   "km": 322.7
+  },
+  {
+   "meters": 828975.8171318392,
+   "km": 829.0
+  },
+  {
+   "meters": 55908.21987633832,
+   "km": 55.9
+  },
+  {
+   "meters": 781097.0738892552,
+   "km": 781.1
+  },
+  {
+   "meters": 442137.19172722526,
+   "km": 442.1
+  },
+  {
+   "meters": 599674.9838800165,
+   "km": 599.7
+  },
+  {
+   "meters": 843635.8695919111,
+   "km": 843.6
+  },
+  {
+   "meters": 16827.392479041227,
+   "km": 16.8
+  },
+  {
+   "meters": 355828.84798407473,
+   "km": 355.8
+  },
+  {
+   "meters": 602135.1907857024,
+   "km": 602.1
+  },
+  {
+   "meters": 849151.564071512,
+   "km": 849.2
+  },
+  {
+   "meters": 808210.9547463494,
+   "km": 808.2
+  },
+  {
+   "meters": 342567.8702446822,
+   "km": 342.6
+  },
+  {
+   "meters": 689579.6922827853,
+   "km": 689.6
+  },
+  {
+   "meters": 52573.03655077193,
+   "km": 52.6
+  },
+  {
+   "meters": 383743.8597363527,
+   "km": 383.7
+  },
+  {
+   "meters": 416314.32456116827,
+   "km": 416.3
+  },
+  {
+   "meters": 669366.1714301613,
+   "km": 669.4
+  },
+  {
+   "meters": 165397.11741494093,
+   "km": 165.4
+  },
+  {
+   "meters": 827664.8644831653,
+   "km": 827.7
+  },
+  {
+   "meters": 172257.03113873096,
+   "km": 172.3
+  },
+  {
+   "meters": 562768.5111182542,
+   "km": 562.8
+  },
+  {
+   "meters": 366325.0882070765,
+   "km": 366.3
+  },
+  {
+   "meters": 460579.5778894565,
+   "km": 460.6
+  },
+  {
+   "meters": 364586.0596569415,
+   "km": 364.6
+  },
+  {
+   "meters": 466347.7064894398,
+   "km": 466.3
+  },
+  {
+   "meters": 639479.4516157263,
+   "km": 639.5
+  },
+  {
+   "meters": 463381.98602590413,
+   "km": 463.4
+  },
+  {
+   "meters": 183598.35378559548,
+   "km": 183.6
+  },
+  {
+   "meters": 444155.82230430713,
+   "km": 444.2
+  },
+  {
+   "meters": 360026.95564807625,
+   "km": 360.0
+  },
+  {
+   "meters": 537725.458395104,
+   "km": 537.7
+  },
+  {
+   "meters": 203776.09703230436,
+   "km": 203.8
+  },
+  {
+   "meters": 672298.152558871,
+   "km": 672.3
+  },
+  {
+   "meters": 196569.64005379105,
+   "km": 196.6
+  },
+  {
+   "meters": 199363.57001250557,
+   "km": 199.4
+  },
+  {
+   "meters": 832147.9009526846,
+   "km": 832.1
+  },
+  {
+   "meters": 586276.3761162382,
+   "km": 586.3
+  },
+  {
+   "meters": 52321.60540504047,
+   "km": 52.3
+  },
+  {
+   "meters": 173532.31097344277,
+   "km": 173.5
+  },
+  {
+   "meters": 234166.04954204394,
+   "km": 234.2
+  },
+  {
+   "meters": 185328.09964255718,
+   "km": 185.3
+  },
+  {
+   "meters": 591982.360461815,
+   "km": 592.0
+  },
+  {
+   "meters": 194591.30263486467,
+   "km": 194.6
+  },
+  {
+   "meters": 891615.0427693456,
+   "km": 891.6
+  },
+  {
+   "meters": 627110.7634275736,
+   "km": 627.1
+  },
+  {
+   "meters": 81517.3453378883,
+   "km": 81.5
+  },
+  {
+   "meters": 204399.4916656253,
+   "km": 204.4
+  },
+  {
+   "meters": 176556.40562736845,
+   "km": 176.6
+  },
+  {
+   "meters": 788891.963303264,
+   "km": 788.9
+  },
+  {
+   "meters": 815075.3282512119,
+   "km": 815.1
+  },
+  {
+   "meters": 39136.173106237,
+   "km": 39.1
+  },
+  {
+   "meters": 184757.581403596,
+   "km": 184.8
+  },
+  {
+   "meters": 441070.1531352961,
+   "km": 441.1
+  },
+  {
+   "meters": 672933.8899667986,
+   "km": 672.9
+  },
+  {
+   "meters": 411005.9692587487,
+   "km": 411.0
+  },
+  {
+   "meters": 415870.95973870764,
+   "km": 415.9
+  },
+  {
+   "meters": 124128.23504725179,
+   "km": 124.1
+  },
+  {
+   "meters": 443182.7216934982,
+   "km": 443.2
+  },
+  {
+   "meters": 325937.72326251335,
+   "km": 325.9
+  },
+  {
+   "meters": 559505.6495432693,
+   "km": 559.5
+  },
+  {
+   "meters": 103882.34558227535,
+   "km": 103.9
+  },
+  {
+   "meters": 547160.6197423374,
+   "km": 547.2
+  },
+  {
+   "meters": 637354.2445356215,
+   "km": 637.4
+  },
+  {
+   "meters": 304740.0122203504,
+   "km": 304.7
+  },
+  {
+   "meters": 165731.96385368463,
+   "km": 165.7
+  },
+  {
+   "meters": 405183.6934089901,
+   "km": 405.2
+  },
+  {
+   "meters": 101601.51029137251,
+   "km": 101.6
+  },
+  {
+   "meters": 799035.4743059583,
+   "km": 799.0
+  },
+  {
+   "meters": 604988.9059034765,
+   "km": 605.0
+  },
+  {
+   "meters": 611085.2178463137,
+   "km": 611.1
+  },
+  {
+   "meters": 372734.0697579456,
+   "km": 372.7
+  },
+  {
+   "meters": 197658.6224176352,
+   "km": 197.7
+  },
+  {
+   "meters": 585255.5312451052,
+   "km": 585.3
+  },
+  {
+   "meters": 78503.40020463475,
+   "km": 78.5
+  },
+  {
+   "meters": 32785.0172872145,
+   "km": 32.8
+  },
+  {
+   "meters": 877877.4305476199,
+   "km": 877.9
+  },
+  {
+   "meters": 874411.9186190305,
+   "km": 874.4
+  },
+  {
+   "meters": 762308.0473743629,
+   "km": 762.3
+  },
+  {
+   "meters": 340216.6253309807,
+   "km": 340.2
+  }
+ ],
+ "duration_truncation": [
+  {
+   "seconds": 0,
+   "minutes": 0
+  },
+  {
+   "seconds": 1,
+   "minutes": 0
+  },
+  {
+   "seconds": 59,
+   "minutes": 0
+  },
+  {
+   "seconds": 60,
+   "minutes": 1
+  },
+  {
+   "seconds": 61,
+   "minutes": 1
+  },
+  {
+   "seconds": 2759,
+   "minutes": 45
+  },
+  {
+   "seconds": 2760,
+   "minutes": 46
+  },
+  {
+   "seconds": 3599.9,
+   "minutes": 59
+  },
+  {
+   "seconds": 11212.018858307641,
+   "minutes": 186
+  },
+  {
+   "seconds": 8343.289201572234,
+   "minutes": 139
+  },
+  {
+   "seconds": 13208.246930203633,
+   "minutes": 220
+  },
+  {
+   "seconds": 16147.386328999808,
+   "minutes": 269
+  },
+  {
+   "seconds": 35719.58457557556,
+   "minutes": 595
+  },
+  {
+   "seconds": 27442.873747501904,
+   "minutes": 457
+  },
+  {
+   "seconds": 2037.125348806422,
+   "minutes": 33
+  },
+  {
+   "seconds": 8073.027669585039,
+   "minutes": 134
+  },
+  {
+   "seconds": 3604.6856894476023,
+   "minutes": 60
+  },
+  {
+   "seconds": 11656.124638480642,
+   "minutes": 194
+  },
+  {
+   "seconds": 25249.067408941795,
+   "minutes": 420
+  },
+  {
+   "seconds": 28441.738287967903,
+   "minutes": 474
+  },
+  {
+   "seconds": 11983.624134409589,
+   "minutes": 199
+  },
+  {
+   "seconds": 3132.5516914886944,
+   "minutes": 52
+  },
+  {
+   "seconds": 3458.702747146609,
+   "minutes": 57
+  },
+  {
+   "seconds": 37891.45910460096,
+   "minutes": 631
+  },
+  {
+   "seconds": 22007.185746379455,
+   "minutes": 366
+  },
+  {
+   "seconds": 26138.62746852234,
+   "minutes": 435
+  },
+  {
+   "seconds": 32035.952604463022,
+   "minutes": 533
+  },
+  {
+   "seconds": 23893.665964171814,
+   "minutes": 398
+  },
+  {
+   "seconds": 9112.265313560167,
+   "minutes": 151
+  },
+  {
+   "seconds": 11539.091141525363,
+   "minutes": 192
+  },
+  {
+   "seconds": 871.153605127916,
+   "minutes": 14
+  },
+  {
+   "seconds": 5149.909666840173,
+   "minutes": 85
+  },
+  {
+   "seconds": 20216.140787555032,
+   "minutes": 336
+  },
+  {
+   "seconds": 6850.537073121372,
+   "minutes": 114
+  },
+  {
+   "seconds": 18858.705394943194,
+   "minutes": 314
+  },
+  {
+   "seconds": 21930.809760868575,
+   "minutes": 365
+  },
+  {
+   "seconds": 37735.259663176796,
+   "minutes": 628
+  },
+  {
+   "seconds": 33913.42765279022,
+   "minutes": 565
+  },
+  {
+   "seconds": 33407.1459356525,
+   "minutes": 556
+  },
+  {
+   "seconds": 3889.6338861663385,
+   "minutes": 64
+  },
+  {
+   "seconds": 39899.060332310546,
+   "minutes": 664
+  },
+  {
+   "seconds": 13825.53557600837,
+   "minutes": 230
+  },
+  {
+   "seconds": 14019.146631049409,
+   "minutes": 233
+  },
+  {
+   "seconds": 27453.150910085875,
+   "minutes": 457
+  },
+  {
+   "seconds": 1764.3741219529227,
+   "minutes": 29
+  },
+  {
+   "seconds": 7573.477817329016,
+   "minutes": 126
+  },
+  {
+   "seconds": 30419.851088043033,
+   "minutes": 506
+  },
+  {
+   "seconds": 11504.904179890647,
+   "minutes": 191
+  },
+  {
+   "seconds": 9223.027778665743,
+   "minutes": 153
+  },
+  {
+   "seconds": 39930.15400705823,
+   "minutes": 665
+  },
+  {
+   "seconds": 11734.338693153162,
+   "minutes": 195
+  },
+  {
+   "seconds": 30757.154768549226,
+   "minutes": 512
+  },
+  {
+   "seconds": 32097.590449611762,
+   "minutes": 534
+  },
+  {
+   "seconds": 10908.469659609362,
+   "minutes": 181
+  },
+  {
+   "seconds": 17962.9817875714,
+   "minutes": 299
+  },
+  {
+   "seconds": 32416.51985100175,
+   "minutes": 540
+  },
+  {
+   "seconds": 36881.76900523866,
+   "minutes": 614
+  },
+  {
+   "seconds": 36467.37963385991,
+   "minutes": 607
+  },
+  {
+   "seconds": 20747.738601855475,
+   "minutes": 345
+  },
+  {
+   "seconds": 20798.12990023237,
+   "minutes": 346
+  },
+  {
+   "seconds": 29992.053313573255,
+   "minutes": 499
+  },
+  {
+   "seconds": 21923.969498086928,
+   "minutes": 365
+  },
+  {
+   "seconds": 34203.048413428514,
+   "minutes": 570
+  },
+  {
+   "seconds": 39971.7762920627,
+   "minutes": 666
+  },
+  {
+   "seconds": 5328.913672966494,
+   "minutes": 88
+  },
+  {
+   "seconds": 2354.1276023688406,
+   "minutes": 39
+  },
+  {
+   "seconds": 642.9306820434786,
+   "minutes": 10
+  },
+  {
+   "seconds": 28525.221457598054,
+   "minutes": 475
+  },
+  {
+   "seconds": 31297.834292483076,
+   "minutes": 521
+  },
+  {
+   "seconds": 5937.102922969072,
+   "minutes": 98
+  },
+  {
+   "seconds": 24004.808324608624,
+   "minutes": 400
+  },
+  {
+   "seconds": 28032.31133036448,
+   "minutes": 467
+  },
+  {
+   "seconds": 8299.763693218158,
+   "minutes": 138
+  },
+  {
+   "seconds": 26194.543368173378,
+   "minutes": 436
+  },
+  {
+   "seconds": 35415.19252939284,
+   "minutes": 590
+  },
+  {
+   "seconds": 15825.719375440152,
+   "minutes": 263
+  },
+  {
+   "seconds": 25044.218184611673,
+   "minutes": 417
+  },
+  {
+   "seconds": 33791.59823596842,
+   "minutes": 563
+  },
+  {
+   "seconds": 25290.78821786463,
+   "minutes": 421
+  },
+  {
+   "seconds": 12498.987325966864,
+   "minutes": 208
+  },
+  {
+   "seconds": 35073.729488780715,
+   "minutes": 584
+  },
+  {
+   "seconds": 10152.853762638615,
+   "minutes": 169
+  },
+  {
+   "seconds": 38773.538132243826,
+   "minutes": 646
+  },
+  {
+   "seconds": 4682.656805033952,
+   "minutes": 78
+  },
+  {
+   "seconds": 29864.08873698752,
+   "minutes": 497
+  },
+  {
+   "seconds": 13713.937822870997,
+   "minutes": 228
+  },
+  {
+   "seconds": 29763.178839651227,
+   "minutes": 496
+  },
+  {
+   "seconds": 11193.366974930348,
+   "minutes": 186
+  },
+  {
+   "seconds": 13618.247893842563,
+   "minutes": 226
+  },
+  {
+   "seconds": 19601.589068928803,
+   "minutes": 326
+  },
+  {
+   "seconds": 10154.059549476837,
+   "minutes": 169
+  },
+  {
+   "seconds": 27310.355566921397,
+   "minutes": 455
+  },
+  {
+   "seconds": 321.32557196672406,
+   "minutes": 5
+  },
+  {
+   "seconds": 19230.501510865222,
+   "minutes": 320
+  },
+  {
+   "seconds": 38561.04803823237,
+   "minutes": 642
+  },
+  {
+   "seconds": 18599.459288598377,
+   "minutes": 309
+  },
+  {
+   "seconds": 7569.891133329561,
+   "minutes": 126
+  },
+  {
+   "seconds": 27396.429604761233,
+   "minutes": 456
+  },
+  {
+   "seconds": 6075.120673086212,
+   "minutes": 101
+  },
+  {
+   "seconds": 10588.877125306373,
+   "minutes": 176
+  },
+  {
+   "seconds": 4812.819781149766,
+   "minutes": 80
+  },
+  {
+   "seconds": 34818.08010443266,
+   "minutes": 580
+  },
+  {
+   "seconds": 462.52024297287085,
+   "minutes": 7
+  },
+  {
+   "seconds": 36093.25989901699,
+   "minutes": 601
+  },
+  {
+   "seconds": 31655.899283199495,
+   "minutes": 527
+  },
+  {
+   "seconds": 5569.421494289818,
+   "minutes": 92
+  },
+  {
+   "seconds": 7596.753090690128,
+   "minutes": 126
+  },
+  {
+   "seconds": 31244.815213756418,
+   "minutes": 520
+  }
+ ]
+}

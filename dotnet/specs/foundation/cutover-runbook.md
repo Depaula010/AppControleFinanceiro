@@ -1,0 +1,78 @@
+# Runbook da virada (big-bang)
+
+Estratégia: construir e validar tudo em homol; em produção, trocar o container `web` de uma vez. **Não executar nenhum passo sem o Rafael presente e sem o rollback testado.**
+
+## Pré-requisitos (todos obrigatórios)
+
+- [ ] Todas as features do `roadmap.md` com DoD cumprida (`constitution.md` §10).
+- [ ] Suíte de paridade sem diferença fora de desvios `aprovado`.
+- [ ] Todos os desvios com estado `aprovado` ou `rejeitado` (nenhum `proposto`).
+- [ ] Homol estável por **7 dias** com os jobs ativos.
+- [ ] Respostas confirmadas pelo Rafael: URL que o bot usa para chamar o backend; `GOOGLE_REDIRECT_URI` real e se passa pelo `oauth_proxy`; quem chama `/admin/run-motor-agendamentos` e `/admin/trigger-*` hoje (bot, UptimeRobot, cron do host).
+- [x] ~~`oauth_proxy` reimplantado~~ **Não é necessário** (verificado em 2026-10-09): o serviço do Render (`meu-financeiro-proxy`, repositório `Depaula010/meu-financeiro-proxy`, arquivo `proxy_server.py`) é um proxy genérico que já repassa a query string de qualquer rota para `http://212.47.65.37` (porta 80, nginx do host) e responde 307 no `/oauth2callback`. O `oauth_proxy/app.py` deste repositório não é o que roda lá. `GOOGLE_REDIRECT_URI` de produção confirmado pelo Rafael em 2026-10-09: `https://meu-financeiro-proxy.onrender.com/oauth2callback` (o .NET usa esse host). Testar `https://meu-financeiro-proxy.onrender.com/connect-calendar/<id>?t=x` em homol.
+- [ ] Google: confirmar que o `GOOGLE_REDIRECT_URI` registrado no Google Cloud Console continua apontando para o `oauth_proxy` e que o proxy aponta (`REAL_SERVER_URL`) para o servidor que passará a ser o .NET, na mesma porta. Opcional na virada: `GOOGLE_CONNECT_LEGACY_UNTIL` (data) aceita por um tempo links de conexão antigos, sem o token assinado (desvio 053); o padrão é desligado.
+- [ ] Redis compartilhado: conferir que as chaves de dedupe (`invoice_*`, `calendar_*`) continuam presentes; o .NET lê o formato do Python e o Python lê o JSON compacto do .NET (rollback seguro).
+- [ ] `pg_dump` completo de `bot_whatsapp_prod` guardado fora do servidor.
+- [ ] Tag `flask-final` criada no commit do Flask em produção.
+- [ ] Janela de baixo uso (madrugada), evitando 00:01 (processador de faturas) e as horas 18–23.
+
+## Migrations de schema (ADR 0001)
+
+Antes do passo 5 da sequência, aplicar em produção, com o Rafael presente, as migrations de `dotnet/migrations/` ainda não aplicadas. As previstas até aqui, todas aditivas:
+
+| # | Migration | Desvio |
+|---|---|---|
+| 0001 | `usuarios.api_key_automate` para `varchar(255)` | 017 |
+| 0050 | `transacoes.observacoes text`, `transacoes.origem varchar(20)` (`ADD COLUMN IF NOT EXISTS`, idempotente; linhas antigas ficam NULL) | 027 |
+
+Aplicar antes é seguro: o Flask não usa as colunas novas e a alteração de tipo só alarga.
+
+## Sequência
+
+1. **Congelar** o Flask: parar o recebimento de novos atalhos avisando o bot (ou aceitar alguns minutos de falha).
+2. **Backup**: `pg_dump` + `redis-cli SAVE` e cópia do volume `redis-data`.
+3. **Desligar schedulers externos** que disparam `/admin/run-motor-agendamentos` e `/admin/trigger-*`, se o Quartz assumir.
+4. **Limpar Redis** das chaves específicas do Python (`pending_*`, `nightly_checkin*`, `security:*`, `gemini_cache:*`, Limiter). Manter chaves de dedupe (`invoice_*`, `calendar_*`, `job_lock:*` expiram sozinhas).
+5. **Merge do PR de virada** ⇒ o workflow faz build do .NET **antes** de derrubar o Flask, depois `up -d` com `container_name: meu-secretario-api`.
+6. **Smoke imediato** (ver abaixo).
+7. **Observar 2 horas** logs (`docker compose logs -f web`), `security.log`, bot, jobs.
+8. **Reativar** gatilhos externos se necessários (apontando para as mesmas rotas).
+
+## Smoke test (obrigatório, nesta ordem)
+
+| # | Teste | Prova |
+|---|---|---|
+| 1 | `curl 127.0.0.1:8080/` ⇒ 200 `{"status":"online",...}` | processo, nginx, DB |
+| 2 | Login no Angular com **usuário antigo** | hasher Werkzeug |
+| 3 | Reabrir o Angular com **token emitido pelo Flask** (ainda válido) | JWT compatível |
+| 4 | Listar contas, transações, contas mensais, dashboard | EF/Dapper no schema real |
+| 5 | Criar e excluir uma transação de teste | escrita, sinal do valor |
+| 6 | Atalho do iPhone em `/api/transacao` ⇒ confirmação por WhatsApp | Fernet + Redis + bot |
+| 7 | Mensagem de texto ao bot ⇒ resposta | webhook, Gemini, HMAC, `x-api-key` |
+| 8 | `POST /admin/security-stats` com `x-api-key` | segurança e Redis |
+| 9 | Disparar manualmente o processador de faturas | job + idempotência |
+| 10 | Próximo alerta de tarefa / briefing matinal | jobs agendados |
+
+## Rollback
+
+Critério: qualquer falha nos itens 1–7, ou erro 5xx sustentado.
+
+1. `git revert` do PR de virada (ou `git checkout flask-final`) e novo deploy: build do Flask (~minutos).
+2. Reativar labels do Ofelia e o serviço `cron-scheduler` (voltam com o revert).
+3. Redis: nada a restaurar além do que expira; se houve escrita de chaves incompatíveis, apagar `security:*` e `pending_*`.
+4. Banco: **o .NET não faz migration destrutiva**, então não há rollback de schema. Migrations só aditivas.
+5. Se houve dados gravados incorretamente pelo .NET, usar o `pg_dump` do passo 2 apenas com aprovação do Rafael.
+
+## Pós-virada (primeira semana)
+
+- Conferir diariamente: faturas fechadas às 00:01, resumo matinal, check-in noturno, relatório do dia 1.
+- Rotacionar a senha do Postgres e `API_SECRET_KEY` (esta invalida JWTs: combinar com o Rafael) — a connection string de produção foi exposta em conversa de planejamento.
+- Só então iniciar a Fase 5 (remoção do Python).
+
+## Ajuste de dados da virada: faturas de cartão deslocadas (desvio 065)
+
+Em produção (export de 2026-10-02) o cartão 2 fecha dia 13 e vence dia 20, e o Flask deixou faturas com vencimento no mês seguinte ao do fechamento (a Aberta fecha 13/10 e vence 20/11) e pares do mesmo ciclo (fevereiro e agosto). O .NET localiza a fatura por (conta, vencimento) com a regra única do desvio 065; sem o ajuste, as compras novas caem no ciclo errado.
+
+**Script:** `dotnet/scripts/cutover/ajuste-faturas-cartao.sql` (idempotente, numa transação). Funde as faturas duplicadas do mesmo ciclo (move as transações) e corrige o vencimento das deslocadas para o mês do fechamento. Validado em 2026-10-12 num banco local com os dados reais do export (12 faturas viraram 10; a Aberta passou a 13/10 → 20/10; uma compra de 12/10 foi para ela e uma de 14/10 criou a de 13/11 → 20/11).
+
+**Na virada:** (1) backup do banco; (2) rodar o script em `bot_whatsapp_prod` pelo HeidiSQL e conferir o `SELECT` final; (3) só então subir o .NET. Rodar também em homol antes, para ensaio.

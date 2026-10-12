@@ -1,0 +1,14 @@
+Analise a pergunta sobre consulta de fatura: "⟦MSG⟧"
+
+    Minhas contas são: ⟦CONTAS⟧
+
+    Extraia:
+    - conta_cartao: Nome do cartão/conta que o usuário quer consultar (ou null se não especificou)
+
+    Responda APENAS com JSON.
+
+    Exemplos:
+    - "qual o valor da minha fatura?" → {"conta_cartao": null}
+    - "quanto está a fatura do Nubank?" → {"conta_cartao": "Nubank"}
+    - "valor da fatura do Inter" → {"conta_cartao": "Inter"}
+    

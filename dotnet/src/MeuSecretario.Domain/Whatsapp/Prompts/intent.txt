@@ -1,0 +1,167 @@
+Analise a mensagem: "⟦MSG⟧"
+
+    REGRA IMPORTANTE: Diferencie ações de consultas!
+    - Se a mensagem começa com PERGUNTAS (quanto, qual, quais, quanto foi, como está) → É uma CONSULTA
+    - Se a mensagem informa um VALOR ESPECÍFICO (gastei X, paguei Y, comprei Z) → É um REGISTRO
+
+    Classifique a intenção principal como:
+
+    📝 REGISTROS (usuário informa algo que aconteceu):
+    - "Renda" → REGISTRAR receita: "recebi 1000", "ganhei 500 de bônus"
+    - "Despesa" → REGISTRAR gasto: "gastei 50 na padaria", "paguei 100 de luz", "comprei X por Y reais"
+    - "Transferência" → Transferir entre contas
+    - "Pagamento Fatura" → PAGOU a fatura: "paguei 500 da fatura"
+
+    ❓ CONSULTAS (usuário pergunta/quer saber):
+    - "Consulta Período" → Pergunta QUANTO gastou em período: "quanto gastei hoje?", "quanto gastei essa semana?", "gastos de ontem?", "total de despesas do mês?"
+    - "Consulta Saldo" → Pergunta quanto TEM: "quanto tenho?", "qual meu saldo?", "saldo da conta"
+    - "Consulta Valor Fatura" → Pergunta VALOR da fatura: "quanto está a fatura?", "valor da fatura do nubank?"
+    - "Consulta Categoria Específica" → Gasto em categoria: "quanto gastei com uber?", "gastos de supermercado"
+    - "Consulta Potes" → Status dos potes de gastos
+    - "Consulta Contas Fixas" → Contas fixas pendentes (só as não pagas)
+    - "Consulta Todas Contas" → TODAS as contas do mês, pagas e pendentes: "todas as minhas contas", "listar todas as contas", "quais contas tenho esse mês", "me mostra todas as contas"
+    - "Consulta Reserva" → Reserva de emergência (6 meses)
+    - "Consulta Detalhes Reserva" → Ver QUAIS contas estão incluídas na reserva: "detalhes da reserva", "quais contas na reserva", "mostrar contas da reserva", "listar reserva"
+    - "Listar Contas" → Quais contas cadastradas
+
+    📅 VENCIMENTOS:
+    - "Vencimentos Hoje" → "tenho conta VENCENDO hoje?", "o que VENCE hoje?" (DIA ATUAL)
+    - "Vencimentos Amanhã" → "o que vence amanhã?" (FUTURO PRÓXIMO)
+    - "Vencimentos Essa Semana" → "contas da semana", "o que vence nos próximos 7 dias?" (FUTURO)
+    - "Contas Atrasadas" → "tenho conta ATRASADA?", "CONTAS VENCIDAS", "o que JÁ VENCEU?", "contas pendentes", "o que não paguei?" (PASSADO)
+
+    ✅ AÇÕES:
+    - "Quitar Conta Fixa" → Marcar conta fixa como paga
+    - "Criar Evento" → criar/agendar/marcar evento no calendário
+    - "Deletar Evento" → deletar/cancelar/remover evento
+    - "Consultar Agenda" → Ver compromissos
+    - "Horários Livres" → "quando estou livre?", "melhor horário para X"
+
+    📊 ANÁLISES:
+    - "Análise Inteligente" → "analisar gastos", "insights", "relatório financeiro"
+    - "Comparação Mensal" → "comparar mês atual com anterior"
+    - "Previsão de Gastos" → "quanto vou gastar?", "projeção de gastos"
+    - "Gráfico de Gastos" → "gráfico", "mostrar gráfico", "visualizar gastos"
+
+    ⚙️ CONFIGURAÇÕES:
+    - "Configurar Notificações" → configurar/ativar/desativar notificações
+    - "Configurar Relatório Mensal" → configurar relatório mensal
+    - "Configurar Localização" → definir cidade/estado
+    - "Configurar Endereço" → cadastrar endereço casa/trabalho
+    - "Listar Endereços" → ver endereços salvos
+    - "Deletar Endereço" → remover endereço
+    - "Solicitar API Key" → pedir chave de acesso
+    - "Menu de Ajuda" → "o que você pode fazer?", "funcionalidades"
+
+    ☁️ GOOGLE DRIVE:
+    - "Upload Drive" → salvar/guardar/enviar arquivo para o drive: "salvar no drive", "guardar no drive pasta X", "enviar para o drive"
+
+    Responda APENAS com JSON: {"intent": "..."}
+
+    ⚠️ EXEMPLOS CRÍTICOS (não confunda!):
+
+    REGISTROS (tem valor específico):
+    - "gastei 50 na padaria" → {"intent": "Despesa"}
+    - "paguei 100 de luz" → {"intent": "Despesa"}
+    - "comprei café por 5 reais" → {"intent": "Despesa"}
+    - "gastei 200 no mercado" → {"intent": "Despesa"}
+    - "recebi 3000 de salário" → {"intent": "Renda"}
+
+    CONSULTAS (pergunta, quer saber):
+    - "quanto gastei hoje?" → {"intent": "Consulta Período"}
+    - "quanto gastei ontem?" → {"intent": "Consulta Período"}
+    - "quanto gastei essa semana?" → {"intent": "Consulta Período"}
+    - "quanto gastei esse mês?" → {"intent": "Consulta Período"}
+    - "gastos de ontem" → {"intent": "Consulta Período"}
+    - "gastos do mês passado" → {"intent": "Consulta Período"}
+    - "total de despesas hoje" → {"intent": "Consulta Período"}
+    - "quanto foi meu gasto ontem?" → {"intent": "Consulta Período"}
+
+    Outros exemplos:
+    - "criar evento academia amanhã" → {"intent": "Criar Evento"}
+    - "deletar reunião de hoje" → {"intent": "Deletar Evento"}
+    - "quero receber minha agenda às 8h" → {"intent": "Configurar Notificações"}
+    - "tenho compromisso agora à tarde?" → {"intent": "Consultar Agenda"}
+    - "quando posso marcar dentista esta semana?" → {"intent": "Horários Livres"}
+    - "quando estou livre amanhã?" → {"intent": "Horários Livres"}
+    - "melhor horário para reunião hoje" → {"intent": "Horários Livres"}
+    - "analisar meus gastos" → {"intent": "Análise Inteligente"}
+    - "quero um relatório financeiro" → {"intent": "Análise Inteligente"}
+    - "comparar este mês com o anterior" → {"intent": "Comparação Mensal"}
+    - "quanto vou gastar este mês" → {"intent": "Previsão de Gastos"}
+    - "qual a projeção de gastos" → {"intent": "Previsão de Gastos"}
+    - "estimativa de gastos próximo mês" → {"intent": "Previsão de Gastos"}
+    - "gráfico de gastos" → {"intent": "Gráfico de Gastos"}
+    - "mostrar gráfico" → {"intent": "Gráfico de Gastos"}
+    - "visualizar meus gastos" → {"intent": "Gráfico de Gastos"}
+    - "qual minha api key" → {"intent": "Solicitar API Key"}
+    - "me dá minha chave de acesso" → {"intent": "Solicitar API Key"}
+    - "tenho conta que vence hoje?" → {"intent": "Vencimentos Hoje"}
+    - "o que vence amanhã?" → {"intent": "Vencimentos Amanhã"}
+    - "contas que vencem essa semana" → {"intent": "Vencimentos Essa Semana"}
+    - "todas as minhas contas" → {"intent": "Consulta Todas Contas"}
+    - "quais contas tenho esse mês" → {"intent": "Consulta Todas Contas"}
+    - "listar todas as contas do mês" → {"intent": "Consulta Todas Contas"}
+    - "me mostra todas as contas" → {"intent": "Consulta Todas Contas"}
+    - "minhas contas desse mês" → {"intent": "Consulta Todas Contas"}
+
+    ⚠️ VENCIMENTOS: DIFERENCIE PASSADO DE PRESENTE/FUTURO:
+
+    PASSADO (contas já vencidas/atrasadas):
+    - "tenho alguma conta atrasada?" → {"intent": "Contas Atrasadas"}
+    - "tenho conta vencida?" → {"intent": "Contas Atrasadas"}
+    - "contas atrasadas" → {"intent": "Contas Atrasadas"}
+    - "o que já venceu?" → {"intent": "Contas Atrasadas"}
+    - "o que passou do vencimento?" → {"intent": "Contas Atrasadas"}
+    - "tem algo vencido?" → {"intent": "Contas Atrasadas"}
+    - "o que não paguei?" → {"intent": "Contas Atrasadas"}
+    - "contas pendentes" → {"intent": "Contas Atrasadas"}
+
+    PRESENTE/FUTURO (contas que vencem hoje ou depois):
+    - "tenho conta vencendo hoje?" → {"intent": "Vencimentos Hoje"}
+    - "o que vence hoje?" → {"intent": "Vencimentos Hoje"}
+    - "contas de hoje" → {"intent": "Vencimentos Hoje"}
+    - "o que vence amanhã?" → {"intent": "Vencimentos Amanhã"}
+    - "o que vence essa semana?" → {"intent": "Vencimentos Essa Semana"}
+    - "vencimentos dos próximos dias" → {"intent": "Vencimentos Essa Semana"}
+
+    - "detalhes da reserva" → {"intent": "Consulta Detalhes Reserva"}
+    - "quais contas estão na reserva" → {"intent": "Consulta Detalhes Reserva"}
+    - "mostrar contas da reserva de emergência" → {"intent": "Consulta Detalhes Reserva"}
+    - "listar agendamentos da reserva" → {"intent": "Consulta Detalhes Reserva"}
+    - "ver o que compõe minha reserva" → {"intent": "Consulta Detalhes Reserva"}
+    - "configurar relatório mensal" → {"intent": "Configurar Relatório Mensal"}
+    - "quero receber relatório todo dia 1" → {"intent": "Configurar Relatório Mensal"}
+    - "ativar relatório mensal às 10h" → {"intent": "Configurar Relatório Mensal"}
+    - "configurar localização São Paulo, SP" → {"intent": "Configurar Localização"}
+    - "minha cidade é Campinas" → {"intent": "Configurar Localização"}
+    - "mudar minha localização" → {"intent": "Configurar Localização"}
+    - "configurar endereço de casa" → {"intent": "Configurar Endereço"}
+    - "adicionar endereço do trabalho" → {"intent": "Configurar Endereço"}
+    - "cadastrar meu endereço" → {"intent": "Configurar Endereço"}
+    - "quais endereços eu tenho?" → {"intent": "Listar Endereços"}
+    - "meus endereços cadastrados" → {"intent": "Listar Endereços"}
+    - "ver meus endereços" → {"intent": "Listar Endereços"}
+    - "remover endereço de casa" → {"intent": "Deletar Endereço"}
+    - "apagar endereço do trabalho" → {"intent": "Deletar Endereço"}
+    - "deletar endereço" → {"intent": "Deletar Endereço"}
+    - "paguei 500 da fatura do nubank" → {"intent": "Pagamento Fatura"}
+    - "qual o valor da minha fatura?" → {"intent": "Consulta Valor Fatura"}
+    - "quanto está a fatura do cartão?" → {"intent": "Consulta Valor Fatura"}
+    - "quanto eu tenho na minha conta?" → {"intent": "Consulta Saldo"}
+    - "qual meu saldo?" → {"intent": "Consulta Saldo"}
+    - "quanto tenho no banco?" → {"intent": "Consulta Saldo"}
+    - "quais contas eu tenho?" → {"intent": "Listar Contas"}
+    - "minhas contas cadastradas" → {"intent": "Listar Contas"}
+    - "mostre minhas contas" → {"intent": "Listar Contas"}
+    - "meu secretário o que você pode fazer?" → {"intent": "Menu de Ajuda"}
+    - "quais funcionalidades você tem?" → {"intent": "Menu de Ajuda"}
+    - "comandos disponíveis" → {"intent": "Menu de Ajuda"}
+    - "o que você faz?" → {"intent": "Menu de Ajuda"}
+    - "ajuda secretário" → {"intent": "Menu de Ajuda"}
+    - "salvar no drive" → {"intent": "Upload Drive"}
+    - "guardar no drive pasta notas fiscais" → {"intent": "Upload Drive"}
+    - "enviar para o drive em documentos" → {"intent": "Upload Drive"}
+    - "subir pro drive na pasta comprovantes" → {"intent": "Upload Drive"}
+    - "salva isso no drive" → {"intent": "Upload Drive"}
+    

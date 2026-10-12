@@ -1,0 +1,5 @@
+Analise a pergunta: "⟦MSG⟧"
+    Extraia o nome da categoria ou subcategoria que o usuário quer consultar.
+    Responda APENAS com JSON: {"nome_categoria": "..."}
+    Ex1: "quanto gastei com supermercado" -> {"nome_categoria": "Supermercado / Mercearia"}
+    Ex2: "qual foi meu gasto com lazer?" -> {"nome_categoria": "Lazer e Entretenimento"}

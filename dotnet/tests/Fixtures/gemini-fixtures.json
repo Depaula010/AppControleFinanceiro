@@ -1,0 +1,62 @@
+{
+  "cache_keys": [
+    {
+      "prompt": "abc",
+      "prefix": "intent",
+      "user_id": null,
+      "key": "gemini_cache:intent:global:900150983cd2"
+    },
+    {
+      "prompt": "abc",
+      "prefix": "category",
+      "user_id": 7,
+      "key": "gemini_cache:category:7:900150983cd2"
+    },
+    {
+      "prompt": "",
+      "prefix": "intent",
+      "user_id": null,
+      "key": "gemini_cache:intent:global:d41d8cd98f00"
+    },
+    {
+      "prompt": "",
+      "prefix": "category",
+      "user_id": 7,
+      "key": "gemini_cache:category:7:d41d8cd98f00"
+    },
+    {
+      "prompt": "Qual a intencao? ação 😀\nsegunda linha \"aspas\"",
+      "prefix": "intent",
+      "user_id": null,
+      "key": "gemini_cache:intent:global:8be416dc5429"
+    },
+    {
+      "prompt": "Qual a intencao? ação 😀\nsegunda linha \"aspas\"",
+      "prefix": "category",
+      "user_id": 7,
+      "key": "gemini_cache:category:7:8be416dc5429"
+    },
+    {
+      "prompt": "Minhas subcategorias são: [{\"id\": 1, \"nome\": \"Mercado\"}]",
+      "prefix": "intent",
+      "user_id": null,
+      "key": "gemini_cache:intent:global:400d7a7a28eb"
+    },
+    {
+      "prompt": "Minhas subcategorias são: [{\"id\": 1, \"nome\": \"Mercado\"}]",
+      "prefix": "category",
+      "user_id": 7,
+      "key": "gemini_cache:category:7:400d7a7a28eb"
+    }
+  ],
+  "cache_entries": [
+    {
+      "value": {
+        "text": "Mercado ç",
+        "prompt_feedback": "",
+        "cached_at": "2026-10-02T10:00:00.123456"
+      },
+      "json": "{\"text\": \"Mercado \\u00e7\", \"prompt_feedback\": \"\", \"cached_at\": \"2026-10-02T10:00:00.123456\"}"
+    }
+  ]
+}

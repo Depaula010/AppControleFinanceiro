@@ -1,0 +1,118 @@
+{
+  "generated_by": {
+    "werkzeug": "3.1.3",
+    "pyjwt": "2.8.0",
+    "cryptography": "42.0.5",
+    "note": "valores fictícios; regenere com generate_auth_fixtures.py"
+  },
+  "passwords": [
+    {
+      "password": "SenhaSegura123",
+      "hash": "pbkdf2:sha256:1000000$K7wPqOimj13J72yG$80c820145772a62437bec4dc4d62e8a5ad34391443a543af296438ae56d3af8d",
+      "kind": "pbkdf2-default"
+    },
+    {
+      "password": "SenhaSegura123",
+      "hash": "pbkdf2:sha256:1000$AxZvYb56Uvr7n8TG$d2ed9dd6ceb6478dec6ee4b3954c4de3eed51abd7fb712c5942c3d94ff4973e9",
+      "kind": "pbkdf2-1000"
+    },
+    {
+      "password": "SenhaSegura123",
+      "hash": "scrypt:32768:8:1$c7phNAGrc9FOtRjy$0436641d376192e99566eac5dcadd07c3854e883b1f20d9d6bfeeb079fbd0770cf0ded84552006bfac8f921e78a0017f70a4afd613494cffcd4ea96836eaf2d2",
+      "kind": "scrypt-default"
+    },
+    {
+      "password": "senha com espaço",
+      "hash": "pbkdf2:sha256:1000000$biMdEAQnYbi5BsiM$e10b6757a47c7e32e7847ce3d6f82ede54eaebea8f84bb020c4bebaa147975d7",
+      "kind": "pbkdf2-default"
+    },
+    {
+      "password": "senha com espaço",
+      "hash": "pbkdf2:sha256:1000$QlmebCihiSFC1SeV$cba35126141e283d39729b7f7b20a9dfdcaa416f5976193b912cb6e5aa709416",
+      "kind": "pbkdf2-1000"
+    },
+    {
+      "password": "senha com espaço",
+      "hash": "scrypt:32768:8:1$QZwt9L30eD4wmN2Z$b60e882ca996b3f517779be1ad3d9964e2ba79bbc67562084842fd7dde50d90d89271716c0a4f7e799809e8fdf454396a15b638b536d4ca721cb4c78ad97ec09",
+      "kind": "scrypt-default"
+    },
+    {
+      "password": "çãõ-ünicode-123",
+      "hash": "pbkdf2:sha256:1000000$MR6CX5GjOJoY2j0m$ad92b38d57f0fae19904092215191bfe4eeec913b4e4b9ca3d3cd44fc02bb034",
+      "kind": "pbkdf2-default"
+    },
+    {
+      "password": "çãõ-ünicode-123",
+      "hash": "pbkdf2:sha256:1000$EVo9u3x4KSRT0ISg$b82770669a28d1d856c3813a247d0f08afe6a5931497c3dcc3b32ca7d1889257",
+      "kind": "pbkdf2-1000"
+    },
+    {
+      "password": "çãõ-ünicode-123",
+      "hash": "scrypt:32768:8:1$5qDDvrpzxcCIwx6N$491fa629c5c6565f87c133ee58f42713599d281d26ff993e8d539b5bcbd1aad3e3da7381e0a88268a0f8e41f10a0e620b45f5328fbe172a7ac49a954a451d117",
+      "kind": "scrypt-default"
+    },
+    {
+      "password": "abc123",
+      "hash": "pbkdf2:sha256:1000000$he4eFfbUqOflabSd$157ad6aaf06bd9fc873f5f60638c3408519b425f618b7952016d9667a1ce3e8b",
+      "kind": "pbkdf2-default"
+    },
+    {
+      "password": "abc123",
+      "hash": "pbkdf2:sha256:1000$3zQr6SxylBz4ePgU$16b9efe96a394f2f52b0f01a8bd476f307e26073a3fe0a627d001c98517430dc",
+      "kind": "pbkdf2-1000"
+    },
+    {
+      "password": "abc123",
+      "hash": "scrypt:32768:8:1$btkC7m2sZyorj2WE$dfd31501843ea33ea0edb2b052e9a59228a9704455a2030fe4da28307a8a28a970296b37f576cebdde466d432f9bbea0df912e1619177a63b17c38f748a458ff",
+      "kind": "scrypt-default"
+    },
+    {
+      "password": "abc123",
+      "hash": "scrypt:16384:8:1$vfOWCy0xUZlypZkS$71c6a6f71bc6fa46ae5f7db8a1449ad6052b0b61059b63161bb0e92387dede01392ba093a7b21826e1f118244876d3da2da9791dc0b0ad26120667f69abd207c",
+      "kind": "scrypt-16384"
+    }
+  ],
+  "fernet": {
+    "key": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+    "cases": [
+      {
+        "plaintext": "abc",
+        "token": "gAAAAABlU_EAAAECAwQFBgcICQoLDA0ODyO-2tElK-o22zRHFJn8pACH5J1b102UZIs9b8kwqGc_ZlPnT0ijViILmHXxcnkHoA==",
+        "timestamp": 1700000000
+      },
+      {
+        "plaintext": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "token": "gAAAAABlU_EAEBESExQVFhcYGRobHB0eHyp69MPp2HF4c82b8eCOEllRMYoJFW9-qj5iS6dgy28owcaIHFRgyHi1-wdrVr9-qwrsP7orOxdj08yFwqxAwezEVYbd8rZ6x311sM2qlYJ6",
+        "timestamp": 1700000000
+      },
+      {
+        "plaintext": "ação-é-ü-🔑",
+        "token": "gAAAAABlU_EAICEiIyQlJicoKSorLC0uLz7710oEsxm3zn0P1mMhwkE5xNFe2u2N0cGEtLZFvUzi4RXdEK6my4W8ZEIK27dQpM89VFyAHV-6P7uIfNk6DJI=",
+        "timestamp": 1700000000
+      },
+      {
+        "plaintext": "",
+        "token": "gAAAAABlU_EAMDEyMzQ1Njc4OTo7PD0-P9Md1X5igSzdq9HMqjxHl5snQVwI7HhH6zAl7VgI4mr6XVth6Pg83VpUiIa9Nf8YEQ==",
+        "timestamp": 1700000000
+      }
+    ],
+    "tampered_token": "gAAAAABlU_EAAAECAwQFBgcICQoLDA0ODyO-2tElKuo22zRHFJn8pACH5J1b102UZIs9b8kwqGc_ZlPnT0ijViILmHXxcnkHoA=="
+  },
+  "jwt": {
+    "secret": "chave-de-teste-com-mais-de-32-caracteres-0123456789",
+    "far_future_exp": 4102444800,
+    "tokens": {
+      "valid": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0MiwiZXhwIjo0MTAyNDQ0ODAwLCJpYXQiOjE3MDAwMDAwMDB9.YfNqi7BqwCEAgEhh2_D8IFKeRhEFT1ts0N8wrqEa_3U",
+      "expired": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0MiwiZXhwIjoxNTAwMDAwMDAwLCJpYXQiOjE0OTk5MTM2MDB9.5IE6DUlnkh0eqaYGbrI6txJ-rIKnM-8y68Wp8qRMF1k",
+      "no_user_id": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjQxMDI0NDQ4MDAsImlhdCI6MTcwMDAwMDAwMH0.FdDqgJP0wTtYZiBhGzWJfWFieCX84svujo711oli_6M",
+      "user_id_zero": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjowLCJleHAiOjQxMDI0NDQ4MDAsImlhdCI6MTcwMDAwMDAwMH0.s_157htVjaaqQIByKlsAn3pniqhXlTM99GQw816xK_4",
+      "no_exp": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0MiwiaWF0IjoxNzAwMDAwMDAwfQ.jkTOHpwXi386g2hiY2UgP-EW9_J28z60F_cF7m8ukgY",
+      "alg_none": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJ1c2VyX2lkIjo0MiwiZXhwIjo0MTAyNDQ0ODAwLCJpYXQiOjE3MDAwMDAwMDB9.",
+      "hs512": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0MiwiZXhwIjo0MTAyNDQ0ODAwLCJpYXQiOjE3MDAwMDAwMDB9.wmZjWPebySl_p9mr34t2ajkbt8ltbPXLfjPxtnJ255Hqx7FXhniAEIo9Lv4Jbrr9OYF2TPkq4_EUIB8pKse0Dg",
+      "wrong_secret": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0MiwiZXhwIjo0MTAyNDQ0ODAwLCJpYXQiOjE3MDAwMDAwMDB9.RLPSVbMQya6Ov-dStgTll75cVbJCm1cD6sMi38YMmEI",
+      "sub_only": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MiIsImV4cCI6NDEwMjQ0NDgwMCwiaWF0IjoxNzAwMDAwMDAwfQ.YW1QUX9KRoLHXP17Snuc2fDchEYZguaINR97FpArtD4",
+      "tampered_payload": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjogMSwgImV4cCI6IDQxMDI0NDQ4MDAsICJpYXQiOiAxNzAwMDAwMDAwfQ.YfNqi7BqwCEAgEhh2_D8IFKeRhEFT1ts0N8wrqEa_3U"
+    },
+    "user_id": 42
+  }
+}

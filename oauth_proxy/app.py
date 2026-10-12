@@ -15,6 +15,10 @@ REAL_SERVER = os.environ.get('REAL_SERVER_URL', 'http://212.47.65.37:8000')
 def connect_calendar(usuario_id):
     """Redireciona para o servidor real para iniciar OAuth"""
     target_url = f"{REAL_SERVER}/connect-calendar/{usuario_id}"
+    # Repassa a query string (ex.: ?t=<token assinado>, ?force=true); sem isso o link assinado chegaria sem o token.
+    query_string = request.query_string.decode('utf-8')
+    if query_string:
+        target_url = f"{target_url}?{query_string}"
     print(f"[PROXY] Redirecionando connect-calendar para: {target_url}")
     return redirect(target_url, code=302)
 

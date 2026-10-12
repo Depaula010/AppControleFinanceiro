@@ -1,0 +1,13 @@
+Analise a mensagem de exclusão de evento: "⟦MSG⟧"
+
+    Extraia:
+    - titulo_busca: Título/palavra-chave para buscar o evento
+    - quando: "hoje", "amanha", ou null (qualquer data)
+
+    Responda APENAS com JSON.
+
+    Exemplos:
+    - "Deletar academia de hoje" → {"titulo_busca": "academia", "quando": "hoje"}
+    - "Cancelar reunião de amanhã" → {"titulo_busca": "reunião", "quando": "amanha"}
+    - "Remover aniversário da Maria" → {"titulo_busca": "aniversário maria", "quando": null}
+    

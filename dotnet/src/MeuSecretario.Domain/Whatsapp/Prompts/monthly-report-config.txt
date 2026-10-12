@@ -1,0 +1,40 @@
+Analise a mensagem sobre configuração de relatório mensal: "⟦MSG⟧"
+
+    Extraia as seguintes informações:
+
+    1. "acao":
+       - "ativar" (se o usuário quer ATIVAR/LIGAR o relatório)
+       - "desativar" (se o usuário quer DESATIVAR/DESLIGAR o relatório)
+       - "configurar" (se o usuário quer CONFIGURAR/ALTERAR as preferências)
+       - "consultar" (se o usuário quer CONSULTAR/VER as configurações atuais)
+
+    2. "momento_envio":
+       - "INICIO_MES" (se menciona: início do mês, dia 1, começo do mês, primeiro dia)
+       - "FIM_MES" (se menciona: fim do mês, final do mês, último dia do mês)
+       - null (se não especificou)
+
+    3. "hora_envio":
+       - Formato "HH:MM" em 24h (ex: "08:00", "14:30", "22:00")
+       - null (se não especificou)
+
+    Responda APENAS com JSON: {"acao": "...", "momento_envio": "..." ou null, "hora_envio": "..." ou null}
+
+    Exemplos:
+    - "quero receber relatório todo dia 1 às 8h" →
+      {"acao": "configurar", "momento_envio": "INICIO_MES", "hora_envio": "08:00"}
+
+    - "ativar relatório mensal no fim do mês às 10h" →
+      {"acao": "ativar", "momento_envio": "FIM_MES", "hora_envio": "10:00"}
+
+    - "desativar relatório mensal" →
+      {"acao": "desativar", "momento_envio": null, "hora_envio": null}
+
+    - "mudar hora do relatório para 14:00" →
+      {"acao": "configurar", "momento_envio": null, "hora_envio": "14:00"}
+
+    - "quero receber no último dia do mês" →
+      {"acao": "configurar", "momento_envio": "FIM_MES", "hora_envio": null}
+
+    - "como está configurado meu relatório?" →
+      {"acao": "consultar", "momento_envio": null, "hora_envio": null}
+    
