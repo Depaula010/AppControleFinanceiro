@@ -79,7 +79,6 @@ jobs:
           GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }}
           WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}
           OPENROUTE_API_KEY=${{ secrets.OPENROUTE_API_KEY }}
-          PYTHON_VERSION=3.11
           ENVEOF
             
             echo "🛑 Stopping containers..."
@@ -91,6 +90,14 @@ jobs:
             echo "🏗️ Building new images..."
             docker compose build --no-cache
             
+            echo "🗄️ Subindo Redis e aplicando migrations do .NET (aditivas, idempotentes)..."
+            docker compose up -d redis
+            sleep 3
+            docker compose run --rm --no-deps web --migrate
+
+            echo "🧹 Limpando chaves do Redis específicas do Flask (dedupe invoice_*/calendar_* é mantido)..."
+            docker compose exec -T redis sh -c 'for p in "pending_*" "nightly_checkin*" "security:*" "gemini_cache:*"; do redis-cli --scan --pattern "$p" | xargs -r redis-cli del > /dev/null; done'
+
             echo "🚀 Starting containers..."
             docker compose up -d
             
