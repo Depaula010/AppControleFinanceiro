@@ -91,7 +91,7 @@ public class WhatsAppAnalyticsRouteTests(PostgresFixture postgres) : IAsyncLifet
         var reply = await SendAsync("comparar com o mês passado", """{"intent": "Comparação Mensal"}""");
 
         reply.ShouldStartWith("📊 *Comparação: ");
-        reply.ShouldContain("R$ -100.00");
+        reply.ShouldContain("R$ 100,00"); // desvio 232: valor absoluto em pt-BR
         reply.ShouldContain("*Maiores mudanças por categoria:*");
     }
 

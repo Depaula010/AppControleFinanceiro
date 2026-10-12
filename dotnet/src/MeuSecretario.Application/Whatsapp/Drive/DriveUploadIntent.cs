@@ -74,7 +74,7 @@ public sealed class DriveUploadIntent(IGoogleAccountService account, IDriveClien
 
         return result.Success
             ? DriveMessages.Success(result.FolderPathDisplay ?? result.FolderName ?? DriveFolderPath.DefaultFolder, result.FileName ?? "arquivo", result.WebViewLink)
-            : DriveMessages.UploadFailed;
+            : DriveMessages.UploadFailure(result.Error);
     }
 
     /// <summary>Remove o prefixo <c>data:...;base64,</c> (tudo até a primeira vírgula) e decodifica; <c>null</c> se não for texto ou não decodificar.</summary>

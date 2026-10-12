@@ -1,6 +1,6 @@
 # Desvio 231 — Gráficos: saldo da linha ignora o histórico anterior ao período e filtros inconsistentes
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-10)
 - **Features afetadas:** 012
 - **Severidade:** correção
 

@@ -8,7 +8,8 @@ using MeuSecretario.Domain.Whatsapp;
 namespace MeuSecretario.Application.Whatsapp;
 
 /// <summary>Linha de <c>notificationconfigs</c> que o WhatsApp lê (resumo matinal e check-in noturno).</summary>
-public sealed record WhatsAppNotificationConfig(bool MorningActive, TimeOnly MorningTime, bool CheckinActive, TimeOnly CheckinTime);
+public sealed record WhatsAppNotificationConfig(
+    bool MorningActive, TimeOnly MorningTime, bool CheckinActive, TimeOnly CheckinTime, bool FinancialAlertsActive = false);
 
 /// <summary>Linha de <c>monthlyreportconfigs</c>.</summary>
 public sealed record WhatsAppReportConfig(bool Active, string Moment, TimeOnly Time);
@@ -24,6 +25,9 @@ public interface IWhatsAppConfigStore
 
     Task<WhatsAppNotificationConfig> UpdateCheckinAsync(int userId, bool? active, TimeOnly? time, CancellationToken cancellationToken);
 
+    /// <summary><c>update_alertas_financeiros_config</c> (desvio 191): grava <c>alertas_financeiros_ativos</c> e devolve a linha.</summary>
+    Task<WhatsAppNotificationConfig> UpdateFinancialAlertsAsync(int userId, bool active, CancellationToken cancellationToken);
+
     Task<WhatsAppReportConfig> GetOrCreateReportAsync(int userId, CancellationToken cancellationToken);
 
     /// <summary>Atualiza só o que veio (<c>null</c> mantém) e devolve a linha lida de novo.</summary>
@@ -38,7 +42,7 @@ public interface IWhatsAppConfigStore
 
 /// <summary>
 /// <c>Configurar Notificações</c> (inline, <c>whatsapp_handler.py:1192-1370</c>): resumo matinal, check-in noturno e o ramo do Gemini.
-/// A exceção sobe (500), como no Flask: hora fora de 00:00-23:59 e o ramo do Gemini (desvio 152, proposto) terminam em erro.
+/// A hora fora de 00:00-23:59 sobe (500), como no Flask. O ramo do Gemini responde o status com as chaves que existem (desvios 152 e 191).
 /// </summary>
 public sealed class NotificationsIntent(ILlmClient llm, IWhatsAppConfigStore store) : IWhatsAppIntent
 {
@@ -127,9 +131,9 @@ public sealed class NotificationsIntent(ILlmClient llm, IWhatsAppConfigStore sto
     }
 
     /// <summary>
-    /// Ramo do Gemini (<c>tipo</c> = <c>agenda_diaria</c> | <c>contas_vencer</c>). Reproduz o Flask (desvio 152): <c>agenda_diaria</c>
-    /// grava o resumo matinal e depois quebra ao ler <c>agenda_diaria_ativa</c>; <c>contas_vencer</c> quebra antes de gravar
-    /// (<c>update_alertas_financeiros_ativos</c> não existe).
+    /// Ramo do Gemini (<c>tipo</c> = <c>agenda_diaria</c> | <c>contas_vencer</c>). <c>agenda_diaria</c> grava o resumo matinal e
+    /// <c>contas_vencer</c> grava <c>alertas_financeiros_ativos</c>; os dois respondem o status atual (desvios 152 e 191).
+    /// <c>dias_antes</c> e <c>hora</c> de <c>contas_vencer</c> seguem ignorados (os alertas rodam com o resumo matinal).
     /// </summary>
     private async Task<string> ByGeminiAsync(IntentContext context, CancellationToken cancellationToken)
     {
@@ -170,18 +174,28 @@ public sealed class NotificationsIntent(ILlmClient llm, IWhatsAppConfigStore sto
                 return NotificationCommand.Failure(message);
             }
 
-            await store.GetOrCreateNotificationAsync(context.User.Id, cancellationToken);
-            throw new InvalidOperationException("config['agenda_diaria_ativa'] não existe.");
+            var current = await store.GetOrCreateNotificationAsync(context.User.Id, cancellationToken);
+            return NotificationCommand.DailyAgendaStatus(message, current.MorningActive, current.MorningTime);
         }
 
         if (type == "contas_vencer")
         {
-            if (action is "ativar" or "desativar" or "configurar")
+            if (action is not ("ativar" or "desativar" or "configurar"))
             {
-                throw new InvalidOperationException("update_alertas_financeiros_ativos não existe.");
+                return NotificationCommand.Failure(NotificationCommand.UnknownAction);
             }
 
-            return NotificationCommand.Failure(NotificationCommand.UnknownAction);
+            await store.GetOrCreateNotificationAsync(context.User.Id, cancellationToken);
+            try
+            {
+                var updated = await store.UpdateFinancialAlertsAsync(context.User.Id, action != "desativar", cancellationToken);
+                return NotificationCommand.FinancialAlertsStatus(
+                    NotificationCommand.FinancialAlertsMessage(updated.FinancialAlertsActive), updated.FinancialAlertsActive, updated.MorningTime);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                return NotificationCommand.Failure(NotificationCommand.UpdateFailed);
+            }
         }
 
         return NotificationCommand.UnknownType;
@@ -406,8 +420,8 @@ public sealed class AddressDeleteIntent(ILlmClient llm, IFavoriteAddressReposito
     }
 }
 
-/// <summary><c>Solicitar API Key</c>: devolve a coluna como está (desvio 153, proposto).</summary>
-public sealed class ApiKeyIntent(IWhatsAppConfigStore store) : IWhatsAppIntent
+/// <summary><c>Solicitar API Key</c>: decifra o valor da coluna quando parece cifrado (desvio 153).</summary>
+public sealed class ApiKeyIntent(IWhatsAppConfigStore store, IEncryptionService encryption) : IWhatsAppIntent
 {
     public string Name => "Solicitar API Key";
 
@@ -416,6 +430,22 @@ public sealed class ApiKeyIntent(IWhatsAppConfigStore store) : IWhatsAppIntent
     public async Task<string> HandleAsync(IntentContext context, CancellationToken cancellationToken)
     {
         var row = await store.GetApiKeyAsync(context.User.Id, cancellationToken);
-        return row is { ApiKey: { Length: > 0 } key } ? ApiKeyMessage.Format(key, row.Value.Name) : ApiKeyMessage.NotFound;
+        if (row is not { ApiKey: { Length: > 0 } stored })
+        {
+            return ApiKeyMessage.NotFound;
+        }
+
+        string key;
+        try
+        {
+            key = encryption.LooksEncrypted(stored) ? encryption.Decrypt(stored) : stored;
+        }
+        catch (System.Security.Cryptography.CryptographicException)
+        {
+            // Token ilegível: nunca mostrar o texto cifrado como se fosse a chave.
+            return ApiKeyMessage.NotFound;
+        }
+
+        return ApiKeyMessage.Format(key, row.Value.Name);
     }
 }

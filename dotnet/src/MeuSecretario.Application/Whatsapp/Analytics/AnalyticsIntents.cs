@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Numerics;
 using System.Text.Json;
 using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Domain.Whatsapp;
@@ -102,8 +101,8 @@ public sealed class ChartIntent(ILlmClient llm, IAnalyticsReader reader, IChartR
         var type = info.TryGetProperty("tipo_grafico", out var typeElement)
             ? (typeElement.ValueKind == JsonValueKind.String ? typeElement.GetString() : null)
             : "pizza";
-        var days = Param(info, "periodo_dias", 30);
-        var months = Param(info, "num_meses", 6);
+        var days = Param(info, "periodo_dias", 30, ChartRules.MaxPieDays);
+        var months = Param(info, "num_meses", 6, ChartRules.MaxMonths);
 
         if (string.IsNullOrEmpty(context.Number))
         {
@@ -189,35 +188,23 @@ public sealed class ChartIntent(ILlmClient llm, IAnalyticsReader reader, IChartR
         }
     }
 
-    /// <summary><c>chart_info.get(chave, padrão)</c> como o Python o usa: número, booleano (é inteiro) ou valor sem sentido numérico.</summary>
-    private static ChartParam Param(JsonElement info, string name, int fallback)
+    /// <summary>
+    /// Desvio 230: só inteiro de 1 a <paramref name="max"/> vale (um número JSON integral como <c>7.0</c> conta); texto, lista, nulo,
+    /// booleano, decimal, negativo e fora da faixa usam o padrão. A legenda mostra sempre um inteiro.
+    /// </summary>
+    private static ChartParam Param(JsonElement info, string name, int fallback, int max)
     {
-        if (!info.TryGetProperty(name, out var element))
+        if (info.TryGetProperty(name, out var element)
+            && element.ValueKind == JsonValueKind.Number
+            && double.TryParse(element.GetRawText(), NumberStyles.Float, CultureInfo.InvariantCulture, out var number)
+            && Math.Floor(number) == number
+            && number >= 1
+            && number <= max)
         {
-            return new ChartParam(fallback.ToString(CultureInfo.InvariantCulture), fallback);
+            var value = (int)number;
+            return new ChartParam(value.ToString(CultureInfo.InvariantCulture), value);
         }
 
-        switch (element.ValueKind)
-        {
-            case JsonValueKind.True:
-                return new ChartParam("True", 1);
-            case JsonValueKind.False:
-                return new ChartParam("False", 0);
-            case JsonValueKind.Number:
-                var text = element.GetRawText();
-                var isFloat = text.Contains('.', StringComparison.Ordinal) || text.Contains('e', StringComparison.OrdinalIgnoreCase);
-                if (!isFloat)
-                {
-                    var big = BigInteger.Parse(text, CultureInfo.InvariantCulture);
-                    return new ChartParam(big.ToString(CultureInfo.InvariantCulture), (double)big);
-                }
-
-                var number = double.Parse(text, NumberStyles.Float, CultureInfo.InvariantCulture);
-                return new ChartParam(MeuSecretario.Domain.Automation.PyFloat.Repr(number), number);
-            case JsonValueKind.Null:
-                return new ChartParam("None", null);
-            default:
-                return new ChartParam(element.GetRawText(), null);
-        }
+        return new ChartParam(fallback.ToString(CultureInfo.InvariantCulture), fallback);
     }
 }

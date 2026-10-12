@@ -65,7 +65,7 @@ public static class AnalyticsReport
         var categories = string.Join('\n', data.Categories.Take(5).Select(c =>
             $"- {c.Category} / {c.Subcategory}: R$ {Money(c.Total)} ({c.Quantity.ToString(CultureInfo.InvariantCulture)} transações)"));
         var weekdays = string.Join('\n', data.Weekdays.Select(d =>
-            $"- {d.Day}: R$ {Money(d.Total)} ({d.Quantity.ToString(CultureInfo.InvariantCulture)} transações)"));
+            $"- {WeekdayNames.ToPortuguese(d.Day)}: R$ {Money(d.Total)} ({d.Quantity.ToString(CultureInfo.InvariantCulture)} transações)"));
         var pots = data.Pots.Count > 0
             ? string.Join('\n', data.Pots.Select(p => $"- {p.Name}: R$ {Money(p.Spent)} / R$ {Money(p.Limit)} ({p.UsageText}%)"))
             : "- Nenhum pote configurado";

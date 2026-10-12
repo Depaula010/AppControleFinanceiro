@@ -53,6 +53,20 @@ public class AnalyticsParityTests
     /// <summary>Entre os de cima, o que no Flask quebra (KeyError) e hoje responde: resposta e chamadas também mudam.</summary>
     internal const string Deviation158NoHistory = "previsao_sem_historico_quebra";
 
+    /// <summary>
+    /// Cenários que embutem o comportamento antigo do Flask e ficam no JSON como evidência; o comportamento novo (desvios 230, 232 e 233,
+    /// feature 012, 2026-10-10) é provado em <c>AnalyticsDeviationTests</c>.
+    /// </summary>
+    private static readonly HashSet<string> SupersededByDeviations =
+    [
+        "comparacao_completa", "comparacao_so_mes_atual", "comparacao_so_mes_anterior", "comparacao_limiares", "comparacao_valores_positivos",
+        "comparacao_anterior_soma_zero",
+        "grafico_pizza_periodo_nulo", "grafico_pizza_periodo_decimal", "grafico_pizza_periodo_inteiro_decimal", "grafico_pizza_periodo_texto",
+        "grafico_pizza_periodo_booleano", "grafico_pizza_periodo_negativo", "grafico_pizza_periodo_enorme",
+        "grafico_pizza_periodo_fora_do_calendario", "grafico_pizza_periodo_lista", "grafico_barras_meses_decimal", "grafico_barras_meses_texto",
+        "grafico_barras_meses_nulo", "grafico_linha_meses_booleano",
+    ];
+
     private static readonly string[] IgnoredCallPrefixes = ["user_service.", "gemini_service.get_message_intent", "route_intent:"];
 
     [Fact]
@@ -68,6 +82,11 @@ public class AnalyticsParityTests
         foreach (var scenario in scenarios)
         {
             var name = scenario.GetProperty("name").GetString()!;
+            if (SupersededByDeviations.Contains(name))
+            {
+                continue;
+            }
+
             try
             {
                 await RunAsync(scenario, name, failures);
@@ -103,7 +122,8 @@ public class AnalyticsParityTests
 
         var extra = result.GetProperty("extra");
 
-        var expectedPrompts = extra.GetProperty("prompts").EnumerateArray().Select(p => p.GetProperty("prompt").GetString()!).ToList();
+        // Desvio 233: os dias da semana do prompt saem em português; o resto do prompt segue o do Flask.
+        var expectedPrompts = extra.GetProperty("prompts").EnumerateArray().Select(p => WeekdaysInPortuguese(p.GetProperty("prompt").GetString()!)).ToList();
         if (!Deviation158.Contains(name) && !rig.Llm.AnalysisPrompts.SequenceEqual(expectedPrompts))
         {
             failures.Add($"{name}: prompt\n  esperado: {string.Join("\n--\n", expectedPrompts)}\n  obtido:   {string.Join("\n--\n", rig.Llm.AnalysisPrompts)}");
@@ -142,6 +162,16 @@ public class AnalyticsParityTests
         }
 
         CompareChart(name, extra.GetProperty("plt"), rig.Renderer, failures);
+    }
+
+    private static string WeekdaysInPortuguese(string prompt)
+    {
+        foreach (var day in new[] { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" })
+        {
+            prompt = prompt.Replace($"\n- {day}: ", $"\n- {WeekdayNames.ToPortuguese(day)}: ", StringComparison.Ordinal);
+        }
+
+        return prompt;
     }
 
     private static void CompareChart(string name, JsonElement plt, RecordingRenderer renderer, List<string> failures)

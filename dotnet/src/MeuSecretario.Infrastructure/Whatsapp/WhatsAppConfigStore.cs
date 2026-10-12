@@ -20,6 +20,8 @@ public sealed class WhatsAppConfigStore(IDbConnectionFactory connections) : IWha
         public bool Checkin { get; set; }
 
         public string CheckinTime { get; set; } = "";
+
+        public bool Alerts { get; set; }
     }
 
     private sealed class ReportRow
@@ -40,7 +42,8 @@ public sealed class WhatsAppConfigStore(IDbConnectionFactory connections) : IWha
 
     private const string SelectNotification = """
         SELECT resumo_matinal_ativo AS Morning, resumo_matinal_hora::text AS MorningTime,
-               checkin_noturno_ativo AS Checkin, checkin_noturno_hora::text AS CheckinTime
+               checkin_noturno_ativo AS Checkin, checkin_noturno_hora::text AS CheckinTime,
+               COALESCE(alertas_financeiros_ativos, FALSE) AS Alerts
         FROM notificationconfigs WHERE usuario_id = @userId
         """;
 
@@ -91,6 +94,16 @@ public sealed class WhatsAppConfigStore(IDbConnectionFactory connections) : IWha
             WHERE usuario_id = @userId
             """,
             new { userId, active, time = Text(time) },
+            cancellationToken: cancellationToken));
+        return ToConfig(await connection.QuerySingleAsync<NotificationRow>(new CommandDefinition(SelectNotification, new { userId }, cancellationToken: cancellationToken)));
+    }
+
+    public async Task<WhatsAppNotificationConfig> UpdateFinancialAlertsAsync(int userId, bool active, CancellationToken cancellationToken)
+    {
+        await using var connection = await connections.OpenAsync(cancellationToken);
+        await connection.ExecuteAsync(new CommandDefinition(
+            "UPDATE notificationconfigs SET alertas_financeiros_ativos = @active, updated_at = now() WHERE usuario_id = @userId",
+            new { userId, active },
             cancellationToken: cancellationToken));
         return ToConfig(await connection.QuerySingleAsync<NotificationRow>(new CommandDefinition(SelectNotification, new { userId }, cancellationToken: cancellationToken)));
     }
@@ -157,7 +170,7 @@ public sealed class WhatsAppConfigStore(IDbConnectionFactory connections) : IWha
     private static TimeOnly Parse(string text) => TimeOnly.Parse(text, CultureInfo.InvariantCulture);
 
     private static WhatsAppNotificationConfig ToConfig(NotificationRow row) =>
-        new(row.Morning, Parse(row.MorningTime), row.Checkin, Parse(row.CheckinTime));
+        new(row.Morning, Parse(row.MorningTime), row.Checkin, Parse(row.CheckinTime), row.Alerts);
 
     private static WhatsAppReportConfig ToReport(ReportRow row) => new(row.Active, row.Moment, Parse(row.Time));
 }

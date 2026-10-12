@@ -78,6 +78,10 @@ Retomada: o que está `[x]` está commitado; a próxima sub-entrega começa na p
 - [x] **T42 — `DriveFolderPath` e `DriveUploadIntent`** (AC-012-801, 802).
 - [x] **T43 — Fechamento da 012h.** Fixtures em `whatsapp_sections/012h_drive.py` (`UploadDriveIntent` real, 28 textos de pasta, 23 fluxos e 30 casos de `b64decode`); falha do upload responde sempre o texto genérico (desvio 159 proposto).
 
+## Desvios aprovados (calendário, configurações, Drive e análises), 2026-10-10
+
+- [x] **T45 — Desvios 152, 153, 159, 190, 191, 192, 230, 231, 232 e 233** implementados (AC-012-152 a 233): `NotificationsIntent`/`NotificationCommand.Action` (152, 190, 191), `ApiKeyIntent` com `IEncryptionService` (153), `DriveMessages.UploadFailure` (159), `DeleteEventIntent` (192), `ChartIntent.Param` (230), `AnalyticsReader` (231, 232, 233), `MonthlyComparison` (232) e `WeekdayNames` (233). Os cenários do Flask que embutem o comportamento antigo seguem nos JSONs de paridade como evidência e são pulados nos testes de paridade (`SupersededByDeviations`); o comportamento novo é provado em `NotificationDeviationTests`, `AnalyticsDeviationTests`, `DriveUploadIntentTests`, `CalendarServicesTests` e nos testes de integração. 154, 157 e 160 seguem adiados.
+
 ## Fechamento da feature
 
 - [x] **T45 — Desvios aprovados do grupo financeiro (2026-10-09).** 150 (descrição bruta quando não há agendamento), 151 (transferência: `TransferIntent` + `TransferConfirmation`), 155 (`last_pending_event`), 156 (`route_origin_pending`), 158 (prompts de análise/previsão em módulo e `formatar_moeda`, previsão sem histórico, desempate por nome), 161 (`t.usuario_id = a.usuario_id` nos vencimentos), 170 (gasto do pote soma todas as subcategorias) e 210 (palavra inteira e adiamento primeiro no check-in). Cenários antigos do harness mantidos como evidência em `KnownDivergences`/`Deviation158`/`Deviation210`.

@@ -1,6 +1,6 @@
 # Desvio 233 — Análise Inteligente: "Maiores gastos" lista os menores e os dias da semana saem em inglês
 
-- **Estado:** aprovado (2026-10-09)
+- **Estado:** implementado (feature 012, 2026-10-10)
 - **Features afetadas:** 012
 - **Severidade:** correção
 

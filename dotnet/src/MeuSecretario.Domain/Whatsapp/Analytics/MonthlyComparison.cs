@@ -8,7 +8,8 @@ public sealed record MacroMonthTotal(string Month, string Macro, double Total);
 
 /// <summary>
 /// <c>Comparação Mensal</c> (<c>analytics_service.get_monthly_comparison</c>): mês de hoje contra o anterior, as 5 maiores variações por
-/// categoria. O desempate das variações iguais é o nome da categoria (desvio 158; o Flask iterava um <c>set</c>, ordem aleatória).
+/// categoria. Desvio 232: despesas em valor absoluto, números em pt-BR (<c>formatar_moeda</c>) e desempate das variações iguais pelo
+/// nome da categoria (o Flask iterava um <c>set</c>, ordem que muda a cada processo).
 /// </summary>
 public static class MonthlyComparison
 {
@@ -35,7 +36,7 @@ public static class MonthlyComparison
         var appearance = new List<string>();
         foreach (var row in rows)
         {
-            Upsert(row.Month == referenceMonth ? reference : previous, row.Macro, row.Total);
+            Upsert(row.Month == referenceMonth ? reference : previous, row.Macro, Math.Abs(row.Total));
             if (!appearance.Contains(row.Macro))
             {
                 appearance.Add(row.Macro);
@@ -53,9 +54,9 @@ public static class MonthlyComparison
 
         var text = new System.Text.StringBuilder();
         text.Append(CultureInfo.InvariantCulture, $"📊 *Comparação: {referenceName} vs {previousName}*\n\n");
-        text.Append(CultureInfo.InvariantCulture, $"💰 *{referenceName}:* R$ {AnalyticsReport.Money(totalReference)}\n");
-        text.Append(CultureInfo.InvariantCulture, $"💰 *{previousName}:* R$ {AnalyticsReport.Money(totalPrevious)}\n");
-        text.Append(CultureInfo.InvariantCulture, $"{totalEmoji} *Variação:* {AnalyticsReport.WithSign(totalVariation)}%\n\n");
+        text.Append(CultureInfo.InvariantCulture, $"💰 *{referenceName}:* {PtBrMoney.Format(totalReference)}\n");
+        text.Append(CultureInfo.InvariantCulture, $"💰 *{previousName}:* {PtBrMoney.Format(totalPrevious)}\n");
+        text.Append(CultureInfo.InvariantCulture, $"{totalEmoji} *Variação:* {PyNumber.WithSignPtBr(totalVariation)}%\n\n");
         text.Append("*Maiores mudanças por categoria:*\n");
 
         var variations = new List<Variation>();
@@ -83,7 +84,7 @@ public static class MonthlyComparison
         foreach (var variation in variations.OrderByDescending(v => Math.Abs(v.Percent)).ThenBy(v => v.Category, StringComparer.Ordinal).Take(5))
         {
             var emoji = variation.Percent > 10 ? "🔴" : variation.Percent < -10 ? "🟢" : "⚪";
-            text.Append(CultureInfo.InvariantCulture, $"{emoji} *{variation.Category}:* R$ {AnalyticsReport.Money(variation.Reference)} ({AnalyticsReport.WithSign(variation.Percent)}%)\n");
+            text.Append(CultureInfo.InvariantCulture, $"{emoji} *{variation.Category}:* {PtBrMoney.Format(variation.Reference)} ({PyNumber.WithSignPtBr(variation.Percent)}%)\n");
         }
 
         return text.ToString();
