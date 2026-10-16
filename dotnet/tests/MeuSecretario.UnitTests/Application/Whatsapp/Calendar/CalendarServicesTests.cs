@@ -117,6 +117,38 @@ public class CalendarServicesTests
     public void NextOccurrence_InvalidDate_IsNull(int day, int month) =>
         AgendaPeriods.NextOccurrence(day, month, new DateOnly(2026, 10, 15)).ShouldBeNull();
 
+    [Theory]
+    [InlineData("Tenho compromisso dia 15 de novembro?", 15, 11)]
+    [InlineData("tenho algo no dia 3 de MARÇO", 3, 3)]
+    [InlineData("agenda 15/11", 15, 11)]
+    [InlineData("compromisso em 5/1?", 5, 1)]
+    public void AgendaDateParser_FindsDayAndMonth(string message, int day, int month)
+    {
+        AgendaDateParser.TryParse(message, out var d, out var m).ShouldBeTrue();
+        (d, m).ShouldBe((day, month));
+    }
+
+    [Theory]
+    [InlineData("agenda de hoje à tarde")]
+    [InlineData("o que tenho esta semana?")]
+    [InlineData("compromisso dia 15/11/2027")]
+    [InlineData("15 de novembro de 2027")]
+    public void AgendaDateParser_IgnoresMessagesWithoutDayAndMonth(string message) =>
+        AgendaDateParser.TryParse(message, out _, out _).ShouldBeFalse();
+
+    [Fact]
+    [Trait("AC", "012-505")]
+    public async Task AgendaIntent_WithADateInTheMessage_AnswersWithoutAskingTheModel()
+    {
+        var rig = new CalendarRig("2026-10-15T14:20:00-03:00");
+        var service = new AgendaService(rig.Client, CalendarRig.Account(true), CalendarRig.Links("https://h/x", rig.Time.GetUtcNow()), rig.Clock);
+
+        var reply = await new AgendaIntent(rig.Llm, service).HandleAsync(rig.Context("Tenho compromisso dia 15 de novembro?"), CancellationToken.None);
+
+        reply.ShouldStartWith("📅 Não, você não tem compromisso no dia 15/11/2026");
+        rig.Llm.Requests.ShouldBeEmpty();
+    }
+
     [Fact]
     [Trait("AC", "012-505")]
     public async Task HasEventsOn_AnswersYesWithTheDay_NoWhenEmpty_AndTheErrorWithoutTheReason()

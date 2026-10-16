@@ -180,6 +180,12 @@ public sealed class AgendaIntent(ILlmClient llm, AgendaService agenda) : IWhatsA
 
     public async Task<string> HandleAsync(IntentContext context, CancellationToken cancellationToken)
     {
+        // "Tenho compromisso dia 15 de novembro?": data citada vale mais que o período do Gemini, que só conhece períodos fixos.
+        if (AgendaDateParser.TryParse(context.Message, out var day, out var month))
+        {
+            return await agenda.HasEventsOnAsync(context.User.Id, day, month, cancellationToken);
+        }
+
         var calendarData = await GeminiFields.ObjectAsync(llm, WhatsAppPrompts.CalendarQuery(context.Message), context.User.Id, cancellationToken);
         var period = GeminiFields.StringOr(calendarData, "period_type", "hoje");
 
