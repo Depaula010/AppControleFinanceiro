@@ -102,6 +102,47 @@ public class CalendarServicesTests
         text.ShouldNotContain("SEGREDO");
     }
 
+    [Theory]
+    [InlineData(2026, 10, 15, 15, 11, 2026, 11, 15)]
+    [InlineData(2026, 11, 15, 15, 11, 2026, 11, 15)]
+    [InlineData(2026, 11, 16, 15, 11, 2027, 11, 15)]
+    [InlineData(2027, 3, 1, 29, 2, 2028, 2, 29)]
+    public void NextOccurrence_IsThisYearOrTheNext(int ty, int tm, int td, int day, int month, int ey, int em, int ed) =>
+        AgendaPeriods.NextOccurrence(day, month, new DateOnly(ty, tm, td)).ShouldBe(new DateOnly(ey, em, ed));
+
+    [Theory]
+    [InlineData(31, 2)]
+    [InlineData(0, 5)]
+    [InlineData(10, 13)]
+    public void NextOccurrence_InvalidDate_IsNull(int day, int month) =>
+        AgendaPeriods.NextOccurrence(day, month, new DateOnly(2026, 10, 15)).ShouldBeNull();
+
+    [Fact]
+    [Trait("AC", "012-505")]
+    public async Task HasEventsOn_AnswersYesWithTheDay_NoWhenEmpty_AndTheErrorWithoutTheReason()
+    {
+        var rig = new CalendarRig("2026-10-15T14:20:00-03:00");
+        var client = Substitute.For<ICalendarClient>();
+        var service = new AgendaService(client, CalendarRig.Account(true), CalendarRig.Links("https://h/x", rig.Time.GetUtcNow()), rig.Clock);
+        var day = new DateOnly(2026, 11, 15);
+        var item = new CalendarEvent("Dentista", "Dentista", "2026-11-15T09:00:00-03:00", "2026-11-15T10:00:00-03:00", string.Empty, string.Empty, false, null);
+
+        client.GetEventsInRangeAsync(7, day, day, Arg.Any<CancellationToken>()).Returns<IReadOnlyList<CalendarEvent>>([item]);
+        var yes = await service.HasEventsOnAsync(7, 15, 11, CancellationToken.None);
+        yes.ShouldStartWith("✅ Sim, você tem 1 compromisso(s) no dia 15/11/2026.");
+        yes.ShouldContain("Dentista");
+
+        client.GetEventsInRangeAsync(7, day, day, Arg.Any<CancellationToken>()).Returns<IReadOnlyList<CalendarEvent>>([]);
+        (await service.HasEventsOnAsync(7, 15, 11, CancellationToken.None)).ShouldBe("📅 Não, você não tem compromisso no dia 15/11/2026! 🎉");
+
+        client.GetEventsInRangeAsync(7, day, day, Arg.Any<CancellationToken>())
+            .Returns<IReadOnlyList<CalendarEvent>>(_ => throw new InvalidOperationException("token SEGREDO"));
+        var failed = await service.HasEventsOnAsync(7, 15, 11, CancellationToken.None);
+        failed.ShouldNotContain("SEGREDO");
+
+        (await service.HasEventsOnAsync(7, 31, 2, CancellationToken.None)).ShouldBe("❌ Data inválida: 31/02.");
+    }
+
     [Fact]
     [Trait("AC", "012-506")]
     public async Task FreeTime_MatchesTheFlask_ForEveryScenario()
