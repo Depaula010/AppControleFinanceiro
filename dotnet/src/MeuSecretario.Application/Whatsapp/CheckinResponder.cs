@@ -10,6 +10,11 @@ namespace MeuSecretario.Application.Whatsapp;
 public interface ICheckinDiagnostics
 {
     void ReplyFailed(string errorType);
+
+    /// <summary>Item que a resposta pediu e que não virou lançamento: só o id do agendamento e o motivo.</summary>
+    void ItemNotConfirmed(int scheduleId, string reason)
+    {
+    }
 }
 
 /// <summary>
@@ -60,9 +65,17 @@ public sealed class CheckinResponder(
 
         try
         {
-            var confirmed = await PostAsync(items, cancellationToken);
+            var (confirmed, notConfirmed) = await PostAsync(items, cancellationToken);
             await EndAsync(number, sessionKey, cancellationToken);
-            return confirmed.Count == 0 ? CheckinReplyTexts.NoValidItems : CheckinReplyTexts.Confirmed(confirmed, data.TotalItems);
+            if (confirmed.Count == 0)
+            {
+                return notConfirmed.Count == 0
+                    ? CheckinReplyTexts.NoValidItems
+                    : CheckinReplyTexts.NotConfirmed(notConfirmed, includeHeader: false);
+            }
+
+            var text = CheckinReplyTexts.Confirmed(confirmed, data.TotalItems);
+            return notConfirmed.Count == 0 ? text : $"{text}\n\n{CheckinReplyTexts.NotConfirmed(notConfirmed, includeHeader: true)}";
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -72,10 +85,12 @@ public sealed class CheckinResponder(
         }
     }
 
-    private async Task<List<string>> PostAsync(List<CheckinSessionItem> items, CancellationToken cancellationToken)
+    private async Task<(List<string> Confirmed, List<(string Description, string Reason)> NotConfirmed)> PostAsync(
+        List<CheckinSessionItem> items, CancellationToken cancellationToken)
     {
         var today = clock.Today;
         var confirmed = new List<string>();
+        var notConfirmed = new List<(string Description, string Reason)>();
         foreach (var item in items)
         {
             var date = CheckinReplyTexts.PaymentDate(item.DueDate, item.Day, today);
@@ -86,9 +101,14 @@ public sealed class CheckinResponder(
             {
                 confirmed.Add(item.Description);
             }
+            else
+            {
+                diagnostics.ItemNotConfirmed(item.Id, outcome.GetType().Name);
+                notConfirmed.Add((item.Description, CheckinReplyTexts.NotEligibleReason));
+            }
         }
 
-        return confirmed;
+        return (confirmed, notConfirmed);
     }
 
     private async Task EndAsync(string number, string sessionKey, CancellationToken cancellationToken)

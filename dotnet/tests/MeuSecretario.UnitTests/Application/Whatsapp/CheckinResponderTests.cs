@@ -56,7 +56,7 @@ public class CheckinResponderTests
 
     [Fact]
     [Trait("AC", "012-404")]
-    public async Task AlreadyPostedInTheMonth_CountsAsConfirmed_NotEligibleDoesNot()
+    public async Task AlreadyPostedInTheMonth_CountsAsConfirmed_NotEligibleIsListedAsNotConfirmed()
     {
         await SeedAsync(Bill(1, "Já lançada", due: Today), Bill(2, "Inativa", due: Today), Bill(3, "Nova", due: Today));
         _execute = request => request.ScheduleId switch
@@ -68,17 +68,17 @@ public class CheckinResponderTests
 
         var reply = await Responder().RespondAsync(Number, "ok", Id, CancellationToken.None);
 
-        reply.ShouldBe("✅ *2 conta(s) confirmada(s):*\n\n• Já lançada\n• Nova\n\n💚 Transações registradas com sucesso!");
+        reply.ShouldBe("✅ *2 conta(s) confirmada(s):*\n\n• Já lançada\n• Nova\n\n💚 Transações registradas com sucesso!\n\n⚠️ *Não foi possível confirmar:*\n\n• Inativa (agendamento inativo ou sem parcelas restantes)");
     }
 
     [Fact]
     [Trait("AC", "012-404")]
-    public async Task NothingEligible_SaysThereWasNothingValid_AndEndsTheSession()
+    public async Task NothingEligible_ListsWhatWasNotConfirmed_AndEndsTheSession()
     {
         await SeedAsync(Bill(1, "Inativa", due: Today));
         _execute = _ => new ScheduleExecutionOutcome.NotEligible();
 
-        (await Responder().RespondAsync(Number, "ok", Id, CancellationToken.None)).ShouldBe("Nenhum item válido para confirmar.");
+        (await Responder().RespondAsync(Number, "ok", Id, CancellationToken.None)).ShouldBe("⚠️ *Nenhuma conta foi confirmada:*\n\n• Inativa (agendamento inativo ou sem parcelas restantes)");
 
         (await SessionEndedAsync()).ShouldBeTrue();
     }

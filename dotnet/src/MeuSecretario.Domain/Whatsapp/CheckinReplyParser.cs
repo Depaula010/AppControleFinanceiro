@@ -141,6 +141,23 @@ public static class CheckinReplyTexts
     /// <summary>Sem o motivo da exceção (desvio 008): o Flask escreve <c>str(e)</c> depois dos dois-pontos.</summary>
     public const string SaveFailed = "❌ Erro ao salvar transações.";
 
+    public const string NotEligibleReason = "agendamento inativo ou sem parcelas restantes";
+
+    /// <summary>Itens pedidos que não viraram lançamento: o usuário vê o que ficou de fora e por quê, em vez de achar que pagou tudo.</summary>
+    public static string NotConfirmed(IReadOnlyList<(string Description, string Reason)> items, bool includeHeader)
+    {
+        ArgumentNullException.ThrowIfNull(items);
+        var sb = new StringBuilder(includeHeader
+            ? "⚠️ *Não foi possível confirmar:*\n\n"
+            : "⚠️ *Nenhuma conta foi confirmada:*\n\n");
+        foreach (var (description, reason) in items)
+        {
+            sb.Append("• ").Append(description).Append(" (").Append(reason).Append(")\n");
+        }
+
+        return sb.ToString().TrimEnd('\n');
+    }
+
     public static string Confirmed(IReadOnlyList<string> descriptions, int totalItems)
     {
         ArgumentNullException.ThrowIfNull(descriptions);

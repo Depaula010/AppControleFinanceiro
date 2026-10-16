@@ -30,9 +30,14 @@ internal static partial class BillsLog
 {
     [LoggerMessage(EventId = 12400, Level = LogLevel.Warning, Message = "Falha ao confirmar contas do check-in noturno: {Error}")]
     public static partial void CheckinReplyFailed(ILogger logger, string error);
+
+    [LoggerMessage(EventId = 12401, Level = LogLevel.Warning, Message = "Item do check-in noturno não confirmado: agendamento {ScheduleId}, motivo {Reason}")]
+    public static partial void CheckinItemNotConfirmed(ILogger logger, int scheduleId, string reason);
 }
 
 internal sealed class CheckinDiagnostics(ILogger<WhatsAppModule> logger) : ICheckinDiagnostics
 {
     public void ReplyFailed(string errorType) => BillsLog.CheckinReplyFailed(logger, errorType);
+
+    public void ItemNotConfirmed(int scheduleId, string reason) => BillsLog.CheckinItemNotConfirmed(logger, scheduleId, reason);
 }

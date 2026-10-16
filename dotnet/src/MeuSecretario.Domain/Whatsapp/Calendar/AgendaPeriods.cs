@@ -81,5 +81,34 @@ public static class AgendaPeriods
     /// <summary><c>date.weekday()</c> do Python: segunda = 0.</summary>
     public static int Weekday(DateOnly date) => ((int)date.DayOfWeek + 6) % 7;
 
+    /// <summary>
+    /// Próxima ocorrência de <paramref name="day"/>/<paramref name="month"/> a partir de <paramref name="today"/> (hoje conta): "dia 15 de
+    /// novembro" sem ano é este ano, ou o próximo se a data já passou. <c>null</c> para dia/mês que não existem (31/02);
+    /// 29/02 vai para o próximo ano bissexto.
+    /// </summary>
+    public static DateOnly? NextOccurrence(int day, int month, DateOnly today)
+    {
+        if (month is < 1 or > 12 || day < 1)
+        {
+            return null;
+        }
+
+        for (var year = today.Year; year <= today.Year + 8; year++)
+        {
+            if (day > DateTime.DaysInMonth(year, month))
+            {
+                continue;
+            }
+
+            var candidate = new DateOnly(year, month, day);
+            if (candidate >= today)
+            {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
+
     private static DateSpan Month(DateOnly first) => new(first, first.AddMonths(1).AddDays(-1));
 }
