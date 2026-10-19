@@ -24,8 +24,8 @@ public sealed class ScheduleExecutionRepositoryTests(PostgresFixture postgres) :
 
     public Task DisposeAsync() => Task.CompletedTask;
 
-    private Task<ScheduleExecutionOutcome> RunAsync(int scheduleId, string date, int? invoiceId = null) =>
-        _repository.ExecuteAsync(new ScheduleExecutionRequest(scheduleId, JobsEnv.Day(date), invoiceId), CancellationToken.None);
+    private Task<ScheduleExecutionOutcome> RunAsync(int scheduleId, string date, int? invoiceId = null, bool allowVariableReminder = false) =>
+        _repository.ExecuteAsync(new ScheduleExecutionRequest(scheduleId, JobsEnv.Day(date), invoiceId, allowVariableReminder), CancellationToken.None);
 
     private sealed class Tx
     {
@@ -187,6 +187,19 @@ public sealed class ScheduleExecutionRepositoryTests(PostgresFixture postgres) :
         (await RunAsync(reminder, "2026-03-18")).ShouldBeOfType<ScheduleExecutionOutcome.NotEligible>();
         (await RunAsync(9999, "2026-03-18")).ShouldBeOfType<ScheduleExecutionOutcome.NotEligible>();
         (await TransactionsAsync()).ShouldBeEmpty();
+    }
+
+    [Fact]
+    [Trait("AC", "013-65")]
+    public async Task VariableReminder_ConfirmedByTheUser_PostsTheExpectedAmount_OnlyOncePerMonth()
+    {
+        var id = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Conta de Água", 44.27m, "LEMBRETE_VARIAVEL", day: 27);
+
+        (await RunAsync(id, "2026-10-19", allowVariableReminder: true)).ShouldBeOfType<ScheduleExecutionOutcome.Posted>();
+        (await RunAsync(id, "2026-10-19", allowVariableReminder: true)).ShouldBeOfType<ScheduleExecutionOutcome.Skipped>();
+
+        var tx = (await TransactionsAsync()).Single();
+        (tx.Descricao, tx.Valor, tx.AgendamentoId).ShouldBe(("Conta de Água", -44.27m, id));
     }
 
     [Fact]

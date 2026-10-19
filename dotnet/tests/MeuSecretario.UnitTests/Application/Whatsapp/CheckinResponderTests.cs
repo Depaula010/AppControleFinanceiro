@@ -49,6 +49,7 @@ public class CheckinResponderTests
 
         var reply = await Responder().RespondAsync(Number, "ok", Id, CancellationToken.None);
 
+        _requests.ShouldAllBe(r => r.AllowVariableReminder);
         _requests.Select(r => (r.ScheduleId, r.Date)).ShouldBe([(1, Today), (2, Today.AddDays(-1)), (3, Today), (4, Today.AddDays(-1))]);
         reply.ShouldBe("✅ *Todas as 4 contas confirmadas!*\n\n• Aluguel\n• Luz\n• Água\n• Sem data\n\n💚 Transações registradas com sucesso!");
         (await SessionEndedAsync()).ShouldBeTrue();

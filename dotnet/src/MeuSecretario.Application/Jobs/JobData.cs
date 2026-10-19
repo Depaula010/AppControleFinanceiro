@@ -60,7 +60,10 @@ public interface IInvoiceJobRepository
 }
 
 /// <param name="InvoiceId">Nulo = resolver a fatura do cartão na data.</param>
-public sealed record ScheduleExecutionRequest(int ScheduleId, DateOnly Date, int? InvoiceId = null);
+/// <param name="AllowVariableReminder">
+/// Só a confirmação do usuário (check-in) lança <c>LEMBRETE_VARIAVEL</c>, pelo valor previsto; o motor automático nunca (padrão <c>false</c>).
+/// </param>
+public sealed record ScheduleExecutionRequest(int ScheduleId, DateOnly Date, int? InvoiceId = null, bool AllowVariableReminder = false);
 
 public abstract record ScheduleExecutionOutcome
 {
