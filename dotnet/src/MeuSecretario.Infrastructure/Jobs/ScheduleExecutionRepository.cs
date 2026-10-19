@@ -62,7 +62,7 @@ public sealed class ScheduleExecutionRepository(IDbConnectionFactory connections
             transaction,
             cancellationToken: cancellationToken));
 
-        if (row is null || !row.Active || row.Kind == ScheduleKinds.VariableReminder)
+        if (row is null || !row.Active || (row.Kind == ScheduleKinds.VariableReminder && !request.AllowVariableReminder))
         {
             return new ScheduleExecutionOutcome.NotEligible();
         }

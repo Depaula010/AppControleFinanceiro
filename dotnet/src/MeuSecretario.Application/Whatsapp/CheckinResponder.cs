@@ -94,7 +94,7 @@ public sealed class CheckinResponder(
         foreach (var item in items)
         {
             var date = CheckinReplyTexts.PaymentDate(item.DueDate, item.Day, today);
-            var outcome = await executor.ExecuteAsync(new ScheduleExecutionRequest(item.Id, date), cancellationToken);
+            var outcome = await executor.ExecuteAsync(new ScheduleExecutionRequest(item.Id, date, AllowVariableReminder: true), cancellationToken);
 
             // Já lançada no mês (Skipped) conta como confirmada: a conta está paga, só não se duplica o lançamento.
             if (outcome is ScheduleExecutionOutcome.Posted or ScheduleExecutionOutcome.Skipped)
