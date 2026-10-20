@@ -148,6 +148,22 @@ public class JobsParityTests
     }
 
     [Fact]
+    [Trait("AC", "013-46")]
+    public void CheckinMessage_PendingIncomeFromThePreviousMonth_ShowsItsRealDueDate_Deviation252()
+    {
+        // Hoje 03/11: a receita do dia 28 venceu em 28/10 (dentro dos 7 dias) e não pode sair como "28/11" (futuro).
+        var salary = new CheckinBill(
+            1, "Salário", 1000m, 28, 1, 1, 1, "Conta", "Conta Corrente", "Salário", "Renda", "Renda", "FIXO", null, null, new DateOnly(2026, 10, 28));
+        var snapshot = new CheckinSnapshot([salary], [], [], []);
+
+        var message = CheckinMessageFormatter.Format(snapshot, new DateOnly(2026, 11, 3), "abcdef12");
+
+        message.ShouldNotBeNull();
+        message.ShouldContain("1. Salário - R$ 1.000,00 - Previsto em 28/10\n");
+        message.ShouldNotContain("28/11");
+    }
+
+    [Fact]
     [Trait("AC", "013-44")]
     public void CheckinSession_MatchesPythonOrderAndFields()
     {

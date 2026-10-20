@@ -9,7 +9,7 @@ namespace MeuSecretario.Domain.Jobs;
 /// </summary>
 public static class CheckinMessageFormatter
 {
-    private sealed record PendingItem(string Description, decimal Value, string Account, string Status, int Day);
+    private sealed record PendingItem(string Description, decimal Value, string Account, string Status, int Day, DateOnly? DueDate);
 
     private sealed record OverdueItem(string Description, decimal Value, DateOnly? DueDate);
 
@@ -58,7 +58,8 @@ public static class CheckinMessageFormatter
                 bill.ExpectedAmount ?? 0m,
                 bill.AccountName,
                 status ?? $"Atrasado {daysLate.ToString(CultureInfo.InvariantCulture)} dias",
-                bill.Day);
+                bill.Day,
+                bill.DueDate);
             (bill.GroupName == CheckinRules.IncomeGroup ? pendingIncomes : pendingExpenses).Add(item);
         }
 
@@ -111,8 +112,11 @@ public static class CheckinMessageFormatter
             foreach (var item in pendingIncomes)
             {
                 totalIncome += item.Value;
+
+                // O vencimento real pode ser do mês anterior (até 7 dias após a virada); "mês de hoje" mostraria uma data futura.
+                var (day, month) = item.DueDate is { } pendingDue ? (pendingDue.Day, pendingDue.Month) : (item.Day, today.Month);
                 message.Append(CultureInfo.InvariantCulture,
-                    $"{number}. {item.Description} - {PtBrMoney.Format(item.Value)} - Previsto em {item.Day:00}/{today.Month:00}\n");
+                    $"{number}. {item.Description} - {PtBrMoney.Format(item.Value)} - Previsto em {day:00}/{month:00}\n");
                 number++;
             }
 
