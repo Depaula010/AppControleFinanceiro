@@ -75,6 +75,20 @@ public sealed class CheckinQueriesTests(PostgresFixture postgres) : IAsyncLifeti
 
     [Fact]
     [Trait("AC", "013-41")]
+    public async Task OverdueBillPaidByTheCheckinToday_StaysPaid_EvenBeyondTwentyDaysAfterTheDueDate()
+    {
+        // Conta de água vencida em 27/02 e confirmada no check-in em 19/03 (lançada em "hoje", mais de 20 dias depois do vencimento).
+        var id = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Água", day: 27);
+        await _env.TransactionAsync(_user, _account, "Despesa Essencial", "2026-03-19", "Conta de Água", scheduleId: id);
+
+        var snapshot = await SnapshotAsync("2026-03-20");
+
+        snapshot.OverdueBills.ShouldBeEmpty();
+        snapshot.PendingBills.ShouldBeEmpty();
+    }
+
+    [Fact]
+    [Trait("AC", "013-41")]
     public async Task PaymentOfAnEarlierMonth_DoesNotBlockTheCurrentOne()
     {
         var id = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Conta", day: 15);

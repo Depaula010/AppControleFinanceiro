@@ -67,7 +67,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
                         AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM ed.data_esperada_mes_atual))
                        OR
                        (t.data_transacao > ed.data_esperada_mes_atual
-                        AND t.data_transacao <= ed.data_esperada_mes_atual + INTERVAL '20 days')
+                        AND (t.agendamento_id = ed.id OR t.data_transacao <= ed.data_esperada_mes_atual + INTERVAL '20 days'))
                    )
              ))
             OR
@@ -82,7 +82,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
                         AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM ed.data_esperada_mes_anterior))
                        OR
                        (t.data_transacao > ed.data_esperada_mes_anterior
-                        AND t.data_transacao <= ed.data_esperada_mes_anterior + INTERVAL '20 days')
+                        AND (t.agendamento_id = ed.id OR t.data_transacao <= ed.data_esperada_mes_anterior + INTERVAL '20 days'))
                    )
              ))
         )
@@ -153,7 +153,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
                         AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM ed.data_esperada_mes_atual))
                        OR
                        (t.data_transacao > ed.data_esperada_mes_atual
-                        AND t.data_transacao <= ed.data_esperada_mes_atual + INTERVAL '20 days')
+                        AND (t.agendamento_id = ed.id OR t.data_transacao <= ed.data_esperada_mes_atual + INTERVAL '20 days'))
                    )
              ))
             OR
@@ -169,7 +169,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
                         AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM ed.data_esperada_mes_anterior))
                        OR
                        (t.data_transacao > ed.data_esperada_mes_anterior
-                        AND t.data_transacao <= ed.data_esperada_mes_anterior + INTERVAL '20 days')
+                        AND (t.agendamento_id = ed.id OR t.data_transacao <= ed.data_esperada_mes_anterior + INTERVAL '20 days'))
                    )
              ))
         )
