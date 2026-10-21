@@ -19,12 +19,6 @@ public interface ICheckinDiagnostics
 }
 
 /// <summary>
-/// Lembretes variáveis que o usuário confirmou e ainda esperam o valor real (<c>nightly_checkin_values:{numero}:{id}</c>). O primeiro da
-/// fila é o que está sendo perguntado; <paramref name="Total"/> é o tamanho original, para o contador "(2/3)".
-/// </summary>
-public sealed record CheckinPendingValues(List<CheckinSessionItem> Items, int Total);
-
-/// <summary>
 /// Resposta do usuário ao check-in noturno (<c>NightlyCheckinService.process_response</c> e <c>mark_bills_as_paid</c>,
 /// <c>nightly_checkin_service.py:482-874</c>; AC-012-404). Lê a sessão que o job da 013 gravou, interpreta a resposta e lança cada
 /// conta confirmada pela rotina única do motor de agendamentos (<see cref="IScheduleExecutor"/>, desvio 011: grava o
@@ -37,27 +31,29 @@ public sealed record CheckinPendingValues(List<CheckinSessionItem> Items, int To
 public sealed class CheckinResponder(
     ICache cache, ICheckinSession session, IScheduleExecutor executor, IClock clock, ICheckinDiagnostics diagnostics) : INightlyCheckinResponder
 {
-    private static readonly TimeSpan SessionTtl = TimeSpan.FromHours(1);
+    private readonly CheckinDialogStore _dialog = new(cache, session);
 
     public async Task<string?> RespondAsync(string number, string message, string checkinId, CancellationToken cancellationToken)
     {
-        var queue = await cache.GetJsonAsync<CheckinPendingValues>(CacheKeys.NightlyCheckinValues(number, checkinId), cancellationToken);
-        if (queue is { Items.Count: > 0 })
+        switch (await _dialog.LoadAsync(number, checkinId, cancellationToken))
         {
-            return await RespondValueAsync(number, message, checkinId, queue, cancellationToken);
+            case CheckinDialogState.AwaitingValues awaiting:
+                return await RespondValueAsync(number, message, checkinId, awaiting.Pending, cancellationToken);
+            case CheckinDialogState.AwaitingConfirmation confirmation:
+                return await RespondConfirmationAsync(number, message, checkinId, confirmation.Session, cancellationToken);
+            default:
+                await _dialog.ExpireAsync(number, cancellationToken);
+                return CheckinReplyTexts.Expired;
         }
+    }
 
-        var sessionKey = CacheKeys.NightlyCheckin(number, checkinId);
-        var data = await cache.GetJsonAsync<CheckinSession>(sessionKey, cancellationToken);
-        if (data is null)
-        {
-            await session.ClearActiveAsync(number, cancellationToken);
-            return CheckinReplyTexts.Expired;
-        }
-
+    /// <summary>A resposta ao check-in em si: "ok", números ou "depois".</summary>
+    private async Task<string?> RespondConfirmationAsync(
+        string number, string message, string checkinId, CheckinSession data, CancellationToken cancellationToken)
+    {
         if (data.TotalItems == 0)
         {
-            await EndAsync(number, checkinId, cancellationToken);
+            await _dialog.EndAsync(number, checkinId, cancellationToken);
             return CheckinReplyTexts.NoRecentItems;
         }
 
@@ -65,11 +61,11 @@ public sealed class CheckinResponder(
         switch (reply.Kind)
         {
             case CheckinReplyKind.Defer:
-                await EndAsync(number, checkinId, cancellationToken);
+                await _dialog.EndAsync(number, checkinId, cancellationToken);
                 return CheckinReplyTexts.Deferred;
             case CheckinReplyKind.Error:
             case CheckinReplyKind.Invalid:
-                await EndAsync(number, checkinId, cancellationToken);
+                await _dialog.EndAsync(number, checkinId, cancellationToken);
                 return reply.Text;
         }
 
@@ -91,14 +87,13 @@ public sealed class CheckinResponder(
 
             if (variable.Count > 0)
             {
-                // A sessão das contas some; a flag ativa e a fila de valores ficam até a última pergunta ser respondida.
-                await cache.DeleteAsync(sessionKey, cancellationToken);
-                var queueStart = new CheckinPendingValues(variable, variable.Count);
-                await SaveQueueAsync(number, checkinId, queueStart, cancellationToken);
-                return Join(Summary(confirmed, notConfirmed, data.TotalItems), Question(queueStart));
+                // A sessão das contas some; a flag ativa e a lista de valores ficam até a última pergunta ser respondida.
+                var pending = new CheckinPendingValues(variable, variable.Count);
+                await _dialog.StartValuesAsync(number, checkinId, pending, cancellationToken);
+                return Join(Summary(confirmed, notConfirmed, data.TotalItems), Question(pending));
             }
 
-            await EndAsync(number, checkinId, cancellationToken);
+            await _dialog.EndAsync(number, checkinId, cancellationToken);
             return confirmed.Count == 0 && notConfirmed.Count == 0
                 ? CheckinReplyTexts.NoValidItems
                 : Summary(confirmed, notConfirmed, data.TotalItems);
@@ -106,7 +101,7 @@ public sealed class CheckinResponder(
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             diagnostics.ReplyFailed(ex.GetType().Name);
-            await EndAsync(number, checkinId, cancellationToken);
+            await _dialog.EndAsync(number, checkinId, cancellationToken);
             return CheckinReplyTexts.SaveFailed;
         }
     }
@@ -120,7 +115,7 @@ public sealed class CheckinResponder(
 
         if (reply.Kind == CheckinValueKind.Invalid)
         {
-            await SaveQueueAsync(number, checkinId, queue, cancellationToken);
+            await _dialog.SaveValuesAsync(number, checkinId, queue, cancellationToken);
             return Join(CheckinReplyTexts.ValueInvalid, Question(queue));
         }
 
@@ -134,7 +129,7 @@ public sealed class CheckinResponder(
             decimal? amount = reply.Kind == CheckinValueKind.Amount ? reply.Amount : Expected(item);
             if (amount is not > 0)
             {
-                await SaveQueueAsync(number, checkinId, queue, cancellationToken);
+                await _dialog.SaveValuesAsync(number, checkinId, queue, cancellationToken);
                 return Join(CheckinReplyTexts.ValueNeeded, Question(queue));
             }
 
@@ -160,7 +155,7 @@ public sealed class CheckinResponder(
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 diagnostics.ReplyFailed(ex.GetType().Name);
-                await EndAsync(number, checkinId, cancellationToken);
+                await _dialog.EndAsync(number, checkinId, cancellationToken);
                 return CheckinReplyTexts.SaveFailed;
             }
         }
@@ -168,11 +163,11 @@ public sealed class CheckinResponder(
         var rest = queue with { Items = [.. queue.Items.Skip(1)] };
         if (rest.Items.Count == 0)
         {
-            await EndAsync(number, checkinId, cancellationToken);
+            await _dialog.EndAsync(number, checkinId, cancellationToken);
             return line;
         }
 
-        await SaveQueueAsync(number, checkinId, rest, cancellationToken);
+        await _dialog.SaveValuesAsync(number, checkinId, rest, cancellationToken);
         return Join(line, Question(rest));
     }
 
@@ -226,18 +221,5 @@ public sealed class CheckinResponder(
     {
         var item = queue.Items[0];
         return CheckinReplyTexts.ValueQuestion(item.Description, Expected(item), queue.Total - queue.Items.Count + 1, queue.Total);
-    }
-
-    private async Task SaveQueueAsync(string number, string checkinId, CheckinPendingValues queue, CancellationToken cancellationToken)
-    {
-        await cache.SetJsonAsync(CacheKeys.NightlyCheckinValues(number, checkinId), queue, SessionTtl, cancellationToken);
-        await cache.SetJsonAsync(CacheKeys.NightlyCheckinActive(number), checkinId, SessionTtl, cancellationToken);
-    }
-
-    private async Task EndAsync(string number, string checkinId, CancellationToken cancellationToken)
-    {
-        await cache.DeleteAsync(CacheKeys.NightlyCheckin(number, checkinId), cancellationToken);
-        await cache.DeleteAsync(CacheKeys.NightlyCheckinValues(number, checkinId), cancellationToken);
-        await session.ClearActiveAsync(number, cancellationToken);
     }
 }
