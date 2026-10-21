@@ -67,6 +67,15 @@ public static class ScheduleRules
         return new InstallmentProgress(next, total is { } t && next >= t);
     }
 
+    /// <summary>
+    /// A definição única de "dá para lançar": ativo, e lembrete variável só quando o usuário confirma (<paramref name="allowVariableReminder"/>,
+    /// desvio 252), e parcelado só com parcela restante. O SQL do check-in (<c>SchedulePaymentSql.Postable</c>) tem o mesmo critério.
+    /// </summary>
+    public static bool IsPostable(string kind, bool active, int executed, int? total, bool allowVariableReminder) =>
+        active
+        && (kind != ScheduleKinds.VariableReminder || allowVariableReminder)
+        && (kind != ScheduleKinds.Installment || HasInstallmentLeft(executed, total));
+
     /// <summary>Uma parcela só é lançada se o total é nulo ou ainda há parcela a executar.</summary>
     public static bool HasInstallmentLeft(int executed, int? total) => total is null || executed < total;
 
