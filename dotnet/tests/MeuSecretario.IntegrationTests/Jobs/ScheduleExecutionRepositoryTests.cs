@@ -24,8 +24,10 @@ public sealed class ScheduleExecutionRepositoryTests(PostgresFixture postgres) :
 
     public Task DisposeAsync() => Task.CompletedTask;
 
-    private Task<ScheduleExecutionOutcome> RunAsync(int scheduleId, string date, int? invoiceId = null, bool allowVariableReminder = false, decimal? amount = null) =>
-        _repository.ExecuteAsync(new ScheduleExecutionRequest(scheduleId, JobsEnv.Day(date), invoiceId, allowVariableReminder, amount), CancellationToken.None);
+    private Task<ScheduleExecutionOutcome> RunAsync(int scheduleId, string date, int? invoiceId = null, bool allowVariableReminder = false, decimal? amount = null, string? competence = null) =>
+        _repository.ExecuteAsync(
+            new ScheduleExecutionRequest(scheduleId, JobsEnv.Day(date), invoiceId, allowVariableReminder, amount, competence is null ? null : JobsEnv.Day(competence)),
+            CancellationToken.None);
 
     private sealed class Tx
     {
@@ -211,6 +213,24 @@ public sealed class ScheduleExecutionRepositoryTests(PostgresFixture postgres) :
         (await RunAsync(id, "2026-10-20", allowVariableReminder: true, amount: 87.35m)).ShouldBeOfType<ScheduleExecutionOutcome.Posted>();
 
         (await TransactionsAsync()).Single().Valor.ShouldBe(-87.35m);
+    }
+
+    [Fact]
+    [Trait("AC", "013-65")]
+    public async Task Competence_IsStored_AndOnlyTheSameDueDateIsSkipped_Deviation253()
+    {
+        var id = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Conta de Água", 44.27m, day: 27);
+
+        // 27/09 quitado em 19/10: grava a competência de setembro.
+        (await RunAsync(id, "2026-10-19", competence: "2026-09-27")).ShouldBeOfType<ScheduleExecutionOutcome.Posted>();
+        (await RunAsync(id, "2026-10-19", competence: "2026-09-27")).ShouldBeOfType<ScheduleExecutionOutcome.Skipped>();
+
+        // Mesmo mês do lançamento, outro vencimento: lança (sem competência informada vale a data do lançamento).
+        (await RunAsync(id, "2026-10-27")).ShouldBeOfType<ScheduleExecutionOutcome.Posted>();
+
+        var competences = await _env.QueryAsync<DateTime>(
+            "SELECT competencia FROM transacoes WHERE agendamento_id = " + id + " ORDER BY competencia");
+        competences.ShouldBe([JobsEnv.D("2026-09-27"), JobsEnv.D("2026-10-27")]);
     }
 
     [Fact]

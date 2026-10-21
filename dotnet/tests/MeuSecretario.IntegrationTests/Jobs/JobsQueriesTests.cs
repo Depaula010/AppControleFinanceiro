@@ -89,6 +89,41 @@ public sealed class CheckinQueriesTests(PostgresFixture postgres) : IAsyncLifeti
 
     [Fact]
     [Trait("AC", "013-41")]
+    public async Task LatePaymentWithCompetence_QuitsOnlyThatDueDate_NotTheNextMonthsOne_Deviation253()
+    {
+        // Vencimento de 27/02 pago em 19/03 (competência 27/02): quita fevereiro e não esconde o vencimento de 27/03.
+        var id = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Água", day: 27);
+        await _env.TransactionAsync(_user, _account, "Despesa Essencial", "2026-03-19", "Conta de Água", scheduleId: id, competence: "2026-02-27");
+
+        (await SnapshotAsync("2026-03-20")).OverdueBills.ShouldBeEmpty();
+
+        var onTheDay = await SnapshotAsync("2026-03-28");
+        onTheDay.OverdueBills.ShouldBeEmpty();
+        onTheDay.PendingBills.Single().DueDate.ShouldBe(JobsEnv.Day("2026-03-27"));
+    }
+
+    [Fact]
+    [Trait("AC", "013-41")]
+    public async Task PaymentWithAnotherCompetence_DoesNotQuitTheDueDate_EvenInTheSameMonth_Deviation253()
+    {
+        var id = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Aluguel", day: 15);
+        await _env.TransactionAsync(_user, _account, "Despesa Essencial", "2026-03-16", "Aluguel", scheduleId: id, competence: "2026-01-15");
+
+        (await SnapshotAsync("2026-03-17")).PendingBills.Single().Id.ShouldBe(id);
+    }
+
+    [Fact]
+    [Trait("AC", "013-41")]
+    public async Task PaymentWithTheSameCompetence_QuitsTheDueDate_Deviation253()
+    {
+        var id = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Aluguel", day: 15);
+        await _env.TransactionAsync(_user, _account, "Despesa Essencial", "2026-03-17", "Aluguel", scheduleId: id, competence: "2026-03-15");
+
+        (await SnapshotAsync("2026-03-17")).PendingBills.ShouldBeEmpty();
+    }
+
+    [Fact]
+    [Trait("AC", "013-41")]
     public async Task PaymentOfAnEarlierMonth_DoesNotBlockTheCurrentOne()
     {
         var id = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Conta", day: 15);

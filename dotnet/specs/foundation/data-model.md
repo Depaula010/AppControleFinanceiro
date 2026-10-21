@@ -42,7 +42,7 @@ id (identity, PK); conta_id (N, FK contas CASCADE); data_vencimento date N; data
 
 ### transacoes
 id (identity, PK); usuario_id (N, CASCADE); conta_id (N, FK **RESTRICT**); subcategoria_id (N, RESTRICT); fatura_id (S, SET NULL); transferencia_par_id (S, auto-FK SET NULL); agendamento_id (S, SET NULL); descricao varchar(255) N; **valor numeric(15,2) N com sinal**; data_transacao date N default CURRENT_DATE; tipo_transacao varchar(20) N; consolidada bool N default true; created_at, updated_at.
-CHECK `tipo_transacao` IN (`Renda`, `Despesa`, `Transferência`, `Pagamento Fatura`). **Atenção**: a API REST grava `Receita`, que o CHECK rejeita ⇒ ver desvio 001. Colunas `observacoes` e `origem` são escritas por `api.py` mas **não existem no dump**.
+CHECK `tipo_transacao` IN (`Renda`, `Despesa`, `Transferência`, `Pagamento Fatura`). **Atenção**: a API REST grava `Receita`, que o CHECK rejeita ⇒ ver desvio 001. Colunas `observacoes` e `origem` são escritas por `api.py` mas **não existem no dump**. `competencia` (date, NULL; migration 0080, desvio 253): o vencimento de agendamento que a transação quita; NULL em transação avulsa e nas anteriores à migration.
 
 ### agendamentos
 id (identity, PK); usuario_id (N, CASCADE); conta_id (N, CASCADE); subcategoria_id (N, RESTRICT); descricao varchar(255) N; valor_previsto numeric(15,2) S; tipo_agendamento varchar(20) N (`FIXO`, `PARCELADO`, `LEMBRETE_VARIAVEL`); periodicidade varchar(20) N (`DIARIA`, `SEMANAL`, `QUINZENAL`, `MENSAL`, `ANUAL`); data_inicio date N; dia_execucao int N (1–31); mes_execucao int S (1–12); total_parcelas int S; parcelas_executadas int S default 0; notificar_antes_dias int S default 3; **ativo** bool N default true; incluir_na_reserva bool S default true; timestamps.

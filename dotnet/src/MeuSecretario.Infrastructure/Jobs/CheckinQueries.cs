@@ -60,7 +60,9 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
              AND ed.data_esperada_mes_atual >= @target_date - INTERVAL '7 days'
              AND NOT EXISTS (
                  SELECT 1 FROM transacoes t
-                 WHERE (t.agendamento_id = ed.id
+                 WHERE (t.agendamento_id = ed.id AND t.competencia = ed.data_esperada_mes_atual)
+                    OR (t.competencia IS NULL AND (
+                     (t.agendamento_id = ed.id
                         OR (t.agendamento_id IS NULL AND t.usuario_id = ed.usuario_id AND t.conta_id = ed.conta_id AND t.descricao = ed.descricao))
                    AND (
                        (EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM ed.data_esperada_mes_atual)
@@ -69,13 +71,16 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
                        (t.data_transacao > ed.data_esperada_mes_atual
                         AND (t.agendamento_id = ed.id OR t.data_transacao <= ed.data_esperada_mes_atual + INTERVAL '20 days'))
                    )
+                 ))
              ))
             OR
             (ed.data_esperada_mes_anterior <= @target_date
              AND ed.data_esperada_mes_anterior >= @target_date - INTERVAL '7 days'
              AND NOT EXISTS (
                  SELECT 1 FROM transacoes t
-                 WHERE (t.agendamento_id = ed.id
+                 WHERE (t.agendamento_id = ed.id AND t.competencia = ed.data_esperada_mes_anterior)
+                    OR (t.competencia IS NULL AND (
+                     (t.agendamento_id = ed.id
                         OR (t.agendamento_id IS NULL AND t.usuario_id = ed.usuario_id AND t.conta_id = ed.conta_id AND t.descricao = ed.descricao))
                    AND (
                        (EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM ed.data_esperada_mes_anterior)
@@ -84,6 +89,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
                        (t.data_transacao > ed.data_esperada_mes_anterior
                         AND (t.agendamento_id = ed.id OR t.data_transacao <= ed.data_esperada_mes_anterior + INTERVAL '20 days'))
                    )
+                 ))
              ))
         )
         AND (
@@ -146,7 +152,9 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
              AND ed.data_esperada_mes_atual < @hoje - INTERVAL '7 days'
              AND NOT EXISTS (
                  SELECT 1 FROM transacoes t
-                 WHERE (t.agendamento_id = ed.id
+                 WHERE (t.agendamento_id = ed.id AND t.competencia = ed.data_esperada_mes_atual)
+                    OR (t.competencia IS NULL AND (
+                     (t.agendamento_id = ed.id
                         OR (t.agendamento_id IS NULL AND t.usuario_id = ed.usuario_id AND t.conta_id = ed.conta_id AND t.descricao = ed.descricao))
                    AND (
                        (EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM ed.data_esperada_mes_atual)
@@ -155,6 +163,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
                        (t.data_transacao > ed.data_esperada_mes_atual
                         AND (t.agendamento_id = ed.id OR t.data_transacao <= ed.data_esperada_mes_atual + INTERVAL '20 days'))
                    )
+                 ))
              ))
             OR
             (ed.data_esperada_mes_anterior < @hoje
@@ -162,7 +171,9 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
              AND ed.data_esperada_mes_anterior < @hoje - INTERVAL '7 days'
              AND NOT EXISTS (
                  SELECT 1 FROM transacoes t
-                 WHERE (t.agendamento_id = ed.id
+                 WHERE (t.agendamento_id = ed.id AND t.competencia = ed.data_esperada_mes_anterior)
+                    OR (t.competencia IS NULL AND (
+                     (t.agendamento_id = ed.id
                         OR (t.agendamento_id IS NULL AND t.usuario_id = ed.usuario_id AND t.conta_id = ed.conta_id AND t.descricao = ed.descricao))
                    AND (
                        (EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM ed.data_esperada_mes_anterior)
@@ -171,6 +182,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
                        (t.data_transacao > ed.data_esperada_mes_anterior
                         AND (t.agendamento_id = ed.id OR t.data_transacao <= ed.data_esperada_mes_anterior + INTERVAL '20 days'))
                    )
+                 ))
              ))
         )
         AND (
