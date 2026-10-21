@@ -14,14 +14,15 @@ namespace MeuSecretario.Infrastructure.Jobs;
 /// </summary>
 public sealed class ScheduleExecutionRepository(IDbConnectionFactory connections) : IScheduleExecutionRepository
 {
-    private const string Select = """
+    /// <summary>O mesmo SELECT com colunas a mais; <paramref name="extra"/> começa com vírgula ou é vazio.</summary>
+    private static string SelectWith(string extra) => $"""
         SELECT a.id AS Id, a.usuario_id AS UserId, a.conta_id AS AccountId, a.subcategoria_id AS SubcategoryId,
                a.descricao AS Description, a.valor_previsto AS ExpectedAmount, a.tipo_agendamento AS Kind,
                a.periodicidade AS Periodicity, a.dia_execucao AS Day, a.mes_execucao AS Month,
                a.total_parcelas AS TotalInstallments, COALESCE(a.parcelas_executadas, 0) AS ExecutedInstallments,
                COALESCE(a.notificar_antes_dias, 0) AS NotifyBeforeDays, g.nome_grupo AS GroupName,
                c.tipo_conta AS AccountType, c.dia_fechamento AS ClosingDay, c.dia_vencimento AS DueDay,
-               u.numero_whatsapp AS WhatsappNumber, a.ativo AS Active
+               u.numero_whatsapp AS WhatsappNumber, a.ativo AS Active{extra}
         FROM agendamentos a
         JOIN usuarios u ON a.usuario_id = u.id
         JOIN contas c ON a.conta_id = c.id
@@ -30,22 +31,28 @@ public sealed class ScheduleExecutionRepository(IDbConnectionFactory connections
         JOIN grupocategoria g ON m.grupo_id = g.id
         """;
 
+    private static readonly string Select = SelectWith(string.Empty);
+
     public async Task<IReadOnlyList<ScheduleInfo>> ListMotorCandidatesAsync(DateOnly today, CancellationToken cancellationToken)
     {
         await using var connection = await connections.OpenAsync(cancellationToken);
         var rows = await connection.QueryAsync<Row>(new CommandDefinition(
             $"""
-            {Select}
+            {SelectWith($", CASE WHEN {SchedulePaymentSql.IsRolling("a")} THEN {SchedulePaymentSql.NextDue("a", "@today")} END AS NextDue")}
             WHERE a.ativo = TRUE
               AND (
                 (a.tipo_agendamento IN ('FIXO', 'PARCELADO')
-                 AND (a.dia_execucao = @day OR (@lastDay AND a.dia_execucao > @day))
-                 AND (a.periodicidade <> 'ANUAL' OR a.mes_execucao = @month))
+                 AND (
+                   (NOT {SchedulePaymentSql.IsRolling("a")}
+                    AND (a.dia_execucao = @day OR (@lastDay AND a.dia_execucao > @day))
+                    AND (a.periodicidade <> 'ANUAL' OR a.mes_execucao = @month))
+                   OR ({SchedulePaymentSql.IsRolling("a")} AND {SchedulePaymentSql.NextDue("a", "@today")} = @today)))
                 OR a.tipo_agendamento = 'LEMBRETE_VARIAVEL')
             ORDER BY a.id
             """,
             JobSql.With(
-                ("day", today.Day, DbType.Int32), ("month", today.Month, DbType.Int32), ("lastDay", JobClock.IsLastDayOfMonth(today), DbType.Boolean)),
+                ("day", today.Day, DbType.Int32), ("month", today.Month, DbType.Int32), ("lastDay", JobClock.IsLastDayOfMonth(today), DbType.Boolean),
+                ("today", JobSql.Day(today), DbType.Date)),
             cancellationToken: cancellationToken));
         return [.. rows.Select(r => r.ToInfo())];
     }
@@ -201,8 +208,10 @@ public sealed class ScheduleExecutionRepository(IDbConnectionFactory connections
 
         public bool Active { get; set; }
 
+        public DateTime? NextDue { get; set; }
+
         public ScheduleInfo ToInfo() => new(
             Id, UserId, AccountId, SubcategoryId, Description, ExpectedAmount, Kind, Periodicity, Day, Month, TotalInstallments,
-            ExecutedInstallments, NotifyBeforeDays, GroupName, AccountType, WhatsappNumber);
+            ExecutedInstallments, NotifyBeforeDays, GroupName, AccountType, WhatsappNumber, NextDue is { } due ? JobSql.ToDate(due) : null);
     }
 }
