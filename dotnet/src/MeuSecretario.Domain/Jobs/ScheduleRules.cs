@@ -16,6 +16,7 @@ public static class ScheduleKinds
 /// <summary>Agendamento ativo com o que o motor, o populador e o check-in precisam (spec 013 §4.7).</summary>
 /// <param name="GroupName">Nome do grupo da categoria; <c>Renda</c> vira transação de renda.</param>
 /// <param name="AccountType">Tipo da conta (cartão de crédito vincula fatura).</param>
+/// <param name="NextDue">Próximo vencimento de um agendamento de cadência contínua (<see cref="ScheduleCadence"/>); nulo nos demais.</param>
 public sealed record ScheduleInfo(
     int Id,
     int UserId,
@@ -32,7 +33,8 @@ public sealed record ScheduleInfo(
     int NotifyBeforeDays,
     string GroupName,
     string AccountType,
-    string WhatsappNumber);
+    string WhatsappNumber,
+    DateOnly? NextDue = null);
 
 /// <summary>Resultado de avançar uma parcela.</summary>
 public readonly record struct InstallmentProgress(int Executed, bool Deactivate);
@@ -97,6 +99,13 @@ public static class ScheduleRules
     public static bool MotorDayMatches(int scheduleDay, DateOnly today) =>
         scheduleDay == today.Day || (JobClock.IsLastDayOfMonth(today) && scheduleDay > today.Day);
 
+    /// <summary>O agendamento é do dia de hoje para o motor? Cadência contínua: o próximo vencimento é hoje; senão, <see cref="MotorDayMatches(int, DateOnly)"/>.</summary>
+    public static bool MotorDayMatches(ScheduleInfo schedule, DateOnly today)
+    {
+        ArgumentNullException.ThrowIfNull(schedule);
+        return ScheduleCadence.IsRolling(schedule.Periodicity) ? schedule.NextDue == today : MotorDayMatches(schedule.Day, today);
+    }
+
     /// <summary>
     /// Data de vencimento a lembrar hoje, ou <c>null</c>. O lembrete cai em <c>vencimento − notificar_antes_dias</c> (desvio
     /// 013): o vencimento é <c>hoje + antes</c> e precisa ser o <c>dia_execucao</c> daquele mês (com o corte do último dia).
@@ -105,6 +114,11 @@ public static class ScheduleRules
     {
         ArgumentNullException.ThrowIfNull(schedule);
         var due = today.AddDays(Math.Max(0, schedule.NotifyBeforeDays));
+        if (ScheduleCadence.IsRolling(schedule.Periodicity))
+        {
+            return schedule.NextDue == due ? due : null;
+        }
+
         if (due.Day != Math.Min(schedule.Day, DateTime.DaysInMonth(due.Year, due.Month)))
         {
             return null;
@@ -121,6 +135,9 @@ public static class ScheduleRules
     {
         ArgumentNullException.ThrowIfNull(schedule);
         var value = schedule.ExpectedAmount is { } amount && amount != 0m ? PtBrMoney.Format(amount) : "???";
-        return $"🔔 *LEMBRETE DE CONTA VARIÁVEL* 🔔\n\nSua conta '{schedule.Description}' vence em {schedule.NotifyBeforeDays.ToString(CultureInfo.InvariantCulture)} dias (no dia {schedule.Day.ToString(CultureInfo.InvariantCulture)}).\n\nO valor previsto é: *{value}*\n\nPor favor, me diga o valor exato deste mês para eu registrar (ex: 'gastei 150.50 na conta de luz').";
+        var when = ScheduleCadence.IsRolling(schedule.Periodicity) && schedule.NextDue is { } next
+            ? next.ToString("dd/MM", CultureInfo.InvariantCulture)
+            : schedule.Day.ToString(CultureInfo.InvariantCulture);
+        return $"🔔 *LEMBRETE DE CONTA VARIÁVEL* 🔔\n\nSua conta '{schedule.Description}' vence em {schedule.NotifyBeforeDays.ToString(CultureInfo.InvariantCulture)} dias (no dia {when}).\n\nO valor previsto é: *{value}*\n\nPor favor, me diga o valor exato deste mês para eu registrar (ex: 'gastei 150.50 na conta de luz').";
     }
 }

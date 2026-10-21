@@ -222,7 +222,7 @@ public sealed class ScheduleMotor(
                 {
                     await RemindAsync(schedule, today, cancellationToken);
                 }
-                else if (ScheduleRules.MotorDayMatches(schedule.Day, today))
+                else if (ScheduleRules.MotorDayMatches(schedule, today))
                 {
                     var outcome = await executor.ExecuteAsync(new ScheduleExecutionRequest(schedule.Id, today), cancellationToken);
                     log.Info(Name, $"Agendamento ID {schedule.Id.ToString(CultureInfo.InvariantCulture)}: {Describe(outcome)}");

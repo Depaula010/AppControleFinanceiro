@@ -23,12 +23,13 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
                 m.nome_macro,
                 g.nome_grupo,
                 CASE
+                    WHEN {SchedulePaymentSql.IsRolling("a")} THEN {SchedulePaymentSql.NextDue("a", "@target_date")}
                     WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', @target_date) + INTERVAL '1 month - 1 day'))
                     THEN (DATE_TRUNC('month', @target_date) + INTERVAL '1 day' * (a.dia_execucao - 1))::date
                     ELSE (DATE_TRUNC('month', @target_date) + INTERVAL '1 month - 1 day')::date
                 END as data_esperada_mes_atual,
                 CASE
-                    WHEN a.periodicidade = 'ANUAL' THEN NULL
+                    WHEN a.periodicidade = 'ANUAL' OR {SchedulePaymentSql.IsRolling("a")} THEN NULL
                     WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', @target_date - INTERVAL '1 month') + INTERVAL '1 month - 1 day'))
                     THEN (DATE_TRUNC('month', @target_date - INTERVAL '1 month') + INTERVAL '1 day' * (a.dia_execucao - 1))::date
                     ELSE (DATE_TRUNC('month', @target_date - INTERVAL '1 month') + INTERVAL '1 month - 1 day')::date
@@ -83,12 +84,13 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
                 m.nome_macro,
                 g.nome_grupo,
                 CASE
+                    WHEN {SchedulePaymentSql.IsRolling("a")} THEN {SchedulePaymentSql.NextDue("a", "@hoje")}
                     WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', @hoje) + INTERVAL '1 month - 1 day'))
                     THEN (DATE_TRUNC('month', @hoje) + INTERVAL '1 day' * (a.dia_execucao - 1))::date
                     ELSE (DATE_TRUNC('month', @hoje) + INTERVAL '1 month - 1 day')::date
                 END as data_esperada_mes_atual,
                 CASE
-                    WHEN a.periodicidade = 'ANUAL' THEN NULL
+                    WHEN a.periodicidade = 'ANUAL' OR {SchedulePaymentSql.IsRolling("a")} THEN NULL
                     WHEN a.dia_execucao <= EXTRACT(DAY FROM (DATE_TRUNC('month', @hoje - INTERVAL '1 month') + INTERVAL '1 month - 1 day'))
                     THEN (DATE_TRUNC('month', @hoje - INTERVAL '1 month') + INTERVAL '1 day' * (a.dia_execucao - 1))::date
                     ELSE (DATE_TRUNC('month', @hoje - INTERVAL '1 month') + INTERVAL '1 month - 1 day')::date
