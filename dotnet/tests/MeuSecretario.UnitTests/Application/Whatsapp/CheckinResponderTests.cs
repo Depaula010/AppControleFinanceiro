@@ -146,6 +146,66 @@ public class CheckinResponderTests
         (await _cache.ExistsAsync(CacheKeys.NightlyCheckinActive(Number))).ShouldBeFalse();
     }
 
+    [Fact]
+    [Trait("AC", "012-404")]
+    public async Task VariableReminder_AfterOk_AsksTheValue_AndPostsTheAnsweredAmount_Deviation252()
+    {
+        await SeedAsync(Bill(1, "Aluguel", due: Today), Bill(2, "Conta de Água", due: Today, kind: "LEMBRETE_VARIAVEL"));
+        var responder = Responder();
+
+        var first = await responder.RespondAsync(Number, "ok", Id, CancellationToken.None);
+
+        first.ShouldBe(
+            "✅ *1 conta(s) confirmada(s):*\n\n• Aluguel\n\n💚 Transações registradas com sucesso!\n\n"
+            + "💬 *Qual o valor de Conta de Água?*\nResponda o valor (ex: 150,50), \"ok\" para usar o previsto (R$ 100,00) ou \"pular\".");
+        _requests.Select(r => r.ScheduleId).ShouldBe([1]);
+        (await _cache.ExistsAsync(CacheKeys.NightlyCheckinActive(Number))).ShouldBeTrue();
+
+        var second = await responder.RespondAsync(Number, "R$ 44,27", Id, CancellationToken.None);
+
+        second.ShouldBe("✅ Conta de Água lançada: R$ 44,27");
+        _requests.Select(r => (r.ScheduleId, r.Amount)).ShouldBe([(1, (decimal?)null), (2, 44.27m)]);
+        _requests[1].AllowVariableReminder.ShouldBeTrue();
+        (await SessionEndedAsync()).ShouldBeTrue();
+    }
+
+    [Fact]
+    [Trait("AC", "012-404")]
+    public async Task VariableReminders_AreAskedOneByOne_OkUsesTheExpectedAmount_AndSkipPostsNothing()
+    {
+        await SeedAsync(
+            Bill(1, "Água", due: Today, kind: "LEMBRETE_VARIAVEL"), Bill(2, "Luz", due: Today, kind: "LEMBRETE_VARIAVEL"));
+        var responder = Responder();
+
+        (await responder.RespondAsync(Number, "ok", Id, CancellationToken.None))!.ShouldContain("*Qual o valor de Água?* (1/2)");
+        _requests.ShouldBeEmpty();
+
+        var afterFirst = await responder.RespondAsync(Number, "ok", Id, CancellationToken.None);
+        afterFirst.ShouldBe(
+            "✅ Água lançada: R$ 100,00\n\n💬 *Qual o valor de Luz?* (2/2)\nResponda o valor (ex: 150,50), \"ok\" para usar o previsto (R$ 100,00) ou \"pular\".");
+
+        (await responder.RespondAsync(Number, "pular", Id, CancellationToken.None)).ShouldBe("⏭️ Luz não foi lançada.");
+
+        _requests.Select(r => (r.ScheduleId, r.Amount)).ShouldBe([(1, (decimal?)100m)]);
+        (await SessionEndedAsync()).ShouldBeTrue();
+    }
+
+    [Fact]
+    [Trait("AC", "012-404")]
+    public async Task VariableReminder_UnrecognizedValue_RepeatsTheQuestionWithoutPosting()
+    {
+        await SeedAsync(Bill(1, "Água", due: Today, kind: "LEMBRETE_VARIAVEL"));
+        var responder = Responder();
+        await responder.RespondAsync(Number, "ok", Id, CancellationToken.None);
+
+        var reply = await responder.RespondAsync(Number, "sei lá", Id, CancellationToken.None);
+
+        reply!.ShouldStartWith(CheckinReplyTexts.ValueInvalid);
+        reply.ShouldContain("*Qual o valor de Água?*");
+        _requests.ShouldBeEmpty();
+        (await SessionEndedAsync()).ShouldBeFalse();
+    }
+
     private static CheckinSessionItem Item(int id, string due) => new()
     {
         Id = id, Description = "Aluguel", ExpectedAmount = 100d, Day = 7, AccountId = 1, SubcategoryId = 10, UserId = 7, AccountName = "Nubank",

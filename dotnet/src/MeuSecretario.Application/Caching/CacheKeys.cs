@@ -22,6 +22,9 @@ public static class CacheKeys
 
     public static string NightlyCheckinActive(string whatsapp) => $"nightly_checkin_active:{whatsapp}";
 
+    /// <summary>Fila de lembretes variáveis esperando o valor (desvio 252); chave própria, o formato da sessão do Flask não muda.</summary>
+    public static string NightlyCheckinValues(string whatsapp, string id) => $"nightly_checkin_values:{whatsapp}:{id}";
+
     public static string InvoiceClosed(int faturaId) => string.Create(CultureInfo.InvariantCulture, $"invoice_closed:{faturaId}");
 
     public static string InvoiceDueWarning3d(int faturaId) => string.Create(CultureInfo.InvariantCulture, $"invoice_due_warning:{faturaId}:3d");

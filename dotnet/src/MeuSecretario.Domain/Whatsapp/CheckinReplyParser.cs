@@ -158,6 +158,28 @@ public static class CheckinReplyTexts
         return sb.ToString().TrimEnd('\n');
     }
 
+    /// <summary>Pergunta do valor de um lembrete variável (<paramref name="expected"/> é o valor previsto, se houver).</summary>
+    public static string ValueQuestion(string description, decimal? expected, int position, int total)
+    {
+        var counter = total > 1 ? string.Create(CultureInfo.InvariantCulture, $" ({position}/{total})") : string.Empty;
+        var hint = expected is > 0
+            ? $"Responda o valor (ex: 150,50), \"ok\" para usar o previsto ({MeuSecretario.Domain.Jobs.PtBrMoney.Format(expected)}) ou \"pular\"."
+            : "Responda o valor (ex: 150,50) ou \"pular\".";
+        return $"💬 *Qual o valor de {description}?*{counter}\n{hint}";
+    }
+
+    public const string ValueInvalid =
+        "❓ Não entendi o valor. Responda só o número (ex: 150,50), \"ok\" para o valor previsto ou \"pular\".";
+
+    public const string ValueNeeded = "❓ Esta conta não tem valor previsto. Responda o valor (ex: 150,50) ou \"pular\".";
+
+    public static string ValuePosted(string description, decimal amount) =>
+        $"✅ {description} lançada: {MeuSecretario.Domain.Jobs.PtBrMoney.Format(amount)}";
+
+    public static string ValueSkipped(string description) => $"⏭️ {description} não foi lançada.";
+
+    public static string ValueAlreadyPosted(string description) => $"✅ {description} já estava lançada neste mês.";
+
     public static string Confirmed(IReadOnlyList<string> descriptions, int totalItems)
     {
         ArgumentNullException.ThrowIfNull(descriptions);

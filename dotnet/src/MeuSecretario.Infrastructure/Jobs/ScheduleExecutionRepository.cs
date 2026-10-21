@@ -107,7 +107,7 @@ public sealed class ScheduleExecutionRepository(IDbConnectionFactory connections
             invoiceId = await ResolveInvoiceAsync(connection, transaction, schedule.AccountId, row.ClosingDay.Value, row.DueDay.Value, request.Date, cancellationToken);
         }
 
-        var amount = ScheduleRules.SignedAmount(schedule.GroupName, schedule.ExpectedAmount);
+        var amount = ScheduleRules.SignedAmount(schedule.GroupName, request.Amount ?? schedule.ExpectedAmount);
         var type = ScheduleRules.TransactionType(schedule.GroupName);
         var transactionId = await connection.ExecuteScalarAsync<int>(new CommandDefinition(
             """
