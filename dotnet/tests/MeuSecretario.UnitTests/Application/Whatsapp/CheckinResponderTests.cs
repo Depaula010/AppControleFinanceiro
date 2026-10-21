@@ -148,6 +148,17 @@ public class CheckinResponderTests
 
     [Fact]
     [Trait("AC", "012-404")]
+    public async Task Ok_SendsTheSessionDueDate_AsTheCompetence_Deviation253()
+    {
+        await SeedAsync(Bill(1, "Água", due: Today.AddDays(-20)), Bill(2, "Sem data", day: 6));
+
+        await Responder().RespondAsync(Number, "ok", Id, CancellationToken.None);
+
+        _requests.Select(r => (r.ScheduleId, r.Competence)).ShouldBe([(1, (DateOnly?)Today.AddDays(-20)), (2, null)]);
+    }
+
+    [Fact]
+    [Trait("AC", "012-404")]
     public async Task VariableReminder_AfterOk_AsksTheValue_AndPostsTheAnsweredAmount_Deviation252()
     {
         await SeedAsync(Bill(1, "Aluguel", due: Today), Bill(2, "Conta de Água", due: Today, kind: "LEMBRETE_VARIAVEL"));

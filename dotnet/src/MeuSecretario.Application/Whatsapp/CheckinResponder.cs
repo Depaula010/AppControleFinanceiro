@@ -142,7 +142,7 @@ public sealed class CheckinResponder(
             {
                 var date = CheckinReplyTexts.PaymentDate(item.DueDate, item.Day, clock.Today);
                 var outcome = await executor.ExecuteAsync(
-                    new ScheduleExecutionRequest(item.Id, date, AllowVariableReminder: true, Amount: amount), cancellationToken);
+                    new ScheduleExecutionRequest(item.Id, date, AllowVariableReminder: true, Amount: amount, Competence: Competence(item)), cancellationToken);
                 switch (outcome)
                 {
                     case ScheduleExecutionOutcome.Posted:
@@ -185,7 +185,7 @@ public sealed class CheckinResponder(
         foreach (var item in items)
         {
             var date = CheckinReplyTexts.PaymentDate(item.DueDate, item.Day, today);
-            var outcome = await executor.ExecuteAsync(new ScheduleExecutionRequest(item.Id, date, AllowVariableReminder: true), cancellationToken);
+            var outcome = await executor.ExecuteAsync(new ScheduleExecutionRequest(item.Id, date, AllowVariableReminder: true, Competence: Competence(item)), cancellationToken);
 
             // Já lançada no mês (Skipped) conta como confirmada: a conta está paga, só não se duplica o lançamento.
             if (outcome is ScheduleExecutionOutcome.Posted or ScheduleExecutionOutcome.Skipped)
@@ -215,6 +215,10 @@ public sealed class CheckinResponder(
     }
 
     private static string Join(string first, string second) => first.Length == 0 ? second : $"{first}\n\n{second}";
+
+    /// <summary>Vencimento que a confirmação quita (<c>data_vencimento_real</c> da sessão); sem ele, a data do lançamento.</summary>
+    private static DateOnly? Competence(CheckinSessionItem item) =>
+        DateOnly.TryParseExact(item.DueDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var due) ? due : null;
 
     private static decimal? Expected(CheckinSessionItem item) => item.ExpectedAmount is { } value ? (decimal)value : null;
 

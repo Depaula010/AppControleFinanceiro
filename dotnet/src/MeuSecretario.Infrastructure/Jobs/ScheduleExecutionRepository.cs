@@ -78,22 +78,25 @@ public sealed class ScheduleExecutionRepository(IDbConnectionFactory connections
             ? ScheduleRules.InstallmentDescription(schedule.Description, schedule.ExecutedInstallments, schedule.TotalInstallments)
             : schedule.Description;
 
+        var competence = request.Competence ?? request.Date;
         var monthStart = new DateOnly(request.Date.Year, request.Date.Month, 1);
         var alreadyPosted = await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
             """
             SELECT EXISTS (
                 SELECT 1 FROM transacoes t
                 WHERE t.usuario_id = @userId
-                  AND ((t.data_transacao >= @monthStart AND t.data_transacao < @nextMonth
-                        AND (t.agendamento_id = @id
-                             OR (t.agendamento_id IS NULL AND t.conta_id = @accountId AND t.descricao = @description)))
-                       OR (@invoiceId IS NOT NULL AND t.fatura_id = @invoiceId AND t.agendamento_id = @id)))
+                  AND ((t.agendamento_id = @id AND t.competencia = @competence)
+                       OR (t.competencia IS NULL
+                           AND ((t.data_transacao >= @monthStart AND t.data_transacao < @nextMonth
+                                 AND (t.agendamento_id = @id
+                                      OR (t.agendamento_id IS NULL AND t.conta_id = @accountId AND t.descricao = @description)))
+                                OR (@invoiceId IS NOT NULL AND t.fatura_id = @invoiceId AND t.agendamento_id = @id)))))
             """,
             JobSql.With(
                 ("userId", schedule.UserId, DbType.Int32), ("monthStart", JobSql.Day(monthStart), DbType.Date),
                 ("nextMonth", JobSql.Day(monthStart.AddMonths(1)), DbType.Date), ("id", schedule.Id, DbType.Int32),
                 ("accountId", schedule.AccountId, DbType.Int32), ("description", description, DbType.String),
-                ("invoiceId", request.InvoiceId, DbType.Int32)),
+                ("invoiceId", request.InvoiceId, DbType.Int32), ("competence", JobSql.Day(competence), DbType.Date)),
             transaction,
             cancellationToken: cancellationToken));
         if (alreadyPosted)
@@ -112,15 +115,16 @@ public sealed class ScheduleExecutionRepository(IDbConnectionFactory connections
         var transactionId = await connection.ExecuteScalarAsync<int>(new CommandDefinition(
             """
             INSERT INTO transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, agendamento_id, descricao, valor,
-                                    tipo_transacao, data_transacao, consolidada)
-            VALUES (@userId, @accountId, @subcategoryId, @invoiceId, @id, @description, @amount, @type, @date, TRUE)
+                                    tipo_transacao, data_transacao, consolidada, competencia)
+            VALUES (@userId, @accountId, @subcategoryId, @invoiceId, @id, @description, @amount, @type, @date, TRUE, @competence)
             RETURNING id
             """,
             JobSql.With(
                 ("userId", schedule.UserId, DbType.Int32), ("accountId", schedule.AccountId, DbType.Int32),
                 ("subcategoryId", schedule.SubcategoryId, DbType.Int32), ("invoiceId", invoiceId, DbType.Int32),
                 ("id", schedule.Id, DbType.Int32), ("description", description, DbType.String), ("amount", amount, DbType.Decimal),
-                ("type", type, DbType.String), ("date", JobSql.Day(request.Date), DbType.Date)),
+                ("type", type, DbType.String), ("date", JobSql.Day(request.Date), DbType.Date),
+                ("competence", JobSql.Day(competence), DbType.Date)),
             transaction,
             cancellationToken: cancellationToken));
 

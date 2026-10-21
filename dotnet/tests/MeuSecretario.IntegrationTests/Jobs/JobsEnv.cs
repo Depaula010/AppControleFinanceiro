@@ -67,19 +67,19 @@ internal sealed class JobsEnv(PostgresFixture postgres)
 
     public async Task<int> TransactionAsync(
         int userId, int accountId, string group, string date, string description = "Aluguel", decimal amount = -1500m,
-        int? scheduleId = null, int? invoiceId = null)
+        int? scheduleId = null, int? invoiceId = null, string? competence = null)
     {
         var sub = await SubcategoryAsync(group);
         await using var connection = await postgres.DataSource.OpenConnectionAsync();
         return await connection.ExecuteScalarAsync<int>(
             """
             INSERT INTO transacoes (usuario_id, conta_id, subcategoria_id, descricao, valor, tipo_transacao, data_transacao,
-                                    agendamento_id, fatura_id)
+                                    agendamento_id, fatura_id, competencia)
             VALUES (@userId, @accountId, @sub, @description, @amount, CASE WHEN @amount < 0 THEN 'Despesa' ELSE 'Renda' END,
-                    @date, @scheduleId, @invoiceId)
+                    @date, @scheduleId, @invoiceId, @competence)
             RETURNING id
             """,
-            new { userId, accountId, sub, description, amount, date = D(date), scheduleId, invoiceId });
+            new { userId, accountId, sub, description, amount, date = D(date), scheduleId, invoiceId, competence = competence is null ? (DateTime?)null : D(competence) });
     }
 
     public async Task<int> InvoiceAsync(int cardId, string due, string closing, string status = "Aberta")
