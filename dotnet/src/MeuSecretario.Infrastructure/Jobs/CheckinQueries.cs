@@ -14,7 +14,7 @@ namespace MeuSecretario.Infrastructure.Jobs;
 /// </summary>
 public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQueries
 {
-    private const string PendingSql = """
+    private static readonly string PendingSql = $"""
         WITH ExpectedDates AS (
             SELECT
                 a.*,
@@ -39,8 +39,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
             JOIN macrocategoria m ON s.macro_id = m.id
             JOIN grupocategoria g ON m.grupo_id = g.id
             WHERE a.usuario_id = @uid
-              AND a.ativo = TRUE
-              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL', 'PARCELADO')
+              AND {SchedulePaymentSql.Postable("a")}
         )
         SELECT
             ed.id AS Id, ed.descricao AS Description, ed.valor_previsto AS ExpectedAmount, ed.dia_execucao AS Day,
@@ -59,37 +58,13 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
             (ed.data_esperada_mes_atual <= @target_date
              AND ed.data_esperada_mes_atual >= @target_date - INTERVAL '7 days'
              AND NOT EXISTS (
-                 SELECT 1 FROM transacoes t
-                 WHERE (t.agendamento_id = ed.id AND t.competencia = ed.data_esperada_mes_atual)
-                    OR (t.competencia IS NULL AND (
-                     (t.agendamento_id = ed.id
-                        OR (t.agendamento_id IS NULL AND t.usuario_id = ed.usuario_id AND t.conta_id = ed.conta_id AND t.descricao = ed.descricao))
-                   AND (
-                       (EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM ed.data_esperada_mes_atual)
-                        AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM ed.data_esperada_mes_atual))
-                       OR
-                       (t.data_transacao > ed.data_esperada_mes_atual
-                        AND (t.agendamento_id = ed.id OR t.data_transacao <= ed.data_esperada_mes_atual + INTERVAL '20 days'))
-                   )
-                 ))
+                 SELECT 1 FROM transacoes t WHERE {SchedulePaymentSql.Paid("ed", "t", "ed.data_esperada_mes_atual", "ed.descricao")}
              ))
             OR
             (ed.data_esperada_mes_anterior <= @target_date
              AND ed.data_esperada_mes_anterior >= @target_date - INTERVAL '7 days'
              AND NOT EXISTS (
-                 SELECT 1 FROM transacoes t
-                 WHERE (t.agendamento_id = ed.id AND t.competencia = ed.data_esperada_mes_anterior)
-                    OR (t.competencia IS NULL AND (
-                     (t.agendamento_id = ed.id
-                        OR (t.agendamento_id IS NULL AND t.usuario_id = ed.usuario_id AND t.conta_id = ed.conta_id AND t.descricao = ed.descricao))
-                   AND (
-                       (EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM ed.data_esperada_mes_anterior)
-                        AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM ed.data_esperada_mes_anterior))
-                       OR
-                       (t.data_transacao > ed.data_esperada_mes_anterior
-                        AND (t.agendamento_id = ed.id OR t.data_transacao <= ed.data_esperada_mes_anterior + INTERVAL '20 days'))
-                   )
-                 ))
+                 SELECT 1 FROM transacoes t WHERE {SchedulePaymentSql.Paid("ed", "t", "ed.data_esperada_mes_anterior", "ed.descricao")}
              ))
         )
         AND (
@@ -99,7 +74,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
         ORDER BY DueDate DESC, ed.nome_grupo, ed.descricao
         """;
 
-    private const string OverdueSql = """
+    private static readonly string OverdueSql = $"""
         WITH ExpectedDates AS (
             SELECT
                 a.*,
@@ -124,8 +99,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
             JOIN macrocategoria m ON s.macro_id = m.id
             JOIN grupocategoria g ON m.grupo_id = g.id
             WHERE a.usuario_id = @uid
-              AND a.ativo = TRUE
-              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL', 'PARCELADO')
+              AND {SchedulePaymentSql.Postable("a")}
               AND NOT (
                   a.tipo_agendamento = 'FIXO'
                   AND g.nome_grupo = 'Despesa'
@@ -151,38 +125,14 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
             (ed.data_esperada_mes_atual < @hoje
              AND ed.data_esperada_mes_atual < @hoje - INTERVAL '7 days'
              AND NOT EXISTS (
-                 SELECT 1 FROM transacoes t
-                 WHERE (t.agendamento_id = ed.id AND t.competencia = ed.data_esperada_mes_atual)
-                    OR (t.competencia IS NULL AND (
-                     (t.agendamento_id = ed.id
-                        OR (t.agendamento_id IS NULL AND t.usuario_id = ed.usuario_id AND t.conta_id = ed.conta_id AND t.descricao = ed.descricao))
-                   AND (
-                       (EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM ed.data_esperada_mes_atual)
-                        AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM ed.data_esperada_mes_atual))
-                       OR
-                       (t.data_transacao > ed.data_esperada_mes_atual
-                        AND (t.agendamento_id = ed.id OR t.data_transacao <= ed.data_esperada_mes_atual + INTERVAL '20 days'))
-                   )
-                 ))
+                 SELECT 1 FROM transacoes t WHERE {SchedulePaymentSql.Paid("ed", "t", "ed.data_esperada_mes_atual", "ed.descricao")}
              ))
             OR
             (ed.data_esperada_mes_anterior < @hoje
              AND ed.data_esperada_mes_anterior >= @data_minima
              AND ed.data_esperada_mes_anterior < @hoje - INTERVAL '7 days'
              AND NOT EXISTS (
-                 SELECT 1 FROM transacoes t
-                 WHERE (t.agendamento_id = ed.id AND t.competencia = ed.data_esperada_mes_anterior)
-                    OR (t.competencia IS NULL AND (
-                     (t.agendamento_id = ed.id
-                        OR (t.agendamento_id IS NULL AND t.usuario_id = ed.usuario_id AND t.conta_id = ed.conta_id AND t.descricao = ed.descricao))
-                   AND (
-                       (EXTRACT(MONTH FROM t.data_transacao) = EXTRACT(MONTH FROM ed.data_esperada_mes_anterior)
-                        AND EXTRACT(YEAR FROM t.data_transacao) = EXTRACT(YEAR FROM ed.data_esperada_mes_anterior))
-                       OR
-                       (t.data_transacao > ed.data_esperada_mes_anterior
-                        AND (t.agendamento_id = ed.id OR t.data_transacao <= ed.data_esperada_mes_anterior + INTERVAL '20 days'))
-                   )
-                 ))
+                 SELECT 1 FROM transacoes t WHERE {SchedulePaymentSql.Paid("ed", "t", "ed.data_esperada_mes_anterior", "ed.descricao")}
              ))
         )
         AND (

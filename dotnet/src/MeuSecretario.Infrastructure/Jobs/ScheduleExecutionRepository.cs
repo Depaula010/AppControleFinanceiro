@@ -62,40 +62,30 @@ public sealed class ScheduleExecutionRepository(IDbConnectionFactory connections
             transaction,
             cancellationToken: cancellationToken));
 
-        if (row is null || !row.Active || (row.Kind == ScheduleKinds.VariableReminder && !request.AllowVariableReminder))
+        if (row is null || !ScheduleRules.IsPostable(row.Kind, row.Active, row.ExecutedInstallments, row.TotalInstallments, request.AllowVariableReminder))
         {
             return new ScheduleExecutionOutcome.NotEligible();
         }
 
         var schedule = row.ToInfo();
         var isInstallment = schedule.Kind == ScheduleKinds.Installment;
-        if (isInstallment && !ScheduleRules.HasInstallmentLeft(schedule.ExecutedInstallments, schedule.TotalInstallments))
-        {
-            return new ScheduleExecutionOutcome.NotEligible();
-        }
 
         var description = isInstallment
             ? ScheduleRules.InstallmentDescription(schedule.Description, schedule.ExecutedInstallments, schedule.TotalInstallments)
             : schedule.Description;
 
         var competence = request.Competence ?? request.Date;
-        var monthStart = new DateOnly(request.Date.Year, request.Date.Month, 1);
         var alreadyPosted = await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
-            """
+            $"""
             SELECT EXISTS (
-                SELECT 1 FROM transacoes t
-                WHERE t.usuario_id = @userId
-                  AND ((t.agendamento_id = @id AND t.competencia = @competence)
-                       OR (t.competencia IS NULL
-                           AND ((t.data_transacao >= @monthStart AND t.data_transacao < @nextMonth
-                                 AND (t.agendamento_id = @id
-                                      OR (t.agendamento_id IS NULL AND t.conta_id = @accountId AND t.descricao = @description)))
-                                OR (@invoiceId IS NOT NULL AND t.fatura_id = @invoiceId AND t.agendamento_id = @id)))))
+                SELECT 1 FROM agendamentos a
+                JOIN transacoes t ON t.usuario_id = a.usuario_id
+                WHERE a.id = @id
+                  AND ({SchedulePaymentSql.Paid("a", "t", "@competence::date", "@description")}
+                       OR (@invoiceId IS NOT NULL AND t.fatura_id = @invoiceId AND t.agendamento_id = a.id)))
             """,
             JobSql.With(
-                ("userId", schedule.UserId, DbType.Int32), ("monthStart", JobSql.Day(monthStart), DbType.Date),
-                ("nextMonth", JobSql.Day(monthStart.AddMonths(1)), DbType.Date), ("id", schedule.Id, DbType.Int32),
-                ("accountId", schedule.AccountId, DbType.Int32), ("description", description, DbType.String),
+                ("id", schedule.Id, DbType.Int32), ("description", description, DbType.String),
                 ("invoiceId", request.InvoiceId, DbType.Int32), ("competence", JobSql.Day(competence), DbType.Date)),
             transaction,
             cancellationToken: cancellationToken));
