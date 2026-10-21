@@ -63,7 +63,9 @@ public interface IInvoiceJobRepository
 /// <param name="AllowVariableReminder">
 /// Só a confirmação do usuário (check-in) lança <c>LEMBRETE_VARIAVEL</c>, pelo valor previsto; o motor automático nunca (padrão <c>false</c>).
 /// </param>
-public sealed record ScheduleExecutionRequest(int ScheduleId, DateOnly Date, int? InvoiceId = null, bool AllowVariableReminder = false);
+/// <param name="Amount">Valor informado pelo usuário (lembrete variável); nulo = <c>valor_previsto</c> do agendamento.</param>
+public sealed record ScheduleExecutionRequest(
+    int ScheduleId, DateOnly Date, int? InvoiceId = null, bool AllowVariableReminder = false, decimal? Amount = null);
 
 public abstract record ScheduleExecutionOutcome
 {
