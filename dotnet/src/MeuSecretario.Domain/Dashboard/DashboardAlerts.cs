@@ -31,7 +31,7 @@ public sealed record DashboardAlert(
     string Level,
     string Type);
 
-/// <summary>Contas agendadas que vencem nos próximos 7 dias (<c>api.py:1198-1288</c>, RN-006-10). Funções puras.</summary>
+/// <summary>Contas agendadas que vencem nos próximos 7 dias (<c>api.py</c>, RN-006-10). Funções puras.</summary>
 public static class DashboardAlerts
 {
     public const int WindowDays = 7;

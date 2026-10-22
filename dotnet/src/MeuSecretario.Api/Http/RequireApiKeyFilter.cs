@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace MeuSecretario.Api.Http;
 
 /// <summary>
-/// Equivale ao <c>x-api-key</c> do Flask (<c>api_keys.py:18-31</c>): compara o header <c>X-API-KEY</c> (primeiro valor)
+/// Equivale ao <c>x-api-key</c> do Flask (<c>api_keys.py</c>): compara o header <c>X-API-KEY</c> (primeiro valor)
 /// com a <c>API_SECRET_KEY</c> em tempo constante. Se falhar, devolve o 401 no envelope escolhido pela rota
 /// (<paramref name="unauthorized"/>) e <b>não</b> chama o endpoint, logo o corpo nem é lido.
 /// </summary>

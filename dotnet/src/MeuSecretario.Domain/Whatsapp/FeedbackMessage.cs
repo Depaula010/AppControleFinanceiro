@@ -19,7 +19,7 @@ public abstract record FeedbackFooter
 }
 
 /// <summary>
-/// Mensagem de feedback da transação salva (<c>transaction_feedback_service.py:248-350</c>, spec 012 §7.8): cabeçalho, bloco do
+/// Mensagem de feedback da transação salva (<c>transaction_feedback_service.py</c>, spec 012 §7.8): cabeçalho, bloco do
 /// pote (só se o alerta dispara) e rodapé de fatura ou saldo.
 /// </summary>
 public static class FeedbackMessage

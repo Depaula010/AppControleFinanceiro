@@ -35,7 +35,7 @@ public sealed class GoogleLinks(IIntegrationSettings settings, ConnectLinkTokenC
     }
 }
 
-/// <summary>Textos de WhatsApp da 010d, literais do Python (<c>google_calendar_oauth_service.py:225-239</c>, <c>calendar_handler.py:174-184</c>).</summary>
+/// <summary>Textos de WhatsApp da 010d, literais do Python (<c>google_calendar_oauth_service.py</c>, <c>calendar_handler.py</c>).</summary>
 public static class GoogleNotificationMessages
 {
     private const string RevokedHeader =

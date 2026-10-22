@@ -41,7 +41,7 @@ public abstract record ValidateKeyValidation
 
 /// <summary>
 /// Leitura de <c>type</c> (ou <c>provedor</c>), <c>useOwnKey</c> e <c>key</c> das rotas <c>PUT /api-keys</c> e
-/// <c>POST /api-keys/validate</c> (spec 007 §3.4 e §3.5, <c>api.py:2574-2680</c>) com o desvio 084 (tipos errados dão 400).
+/// <c>POST /api-keys/validate</c> (spec 007 §3.4 e §3.5, <c>api.py</c>) com o desvio 084 (tipos errados dão 400).
 /// </summary>
 public static class ApiKeyRules
 {

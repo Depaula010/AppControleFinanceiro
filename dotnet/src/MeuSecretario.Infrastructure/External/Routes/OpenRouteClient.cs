@@ -161,7 +161,7 @@ public sealed class OpenRouteClient(
         var selection = await keys.SelectAsync(userId, ApiProviders.OpenRoute, cancellationToken).ConfigureAwait(false);
         if (selection.Failure is { } failure)
         {
-            // Como o Python, a falha da chave do usuário propaga (travel_time_service.py:37-39).
+            // Como o Python, a falha da chave do usuário propaga (travel_time_service.py).
             throw new ApiKeyUnavailableException(failure.Message);
         }
 

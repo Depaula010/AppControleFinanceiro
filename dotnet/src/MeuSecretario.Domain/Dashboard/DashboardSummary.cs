@@ -6,7 +6,7 @@ namespace MeuSecretario.Domain.Dashboard;
 public sealed record DashboardSummary(
     double TotalBalance, double MonthIncome, double MonthExpense, double MonthNet, string ReferenceMonth);
 
-/// <summary><c>meses_pt[hoje.month]/hoje.year</c> (<c>api.py:146-153</c>), em português fixo e sem depender da cultura.</summary>
+/// <summary><c>meses_pt[hoje.month]/hoje.year</c> (<c>api.py</c>), em português fixo e sem depender da cultura.</summary>
 public static class DashboardMonths
 {
     private static readonly string[] Names =
@@ -18,7 +18,7 @@ public static class DashboardMonths
     public static string Reference(DateOnly today) => $"{Names[today.Month - 1]}/{today.Year}";
 }
 
-/// <summary>Resumo do dashboard (RN-006-04 a RN-006-06; <c>api.py:105-163</c>).</summary>
+/// <summary>Resumo do dashboard (RN-006-04 a RN-006-06; <c>api.py</c>).</summary>
 public static class DashboardSummaryCalculator
 {
     /// <param name="balances">Saldo de cada conta ativa (consolidadas).</param>

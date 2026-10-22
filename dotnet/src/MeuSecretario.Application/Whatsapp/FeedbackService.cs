@@ -4,7 +4,7 @@ using MeuSecretario.Domain.Whatsapp;
 namespace MeuSecretario.Application.Whatsapp;
 
 /// <summary>
-/// <c>gerar_feedback_transacao</c> (<c>transaction_feedback_service.py:353-419</c>, spec 012 §7.8): dados da transação, pote
+/// <c>gerar_feedback_transacao</c> (<c>transaction_feedback_service.py</c>, spec 012 §7.8): dados da transação, pote
 /// (período do desvio 015 e alerta por limiar) e rodapé de fatura ou saldo. Qualquer exceção devolve o texto simples.
 /// </summary>
 public sealed class FeedbackService(IFeedbackReader reader, IClock clock, IFinanceDiagnostics diagnostics) : IFeedbackService

@@ -6,13 +6,13 @@ namespace MeuSecretario.Domain.Automation;
 /// <summary>Prompts do Gemini desta feature, copiados byte a byte de <c>gemini_service.py</c> (spec 011 §7.4; recuo de 4 espaços do Python).</summary>
 public static class AutomationPrompts
 {
-    /// <summary><c>extract_from_notification</c> (<c>gemini_service.py:105-108</c>); sem cache.</summary>
+    /// <summary><c>extract_from_notification</c> (<c>gemini_service.py</c>); sem cache.</summary>
     public static string ExtractFromNotification(string notificationText) =>
         "\n    Analise a notificação: \"" + notificationText + "\"\n"
         + "    Retorne APENAS JSON com: \"valor_decimal\" (sempre positivo), \"descricao_bruta\", \"tipo_fluxo\" (\"Renda\" ou \"Despesa\").\n"
         + "    ";
 
-    /// <summary><c>categorize_transaction</c> (<c>gemini_service.py:135-140</c>); <paramref name="fallbackId"/> nulo vira o texto <c>None</c>.</summary>
+    /// <summary><c>categorize_transaction</c> (<c>gemini_service.py</c>); <paramref name="fallbackId"/> nulo vira o texto <c>None</c>.</summary>
     public static string Categorize(IEnumerable<CategoryOption> categories, string? description, string transactionType, int? fallbackId) =>
         "\n    Minhas subcategorias são: " + PythonJson.DumpCategories(categories) + "\n"
         + "    A transação teve a descrição: \"" + (description ?? "None") + "\"; O tipo é: \"" + transactionType + "\"\n"
@@ -21,7 +21,7 @@ public static class AutomationPrompts
         + "    Responda APENAS com o número do ID.\n"
         + "    ";
 
-    /// <summary><c>extract_transaction_details</c> (<c>gemini_service.py:390-406</c>); cache <c>extract_trans</c>, global.</summary>
+    /// <summary><c>extract_transaction_details</c> (<c>gemini_service.py</c>); cache <c>extract_trans</c>, global.</summary>
     public static string ExtractTransactionDetails(string message, string intent) =>
         "Analise a mensagem: \"" + message + "\"\n"
         + "    O tipo é: \"" + intent + "\".\n"
@@ -42,18 +42,18 @@ public static class AutomationPrompts
         + "    Ex: {\"valor_decimal\": null, \"descricao_bruta\": \"salário\"}";
 }
 
-/// <summary>Textos de WhatsApp e de resposta fixos das rotas (<c>transaction_handler.py</c>, <c>fixed_bills_service.py:507-515</c>).</summary>
+/// <summary>Textos de WhatsApp e de resposta fixos das rotas (<c>transaction_handler.py</c>, <c>fixed_bills_service.py</c>).</summary>
 public static class AutomationTexts
 {
-    /// <summary>Automate sem Redis (<c>transaction_handler.py:129</c>); descrição nula escreve <c>None</c>.</summary>
+    /// <summary>Automate sem Redis (<c>transaction_handler.py</c>); descrição nula escreve <c>None</c>.</summary>
     public static string AutomateSaved(string? description, double value, string categoryLabel) =>
         $"Transacao salva!\n\nDescricao: {description ?? "None"}\nValor: {MoneyText.Brl(value)}\nCategoria: {categoryLabel}";
 
-    /// <summary><c>/api/transacao</c> sem Redis (<c>transaction_handler.py:387</c>).</summary>
+    /// <summary><c>/api/transacao</c> sem Redis (<c>transaction_handler.py</c>).</summary>
     public static string ApiSaved(string finalDescription, double value, string categoryLabel) =>
         $"Transacao salva!\n\n{finalDescription}\n{MoneyText.Brl(value)}\n{categoryLabel}";
 
-    /// <summary>Quitação por SMS (<c>fixed_bills_service.py:507-515</c>); <paramref name="paid"/> já é o texto do <c>formatar_moeda</c>.</summary>
+    /// <summary>Quitação por SMS (<c>fixed_bills_service.py</c>); <paramref name="paid"/> já é o texto do <c>formatar_moeda</c>.</summary>
     public static string BillSettled(string description, string paidFormatted, string category) =>
         "✅ *CONTA QUITADA!* ✅\n\n"
         + $"📝 {description}\n"
@@ -61,7 +61,7 @@ public static class AutomationTexts
         + $"📊 {category}\n\n"
         + "_Esta conta não será mais cobrada automaticamente este mês._";
 
-    /// <summary>Despesa avulsa por SMS (<c>transaction_handler.py:563-569</c>).</summary>
+    /// <summary>Despesa avulsa por SMS (<c>transaction_handler.py</c>).</summary>
     public static string SmsRegistered(string description, string paidFormatted, string paymentAccount) =>
         "Pagamento Registrado!\n\n"
         + $"{description}\n"
@@ -90,13 +90,13 @@ public sealed record PendingTransaction(
     string? BudgetWarning = null,
     bool FromApi = false)
 {
-    /// <summary>Pendência do <c>/webhook-automate</c> (<c>transaction_handler.py:104-115</c>).</summary>
+    /// <summary>Pendência do <c>/webhook-automate</c> (<c>transaction_handler.py</c>).</summary>
     public static PendingTransaction FromAutomate(
         int userId, int accountId, int categoryId, int? invoiceId, string? description, double valueDb, double valueOriginal,
         string transactionType, DateOnly date) =>
         new(userId, accountId, categoryId, invoiceId, valueDb, valueOriginal, transactionType, DateText(date), "automate", description);
 
-    /// <summary>Pendência do <c>/api/transacao</c> (<c>transaction_handler.py:356-373</c>).</summary>
+    /// <summary>Pendência do <c>/api/transacao</c> (<c>transaction_handler.py</c>).</summary>
     public static PendingTransaction FromApiEndpoint(
         int userId, int accountId, string accountName, string accountType, int categoryId, int? invoiceId, string local,
         string? description, string finalDescription, double valueDb, double valueOriginal, string paymentType, DateOnly date,
@@ -148,7 +148,7 @@ public sealed record PendingTransaction(
     private static string DateText(DateOnly date) => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 }
 
-/// <summary><c>format_confirmation_message</c> (<c>transaction_confirmation_service.py:77-165</c>, spec 011 §7.5).</summary>
+/// <summary><c>format_confirmation_message</c> (<c>transaction_confirmation_service.py</c>, spec 011 §7.5).</summary>
 public static class ConfirmationMessage
 {
     private const string Line = "━━━━━━━━━━━━━━━━━━━━";

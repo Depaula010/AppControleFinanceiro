@@ -21,7 +21,7 @@ public abstract record LoginResult
 }
 
 /// <summary>
-/// Login (<c>auth.py:206-300</c>). Distingue "não cadastrado" (404) de "senha incorreta" (401), como o Flask.
+/// Login (<c>auth.py</c>). Distingue "não cadastrado" (404) de "senha incorreta" (401), como o Flask.
 /// Não verifica <c>usuarios.ativo</c> nem grava <c>ultimo_acesso</c> (o Flask também não).
 /// </summary>
 public sealed class LoginUser(IUserRepository users, IPasswordHasher hasher, IJwtTokenService jwt)
@@ -68,7 +68,7 @@ public abstract record VerifyResult
     public sealed record NoUserId : VerifyResult;
 }
 
-/// <summary><c>POST /auth/verify</c> (<c>auth.py:303-352</c>). Não consulta o banco.</summary>
+/// <summary><c>POST /auth/verify</c> (<c>auth.py</c>). Não consulta o banco.</summary>
 public sealed class VerifyToken(IJwtTokenService jwt)
 {
     public VerifyResult Execute(string? token)

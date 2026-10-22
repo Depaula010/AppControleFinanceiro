@@ -54,7 +54,7 @@ public abstract record SaveAddressValidation
     public sealed record Rejected(SaveAddressError Error) : SaveAddressValidation;
 }
 
-/// <summary><c>POST /api/user/addresses</c> (spec 007 §3.9, <c>api.py:2830-2866</c>) com os desvios 084, 086 e 087.</summary>
+/// <summary><c>POST /api/user/addresses</c> (spec 007 §3.9, <c>api.py</c>) com os desvios 084, 086 e 087.</summary>
 public static class AddressRules
 {
     private const decimal MaxLatitude = 90m;

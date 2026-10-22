@@ -55,7 +55,7 @@ public sealed class JobLog(AppSettings settings, IClock clock, ILogger<JobLog> l
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            // Falha ao gravar o arquivo é ignorada (base_job.py:186-187).
+            // Falha ao gravar o arquivo é ignorada (base_job.py).
         }
     }
 }

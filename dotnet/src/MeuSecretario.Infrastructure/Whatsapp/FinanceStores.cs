@@ -116,7 +116,7 @@ public sealed class WhatsAppFinanceReader(IDbConnectionFactory connections) : IW
     }
 }
 
-/// <summary>Leituras do feedback da transação salva (<c>transaction_feedback_service.py:15-250</c>), com o período do pote do desvio 015.</summary>
+/// <summary>Leituras do feedback da transação salva (<c>transaction_feedback_service.py</c>), com o período do pote do desvio 015.</summary>
 public sealed class FeedbackReader(IDbConnectionFactory connections) : IFeedbackReader
 {
     private sealed class TransactionRow

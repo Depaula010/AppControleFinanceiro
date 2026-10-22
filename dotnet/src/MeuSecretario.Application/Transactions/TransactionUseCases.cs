@@ -29,14 +29,14 @@ public abstract record UpdateTransactionResult
     public sealed record SubcategoryNotFound : UpdateTransactionResult;
 }
 
-/// <summary><c>GET /api/transactions</c> (<c>api.py:728-901</c>): a validação dos parâmetros já foi feita pelo <see cref="ListQueryParser"/>.</summary>
+/// <summary><c>GET /api/transactions</c> (<c>api.py</c>): a validação dos parâmetros já foi feita pelo <see cref="ListQueryParser"/>.</summary>
 public sealed class ListTransactions(ITransactionRepository transactions)
 {
     public Task<TransactionPage> ExecuteAsync(int userId, ListFilter filter, CancellationToken cancellationToken) =>
         transactions.ListAsync(userId, filter, cancellationToken);
 }
 
-/// <summary><c>POST /api/transactions</c> (<c>api.py:1301-1459</c>): regras 1 a 9 no Domain; 10 e 11 e a gravação no serviço de lançamento.</summary>
+/// <summary><c>POST /api/transactions</c> (<c>api.py</c>): regras 1 a 9 no Domain; 10 e 11 e a gravação no serviço de lançamento.</summary>
 public sealed class CreateTransaction(ITransactionPosting posting)
 {
     public const string Origin = "api";
@@ -67,7 +67,7 @@ public sealed class CreateTransaction(ITransactionPosting posting)
 }
 
 /// <summary>
-/// <c>PUT /api/transactions/{id}</c> (<c>api.py:1462-1635</c>). A ordem é a da spec §3.3: corpo, 404, tipo editável
+/// <c>PUT /api/transactions/{id}</c> (<c>api.py</c>). A ordem é a da spec §3.3: corpo, 404, tipo editável
 /// (desvio 068), descrição/valor/tipo/data, subcategoria, conta, observações/consolidada, "nenhum campo", gravação.
 /// </summary>
 public sealed class UpdateTransaction(ITransactionRepository transactions, ITransactionsUnitOfWork unitOfWork)
@@ -159,7 +159,7 @@ public sealed class UpdateTransaction(ITransactionRepository transactions, ITran
     }
 }
 
-/// <summary><c>DELETE /api/transactions/{id}</c> (<c>api.py:1638-1695</c>): a transação, o par e a reabertura da fatura são do repositório.</summary>
+/// <summary><c>DELETE /api/transactions/{id}</c> (<c>api.py</c>): a transação, o par e a reabertura da fatura são do repositório.</summary>
 public sealed class DeleteTransaction(ITransactionRepository transactions, IClock clock)
 {
     /// <returns><c>false</c> = não existe (404).</returns>

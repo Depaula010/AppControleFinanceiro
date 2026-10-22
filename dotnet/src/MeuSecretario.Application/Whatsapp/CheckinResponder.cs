@@ -20,7 +20,7 @@ public interface ICheckinDiagnostics
 
 /// <summary>
 /// Resposta do usuário ao check-in noturno (<c>NightlyCheckinService.process_response</c> e <c>mark_bills_as_paid</c>,
-/// <c>nightly_checkin_service.py:482-874</c>; AC-012-404). Lê a sessão que o job da 013 gravou, interpreta a resposta e lança cada
+/// <c>nightly_checkin_service.py</c>; AC-012-404). Lê a sessão que o job da 013 gravou, interpreta a resposta e lança cada
 /// conta confirmada pela rotina única do motor de agendamentos (<see cref="IScheduleExecutor"/>, desvio 011: grava o
 /// <c>agendamento_id</c> e não duplica o que já foi lançado no mês). A sessão e a flag ativa somem sempre, inclusive em exceção.
 /// <para>

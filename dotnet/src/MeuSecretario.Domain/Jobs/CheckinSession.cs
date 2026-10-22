@@ -5,7 +5,7 @@ namespace MeuSecretario.Domain.Jobs;
 
 /// <summary>
 /// Item da sessão do check-in no Redis: as colunas da query do Python (mesmos nomes, ordem do <c>SELECT</c>) mais
-/// <c>status_text</c> e <c>dias_atraso</c> (<c>create_checkin_session</c>, <c>nightly_checkin_service.py:333-359</c>).
+/// <c>status_text</c> e <c>dias_atraso</c> (<c>create_checkin_session</c>, <c>nightly_checkin_service.py</c>).
 /// O formato é o contrato com o handler de resposta (012) e com o rollback para o Flask.
 /// </summary>
 public sealed record CheckinSessionItem

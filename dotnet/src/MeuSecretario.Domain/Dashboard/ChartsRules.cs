@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace MeuSecretario.Domain.Dashboard;
 
-/// <summary>Janelas de data dos gráficos (<c>analytics_service.py:31-32, 54, 88</c>), sempre a partir de "hoje" de São Paulo.</summary>
+/// <summary>Janelas de data dos gráficos (<c>analytics_service.py, 54, 88</c>), sempre a partir de "hoje" de São Paulo.</summary>
 public static class ChartsWindow
 {
     public static DateOnly MonthStart(DateOnly today) => new(today.Year, today.Month, 1);
@@ -38,7 +38,7 @@ public abstract record MonthsResult
 }
 
 /// <summary>
-/// <c>request.args.get('meses', 3, type=int)</c> mais a faixa 1..12 (<c>api.py:208-215</c>, RN-006-08). Falha na
+/// <c>request.args.get('meses', 3, type=int)</c> mais a faixa 1..12 (<c>api.py</c>, RN-006-08). Falha na
 /// conversão devolve o padrão 3 sem erro; <c>int()</c> aceita espaços, sinal e <c>_</c> entre dígitos.
 /// </summary>
 public static partial class MonthsParameter

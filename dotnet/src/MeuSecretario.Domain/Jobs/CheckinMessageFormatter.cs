@@ -4,7 +4,7 @@ using System.Text;
 namespace MeuSecretario.Domain.Jobs;
 
 /// <summary>
-/// <c>format_consolidated_checkin_message</c> (<c>nightly_checkin_service.py:382-617</c>, RN-013-45): texto literal, uma
+/// <c>format_consolidated_checkin_message</c> (<c>nightly_checkin_service.py</c>, RN-013-45): texto literal, uma
 /// mensagem só. <c>checkinId</c> nulo é o modo leitura da intenção do WhatsApp (título <c>RESUMO FINANCEIRO</c>).
 /// </summary>
 public static class CheckinMessageFormatter

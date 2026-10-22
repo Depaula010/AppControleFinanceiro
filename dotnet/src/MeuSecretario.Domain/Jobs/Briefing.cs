@@ -147,7 +147,7 @@ public static class BriefingRules
     }
 }
 
-/// <summary>Prompt e pós-processamento de <c>generate_daily_briefing</c> (<c>gemini_service.py:1256-1500</c>, RN-013-24).</summary>
+/// <summary>Prompt e pós-processamento de <c>generate_daily_briefing</c> (<c>gemini_service.py</c>, RN-013-24).</summary>
 public static partial class BriefingPrompt
 {
     private static readonly string[] WeekDays =

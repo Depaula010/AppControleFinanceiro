@@ -45,7 +45,7 @@ public sealed class ApiKeysModule : IFeatureModule
 
         var group = app.MapGroup("/api-keys");
 
-        // Health sem autenticação (api_keys.py:840-847).
+        // Health sem autenticação (api_keys.py).
         group.MapGet("/health", () => Envelopes.C.Success(new Dictionary<string, object?>
         {
             ["status"] = "ok",

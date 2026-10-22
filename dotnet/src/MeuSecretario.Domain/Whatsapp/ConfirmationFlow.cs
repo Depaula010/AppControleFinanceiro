@@ -29,7 +29,7 @@ public sealed record ConfirmationOutcome(ConfirmationStatus Status, string? Mess
 
 /// <summary>
 /// Resposta do usuário a uma transação pendente (<c>TransactionConfirmationService.process_confirmation_response</c>,
-/// <c>transaction_confirmation_service.py:224-296</c>, spec 012 §7.2). Pura: recebe a pendência lida do Redis e devolve
+/// <c>transaction_confirmation_service.py</c>, spec 012 §7.2). Pura: recebe a pendência lida do Redis e devolve
 /// o estado e o efeito esperado.
 /// </summary>
 public static class ConfirmationFlow
@@ -110,7 +110,7 @@ public static class ConfirmationFlow
         node is JsonValue value && value.TryGetValue<bool>(out var flag) && flag;
 }
 
-/// <summary><c>format_category_selection_message</c> (<c>transaction_confirmation_service.py:167-197</c>).</summary>
+/// <summary><c>format_category_selection_message</c> (<c>transaction_confirmation_service.py</c>).</summary>
 public static class CategorySelection
 {
     public static (string Text, IReadOnlyDictionary<string, int> Map) Format(IReadOnlyList<CategoryOption> categories)

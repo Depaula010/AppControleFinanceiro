@@ -13,7 +13,7 @@ public sealed record DueInvoice(string Card, DateOnly DueDate, decimal Value);
 
 /// <summary>
 /// Um trecho da busca de contas fixas por dia do mês. O Flask faz uma consulta quando o período cabe num mês e duas quando
-/// cruza a virada (<c>finance_service.py:1469-1580</c>): <c>DayFrom</c> sem <c>DayTo</c> é o fim do primeiro mês, <c>DayTo</c> sem
+/// cruza a virada (<c>finance_service.py</c>): <c>DayFrom</c> sem <c>DayTo</c> é o fim do primeiro mês, <c>DayTo</c> sem
 /// <c>DayFrom</c> é o começo do seguinte. <c>Month</c> e <c>Year</c> são os da checagem de "já pago" e da periodicidade anual.
 /// </summary>
 public sealed record DueSlice(int? DayFrom, int? DayTo, int Month, int Year);
@@ -129,7 +129,7 @@ public static class DueDatesMessage
     private static string Brl(decimal value) => MoneyText.Brl((double)value);
 }
 
-/// <summary><c>Contas Atrasadas</c> (<c>notification_intents.py:233-306</c>): o snapshot e o texto do check-in noturno em modo leitura.</summary>
+/// <summary><c>Contas Atrasadas</c> (<c>notification_intents.py</c>): o snapshot e o texto do check-in noturno em modo leitura.</summary>
 public static class CheckinSnapshotMessage
 {
     public const string AllPaid = "✅ Você não tem contas atrasadas! Tudo em dia! 🎉";

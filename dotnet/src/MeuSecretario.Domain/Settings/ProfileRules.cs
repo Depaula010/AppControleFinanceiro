@@ -40,7 +40,7 @@ public abstract record ProfileValidation
 }
 
 /// <summary>
-/// <c>PUT /api/user/profile</c> (spec 007 Â§3.2, <c>api.py:2454-2519</c>), na ordem da spec: nada a atualizar, conversÃ£o de
+/// <c>PUT /api/user/profile</c> (spec 007 Â§3.2, <c>api.py</c>), na ordem da spec: nada a atualizar, conversÃ£o de
 /// <c>meses</c>, nome, estado, faixa de meses; depois as regras dos desvios 084 e 085 (tipos, limites, fuso).
 /// </summary>
 public static class ProfileRules

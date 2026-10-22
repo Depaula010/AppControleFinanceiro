@@ -41,7 +41,7 @@ public interface IWhatsAppConfigStore
 }
 
 /// <summary>
-/// <c>Configurar Notificações</c> (inline, <c>whatsapp_handler.py:1192-1370</c>): resumo matinal, check-in noturno e o ramo do Gemini.
+/// <c>Configurar Notificações</c> (inline, <c>whatsapp_handler.py</c>): resumo matinal, check-in noturno e o ramo do Gemini.
 /// A hora fora de 00:00-23:59 sobe (500), como no Flask. O ramo do Gemini responde o status com as chaves que existem (desvios 152 e 191).
 /// </summary>
 public sealed class NotificationsIntent(ILlmClient llm, IWhatsAppConfigStore store) : IWhatsAppIntent

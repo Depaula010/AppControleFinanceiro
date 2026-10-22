@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace MeuSecretario.Domain.Routes;
 
-/// <summary>Conversões da resposta do OpenRouteService com a aritmética do Python (<c>travel_time_service.py:166-167</c>).</summary>
+/// <summary>Conversões da resposta do OpenRouteService com a aritmética do Python (<c>travel_time_service.py</c>).</summary>
 public static class TravelMath
 {
     /// <summary><c>int(seconds / 60)</c>: trunca.</summary>

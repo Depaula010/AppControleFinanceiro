@@ -57,7 +57,7 @@ public static class CheckinRules
 
     /// <summary>
     /// <c>calculate_days_overdue</c>: dias de atraso por <c>dia_execucao</c>, com a virada de mês
-    /// (<c>nightly_checkin_service.py:249-270</c>).
+    /// (<c>nightly_checkin_service.py</c>).
     /// </summary>
     public static int DaysOverdue(int scheduleDay, DateOnly today)
     {
@@ -86,7 +86,7 @@ public static class CheckinRules
 
     /// <summary>
     /// Ordem da sessão e da mensagem: receitas (grupo <c>Renda</c>) primeiro, depois as demais sem despesa de cartão
-    /// (<c>create_checkin_session</c>, <c>:321-328</c>).
+    /// (<c>create_checkin_session</c>).
     /// </summary>
     public static IReadOnlyList<CheckinBill> OrderForSession(IEnumerable<CheckinBill> bills)
     {

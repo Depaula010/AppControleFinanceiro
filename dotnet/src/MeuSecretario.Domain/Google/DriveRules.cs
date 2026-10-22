@@ -1,6 +1,6 @@
 namespace MeuSecretario.Domain.Google;
 
-/// <summary>Validação do arquivo antes do upload (RN-010-50), literal de <c>google_drive_service.py:37-100</c>.</summary>
+/// <summary>Validação do arquivo antes do upload (RN-010-50), literal de <c>google_drive_service.py</c>.</summary>
 public static class DriveFilePolicy
 {
     public const int MaxFileSizeMb = 10;

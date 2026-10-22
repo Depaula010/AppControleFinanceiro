@@ -5,7 +5,7 @@ namespace MeuSecretario.Domain.Whatsapp;
 
 /// <summary>
 /// <c>X-Webhook-Signature</c>: HMAC-SHA256 em hexadecimal minúsculo do corpo bruto (<c>verify_hmac_signature</c>,
-/// <c>app/shared/security/hmac_validator.py:14-47</c>). Chave ou assinatura vazias nunca valem.
+/// <c>app/shared/security/hmac_validator.py</c>). Chave ou assinatura vazias nunca valem.
 /// </summary>
 public static class WebhookSignature
 {
@@ -28,7 +28,7 @@ public static class WebhookSignature
 }
 
 /// <summary>
-/// Decisões do roteador por texto (<c>whatsapp_handler.py:133-142, 300-307, 431, 446</c>). Tudo recebe o texto já
+/// Decisões do roteador por texto (<c>whatsapp_handler.py, 300-307, 431, 446</c>). Tudo recebe o texto já
 /// sanitizado; o <c>strip</c>/<c>lower</c>/<c>upper</c> do Python são feitos aqui.
 /// </summary>
 public static class MessageIntent
@@ -88,7 +88,7 @@ public static class MessageIntent
         return PaymentWords.Any(word => lower.Contains(word, StringComparison.Ordinal));
     }
 
-    /// <summary>Uma só palavra, <c>cancelar</c> ou <c>cancela</c> (<c>whatsapp_handler.py:431</c>).</summary>
+    /// <summary>Uma só palavra, <c>cancelar</c> ou <c>cancela</c> (<c>whatsapp_handler.py</c>).</summary>
     public static bool IsBareCancel(string lower, string message) =>
         (lower is "cancelar" or "cancela") && message.Trim().Split(default(char[]), StringSplitOptions.RemoveEmptyEntries).Length == 1;
 
@@ -135,7 +135,7 @@ public static class WhatsAppTexts
         "• Configure sua própria chave de API do Gemini\n\n" +
         "⏰ O limite é renovado automaticamente.";
 
-    /// <summary>Mensagem de erro do Flask que aciona o 429 (<c>whatsapp_handler.py:1561</c>).</summary>
+    /// <summary>Mensagem de erro do Flask que aciona o 429 (<c>whatsapp_handler.py</c>).</summary>
     public static bool IsQuotaMessage(string? message) =>
         message is not null
         && (message.Contains("429", StringComparison.Ordinal)

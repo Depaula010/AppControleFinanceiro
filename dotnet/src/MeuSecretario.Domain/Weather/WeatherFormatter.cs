@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace MeuSecretario.Domain.Weather;
 
-/// <summary>Formatação do clima para o resumo matinal (<c>weather_service.py:223-251</c>).</summary>
+/// <summary>Formatação do clima para o resumo matinal (<c>weather_service.py</c>).</summary>
 public static class WeatherFormatter
 {
     /// <summary>

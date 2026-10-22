@@ -46,7 +46,7 @@ public static class NotificationDefaults
 }
 
 /// <summary>
-/// <c>PUT /api/user/notifications</c> (spec 007 §3.7, <c>api.py:2730-2792</c>): ordem da spec (formato do check-in, hora 18 a 23)
+/// <c>PUT /api/user/notifications</c> (spec 007 §3.7, <c>api.py</c>): ordem da spec (formato do check-in, hora 18 a 23)
 /// seguida das regras dos desvios 084 e 085 (blocos e tipos, minutos, hora do resumo matinal).
 /// </summary>
 public static class NotificationRules

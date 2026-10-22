@@ -12,7 +12,7 @@ public sealed record CatalogBill(string Description, double Amount, int Day, int
 
 /// <summary>
 /// Textos de <c>Consulta Contas Fixas</c> e <c>Consulta Todas Contas</c> (<c>FixedBillsService.list_pending_bills_formatted</c> e
-/// <c>list_all_bills_formatted</c>, <c>fixed_bills_service.py:269-504</c>). Valores em <see cref="double"/>, como o <c>float</c> do Python.
+/// <c>list_all_bills_formatted</c>, <c>fixed_bills_service.py</c>). Valores em <see cref="double"/>, como o <c>float</c> do Python.
 /// </summary>
 public static class FixedBillsMessages
 {

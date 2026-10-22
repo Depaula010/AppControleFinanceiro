@@ -8,7 +8,7 @@ namespace MeuSecretario.Application.Whatsapp;
 public sealed record ResolvedAccount(AccountRef Account, string Origin);
 
 /// <summary>
-/// <c>resolve_account_for_transaction</c> e <c>choose_account_for_transaction</c> (<c>finance_service.py:1799-1960</c>, spec 012 §7.6):
+/// <c>resolve_account_for_transaction</c> e <c>choose_account_for_transaction</c> (<c>finance_service.py</c>, spec 012 §7.6):
 /// conta do agendamento, conta citada, conta padrão do tipo, primeira conta. Só contas <b>ativas</b> (desvio 039).
 /// </summary>
 public sealed class AccountResolver(IAutomationLookups lookups, IWhatsAppFinanceReader reader)

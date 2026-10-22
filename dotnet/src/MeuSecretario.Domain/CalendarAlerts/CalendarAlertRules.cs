@@ -45,7 +45,7 @@ public static class CalendarAlertRules
         _ => new ActiveCheck(FieldState.Invalid, false),
     };
 
-    /// <summary>Mensagem de sucesso (<c>calendar_alert_config_service.py:68-75</c>): partes presentes unidas por " e ".</summary>
+    /// <summary>Mensagem de sucesso (<c>calendar_alert_config_service.py</c>): partes presentes unidas por " e ".</summary>
     public static string SuccessMessage(bool? active, int? minutes)
     {
         var parts = new List<string>(2);

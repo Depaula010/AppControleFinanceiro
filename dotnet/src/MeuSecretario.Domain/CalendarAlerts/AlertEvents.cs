@@ -61,7 +61,7 @@ public static class AlertMessage
     public static string FormatTime(string startText) =>
         TryParseIso(startText, out var parsed) ? parsed.ToString("HH:mm", CultureInfo.InvariantCulture) : startText;
 
-    /// <summary>Texto literal do Flask (<c>calendar_alert_service.py:243-250</c>).</summary>
+    /// <summary>Texto literal do Flask (<c>calendar_alert_service.py</c>).</summary>
     public static string Build(string title, string startText, string location, int minutesBefore)
     {
         var message = string.Create(CultureInfo.InvariantCulture, $"⚠️ Faltam {minutesBefore} min: {title}") +

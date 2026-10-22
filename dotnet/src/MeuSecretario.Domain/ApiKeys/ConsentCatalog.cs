@@ -4,7 +4,7 @@ namespace MeuSecretario.Domain.ApiKeys;
 public sealed record ConsentType(string Type, string Description, bool Required);
 
 /// <summary>
-/// Catálogo dos 5 tipos de consentimento, na ordem do Flask (<c>servico_consentimento_lgpd.py:23-32</c>).
+/// Catálogo dos 5 tipos de consentimento, na ordem do Flask (<c>servico_consentimento_lgpd.py</c>).
 /// Descrições literais; versão padrão <c>1.0</c>.
 /// </summary>
 public static class ConsentCatalog

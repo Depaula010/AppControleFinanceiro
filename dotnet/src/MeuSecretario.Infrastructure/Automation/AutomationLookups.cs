@@ -6,7 +6,7 @@ using MeuSecretario.Infrastructure.Database;
 
 namespace MeuSecretario.Infrastructure.Automation;
 
-/// <summary><c>SELECT id, numero_whatsapp, api_key_automate FROM usuarios WHERE api_key_automate IS NOT NULL</c> (<c>finance_service.py:264</c>).</summary>
+/// <summary><c>SELECT id, numero_whatsapp, api_key_automate FROM usuarios WHERE api_key_automate IS NOT NULL</c> (<c>finance_service.py</c>).</summary>
 public sealed class UserKeyReader(IDbConnectionFactory connections) : IUserKeyReader
 {
     private sealed class Row
@@ -197,7 +197,7 @@ public sealed class AutomationLookups(IDbConnectionFactory connections) : IAutom
     }
 }
 
-/// <summary>Potes ativos e gasto do período (<c>budget_validation_service.py:50-150</c>); só leitura.</summary>
+/// <summary>Potes ativos e gasto do período (<c>budget_validation_service.py</c>); só leitura.</summary>
 public sealed class BudgetReader(IDbConnectionFactory connections) : IBudgetReader
 {
     private sealed class PotDbRow

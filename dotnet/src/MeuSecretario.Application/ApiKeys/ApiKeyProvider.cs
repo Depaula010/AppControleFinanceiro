@@ -4,7 +4,7 @@ using MeuSecretario.Domain.ApiKeys;
 namespace MeuSecretario.Application.ApiKeys;
 
 /// <summary>
-/// Implementação de <see cref="IApiKeyProvider"/> (spec 008 §5; <c>gerenciador_chaves_api.py:33-286</c>).
+/// Implementação de <see cref="IApiKeyProvider"/> (spec 008 §5; <c>gerenciador_chaves_api.py</c>).
 /// Tarefas acessórias são "best effort": o erro é engolido e vai para <see cref="IApiKeyDiagnostics"/> sem texto do banco.
 /// Desvios: 046 (limite só conta uso do sistema) e 047 (grava o log de acesso).
 /// </summary>

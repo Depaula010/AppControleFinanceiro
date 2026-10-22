@@ -2,14 +2,14 @@ using MeuSecretario.Domain.Accounts;
 
 namespace MeuSecretario.Application.Accounts;
 
-/// <summary><c>GET /api/accounts</c> (<c>api.py:283-335</c>).</summary>
+/// <summary><c>GET /api/accounts</c> (<c>api.py</c>).</summary>
 public sealed class ListAccounts(IAccountRepository accounts)
 {
     public Task<IReadOnlyList<AccountListItem>> ExecuteAsync(int userId, CancellationToken cancellationToken) =>
         accounts.ListActiveAsync(userId, cancellationToken);
 }
 
-/// <summary><c>DELETE /api/accounts/{id}</c> (<c>api.py:660-721</c>). A checagem e a gravação são do repositório (uma transação).</summary>
+/// <summary><c>DELETE /api/accounts/{id}</c> (<c>api.py</c>). A checagem e a gravação são do repositório (uma transação).</summary>
 public sealed class DeleteAccount(IAccountRepository accounts)
 {
     public Task<DeleteAccountResult> ExecuteAsync(int userId, int accountId, CancellationToken cancellationToken) =>
@@ -17,7 +17,7 @@ public sealed class DeleteAccount(IAccountRepository accounts)
 }
 
 /// <summary>
-/// <c>POST /api/accounts</c> (<c>api.py:340-498</c>): validações da spec §3.2 linhas 1 a 12 no Domain; a linha 13
+/// <c>POST /api/accounts</c> (<c>api.py</c>): validações da spec §3.2 linhas 1 a 12 no Domain; a linha 13
 /// (nome ativo em uso) e a reativação (desvio 032) no repositório.
 /// </summary>
 public sealed class CreateAccount(IAccountRepository accounts)
@@ -34,7 +34,7 @@ public sealed class CreateAccount(IAccountRepository accounts)
 }
 
 /// <summary>
-/// <c>PUT /api/accounts/{id}</c> (<c>api.py:501-657</c>). A ordem é a da spec §3.3: corpo, 404, nome (e duplicidade),
+/// <c>PUT /api/accounts/{id}</c> (<c>api.py</c>). A ordem é a da spec §3.3: corpo, 404, nome (e duplicidade),
 /// demais campos, "nenhum campo", consistência com a conta atual, gravação.
 /// </summary>
 public sealed class UpdateAccount(IAccountRepository accounts)

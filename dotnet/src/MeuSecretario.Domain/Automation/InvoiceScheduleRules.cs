@@ -15,7 +15,7 @@ public sealed record InvoiceScheduleStats(
 /// <param name="Amount"><c>0</c> (número) sem valor previsto, ou o texto com duas casas (o Flask serializa o <c>Decimal</c> como texto).</param>
 public sealed record InvoiceScheduleDetail(string Type, string Description, object Amount);
 
-/// <summary>Regras puras do populador de faturas (<c>invoice_service.py:590-800</c>).</summary>
+/// <summary>Regras puras do populador de faturas (<c>invoice_service.py</c>).</summary>
 public static class InvoiceScheduleRules
 {
     public const string Fixed = "FIXO";

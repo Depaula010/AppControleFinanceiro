@@ -27,7 +27,7 @@ public abstract record RegisterResult
 }
 
 /// <summary>
-/// Cadastro (<c>auth.py:61-203</c>). Validações na ordem do Flask; a primeira que falhar responde.
+/// Cadastro (<c>auth.py</c>). Validações na ordem do Flask; a primeira que falhar responde.
 /// A <c>api_key_automate</c> é cifrada com Fernet e, se a cifra falhar, o cadastro falha (desvio 017);
 /// o Flask gravava em texto puro.
 /// </summary>

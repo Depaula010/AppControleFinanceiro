@@ -4,7 +4,7 @@ using MeuSecretario.Domain.Whatsapp;
 
 namespace MeuSecretario.Application.Whatsapp;
 
-/// <summary>Leituras das contas fixas e dos vencimentos da 012d (<c>fixed_bills_service.py</c>, <c>finance_service.py:1448-1610</c>); Infrastructure implementa com Dapper.</summary>
+/// <summary>Leituras das contas fixas e dos vencimentos da 012d (<c>fixed_bills_service.py</c>, <c>finance_service.py</c>); Infrastructure implementa com Dapper.</summary>
 public interface IWhatsAppFixedBillsReader
 {
     /// <summary>

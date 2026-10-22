@@ -3,7 +3,7 @@ using MeuSecretario.Domain.Automation;
 namespace MeuSecretario.Domain.Whatsapp;
 
 /// <summary>
-/// <c>finance_service.extract_mentioned_account</c> (<c>finance_service.py:1695-1759</c>, spec 012 §7.6): conta citada na mensagem
+/// <c>finance_service.extract_mentioned_account</c> (<c>finance_service.py</c>, spec 012 §7.6): conta citada na mensagem
 /// depois de uma palavra-chave ("com o", "no", "da"...), casada por <c>WRatio</c> (corte 60) com os nomes das contas ativas.
 /// </summary>
 public static class AccountMention

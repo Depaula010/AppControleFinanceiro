@@ -6,7 +6,7 @@ using Npgsql;
 namespace MeuSecretario.Infrastructure.Admin;
 
 /// <summary>
-/// <c>baileys_auth</c> é compartilhada com o bot Node. O <c>session_id</c> é o literal do Flask (<c>setup_service.py:22</c>;
+/// <c>baileys_auth</c> é compartilhada com o bot Node. O <c>session_id</c> é o literal do Flask (<c>setup_service.py</c>;
 /// Q-009-3 e P-009-8 seguem abertas: manter o literal).
 /// </summary>
 public sealed class BotSessionRepository(IDbConnectionFactory connections) : IBotSessionRepository
