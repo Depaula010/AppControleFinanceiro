@@ -1,0 +1,10 @@
+# Fim de linha: o repositório guarda LF; no Windows o core.autocrlf converte só na cópia local.
+* text=auto
+
+# Executados no Linux (Docker, nginx, deploy): LF sempre, inclusive no checkout do Windows.
+*.sh                  text eol=lf
+Dockerfile            text eol=lf
+*.conf                text eol=lf
+docker-compose*.yml   text eol=lf
+.github/workflows/*.yml text eol=lf
+*.example             text eol=lf
