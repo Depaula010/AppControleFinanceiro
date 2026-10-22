@@ -4,7 +4,7 @@ using MeuSecretario.Domain.Transactions;
 
 namespace MeuSecretario.Application.Dashboard;
 
-/// <summary><c>GET /api/dashboard/summary</c> e aliases (<c>api.py:97-171</c>).</summary>
+/// <summary><c>GET /api/dashboard/summary</c> e aliases (<c>api.py</c>).</summary>
 public sealed class GetDashboardSummary(IDashboardRepository repository, IClock clock)
 {
     public async Task<DashboardSummary> ExecuteAsync(int userId, CancellationToken cancellationToken)
@@ -13,7 +13,7 @@ public sealed class GetDashboardSummary(IDashboardRepository repository, IClock 
         var balances = await repository.ListActiveAccountBalancesAsync(userId, cancellationToken);
         var totals = await repository.SumByTypeAsync(userId, ChartsWindow.MonthStart(today), today, cancellationToken);
 
-        // Só Renda e Despesa contam; Transferência e Pagamento Fatura são ignorados (api.py:140-148).
+        // Só Renda e Despesa contam; Transferência e Pagamento Fatura são ignorados (api.py).
         var income = totals.Where(t => t.Type == TransactionTypes.Income).Sum(t => t.Total);
         var expense = totals.Where(t => t.Type == TransactionTypes.Expense).Sum(t => t.Total);
 
@@ -21,7 +21,7 @@ public sealed class GetDashboardSummary(IDashboardRepository repository, IClock 
     }
 }
 
-/// <summary><c>GET /api/dashboard/charts</c> (<c>api.py:181-280</c>; <c>analytics_service.py:29-95</c>). <c>meses</c> já validado.</summary>
+/// <summary><c>GET /api/dashboard/charts</c> (<c>api.py</c>; <c>analytics_service.py</c>). <c>meses</c> já validado.</summary>
 public sealed class GetDashboardCharts(IDashboardRepository repository, IClock clock)
 {
     public async Task<DashboardCharts> ExecuteAsync(int userId, int months, CancellationToken cancellationToken)
@@ -41,14 +41,14 @@ public sealed class GetDashboardCharts(IDashboardRepository repository, IClock c
     private static double Magnitude(decimal total) => (double)Math.Abs(total);
 }
 
-/// <summary><c>GET /api/dashboard/recent</c> e aliases (<c>api.py:955-1014</c>).</summary>
+/// <summary><c>GET /api/dashboard/recent</c> e aliases (<c>api.py</c>).</summary>
 public sealed class GetRecentTransactions(IDashboardRepository repository)
 {
     public Task<IReadOnlyList<RecentTransaction>> ExecuteAsync(int userId, CancellationToken cancellationToken) =>
         repository.ListRecentAsync(userId, cancellationToken);
 }
 
-/// <summary><c>GET /api/dashboard/alerts</c> (<c>api.py:1162-1298</c>).</summary>
+/// <summary><c>GET /api/dashboard/alerts</c> (<c>api.py</c>).</summary>
 public sealed class GetDashboardAlerts(IDashboardRepository repository, IClock clock)
 {
     public async Task<IReadOnlyList<DashboardAlert>> ExecuteAsync(int userId, CancellationToken cancellationToken)

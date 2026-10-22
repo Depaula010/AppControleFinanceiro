@@ -61,7 +61,7 @@ public sealed record SettledBill(string Description, double Value, double Expect
 public sealed record CreatedExpense(string Description, double Value, string Category, string AccountName);
 
 /// <summary>
-/// Textos do fluxo de pagamento (<c>whatsapp_handler.py:458-705</c>, spec 012 §6.b): nada reconhecido, pedido de valor e a
+/// Textos do fluxo de pagamento (<c>whatsapp_handler.py</c>, spec 012 §6.b): nada reconhecido, pedido de valor e a
 /// resposta unificada de quitações e despesas.
 /// </summary>
 public static class PaymentReply

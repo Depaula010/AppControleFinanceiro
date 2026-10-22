@@ -4,7 +4,7 @@ namespace MeuSecretario.Domain.Whatsapp;
 
 /// <summary>
 /// Textos da transferência por WhatsApp (desvio 151). As mensagens de erro e a de confirmação vêm de
-/// <c>transaction_intents.py:312-442</c> (código que o Flask nunca alcançava); a de sucesso e a de "trocar" são novas.
+/// <c>transaction_intents.py</c> (código que o Flask nunca alcançava); a de sucesso e a de "trocar" são novas.
 /// </summary>
 public static class TransferMessages
 {

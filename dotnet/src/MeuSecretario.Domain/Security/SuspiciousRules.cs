@@ -6,7 +6,7 @@ namespace MeuSecretario.Domain.Security;
 public sealed record SuspicionResult(string Reason);
 
 /// <summary>
-/// Padrões de scanners e bots copiados literalmente de <c>app/middleware/security.py:30-76</c> (RN-009-04), na ordem
+/// Padrões de scanners e bots copiados literalmente de <c>app/middleware/security.py</c> (RN-009-04), na ordem
 /// do Flask. Funções puras, sem I/O.
 /// </summary>
 public static class SuspiciousRules

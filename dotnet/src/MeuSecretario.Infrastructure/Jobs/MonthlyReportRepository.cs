@@ -8,7 +8,7 @@ using MeuSecretario.Infrastructure.Database;
 namespace MeuSecretario.Infrastructure.Jobs;
 
 /// <summary>
-/// Dados do relatório mensal, portados de <c>monthly_report_service.py:48-320</c> e <c>monthly_report_config_service.py:172-231</c>.
+/// Dados do relatório mensal, portados de <c>monthly_report_service.py</c> e <c>monthly_report_config_service.py</c>.
 /// Desvio 132: as despesas são gravadas negativas e aqui entram em valor absoluto (totais, top, comparação, potes e contas
 /// pagas); o Python somava o valor com sinal e o saldo, a variação e os potes saíam errados.
 /// </summary>

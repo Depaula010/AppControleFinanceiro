@@ -5,7 +5,7 @@ using MeuSecretario.Application.Abstractions;
 
 namespace MeuSecretario.Api.Health;
 
-/// <summary><c>GET /</c> (app/__init__.py:178) e <c>GET /api/health</c> (api.py:908).</summary>
+/// <summary><c>GET /</c> (app/__init__.py) e <c>GET /api/health</c> (api.py).</summary>
 public sealed class HealthModule : IFeatureModule
 {
     public void AddServices(IServiceCollection services)

@@ -10,7 +10,7 @@ namespace MeuSecretario.Api.Accounts;
 
 /// <summary>
 /// Feature 002: <c>GET/POST /api/accounts</c> e <c>PUT/DELETE /api/accounts/{id}</c>, mais o alias <c>/api/contas</c>
-/// (mesma lógica, <c>api.py:1017-1063</c>). Todas as rotas exigem JWT (<c>RequireUser</c>).
+/// (mesma lógica, <c>api.py</c>). Todas as rotas exigem JWT (<c>RequireUser</c>).
 /// </summary>
 public sealed class AccountsModule : IFeatureModule
 {

@@ -7,8 +7,8 @@ using MeuSecretario.Infrastructure.Database;
 namespace MeuSecretario.Infrastructure.Jobs;
 
 /// <summary>
-/// Queries do check-in noturno, portadas literalmente de <c>agendamentos_queries.py:116-231,338-458</c> e
-/// <c>faturas_queries.py:18-115</c>. Única mudança (desvio 012): o "pagamento" também é achado por descrição quando a transação
+/// Queries do check-in noturno, portadas literalmente de <c>agendamentos_queries.py</c> e
+/// <c>faturas_queries.py</c>. Única mudança (desvio 012): o "pagamento" também é achado por descrição quando a transação
 /// não tem <c>agendamento_id</c> (as que o motor do Flask gravava). A regra híbrida do ADR 5 (mesmo mês/ano ou até 20 dias
 /// depois) segue igual.
 /// </summary>

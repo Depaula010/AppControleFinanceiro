@@ -7,7 +7,7 @@ using MeuSecretario.Domain.Whatsapp;
 namespace MeuSecretario.Application.Whatsapp;
 
 /// <summary>
-/// <c>RendaIntent</c> e <c>DespesaIntent</c> (<c>transaction_intents.py:22-309</c>, spec 012 §6.a): extrai valor e descrição, valida,
+/// <c>RendaIntent</c> e <c>DespesaIntent</c> (<c>transaction_intents.py</c>, spec 012 §6.a): extrai valor e descrição, valida,
 /// escolhe conta e categoria e grava a <b>pendência</b> de confirmação no Redis. Intenção "template": qualquer exceção vira
 /// <see cref="WhatsAppTexts.IntentFailed"/> no <see cref="IntentRouter"/>.
 /// </summary>
@@ -31,7 +31,7 @@ public abstract class TransactionIntent(
         var userId = context.User.Id;
         var income = type == TransactionIntentRules.Income;
 
-        // extract_income_params / extract_expense_params (gemini_service.py:1724-1889).
+        // extract_income_params / extract_expense_params (gemini_service.py).
         var raw = await llm.GenerateTextAsync(
             new LlmRequest(AutomationPrompts.ExtractTransactionDetails(context.Message, type), userId, LlmCachePolicies.ExtractTransaction),
             cancellationToken);

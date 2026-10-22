@@ -11,7 +11,7 @@ namespace MeuSecretario.Api.Bills;
 
 /// <summary>
 /// Feature 005: <c>GET/POST /api/bills</c>, <c>PUT/DELETE /api/bills/{id}</c> e <c>GET /api/bills/summary</c>, mais o
-/// alias <c>/api/contas-mensais</c> (sem <c>summary</c>, <c>api.py:2390-2418</c>). Todas as rotas exigem JWT (<c>RequireUser</c>).
+/// alias <c>/api/contas-mensais</c> (sem <c>summary</c>, <c>api.py</c>). Todas as rotas exigem JWT (<c>RequireUser</c>).
 /// </summary>
 public sealed class BillsModule : IFeatureModule
 {

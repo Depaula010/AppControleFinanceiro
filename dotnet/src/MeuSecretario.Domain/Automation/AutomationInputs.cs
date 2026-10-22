@@ -7,7 +7,7 @@ using MeuSecretario.Domain.Llm;
 
 namespace MeuSecretario.Domain.Automation;
 
-/// <summary>Dados já saneados de <c>/api/transacao</c> (<c>transaction_handler.py:208-274</c>).</summary>
+/// <summary>Dados já saneados de <c>/api/transacao</c> (<c>transaction_handler.py</c>).</summary>
 public sealed record ApiTransactionData(
     string? UserApiKey,
     double Value,
@@ -280,7 +280,7 @@ public static class NotificationParser
     }
 }
 
-/// <summary>Escolha da conta e do grupo de categorias do Automate (<c>transaction_handler.py:73-82</c>).</summary>
+/// <summary>Escolha da conta e do grupo de categorias do Automate (<c>transaction_handler.py</c>).</summary>
 public static class AutomateChoice
 {
     private static readonly string[] CardWords = ["cartao", "compra", "credit"];
@@ -350,7 +350,7 @@ public static partial class PyIsoDate
         match.Groups[index].Success ? match.Groups[index].Value : match.Groups[index + 3].Value;
 }
 
-/// <summary>Filtros e paginação de <c>GET /api/agendamentos/reserva</c> (<c>reserve_handler.py:217-274</c>).</summary>
+/// <summary>Filtros e paginação de <c>GET /api/agendamentos/reserva</c> (<c>reserve_handler.py</c>).</summary>
 public sealed record ReserveListFilter(bool? IncludeInReserve, string? Periodicity, string? Category, long Limit, long Offset);
 
 public abstract record ReserveListParse
@@ -443,7 +443,7 @@ public static partial class PyInt
     private static partial Regex IntPattern();
 }
 
-/// <summary>Corpo do <c>PATCH .../reserva</c> (<c>reserve_handler.py:59-68</c>).</summary>
+/// <summary>Corpo do <c>PATCH .../reserva</c> (<c>reserve_handler.py</c>).</summary>
 public abstract record ReserveToggleParse
 {
     /// <summary><c>incluir</c> nulo/ausente ou <c>api_key</c> falsa (400).</summary>

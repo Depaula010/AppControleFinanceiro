@@ -4,7 +4,7 @@ using MeuSecretario.Application.Abstractions;
 namespace MeuSecretario.Api.Auth;
 
 /// <summary>
-/// Equivale ao decorator <c>token_required</c> do Flask (api.py:34-90): valida o header
+/// Equivale ao decorator <c>token_required</c> do Flask (api.py): valida o header
 /// <c>Authorization: Bearer &lt;jwt&gt;</c> e disponibiliza o <c>user_id</c> em <see cref="ICurrentUser"/>.
 /// Erros em envelope A com as 4 mensagens exatas do Flask.
 /// </summary>

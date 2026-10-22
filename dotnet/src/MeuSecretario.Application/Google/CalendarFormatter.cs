@@ -6,7 +6,7 @@ using MeuSecretario.Application.Abstractions;
 namespace MeuSecretario.Application.Google;
 
 /// <summary>
-/// Formatadores de agenda para WhatsApp (RN-010-53), literais de <c>google_calendar_service.py:14-185</c>: emojis,
+/// Formatadores de agenda para WhatsApp (RN-010-53), literais de <c>google_calendar_service.py</c>: emojis,
 /// <c>━</c> x 20, dias da semana e plurais idênticos. Puros: o "hoje" entra por parâmetro (o chamador passa
 /// <c>IClock.Today</c>), no lugar do <c>date.today()</c> do Python.
 /// </summary>

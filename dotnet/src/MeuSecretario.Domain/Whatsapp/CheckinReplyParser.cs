@@ -27,7 +27,7 @@ public enum CheckinReplyKind
 public sealed record CheckinReply(CheckinReplyKind Kind, IReadOnlyList<int> Indices, string? Text);
 
 /// <summary>
-/// <c>NightlyCheckinService.parse_checkin_response</c> (<c>nightly_checkin_service.py:430-480</c>) com o desvio 210 (implementado):
+/// <c>NightlyCheckinService.parse_checkin_response</c> (<c>nightly_checkin_service.py</c>) com o desvio 210 (implementado):
 /// as palavras são procuradas como PALAVRA inteira (o Flask procurava trecho: "assim" e "joaquim" confirmavam tudo) e o adiamento tem
 /// prioridade sobre a confirmação ("ok não" adia). Emojis de confirmação continuam valendo em qualquer parte; números, como antes.
 /// </summary>

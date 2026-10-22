@@ -4,7 +4,7 @@ namespace MeuSecretario.Domain.Weather;
 public readonly record struct WeatherCondition(string Name, string Emoji);
 
 /// <summary>
-/// Tradução das condições do WeatherAPI (<c>weather_service.py:18-54</c>, 22 entradas). Desvio 054: o Flask só casava o
+/// Tradução das condições do WeatherAPI (<c>weather_service.py</c>, 22 entradas). Desvio 054: o Flask só casava o
 /// texto em inglês, mas envia <c>lang=pt</c>, então nunca casava. Aqui casa pelo texto em inglês, pelo texto em
 /// português (comparação sem diferenciar maiúsculas) e pelo <c>condition.code</c>; sem casamento, vale o texto da
 /// API com o termômetro, como no Flask.

@@ -1,7 +1,7 @@
 namespace MeuSecretario.Domain.Security;
 
 /// <summary>
-/// Ramo de <c>POST /admin/gemini-cache-clear</c> (RN-009-16, <c>cache_management.py:190-205</c>), nesta ordem:
+/// Ramo de <c>POST /admin/gemini-cache-clear</c> (RN-009-16, <c>cache_management.py</c>), nesta ordem:
 /// usuário (com tipo opcional), só o padrão, ou tudo.
 /// </summary>
 public abstract record CacheClearPlan

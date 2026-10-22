@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace MeuSecretario.Domain.Whatsapp;
 
-/// <summary>Resumo matinal e check-in noturno (<c>whatsapp_handler.py:1192-1370</c> e <c>notification_config_service.py</c>).</summary>
+/// <summary>Resumo matinal e check-in noturno (<c>whatsapp_handler.py</c> e <c>notification_config_service.py</c>).</summary>
 public static partial class NotificationCommand
 {
     private static readonly string[] MorningWords = ["resumo", "matinal", "briefing", "preparação do dia"];

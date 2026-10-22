@@ -9,7 +9,7 @@ using MeuSecretario.Infrastructure.Dashboard;
 namespace MeuSecretario.Api.Dashboard;
 
 /// <summary>
-/// Feature 006: as 4 leituras do dashboard e seus aliases (<c>api.py:174-178, 181-280, 927-1159, 1162-1298</c>). Todas
+/// Feature 006: as 4 leituras do dashboard e seus aliases (<c>api.py, 181-280, 927-1159, 1162-1298</c>). Todas
 /// exigem JWT (<c>RequireUser</c>), só respondem GET (os outros métodos dão 405 pelo roteamento) e nunca escrevem.
 /// </summary>
 public sealed class DashboardModule : IFeatureModule

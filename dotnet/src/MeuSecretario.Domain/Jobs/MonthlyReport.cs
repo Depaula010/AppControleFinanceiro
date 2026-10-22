@@ -97,7 +97,7 @@ public static class MonthlyReportRules
 }
 
 /// <summary>
-/// <c>format_report_message</c> (<c>monthly_report_service.py:374-441</c>): texto literal; números em pt-BR, <c>R$ 1.234,56</c> e
+/// <c>format_report_message</c> (<c>monthly_report_service.py</c>): texto literal; números em pt-BR, <c>R$ 1.234,56</c> e
 /// <c>+12,5%</c> (desvio 133: o Python escrevia <c>1,234.56</c>).
 /// </summary>
 public static class MonthlyReportFormatter

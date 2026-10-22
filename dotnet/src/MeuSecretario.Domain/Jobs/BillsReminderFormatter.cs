@@ -6,7 +6,7 @@ namespace MeuSecretario.Domain.Jobs;
 /// <summary>Conta que vence no dia alvo (<c>processar_contas_vencer</c>, spec 013 RN-013-33).</summary>
 public sealed record ReminderBill(string Description, double Value, string Category, string AccountType, string GroupName);
 
-/// <summary>Mensagem de <c>notification_processor_service.py:250-332</c>: texto literal.</summary>
+/// <summary>Mensagem de <c>notification_processor_service.py</c>: texto literal.</summary>
 public static class BillsReminderFormatter
 {
     /// <summary><c>null</c> se não há contas.</summary>

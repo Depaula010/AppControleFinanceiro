@@ -7,7 +7,7 @@ namespace MeuSecretario.Application.Whatsapp;
 
 /// <summary>
 /// "sim"/"confirmar"/"ok"/"s" criam e "não"/"cancelar"/"desistir"/"n" descartam o evento pendente mais recente
-/// (<c>whatsapp_handler.py:133-174</c>); sem evento pendente o pipeline segue. "calcular rota" fica com <see cref="RouteRequestStep"/>.
+/// (<c>whatsapp_handler.py</c>); sem evento pendente o pipeline segue. "calcular rota" fica com <see cref="RouteRequestStep"/>.
 /// </summary>
 public sealed class EventReplyStep(IPendingEventStore events, ICalendarClient calendar) : IWhatsAppStep
 {
@@ -123,7 +123,7 @@ public sealed class EventReplyStep(IPendingEventStore events, ICalendarClient ca
 }
 
 /// <summary>
-/// "calcular rota" (<c>whatsapp_handler.py:176-266</c>): tempo de deslocamento do endereço favorito até o local do evento pendente.
+/// "calcular rota" (<c>whatsapp_handler.py</c>): tempo de deslocamento do endereço favorito até o local do evento pendente.
 /// Sempre responde. Com vários endereços pergunta a origem e guarda a escolha pendente; a resposta <c>casa</c>/<c>trabalho</c>/<c>outro</c> calcula a rota (desvio 156). O limite diário de
 /// rotas não é aplicado (desvio 055).
 /// </summary>

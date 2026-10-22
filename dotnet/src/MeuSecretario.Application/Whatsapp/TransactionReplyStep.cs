@@ -10,7 +10,7 @@ using MeuSecretario.Domain.Whatsapp;
 namespace MeuSecretario.Application.Whatsapp;
 
 /// <summary>
-/// Passo 6 do pipeline (<c>whatsapp_handler.py:291-428</c>, spec 012 §4 e §7.2): resposta do usuário a uma transação pendente
+/// Passo 6 do pipeline (<c>whatsapp_handler.py</c>, spec 012 §4 e §7.2): resposta do usuário a uma transação pendente
 /// (<c>OK</c>, <c>TROCAR</c>, número, <c>CANCELAR</c>). Palavras exclusivas de evento (<c>sim</c>, <c>n</c>...) nunca chegam aqui.
 /// </summary>
 public sealed class TransactionReplyStep(
@@ -108,7 +108,7 @@ public sealed class TransactionReplyStep(
 }
 
 /// <summary>
-/// Grava a transação confirmada (<c>whatsapp_handler.py:324-386</c>) pelas portas da 004: <c>Renda</c> vira receita e qualquer outro
+/// Grava a transação confirmada (<c>whatsapp_handler.py</c>) pelas portas da 004: <c>Renda</c> vira receita e qualquer outro
 /// tipo, despesa; valor sem sinal; descrição <c>descricao_final</c> se preenchida, senão <c>descricao</c> (desvio 150: o Flask
 /// gravava <c>NULL</c> quando a chave existia vazia e o INSERT falhava); <c>num_parcelas &gt; 1</c> usa a compra parcelada.
 /// </summary>

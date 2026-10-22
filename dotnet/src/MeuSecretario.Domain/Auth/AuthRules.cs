@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MeuSecretario.Domain.Auth;
 
-/// <summary>Número de WhatsApp: guardado e buscado só com dígitos (spec 001, RN-001-05; <c>auth.py:130,245</c>).</summary>
+/// <summary>Número de WhatsApp: guardado e buscado só com dígitos (spec 001, RN-001-05; <c>auth.py</c>).</summary>
 public static class PhoneNumber
 {
     public static string Digits(string? raw)
@@ -47,7 +47,7 @@ public sealed record CardDaysResult(CardDaysOutcome Outcome, int Vencimento = 0,
 
 /// <summary>
 /// Dias de vencimento e fechamento do cartão (1..31), convertidos como o <c>int()</c> do Python
-/// (<c>auth.py:115-127</c>): números inteiros, números com parte decimal (truncados) e textos inteiros
+/// (<c>auth.py</c>): números inteiros, números com parte decimal (truncados) e textos inteiros
 /// (com espaços) são aceitos. Booleanos e o resto são "não inteiro" (desvio 031).
 /// As duas conversões acontecem antes da checagem de faixa; a faixa do vencimento vem primeiro.
 /// </summary>
@@ -110,7 +110,7 @@ public static class CardDays
 
 public sealed record NewAccount(string NomeConta, string TipoConta, int? DiaVencimento, int? DiaFechamento);
 
-/// <summary>As três contas criadas no cadastro (<c>auth.py:173-179</c>), com nomes e tipos literais.</summary>
+/// <summary>As três contas criadas no cadastro (<c>auth.py</c>), com nomes e tipos literais.</summary>
 public static class DefaultAccounts
 {
     public static IReadOnlyList<NewAccount> For(int diaVencimento, int diaFechamento) =>

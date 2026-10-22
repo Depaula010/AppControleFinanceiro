@@ -4,14 +4,14 @@ using MeuSecretario.Domain.Bills;
 
 namespace MeuSecretario.Application.Bills;
 
-/// <summary><c>GET /api/bills</c> (<c>api.py:1795-1858</c>).</summary>
+/// <summary><c>GET /api/bills</c> (<c>api.py</c>).</summary>
 public sealed class ListBills(IBillRepository bills)
 {
     public Task<IReadOnlyList<BillListItem>> ExecuteAsync(int userId, CancellationToken cancellationToken) =>
         bills.ListActiveAsync(userId, cancellationToken);
 }
 
-/// <summary><c>DELETE /api/bills/{id}</c> (<c>api.py:2206-2228</c>): uma única instrução, sem leitura prévia.</summary>
+/// <summary><c>DELETE /api/bills/{id}</c> (<c>api.py</c>): uma única instrução, sem leitura prévia.</summary>
 public sealed class DeleteBill(IBillRepository bills)
 {
     /// <returns><c>true</c> se removeu; <c>false</c> se não há agendamento ativo do usuário (404).</returns>
@@ -20,7 +20,7 @@ public sealed class DeleteBill(IBillRepository bills)
 }
 
 /// <summary>
-/// <c>POST /api/bills</c> (<c>api.py:1861-2037</c>): validações da spec §3.2 no Domain, depois a conta (linha 12) e,
+/// <c>POST /api/bills</c> (<c>api.py</c>): validações da spec §3.2 no Domain, depois a conta (linha 12) e,
 /// com o desvio 073, a subcategoria.
 /// </summary>
 public sealed class CreateBill(IBillRepository bills, IClock clock)
@@ -49,7 +49,7 @@ public sealed class CreateBill(IBillRepository bills, IClock clock)
 }
 
 /// <summary>
-/// <c>PUT /api/bills/{id}</c> (<c>api.py:2040-2203</c>). A ordem é a da spec §3.3: corpo, 404, campos (descrição a valor),
+/// <c>PUT /api/bills/{id}</c> (<c>api.py</c>). A ordem é a da spec §3.3: corpo, 404, campos (descrição a valor),
 /// subcategoria (desvio 073), conta, restante, "nenhum campo", consistência do estado final (desvio 074), gravação.
 /// </summary>
 public sealed class UpdateBill(IBillRepository bills)
@@ -114,7 +114,7 @@ public sealed class UpdateBill(IBillRepository bills)
     }
 }
 
-/// <summary><c>GET /api/bills/summary</c> (<c>api.py:2264-2387</c>): a reserva vem do serviço único (desvio 014).</summary>
+/// <summary><c>GET /api/bills/summary</c> (<c>api.py</c>): a reserva vem do serviço único (desvio 014).</summary>
 public sealed class GetBillsSummary(IBillRepository bills, IEmergencyReserveService reserve)
 {
     public async Task<BillsSummary> ExecuteAsync(int userId, CancellationToken cancellationToken)

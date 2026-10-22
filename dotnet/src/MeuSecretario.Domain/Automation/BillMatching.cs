@@ -13,7 +13,7 @@ public sealed record FixedBill(
     int AccountId,
     string Category);
 
-/// <summary>Casamento difuso da descrição do SMS com as contas fixas (<c>fixed_bills_service.py:80-145</c>, spec 011 §7.3; desvio 099).</summary>
+/// <summary>Casamento difuso da descrição do SMS com as contas fixas (<c>fixed_bills_service.py</c>, spec 011 §7.3; desvio 099).</summary>
 public static class BillMatching
 {
     public const double Threshold = 65;

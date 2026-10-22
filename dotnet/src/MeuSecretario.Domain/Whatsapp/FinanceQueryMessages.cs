@@ -27,7 +27,7 @@ public static class AccountIcons
     public static string For(string type) => type == "Cartão de Crédito" ? "💳" : type == "Conta Corrente" ? "🏦" : "💰";
 }
 
-/// <summary><c>Consulta Saldo</c> (<c>whatsapp_handler.py:853-891</c>).</summary>
+/// <summary><c>Consulta Saldo</c> (<c>whatsapp_handler.py</c>).</summary>
 public static class BalanceMessages
 {
     public const string NoAccounts = "❌ Você não tem contas cadastradas.";
@@ -60,7 +60,7 @@ public static class BalanceMessages
     }
 }
 
-/// <summary><c>Consulta Reserva</c> e <c>Consulta Detalhes Reserva</c> (<c>whatsapp_handler.py:758-850</c>).</summary>
+/// <summary><c>Consulta Reserva</c> e <c>Consulta Detalhes Reserva</c> (<c>whatsapp_handler.py</c>).</summary>
 public static class ReserveMessages
 {
     public const string NoItems =
@@ -127,7 +127,7 @@ public static class ReserveMessages
 
 public sealed record ReserveLine(string Description, double Amount, string Periodicity, double Impact);
 
-/// <summary><c>Consulta Potes</c> (<c>whatsapp_handler.py:933-944</c>).</summary>
+/// <summary><c>Consulta Potes</c> (<c>whatsapp_handler.py</c>).</summary>
 public static class PotMessages
 {
     public const string None = "Você não tem potes configurados.";

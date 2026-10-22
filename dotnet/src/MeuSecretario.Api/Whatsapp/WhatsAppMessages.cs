@@ -1,6 +1,6 @@
 namespace MeuSecretario.Api.Whatsapp;
 
-/// <summary>Textos de erro do <c>/webhook-whatsapp</c> (spec 012 §3), literais de <c>whatsapp_handler.py:58-105, 1556-1575</c>.</summary>
+/// <summary>Textos de erro do <c>/webhook-whatsapp</c> (spec 012 §3), literais de <c>whatsapp_handler.py, 1556-1575</c>.</summary>
 public static class WhatsAppMessages
 {
     public const string DatabaseUnavailable = "Banco de dados temporariamente indisponível";

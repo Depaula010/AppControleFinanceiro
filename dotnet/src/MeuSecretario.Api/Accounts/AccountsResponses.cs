@@ -12,7 +12,7 @@ public static class AccountsResponses
             {
                 ["id"] = a.Id,
                 ["nome"] = a.NomeConta,
-                ["banco"] = a.TipoConta,   // a coluna banco não existe: o Flask repete o tipo (api.py:289-290)
+                ["banco"] = a.TipoConta,   // a coluna banco não existe: o Flask repete o tipo (api.py)
                 ["tipo"] = a.TipoConta,
                 ["saldo"] = (double)a.Saldo,
                 ["nome_conta"] = a.NomeConta,

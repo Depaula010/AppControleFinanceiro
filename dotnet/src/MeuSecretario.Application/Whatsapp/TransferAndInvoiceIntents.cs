@@ -9,7 +9,7 @@ using MeuSecretario.Domain.Whatsapp;
 namespace MeuSecretario.Application.Whatsapp;
 
 /// <summary>
-/// <c>Transferência</c> (<c>transaction_intents.py:312-442</c>, spec 012 §6.a). Desvio 151 (implementado): o Flask lê <c>c["id"]</c> de
+/// <c>Transferência</c> (<c>transaction_intents.py</c>, spec 012 §6.a). Desvio 151 (implementado): o Flask lê <c>c["id"]</c> de
 /// uma <c>Row</c> e quebra para quem tem conta; aqui a transferência funciona: contas ativas por nome, mesma conta, saldo suficiente,
 /// pendência no Redis (<c>tipo_transacao</c> <c>Transferência</c>) e, no <c>OK</c>, <see cref="TransferConfirmation"/>.
 /// </summary>
@@ -133,7 +133,7 @@ public sealed class TransferIntent(
 }
 
 /// <summary>
-/// <c>Pagamento Fatura</c> (<c>whatsapp_handler.py:1071-1112</c>, spec 012 §6.a). Inline: exceções sobem (cota do Gemini ⇒ 429).
+/// <c>Pagamento Fatura</c> (<c>whatsapp_handler.py</c>, spec 012 §6.a). Inline: exceções sobem (cota do Gemini ⇒ 429).
 /// <c>NotACreditCard</c>/<c>SameAccount</c> (desvios 071/004) respondem o mesmo "Não encontrei as contas mencionadas".
 /// </summary>
 public sealed class InvoicePaymentIntent(

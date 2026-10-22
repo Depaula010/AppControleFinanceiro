@@ -83,7 +83,7 @@ public static class ScheduleRules
 
     /// <summary>
     /// Data da transação do populador: <c>dia_execucao</c> no mês e ano do vencimento da fatura; dia inexistente cai no
-    /// último dia do mês (<c>invoice_service.py:703-708</c>).
+    /// último dia do mês (<c>invoice_service.py</c>).
     /// </summary>
     public static DateOnly DateInMonth(DateOnly reference, int day) => MonthDays.Clamp(reference.Year, reference.Month, day);
 
@@ -128,7 +128,7 @@ public static class ScheduleRules
     }
 
     /// <summary>
-    /// Mensagem do lembrete (literal de <c>schedule_processor.py:96-101</c>). <c>valor_previsto</c> nulo ou zero vira
+    /// Mensagem do lembrete (literal de <c>schedule_processor.py</c>). <c>valor_previsto</c> nulo ou zero vira
     /// <c>???</c> (o <c>if ag.valor_previsto</c> do Python).
     /// </summary>
     public static string ReminderMessage(ScheduleInfo schedule)

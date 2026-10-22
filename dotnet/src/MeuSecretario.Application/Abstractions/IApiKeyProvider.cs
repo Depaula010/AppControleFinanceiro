@@ -42,7 +42,7 @@ public abstract record ApiKeyResolution
     public sealed record Failed(ApiKeyFailure Reason, string Message) : ApiKeyResolution;
 }
 
-/// <summary>Textos literais das falhas da porta (<c>gerenciador_chaves_api.py:33-139</c>).</summary>
+/// <summary>Textos literais das falhas da porta (<c>gerenciador_chaves_api.py</c>).</summary>
 public static class ApiKeyMessages
 {
     public static string InvalidProvider(string provider) => $"Provedor inválido: {provider}";

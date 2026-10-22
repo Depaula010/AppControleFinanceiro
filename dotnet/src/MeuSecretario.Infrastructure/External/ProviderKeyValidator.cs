@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace MeuSecretario.Infrastructure.External;
 
 /// <summary>
-/// Valida a chave de um usuário contra o provedor (RN-010-59; <c>api.py:2630-2672</c>). Gemini: 200. Weather (desvio
+/// Valida a chave de um usuário contra o provedor (RN-010-59; <c>api.py</c>). Gemini: 200. Weather (desvio
 /// 019, WeatherAPI.com): diferente de 401. OpenRoute: diferente de 403, URL fixa. Timeout de 5 s no pipeline; rede ou
 /// timeout viram <see cref="ProviderUnavailableException"/> sem a chave na mensagem.
 /// </summary>

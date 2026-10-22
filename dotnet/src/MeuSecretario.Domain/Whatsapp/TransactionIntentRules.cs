@@ -7,7 +7,7 @@ using MeuSecretario.Domain.Automation;
 namespace MeuSecretario.Domain.Whatsapp;
 
 /// <summary>
-/// O que <c>extract_income_params</c>/<c>extract_expense_params</c> tiram da resposta do Gemini (<c>gemini_service.py:1724-1889</c>).
+/// O que <c>extract_income_params</c>/<c>extract_expense_params</c> tiram da resposta do Gemini (<c>gemini_service.py</c>).
 /// O prompt só pede <c>valor_decimal</c> e <c>descricao_bruta</c>; <c>data</c>, <c>conta</c> e <c>parcelamento</c> só existem se o
 /// modelo os inventar (desvio 154 proposto: portado como está).
 /// </summary>
@@ -104,7 +104,7 @@ public static class TransactionIntentRules
             ? "❌ Não consegui identificar o valor da renda. Por favor, informe o valor."
             : "❌ Não consegui identificar o valor da despesa. Por favor, informe o valor.";
 
-    /// <summary><c>validate()</c> de <c>RendaIntent</c>/<c>DespesaIntent</c> (<c>transaction_intents.py:47-56, 178-192</c>).</summary>
+    /// <summary><c>validate()</c> de <c>RendaIntent</c>/<c>DespesaIntent</c> (<c>transaction_intents.py, 178-192</c>).</summary>
     public static string? Validate(string type, ExtractedTransaction p)
     {
         if (p.Invalid)
@@ -159,7 +159,7 @@ public static class TransactionIntentRules
         accountType is not null && accountType.ToLowerInvariant().Contains("crédito", StringComparison.Ordinal);
 
     /// <summary>
-    /// A pendência no Redis (<c>transacao_data</c>, <c>transaction_intents.py:97-114, 258-275</c>), na ordem das chaves do
+    /// A pendência no Redis (<c>transacao_data</c>, <c>transaction_intents.py, 258-275</c>), na ordem das chaves do
     /// Flask, mais o modelo da mensagem de confirmação.
     /// </summary>
     public static PendingBuild BuildPending(

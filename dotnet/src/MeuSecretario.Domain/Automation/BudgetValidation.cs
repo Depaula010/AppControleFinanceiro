@@ -41,7 +41,7 @@ public sealed record BudgetCheck(bool RequiresConfirmation, string Message, IRea
     public static BudgetCheck None { get; } = new(false, string.Empty, []);
 }
 
-/// <summary><c>validate_budget</c> sem I/O (<c>budget_validation_service.py:152-289</c>, spec 011 §7.6).</summary>
+/// <summary><c>validate_budget</c> sem I/O (<c>budget_validation_service.py</c>, spec 011 §7.6).</summary>
 public static class BudgetValidation
 {
     /// <param name="pots">Cada pote com o gasto do período atual (positivo).</param>

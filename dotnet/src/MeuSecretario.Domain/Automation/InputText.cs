@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace MeuSecretario.Domain.Automation;
 
-/// <summary><c>sanitize_input</c> (<c>app/shared/validators/input_sanitizer.py:43-68</c>, spec 011 §7.2).</summary>
+/// <summary><c>sanitize_input</c> (<c>app/shared/validators/input_sanitizer.py</c>, spec 011 §7.2).</summary>
 public static partial class InputSanitizer
 {
     private const string Dangerous = "<>{}\\$`|;&";
@@ -47,7 +47,7 @@ public static partial class InputSanitizer
     private static partial Regex Whitespace();
 }
 
-/// <summary>Tipos de pagamento do atalho (<c>transaction_handler.py:217-266</c>).</summary>
+/// <summary>Tipos de pagamento do atalho (<c>transaction_handler.py</c>).</summary>
 public static class PaymentType
 {
     public const string Credit = "credito";

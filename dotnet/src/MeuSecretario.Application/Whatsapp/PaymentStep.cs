@@ -9,7 +9,7 @@ using MeuSecretario.Domain.Whatsapp;
 namespace MeuSecretario.Application.Whatsapp;
 
 /// <summary>
-/// <c>FixedBillsService.settle_fixed_bill</c> (<c>fixed_bills_service.py:150-225</c>): despesa na conta e na subcategoria do
+/// <c>FixedBillsService.settle_fixed_bill</c> (<c>fixed_bills_service.py</c>): despesa na conta e na subcategoria do
 /// agendamento, com a descrição dele, pela porta de lançamento da 004. Agendamento inexistente lança.
 /// </summary>
 public sealed class FixedBillSettler(IAutomationLookups lookups, DirectPoster poster) : IFixedBillSettler
@@ -25,7 +25,7 @@ public sealed class FixedBillSettler(IAutomationLookups lookups, DirectPoster po
 }
 
 /// <summary>
-/// Passo 8 do pipeline (<c>whatsapp_handler.py:444-705</c>, spec 012 §6.b): "paguei", "quitei", "liquidei", "saldei" ou "zerei" em
+/// Passo 8 do pipeline (<c>whatsapp_handler.py</c>, spec 012 §6.b): "paguei", "quitei", "liquidei", "saldei" ou "zerei" em
 /// qualquer parte do texto disparam o fluxo antes do Gemini classificar a intenção. Cada item vira quitação de conta fixa
 /// (casamento difuso) ou despesa avulsa; o erro de um item não impede os seguintes (uma transação do banco por lançamento).
 /// </summary>
