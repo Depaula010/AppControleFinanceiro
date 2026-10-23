@@ -328,6 +328,7 @@ Convenção: `AC-012-NNN`, faixa por sub-entrega (0xx = 012-0, 1xx = 012a, 2xx =
 - **AC-012-504** Deletar evento: não achou, um (deleta), vários (lista), filtro `hoje`/`amanha`; outro valor de `quando` é sem filtro (desvio 192, AC-012-192).
 - **AC-012-505** Consultar agenda (um dia, período, filtro de horário); sem Google ⇒ mensagem de conexão.
 - **AC-012-506** Horários livres: slots, qualidade, formato da mensagem e sugestão da IA.
+- **AC-012-507** (desvio 256) Relatórios sob comando, por palavra-chave e antes do Gemini (o prompt de intenção do Flask não muda): `fatura do inter por categoria` (fatura de um cartão: total, estornos, categorias com %, maiores compras e parcelas a vencer; aberta por padrão, `passada` ou um mês pelo vencimento), `gastos do mês por categoria` (ranking de subcategorias; mês atual até hoje contra o mesmo trecho do anterior; transferências e rendas fora) e `relatório do mês` (dispara `SendManualAsync` do relatório mensal; só o mês atual e o anterior). Frases de ação (`configurar`, `paguei`, `ativar`...) e `qual valor da fatura?` seguem o pipeline. Menu de ajuda e fixtures do Flask atualizados (política de correção documentada).
 
 **012f — Configurações**
 - **AC-012-601** Resumo matinal e check-in noturno: ativar/desativar/configurar, regex da hora, faixa 18–23, mensagens.
