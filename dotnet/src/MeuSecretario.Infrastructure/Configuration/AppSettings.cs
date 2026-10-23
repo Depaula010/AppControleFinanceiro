@@ -21,12 +21,6 @@ public sealed class AppSettings
 
     public string WebhookSignatureKey { get; init; } = string.Empty;
     public string BotWhatsappUrl { get; init; } = string.Empty;
-
-    /// <summary>
-    /// <c>OPS_ALERT_WHATSAPP</c> (opcional, desvio 261): número do dono (só dígitos, com DDI) que recebe o aviso quando um job falha.
-    /// Vazio = desligado.
-    /// </summary>
-    public string OpsAlertWhatsapp { get; init; } = string.Empty;
     public string BotSessionName { get; init; } = "sessao-principal";
     public string BotSessionId { get; init; } = string.Empty;
     public string BotApiKey { get; init; } = string.Empty;
@@ -163,7 +157,6 @@ public sealed class AppSettings
             GeminiModel = Optional("GEMINI_MODEL", "gemini-2.5-flash-lite"),
             WebhookSignatureKey = Optional("WEBHOOK_SIGNATURE_KEY", apiSecretKey),
             BotWhatsappUrl = Optional("BOT_WHATSAPP_URL"),
-            OpsAlertWhatsapp = new string([.. Optional("OPS_ALERT_WHATSAPP").Where(char.IsAsciiDigit)]),
             BotSessionName = Optional("BOT_SESSION_NAME", "sessao-principal"),
             BotSessionId = Optional("BOT_SESSION_ID"),
             BotApiKey = Optional("BOT_API_KEY"),

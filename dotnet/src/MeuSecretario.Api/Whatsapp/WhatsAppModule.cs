@@ -60,10 +60,6 @@ public sealed class WhatsAppModule : IFeatureModule
         ILogger<WhatsAppModule> logger,
         CancellationToken cancellationToken)
     {
-        // Desvio 261: um id por mensagem em todas as linhas de log dela e no cabeçalho da resposta, para achar o caso no log.
-        var correlationId = LogTemplates.NewCorrelationId();
-        request.HttpContext.Response.Headers[LogTemplates.CorrelationHeader] = correlationId;
-        using var scope = logger.BeginScope(new Dictionary<string, object> { [LogTemplates.CorrelationProperty] = LogTemplates.Prefix(correlationId) });
         try
         {
             if (!(await database.CheckAsync(cancellationToken)).Connected)

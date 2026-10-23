@@ -146,4 +146,3 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [232](232-whatsapp-comparacao-mensal-sinal-e-formato.md) | Comparação Mensal: totais negativos, variação invertida e números em formato inglês | correção | 012 | implementado |
 | [233](233-whatsapp-analise-maiores-gastos-invertidos.md) | Análise Inteligente: "Maiores gastos" lista os menores e os dias da semana saem em inglês | correção | 012 | implementado |
 | [250](250-dias-antes-vencimento-coluna-propria.md) | daysBeforeDue em coluna própria | correção | 007, 013 | implementado |
-| [261](261-observabilidade-aviso-e-correlacao.md) | Aviso de falha por WhatsApp e ID de correlação nos logs | operação | 012, 013 | implementado |
