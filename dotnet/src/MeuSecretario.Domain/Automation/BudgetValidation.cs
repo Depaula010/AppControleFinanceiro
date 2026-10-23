@@ -59,7 +59,7 @@ public static class BudgetValidation
         {
             var after = spent + absolute;
             var percent = pot.Limit > 0 ? after / pot.Limit * 100 : 0;
-            checks.Add(new PotCheck(pot.Id, pot.Name, pot.Limit, spent, after, PyFloat.Round(percent, 1), after > pot.Limit));
+            checks.Add(new PotCheck(pot.Id, pot.Name, pot.Limit, spent, after, PyFloat.Round(percent, 1), Exceeds(pot.Limit, spent, absolute)));
         }
 
         var exceeded = checks.Where(c => c.Exceeds).ToList();
@@ -67,6 +67,19 @@ public static class BudgetValidation
             ? new BudgetCheck(false, string.Empty, checks)
             : new BudgetCheck(true, WarningMessage(exceeded), checks);
     }
+
+    /// <summary>
+    /// "Passou do limite?" em <see cref="decimal"/> (desvio 260). Em <see cref="double"/>, gasto + valor que fecha EXATAMENTE o limite
+    /// (R$ 0,14 + R$ 0,10 contra R$ 0,24) dava "ultrapassará seu limite" em cerca de 10% dos casos, com "Excesso: R$ 0,00". Os valores
+    /// exibidos continuam em <see cref="double"/> (paridade de formatação com o Flask); só a decisão é exata. Valor fora de
+    /// <c>numeric(15,2)</c> mantém a comparação antiga.
+    /// </summary>
+    private static bool Exceeds(double limit, double spent, double amount) =>
+        MoneyDecimal.TryFromDouble(limit, out var limitValue)
+        && MoneyDecimal.TryFromDouble(spent, out var spentValue)
+        && MoneyDecimal.TryFromDouble(amount, out var amountValue)
+            ? spentValue + amountValue > limitValue
+            : spent + amount > limit;
 
     /// <summary>Sem limite o Python usa o inteiro <c>0</c> (escreve <c>0</c>, não <c>0.0</c>).</summary>
     private static string PercentText(PotCheck pot) => pot.Limit > 0 ? PyFloat.Repr(pot.Percent) : "0";
