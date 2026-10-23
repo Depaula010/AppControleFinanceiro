@@ -3,9 +3,8 @@ using MeuSecretario.IntegrationTests.Support;
 
 namespace MeuSecretario.IntegrationTests.Settings;
 
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class ProfileEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public class ProfileEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Path = "/api/user/profile";
     private readonly SettingsEnv _env = new(postgres);

@@ -7,9 +7,8 @@ using MeuSecretario.IntegrationTests.Transactions;
 namespace MeuSecretario.IntegrationTests.Whatsapp;
 
 /// <summary>Pagamentos pela rota real (spec 012b): quitação de conta fixa e despesa avulsa gravam pelas portas da 004.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class PaymentFlowEndpointTests(PostgresFixture postgres) : IAsyncLifetime
+public class PaymentFlowEndpointTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private WhatsAppEnv _env = default!;
     private int _user;

@@ -4,9 +4,8 @@ using MeuSecretario.IntegrationTests.Support;
 namespace MeuSecretario.IntegrationTests.Bills;
 
 /// <summary><c>PUT /api/bills/{id}</c> e <c>/api/contas-mensais/{id}</c> (spec 005 §3.3), corpo comparado como texto exato.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class BillsPutEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public class BillsPutEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly BillsHttp _http = new(postgres);
     private readonly BillsTestData _data = new(postgres.DataSource);

@@ -6,9 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MeuSecretario.IntegrationTests.Settings;
 
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class AddressesEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public class AddressesEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Path = "/api/user/addresses";
     private readonly SettingsEnv _env = new(postgres);

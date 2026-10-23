@@ -7,9 +7,8 @@ using Npgsql;
 namespace MeuSecretario.IntegrationTests.Google;
 
 /// <summary>Tabela <c>googlecalendartokens</c> em PostgreSQL real (spec 010d, T23).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class GoogleTokenRepositoryTests(PostgresFixture postgres) : IAsyncLifetime
+public class GoogleTokenRepositoryTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Calendar = "https://www.googleapis.com/auth/calendar";
     private const string Drive = "https://www.googleapis.com/auth/drive.file";

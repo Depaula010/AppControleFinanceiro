@@ -8,9 +8,8 @@ using MeuSecretario.IntegrationTests.Transactions;
 namespace MeuSecretario.IntegrationTests.Whatsapp;
 
 /// <summary>SQL real das leituras financeiras do WhatsApp (spec 012 §7.6, §7.7, §7.8).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class FinanceStoresTests(PostgresFixture postgres) : IAsyncLifetime
+public class FinanceStoresTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private AutomationEnv _env = default!;
     private WhatsAppFinanceReader _reader = default!;

@@ -8,9 +8,8 @@ namespace MeuSecretario.IntegrationTests.Jobs;
 /// Desvio 258: o banco recusa dois lançamentos do mesmo vencimento (<c>competencia</c>) do mesmo agendamento, e a migration 0090 não
 /// derruba o deploy se já houver duplicata.
 /// </summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class CompetenceUniqueIndexTests(PostgresFixture postgres) : IAsyncLifetime
+public sealed class CompetenceUniqueIndexTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Index = "ux_transacoes_agendamento_competencia";
 

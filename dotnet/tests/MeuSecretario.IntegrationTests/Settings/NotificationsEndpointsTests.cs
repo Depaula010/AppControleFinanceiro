@@ -3,9 +3,8 @@ using MeuSecretario.IntegrationTests.Support;
 
 namespace MeuSecretario.IntegrationTests.Settings;
 
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class NotificationsEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public class NotificationsEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Path = "/api/user/notifications";
     private const string Defaults =

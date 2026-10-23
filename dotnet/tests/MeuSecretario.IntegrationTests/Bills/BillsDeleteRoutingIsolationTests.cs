@@ -10,9 +10,8 @@ using Npgsql;
 namespace MeuSecretario.IntegrationTests.Bills;
 
 /// <summary><c>DELETE /api/bills/{id}</c> (spec 005 §3.4).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class BillsDeleteEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public class BillsDeleteEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly BillsHttp _http = new(postgres);
     private readonly BillsTestData _data = new(postgres.DataSource);
@@ -96,9 +95,8 @@ public class BillsDeleteEndpointsTests(PostgresFixture postgres) : IAsyncLifetim
 }
 
 /// <summary>Roteamento do Flask reproduzido: 404 HTML antes da autenticação, 405, <c>summary</c> (spec 005 §2).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class BillsRoutingTests(PostgresFixture postgres) : IAsyncLifetime
+public class BillsRoutingTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string FlaskNotFoundHtml =
         "<!doctype html>\n<html lang=en>\n<title>404 Not Found</title>\n<h1>Not Found</h1>\n" +
@@ -202,9 +200,8 @@ public class BillsRoutingTests(PostgresFixture postgres) : IAsyncLifetime
 }
 
 /// <summary>Usuário B nunca vê, altera nem remove agendamento do usuário A (RN-005-02): as 9 operações.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class BillsTenantIsolationTests(PostgresFixture postgres) : IAsyncLifetime
+public class BillsTenantIsolationTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly BillsHttp _http = new(postgres);
     private readonly BillsTestData _data = new(postgres.DataSource);
@@ -341,9 +338,8 @@ public class BillsTenantIsolationTests(PostgresFixture postgres) : IAsyncLifetim
 }
 
 /// <summary>500 com mensagem fixa e log só com o tipo do erro (desvio 008, AC-005-84).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class BillsFailureTests(PostgresFixture postgres) : IAsyncLifetime
+public class BillsFailureTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Secret = "segredo-interno 5511999999999 Internet";
 

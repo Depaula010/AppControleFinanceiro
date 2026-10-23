@@ -7,9 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MeuSecretario.IntegrationTests.Google;
 
 /// <summary>AC-010-89: tokens, <c>code</c>, <c>state</c>, <c>client_secret</c> e número completo nunca aparecem em log.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class GoogleLogSecretsTests(PostgresFixture postgres) : IAsyncLifetime
+public class GoogleLogSecretsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private static readonly string[] Secrets =
     [

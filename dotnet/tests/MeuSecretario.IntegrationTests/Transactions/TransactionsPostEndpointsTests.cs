@@ -5,9 +5,8 @@ using static MeuSecretario.IntegrationTests.Transactions.TransactionsTestData;
 namespace MeuSecretario.IntegrationTests.Transactions;
 
 /// <summary><c>POST /api/transactions</c> (spec 004 §3.2): uma linha da tabela de validações por teste, corpo como texto exato.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class TransactionsPostEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public class TransactionsPostEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly TransactionsHttp _http = new(postgres);
     private readonly TransactionsTestData _data = new(postgres.DataSource);

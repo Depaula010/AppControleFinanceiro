@@ -8,9 +8,8 @@ namespace MeuSecretario.IntegrationTests.Jobs;
 /// O check-in e o executor decidem com a mesma regra (<c>SchedulePaymentSql</c>, desvio 253): o que a consulta oferece o executor aceita, e
 /// o que o executor lança some da consulta. Os bugs de 15 a 20/10/2026 eram essas duas regras em divergência.
 /// </summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class CheckinExecutorAgreementTests(PostgresFixture postgres) : IAsyncLifetime
+public sealed class CheckinExecutorAgreementTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     // Dia 11 vence exatamente 7 dias antes de "hoje": é pendente, e o vencimento de fevereiro já saiu da janela de 30 dias.
     private const string Today = "2026-03-18";

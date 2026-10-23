@@ -5,9 +5,8 @@ using MeuSecretario.IntegrationTests.Support;
 namespace MeuSecretario.IntegrationTests.Bills;
 
 /// <summary><c>POST /api/bills</c> e <c>/api/contas-mensais</c> (spec 005 §3.2), corpo comparado como texto exato.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class BillsPostEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public class BillsPostEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string TypeMessage = "Tipo de agendamento inválido. Valores permitidos: FIXO, LEMBRETE_VARIAVEL, PARCELADO";
     private const string PeriodMessage = "Periodicidade inválida. Valores permitidos: DIARIA, SEMANAL, QUINZENAL, MENSAL, ANUAL";

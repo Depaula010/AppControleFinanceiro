@@ -5,9 +5,8 @@ using MeuSecretario.IntegrationTests.Support;
 namespace MeuSecretario.IntegrationTests.Categories;
 
 /// <summary>Buscas por nome (G-3, desvio 030): sempre <c>ORDER BY id</c>, nunca devolvem categoria de outro usuário.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class CategoryLookupTests(PostgresFixture postgres) : IAsyncLifetime
+public class CategoryLookupTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly CategoryRepository _lookup = new(postgres.Connections);
 

@@ -7,9 +7,8 @@ using MeuSecretario.IntegrationTests.Transactions;
 namespace MeuSecretario.IntegrationTests.Whatsapp;
 
 /// <summary>SQL real das consultas financeiras do WhatsApp (spec 012 §6.c).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class QueryReaderTests(PostgresFixture postgres) : IAsyncLifetime
+public class QueryReaderTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private static readonly DateOnly Today = new(2026, 10, 7);
 

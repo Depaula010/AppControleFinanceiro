@@ -10,9 +10,8 @@ using Quartz;
 namespace MeuSecretario.IntegrationTests.Jobs;
 
 /// <summary>O agendador só liga com <c>JOBS_ENABLED=true</c>; as portas da 009c existem sempre (AC-013-01 e 81).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class JobsHostTests(PostgresFixture postgres)
+public sealed class JobsHostTests(PostgresFixture postgres) : IClassFixture<PostgresFixture>
 {
     private WebApplicationFactory<Program> Host(string? enabled) => postgres.Api.WithWebHostBuilder(builder =>
     {

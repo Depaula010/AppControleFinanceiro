@@ -5,9 +5,8 @@ using MeuSecretario.IntegrationTests.Support;
 
 namespace MeuSecretario.IntegrationTests.Jobs;
 
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class CheckinQueriesTests(PostgresFixture postgres) : IAsyncLifetime
+public sealed class CheckinQueriesTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly JobsEnv _env = new(postgres);
     private CheckinQueries _queries = default!;
@@ -233,9 +232,8 @@ public sealed class CheckinQueriesTests(PostgresFixture postgres) : IAsyncLifeti
     }
 }
 
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class NotificationQueriesTests(PostgresFixture postgres) : IAsyncLifetime
+public sealed class NotificationQueriesTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly JobsEnv _env = new(postgres);
     private int _user;
@@ -384,9 +382,8 @@ public sealed class NotificationQueriesTests(PostgresFixture postgres) : IAsyncL
     }
 }
 
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class InvoiceJobRepositoryTests(PostgresFixture postgres) : IAsyncLifetime
+public sealed class InvoiceJobRepositoryTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly JobsEnv _env = new(postgres);
     private InvoiceJobRepository _repository = default!;

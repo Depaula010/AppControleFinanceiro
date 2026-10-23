@@ -4,9 +4,8 @@ using MeuSecretario.IntegrationTests.Support;
 
 namespace MeuSecretario.IntegrationTests.Jobs;
 
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class MonthlyReportRepositoryTests(PostgresFixture postgres) : IAsyncLifetime
+public sealed class MonthlyReportRepositoryTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly JobsEnv _env = new(postgres);
     private MonthlyReportRepository _repository = default!;

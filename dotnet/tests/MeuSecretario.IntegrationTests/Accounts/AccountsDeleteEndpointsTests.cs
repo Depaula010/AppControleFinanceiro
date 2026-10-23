@@ -5,9 +5,8 @@ using MeuSecretario.IntegrationTests.Support;
 namespace MeuSecretario.IntegrationTests.Accounts;
 
 /// <summary>Spec 002 §3.4: <c>DELETE /api/accounts/{id}</c> e <c>/api/contas/{id}</c>.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class AccountsDeleteEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public class AccountsDeleteEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly AccountsHttp _http = new(postgres);
     private readonly AccountsTestData _data = new(postgres.DataSource);

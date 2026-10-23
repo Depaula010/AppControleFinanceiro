@@ -10,9 +10,8 @@ using static MeuSecretario.IntegrationTests.Transactions.TransactionsTestData;
 namespace MeuSecretario.IntegrationTests.Transactions;
 
 /// <summary>Os 4 serviços de lançamento e o <c>EnsureCurrent</c> contra o banco real (spec 004 §7).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class TransactionPostingDbTests(PostgresFixture postgres) : IAsyncLifetime
+public class TransactionPostingDbTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly TransactionsTestData _data = new(postgres.DataSource);
     private readonly TransactionsUnitOfWork _unitOfWork = new(postgres.Connections);

@@ -27,9 +27,8 @@ internal sealed class ImageCapturingBot : IBotClient
 }
 
 /// <summary>Fiação de <c>Comparação Mensal</c> e <c>Gráfico de Gastos</c> pela rota real (DI, banco, renderizador ScottPlot e bot).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class WhatsAppAnalyticsRouteTests(PostgresFixture postgres) : IAsyncLifetime
+public class WhatsAppAnalyticsRouteTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private static readonly byte[] PngSignature = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
 

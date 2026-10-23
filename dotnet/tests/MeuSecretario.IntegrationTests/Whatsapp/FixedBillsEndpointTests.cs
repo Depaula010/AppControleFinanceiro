@@ -17,9 +17,8 @@ namespace MeuSecretario.IntegrationTests.Whatsapp;
 /// do contêiner (sem subir um host por teste: cada host guarda o próprio pool e o contêiner tem um limite de conexões); a fiação de DI e a
 /// rota ficam cobertas pelos testes de rota do WhatsApp e pela resolução de DI abaixo.
 /// </summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class FixedBillsEndpointTests(PostgresFixture postgres) : IAsyncLifetime
+public class FixedBillsEndpointTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Number = "5531999990001";
 

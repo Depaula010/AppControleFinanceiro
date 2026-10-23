@@ -33,9 +33,8 @@ internal static class HarnessScenarios
 }
 
 /// <summary><c>POST /webhook-whatsapp</c> (spec 012 §3 e §4): banco real, Gemini, bot e Redis falsos; corpo como bytes exatos.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class WhatsAppEndpointParityTests(PostgresFixture postgres) : IAsyncLifetime
+public class WhatsAppEndpointParityTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     /// <summary>Sub-entregas já implementadas; o harness traz cenários das demais.</summary>
     private static readonly string[] ImplementedGroups = ["012-0"];

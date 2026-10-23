@@ -5,9 +5,8 @@ using MeuSecretario.IntegrationTests.Support;
 namespace MeuSecretario.IntegrationTests.Whatsapp;
 
 /// <summary>Desvio 259: o bot reenvia a mesma mensagem (mesmo <c>message_id</c>) e o webhook responde vazio sem reprocessar.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class WebhookIdempotencyTests(PostgresFixture postgres) : IAsyncLifetime
+public sealed class WebhookIdempotencyTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Help = """{"intent": "Menu de Ajuda"}""";
 

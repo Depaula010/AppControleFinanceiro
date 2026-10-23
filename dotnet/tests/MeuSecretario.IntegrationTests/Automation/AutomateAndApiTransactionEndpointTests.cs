@@ -9,9 +9,8 @@ using MeuSecretario.TestFixtures;
 namespace MeuSecretario.IntegrationTests.Automation;
 
 /// <summary><c>POST /webhook-automate</c> (spec 011 §3.1): banco real, Gemini, bot e Redis falsos; corpo como texto exato.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class AutomateEndpointTests(PostgresFixture postgres) : IAsyncLifetime
+public class AutomateEndpointTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Extraction = """{"valor_decimal": 45.9, "descricao_bruta": "Mercado", "tipo_fluxo": "Despesa"}""";
     private const string Sentinel = "SENTINELA-gemini-7741";
@@ -294,9 +293,8 @@ public class AutomateEndpointTests(PostgresFixture postgres) : IAsyncLifetime
 }
 
 /// <summary><c>POST /api/transacao</c> (spec 011 §3.2).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class ApiTransacaoEndpointTests(PostgresFixture postgres) : IAsyncLifetime
+public class ApiTransacaoEndpointTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private AutomationEnv _env = default!;
     private int _user;

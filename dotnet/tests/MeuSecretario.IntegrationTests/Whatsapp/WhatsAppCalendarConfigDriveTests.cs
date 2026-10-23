@@ -11,9 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MeuSecretario.IntegrationTests.Whatsapp;
 
 /// <summary>012f: <see cref="WhatsAppConfigStore"/> no PostgreSQL real.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class WhatsAppConfigStoreTests(PostgresFixture postgres) : IAsyncLifetime
+public class WhatsAppConfigStoreTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private WhatsAppEnv _env = default!;
     private WhatsAppConfigStore _store = default!;
@@ -86,9 +85,8 @@ public class WhatsAppConfigStoreTests(PostgresFixture postgres) : IAsyncLifetime
 }
 
 /// <summary>Fiação das intenções e dos passos da 012e/012f/012h pela rota real (DI, banco e pipeline).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class WhatsAppCalendarConfigDriveRouteTests(PostgresFixture postgres) : IAsyncLifetime
+public class WhatsAppCalendarConfigDriveRouteTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private WhatsAppEnv _env = default!;
     private int _user;
