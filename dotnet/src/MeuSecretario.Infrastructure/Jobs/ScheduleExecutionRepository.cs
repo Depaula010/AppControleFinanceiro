@@ -4,6 +4,7 @@ using MeuSecretario.Application.Jobs;
 using MeuSecretario.Domain.Jobs;
 using MeuSecretario.Domain.Transactions;
 using MeuSecretario.Infrastructure.Database;
+using Npgsql;
 
 namespace MeuSecretario.Infrastructure.Jobs;
 
@@ -14,6 +15,9 @@ namespace MeuSecretario.Infrastructure.Jobs;
 /// </summary>
 public sealed class ScheduleExecutionRepository(IDbConnectionFactory connections) : IScheduleExecutionRepository
 {
+    /// <summary>Índice único parcial (migration 0090) que impede dois lançamentos do mesmo vencimento do mesmo agendamento.</summary>
+    internal const string CompetenceIndex = "ux_transacoes_agendamento_competencia";
+
     /// <summary>O mesmo SELECT com colunas a mais; <paramref name="extra"/> começa com vírgula ou é vazio.</summary>
     private static string SelectWith(string extra) => $"""
         SELECT a.id AS Id, a.usuario_id AS UserId, a.conta_id AS AccountId, a.subcategoria_id AS SubcategoryId,
@@ -109,21 +113,31 @@ public sealed class ScheduleExecutionRepository(IDbConnectionFactory connections
 
         var amount = ScheduleRules.SignedAmount(schedule.GroupName, request.Amount ?? schedule.ExpectedAmount);
         var type = ScheduleRules.TransactionType(schedule.GroupName);
-        var transactionId = await connection.ExecuteScalarAsync<int>(new CommandDefinition(
-            """
-            INSERT INTO transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, agendamento_id, descricao, valor,
-                                    tipo_transacao, data_transacao, consolidada, competencia)
-            VALUES (@userId, @accountId, @subcategoryId, @invoiceId, @id, @description, @amount, @type, @date, TRUE, @competence)
-            RETURNING id
-            """,
-            JobSql.With(
-                ("userId", schedule.UserId, DbType.Int32), ("accountId", schedule.AccountId, DbType.Int32),
-                ("subcategoryId", schedule.SubcategoryId, DbType.Int32), ("invoiceId", invoiceId, DbType.Int32),
-                ("id", schedule.Id, DbType.Int32), ("description", description, DbType.String), ("amount", amount, DbType.Decimal),
-                ("type", type, DbType.String), ("date", JobSql.Day(request.Date), DbType.Date),
-                ("competence", JobSql.Day(competence), DbType.Date)),
-            transaction,
-            cancellationToken: cancellationToken));
+        int transactionId;
+        try
+        {
+            transactionId = await connection.ExecuteScalarAsync<int>(new CommandDefinition(
+                """
+                INSERT INTO transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, agendamento_id, descricao, valor,
+                                        tipo_transacao, data_transacao, consolidada, competencia)
+                VALUES (@userId, @accountId, @subcategoryId, @invoiceId, @id, @description, @amount, @type, @date, TRUE, @competence)
+                RETURNING id
+                """,
+                JobSql.With(
+                    ("userId", schedule.UserId, DbType.Int32), ("accountId", schedule.AccountId, DbType.Int32),
+                    ("subcategoryId", schedule.SubcategoryId, DbType.Int32), ("invoiceId", invoiceId, DbType.Int32),
+                    ("id", schedule.Id, DbType.Int32), ("description", description, DbType.String), ("amount", amount, DbType.Decimal),
+                    ("type", type, DbType.String), ("date", JobSql.Day(request.Date), DbType.Date),
+                    ("competence", JobSql.Day(competence), DbType.Date)),
+                transaction,
+                cancellationToken: cancellationToken));
+        }
+        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UniqueViolation && ex.ConstraintName == CompetenceIndex)
+        {
+            // Desvio 258: outro processo lançou o mesmo vencimento entre a conferência e o INSERT. O banco recusou; nada foi gravado.
+            await transaction.RollbackAsync(cancellationToken);
+            return new ScheduleExecutionOutcome.Skipped("já lançado no mês");
+        }
 
         if (isInstallment)
         {
