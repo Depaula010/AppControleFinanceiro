@@ -2,8 +2,10 @@ using System.Globalization;
 using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Application.CalendarAlerts;
 using MeuSecretario.Application.Jobs;
+using MeuSecretario.Application.Ops;
 using MeuSecretario.Infrastructure.CalendarAlerts;
 using MeuSecretario.Infrastructure.Configuration;
+using MeuSecretario.Infrastructure.Ops;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -154,7 +156,16 @@ public static class JobsServiceCollectionExtensions
         services.TryAddSingleton<IScheduleExecutionRepository, ScheduleExecutionRepository>();
         services.TryAddSingleton<IMonthlyReportRepository, MonthlyReportRepository>();
         services.TryAddSingleton<IChartRenderer, ScottPlotChartRenderer>();
-        services.TryAddSingleton<IJobLog, JobLog>();
+        services.TryAddSingleton<JobLog>();
+        services.TryAddSingleton<OpsAlertChannel>(sp => new OpsAlertChannel(sp.GetRequiredService<AppSettings>().OpsAlertWhatsapp.Length > 0));
+        services.TryAddSingleton<IOpsAlerts>(sp => sp.GetRequiredService<OpsAlertChannel>());
+        services.TryAddSingleton<IJobLog>(sp => new AlertingJobLog(sp.GetRequiredService<JobLog>(), sp.GetRequiredService<IOpsAlerts>()));
+        services.AddHostedService(sp => new OpsAlertWorker(
+            sp.GetRequiredService<OpsAlertChannel>(),
+            sp.GetRequiredService<IBotClient>(),
+            sp.GetRequiredService<AppSettings>().OpsAlertWhatsapp,
+            sp.GetRequiredService<TimeProvider>(),
+            sp.GetRequiredService<ILogger<OpsAlertWorker>>()));
 
         services.AddScoped<JobRunner>();
         services.AddScoped<IScheduleExecutor, ScheduleExecutor>();
