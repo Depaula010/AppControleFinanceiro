@@ -27,7 +27,7 @@ public class CheckinResponderTests
     }
 
     private CheckinResponder Responder() =>
-        new(_cache, new CheckinSessionState(_cache), new DelegateExecutor(this), new FinanceClock(Today), _diagnostics);
+        new(new CheckinDialogStore(_cache, new CheckinSessionState(_cache)), new DelegateExecutor(this), new FinanceClock(Today), _diagnostics);
 
     private async Task SeedAsync(params CheckinBill[] bills)
     {
