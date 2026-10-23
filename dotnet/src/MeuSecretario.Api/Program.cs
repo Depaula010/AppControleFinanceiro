@@ -1,4 +1,3 @@
-using MeuSecretario.Api;
 using System.Globalization;
 using MeuSecretario.Api.Http;
 using MeuSecretario.Api.Modules;
@@ -23,8 +22,7 @@ builder.Host.UseSerilog((_, services, logger) =>
 {
     logger.MinimumLevel.Information()
         .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
-        .Enrich.WithProperty(LogTemplates.CorrelationProperty, string.Empty)
-        .WriteTo.Console(outputTemplate: LogTemplates.Output, formatProvider: CultureInfo.InvariantCulture);
+        .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture);
 
     // Em produção os logs vão para ./logs (volume do compose), como o Flask.
     var settings = services.GetService<AppSettings>();
@@ -32,7 +30,6 @@ builder.Host.UseSerilog((_, services, logger) =>
     {
         logger.WriteTo.File(
             Path.Combine(settings.LogDirectory, "app-.log"),
-            outputTemplate: LogTemplates.Output,
             formatProvider: CultureInfo.InvariantCulture,
             rollingInterval: RollingInterval.Day,
             retainedFileCountLimit: 14);
