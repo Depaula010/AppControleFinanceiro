@@ -2,7 +2,7 @@
 
 ## 1. Estado atual (produção, Contabo 212.47.65.37)
 
-- Diretório: `/opt/meu-secretario`. Workflow `.github/workflows/deploy.yml`: push em `main`/`master` ⇒ SSH ⇒ `git fetch` + `git reset --hard origin/main` ⇒ reescreve `.env` ⇒ `docker compose down --remove-orphans` ⇒ `docker system prune -f` ⇒ `docker compose build --no-cache` ⇒ `up -d` ⇒ health check `curl http://127.0.0.1:8080/` esperando 200.
+- Diretório: `/opt/meu-secretario`. Workflow `.github/workflows/deploy.yml`: push em `main`/`master` ⇒ SSH ⇒ `git fetch` + `git reset --hard origin/main` ⇒ reescreve `.env` ⇒ `docker compose build --no-cache` (com os containers atuais no ar) ⇒ migrations ⇒ `up -d --remove-orphans` ⇒ remove só as imagens antigas do projeto (`docker image rm` das anotadas antes + `docker image prune --filter label=app=meu-secretario`) ⇒ health check `curl http://127.0.0.1:8080/` esperando 200.
 - Serviços do `docker-compose.yml` (todos na rede externa **`rede-global`**):
 
 | Serviço | container_name | Notas |
@@ -41,8 +41,8 @@ Multi-stage: `mcr.microsoft.com/dotnet/sdk:10.0` (build/publish, `--no-restore` 
 **Fontes e bibliotecas nativas (gráficos, spec 013 RN-013-75).** A imagem `aspnet` não traz fontes nem `libfontconfig`. O Dockerfile instala `fontconfig`, `libfontconfig1`, `libfreetype6` e `fonts-dejavu-core` (e roda `fc-cache -f`). Verificado em 2026-10-09 com o `ScottPlotChartRenderer` real dentro do container: na imagem `aspnet` pura o PNG sai sem nenhum texto (título, percentuais e legenda em branco) e o renderizador não acusa erro; na imagem do Dockerfile os textos saem com acentos (`Saúde`, `R$ 1.200,50`). Para repetir: publicar um console que chama `RenderPie`/`RenderBars`/`RenderLine`, montá-lo em `docker run --entrypoint dotnet meusecretario-api:<tag> /smoke/Smoke.dll /out` e abrir os PNG. Custo: cerca de 15 MB na imagem.
 
 ### Mudanças no workflow (Fase 4)
-1. **Build antes do `down`**: `docker compose build` ⇒ `docker compose up -d` (recria só o que mudou). Elimina o downtime de build.
-2. **Sem `docker system prune -f` global** (o host é compartilhado com outras stacks); usar `docker image prune -f --filter "label=app=meu-secretario"`.
+1. **Build antes do `down`** (feito): `docker compose build` ⇒ `docker compose up -d` (recria só o que mudou). Elimina o downtime de build, e um build que falha não derruba a versão atual.
+2. **Sem `docker system prune -f` global** (feito; o host é compartilhado com outras stacks): `docker image prune -f --filter "label=app=meu-secretario"` e remoção das imagens antigas anotadas. Acrescentado: `concurrency` para um deploy por vez.
 3. `git reset --hard origin/${GITHUB_REF_NAME}` (hoje fixo em `main`).
 4. Etapa de testes (`ci.yml` verde) como pré-requisito do deploy.
 5. Heredoc do `.env` mantém as mesmas variáveis; remover `PYTHON_VERSION` e `DB_PASSWORD`.
