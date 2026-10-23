@@ -43,6 +43,7 @@ public sealed class WhatsAppModule : IFeatureModule
 
         FinancialWhatsAppModule.AddFinancialServices(services); // 012a, 012b, 012c
         FixedBillsWhatsAppModule.AddFixedBillsServices(services); // 012d
+        ReportsWhatsAppModule.AddReportsServices(services); // desvio 256
     }
 
     public void MapEndpoints(IEndpointRouteBuilder app) => app.MapPost("/webhook-whatsapp", WebhookAsync);

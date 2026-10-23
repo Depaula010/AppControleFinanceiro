@@ -36,6 +36,9 @@
 • _"comparar com mês anterior"_ - Comparação mensal
 • _"quanto vou gastar este mês"_ - Previsão de gastos
 • _"gráfico de gastos"_ - Gerar gráfico visual
+• _"fatura do inter por categoria"_ - Fatura detalhada (categorias, maiores compras, parcelas)
+• _"gastos do mês por categoria"_ - Ranking de categorias vs mês anterior
+• _"relatório do mês"_ - Relatório mensal agora (texto e gráfico)
 
 *⚙️ CONFIGURAÇÕES*
 • _"ativar resumo matinal"_ - Configurar notificações
