@@ -7,9 +7,8 @@ namespace MeuSecretario.IntegrationTests.Jobs;
 /// <summary>
 /// Desvio 262: o motor recupera, de forma idempotente, o que venceu nos últimos dias e não foi lançado (app fora do ar, job que falhou).
 /// </summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class MotorCatchUpTests(PostgresFixture postgres) : IAsyncLifetime
+public sealed class MotorCatchUpTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly JobsEnv _env = new(postgres);
     private ScheduleExecutionRepository _repository = default!;

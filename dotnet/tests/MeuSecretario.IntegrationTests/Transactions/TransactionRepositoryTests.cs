@@ -9,9 +9,8 @@ using static MeuSecretario.IntegrationTests.Transactions.TransactionsTestData;
 namespace MeuSecretario.IntegrationTests.Transactions;
 
 /// <summary>SQL real do repositório de transações (spec 004 §3 e plan §3).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class TransactionRepositoryTests(PostgresFixture postgres) : IAsyncLifetime
+public class TransactionRepositoryTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly TransactionsTestData _data = new(postgres.DataSource);
     private readonly TransactionRepository _repository = new(postgres.Connections);

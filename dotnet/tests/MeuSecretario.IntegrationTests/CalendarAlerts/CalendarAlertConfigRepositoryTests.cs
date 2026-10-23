@@ -6,9 +6,8 @@ using Npgsql;
 
 namespace MeuSecretario.IntegrationTests.CalendarAlerts;
 
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class CalendarAlertConfigRepositoryTests(PostgresFixture postgres) : IAsyncLifetime
+public sealed class CalendarAlertConfigRepositoryTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly SettingsEnv _env = new(postgres);
     private CalendarAlertConfigRepository _repository = default!;

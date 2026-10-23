@@ -16,9 +16,8 @@ namespace MeuSecretario.IntegrationTests.Auth;
 /// Spec 001 ponta a ponta: HTTP real (WebApplicationFactory) → casos de uso → PostgreSQL 15 em container.
 /// Os corpos são comparados como texto exato: nomes de campo, ordem e acentuação são o contrato com o Angular.
 /// </summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class AuthEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public class AuthEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Whatsapp = "5511999999999";
     private const string Password = "SenhaSegura123";

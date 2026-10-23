@@ -10,9 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MeuSecretario.IntegrationTests.Automation;
 
 /// <summary><c>POST /webhook-sms-payment</c> (spec 011 §3.3).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime
+public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private AutomationEnv _env = default!;
     private int _user;
@@ -249,9 +248,8 @@ public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime
 }
 
 /// <summary><c>PATCH /api/agendamento/{id}/reserva</c> e <c>GET /api/agendamentos/reserva</c> (spec 011 §3.4 e §3.5).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class ReserveEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public class ReserveEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private AutomationEnv _env = default!;
     private int _user;
@@ -523,9 +521,8 @@ public class ReserveEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
 }
 
 /// <summary><c>POST /api/fatura/{id}/reprocessar</c> e o populador real (spec 011 §3.6, RN-011-14).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class ReprocessEndpointTests(PostgresFixture postgres) : IAsyncLifetime
+public class ReprocessEndpointTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private AutomationEnv _env = default!;
     private int _user;

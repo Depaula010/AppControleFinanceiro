@@ -8,9 +8,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace MeuSecretario.IntegrationTests.Caching;
 
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class UserCacheCleanerTests(PostgresFixture postgres, RedisFixture redis) : IAsyncLifetime, IClassFixture<RedisFixture>, IDisposable
+public sealed class UserCacheCleanerTests(PostgresFixture postgres, RedisFixture redis) : IAsyncLifetime, IClassFixture<RedisFixture>, IDisposable, IClassFixture<PostgresFixture>
 {
     private const string Number = "5531999990000";
     private const string Other = "5531888880000";

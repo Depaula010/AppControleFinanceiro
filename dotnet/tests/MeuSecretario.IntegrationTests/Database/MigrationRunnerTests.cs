@@ -5,9 +5,8 @@ using Npgsql;
 
 namespace MeuSecretario.IntegrationTests.Database;
 
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class MigrationRunnerTests(PostgresFixture postgres)
+public class MigrationRunnerTests(PostgresFixture postgres) : IClassFixture<PostgresFixture>
 {
     [Fact]
     public async Task EmptyDatabase_GetsTheWholeProductionSchema()

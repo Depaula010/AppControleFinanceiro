@@ -8,9 +8,8 @@ using Npgsql;
 namespace MeuSecretario.IntegrationTests.Bills;
 
 /// <summary>SQL real da spec 005 (§3, §6): <c>ativo</c>, ordem, <c>LEFT JOIN</c>, releitura, <c>CHECK</c>, tenant, soma e reserva.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class BillRepositoryTests(PostgresFixture postgres) : IAsyncLifetime
+public class BillRepositoryTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly BillRepository _repository = new(postgres.Connections);
     private readonly BillsTestData _data = new(postgres.DataSource);

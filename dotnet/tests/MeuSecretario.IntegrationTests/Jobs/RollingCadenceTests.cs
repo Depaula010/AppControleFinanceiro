@@ -8,9 +8,8 @@ namespace MeuSecretario.IntegrationTests.Jobs;
 /// Desvio 255: Gasolina semanal e Terapia quinzenal (dados reais de 2026-10) vencem a cada 7 e 14 dias do último lançamento, no check-in,
 /// no motor e na idempotência do executor.
 /// </summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class RollingCadenceTests(PostgresFixture postgres) : IAsyncLifetime
+public sealed class RollingCadenceTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly JobsEnv _env = new(postgres);
     private CheckinQueries _queries = default!;

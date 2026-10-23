@@ -9,9 +9,8 @@ using Npgsql;
 namespace MeuSecretario.IntegrationTests.Admin;
 
 /// <summary><c>clear-bot-session</c>, <c>get-notification-config</c> e <c>config-alertas-financeiros</c> com PostgreSQL real (T16 a T18).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class BotSessionAndNotificationConfigTests(PostgresFixture postgres) : IAsyncLifetime
+public sealed class BotSessionAndNotificationConfigTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     public async Task InitializeAsync()
     {

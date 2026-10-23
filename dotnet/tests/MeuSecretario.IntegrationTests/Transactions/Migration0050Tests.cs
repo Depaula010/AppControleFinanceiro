@@ -4,9 +4,8 @@ using MeuSecretario.IntegrationTests.Support;
 namespace MeuSecretario.IntegrationTests.Transactions;
 
 /// <summary>Migration 0050 (desvio 027): <c>observacoes</c> e <c>origem</c> em <c>transacoes</c>.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class Migration0050Tests(PostgresFixture postgres) : IAsyncLifetime
+public class Migration0050Tests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly TransactionsTestData _data = new(postgres.DataSource);
 

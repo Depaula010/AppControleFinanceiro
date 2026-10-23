@@ -11,9 +11,8 @@ using Npgsql;
 namespace MeuSecretario.IntegrationTests.Accounts;
 
 /// <summary>Roteamento do Flask reproduzido: 404 HTML antes da autenticação, 405, barra final (spec 002 §2).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class AccountsRoutingTests(PostgresFixture postgres) : IAsyncLifetime
+public class AccountsRoutingTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string FlaskNotFoundHtml =
         "<!doctype html>\n<html lang=en>\n<title>404 Not Found</title>\n<h1>Not Found</h1>\n" +
@@ -88,9 +87,8 @@ public class AccountsRoutingTests(PostgresFixture postgres) : IAsyncLifetime
 }
 
 /// <summary>Usuário B nunca vê, altera nem remove conta do usuário A (RN-002-02): as 8 operações.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class AccountsTenantIsolationTests(PostgresFixture postgres) : IAsyncLifetime
+public class AccountsTenantIsolationTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly AccountsHttp _http = new(postgres);
     private readonly AccountsTestData _data = new(postgres.DataSource);
@@ -195,9 +193,8 @@ public class AccountsTenantIsolationTests(PostgresFixture postgres) : IAsyncLife
 }
 
 /// <summary>500 com mensagem fixa e log só com o tipo do erro (desvio 008, AC-002-85).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class AccountsFailureTests(PostgresFixture postgres) : IAsyncLifetime
+public class AccountsFailureTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Secret = "segredo-interno 5511999999999 Nubank";
 

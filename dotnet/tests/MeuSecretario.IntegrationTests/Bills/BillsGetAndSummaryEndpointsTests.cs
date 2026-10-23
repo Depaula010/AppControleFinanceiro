@@ -7,9 +7,8 @@ using MeuSecretario.TestFixtures;
 namespace MeuSecretario.IntegrationTests.Bills;
 
 /// <summary><c>RequireUser</c> nas 9 operações (AC-005-80), <c>GET /api/bills</c> (§3.1) e <c>GET /api/bills/summary</c> (§3.5).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class BillsGetAndSummaryEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public class BillsGetAndSummaryEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly BillsHttp _http = new(postgres);
     private readonly BillsTestData _data = new(postgres.DataSource);

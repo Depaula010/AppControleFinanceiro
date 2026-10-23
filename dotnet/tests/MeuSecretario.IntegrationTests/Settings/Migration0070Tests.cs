@@ -5,9 +5,8 @@ using MeuSecretario.IntegrationTests.Support;
 namespace MeuSecretario.IntegrationTests.Settings;
 
 /// <summary>Migration 0070 (desvio 250): coluna própria de <c>daysBeforeDue</c>, idempotente, sem copiar o valor antigo.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class Migration0070Tests(PostgresFixture postgres) : IAsyncLifetime
+public class Migration0070Tests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Version = "0070_notificationconfigs_dias_antes_vencimento";
 

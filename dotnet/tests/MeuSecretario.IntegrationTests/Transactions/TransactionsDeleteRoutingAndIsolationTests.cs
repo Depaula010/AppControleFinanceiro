@@ -11,9 +11,8 @@ using static MeuSecretario.IntegrationTests.Transactions.TransactionsTestData;
 namespace MeuSecretario.IntegrationTests.Transactions;
 
 /// <summary><c>DELETE /api/transactions/{id}</c> (spec 004 §3.4), corpo como texto exato.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class TransactionsDeleteEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public class TransactionsDeleteEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Deleted = """{"status":"success","message":"Transação deletada com sucesso"}""";
 
@@ -151,9 +150,8 @@ public class TransactionsDeleteEndpointsTests(PostgresFixture postgres) : IAsync
 }
 
 /// <summary>Roteamento do Flask reproduzido: 404 HTML antes da autenticação, 405, barra final (spec 004 §2).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class TransactionsRoutingTests(PostgresFixture postgres) : IAsyncLifetime
+public class TransactionsRoutingTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string FlaskNotFoundHtml =
         "<!doctype html>\n<html lang=en>\n<title>404 Not Found</title>\n<h1>Not Found</h1>\n" +
@@ -217,9 +215,8 @@ public class TransactionsRoutingTests(PostgresFixture postgres) : IAsyncLifetime
 }
 
 /// <summary>Usuário B nunca vê, altera nem remove transação do usuário A (RN-004-02): as 4 rotas.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class TransactionsTenantIsolationTests(PostgresFixture postgres) : IAsyncLifetime
+public class TransactionsTenantIsolationTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly TransactionsHttp _http = new(postgres);
     private readonly TransactionsTestData _data = new(postgres.DataSource);
@@ -323,9 +320,8 @@ public class TransactionsTenantIsolationTests(PostgresFixture postgres) : IAsync
 }
 
 /// <summary>500 com mensagem fixa e log só com o tipo do erro (desvio 008, AC-004-83).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class TransactionsFailureTests(PostgresFixture postgres) : IAsyncLifetime
+public class TransactionsFailureTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Secret = "segredo-interno 5511999999999 Supermercado";
 

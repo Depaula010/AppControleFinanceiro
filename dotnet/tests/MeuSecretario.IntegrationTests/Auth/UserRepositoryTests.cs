@@ -7,9 +7,8 @@ using Npgsql;
 
 namespace MeuSecretario.IntegrationTests.Auth;
 
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class UserRepositoryTests(PostgresFixture postgres) : IAsyncLifetime
+public class UserRepositoryTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly UserRepository _repository = new(postgres.Connections);
 

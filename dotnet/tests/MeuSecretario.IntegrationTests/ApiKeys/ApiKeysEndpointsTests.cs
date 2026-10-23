@@ -15,9 +15,8 @@ namespace MeuSecretario.IntegrationTests.ApiKeys;
 /// Spec 008 (rotas 1 a 9 e 16) ponta a ponta: HTTP real → casos de uso → PostgreSQL 15.
 /// Corpos comparados como texto exato (nomes, ordem e acentos são o contrato).
 /// </summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public partial class ApiKeysEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public partial class ApiKeysEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     public async Task InitializeAsync()
     {

@@ -5,9 +5,8 @@ using MeuSecretario.IntegrationTests.Support;
 namespace MeuSecretario.IntegrationTests.ApiKeys;
 
 /// <summary>Repositórios Dapper da 008a contra PostgreSQL 15 real: UNIQUE, FK, dono, upsert, agregação, plano.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class ApiKeyRepositoriesTests(PostgresFixture postgres) : IAsyncLifetime
+public class ApiKeyRepositoriesTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     public async Task InitializeAsync()
     {

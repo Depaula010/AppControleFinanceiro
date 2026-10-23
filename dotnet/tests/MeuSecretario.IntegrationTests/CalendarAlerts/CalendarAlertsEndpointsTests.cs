@@ -3,9 +3,8 @@ using MeuSecretario.IntegrationTests.Support;
 
 namespace MeuSecretario.IntegrationTests.CalendarAlerts;
 
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class CalendarAlertsEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public sealed class CalendarAlertsEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string NotConnected = "Você precisa conectar o Google Calendar primeiro para ativar alertas de tarefas";
     private const string NoParameters = "Nenhum parâmetro fornecido. Use 'ativo' e/ou 'minutos_antes'";

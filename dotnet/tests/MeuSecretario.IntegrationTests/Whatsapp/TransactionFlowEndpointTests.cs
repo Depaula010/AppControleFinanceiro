@@ -6,9 +6,8 @@ using MeuSecretario.IntegrationTests.Transactions;
 namespace MeuSecretario.IntegrationTests.Whatsapp;
 
 /// <summary>Fluxo completo pela rota real (spec 012a): "gastei 50" gera a pendência; "OK" grava e responde o feedback.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class TransactionFlowEndpointTests(PostgresFixture postgres) : IAsyncLifetime
+public class TransactionFlowEndpointTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private WhatsAppEnv _env = default!;
     private int _user;

@@ -8,9 +8,8 @@ using Npgsql;
 namespace MeuSecretario.IntegrationTests.Automation;
 
 /// <summary>SQL real das leituras de automação (spec 011 §7.3, §7.6): contas ativas, buscas, categorias, contas fixas, potes.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class AutomationLookupsTests(PostgresFixture postgres) : IAsyncLifetime
+public class AutomationLookupsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private AutomationEnv _env = default!;
     private AutomationLookups _lookups = default!;
@@ -200,9 +199,8 @@ public class AutomationLookupsTests(PostgresFixture postgres) : IAsyncLifetime
 }
 
 /// <summary>SQL real da reserva e do populador de faturas, com rollback (spec 011 §3.4, §3.5, §7.7).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class InvoiceScheduleStoreTests(PostgresFixture postgres) : IAsyncLifetime
+public class InvoiceScheduleStoreTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private AutomationEnv _env = default!;
     private int _user;

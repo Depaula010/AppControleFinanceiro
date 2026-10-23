@@ -8,9 +8,8 @@ namespace MeuSecretario.IntegrationTests.Categories;
 /// Critérios do seed (spec 003 §4 / AC-003-40 a 45) que o <c>ReferenceDataMigrationTests</c> da G-2 não verifica:
 /// conteúdo exato, ids do seed, sequences, ausência de linhas de usuário e o registro da migration.
 /// </summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class CategorySeedGapsTests(PostgresFixture postgres) : IAsyncLifetime
+public class CategorySeedGapsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     public async Task InitializeAsync() => await postgres.ResetAsync();
 

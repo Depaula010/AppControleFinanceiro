@@ -6,9 +6,8 @@ using static MeuSecretario.IntegrationTests.Transactions.TransactionsTestData;
 namespace MeuSecretario.IntegrationTests.Transactions;
 
 /// <summary>Autenticação nas 4 rotas (AC-004-80) e o <c>GET /api/transactions</c> (spec 004 §3.1), corpo como texto exato.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class TransactionsAuthAndGetEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public class TransactionsAuthAndGetEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly TransactionsHttp _http = new(postgres);
     private readonly TransactionsTestData _data = new(postgres.DataSource);

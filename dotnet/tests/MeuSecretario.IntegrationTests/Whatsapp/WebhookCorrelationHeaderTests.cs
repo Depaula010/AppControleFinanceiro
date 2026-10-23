@@ -3,9 +3,8 @@ using MeuSecretario.IntegrationTests.Support;
 namespace MeuSecretario.IntegrationTests.Whatsapp;
 
 /// <summary>Desvio 261: cada resposta do webhook devolve um <c>X-Correlation-Id</c> (o mesmo que prefixa as linhas de log daquela mensagem).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class WebhookCorrelationHeaderTests(PostgresFixture postgres) : IAsyncLifetime
+public sealed class WebhookCorrelationHeaderTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private WhatsAppEnv _env = default!;
 

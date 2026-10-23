@@ -6,9 +6,8 @@ using MeuSecretario.IntegrationTests.Support;
 namespace MeuSecretario.IntegrationTests.Categories;
 
 /// <summary>Spec 003 §3.5: visibilidade, filtro por tipo e ordem da consulta, contra o PostgreSQL 15 em container.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class CategoryRepositoryTests(PostgresFixture postgres) : IAsyncLifetime
+public class CategoryRepositoryTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly CategoryRepository _repository = new(postgres.Connections);
 

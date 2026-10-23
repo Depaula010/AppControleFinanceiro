@@ -8,9 +8,8 @@ using MeuSecretario.TestFixtures;
 namespace MeuSecretario.IntegrationTests.Categories;
 
 /// <summary>Spec 003 ponta a ponta: HTTP real, PostgreSQL 15 em container, seed da migration 0020. Corpos comparados como texto.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class CategoriesEndpointsDbTests(PostgresFixture postgres) : IAsyncLifetime
+public class CategoriesEndpointsDbTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     public async Task InitializeAsync() => await postgres.ResetAsync();
 

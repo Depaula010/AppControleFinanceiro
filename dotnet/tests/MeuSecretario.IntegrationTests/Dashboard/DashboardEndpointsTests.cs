@@ -49,9 +49,8 @@ internal sealed class DashboardTestKit(PostgresFixture postgres)
     public static string Ok(string data) => $$"""{"status":"success","data":{{data}}}""";
 }
 
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly DashboardTestKit _kit = new(postgres);
     private int _user;

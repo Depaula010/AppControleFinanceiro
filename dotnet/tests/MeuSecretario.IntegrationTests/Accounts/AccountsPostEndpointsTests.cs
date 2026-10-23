@@ -4,9 +4,8 @@ using MeuSecretario.IntegrationTests.Support;
 namespace MeuSecretario.IntegrationTests.Accounts;
 
 /// <summary>Spec 002 §3.2: <c>POST /api/accounts</c> e <c>/api/contas</c>, corpo comparado como texto exato.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class AccountsPostEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public class AccountsPostEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string TypeMessage =
         "Tipo de conta inválido. Valores permitidos: Conta Corrente, Conta Poupança, Investimento, Cartão de Crédito, Dinheiro, Outro";

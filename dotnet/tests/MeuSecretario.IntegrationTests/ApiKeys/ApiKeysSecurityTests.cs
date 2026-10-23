@@ -11,9 +11,8 @@ using Microsoft.Extensions.Logging;
 namespace MeuSecretario.IntegrationTests.ApiKeys;
 
 /// <summary>IDOR (desvios 006 e 045) e 500 sem vazamento (desvio 008, AC-008-17 e 50).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class ApiKeysSecurityTests(PostgresFixture postgres) : IAsyncLifetime
+public class ApiKeysSecurityTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     public async Task InitializeAsync() => await postgres.ResetAsync();
 

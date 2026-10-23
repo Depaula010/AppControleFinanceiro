@@ -11,9 +11,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace MeuSecretario.IntegrationTests.Admin;
 
 /// <summary><c>AdminTestDataRepository</c> e <c>test-notification tipo=contas</c> contra PostgreSQL real (T27, AC-009-36).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class TestDataRepositoryTests(PostgresFixture postgres) : IAsyncLifetime
+public sealed class TestDataRepositoryTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     public Task InitializeAsync() => postgres.ResetAsync();
 

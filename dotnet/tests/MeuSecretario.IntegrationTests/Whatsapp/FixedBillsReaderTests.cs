@@ -7,9 +7,8 @@ using MeuSecretario.IntegrationTests.Transactions;
 namespace MeuSecretario.IntegrationTests.Whatsapp;
 
 /// <summary>SQL real das contas fixas e dos vencimentos do WhatsApp (spec 012 §6.d).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class FixedBillsReaderTests(PostgresFixture postgres) : IAsyncLifetime
+public class FixedBillsReaderTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private static readonly DateOnly October1 = new(2026, 10, 1);
     private static readonly DateOnly October31 = new(2026, 10, 31);

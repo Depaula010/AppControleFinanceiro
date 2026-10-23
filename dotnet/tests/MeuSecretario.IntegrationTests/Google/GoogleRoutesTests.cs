@@ -10,9 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MeuSecretario.IntegrationTests.Google;
 
 /// <summary>Rotas do OAuth do Google ponta a ponta: HTTP real, PostgreSQL em container, Google e bot falsos (spec 010d, T29).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class GoogleRoutesTests(PostgresFixture postgres) : IAsyncLifetime
+public class GoogleRoutesTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string DeadDatabase = "postgresql://u:p@127.0.0.1:1/x";
     private const string TokenResponse =

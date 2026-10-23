@@ -8,9 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MeuSecretario.IntegrationTests.ApiKeys;
 
 /// <summary>Spec 008b (rotas 10 a 15) ponta a ponta contra PostgreSQL 15, com as colunas reais do banco (desvio 028).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public partial class LgpdEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public partial class LgpdEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     public async Task InitializeAsync()
     {

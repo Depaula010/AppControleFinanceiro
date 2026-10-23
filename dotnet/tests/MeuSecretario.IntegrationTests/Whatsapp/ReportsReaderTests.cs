@@ -6,9 +6,8 @@ using MeuSecretario.IntegrationTests.Support;
 namespace MeuSecretario.IntegrationTests.Whatsapp;
 
 /// <summary>Leitura dos relatórios sob comando (desvio 256) contra o PostgreSQL real.</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public sealed class ReportsReaderTests(PostgresFixture postgres) : IAsyncLifetime
+public sealed class ReportsReaderTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private static readonly DateOnly Today = new(2026, 10, 22);
 

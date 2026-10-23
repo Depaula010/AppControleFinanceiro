@@ -5,9 +5,8 @@ using MeuSecretario.IntegrationTests.Support;
 namespace MeuSecretario.IntegrationTests.Database;
 
 /// <summary>Migration 0020 (seed das categorias globais): idempotente e inofensiva em produção (ADR 0001, adendo).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class ReferenceDataMigrationTests(PostgresFixture postgres) : IAsyncLifetime
+public class ReferenceDataMigrationTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     public async Task InitializeAsync() => await postgres.ResetAsync();
 

@@ -11,9 +11,8 @@ using Npgsql;
 
 namespace MeuSecretario.IntegrationTests.Settings;
 
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class SettingsAggregateTests(PostgresFixture postgres) : IAsyncLifetime
+public class SettingsAggregateTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Defaults = """
         {"profile":{"id":1,"nome":"Ana Souza","email":null,"numero_whatsapp":"5511900000001","cidade":"Sao Paulo","estado":"SP","fuso_horario":"America/Sao_Paulo","meses_reserva_emergencia":6},"apiKeys":[{"provedor":"gemini","usar_chave_propria":false,"has_key":false},{"provedor":"weather","usar_chave_propria":false,"has_key":false},{"provedor":"openroute","usar_chave_propria":false,"has_key":false}],"notifications":{"morningBriefing":{"enabled":true,"time":"07:00"},"eveningCheckIn":{"enabled":true,"time":"19:00"},"financialAlerts":{"enabled":true,"daysBeforeDue":3}},"addresses":[]}
@@ -75,9 +74,8 @@ public class SettingsAggregateTests(PostgresFixture postgres) : IAsyncLifetime
 }
 
 /// <summary>401 nas 11 rotas, isolamento entre usuários e 500 sem vazamento (AC-007-01, 80, 81).</summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class SettingsAuthAndIsolationTests(PostgresFixture postgres) : IAsyncLifetime
+public class SettingsAuthAndIsolationTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly SettingsEnv _env = new(postgres);
     private int _a;
@@ -149,9 +147,8 @@ public class SettingsAuthAndIsolationTests(PostgresFixture postgres) : IAsyncLif
     }
 }
 
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class SettingsFailureTests(PostgresFixture postgres) : IAsyncLifetime
+public class SettingsFailureTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Secret = "SENTINELA-interna 5511900000001 ana@x.com";
 

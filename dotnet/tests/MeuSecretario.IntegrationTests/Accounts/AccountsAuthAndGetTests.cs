@@ -8,9 +8,8 @@ namespace MeuSecretario.IntegrationTests.Accounts;
 /// Primeira prova do filtro <c>RequireUser</c> numa rota <c>/api/*</c> real (AC-001-40 a 44, AC-002-80 e 81),
 /// nas 8 operações, e o <c>GET</c> de contas (spec 002 §3.1).
 /// </summary>
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class AccountsAuthAndGetTests(PostgresFixture postgres) : IAsyncLifetime
+public class AccountsAuthAndGetTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private readonly AccountsHttp _http = new(postgres);
     private readonly AccountsTestData _data = new(postgres.DataSource);

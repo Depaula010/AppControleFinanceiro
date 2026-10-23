@@ -7,9 +7,8 @@ using Microsoft.Extensions.Logging;
 
 namespace MeuSecretario.IntegrationTests.Settings;
 
-[Collection(PostgresTestGroup.Name)]
 [Trait("Category", "Docker")]
-public class ApiKeysSettingsEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
+public class ApiKeysSettingsEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
     private const string Path = "/api/user/api-keys";
     private readonly SettingsEnv _env = new(postgres);
