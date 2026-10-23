@@ -146,3 +146,13 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [232](232-whatsapp-comparacao-mensal-sinal-e-formato.md) | Comparação Mensal: totais negativos, variação invertida e números em formato inglês | correção | 012 | implementado |
 | [233](233-whatsapp-analise-maiores-gastos-invertidos.md) | Análise Inteligente: "Maiores gastos" lista os menores e os dias da semana saem em inglês | correção | 012 | implementado |
 | [250](250-dias-antes-vencimento-coluna-propria.md) | daysBeforeDue em coluna própria | correção | 007, 013 | implementado |
+| [251](251-checkin-conta-atrasada-nao-reaparece.md) | Check-in: conta atrasada confirmada não volta no dia seguinte | correção | 013 | implementado |
+| [252](252-checkin-lembrete-variavel-pergunta-valor.md) | Check-in confirma lembretes variáveis perguntando o valor e lista o que não foi confirmado | correção | 012, 013 | implementado |
+| [253](253-transacoes-competencia.md) | Transação de agendamento guarda a que vencimento se refere (competencia) | correção | 013, 012 | implementado |
+| [254](254-checkin-estado-explicito.md) | Diálogo do check-in com estado explícito (sem mudança de comportamento) | operação | 012 | implementado |
+| [255](255-cadencia-continua-semanal-quinzenal.md) | Agendamentos SEMANAL, QUINZENAL e DIARIA têm cadência contínua | correção | 013 | implementado |
+| [256](256-whatsapp-relatorios-sob-comando.md) | Relatórios sob comando no WhatsApp (fatura por categoria, gastos do mês por categoria, relatório do mês) | compatibilidade | 012 | implementado |
+| [257](257-checkin-previsto-em-data-real.md) | Check-in: "Previsto em" da receita pendente usa o vencimento real | correção | 013 | implementado |
+| [258](258-indice-unico-lancamento-agendamento.md) | Índice único (agendamento_id, competencia): o banco recusa lançamento duplicado | correção | 013 | implementado |
+| [259](259-webhook-idempotente-message-id.md) | Webhook do WhatsApp ignora a mesma mensagem reenviada (message_id) | correção | 012 | implementado |
+| [260](260-pote-limite-em-decimal.md) | Limite do pote decidido em decimal | correção | 011 | implementado |
