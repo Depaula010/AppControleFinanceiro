@@ -87,6 +87,9 @@ public interface IScheduleExecutionRepository
     /// </summary>
     Task<IReadOnlyList<ScheduleInfo>> ListMotorCandidatesAsync(DateOnly today, CancellationToken cancellationToken);
 
+    /// <summary>Desvio 262: os FIXO/PARCELADO que venceram em <paramref name="day"/> (dia já passado) e já existiam nesse dia.</summary>
+    Task<IReadOnlyList<ScheduleInfo>> ListCatchUpCandidatesAsync(DateOnly day, CancellationToken cancellationToken);
+
     /// <summary>Uma transação: trava o agendamento, confere a idempotência (desvios 011 e 012), lança e avança a parcela.</summary>
     Task<ScheduleExecutionOutcome> ExecuteAsync(ScheduleExecutionRequest request, CancellationToken cancellationToken);
 }

@@ -1,5 +1,6 @@
 using System.Globalization;
 using MeuSecretario.Application.Abstractions;
+using MeuSecretario.Application.Ops;
 using MeuSecretario.Application.Automation;
 using MeuSecretario.Application.CalendarAlerts;
 using MeuSecretario.Application.Caching;
@@ -190,9 +191,13 @@ public sealed class ScheduleMotor(
     ICache cache,
     IClock clock,
     JobRunner runner,
-    IJobLog log) : IScheduleMotor, IScheduledJob
+    IJobLog log,
+    IOpsAlerts alerts) : IScheduleMotor, IScheduledJob
 {
     private static readonly TimeSpan ReminderTtl = TimeSpan.FromHours(48);
+
+    /// <summary>Quantos dias para trás o motor confere o que deveria ter lançado (desvio 262).</summary>
+    public const int CatchUpDays = 3;
 
     public string Name => "MOTOR-AGENDAMENTOS";
 
@@ -234,7 +239,57 @@ public sealed class ScheduleMotor(
             }
         }
 
+        await CatchUpAsync(today, cancellationToken);
+
         log.Info(Name, "Processamento de agendamentos finalizado.");
+    }
+
+    /// <summary>
+    /// Desvio 262: o motor só lançava no dia exato; se o app estivesse fora do ar (ou o job falhasse) naquele dia, a conta nunca era
+    /// lançada sozinha. Agora cada execução reconfere os últimos <see cref="CatchUpDays"/> dias: o executor é idempotente (competência,
+    /// regra de "paga" e índice único), então repetir o que já foi lançado dá <c>Skipped</c> e só o que ficou para trás é lançado,
+    /// na data do próprio vencimento. Se recuperar algo, avisa o dono: significa que um dia foi perdido.
+    /// </summary>
+    private async Task CatchUpAsync(DateOnly today, CancellationToken cancellationToken)
+    {
+        var recovered = new List<string>();
+        for (var back = CatchUpDays; back >= 1; back--)
+        {
+            var day = today.AddDays(-back);
+            IReadOnlyList<ScheduleInfo> candidates;
+            try
+            {
+                candidates = await repository.ListCatchUpCandidatesAsync(day, cancellationToken);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                log.Failure(Name, $"ERRO ao listar agendamentos de {day:dd/MM}: {ex.GetType().Name}");
+                continue;
+            }
+
+            foreach (var schedule in candidates)
+            {
+                try
+                {
+                    var outcome = await executor.ExecuteAsync(new ScheduleExecutionRequest(schedule.Id, day), cancellationToken);
+                    if (outcome is ScheduleExecutionOutcome.Posted)
+                    {
+                        recovered.Add($"#{schedule.Id.ToString(CultureInfo.InvariantCulture)} ({day:dd/MM})");
+                    }
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    log.Failure(Name, $"ERRO ao recuperar Agendamento ID {schedule.Id.ToString(CultureInfo.InvariantCulture)} de {day:dd/MM}: {ex.GetType().Name}");
+                }
+            }
+        }
+
+        if (recovered.Count > 0)
+        {
+            var message = $"Recuperei {recovered.Count.ToString(CultureInfo.InvariantCulture)} lançamento(s) de dias anteriores que o motor não fez: {string.Join(", ", recovered)}";
+            log.Warning(Name, message);
+            alerts.Raise(Name, message);
+        }
     }
 
     private async Task RemindAsync(ScheduleInfo schedule, DateOnly today, CancellationToken cancellationToken)
