@@ -187,7 +187,7 @@ internal sealed class BillsRig
 
         var steps = new List<IWhatsAppStep>
         {
-            new CheckinStep(session, new CheckinResponder(Cache, session, Executor, clock, Diagnostics)),
+            new CheckinStep(session, new CheckinResponder(new CheckinDialogStore(Cache, session), Executor, clock, Diagnostics)),
         };
         var intents = new List<IWhatsAppIntent>
         {

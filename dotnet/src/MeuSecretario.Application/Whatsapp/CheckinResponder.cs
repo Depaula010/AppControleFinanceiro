@@ -1,6 +1,5 @@
 using System.Globalization;
 using MeuSecretario.Application.Abstractions;
-using MeuSecretario.Application.Caching;
 using MeuSecretario.Application.Jobs;
 using MeuSecretario.Domain.Jobs;
 using MeuSecretario.Domain.Whatsapp;
@@ -29,20 +28,18 @@ public interface ICheckinDiagnostics
 /// </para>
 /// </summary>
 public sealed class CheckinResponder(
-    ICache cache, ICheckinSession session, IScheduleExecutor executor, IClock clock, ICheckinDiagnostics diagnostics) : INightlyCheckinResponder
+    CheckinDialogStore dialog, IScheduleExecutor executor, IClock clock, ICheckinDiagnostics diagnostics) : INightlyCheckinResponder
 {
-    private readonly CheckinDialogStore _dialog = new(cache, session);
-
     public async Task<string?> RespondAsync(string number, string message, string checkinId, CancellationToken cancellationToken)
     {
-        switch (await _dialog.LoadAsync(number, checkinId, cancellationToken))
+        switch (await dialog.LoadAsync(number, checkinId, cancellationToken))
         {
             case CheckinDialogState.AwaitingValues awaiting:
                 return await RespondValueAsync(number, message, checkinId, awaiting.Pending, cancellationToken);
             case CheckinDialogState.AwaitingConfirmation confirmation:
                 return await RespondConfirmationAsync(number, message, checkinId, confirmation.Session, cancellationToken);
             default:
-                await _dialog.ExpireAsync(number, cancellationToken);
+                await dialog.ExpireAsync(number, cancellationToken);
                 return CheckinReplyTexts.Expired;
         }
     }
@@ -53,7 +50,7 @@ public sealed class CheckinResponder(
     {
         if (data.TotalItems == 0)
         {
-            await _dialog.EndAsync(number, checkinId, cancellationToken);
+            await dialog.EndAsync(number, checkinId, cancellationToken);
             return CheckinReplyTexts.NoRecentItems;
         }
 
@@ -61,11 +58,11 @@ public sealed class CheckinResponder(
         switch (reply.Kind)
         {
             case CheckinReplyKind.Defer:
-                await _dialog.EndAsync(number, checkinId, cancellationToken);
+                await dialog.EndAsync(number, checkinId, cancellationToken);
                 return CheckinReplyTexts.Deferred;
             case CheckinReplyKind.Error:
             case CheckinReplyKind.Invalid:
-                await _dialog.EndAsync(number, checkinId, cancellationToken);
+                await dialog.EndAsync(number, checkinId, cancellationToken);
                 return reply.Text;
         }
 
@@ -89,11 +86,11 @@ public sealed class CheckinResponder(
             {
                 // A sessão das contas some; a flag ativa e a lista de valores ficam até a última pergunta ser respondida.
                 var pending = new CheckinPendingValues(variable, variable.Count);
-                await _dialog.StartValuesAsync(number, checkinId, pending, cancellationToken);
+                await dialog.StartValuesAsync(number, checkinId, pending, cancellationToken);
                 return Join(Summary(confirmed, notConfirmed, data.TotalItems), Question(pending));
             }
 
-            await _dialog.EndAsync(number, checkinId, cancellationToken);
+            await dialog.EndAsync(number, checkinId, cancellationToken);
             return confirmed.Count == 0 && notConfirmed.Count == 0
                 ? CheckinReplyTexts.NoValidItems
                 : Summary(confirmed, notConfirmed, data.TotalItems);
@@ -101,7 +98,7 @@ public sealed class CheckinResponder(
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             diagnostics.ReplyFailed(ex.GetType().Name);
-            await _dialog.EndAsync(number, checkinId, cancellationToken);
+            await dialog.EndAsync(number, checkinId, cancellationToken);
             return CheckinReplyTexts.SaveFailed;
         }
     }
@@ -115,7 +112,7 @@ public sealed class CheckinResponder(
 
         if (reply.Kind == CheckinValueKind.Invalid)
         {
-            await _dialog.SaveValuesAsync(number, checkinId, queue, cancellationToken);
+            await dialog.SaveValuesAsync(number, checkinId, queue, cancellationToken);
             return Join(CheckinReplyTexts.ValueInvalid, Question(queue));
         }
 
@@ -129,7 +126,7 @@ public sealed class CheckinResponder(
             decimal? amount = reply.Kind == CheckinValueKind.Amount ? reply.Amount : Expected(item);
             if (amount is not > 0)
             {
-                await _dialog.SaveValuesAsync(number, checkinId, queue, cancellationToken);
+                await dialog.SaveValuesAsync(number, checkinId, queue, cancellationToken);
                 return Join(CheckinReplyTexts.ValueNeeded, Question(queue));
             }
 
@@ -155,7 +152,7 @@ public sealed class CheckinResponder(
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 diagnostics.ReplyFailed(ex.GetType().Name);
-                await _dialog.EndAsync(number, checkinId, cancellationToken);
+                await dialog.EndAsync(number, checkinId, cancellationToken);
                 return CheckinReplyTexts.SaveFailed;
             }
         }
@@ -163,11 +160,11 @@ public sealed class CheckinResponder(
         var rest = queue with { Items = [.. queue.Items.Skip(1)] };
         if (rest.Items.Count == 0)
         {
-            await _dialog.EndAsync(number, checkinId, cancellationToken);
+            await dialog.EndAsync(number, checkinId, cancellationToken);
             return line;
         }
 
-        await _dialog.SaveValuesAsync(number, checkinId, rest, cancellationToken);
+        await dialog.SaveValuesAsync(number, checkinId, rest, cancellationToken);
         return Join(line, Question(rest));
     }
 

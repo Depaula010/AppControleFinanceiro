@@ -149,7 +149,7 @@ public class JobsParityTests
 
     [Fact]
     [Trait("AC", "013-46")]
-    public void CheckinMessage_PendingIncomeFromThePreviousMonth_ShowsItsRealDueDate_Deviation252()
+    public void CheckinMessage_PendingIncomeFromThePreviousMonth_ShowsItsRealDueDate_Deviation257()
     {
         // Hoje 03/11: a receita do dia 28 venceu em 28/10 (dentro dos 7 dias) e não pode sair como "28/11" (futuro).
         var salary = new CheckinBill(

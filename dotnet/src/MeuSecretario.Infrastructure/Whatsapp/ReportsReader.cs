@@ -16,6 +16,16 @@ public sealed class ReportsReader(IDbConnectionFactory connections) : IReportsRe
 
     private const int TopPurchases = 5;
 
+    /// <summary>Gasto por categoria (maior primeiro) das transações que casam com <paramref name="where"/>; só valores negativos entram.</summary>
+    private static string CategoriesSql(string where) => $"""
+        SELECT {CategoryName} AS Name, SUM(-t.valor) AS Amount, COUNT(*) AS Count
+        FROM transacoes t
+        JOIN subcategoria s ON s.id = t.subcategoria_id
+        JOIN macrocategoria m ON m.id = s.macro_id
+        WHERE t.valor < 0 AND {where}
+        GROUP BY 1 ORDER BY 2 DESC, 1
+        """;
+
     public async Task<IReadOnlyList<ReportCard>> ListCardsAsync(int userId, CancellationToken cancellationToken)
     {
         await using var connection = await connections.OpenAsync(cancellationToken);
@@ -52,14 +62,7 @@ public sealed class ReportsReader(IDbConnectionFactory connections) : IReportsRe
             cancellationToken: cancellationToken));
 
         var categories = await connection.QueryAsync<CategoryRow>(new CommandDefinition(
-            $"""
-            SELECT {CategoryName} AS Name, SUM(-t.valor) AS Amount, COUNT(*) AS Count
-            FROM transacoes t
-            JOIN subcategoria s ON s.id = t.subcategoria_id
-            JOIN macrocategoria m ON m.id = s.macro_id
-            WHERE t.fatura_id = @invoiceId AND t.valor < 0
-            GROUP BY 1 ORDER BY 2 DESC, 1
-            """,
+            CategoriesSql("t.fatura_id = @invoiceId"),
             new { invoiceId = invoice.Id },
             cancellationToken: cancellationToken));
 
@@ -117,8 +120,8 @@ public sealed class ReportsReader(IDbConnectionFactory connections) : IReportsRe
         var previousEndExclusive = partial ? previousStart.AddDays(Math.Min(elapsedDays, monthStart.DayNumber - previousStart.DayNumber)) : monthStart;
 
         await using var connection = await connections.OpenAsync(cancellationToken);
-        var current = await CategoryTotalsListAsync(connection, userId, monthStart, until.AddDays(1), cancellationToken);
-        var previous = (await CategoryTotalsListAsync(connection, userId, previousStart, previousEndExclusive, cancellationToken))
+        var current = await MonthCategoriesAsync(connection, userId, monthStart, until.AddDays(1), cancellationToken);
+        var previous = (await MonthCategoriesAsync(connection, userId, previousStart, previousEndExclusive, cancellationToken))
             .ToDictionary(c => c.Name, c => (c.Amount, c.Count), StringComparer.Ordinal);
 
         var rows = current
@@ -129,18 +132,11 @@ public sealed class ReportsReader(IDbConnectionFactory connections) : IReportsRe
         return new MonthByCategoryReport(monthStart, until, partial, rows.Sum(r => r.Amount), previous.Values.Sum(p => p.Amount), rows);
     }
 
-    private static async Task<IReadOnlyList<(string Name, decimal Amount, int Count)>> CategoryTotalsListAsync(
+    private static async Task<IReadOnlyList<(string Name, decimal Amount, int Count)>> MonthCategoriesAsync(
         System.Data.Common.DbConnection connection, int userId, DateOnly from, DateOnly toExclusive, CancellationToken cancellationToken) =>
         [.. (await connection.QueryAsync<CategoryRow>(new CommandDefinition(
-            $"""
-            SELECT {CategoryName} AS Name, SUM(-t.valor) AS Amount, COUNT(*) AS Count
-            FROM transacoes t
-            JOIN subcategoria s ON s.id = t.subcategoria_id
-            JOIN macrocategoria m ON m.id = s.macro_id
-            WHERE t.usuario_id = @userId AND t.tipo_transacao = 'Despesa' AND t.valor < 0
-              AND t.data_transacao >= @from AND t.data_transacao < @toExclusive
-            GROUP BY 1
-            """,
+            CategoriesSql(
+                "t.usuario_id = @userId AND t.tipo_transacao = 'Despesa' AND t.data_transacao >= @from AND t.data_transacao < @toExclusive"),
             new { userId, from = from.ToDateTime(TimeOnly.MinValue), toExclusive = toExclusive.ToDateTime(TimeOnly.MinValue) },
             cancellationToken: cancellationToken))).Select(r => (r.Name, r.Amount, r.Count))];
 

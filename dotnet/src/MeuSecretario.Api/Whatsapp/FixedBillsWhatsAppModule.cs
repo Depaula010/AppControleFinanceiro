@@ -20,6 +20,8 @@ internal static class FixedBillsWhatsAppModule
         services.AddScoped<IWhatsAppIntent, DueWeekIntent>();
         services.AddScoped<IWhatsAppIntent, OverdueIntent>();
 
+        services.AddScoped<CheckinDialogStore>();
+
         // O módulo base registra o responsável padrão (TryAdd, "não tratada"); esta é a implementação real e vence por vir depois.
         services.AddScoped<INightlyCheckinResponder, CheckinResponder>();
     }

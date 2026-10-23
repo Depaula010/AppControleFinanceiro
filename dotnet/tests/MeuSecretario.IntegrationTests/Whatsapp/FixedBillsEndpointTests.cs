@@ -46,7 +46,8 @@ public class FixedBillsEndpointTests(PostgresFixture postgres) : IAsyncLifetime
         var session = new CheckinSessionState(_cache);
         _checkin = new NightlyCheckinService(new CheckinQueries(postgres.Connections), _cache, clock);
         var responder = new CheckinResponder(
-            _cache, session, new ScheduleExecutor(new ScheduleExecutionRepository(postgres.Connections)), clock, new NoDiagnostics());
+            new CheckinDialogStore(_cache, session), new ScheduleExecutor(new ScheduleExecutionRepository(postgres.Connections)), clock,
+            new NoDiagnostics());
 
         _useCase = new HandleWhatsAppMessage(
             new WhatsAppUserLookup(postgres.Connections),
