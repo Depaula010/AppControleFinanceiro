@@ -13,6 +13,7 @@ Backend **.NET 10** do Meu Secretário (finanças pessoais + agenda por WhatsApp
 7. **Idioma:** código em inglês; mensagens ao usuário, erros da API e WhatsApp em português, idênticos aos contratos.
 8. **Fuso `America/Sao_Paulo` e cultura `pt-BR` explícitos**; use `IClock`/`TimeProvider`, nunca `DateTime.Now`.
 9. **Nunca dar push em `main` sem intenção de deployar**: cada push em `main` derruba e recria os containers (~3 min de indisponibilidade). Trabalhe em branch.
+10. **Dinheiro é `decimal` (e `numeric` no banco).** `double` só onde o Flask é reproduzido literalmente (formatação de mensagem, JSON de resposta), e nunca para DECIDIR: compare e some valores em `decimal` (`MoneyDecimal.TryFromDouble` converte pela forma textual mais curta). Ex. (desvio 260): `0.14 + 0.10 > 0.24` é verdadeiro em `double`.
 
 ## 2. Comandos
 
