@@ -42,24 +42,54 @@ public sealed class ScheduleExecutionRepository(IDbConnectionFactory connections
         await using var connection = await connections.OpenAsync(cancellationToken);
         var rows = await connection.QueryAsync<Row>(new CommandDefinition(
             $"""
-            {SelectWith($", CASE WHEN {SchedulePaymentSql.IsRolling("a")} THEN {SchedulePaymentSql.NextDue("a", "@today")} END AS NextDue")}
+            {SelectWithNextDue}
             WHERE a.ativo = TRUE
               AND (
-                (a.tipo_agendamento IN ('FIXO', 'PARCELADO')
-                 AND (
-                   (NOT {SchedulePaymentSql.IsRolling("a")}
-                    AND (a.dia_execucao = @day OR (@lastDay AND a.dia_execucao > @day))
-                    AND (a.periodicidade <> 'ANUAL' OR a.mes_execucao = @month))
-                   OR ({SchedulePaymentSql.IsRolling("a")} AND {SchedulePaymentSql.NextDue("a", "@today")} = @today)))
+                (a.tipo_agendamento IN ('FIXO', 'PARCELADO') AND {DueOnDay})
                 OR a.tipo_agendamento = 'LEMBRETE_VARIAVEL')
             ORDER BY a.id
             """,
-            JobSql.With(
-                ("day", today.Day, DbType.Int32), ("month", today.Month, DbType.Int32), ("lastDay", JobClock.IsLastDayOfMonth(today), DbType.Boolean),
-                ("today", JobSql.Day(today), DbType.Date)),
+            DayParameters(today),
             cancellationToken: cancellationToken));
         return [.. rows.Select(r => r.ToInfo())];
     }
+
+    /// <summary>
+    /// Desvio 262: o que venceu em <paramref name="day"/> (FIXO e PARCELADO, os que o motor lança sozinho) e já existia nesse dia
+    /// (<c>data_inicio</c>). Lembrete variável fica de fora: avisar tarde é só ruído.
+    /// </summary>
+    public async Task<IReadOnlyList<ScheduleInfo>> ListCatchUpCandidatesAsync(DateOnly day, CancellationToken cancellationToken)
+    {
+        await using var connection = await connections.OpenAsync(cancellationToken);
+        var rows = await connection.QueryAsync<Row>(new CommandDefinition(
+            $"""
+            {SelectWithNextDue}
+            WHERE a.ativo = TRUE
+              AND a.tipo_agendamento IN ('FIXO', 'PARCELADO')
+              AND (a.data_inicio IS NULL OR a.data_inicio <= @today)
+              AND {DueOnDay}
+            ORDER BY a.id
+            """,
+            DayParameters(day),
+            cancellationToken: cancellationToken));
+        return [.. rows.Select(r => r.ToInfo())];
+    }
+
+    /// <summary>"Vence no dia <c>@today</c>": dia do mês (com o corte do último dia) ou, na cadência contínua, o próximo vencimento.</summary>
+    private static readonly string DueOnDay = $"""
+        (
+           (NOT {SchedulePaymentSql.IsRolling("a")}
+            AND (a.dia_execucao = @day OR (@lastDay AND a.dia_execucao > @day))
+            AND (a.periodicidade <> 'ANUAL' OR a.mes_execucao = @month))
+           OR ({SchedulePaymentSql.IsRolling("a")} AND {SchedulePaymentSql.NextDue("a", "@today")} = @today))
+        """;
+
+    private static readonly string SelectWithNextDue = SelectWith(
+        $", CASE WHEN {SchedulePaymentSql.IsRolling("a")} THEN {SchedulePaymentSql.NextDue("a", "@today")} END AS NextDue");
+
+    private static DynamicParameters DayParameters(DateOnly day) => JobSql.With(
+        ("day", day.Day, DbType.Int32), ("month", day.Month, DbType.Int32), ("lastDay", JobClock.IsLastDayOfMonth(day), DbType.Boolean),
+        ("today", JobSql.Day(day), DbType.Date));
 
     public async Task<ScheduleExecutionOutcome> ExecuteAsync(ScheduleExecutionRequest request, CancellationToken cancellationToken)
     {
