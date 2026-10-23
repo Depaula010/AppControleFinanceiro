@@ -52,6 +52,7 @@ jobs:
           BOT_WHATSAPP_URL: ${{ secrets.BOT_WHATSAPP_URL }}
           BOT_SESSION_NAME: ${{ secrets.BOT_SESSION_NAME }}
           BOT_API_KEY: ${{ secrets.BOT_API_KEY }}
+          OPS_ALERT_WHATSAPP: ${{ secrets.OPS_ALERT_WHATSAPP }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
@@ -81,6 +82,7 @@ jobs:
           BOT_WHATSAPP_URL=${{ secrets.BOT_WHATSAPP_URL }}
           BOT_SESSION_NAME=${{ secrets.BOT_SESSION_NAME }}
           BOT_API_KEY=${{ secrets.BOT_API_KEY }}
+          OPS_ALERT_WHATSAPP=${{ secrets.OPS_ALERT_WHATSAPP }}
           GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }}

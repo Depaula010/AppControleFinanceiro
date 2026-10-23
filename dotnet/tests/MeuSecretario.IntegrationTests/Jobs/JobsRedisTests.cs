@@ -66,6 +66,9 @@ public sealed class JobsRedisTests(RedisFixture redis) : IClassFixture<RedisFixt
             return [];
         }
 
+        public Task<IReadOnlyList<ScheduleInfo>> ListCatchUpCandidatesAsync(DateOnly day, CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<ScheduleInfo>>([]);
+
         public Task<ScheduleExecutionOutcome> ExecuteAsync(ScheduleExecutionRequest request, CancellationToken cancellationToken) =>
             throw new NotSupportedException();
     }
@@ -126,7 +129,7 @@ public sealed class JobsRedisTests(RedisFixture redis) : IClassFixture<RedisFixt
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var motor = new ScheduleMotor(
             new BlockingMotorRepository(started, release), new ScheduleExecutor(new BlockingMotorRepository(started, release)),
-            new RecordingBot(), _cache, new BrazilClock(TimeProvider.System), Runner(), new QuietLog());
+            new RecordingBot(), _cache, new BrazilClock(TimeProvider.System), Runner(), new QuietLog(), new MeuSecretario.Infrastructure.Ops.OpsAlertChannel(false));
         var lockKey = CacheKeys.JobLock("motor-agendamentos");
         await _mux.GetDatabase().KeyDeleteAsync(lockKey);
 

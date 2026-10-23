@@ -3,6 +3,7 @@ using MeuSecretario.Application.Automation;
 using MeuSecretario.Application.CalendarAlerts;
 using MeuSecretario.Application.Caching;
 using MeuSecretario.Application.Jobs;
+using MeuSecretario.Application.Ops;
 using MeuSecretario.Application.Transactions;
 using MeuSecretario.Domain.Automation;
 using MeuSecretario.Domain.Jobs;
@@ -283,6 +284,7 @@ public class ScheduleMotorTests
     private readonly JobsHarness _h = new();
     private readonly IScheduleExecutionRepository _repository = Substitute.For<IScheduleExecutionRepository>();
     private readonly IScheduleExecutor _executor = Substitute.For<IScheduleExecutor>();
+    private readonly IOpsAlerts _alerts = Substitute.For<IOpsAlerts>();
 
     public ScheduleMotorTests()
     {
@@ -290,11 +292,64 @@ public class ScheduleMotorTests
             .Returns(new ScheduleExecutionOutcome.Posted(1, "x", -1m, null));
     }
 
-    private ScheduleMotor Motor() => new(_repository, _executor, _h.Bot, _h.Cache, _h.Clock, _h.Runner, _h.Log);
+    private ScheduleMotor Motor() => new(_repository, _executor, _h.Bot, _h.Cache, _h.Clock, _h.Runner, _h.Log, _alerts);
 
     private static ScheduleInfo Schedule(
         int id, string kind = ScheduleKinds.Fixed, int day = 18, int notify = 0, decimal? amount = 100m, string whatsapp = "5511") =>
         new(id, 2, 3, 4, "Luz", amount, kind, "MENSAL", day, null, null, 0, notify, "Despesa Essencial", "Conta Corrente", whatsapp);
+
+    // Hoje é 18/03/2026: a recuperação confere 15, 16 e 17/03 (desvio 262).
+    private static readonly DateOnly March16 = new(2026, 3, 16);
+
+    [Fact]
+    [Trait("AC", "013-60")]
+    public async Task CatchUp_RechecksTheLastThreeDays_AndPostsWhatWasMissedOnItsDueDate_AndWarnsTheOwner()
+    {
+        _repository.ListCatchUpCandidatesAsync(March16, Arg.Any<CancellationToken>()).Returns([Schedule(7, day: 16)]);
+
+        await Motor().RunAsync(CancellationToken.None);
+
+        foreach (var day in new[] { 15, 16, 17 })
+        {
+            await _repository.Received(1).ListCatchUpCandidatesAsync(new DateOnly(2026, 3, day), Arg.Any<CancellationToken>());
+        }
+
+        await _repository.DidNotReceive().ListCatchUpCandidatesAsync(new DateOnly(2026, 3, 14), Arg.Any<CancellationToken>());
+        await _executor.Received(1).ExecuteAsync(new ScheduleExecutionRequest(7, March16), Arg.Any<CancellationToken>());
+        _alerts.Received(1).Raise("MOTOR-AGENDAMENTOS", "Recuperei 1 lançamento(s) de dias anteriores que o motor não fez: #7 (16/03)");
+        _h.Log.Lines.ShouldContain(line => line.StartsWith("WARNING MOTOR-AGENDAMENTOS: Recuperei 1", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    [Trait("AC", "013-60")]
+    public async Task CatchUp_WhatWasAlreadyPosted_IsSkipped_AndNobodyIsWarned()
+    {
+        _repository.ListCatchUpCandidatesAsync(March16, Arg.Any<CancellationToken>()).Returns([Schedule(7, day: 16)]);
+        _executor.ExecuteAsync(new ScheduleExecutionRequest(7, March16), Arg.Any<CancellationToken>())
+            .Returns(new ScheduleExecutionOutcome.Skipped("já lançado no mês"));
+
+        await Motor().RunAsync(CancellationToken.None);
+
+        await _executor.Received(1).ExecuteAsync(new ScheduleExecutionRequest(7, March16), Arg.Any<CancellationToken>());
+        _alerts.DidNotReceiveWithAnyArgs().Raise(default!, default!);
+    }
+
+    [Fact]
+    [Trait("AC", "013-60")]
+    public async Task CatchUp_AFailureForOneScheduleOrDay_IsLogged_AndTheRestStillRuns()
+    {
+        _repository.ListCatchUpCandidatesAsync(new DateOnly(2026, 3, 15), Arg.Any<CancellationToken>())
+            .Returns<IReadOnlyList<ScheduleInfo>>(_ => throw new InvalidOperationException("banco fora"));
+        _repository.ListCatchUpCandidatesAsync(March16, Arg.Any<CancellationToken>()).Returns([Schedule(7, day: 16), Schedule(8, day: 16)]);
+        _executor.ExecuteAsync(new ScheduleExecutionRequest(7, March16), Arg.Any<CancellationToken>()).Throws(new InvalidOperationException("x"));
+
+        await Motor().RunAsync(CancellationToken.None);
+
+        _h.Log.Lines.ShouldContain(line => line.StartsWith("ERROR MOTOR-AGENDAMENTOS: ERRO ao listar agendamentos de 15/03", StringComparison.Ordinal));
+        _h.Log.Lines.ShouldContain(line => line.StartsWith("ERROR MOTOR-AGENDAMENTOS: ERRO ao recuperar Agendamento ID 7 de 16/03", StringComparison.Ordinal));
+        await _executor.Received(1).ExecuteAsync(new ScheduleExecutionRequest(8, March16), Arg.Any<CancellationToken>());
+        _alerts.Received(1).Raise("MOTOR-AGENDAMENTOS", "Recuperei 1 lançamento(s) de dias anteriores que o motor não fez: #8 (16/03)");
+    }
 
     [Fact]
     [Trait("AC", "013-60")]
