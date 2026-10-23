@@ -18,6 +18,11 @@ env:
   DEPLOY_PATH: /opt/meu-secretario
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+# Um deploy por vez: dois merges seguidos entram em fila (sem cancelar o que já está rodando).
+concurrency:
+  group: deploy-contabo
+  cancel-in-progress: false
+
 jobs:
   deploy:
     name: Deploy to Production
@@ -90,13 +95,14 @@ jobs:
           OPENROUTE_API_KEY=${{ secrets.OPENROUTE_API_KEY }}
           ENVEOF
             
-            echo "🛑 Stopping containers..."
-            docker compose down --remove-orphans
-            
-            echo "🗑️ Cleaning old images..."
-            docker system prune -f
-            
-            echo "🏗️ Building new images..."
+            # Servidor compartilhado (docs/SERVIDOR_CONTABO.md): só mexe neste projeto (compose project = esta pasta), nunca em
+            # `docker system prune` nem em containers de outro projeto.
+            echo "📸 Anotando as imagens atuais deste projeto (para remover só as antigas no fim)..."
+            OLD_IMAGES=$(docker compose images -q 2>/dev/null | sort -u | xargs echo || true)
+
+            # Build ANTES de qualquer down: os containers atuais continuam atendendo durante o build (~3 min). Se o build
+            # falhar, o `set -e` para aqui e a versão em produção segue no ar.
+            echo "🏗️ Building new images (os containers atuais continuam no ar)..."
             docker compose build --no-cache
             
             echo "🗄️ Subindo Redis e aplicando migrations do .NET (aditivas, idempotentes)..."
@@ -107,8 +113,8 @@ jobs:
             echo "🧹 Limpando chaves do Redis específicas do Flask (dedupe invoice_*/calendar_* é mantido)..."
             docker compose exec -T redis sh -c 'for p in "pending_*" "nightly_checkin*" "security:*" "gemini_cache:*"; do redis-cli --scan --pattern "$p" | xargs -r redis-cli del > /dev/null; done' < /dev/null
 
-            echo "🚀 Starting containers..."
-            docker compose up -d
+            echo "🚀 Recriando só o que mudou (queda de segundos, não de minutos)..."
+            docker compose up -d --remove-orphans
             
             echo "⏳ Waiting for containers to be healthy..."
             sleep 20
@@ -118,7 +124,13 @@ jobs:
             
             echo "📋 Recent logs:"
             docker compose logs --tail=30 web
-            
+
+            # Só depois de subir: remove as imagens ANTIGAS deste projeto. `docker image rm` sem -f nunca apaga imagem em uso
+            # (inclusive por outro projeto), então o que ainda é usado fica. E, por label, as soltas deste projeto.
+            echo "🗑️ Removendo imagens antigas deste projeto (sem prune global)..."
+            for img in $OLD_IMAGES; do docker image rm "$img" > /dev/null 2>&1 || true; done
+            docker image prune -f --filter "label=app=meu-secretario" > /dev/null || true
+
             echo "✅ Deployment completed successfully!"
           ENDSSH
 

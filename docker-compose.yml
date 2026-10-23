@@ -29,7 +29,10 @@ services:
   # BACKEND .NET 10 (ASP.NET Core + Quartz)
   # ============================================
   web:
-    build: ./dotnet
+    build:
+      context: ./dotnet
+      labels:
+        - app=meu-secretario   # o deploy limpa só as imagens soltas com este label (nunca `docker system prune`)
     container_name: meu-secretario-api
     restart: unless-stopped
     networks:
