@@ -13,7 +13,8 @@ public sealed record WhatsAppUser(int Id, string Name);
 public sealed record MediaPayload(bool HasData, string? Data, string? Type, string? FileName);
 
 /// <summary>Corpo já validado do webhook (<c>texto</c> e <c>numero_remetente</c> são texto verdadeiro).</summary>
-public sealed record WebhookInput(string Text, string RawNumber, MediaPayload? Media);
+/// <param name="MessageId"><c>message_id</c> do bot (opcional, desvio 259): quando vem, a mesma mensagem reenviada é ignorada.</param>
+public sealed record WebhookInput(string Text, string RawNumber, MediaPayload? Media, string? MessageId = null);
 
 public interface IWhatsAppUserLookup
 {

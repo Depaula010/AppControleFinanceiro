@@ -37,6 +37,9 @@ internal static partial class WhatsAppLog
 
     [LoggerMessage(EventId = 12009, Level = LogLevel.Warning, Message = "Webhook do WhatsApp sem texto ou numero_remetente; chaves recebidas: {Keys}")]
     public static partial void MissingFields(ILogger logger, string keys);
+
+    [LoggerMessage(EventId = 12011, Level = LogLevel.Information, Message = "Webhook do WhatsApp ignorado: mensagem repetida (message_id já processado)")]
+    public static partial void DuplicateIgnored(ILogger logger);
 }
 
 /// <summary>Implementa a porta de diagnóstico da Application com o logger da Api.</summary>
