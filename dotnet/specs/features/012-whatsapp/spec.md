@@ -279,6 +279,7 @@ Convenção: `AC-012-NNN`, faixa por sub-entrega (0xx = 012-0, 1xx = 012a, 2xx =
 - **AC-012-015** Dado `nightly_checkin_active` e palavra de escape (palavra inteira, desvio 210) no texto, então a chave é apagada e o pipeline continua; sem palavra de escape o responsável pelo check-in decide a resposta.
 - **AC-012-016** Prompts de todas as chamadas desta feature renderizam idênticos ao Python (fixtures), com `UserId` e política de cache da §8.
 - **AC-012-017** O pipeline reproduz o Flask nos cenários do harness (ordem dos passos, respostas e chamadas).
+- **AC-012-018** (desvio 259) Idempotência: o corpo do webhook aceita `message_id` (texto, opcional, até 128 caracteres); a mesma mensagem do mesmo número reenviada em até 10 min responde `sucesso` com `resposta` vazia, sem tocar o Gemini nem o pipeline. Sem `message_id` nada é descartado (comparar só o texto engoliria "sim"/"ok" repetidos de propósito); Redis fora processa; falha no processamento libera o id para o reenvio do bot. **Depende do bot (Node) enviar o `message_id`** (no Baileys, `message.key.id`).
 - **AC-012-018** Estado Redis: pendência lida e regravada preserva chaves desconhecidas; `process_confirmation_response` bate com o Python em todos os ramos (fixtures).
 
 **012a — Transações**

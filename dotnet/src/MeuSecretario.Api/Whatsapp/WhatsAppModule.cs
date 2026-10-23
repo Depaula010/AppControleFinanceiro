@@ -25,6 +25,7 @@ public sealed class WhatsAppModule : IFeatureModule
     {
         services.TryAddSingleton<IPendingIdGenerator, UuidPendingIdGenerator>();
         services.AddScoped<IWhatsAppUserLookup, WhatsAppUserLookup>();
+        services.AddScoped<IWebhookDeduplicator, CacheWebhookDeduplicator>();
         services.AddScoped<IPendingTransactionState, PendingTransactionState>();
         services.AddScoped<IPendingEventStore, PendingEventStore>();
         services.AddScoped<ICheckinSession, CheckinSessionState>();
@@ -55,6 +56,7 @@ public sealed class WhatsAppModule : IFeatureModule
         AppSettings appSettings,
         IApiKeyValidator apiKeys,
         HandleWhatsAppMessage useCase,
+        IWebhookDeduplicator deduplicator,
         ILogger<WhatsAppModule> logger,
         CancellationToken cancellationToken)
     {
@@ -96,7 +98,7 @@ public sealed class WhatsAppModule : IFeatureModule
             {
                 InputParse.Missing => MissingDataResult(logger, raw),
                 InputParse.WrongType => Envelopes.E.Error(WhatsAppMessages.ProcessingFailed, StatusCodes.Status500InternalServerError),
-                InputParse.Valid valid => await ProcessedResultAsync(useCase, valid, logger, cancellationToken),
+                InputParse.Valid valid => await ProcessedResultAsync(useCase, deduplicator, valid, logger, cancellationToken),
                 _ => throw new InvalidOperationException("Resultado do parse desconhecido."),
             };
         }
@@ -115,13 +117,31 @@ public sealed class WhatsAppModule : IFeatureModule
 
     private static async Task<IResult> ProcessedResultAsync(
         HandleWhatsAppMessage useCase,
+        IWebhookDeduplicator deduplicator,
         InputParse.Valid valid,
         ILogger logger,
         CancellationToken cancellationToken)
     {
-        var reply = await useCase.ExecuteAsync(valid.Input, cancellationToken);
-        WhatsAppLog.Processed(logger);
-        return Envelopes.E.Success(reply);
+        var input = valid.Input;
+        if (await deduplicator.IsDuplicateAsync(input.RawNumber, input.MessageId, cancellationToken))
+        {
+            // Já foi processada (reenvio do bot): resposta vazia, que o bot não manda ao usuário.
+            WhatsAppLog.DuplicateIgnored(logger);
+            return Envelopes.E.Success(string.Empty);
+        }
+
+        try
+        {
+            var reply = await useCase.ExecuteAsync(input, cancellationToken);
+            WhatsAppLog.Processed(logger);
+            return Envelopes.E.Success(reply);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // Falhou (ex.: cota do Gemini): libera o id, senão o reenvio do bot seria descartado como duplicado.
+            await deduplicator.ReleaseAsync(input.RawNumber, input.MessageId, CancellationToken.None);
+            throw;
+        }
     }
 
     /// <summary>400 "Dados faltando": registra só os NOMES das chaves recebidas (nunca valores) para diagnosticar contrato do bot.</summary>
@@ -195,7 +215,9 @@ public sealed class WhatsAppModule : IFeatureModule
             type is { } t && PyJsonValue.IsTruthy(t) ? PyJsonValue.Str(t) : null,
             fileName);
 
-        return new InputParse.Valid(new WebhookInput(text.Value.GetString()!, number.Value.GetString()!, media));
+        var messageId = Property(body, "message_id") is { ValueKind: JsonValueKind.String } id ? id.GetString() : null;
+
+        return new InputParse.Valid(new WebhookInput(text.Value.GetString()!, number.Value.GetString()!, media, messageId));
     }
 
     private static JsonElement? Property(JsonElement body, string name) =>
