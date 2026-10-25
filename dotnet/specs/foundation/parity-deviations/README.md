@@ -157,4 +157,5 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [259](259-webhook-idempotente-message-id.md) | Webhook do WhatsApp ignora a mesma mensagem reenviada (message_id) | correção | 012 | implementado |
 | [260](260-pote-limite-em-decimal.md) | Limite do pote decidido em decimal | correção | 011 | implementado |
 | [261](261-observabilidade-aviso-e-correlacao.md) | Aviso de falha por WhatsApp e ID de correlação nos logs | operação | 012, 013 | implementado |
-| [262](262-motor-recupera-dias-perdidos.md) | Motor de agendamentos recupera o que ficou para trás | correção | 013 | implementado |
+| [262](262-motor-recupera-dias-perdidos.md) | Motor de agendamentos recupera o que ficou para trás | correção | 013 | implementado |
+| [263](263-gemini-modelo-e-versao-no-banco.md) | Modelo e versão da API do Gemini ficam na tabela `configuracoes` (troca por SQL, sem deploy) | operação | 010, 012 | implementado |

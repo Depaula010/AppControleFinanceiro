@@ -13,12 +13,12 @@ public class GeminiTransportTests
 {
     private const string Ok = "{\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"resposta\"}]}}]}";
 
-    private static (GeminiHttpTransport Transport, FakeHttpHandler Handler, ListLogger<GeminiHttpTransport> Log, FakeIntegrationSettings Settings) Build()
+    private static (GeminiHttpTransport Transport, FakeHttpHandler Handler, ListLogger<GeminiHttpTransport> Log, FakeEndpoint Endpoint) Build()
     {
         var handler = new FakeHttpHandler();
-        var settings = new FakeIntegrationSettings { GeminiModel = "gemini-2.5-flash-lite" };
+        var endpoint = new FakeEndpoint();
         var log = new ListLogger<GeminiHttpTransport>();
-        return (new GeminiHttpTransport(new StubHttpClientFactory(handler), settings, log), handler, log, settings);
+        return (new GeminiHttpTransport(new StubHttpClientFactory(handler), endpoint, log), handler, log, endpoint);
     }
 
     [Fact]
@@ -47,8 +47,8 @@ public class GeminiTransportTests
     [Trait("AC", "010-41")]
     public async Task Generate_ModelOverride_ChangesOnlyTheModelSegment()
     {
-        var (transport, handler, _, settings) = Build();
-        settings.GeminiModel = "gemini-teste-9";
+        var (transport, handler, _, endpoint) = Build();
+        endpoint.Value = endpoint.Value with { Model = "gemini-teste-9" };
         handler.Enqueue(HttpStatusCode.OK, Ok);
 
         await transport.GenerateAsync("x", "k", CancellationToken.None);
@@ -58,15 +58,15 @@ public class GeminiTransportTests
 
     [Fact]
     [Trait("AC", "010-41")]
-    public async Task Generate_EmptyModel_UsesTheDefault()
+    public async Task Generate_ApiVersionFromTheEndpoint_GoesInTheUrlPath()
     {
-        var (transport, handler, _, settings) = Build();
-        settings.GeminiModel = string.Empty;
+        var (transport, handler, _, endpoint) = Build();
+        endpoint.Value = endpoint.Value with { ApiVersion = "v1" };
         handler.Enqueue(HttpStatusCode.OK, Ok);
 
         await transport.GenerateAsync("x", "k", CancellationToken.None);
 
-        handler.Requests.Single().Uri.AbsolutePath.ShouldEndWith("models/gemini-2.5-flash-lite:generateContent");
+        handler.Requests.Single().Uri.ToString().ShouldBe("https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-lite:generateContent");
     }
 
     [Fact]
@@ -215,5 +215,12 @@ public class GeminiTransportTests
         var ex = await Should.ThrowAsync<LlmException>(() => transport.GenerateAsync("p", "k", CancellationToken.None));
 
         ex.GetType().ShouldBe(typeof(LlmException));
+    }
+
+    private sealed class FakeEndpoint : IGeminiEndpointProvider
+    {
+        public GeminiEndpoint Value { get; set; } = new("gemini-2.5-flash-lite", "v1beta");
+
+        public Task<GeminiEndpoint> GetAsync(CancellationToken cancellationToken) => Task.FromResult(Value);
     }
 }

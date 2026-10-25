@@ -35,6 +35,12 @@ internal static partial class LlmLog
     [LoggerMessage(EventId = 10309, Level = LogLevel.Warning, Message = "[GEMINI] Falha de rede ou timeout: {Error}")]
     public static partial void Transport(ILogger logger, string error);
 
+    [LoggerMessage(EventId = 10311, Level = LogLevel.Warning, Message = "[GEMINI-CONFIG] Não consegui ler a tabela configuracoes ({Error}); usando o último valor ou o padrão.")]
+    public static partial void ConfigReadFailed(ILogger logger, string error);
+
+    [LoggerMessage(EventId = 10312, Level = LogLevel.Warning, Message = "[GEMINI-CONFIG] Valor inválido em configuracoes.{Key}; usando o padrão.")]
+    public static partial void ConfigInvalid(ILogger logger, string key);
+
     [LoggerMessage(EventId = 10310, Level = LogLevel.Information, Message = "[CACHE-INVALIDATE] {Deleted} chave(s) apagada(s) (user_id: {UserId}, padrão: {Pattern}).")]
     public static partial void Invalidated(ILogger logger, int deleted, int? userId, string pattern);
 }
