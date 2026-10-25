@@ -41,6 +41,7 @@ public static class LlmServiceCollectionExtensions
                 builder.AddTimeout(settings.AttemptTimeout);
             });
 
+        services.AddSingleton<IGeminiEndpointProvider, DbGeminiEndpointProvider>();
         services.AddSingleton<IGeminiTransport, GeminiHttpTransport>();
         services.AddSingleton<LlmCacheMetricsCollector>();
         services.AddSingleton<ILlmClient, LlmClient>();

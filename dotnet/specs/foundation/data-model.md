@@ -72,6 +72,8 @@ CHECKs: `chk_parcelado`; `chk_anual_mes` (ANUAL exige `mes_execucao`; os demais 
 ### Infraestrutura
 `baileys_auth` (PK composta session_id + data_key; **pertence ao bot Node**), `alembic_version` (`99422c2605c6`).
 
+`configuracoes` (chave PK, valor, descricao, atualizado_em; migration 0100, desvio 263): configuração global do sistema, editável por SQL. Hoje: `gemini.modelo` e `gemini.versao_api`, lidos com cache de 60 s.
+
 ## 3. Relacionamentos
 
 ```

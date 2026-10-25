@@ -14,7 +14,7 @@ namespace MeuSecretario.Infrastructure.Llm;
 /// </summary>
 public sealed class GeminiHttpTransport(
     IHttpClientFactory httpClients,
-    IIntegrationSettings settings,
+    IGeminiEndpointProvider endpoints,
     ILogger<GeminiHttpTransport> logger) : IGeminiTransport
 {
     private static readonly JsonWriterOptions WriterOptions = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
@@ -24,8 +24,8 @@ public sealed class GeminiHttpTransport(
         ArgumentNullException.ThrowIfNull(prompt);
         ArgumentException.ThrowIfNullOrEmpty(apiKey);
 
-        var model = string.IsNullOrWhiteSpace(settings.GeminiModel) ? GeminiHttpOptions.DefaultModel : settings.GeminiModel.Trim();
-        var url = $"{GeminiHttpOptions.BaseUrl}models/{Uri.EscapeDataString(model)}:generateContent";
+        var endpoint = await endpoints.GetAsync(cancellationToken).ConfigureAwait(false);
+        var url = $"{GeminiHttpOptions.BaseUrl(endpoint.ApiVersion)}models/{Uri.EscapeDataString(endpoint.Model)}:generateContent";
 
         using var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = new ByteArrayContent(Payload(prompt)) };
         request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
