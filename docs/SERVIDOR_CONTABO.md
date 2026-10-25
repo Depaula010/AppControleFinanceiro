@@ -57,11 +57,12 @@ Cada projeto tem um workflow como `.github/workflows/deploy.yml`. O do Meu Secre
 
 1. **Gatilho:** push em `main` (com `paths-ignore` para docs; `[skip ci]` também evita).
 2. **Segredos do repositório** (GitHub → Settings → Secrets): `CONTABO_SSH_KEY`, `CONTABO_HOST`, `CONTABO_USER` + os do app (`DATABASE_URL`, chaves de API...). O workflow escreve o `.env` do servidor a partir deles em **todo deploy** (não edite o `.env` na mão, ele é sobrescrito).
-3. Passos remotos (`ssh $USER@$HOST bash << 'ENDSSH'`): `cd /opt/<projeto>` → `git fetch && git reset --hard origin/main` → escreve `.env` → `docker compose down` → `docker compose build` → (migrations) → `docker compose up -d` → health check por `curl 127.0.0.1:<porta>`.
+3. Passos remotos (`ssh $USER@$HOST bash << 'ENDSSH'`): `cd /opt/<projeto>` → `git fetch && git reset --hard origin/main` → escreve `.env` → `docker compose build` (**com os containers atuais ainda no ar**) → (migrations) → `docker compose up -d --remove-orphans` (recria só o que mudou) → remove só as imagens antigas do projeto → health check por `curl 127.0.0.1:<porta>`.
 4. **Armadilhas já vividas:**
    - `docker compose run/exec` dentro do heredoc **consome o stdin do SSH e engole o resto do script**: sempre `-T` e `< /dev/null`.
-   - `down` antes de `build` = o serviço fica **fora do ar durante o build** (~3 min). Para zero downtime, faça o build antes do `down`.
-   - `docker system prune -f` no workflow apaga cache de build de todos os projetos; evite em servidor compartilhado.
+   - `down` antes de `build` = o serviço fica **fora do ar durante o build** (~3 min). **O deploy do Meu Secretário já faz o build antes** e recria com `up -d` (queda de segundos); um build que falha deixa a versão atual no ar. Mantenha assim nos outros projetos.
+   - `docker system prune -f` no workflow apaga cache de build de todos os projetos: **não use** em servidor compartilhado. O Meu Secretário anota as imagens atuais (`docker compose images -q`), remove só essas no fim (`docker image rm` sem `-f` nunca apaga imagem em uso) e roda `docker image prune -f --filter "label=app=meu-secretario"` (label no `build` do compose).
+   - Dois pushes seguidos disparavam dois deploys **ao mesmo tempo** (build e recriação em paralelo): o workflow tem `concurrency: deploy-contabo` (fila, sem cancelar o que está rodando).
    - O primeiro `git clone` em `/opt/<projeto>` e a pasta precisam existir antes do primeiro deploy.
 5. **Convenções:** `container_name` fixo e prefixado pelo projeto; rede `rede-global` declarada `external: true`; `restart: unless-stopped`; `TZ` explícito; logs no console (`docker logs`).
 
