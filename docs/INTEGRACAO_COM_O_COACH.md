@@ -10,7 +10,7 @@ Respostas: `200` com `{de, ate, geradoEm, eventos[]}`; `400` entrada inválida; 
 ## A chave é a sua api key (a mesma do atalho)
 Decisão do Rafael: **uma chave só**. A rota da agenda aceita a **api key pessoal** do usuário (`api_key_automate`, a que o atalho já usa) e descobre o dono por ela. No Coach, em Fichas → Conexões e chaves, cole **essa** chave; não precisa gerar nenhuma outra. Para ver a sua, peça "minha api key" no WhatsApp do Meu Secretário. Ressalva: essa chave também lança transações, por isso no Coach ela fica cifrada no banco e nunca volta para a tela.
 
-As seções abaixo (chave só da agenda, "chave do coach") continuam existindo como **opção mais restrita** (só lê a agenda).
+A seção abaixo (chave só da agenda, gerada com `POST /coach/agenda/chave`) continua existindo como **opção mais restrita** (só lê a agenda). O comando "chave do coach" no WhatsApp foi **removido** (decisão do Rafael, 2026-10-26): use a api key pessoal.
 
 ## Chave só da agenda (opcional, spec 016)
 Cada pessoa tem a **própria chave de leitura da agenda**. O banco guarda só o hash (tabela `coach_agenda_chaves`, migration `0110`); a chave aparece **uma única vez**, ao ser gerada. A rota descobre o dono pela chave e lê a agenda **dele**. Não há secret por pessoa nem deploy para incluir alguém.
@@ -23,7 +23,7 @@ Rotas com o login normal do app (`Authorization: Bearer <token>`):
 | `GET /coach/agenda/chave` | `existe`, `final`, `criadaEm`, `ultimoUsoEm`; nunca a chave |
 | `DELETE /coach/agenda/chave` | revoga a chave |
 
-Depois a pessoa cola a chave no Coach (Fichas → Conexões e chaves) e toca em "Testar conexão". **No WhatsApp:** escreva **"chave do coach"** (ou "chave da agenda") para o Meu Secretário. Ele responde com a chave uma única vez; copie, cole no Coach e apague a mensagem. Pedir de novo gera outra e a anterior deixa de valer. A rota `POST` acima faz o mesmo para quem usa o app.
+Depois a pessoa cola a chave no Coach (Fichas → Conexões e chaves) e toca em "Testar conexão". A rota `POST` acima gera a chave só da agenda para quem precisar dela.
 
 A rota da agenda está **sempre registrada**: sem nenhuma chave ativa responde `401`.
 

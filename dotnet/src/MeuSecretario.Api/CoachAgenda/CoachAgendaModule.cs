@@ -5,7 +5,6 @@ using MeuSecretario.Api.Modules;
 using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Application.Automation;
 using MeuSecretario.Application.CoachAgenda;
-using MeuSecretario.Application.Whatsapp;
 using MeuSecretario.Domain.CoachAgenda;
 using MeuSecretario.Infrastructure.CoachAgenda;
 using MeuSecretario.Infrastructure.Security;
@@ -63,7 +62,6 @@ public sealed class CoachAgendaModule : IFeatureModule
     {
         services.AddSingleton<ICoachAgendaConfig, DbCoachAgendaConfig>();
         services.AddSingleton<IChavesDaAgenda, DbChavesDaAgenda>();
-        services.AddScoped<IWhatsAppStep, CoachKeyStep>();                              // "chave do coach" no WhatsApp (Q-016-1)
         services.AddSingleton(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
