@@ -6,4 +6,4 @@
 - [x] T4 — Rota da agenda sempre registrada (401 sem chave ativa) — AC-016-06
 - [x] T5 — Rotas `POST/GET/DELETE /coach/agenda/chave` com login — AC-016-02, 03, 09
 - [x] T6 — Testes (banco real, API real, fakes) e `docs/INTEGRACAO_COM_O_COACH.md`
-- [ ] T7 — Tela ou comando para a pessoa gerar a chave (Q-016-1, depois)
+- [x] T7 — Comando "chave do coach" no WhatsApp (`CoachKeyStep`, frases exatas, sem Gemini) — Q-016-1

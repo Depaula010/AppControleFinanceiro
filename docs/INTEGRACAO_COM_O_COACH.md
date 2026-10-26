@@ -18,7 +18,7 @@ Rotas com o login normal do app (`Authorization: Bearer <token>`):
 | `GET /coach/agenda/chave` | `existe`, `final`, `criadaEm`, `ultimoUsoEm`; nunca a chave |
 | `DELETE /coach/agenda/chave` | revoga a chave |
 
-Depois a pessoa cola a chave no Coach (Fichas → Conexões e chaves) e toca em "Testar conexão". A tela ou comando para gerar a chave ainda não existe (Q-016-1): por ora a rota `POST` é chamada com o login.
+Depois a pessoa cola a chave no Coach (Fichas → Conexões e chaves) e toca em "Testar conexão". **No WhatsApp:** escreva **"chave do coach"** (ou "chave da agenda") para o Meu Secretário. Ele responde com a chave uma única vez; copie, cole no Coach e apague a mensagem. Pedir de novo gera outra e a anterior deixa de valer. A rota `POST` acima faz o mesmo para quem usa o app.
 
 A rota da agenda está **sempre registrada**: sem nenhuma chave ativa responde `401`.
 
