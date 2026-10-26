@@ -1,6 +1,6 @@
 # Feature 016 — Chave da agenda por usuário (para o Coach)
 
-**Status:** rascunho para aprovação do Rafael (2026-10-26). **Emenda a 015 (parte B).** Pedido do Rafael: "fazer de um jeito que não precise mexer no código futuramente" para outros usuários usarem a agenda no Coach.
+**Status:** aprovada pelo Rafael e implementada (2026-10-26); aguardando a decisão de merge/deploy. **Emenda a 015 (parte B).** Pedido do Rafael: "fazer de um jeito que não precise mexer no código futuramente" para outros usuários usarem a agenda no Coach.
 
 ## 1. Problema
 A rota `GET /internal/coach/agenda` (015 B) aceita **uma chave só**, do ambiente (`COACH_AGENDA_API_KEY`), e lê a agenda de **um usuário fixo** (`COACH_AGENDA_USER_ID`). Outra pessoa só poderia usar com mudança de código e de secrets.

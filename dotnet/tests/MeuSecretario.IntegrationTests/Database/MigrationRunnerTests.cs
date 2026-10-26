@@ -16,7 +16,7 @@ public class MigrationRunnerTests(PostgresFixture postgres) : IClassFixture<Post
         var tables = (await connection.QueryAsync<string>(
             "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'")).ToList();
 
-        tables.Count.ShouldBe(26); // 24 do Flask + dotnet_migrations + configuracoes (0100)
+        tables.Count.ShouldBe(27); // 24 do Flask + dotnet_migrations + configuracoes (0100) + coach_agenda_chaves (0110)
         tables.ShouldContain("usuarios");
         tables.ShouldContain("transacoes");
         tables.ShouldContain("dotnet_migrations");
@@ -24,7 +24,7 @@ public class MigrationRunnerTests(PostgresFixture postgres) : IClassFixture<Post
         (await connection.ExecuteScalarAsync<int>(
             "SELECT count(*) FROM information_schema.triggers WHERE trigger_schema = 'public'")).ShouldBe(9);
         (await connection.ExecuteScalarAsync<int>(
-            "SELECT count(*) FROM pg_constraint WHERE contype = 'f' AND connamespace = 'public'::regnamespace")).ShouldBe(33);
+            "SELECT count(*) FROM pg_constraint WHERE contype = 'f' AND connamespace = 'public'::regnamespace")).ShouldBe(34);
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public class MigrationRunnerTests(PostgresFixture postgres) : IClassFixture<Post
         [
             "0000_baseline", "0001_usuarios_api_key_varchar255", "0020_categorias_globais", "0050_transacoes_observacoes_origem",
             "0070_notificationconfigs_dias_antes_vencimento", "0080_transacoes_competencia",
-            "0090_transacoes_competencia_unica", "0100_configuracoes_gemini",
+            "0090_transacoes_competencia_unica", "0100_configuracoes_gemini", "0110_coach_agenda_chaves",
         ]);
     }
 
@@ -91,7 +91,7 @@ public class MigrationRunnerTests(PostgresFixture postgres) : IClassFixture<Post
         [
             "0000_baseline", "0001_usuarios_api_key_varchar255", "0020_categorias_globais", "0050_transacoes_observacoes_origem",
             "0070_notificationconfigs_dias_antes_vencimento", "0080_transacoes_competencia",
-            "0090_transacoes_competencia_unica", "0100_configuracoes_gemini",
+            "0090_transacoes_competencia_unica", "0100_configuracoes_gemini", "0110_coach_agenda_chaves",
         ]);
         await using var check = await dataSource.OpenConnectionAsync();
         (await check.ExecuteScalarAsync<int>("SELECT count(*) FROM subcategoria WHERE usuario_id IS NULL")).ShouldBe(61);

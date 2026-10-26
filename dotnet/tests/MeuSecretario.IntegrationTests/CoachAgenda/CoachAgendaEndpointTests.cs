@@ -22,6 +22,7 @@ public sealed class CoachAgendaEndpointTests(RedisFixture redis) : IClassFixture
     private readonly List<SecurityTestHost> _hosts = [];
     private readonly CapturedLogs _logs = new();
     private readonly AgendaFalsa _agenda = new();
+    private readonly ChavesFalsas _chaves = new();
 
     public async Task InitializeAsync()
     {
@@ -55,6 +56,8 @@ public sealed class CoachAgendaEndpointTests(RedisFixture redis) : IClassFixture
                 services.AddSingleton<ICalendarClient>(_agenda);
                 services.RemoveAll<IGoogleAccountService>();
                 services.AddSingleton<IGoogleAccountService>(_agenda);
+                services.RemoveAll<IChavesDaAgenda>();
+                services.AddSingleton<IChavesDaAgenda>(_chaves);
                 services.RemoveAll<ICoachAgendaConfig>();
                 services.AddSingleton<ICoachAgendaConfig>(new ConfigFixa(nivel, mascarar));
                 services.AddCapturedLogs(_logs);
@@ -67,22 +70,45 @@ public sealed class CoachAgendaEndpointTests(RedisFixture redis) : IClassFixture
         host.Call(HttpMethod.Get, url, null, chave is null ? null : new Dictionary<string, string> { ["X-API-KEY"] = chave });
 
     [Fact]
-    public async Task AC_015_01_Sem_as_variaveis_a_rota_nao_existe_e_o_resto_segue_igual()
+    public async Task AC_016_06_Sem_nenhuma_chave_a_rota_responde_401_e_o_resto_segue_igual()
     {
         var host = Host(ligada: false);
 
-        (await Chamar(host, Rota)).Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await Chamar(host, Rota)).Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
         (await host.Send("/")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);                          // as rotas existentes não mudam
         _agenda.Chamadas.ShouldBe(0);
     }
 
     [Fact]
-    public async Task AC_015_01_So_a_chave_sem_o_usuario_tambem_deixa_a_rota_desligada()
+    public async Task AC_016_07_Com_as_variaveis_antigas_a_rota_segue_funcionando_para_aquele_usuario()
     {
-        var host = new SecurityTestHost(redis.RedisUrl, redis.ConnectionString + ",allowAdmin=true", new Dictionary<string, string> { ["COACH_AGENDA_API_KEY"] = Chave });
-        _hosts.Add(host);
+        var host = Host();
 
-        (await Chamar(host, Rota)).Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await Chamar(host, Rota)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        _agenda.UltimoUsuario.ShouldBe(7);
+    }
+
+    [Fact]
+    public async Task AC_016_04_Duas_pessoas_com_chaves_diferentes_recebem_cada_uma_a_sua_agenda()
+    {
+        var host = Host(ligada: false);
+        _chaves.Donos["chave-da-ana"] = 11;
+        _chaves.Donos["chave-do-beto"] = 22;
+
+        (await Chamar(host, Rota, "chave-da-ana")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        _agenda.UltimoUsuario.ShouldBe(11);
+        (await Chamar(host, Rota, "chave-do-beto")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        _agenda.UltimoUsuario.ShouldBe(22);
+    }
+
+    [Fact]
+    public async Task AC_016_05_Falha_do_banco_nas_chaves_nega_com_401_e_nao_chama_o_Google()
+    {
+        var host = Host(ligada: false);
+        _chaves.Falha = true;
+
+        (await Chamar(host, Rota, "qualquer")).Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+        _agenda.Chamadas.ShouldBe(0);
     }
 
     [Theory]
@@ -212,6 +238,22 @@ public sealed class CoachAgendaEndpointTests(RedisFixture redis) : IClassFixture
         }
 
         tudo.ShouldContain("Agenda do Coach atendida: 2 eventos de 2026-10-26 a 2026-11-08");
+    }
+
+    private sealed class ChavesFalsas : IChavesDaAgenda
+    {
+        public Dictionary<string, int> Donos { get; } = [];
+
+        public bool Falha { get; set; }
+
+        public Task<int?> ResolverAsync(string chave, CancellationToken cancellationToken) =>
+            Falha ? throw new InvalidOperationException("banco fora") : Task.FromResult(Donos.TryGetValue(chave, out var id) ? id : (int?)null);
+
+        public Task<ChaveGerada> GerarAsync(int userId, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+        public Task<ChaveExistente?> ConsultarAsync(int userId, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+        public Task<bool> RevogarAsync(int userId, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 
     private sealed class ConfigFixa(NivelDeDetalhe nivel, bool mascarar) : ICoachAgendaConfig

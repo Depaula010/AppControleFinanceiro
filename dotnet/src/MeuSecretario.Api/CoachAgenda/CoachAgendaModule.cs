@@ -1,4 +1,5 @@
 using System.Globalization;
+using MeuSecretario.Api.Auth;
 using MeuSecretario.Api.Contracts;
 using MeuSecretario.Api.Modules;
 using MeuSecretario.Application.Abstractions;
@@ -9,43 +10,70 @@ using MeuSecretario.Infrastructure.Security;
 
 namespace MeuSecretario.Api.CoachAgenda;
 
-/// <summary>A chave própria da rota (<c>COACH_AGENDA_API_KEY</c>), validada em tempo constante. Não é a <c>API_SECRET_KEY</c> (AC-015-02).</summary>
-public sealed class CoachAgendaApiKey(IApiKeyValidator validator)
+/// <summary>
+/// Descobre o dono da chave apresentada (spec 016). Primeiro a chave antiga do ambiente (<c>COACH_AGENDA_API_KEY</c> + <c>COACH_AGENDA_USER_ID</c>, transição
+/// RN-016-06), em tempo constante; depois as chaves por usuário (hash no banco). Não é a <c>API_SECRET_KEY</c> (AC-015-02). Falha do banco = ninguém (nega).
+/// </summary>
+public sealed class CoachAgendaApiKey(IApiKeyValidator validator, int? usuarioDaChaveAntiga, IChavesDaAgenda chaves)
 {
-    public bool IsValid(string? presented) => validator.IsValid(presented);
+    public async Task<int?> DonoAsync(string? apresentada, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(apresentada))
+        {
+            return null;
+        }
+
+        if (usuarioDaChaveAntiga is { } antigo && validator.IsValid(apresentada))
+        {
+            return antigo;
+        }
+
+        try
+        {
+            return await chaves.ResolverAsync(apresentada, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            return null;
+        }
+    }
 }
 
 /// <summary>
-/// Feature 015 (parte B): <c>GET /internal/coach/agenda</c>, somente leitura, para o Coach (projeto amazfit-dados). <b>Desligada por padrão</b>: sem
-/// <c>COACH_AGENDA_API_KEY</c> e <c>COACH_AGENDA_USER_ID</c> a rota não é registrada (404) e nada mais muda. Nenhuma rota existente é tocada.
+/// Feature 015 (parte B) e 016: <c>GET /internal/coach/agenda</c>, somente leitura, para o Coach (projeto amazfit-dados). A rota está <b>sempre registrada</b>:
+/// cada pessoa tem a própria chave (hash no banco) e a rota lê a agenda do dono da chave; sem nenhuma chave ativa, responde 401. As rotas
+/// <c>/coach/agenda/chave</c> (gerar, consultar, revogar) usam o login normal do app.
 /// </summary>
 public sealed class CoachAgendaModule : IFeatureModule
 {
     public const string Caminho = "/internal/coach/agenda";
+    public const string CaminhoDaChave = "/coach/agenda/chave";
     public const string ChaveDaRota = "COACH_AGENDA_API_KEY";
     public const string UsuarioDaAgenda = "COACH_AGENDA_USER_ID";
 
     public void AddServices(IServiceCollection services)
     {
         services.AddSingleton<ICoachAgendaConfig, DbCoachAgendaConfig>();
-        services.AddSingleton(sp => new CoachAgendaApiKey(new ApiSecretKeyValidator(sp.GetRequiredService<IConfiguration>()[ChaveDaRota] ?? string.Empty)));
+        services.AddSingleton<IChavesDaAgenda, DbChavesDaAgenda>();
+        services.AddSingleton(sp =>
+        {
+            var config = sp.GetRequiredService<IConfiguration>();
+            int? antigo = int.TryParse(config[UsuarioDaAgenda], NumberStyles.None, CultureInfo.InvariantCulture, out var id) && id > 0 ? id : null;
+            return new CoachAgendaApiKey(new ApiSecretKeyValidator(config[ChaveDaRota] ?? string.Empty), antigo, sp.GetRequiredService<IChavesDaAgenda>());
+        });
         services.AddScoped<ConsultarAgendaDoCoach>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        var config = app.ServiceProvider.GetRequiredService<IConfiguration>();
-        if (string.IsNullOrWhiteSpace(config[ChaveDaRota])
-            || !int.TryParse(config[UsuarioDaAgenda], NumberStyles.None, CultureInfo.InvariantCulture, out var userId)
-            || userId <= 0)
-        {
-            return;                                                                      // RN-015-01: desligada
-        }
+        app.MapPost(CaminhoDaChave, GerarChaveAsync).RequireUser();
+        app.MapGet(CaminhoDaChave, ConsultarChaveAsync).RequireUser();
+        app.MapDelete(CaminhoDaChave, RevogarChaveAsync).RequireUser();
 
         app.MapGet(Caminho, async (HttpContext http, CoachAgendaApiKey key, ConsultarAgendaDoCoach useCase, ILogger<CoachAgendaModule> logger, CancellationToken ct) =>
         {
             // a chave vem antes de tudo: sem ela nem a query é lida
-            if (!key.IsValid(http.Request.Headers["X-API-KEY"].FirstOrDefault()))
+            if (await key.DonoAsync(http.Request.Headers["X-API-KEY"].FirstOrDefault(), ct).ConfigureAwait(false) is not { } userId)
             {
                 return Erro("Chave inválida", StatusCodes.Status401Unauthorized);
             }
@@ -66,6 +94,33 @@ public sealed class CoachAgendaModule : IFeatureModule
                     return Erro("Agenda indisponível agora", StatusCodes.Status503ServiceUnavailable);
             }
         });
+    }
+
+    // a chave sai UMA vez, aqui; depois só o final dela (AC-016-02)
+    private static async Task<IResult> GerarChaveAsync(ICurrentUser user, IChavesDaAgenda chaves, CancellationToken ct)
+    {
+        var nova = await chaves.GerarAsync(user.UserId, ct).ConfigureAwait(false);
+        return Envelopes.Json(new Dictionary<string, object?> { ["chave"] = nova.Chave, ["final"] = nova.Final, ["criadaEm"] = nova.CriadaEm.ToString("O", CultureInfo.InvariantCulture) }, StatusCodes.Status201Created);
+    }
+
+    private static async Task<IResult> ConsultarChaveAsync(ICurrentUser user, IChavesDaAgenda chaves, CancellationToken ct)
+    {
+        var atual = await chaves.ConsultarAsync(user.UserId, ct).ConfigureAwait(false);
+        return Envelopes.Json(atual is null
+            ? new Dictionary<string, object?> { ["existe"] = false }
+            : new Dictionary<string, object?>
+            {
+                ["existe"] = true,
+                ["final"] = atual.Final,
+                ["criadaEm"] = atual.CriadaEm.ToString("O", CultureInfo.InvariantCulture),
+                ["ultimoUsoEm"] = atual.UltimoUsoEm?.ToString("O", CultureInfo.InvariantCulture),
+            }, StatusCodes.Status200OK);
+    }
+
+    private static async Task<IResult> RevogarChaveAsync(ICurrentUser user, IChavesDaAgenda chaves, CancellationToken ct)
+    {
+        var revogou = await chaves.RevogarAsync(user.UserId, ct).ConfigureAwait(false);
+        return Envelopes.Json(new Dictionary<string, object?> { ["revogada"] = revogou }, StatusCodes.Status200OK);
     }
 
     private static IResult Erro(string mensagem, int status) => Envelopes.Json(new Dictionary<string, object?> { ["erro"] = mensagem }, status);
