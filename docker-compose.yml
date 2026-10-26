@@ -55,6 +55,9 @@ services:
       - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
       - WEATHER_API_KEY=${WEATHER_API_KEY}
       - OPENROUTE_API_KEY=${OPENROUTE_API_KEY}
+      # Spec 015 (agenda para o Coach): opcionais. Sem elas a rota /internal/coach/agenda nem existe.
+      - COACH_AGENDA_API_KEY=${COACH_AGENDA_API_KEY:-}
+      - COACH_AGENDA_USER_ID=${COACH_AGENDA_USER_ID:-}
       - DATABASE_URL=${DATABASE_URL}
       # Jobs agendados dentro do processo (resumo matinal, check-in, alertas, faturas, relatórios, motor).
       - JOBS_ENABLED=true
