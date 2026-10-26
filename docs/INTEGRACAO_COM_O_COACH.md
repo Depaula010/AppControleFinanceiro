@@ -1,21 +1,29 @@
-# Integração com o Coach (agenda somente leitura, spec 015 parte B)
+# Integração com o Coach (agenda somente leitura, specs 015 B e 016)
 
-O **Coach** (projeto `amazfit-dados`, no mesmo servidor, rede `rede-global`) lê a agenda do Rafael por **uma rota nova e só de leitura** deste serviço. Nenhuma rota existente muda e não há migration.
+O **Coach** (projeto `amazfit-dados`, no mesmo servidor, rede `rede-global`) lê a agenda do Rafael por **uma rota nova e só de leitura** deste serviço. Nenhuma rota existente muda.
 
 ## Rota
-`GET /internal/coach/agenda?de=AAAA-MM-DD&ate=AAAA-MM-DD` (até 42 dias, datas inclusivas), chamada pela rede interna: `http://meu-secretario-api:8000/internal/coach/agenda`, com o header `X-API-KEY` = `COACH_AGENDA_API_KEY` (**não** vale a `API_SECRET_KEY`).
+`GET /internal/coach/agenda?de=AAAA-MM-DD&ate=AAAA-MM-DD` (até 42 dias, datas inclusivas), chamada pela rede interna: `http://meu-secretario-api:8000/internal/coach/agenda`, com o header `X-API-KEY` = a chave da pessoa (**não** vale a `API_SECRET_KEY`).
 
 Respostas: `200` com `{de, ate, geradoEm, eventos[]}`; `400` entrada inválida; `401` chave errada; `503` Google não conectado ou indisponível. Cada evento traz `inicio`, `fim`, `diaInteiro`, `nivel` e, conforme o nível do calendário, `titulo`, `descricao`, `local` e `calendario`. Nunca traz id de evento, e-mail de participante nem link de reunião (mascarado).
 
-## Ligar (desligada por padrão)
-Duas variáveis, as duas como **secrets do GitHub** (nunca no chat nem no Git), entregues ao container pelo deploy:
+## Chave por pessoa (spec 016)
+Cada pessoa tem a **própria chave de leitura da agenda**. O banco guarda só o hash (tabela `coach_agenda_chaves`, migration `0110`); a chave aparece **uma única vez**, ao ser gerada. A rota descobre o dono pela chave e lê a agenda **dele**. Não há secret por pessoa nem deploy para incluir alguém.
 
-| Secret | O que é |
+Rotas com o login normal do app (`Authorization: Bearer <token>`):
+
+| Rota | O que faz |
 |---|---|
-| `COACH_AGENDA_API_KEY` | chave própria desta rota (gere uma aleatória e longa; o Coach recebe a mesma) |
-| `COACH_AGENDA_USER_ID` | o `id` do Rafael na tabela `usuarios` (conferir antes: `SELECT id, email FROM usuarios;`) |
+| `POST /coach/agenda/chave` | gera a chave (`201`, devolve `chave` e `final`) e **revoga a anterior** |
+| `GET /coach/agenda/chave` | `existe`, `final`, `criadaEm`, `ultimoUsoEm`; nunca a chave |
+| `DELETE /coach/agenda/chave` | revoga a chave |
 
-Sem **as duas**, a rota não é registrada (404) e nada mais muda. Depois de criar os secrets, o próximo deploy a liga.
+Depois a pessoa cola a chave no Coach (Fichas → Conexões e chaves) e toca em "Testar conexão". A tela ou comando para gerar a chave ainda não existe (Q-016-1): por ora a rota `POST` é chamada com o login.
+
+A rota da agenda está **sempre registrada**: sem nenhuma chave ativa responde `401`.
+
+## Transição (chave antiga do ambiente)
+Se os secrets `COACH_AGENDA_API_KEY` e `COACH_AGENDA_USER_ID` existirem, continuam valendo como uma chave extra daquele usuário. Depois de gerar a chave própria, os dois podem ser apagados. **Não são mais necessários** para ligar a rota.
 
 ## Nível de detalhe por calendário (sem deploy)
 Na tabela `configuracoes` (valem em até 60 s):
