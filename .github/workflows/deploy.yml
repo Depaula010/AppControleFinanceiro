@@ -65,6 +65,8 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
           OPENROUTE_API_KEY: ${{ secrets.OPENROUTE_API_KEY }}
+          COACH_AGENDA_API_KEY: ${{ secrets.COACH_AGENDA_API_KEY }}
+          COACH_AGENDA_USER_ID: ${{ secrets.COACH_AGENDA_USER_ID }}
         run: |
           ssh $USER@$HOST bash << 'ENDSSH'
             set -e  # Exit on error
@@ -93,6 +95,8 @@ jobs:
           GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }}
           WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}
           OPENROUTE_API_KEY=${{ secrets.OPENROUTE_API_KEY }}
+          COACH_AGENDA_API_KEY=${{ secrets.COACH_AGENDA_API_KEY }}
+          COACH_AGENDA_USER_ID=${{ secrets.COACH_AGENDA_USER_ID }}
           ENVEOF
             
             # Servidor compartilhado (docs/SERVIDOR_CONTABO.md): só mexe neste projeto (compose project = esta pasta), nunca em

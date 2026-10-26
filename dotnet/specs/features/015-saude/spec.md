@@ -1,6 +1,6 @@
 # Spec 015 — Saúde e Coach (parte B: agenda somente leitura para o Coach)
 
-- **Estado:** rascunho (2026-10-25), **aguarda aprovação do Rafael** (a parte B já foi aprovada por ele em conversa no repositório `amazfit-dados`, "aprovo tudo", 2026-10-25; esta spec formaliza o contrato aqui).
+- **Estado:** **aprovada** pelo Rafael (2026-10-25, "aprovo, pr ok") e **implementada** (parte B). Perguntas Q-015-1 e Q-015-2 ainda com o Rafael (níveis por calendário e o id do usuário): resolvidas por SQL e por secret, **sem mudar código**.
 - **Onda:** nova (pós-produção). **Origem:** não há Python: é feature nova e **só aditiva**. Contexto e decisões em `amazfit-dados`: `specs/foundation/coach-visao.md` seções 9 e 11 e `docs/INTEGRACAO_MEU_SECRETARIO.md`.
 - **Depende de:** 010 (`ICalendarClient.GetEventsInRangeAsync`, `IGoogleAccountService`), 009 (filtro de segurança: a whitelist é derivada das rotas registradas), desvio 263 (tabela `configuracoes`, migration 0100).
 - **Fora desta spec (parte A, adiada):** o bloco "Recuperação" no resumo das 06:00 e as intenções de saúde no WhatsApp (`IHealthDataProvider`, `intent.txt`). Entram numa **emenda** desta spec, com a decisão da Q-005-3 do `amazfit-dados` (o que o resumo vê antes do envio do relógio).
