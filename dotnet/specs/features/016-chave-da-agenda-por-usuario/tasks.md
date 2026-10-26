@@ -7,3 +7,4 @@
 - [x] T5 — Rotas `POST/GET/DELETE /coach/agenda/chave` com login — AC-016-02, 03, 09
 - [x] T6 — Testes (banco real, API real, fakes) e `docs/INTEGRACAO_COM_O_COACH.md`
 - [x] T7 — Comando "chave do coach" no WhatsApp (`CoachKeyStep`, frases exatas, sem Gemini) — Q-016-1
+- [x] T8 — A api key pessoal (`api_key_automate`) também abre a agenda do dono (RN-016-09, decisão "uma chave só")

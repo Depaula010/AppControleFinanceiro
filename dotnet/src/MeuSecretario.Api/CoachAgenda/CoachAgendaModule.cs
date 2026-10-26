@@ -3,6 +3,7 @@ using MeuSecretario.Api.Auth;
 using MeuSecretario.Api.Contracts;
 using MeuSecretario.Api.Modules;
 using MeuSecretario.Application.Abstractions;
+using MeuSecretario.Application.Automation;
 using MeuSecretario.Application.CoachAgenda;
 using MeuSecretario.Application.Whatsapp;
 using MeuSecretario.Domain.CoachAgenda;
@@ -12,12 +13,13 @@ using MeuSecretario.Infrastructure.Security;
 namespace MeuSecretario.Api.CoachAgenda;
 
 /// <summary>
-/// Descobre o dono da chave apresentada (spec 016). Primeiro a chave antiga do ambiente (<c>COACH_AGENDA_API_KEY</c> + <c>COACH_AGENDA_USER_ID</c>, transição
-/// RN-016-06), em tempo constante; depois as chaves por usuário (hash no banco). Não é a <c>API_SECRET_KEY</c> (AC-015-02). Falha do banco = ninguém (nega).
+/// Descobre o dono da chave apresentada (spec 016). Ordem: (1) a chave antiga do ambiente (<c>COACH_AGENDA_API_KEY</c> + <c>COACH_AGENDA_USER_ID</c>, transição
+/// RN-016-06), em tempo constante; (2) as chaves só da agenda (hash no banco); (3) a **api key pessoal do usuário** (<c>api_key_automate</c>, a mesma do atalho:
+/// decisão do Rafael de usar uma chave só, RN-016-09). Não é a <c>API_SECRET_KEY</c> (AC-015-02). Falha do banco ou da decifragem = ninguém (nega).
 /// </summary>
 public sealed class CoachAgendaApiKey(IApiKeyValidator validator, int? usuarioDaChaveAntiga, IChavesDaAgenda chaves)
 {
-    public async Task<int?> DonoAsync(string? apresentada, CancellationToken cancellationToken)
+    public async Task<int?> DonoAsync(string? apresentada, IUserApiKeyAuthenticator pessoais, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(apresentada))
         {
@@ -31,7 +33,12 @@ public sealed class CoachAgendaApiKey(IApiKeyValidator validator, int? usuarioDa
 
         try
         {
-            return await chaves.ResolverAsync(apresentada, cancellationToken).ConfigureAwait(false);
+            if (await chaves.ResolverAsync(apresentada, cancellationToken).ConfigureAwait(false) is { } dono)
+            {
+                return dono;
+            }
+
+            return (await pessoais.AuthenticateAsync(apresentada, cancellationToken).ConfigureAwait(false))?.UserId;
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
@@ -72,10 +79,10 @@ public sealed class CoachAgendaModule : IFeatureModule
         app.MapGet(CaminhoDaChave, ConsultarChaveAsync).RequireUser();
         app.MapDelete(CaminhoDaChave, RevogarChaveAsync).RequireUser();
 
-        app.MapGet(Caminho, async (HttpContext http, CoachAgendaApiKey key, ConsultarAgendaDoCoach useCase, ILogger<CoachAgendaModule> logger, CancellationToken ct) =>
+        app.MapGet(Caminho, async (HttpContext http, CoachAgendaApiKey key, IUserApiKeyAuthenticator pessoais, ConsultarAgendaDoCoach useCase, ILogger<CoachAgendaModule> logger, CancellationToken ct) =>
         {
             // a chave vem antes de tudo: sem ela nem a query é lida
-            if (await key.DonoAsync(http.Request.Headers["X-API-KEY"].FirstOrDefault(), ct).ConfigureAwait(false) is not { } userId)
+            if (await key.DonoAsync(http.Request.Headers["X-API-KEY"].FirstOrDefault(), pessoais, ct).ConfigureAwait(false) is not { } userId)
             {
                 return Erro("Chave inválida", StatusCodes.Status401Unauthorized);
             }
