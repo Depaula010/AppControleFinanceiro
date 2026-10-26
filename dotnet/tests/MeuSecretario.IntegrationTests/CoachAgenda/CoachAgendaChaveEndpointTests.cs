@@ -94,4 +94,16 @@ public sealed class CoachAgendaChaveEndpointTests(PostgresFixture postgres) : IA
         (await _http.SendAsync(HttpMethod.Delete, Rota, userId: _ana)).Status.ShouldBe(HttpStatusCode.OK);
         (await UsarAsync(nova)).ShouldBe(HttpStatusCode.Unauthorized);
     }
+
+    [Fact]
+    public async Task AC_016_09_A_api_key_pessoal_gravada_no_banco_autentica_a_agenda_sem_gerar_chave_nenhuma()
+    {
+        await using (var connection = await postgres.DataSource.OpenConnectionAsync())
+        {
+            await Dapper.SqlMapper.ExecuteAsync(connection, "UPDATE usuarios SET api_key_automate = @k WHERE id = @id", new { k = "api-key-pessoal-em-texto-puro-legado", id = _ana });
+        }
+
+        (await UsarAsync("api-key-pessoal-em-texto-puro-legado")).ShouldBe(HttpStatusCode.ServiceUnavailable);   // autenticou; o Google da Ana não está conectado
+        (await UsarAsync("api-key-pessoal-errada")).ShouldBe(HttpStatusCode.Unauthorized);
+    }
 }

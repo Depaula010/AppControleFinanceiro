@@ -18,6 +18,8 @@ Cada pessoa tem a **própria chave da agenda**, guardada no banco só como **has
 - **RN-016-07 Níveis por usuário.** Hoje os níveis (`coach_agenda.nivel_padrao`, `coach_agenda.nivel.<calendário>`, `coach_agenda.mascarar`) são globais. Nesta feature **continuam globais** (o padrão sem SQL é `completo`); níveis por pessoa ficam para quando houver segunda pessoa de verdade. Anotado, não implementado.
 - **RN-016-08 Privacidade.** Nenhum log leva a chave, nem a recusada; só contagens e o motivo. Limite de tentativas inválidas por IP como nas outras rotas internas.
 
+- **RN-016-09 A api key pessoal também vale (decisão do Rafael, 2026-10-26: "uma chave só").** A rota aceita também a **`api_key_automate` do usuário** (a mesma do atalho), descobrindo o dono por ela (`IUserApiKeyAuthenticator`, a mesma da automação). Quem usa essa chave **não precisa gerar nenhuma chave da agenda** (o comando "chave do coach" e `/coach/agenda/chave` seguem existindo como opção). Ressalva aceita: essa chave também lança transações, então no Coach ela fica cifrada no banco (spec 016 do Coach). AC-016-09: a api key pessoal abre a agenda do dono; chave desconhecida ou falha ao decifrar nega com 401 sem chamar o Google.
+
 ## 4. Como a pessoa pega a chave (decidido pelo Rafael em 2026-10-26)
 O Rafael não lembra como usa o Meu Secretário, então a **tela/comando que chama `POST /coach/agenda/chave`** fica para depois. A rota existe e funciona com o login normal; até haver tela, quem chama é o próprio Rafael (passo a passo no `docs/` quando for implementar).
 

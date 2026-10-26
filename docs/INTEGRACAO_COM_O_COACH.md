@@ -7,7 +7,12 @@ O **Coach** (projeto `amazfit-dados`, no mesmo servidor, rede `rede-global`) lê
 
 Respostas: `200` com `{de, ate, geradoEm, eventos[]}`; `400` entrada inválida; `401` chave errada; `503` Google não conectado ou indisponível. Cada evento traz `inicio`, `fim`, `diaInteiro`, `nivel` e, conforme o nível do calendário, `titulo`, `descricao`, `local` e `calendario`. Nunca traz id de evento, e-mail de participante nem link de reunião (mascarado).
 
-## Chave por pessoa (spec 016)
+## A chave é a sua api key (a mesma do atalho)
+Decisão do Rafael: **uma chave só**. A rota da agenda aceita a **api key pessoal** do usuário (`api_key_automate`, a que o atalho já usa) e descobre o dono por ela. No Coach, em Fichas → Conexões e chaves, cole **essa** chave; não precisa gerar nenhuma outra. Para ver a sua, peça "minha api key" no WhatsApp do Meu Secretário. Ressalva: essa chave também lança transações, por isso no Coach ela fica cifrada no banco e nunca volta para a tela.
+
+As seções abaixo (chave só da agenda, "chave do coach") continuam existindo como **opção mais restrita** (só lê a agenda).
+
+## Chave só da agenda (opcional, spec 016)
 Cada pessoa tem a **própria chave de leitura da agenda**. O banco guarda só o hash (tabela `coach_agenda_chaves`, migration `0110`); a chave aparece **uma única vez**, ao ser gerada. A rota descobre o dono pela chave e lê a agenda **dele**. Não há secret por pessoa nem deploy para incluir alguém.
 
 Rotas com o login normal do app (`Authorization: Bearer <token>`):

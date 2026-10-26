@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using MeuSecretario.Application.Abstractions;
+using MeuSecretario.Application.Automation;
 using MeuSecretario.Application.CoachAgenda;
 using MeuSecretario.Domain.CoachAgenda;
 using MeuSecretario.IntegrationTests.Admin;
@@ -23,6 +24,7 @@ public sealed class CoachAgendaEndpointTests(RedisFixture redis) : IClassFixture
     private readonly CapturedLogs _logs = new();
     private readonly AgendaFalsa _agenda = new();
     private readonly ChavesFalsas _chaves = new();
+    private readonly PessoaisFalsas _pessoais = new();
 
     public async Task InitializeAsync()
     {
@@ -56,6 +58,8 @@ public sealed class CoachAgendaEndpointTests(RedisFixture redis) : IClassFixture
                 services.AddSingleton<ICalendarClient>(_agenda);
                 services.RemoveAll<IGoogleAccountService>();
                 services.AddSingleton<IGoogleAccountService>(_agenda);
+                services.RemoveAll<IUserApiKeyAuthenticator>();
+                services.AddSingleton<IUserApiKeyAuthenticator>(_pessoais);
                 services.RemoveAll<IChavesDaAgenda>();
                 services.AddSingleton<IChavesDaAgenda>(_chaves);
                 services.RemoveAll<ICoachAgendaConfig>();
@@ -99,6 +103,27 @@ public sealed class CoachAgendaEndpointTests(RedisFixture redis) : IClassFixture
         _agenda.UltimoUsuario.ShouldBe(11);
         (await Chamar(host, Rota, "chave-do-beto")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
         _agenda.UltimoUsuario.ShouldBe(22);
+    }
+
+    [Fact]
+    public async Task AC_016_09_A_api_key_pessoal_do_usuario_tambem_abre_a_agenda_dele()
+    {
+        var host = Host(ligada: false);
+        _pessoais.Donos["api-key-pessoal-da-ana"] = 33;
+
+        (await Chamar(host, Rota, "api-key-pessoal-da-ana")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        _agenda.UltimoUsuario.ShouldBe(33);
+        (await Chamar(host, Rota, "api-key-de-ninguem")).Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task AC_016_09_Falha_ao_conferir_a_api_key_pessoal_nega_e_nao_chama_o_Google()
+    {
+        var host = Host(ligada: false);
+        _pessoais.Falha = true;
+
+        (await Chamar(host, Rota, "qualquer")).Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+        _agenda.Chamadas.ShouldBe(0);
     }
 
     [Fact]
@@ -238,6 +263,17 @@ public sealed class CoachAgendaEndpointTests(RedisFixture redis) : IClassFixture
         }
 
         tudo.ShouldContain("Agenda do Coach atendida: 2 eventos de 2026-10-26 a 2026-11-08");
+    }
+
+    private sealed class PessoaisFalsas : IUserApiKeyAuthenticator
+    {
+        public Dictionary<string, int> Donos { get; } = [];
+
+        public bool Falha { get; set; }
+
+        public Task<AutomationUser?> AuthenticateAsync(string? key, CancellationToken cancellationToken) =>
+            Falha ? throw new InvalidOperationException("decifrar falhou")
+                : Task.FromResult(key is not null && Donos.TryGetValue(key, out var id) ? new AutomationUser(id, "5511999990000") : null);
     }
 
     private sealed class ChavesFalsas : IChavesDaAgenda
