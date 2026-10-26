@@ -18,7 +18,7 @@ Cada pessoa tem a **própria chave da agenda**, guardada no banco só como **has
 - **RN-016-07 Níveis por usuário.** Hoje os níveis (`coach_agenda.nivel_padrao`, `coach_agenda.nivel.<calendário>`, `coach_agenda.mascarar`) são globais. Nesta feature **continuam globais** (o padrão sem SQL é `completo`); níveis por pessoa ficam para quando houver segunda pessoa de verdade. Anotado, não implementado.
 - **RN-016-08 Privacidade.** Nenhum log leva a chave, nem a recusada; só contagens e o motivo. Limite de tentativas inválidas por IP como nas outras rotas internas.
 
-## 4. Como a pessoa pega a chave (a decidir)
+## 4. Como a pessoa pega a chave (decidido pelo Rafael em 2026-10-26)
 O Rafael não lembra como usa o Meu Secretário, então a **tela/comando que chama `POST /coach/agenda/chave`** fica para depois. A rota existe e funciona com o login normal; até haver tela, quem chama é o próprio Rafael (passo a passo no `docs/` quando for implementar).
 
 ## 5. Critérios de aceite (todos com teste)
@@ -28,7 +28,7 @@ AC-016-01 o banco só tem o hash; AC-016-02 gerar devolve a chave uma vez e a li
 **Nada muda.** A tela Conexões e chaves já guarda a chave de cada pessoa cifrada e manda no cabeçalho `X-API-KEY`. O Coach ter vários usuários é outra spec (008).
 
 ## 7. Perguntas em aberto
-- **Q-016-1** Onde a pessoa gera a chave (comando no bot ou tela web)? Depois.
+- **Q-016-1** (resolvida) A pessoa escreve **"chave do coach"** no WhatsApp do Meu Secretário, recebe a chave uma única vez, copia e cola no Coach (Conexões e chaves). Não precisa fazer mais nada no bot. O comando só vale para frases exatas (como "chave da agenda"), funciona sem o Gemini e gerar de novo revoga a anterior.
 - **Q-016-2** Níveis da agenda por pessoa: só quando existir a segunda pessoa.
 
 ## 8. Risco do deploy

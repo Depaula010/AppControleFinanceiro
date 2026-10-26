@@ -32,6 +32,7 @@ public static class StepOrder
     public const int TransactionReply = 60;
     public const int BareCancel = 70;
     public const int Payment = 80;
+    public const int CoachKey = 57;
 }
 
 /// <summary>Dados que uma intenção recebe.</summary>
