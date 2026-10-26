@@ -1,6 +1,7 @@
 using System.Globalization;
 using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Application.Jobs;
+using MeuSecretario.Domain.Automation;
 using MeuSecretario.Domain.Jobs;
 using MeuSecretario.Domain.Whatsapp;
 
@@ -28,14 +29,17 @@ public interface ICheckinDiagnostics
 /// </para>
 /// </summary>
 public sealed class CheckinResponder(
-    CheckinDialogStore dialog, IScheduleExecutor executor, IClock clock, ICheckinDiagnostics diagnostics) : INightlyCheckinResponder
+    CheckinDialogStore dialog, IScheduleExecutor executor, CheckinInvoicePayer invoicePayer, IClock clock, ICheckinDiagnostics diagnostics)
+    : INightlyCheckinResponder
 {
     public async Task<string?> RespondAsync(string number, string message, string checkinId, CancellationToken cancellationToken)
     {
         switch (await dialog.LoadAsync(number, checkinId, cancellationToken))
         {
-            case CheckinDialogState.AwaitingValues awaiting:
+            case CheckinDialogState.AwaitingValues awaiting when awaiting.Pending.Items.Count > 0:
                 return await RespondValueAsync(number, message, checkinId, awaiting.Pending, cancellationToken);
+            case CheckinDialogState.AwaitingValues awaiting:
+                return await RespondInvoiceAsync(number, message, checkinId, awaiting.Pending, cancellationToken);
             case CheckinDialogState.AwaitingConfirmation confirmation:
                 return await RespondConfirmationAsync(number, message, checkinId, confirmation.Session, cancellationToken);
             default:
@@ -70,7 +74,11 @@ public sealed class CheckinResponder(
             .Select(index => data.Items.GetValueOrDefault(index.ToString(CultureInfo.InvariantCulture)))
             .OfType<CheckinSessionItem>()
             .ToList();
-        if (items.Count == 0)
+        var chosenInvoices = reply.Indices
+            .Select(index => data.Invoices.GetValueOrDefault(index.ToString(CultureInfo.InvariantCulture)))
+            .OfType<CheckinInvoiceItem>()
+            .ToList();
+        if (items.Count == 0 && chosenInvoices.Count == 0)
         {
             return CheckinReplyTexts.NoValidItems;
         }
@@ -82,18 +90,18 @@ public sealed class CheckinResponder(
         {
             var (confirmed, notConfirmed) = await PostAsync(direct, cancellationToken);
 
-            if (variable.Count > 0)
+            if (variable.Count > 0 || chosenInvoices.Count > 0)
             {
-                // A sessão das contas some; a flag ativa e a lista de valores ficam até a última pergunta ser respondida.
-                var pending = new CheckinPendingValues(variable, variable.Count);
+                // A sessão das contas some; a flag ativa e as perguntas (valores, depois contas das faturas) ficam até a última ser respondida.
+                var pending = new CheckinPendingValues(variable, variable.Count, chosenInvoices, chosenInvoices.Count);
                 await dialog.StartValuesAsync(number, checkinId, pending, cancellationToken);
-                return Join(Summary(confirmed, notConfirmed, data.TotalItems), Question(pending));
+                return Join(Summary(confirmed, notConfirmed, data.Items.Count), await NextQuestionAsync(pending, cancellationToken));
             }
 
             await dialog.EndAsync(number, checkinId, cancellationToken);
             return confirmed.Count == 0 && notConfirmed.Count == 0
                 ? CheckinReplyTexts.NoValidItems
-                : Summary(confirmed, notConfirmed, data.TotalItems);
+                : Summary(confirmed, notConfirmed, data.Items.Count);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -158,14 +166,73 @@ public sealed class CheckinResponder(
         }
 
         var rest = queue with { Items = [.. queue.Items.Skip(1)] };
-        if (rest.Items.Count == 0)
+        if (rest.Items.Count == 0 && !rest.HasInvoices)
         {
             await dialog.EndAsync(number, checkinId, cancellationToken);
             return line;
         }
 
         await dialog.SaveValuesAsync(number, checkinId, rest, cancellationToken);
-        return Join(line, Question(rest));
+        return Join(line, await NextQuestionAsync(rest, cancellationToken));
+    }
+
+    /// <summary>Uma resposta à pergunta "pagar a fatura com qual conta?" (desvio 264).</summary>
+    private async Task<string> RespondInvoiceAsync(
+        string number, string message, string checkinId, CheckinPendingValues queue, CancellationToken cancellationToken)
+    {
+        var invoice = queue.Invoices![0];
+        string line;
+        try
+        {
+            var accounts = await invoicePayer.PayingAccountsAsync(invoice.UserId, cancellationToken);
+            var reply = CheckinInvoiceReplyParser.Parse(message, accounts.Count);
+            if (reply.Kind == CheckinInvoiceReplyKind.Invalid)
+            {
+                await dialog.SaveValuesAsync(number, checkinId, queue, cancellationToken);
+                return Join(CheckinReplyTexts.InvoiceInvalid, InvoiceQuestion(queue, accounts));
+            }
+
+            if (reply.Kind == CheckinInvoiceReplyKind.Skip)
+            {
+                line = CheckinReplyTexts.InvoiceSkipped(invoice.Card);
+            }
+            else
+            {
+                var outcome = await invoicePayer.PayAsync(invoice, accounts[reply.Index - 1], cancellationToken);
+                line = outcome is CheckinInvoiceOutcome.Paid paid
+                    ? CheckinReplyTexts.InvoicePaid(invoice.Card, paid.Amount, paid.AccountName)
+                    : CheckinReplyTexts.InvoiceFailed(invoice.Card);
+            }
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            diagnostics.ReplyFailed(ex.GetType().Name);
+            await dialog.EndAsync(number, checkinId, cancellationToken);
+            return CheckinReplyTexts.SaveFailed;
+        }
+
+        var rest = queue with { Invoices = [.. queue.Invoices.Skip(1)] };
+        if (!rest.HasInvoices)
+        {
+            await dialog.EndAsync(number, checkinId, cancellationToken);
+            return line;
+        }
+
+        await dialog.SaveValuesAsync(number, checkinId, rest, cancellationToken);
+        return Join(line, await NextQuestionAsync(rest, cancellationToken));
+    }
+
+    /// <summary>A próxima pergunta da fila: primeiro os valores dos lembretes, depois a conta de cada fatura.</summary>
+    private async Task<string> NextQuestionAsync(CheckinPendingValues queue, CancellationToken cancellationToken) =>
+        queue.Items.Count > 0
+            ? Question(queue)
+            : InvoiceQuestion(queue, await invoicePayer.PayingAccountsAsync(queue.Invoices![0].UserId, cancellationToken));
+
+    private static string InvoiceQuestion(CheckinPendingValues queue, IReadOnlyList<AccountRef> accounts)
+    {
+        var invoice = queue.Invoices![0];
+        return CheckinReplyTexts.InvoiceQuestion(
+            invoice.Card, (decimal)invoice.Amount, [.. accounts.Select(a => a.Name)], queue.InvoiceTotal - queue.Invoices.Count + 1, queue.InvoiceTotal);
     }
 
     private async Task<(List<string> Confirmed, List<(string Description, string Reason)> NotConfirmed)> PostAsync(

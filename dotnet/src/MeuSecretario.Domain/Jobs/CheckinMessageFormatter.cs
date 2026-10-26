@@ -190,8 +190,11 @@ public static class CheckinMessageFormatter
             foreach (var invoice in snapshot.OverdueInvoices)
             {
                 // Desvio 130: o Python lia fatura['nome_conta'] (KeyError, a query devolve 'cartao'); aqui sai o nome do cartão.
+                // Desvio 264: no check-in a fatura é um item numerado (paga-se pelo "ok" ou pelo número); no modo leitura segue o marcador.
+                var bullet = checkinId is null ? "•" : $"{number.ToString(CultureInfo.InvariantCulture)}.";
                 message.Append(CultureInfo.InvariantCulture,
-                    $"• {invoice.Card} - {PtBrMoney.Format(invoice.Total)} - Venceu em {InvoiceNotificationFormatter.Date(invoice.DueDate)}\n");
+                    $"{bullet} {invoice.Card} - {PtBrMoney.Format(invoice.Total)} - Venceu em {InvoiceNotificationFormatter.Date(invoice.DueDate)}\n");
+                number++;
             }
 
             message.Append('\n');
@@ -203,13 +206,16 @@ public static class CheckinMessageFormatter
             message.Append("_Atenção! Estas faturas devem ser pagas hoje para evitar juros._\n\n");
             foreach (var invoice in snapshot.InvoicesDueToday)
             {
-                message.Append(CultureInfo.InvariantCulture, $"💳 {invoice.AccountName} - {PtBrMoney.Format(invoice.Total)} - Vence HOJE\n");
+                var prefix = checkinId is null ? string.Empty : $"{number.ToString(CultureInfo.InvariantCulture)}. ";
+                message.Append(CultureInfo.InvariantCulture, $"{prefix}💳 {invoice.AccountName} - {PtBrMoney.Format(invoice.Total)} - Vence HOJE\n");
+                number++;
             }
 
             message.Append('\n');
         }
 
-        var anyConfirmable = pendingExpenses.Count > 0 || pendingIncomes.Count > 0 || overdueExpenses.Count > 0 || overdueIncomes.Count > 0;
+        var anyConfirmable = pendingExpenses.Count > 0 || pendingIncomes.Count > 0 || overdueExpenses.Count > 0 || overdueIncomes.Count > 0
+            || (checkinId is not null && (snapshot.OverdueInvoices.Count > 0 || snapshot.InvoicesDueToday.Count > 0));
         if (anyConfirmable)
         {
             if (checkinId is not null)

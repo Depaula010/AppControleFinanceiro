@@ -1,5 +1,9 @@
 using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Application.Jobs;
+using MeuSecretario.Application.Transactions;
+using MeuSecretario.Infrastructure.Automation;
+using MeuSecretario.Infrastructure.Categories;
+using MeuSecretario.Infrastructure.Transactions;
 using MeuSecretario.Application.Whatsapp;
 using MeuSecretario.Domain.Jobs;
 using MeuSecretario.Infrastructure.Jobs;
@@ -45,8 +49,11 @@ public class FixedBillsEndpointTests(PostgresFixture postgres) : IAsyncLifetime,
         var session = new CheckinSessionState(_cache);
         _checkin = new NightlyCheckinService(new CheckinQueries(postgres.Connections), _cache, clock);
         var responder = new CheckinResponder(
-            new CheckinDialogStore(_cache, session), new ScheduleExecutor(new ScheduleExecutionRepository(postgres.Connections)), clock,
-            new NoDiagnostics());
+            new CheckinDialogStore(_cache, session), new ScheduleExecutor(new ScheduleExecutionRepository(postgres.Connections)),
+            new CheckinInvoicePayer(
+                new AutomationLookups(postgres.Connections),
+                new TransactionPosting(new TransactionsUnitOfWork(postgres.Connections), new CategoryRepository(postgres.Connections)), clock),
+            clock, new NoDiagnostics());
 
         _useCase = new HandleWhatsAppMessage(
             new WhatsAppUserLookup(postgres.Connections),
