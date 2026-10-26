@@ -28,6 +28,7 @@ public static class StepOrder
     public const int RouteRequest = 40;
     public const int Checkin = 50;
     public const int Reports = 55;
+    public const int Help = 56;
     public const int TransactionReply = 60;
     public const int BareCancel = 70;
     public const int Payment = 80;

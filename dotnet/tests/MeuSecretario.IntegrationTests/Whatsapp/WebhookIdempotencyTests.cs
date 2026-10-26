@@ -4,6 +4,7 @@ using MeuSecretario.IntegrationTests.Support;
 
 namespace MeuSecretario.IntegrationTests.Whatsapp;
 
+// A mensagem não pode ser "menu" (desvio 265: ela nem chega ao Gemini, e estes testes contam as chamadas dele).
 /// <summary>Desvio 259: o bot reenvia a mesma mensagem (mesmo <c>message_id</c>) e o webhook responde vazio sem reprocessar.</summary>
 [Trait("Category", "Docker")]
 public sealed class WebhookIdempotencyTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
@@ -23,8 +24,8 @@ public sealed class WebhookIdempotencyTests(PostgresFixture postgres) : IAsyncLi
 
     private Task<(HttpStatusCode Status, string Body)> SendAsync(string? messageId) => _env.PostJsonAsync(
         messageId is null
-            ? new { texto = "menu", numero_remetente = WhatsAppEnv.Number + "@s.whatsapp.net" }
-            : new { texto = "menu", numero_remetente = WhatsAppEnv.Number + "@s.whatsapp.net", message_id = messageId });
+            ? new { texto = "quais funcoes voce tem", numero_remetente = WhatsAppEnv.Number + "@s.whatsapp.net" }
+            : new { texto = "quais funcoes voce tem", numero_remetente = WhatsAppEnv.Number + "@s.whatsapp.net", message_id = messageId });
 
     private static string Reply(string body) => JsonNode.Parse(body)!["resposta"]!.GetValue<string>();
 
