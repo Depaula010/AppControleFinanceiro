@@ -160,3 +160,4 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [262](262-motor-recupera-dias-perdidos.md) | Motor de agendamentos recupera o que ficou para trás | correção | 013 | implementado |
 | [263](263-gemini-modelo-e-versao-no-banco.md) | Modelo e versão da API do Gemini ficam na tabela `configuracoes` (troca por SQL, sem deploy) | operação | 010, 012 | implementado |
 | [264](264-checkin-fatura-pagavel.md) | Check-in noturno: a fatura de cartão vira item numerado e pagável (pergunta a conta) | correção | 012, 013 | implementado |
+| [265](265-menu-sem-gemini.md) | "menu" e "ajuda" respondem sem chamar o Gemini | operação | 012 | implementado |

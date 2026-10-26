@@ -41,6 +41,7 @@ public sealed class WhatsAppModule : IFeatureModule
         services.AddScoped<IWhatsAppStep, BareCancelStep>();
 
         services.AddScoped<IWhatsAppIntent, HelpIntent>();
+        services.AddScoped<IWhatsAppStep, HelpCommandStep>();
 
         FinancialWhatsAppModule.AddFinancialServices(services); // 012a, 012b, 012c
         FixedBillsWhatsAppModule.AddFixedBillsServices(services); // 012d
