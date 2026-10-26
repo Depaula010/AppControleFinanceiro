@@ -145,7 +145,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
         """;
 
     private const string OverdueInvoicesSql = """
-        SELECT f.id AS Id, c.nome_conta AS Name, f.data_vencimento AS DueDate, f.status AS Status,
+        SELECT f.id AS Id, c.nome_conta AS Name, f.data_vencimento AS DueDate, f.status AS Status, f.conta_id AS AccountId,
                COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) AS Total
         FROM faturas f
         JOIN contas c ON f.conta_id = c.id
@@ -154,12 +154,12 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
           AND f.status IN ('Aberta', 'Fechada')
           AND f.data_vencimento < @hoje
           AND f.data_vencimento >= @limite_inferior
-        GROUP BY f.id, c.nome_conta, f.data_vencimento, f.status
+        GROUP BY f.id, c.nome_conta, f.data_vencimento, f.status, f.conta_id
         ORDER BY f.data_vencimento DESC
         """;
 
     private const string DueTodaySql = """
-        SELECT f.id AS Id, c.nome_conta AS Name, f.data_vencimento AS DueDate, f.status AS Status,
+        SELECT f.id AS Id, c.nome_conta AS Name, f.data_vencimento AS DueDate, f.status AS Status, f.conta_id AS AccountId,
                COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) AS Total
         FROM faturas f
         JOIN contas c ON f.conta_id = c.id
@@ -167,7 +167,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
         WHERE c.usuario_id = @uid
           AND f.status IN ('Aberta', 'Fechada')
           AND f.data_vencimento = @hoje
-        GROUP BY f.id, c.nome_conta, f.data_vencimento, f.status
+        GROUP BY f.id, c.nome_conta, f.data_vencimento, f.status, f.conta_id
         ORDER BY c.nome_conta
         """;
 
@@ -200,8 +200,8 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
         return new CheckinSnapshot(
             pendingBills,
             overdueBills,
-            [.. overdueInvoices.Select(i => new OverdueInvoice(i.Id, i.Name, JobSql.ToDate(i.DueDate), i.Status, i.Total))],
-            [.. dueToday.Select(i => new DueTodayInvoice(i.Id, i.Name, JobSql.ToDate(i.DueDate), i.Status, i.Total))]);
+            [.. overdueInvoices.Select(i => new OverdueInvoice(i.Id, i.Name, JobSql.ToDate(i.DueDate), i.Status, i.Total, i.AccountId))],
+            [.. dueToday.Select(i => new DueTodayInvoice(i.Id, i.Name, JobSql.ToDate(i.DueDate), i.Status, i.Total, i.AccountId))]);
     }
 
     private static CheckinBill ToBill(BillRow row) => new(
@@ -255,5 +255,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
         public string Status { get; set; } = string.Empty;
 
         public decimal Total { get; set; }
+
+        public int AccountId { get; set; }
     }
 }

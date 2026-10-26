@@ -53,6 +53,42 @@ public static class CheckinReplyTexts
     public static string ValuePosted(string description, decimal amount) =>
         $"✅ {description} lançada: {MeuSecretario.Domain.Jobs.PtBrMoney.Format(amount)}";
 
+    /// <summary>Pergunta da conta de origem do pagamento da fatura (desvio 264). <paramref name="accounts"/> são os nomes, na ordem numerada.</summary>
+    public static string InvoiceQuestion(string card, decimal amount, IReadOnlyList<string> accounts, int position, int total)
+    {
+        ArgumentNullException.ThrowIfNull(accounts);
+        var counter = total > 1 ? string.Create(CultureInfo.InvariantCulture, $" ({position}/{total})") : string.Empty;
+        var sb = new StringBuilder($"💳 *Pagar a fatura {card} ({MeuSecretario.Domain.Jobs.PtBrMoney.Format(amount)})?*{counter}{NL}");
+        if (accounts.Count == 0)
+        {
+            return sb.Append("Não encontrei uma conta ativa (que não seja cartão) para pagar. Responda \"pular\".").ToString();
+        }
+
+        if (accounts.Count == 1)
+        {
+            return sb.Append(CultureInfo.InvariantCulture, $"Responda \"ok\" para pagar com {accounts[0]} ou \"pular\".").ToString();
+        }
+
+        sb.Append("Com qual conta você pagou?" + NL);
+        for (var i = 0; i < accounts.Count; i++)
+        {
+            sb.Append(CultureInfo.InvariantCulture, $"{i + 1}. {accounts[i]}{NL}");
+        }
+
+        return sb.Append("Responda o número ou \"pular\".").ToString();
+    }
+
+    private const string NL = "\n";
+
+    public const string InvoiceInvalid = "❓ Não entendi. Responda o número da conta que pagou a fatura ou \"pular\".";
+
+    public static string InvoicePaid(string card, decimal amount, string account) =>
+        $"✅ Fatura {card} paga: {MeuSecretario.Domain.Jobs.PtBrMoney.Format(amount)} ({account}).";
+
+    public static string InvoiceSkipped(string card) => $"⏭️ A fatura {card} continua em aberto.";
+
+    public static string InvoiceFailed(string card) => $"❌ Não consegui registrar o pagamento da fatura {card}. Registre manualmente: \"paguei a fatura do {card} com [conta]\".";
+
     public static string ValueSkipped(string description) => $"⏭️ {description} não foi lançada.";
 
     public static string ValueAlreadyPosted(string description) => $"✅ {description} já estava lançada neste mês.";

@@ -5,10 +5,15 @@ using MeuSecretario.Domain.Jobs;
 namespace MeuSecretario.Application.Whatsapp;
 
 /// <summary>
-/// Lembretes variáveis que o usuário confirmou e ainda esperam o valor real. O primeiro da lista é o que está sendo perguntado;
-/// <paramref name="Total"/> é o tamanho original, para o contador "(2/3)".
+/// Lembretes variáveis que o usuário confirmou e ainda esperam o valor real; depois deles, as faturas que esperam a conta de pagamento
+/// (desvio 264). O primeiro de cada lista é o que está sendo perguntado; <paramref name="Total"/> e <paramref name="InvoiceTotal"/> são os
+/// tamanhos originais, para o contador "(2/3)".
 /// </summary>
-public sealed record CheckinPendingValues(List<CheckinSessionItem> Items, int Total);
+public sealed record CheckinPendingValues(
+    List<CheckinSessionItem> Items, int Total, List<CheckinInvoiceItem>? Invoices = null, int InvoiceTotal = 0)
+{
+    public bool HasInvoices => Invoices is { Count: > 0 };
+}
 
 /// <summary>Em que ponto está o diálogo do check-in noturno de um número (desvio 254: antes eram três chaves soltas no Redis).</summary>
 public abstract record CheckinDialogState
@@ -19,7 +24,7 @@ public abstract record CheckinDialogState
     /// <summary>O check-in foi enviado e espera "ok", números ou "depois".</summary>
     public sealed record AwaitingConfirmation(CheckinSession Session) : CheckinDialogState;
 
-    /// <summary>As contas foram confirmadas e falta o valor de um ou mais lembretes variáveis.</summary>
+    /// <summary>As contas foram confirmadas e falta o valor de um ou mais lembretes variáveis e/ou a conta de pagamento de uma ou mais faturas.</summary>
     public sealed record AwaitingValues(CheckinPendingValues Pending) : CheckinDialogState;
 }
 
@@ -35,7 +40,7 @@ public sealed class CheckinDialogStore(ICache cache, ICheckinSession session)
     public async Task<CheckinDialogState> LoadAsync(string number, string checkinId, CancellationToken cancellationToken)
     {
         var pending = await cache.GetJsonAsync<CheckinPendingValues>(CacheKeys.NightlyCheckinValues(number, checkinId), cancellationToken);
-        if (pending is { Items.Count: > 0 })
+        if (pending is not null && (pending.Items.Count > 0 || pending.HasInvoices))
         {
             return new CheckinDialogState.AwaitingValues(pending);
         }

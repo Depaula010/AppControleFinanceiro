@@ -159,3 +159,4 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [261](261-observabilidade-aviso-e-correlacao.md) | Aviso de falha por WhatsApp e ID de correlação nos logs | operação | 012, 013 | implementado |
 | [262](262-motor-recupera-dias-perdidos.md) | Motor de agendamentos recupera o que ficou para trás | correção | 013 | implementado |
 | [263](263-gemini-modelo-e-versao-no-banco.md) | Modelo e versão da API do Gemini ficam na tabela `configuracoes` (troca por SQL, sem deploy) | operação | 010, 012 | implementado |
+| [264](264-checkin-fatura-pagavel.md) | Check-in noturno: a fatura de cartão vira item numerado e pagável (pergunta a conta) | correção | 012, 013 | implementado |

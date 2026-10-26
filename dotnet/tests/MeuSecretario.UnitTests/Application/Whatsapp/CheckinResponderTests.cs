@@ -1,4 +1,8 @@
+using MeuSecretario.Application.Automation;
 using MeuSecretario.Application.Caching;
+using MeuSecretario.Application.Transactions;
+using MeuSecretario.Domain.Automation;
+using NSubstitute;
 using MeuSecretario.Application.Jobs;
 using MeuSecretario.Application.Whatsapp;
 using MeuSecretario.Domain.Jobs;
@@ -26,8 +30,168 @@ public class CheckinResponderTests
         _execute = request => new ScheduleExecutionOutcome.Posted(1, "x", 1m, null);
     }
 
+    private readonly IAutomationLookups _lookups = Substitute.For<IAutomationLookups>();
+    private readonly ITransactionPosting _posting = Substitute.For<ITransactionPosting>();
+
+    private CheckinResponder InvoiceResponder() =>
+        new(new CheckinDialogStore(_cache, new CheckinSessionState(_cache)), new DelegateExecutor(this),
+            new CheckinInvoicePayer(_lookups, _posting, new FinanceClock(Today)), new FinanceClock(Today), _diagnostics);
+
+    private static CheckinInvoiceItem Invoice(int id = 9, string card = "Cartão Inter", double amount = 405.73) => new()
+    {
+        InvoiceId = id, CardAccountId = 3, UserId = 7, Card = card, Amount = amount, DueDate = "2026-10-20",
+    };
+
+    private async Task SeedInvoicesAsync(CheckinBill[] bills, params CheckinInvoiceItem[] invoices)
+    {
+        await _cache.SetJsonAsync(CacheKeys.NightlyCheckin(Number, Id), CheckinSession.Build(bills, Today, invoices), TimeSpan.FromHours(1));
+        await _cache.SetJsonAsync(CacheKeys.NightlyCheckinActive(Number), Id, TimeSpan.FromHours(1));
+    }
+
+    private void Accounts(params AccountRef[] accounts) =>
+        _lookups.ListActiveAccountsAsync(7, Arg.Any<CancellationToken>()).Returns(accounts);
+
+    private void PaymentSucceeds() =>
+        _posting.PostInvoicePaymentAsync(Arg.Any<PostInvoicePayment>(), Arg.Any<CancellationToken>())
+            .Returns(new PostingResult<PostedInvoicePayment>.Ok(new PostedInvoicePayment(1, 2, "Conta Inter", "Cartão Inter", 9, null, true)));
+
+    [Fact]
+    [Trait("AC", "012-404")]
+    public async Task Ok_WithOnlyAnInvoice_AsksWhichAccountPaid_ListingOnlyNonCardAccounts_Deviation264()
+    {
+        await SeedInvoicesAsync([], Invoice());
+        Accounts(new AccountRef(1, "Conta Inter", "Conta Corrente"), new AccountRef(3, "Cartão Inter", "Cartão de Crédito"), new AccountRef(4, "Carteira", "Carteira"));
+
+        var reply = await InvoiceResponder().RespondAsync(Number, "ok", Id, CancellationToken.None);
+
+        reply.ShouldBe("💳 *Pagar a fatura Cartão Inter (R$ 405,73)?*\nCom qual conta você pagou?\n1. Conta Inter\n2. Carteira\nResponda o número ou \"pular\".");
+        _posting.ReceivedCalls().ShouldBeEmpty();
+        (await SessionEndedAsync()).ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("AC", "012-404")]
+    public async Task AnsweringTheAccount_PaysTheInvoiceWithTheChosenAccount_AndEndsTheDialog_Deviation264()
+    {
+        await SeedInvoicesAsync([], Invoice());
+        Accounts(new AccountRef(1, "Conta Inter", "Conta Corrente"), new AccountRef(4, "Carteira", "Carteira"));
+        PaymentSucceeds();
+        var responder = InvoiceResponder();
+        await responder.RespondAsync(Number, "ok", Id, CancellationToken.None);
+
+        var reply = await responder.RespondAsync(Number, "2", Id, CancellationToken.None);
+
+        reply.ShouldBe("✅ Fatura Cartão Inter paga: R$ 405,73 (Carteira).");
+        await _posting.Received(1).PostInvoicePaymentAsync(
+            Arg.Is<PostInvoicePayment>(p => p.UserId == 7 && p.FromAccountId == 4 && p.CardAccountId == 3 && p.Amount == 405.73m && p.Date == Today),
+            Arg.Any<CancellationToken>());
+        (await SessionEndedAsync()).ShouldBeTrue();
+    }
+
+    [Fact]
+    [Trait("AC", "012-404")]
+    public async Task SingleAccount_OkPaysWithIt_Deviation264()
+    {
+        await SeedInvoicesAsync([], Invoice());
+        Accounts(new AccountRef(1, "Conta Inter", "Conta Corrente"));
+        PaymentSucceeds();
+        var responder = InvoiceResponder();
+
+        (await responder.RespondAsync(Number, "ok", Id, CancellationToken.None))!
+            .ShouldBe("💳 *Pagar a fatura Cartão Inter (R$ 405,73)?*\nResponda \"ok\" para pagar com Conta Inter ou \"pular\".");
+        (await responder.RespondAsync(Number, "ok", Id, CancellationToken.None)).ShouldBe("✅ Fatura Cartão Inter paga: R$ 405,73 (Conta Inter).");
+    }
+
+    [Fact]
+    [Trait("AC", "012-404")]
+    public async Task Skip_LeavesTheInvoiceOpen_WithoutPosting_Deviation264()
+    {
+        await SeedInvoicesAsync([], Invoice());
+        Accounts(new AccountRef(1, "Conta Inter", "Conta Corrente"), new AccountRef(4, "Carteira", "Carteira"));
+        var responder = InvoiceResponder();
+        await responder.RespondAsync(Number, "ok", Id, CancellationToken.None);
+
+        (await responder.RespondAsync(Number, "pular", Id, CancellationToken.None)).ShouldBe("⏭️ A fatura Cartão Inter continua em aberto.");
+
+        _posting.ReceivedCalls().ShouldBeEmpty();
+        (await SessionEndedAsync()).ShouldBeTrue();
+    }
+
+    [Fact]
+    [Trait("AC", "012-404")]
+    public async Task InvalidAnswer_RepeatsTheQuestion_AndKeepsTheDialog_Deviation264()
+    {
+        await SeedInvoicesAsync([], Invoice());
+        Accounts(new AccountRef(1, "Conta Inter", "Conta Corrente"), new AccountRef(4, "Carteira", "Carteira"));
+        var responder = InvoiceResponder();
+        await responder.RespondAsync(Number, "ok", Id, CancellationToken.None);
+
+        var reply = await responder.RespondAsync(Number, "talvez", Id, CancellationToken.None);
+
+        reply!.ShouldStartWith("❓ Não entendi. Responda o número da conta que pagou a fatura ou \"pular\".\n\n💳 *Pagar a fatura Cartão Inter");
+        (await SessionEndedAsync()).ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("AC", "012-404")]
+    public async Task RefusedPayment_TellsTheUserHowToDoItByHand_Deviation264()
+    {
+        await SeedInvoicesAsync([], Invoice());
+        Accounts(new AccountRef(1, "Conta Inter", "Conta Corrente"));
+        _posting.PostInvoicePaymentAsync(Arg.Any<PostInvoicePayment>(), Arg.Any<CancellationToken>())
+            .Returns(new PostingResult<PostedInvoicePayment>.Failed(PostingError.RequiredCategoryMissing));
+        var responder = InvoiceResponder();
+        await responder.RespondAsync(Number, "ok", Id, CancellationToken.None);
+
+        (await responder.RespondAsync(Number, "ok", Id, CancellationToken.None))!.ShouldStartWith("❌ Não consegui registrar o pagamento da fatura Cartão Inter.");
+        (await SessionEndedAsync()).ShouldBeTrue();
+    }
+
+    [Fact]
+    [Trait("AC", "012-404")]
+    public async Task BillsAreConfirmedFirst_ThenTheInvoicesAreAskedOneByOne_Deviation264()
+    {
+        await SeedInvoicesAsync([Bill(1, "Aluguel", due: Today)], Invoice(9, "Cartão Inter", 405.73), Invoice(10, "Nubank", 99.9));
+        Accounts(new AccountRef(1, "Conta Inter", "Conta Corrente"));
+        PaymentSucceeds();
+        var responder = InvoiceResponder();
+
+        var first = await responder.RespondAsync(Number, "ok", Id, CancellationToken.None);
+
+        first!.ShouldStartWith("✅ *Todas as 1 contas confirmadas!*\n\n• Aluguel");
+        first.ShouldContain("💳 *Pagar a fatura Cartão Inter (R$ 405,73)?* (1/2)");
+        var second = await responder.RespondAsync(Number, "ok", Id, CancellationToken.None);
+        second!.ShouldStartWith("✅ Fatura Cartão Inter paga: R$ 405,73 (Conta Inter).");
+        second.ShouldContain("💳 *Pagar a fatura Nubank (R$ 99,90)?* (2/2)");
+        (await responder.RespondAsync(Number, "pular", Id, CancellationToken.None)).ShouldBe("⏭️ A fatura Nubank continua em aberto.");
+        (await SessionEndedAsync()).ShouldBeTrue();
+    }
+
+    [Fact]
+    [Trait("AC", "012-404")]
+    public async Task ChoosingOnlyTheBillNumber_DoesNotTouchTheInvoice_Deviation264()
+    {
+        await SeedInvoicesAsync([Bill(1, "Aluguel", due: Today)], Invoice());
+
+        var reply = await InvoiceResponder().RespondAsync(Number, "1", Id, CancellationToken.None);
+
+        reply.ShouldBe("✅ *Todas as 1 contas confirmadas!*\n\n• Aluguel\n\n💚 Transações registradas com sucesso!");
+        _posting.ReceivedCalls().ShouldBeEmpty();
+    }
+
+    [Fact]
+    [Trait("AC", "012-404")]
+    public async Task NoPayingAccount_SaysSo_AndOnlySkipWorks_Deviation264()
+    {
+        await SeedInvoicesAsync([], Invoice());
+        Accounts(new AccountRef(3, "Cartão Inter", "Cartão de Crédito"));
+
+        (await InvoiceResponder().RespondAsync(Number, "ok", Id, CancellationToken.None))!
+            .ShouldBe("💳 *Pagar a fatura Cartão Inter (R$ 405,73)?*\nNão encontrei uma conta ativa (que não seja cartão) para pagar. Responda \"pular\".");
+    }
+
     private CheckinResponder Responder() =>
-        new(new CheckinDialogStore(_cache, new CheckinSessionState(_cache)), new DelegateExecutor(this), new FinanceClock(Today), _diagnostics);
+        new(new CheckinDialogStore(_cache, new CheckinSessionState(_cache)), new DelegateExecutor(this), InvoicePayer.None(new FinanceClock(Today)), new FinanceClock(Today), _diagnostics);
 
     private async Task SeedAsync(params CheckinBill[] bills)
     {

@@ -23,6 +23,7 @@ internal static class FixedBillsWhatsAppModule
         services.AddScoped<CheckinDialogStore>();
 
         // O módulo base registra o responsável padrão (TryAdd, "não tratada"); esta é a implementação real e vence por vir depois.
+        services.AddScoped<CheckinInvoicePayer>();
         services.AddScoped<INightlyCheckinResponder, CheckinResponder>();
     }
 }

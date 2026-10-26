@@ -417,12 +417,29 @@ public class NightlyCheckinJobTests
     public async Task Execute_OverdueInvoice_SendsTheMessageWithTheCardName_AndCreatesTheSession_Deviation130()
     {
         _queries.GetSnapshotAsync(1, Arg.Any<DateOnly>(), Arg.Any<CancellationToken>())
-            .Returns(new CheckinSnapshot([Bill(1)], [], [new OverdueInvoice(1, "Inter", new DateOnly(2026, 3, 10), "Aberta", 10m)], []));
+            .Returns(new CheckinSnapshot([Bill(1)], [], [new OverdueInvoice(1, "Inter", new DateOnly(2026, 3, 10), "Aberta", 10m, AccountId: 7)], []));
 
         await Job().ExecuteAsync(CancellationToken.None);
 
-        await _h.Bot.Received(1).SendTextAsync("5511", Arg.Is<string>(m => m.Contains("🔴 *FATURAS VENCIDAS:*\n• Inter - R$ 10,00 - Venceu em 10/03/2026", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
+        await _h.Bot.Received(1).SendTextAsync("5511", Arg.Is<string>(m => m.Contains("🔴 *FATURAS VENCIDAS:*\n2. Inter - R$ 10,00 - Venceu em 10/03/2026", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
         _h.Cache.RawValue(CacheKeys.NightlyCheckinActive("5511")).ShouldNotBeNull();
+    }
+
+    [Fact]
+    [Trait("AC", "013-46")]
+    public async Task Execute_OverdueInvoice_IsNumberedAfterTheBills_AndStoredInTheSession_Deviation264()
+    {
+        _queries.GetSnapshotAsync(1, Arg.Any<DateOnly>(), Arg.Any<CancellationToken>())
+            .Returns(new CheckinSnapshot([Bill(1)], [], [new OverdueInvoice(9, "Inter", new DateOnly(2026, 3, 10), "Fechada", 405.73m, AccountId: 7)], []));
+
+        await Job().ExecuteAsync(CancellationToken.None);
+
+        var id = _h.Cache.RawValue(CacheKeys.NightlyCheckinActive("5511"))!.Trim('"');
+        var session = System.Text.Json.JsonSerializer.Deserialize<CheckinSession>(_h.Cache.RawValue(CacheKeys.NightlyCheckin("5511", id))!)!;
+        session.TotalItems.ShouldBe(2);
+        session.Items.Keys.ShouldBe(["1"]);
+        var invoice = session.Invoices["2"];
+        (invoice.InvoiceId, invoice.CardAccountId, invoice.UserId, invoice.Card, invoice.Amount).ShouldBe((9, 7, 1, "Inter", 405.73));
     }
 
     [Fact]

@@ -26,10 +26,11 @@ public sealed record CheckinBill(
     DateOnly? DueDate);
 
 /// <summary>Fatura vencida do check-in (<c>get_faturas_vencidas</c>: o nome do cartão vem na coluna <c>cartao</c>).</summary>
-public sealed record OverdueInvoice(int Id, string Card, DateOnly DueDate, string Status, decimal Total);
+/// <remarks><paramref name="AccountId"/> é a conta do cartão (desvio 264: a fatura vira item pagável do check-in).</remarks>
+public sealed record OverdueInvoice(int Id, string Card, DateOnly DueDate, string Status, decimal Total, int AccountId = 0);
 
 /// <summary>Fatura que vence hoje (<c>get_faturas_vencendo_hoje</c>: aqui a coluna se chama <c>nome_conta</c>).</summary>
-public sealed record DueTodayInvoice(int Id, string AccountName, DateOnly DueDate, string Status, decimal Total);
+public sealed record DueTodayInvoice(int Id, string AccountName, DateOnly DueDate, string Status, decimal Total, int AccountId = 0);
 
 /// <summary><c>collect_financial_snapshot</c> (RN-013-42).</summary>
 public sealed record CheckinSnapshot(

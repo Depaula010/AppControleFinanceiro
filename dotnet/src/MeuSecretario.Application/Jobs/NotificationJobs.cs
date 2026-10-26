@@ -374,10 +374,11 @@ public sealed class NightlyCheckinService(ICheckinQueries queries, ICache cache,
 
     /// <summary>Grava a sessão e a flag ativa (1 h); devolve o <c>checkin_id</c> (<paramref name="checkinId"/> ou um novo).</summary>
     public async Task<string> CreateSessionAsync(
-        string whatsappNumber, IEnumerable<CheckinBill> bills, CancellationToken cancellationToken, string? checkinId = null)
+        string whatsappNumber, IEnumerable<CheckinBill> bills, CancellationToken cancellationToken, string? checkinId = null,
+        IEnumerable<CheckinInvoiceItem>? invoices = null)
     {
         checkinId ??= NewCheckinId();
-        var session = CheckinSession.Build(bills, clock.Today);
+        var session = CheckinSession.Build(bills, clock.Today, invoices);
         await cache.SetJsonAsync(CacheKeys.NightlyCheckin(whatsappNumber, checkinId), session, SessionTtl, cancellationToken);
         await cache.SetJsonAsync(CacheKeys.NightlyCheckinActive(whatsappNumber), checkinId, SessionTtl, cancellationToken);
         return checkinId;
@@ -454,7 +455,8 @@ public sealed class NightlyCheckinJob(
                 }
 
                 await checkin.CreateSessionAsync(
-                    recipient.WhatsappNumber, [.. snapshot.PendingBills, .. snapshot.OverdueBills], cancellationToken, checkinId);
+                    recipient.WhatsappNumber, [.. snapshot.PendingBills, .. snapshot.OverdueBills], cancellationToken, checkinId,
+                    CheckinInvoiceItem.FromSnapshot(snapshot, recipient.UserId));
 
                 // Desvio 139: a sessão só vale se o usuário recebeu o check-in.
                 var sent = false;

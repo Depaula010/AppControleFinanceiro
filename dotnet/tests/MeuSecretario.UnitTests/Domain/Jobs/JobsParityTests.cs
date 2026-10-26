@@ -127,6 +127,13 @@ public class JobsParityTests
             var id = input.GetProperty("checkin_id").ValueKind == JsonValueKind.String ? input.GetProperty("checkin_id").GetString() : null;
             var expected = c.GetProperty("output").ValueKind == JsonValueKind.Null ? null : c.GetProperty("output").GetString();
 
+            // Desvio 264: no check-in (com id) a fatura é um item numerado e a mensagem traz o "COMO RESPONDER"; o texto do Flask segue valendo
+            // no modo leitura e nos check-ins sem fatura (os casos com fatura estão em CheckinInvoiceMessageTests).
+            if (id is not null && (snapshot.OverdueInvoices.Count > 0 || snapshot.InvoicesDueToday.Count > 0))
+            {
+                continue;
+            }
+
             CheckinMessageFormatter.Format(snapshot, Today, id).ShouldBe(expected);
         }
     }
@@ -144,7 +151,7 @@ public class JobsParityTests
         var message = CheckinMessageFormatter.Format(snapshot, Today, "abcdef12");
 
         message.ShouldNotBeNull();
-        message.ShouldContain("🔴 *FATURAS VENCIDAS:*\n• Inter - R$ 10,00 - Venceu em 10/03/2026\n");
+        message.ShouldContain("🔴 *FATURAS VENCIDAS:*\n2. Inter - R$ 10,00 - Venceu em 10/03/2026\n");
     }
 
     [Fact]
