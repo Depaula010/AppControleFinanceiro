@@ -4,6 +4,7 @@ using MeuSecretario.Api.Http;
 using MeuSecretario.Api.Modules;
 using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Application.Automation;
+using MeuSecretario.Application.Ops;
 using MeuSecretario.Application.Whatsapp;
 using MeuSecretario.Domain.Automation;
 using MeuSecretario.Domain.Whatsapp;
@@ -58,6 +59,7 @@ public sealed class WhatsAppModule : IFeatureModule
         IApiKeyValidator apiKeys,
         HandleWhatsAppMessage useCase,
         IWebhookDeduplicator deduplicator,
+        IOpsAlerts alerts,
         ILogger<WhatsAppModule> logger,
         CancellationToken cancellationToken)
     {
@@ -110,6 +112,8 @@ public sealed class WhatsAppModule : IFeatureModule
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             WhatsAppLog.WebhookFailed(logger, SafeError.Describe(ex));
+            var (alertSource, alertMessage) = WebhookFailureAlert.Describe(ex);
+            alerts.Raise(alertSource, alertMessage);
             if (!WhatsAppTexts.IsQuotaMessage(ex.Message))
             {
                 return Envelopes.E.Error(WhatsAppMessages.ProcessingFailed, StatusCodes.Status500InternalServerError);
