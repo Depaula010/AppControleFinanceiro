@@ -206,7 +206,7 @@ public sealed class FinancialAlertsRepository(IDbConnectionFactory connections) 
         var rows = await connection.QueryAsync<BillRow>(new CommandDefinition(
             $"""
             SELECT a.id AS Id, a.descricao AS Description, a.valor_previsto AS Amount, s.nome_sub AS Category,
-                   c.nome_conta AS Account, g.nome_grupo AS GroupName
+                   c.nome_conta AS Account, g.nome_grupo AS GroupName, c.tipo_conta AS AccountType
             FROM agendamentos a
             JOIN subcategoria s ON a.subcategoria_id = s.id
             JOIN macrocategoria m ON s.macro_id = m.id
@@ -217,13 +217,13 @@ public sealed class FinancialAlertsRepository(IDbConnectionFactory connections) 
               AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
               AND a.dia_execucao = @dia
               AND (a.periodicidade <> 'ANUAL' OR EXTRACT(MONTH FROM a.data_inicio) = @mes)
-              AND NOT {JobSql.LaunchedInMonth}
+              AND (c.tipo_conta = 'Cartão de Crédito' OR NOT {JobSql.LaunchedInMonth})
             ORDER BY a.dia_execucao ASC, a.id
             """,
             JobSql.With(
                 ("uid", userId, DbType.Int32), ("dia", day.Day, DbType.Int32), ("mes", day.Month, DbType.Int32), ("ano", day.Year, DbType.Int32)),
             cancellationToken: cancellationToken));
-        return [.. rows.Select(r => new AlertBill(r.Id, r.Description, (double)(r.Amount ?? 0m), r.Category, r.Account, AlertBill.TypeFor(r.GroupName)))];
+        return [.. rows.Select(r => new AlertBill(r.Id, r.Description, (double)(r.Amount ?? 0m), r.Category, r.Account, AlertBill.TypeFor(r.GroupName), r.AccountType == ScheduleRules.CardAccountType))];
     }
 
     private sealed class BillRow
@@ -239,6 +239,8 @@ public sealed class FinancialAlertsRepository(IDbConnectionFactory connections) 
         public string Account { get; set; } = string.Empty;
 
         public string GroupName { get; set; } = string.Empty;
+
+        public string AccountType { get; set; } = string.Empty;
     }
 
     private sealed class InvoiceRow

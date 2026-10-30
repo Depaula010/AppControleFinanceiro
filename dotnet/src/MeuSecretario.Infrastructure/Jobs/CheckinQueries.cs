@@ -171,6 +171,24 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
         ORDER BY c.nome_conta
         """;
 
+    // Desvio 267: contas fixas do cartão cobradas hoje, lançadas ou não. Só aviso (o cartão cobra sozinho na fatura).
+    private const string CardBillsTodaySql = """
+        SELECT a.descricao AS Description, a.valor_previsto AS Amount, c.nome_conta AS Account
+        FROM agendamentos a
+        JOIN contas c ON a.conta_id = c.id
+        JOIN subcategoria s ON a.subcategoria_id = s.id
+        JOIN macrocategoria m ON s.macro_id = m.id
+        JOIN grupocategoria g ON m.grupo_id = g.id
+        WHERE a.usuario_id = @uid
+          AND a.ativo = TRUE
+          AND c.tipo_conta = 'Cartão de Crédito'
+          AND g.nome_grupo <> 'Renda'
+          AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+          AND (a.periodicidade = 'MENSAL' OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = EXTRACT(MONTH FROM @hoje)))
+          AND a.dia_execucao = EXTRACT(DAY FROM @hoje)
+        ORDER BY a.id
+        """;
+
     public async Task<CheckinSnapshot> GetSnapshotAsync(int userId, DateOnly today, CancellationToken cancellationToken)
     {
         await using var connection = await connections.OpenAsync(cancellationToken);
@@ -195,13 +213,19 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
         var dueToday = await connection.QueryAsync<InvoiceRow>(new CommandDefinition(
             DueTodaySql, invoiceParameters, cancellationToken: cancellationToken));
 
+        var cardBills = await connection.QueryAsync<CardBillRow>(new CommandDefinition(
+            CardBillsTodaySql,
+            JobSql.With(("uid", userId, DbType.Int32), ("hoje", JobSql.Day(today), DbType.Date)),
+            cancellationToken: cancellationToken));
+
         var pendingBills = pending.Select(ToBill).ToList();
         var overdueBills = CheckinRules.Deduplicate(pendingBills, overdue.Select(ToBill));
         return new CheckinSnapshot(
             pendingBills,
             overdueBills,
             [.. overdueInvoices.Select(i => new OverdueInvoice(i.Id, i.Name, JobSql.ToDate(i.DueDate), i.Status, i.Total, i.AccountId))],
-            [.. dueToday.Select(i => new DueTodayInvoice(i.Id, i.Name, JobSql.ToDate(i.DueDate), i.Status, i.Total, i.AccountId))]);
+            [.. dueToday.Select(i => new DueTodayInvoice(i.Id, i.Name, JobSql.ToDate(i.DueDate), i.Status, i.Total, i.AccountId))],
+            [.. cardBills.Select(c => new CardBillNotice(c.Description, c.Amount ?? 0m, c.Account))]);
     }
 
     private static CheckinBill ToBill(BillRow row) => new(
@@ -242,6 +266,15 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
         public int? TotalInstallments { get; set; }
 
         public DateTime? DueDate { get; set; }
+    }
+
+    private sealed class CardBillRow
+    {
+        public string Description { get; set; } = string.Empty;
+
+        public decimal? Amount { get; set; }
+
+        public string Account { get; set; } = string.Empty;
     }
 
     private sealed class InvoiceRow
