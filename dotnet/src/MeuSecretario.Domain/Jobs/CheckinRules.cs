@@ -32,14 +32,23 @@ public sealed record OverdueInvoice(int Id, string Card, DateOnly DueDate, strin
 /// <summary>Fatura que vence hoje (<c>get_faturas_vencendo_hoje</c>: aqui a coluna se chama <c>nome_conta</c>).</summary>
 public sealed record DueTodayInvoice(int Id, string AccountName, DateOnly DueDate, string Status, decimal Total, int AccountId = 0);
 
+/// <summary>Conta fixa de cartão de crédito cobrada hoje na fatura (desvio 267): só informativa, nunca confirmável.</summary>
+public sealed record CardBillNotice(string Description, decimal Value, string Account);
+
 /// <summary><c>collect_financial_snapshot</c> (RN-013-42).</summary>
+/// <param name="CardBillsToday">
+/// Contas fixas do cartão cobradas hoje, MESMO as que o motor já lançou na fatura às 00:05 (desvio 267). <c>null</c> = não informado: o
+/// formatador cai no comportamento antigo (as do cartão que ainda estão pendentes).
+/// </param>
 public sealed record CheckinSnapshot(
     IReadOnlyList<CheckinBill> PendingBills,
     IReadOnlyList<CheckinBill> OverdueBills,
     IReadOnlyList<OverdueInvoice> OverdueInvoices,
-    IReadOnlyList<DueTodayInvoice> InvoicesDueToday)
+    IReadOnlyList<DueTodayInvoice> InvoicesDueToday,
+    IReadOnlyList<CardBillNotice>? CardBillsToday = null)
 {
-    public bool IsEmpty => PendingBills.Count == 0 && OverdueBills.Count == 0 && OverdueInvoices.Count == 0 && InvoicesDueToday.Count == 0;
+    public bool IsEmpty => PendingBills.Count == 0 && OverdueBills.Count == 0 && OverdueInvoices.Count == 0 && InvoicesDueToday.Count == 0
+        && (CardBillsToday is null || CardBillsToday.Count == 0);
 }
 
 /// <summary>Regras do check-in noturno (spec 013 §4.5). Funções puras.</summary>

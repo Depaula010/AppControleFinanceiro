@@ -81,6 +81,12 @@ public static class CheckinMessageFormatter
             }
         }
 
+        // Desvio 267: com a lista do cartão informada, ela manda (inclui as que o motor já lançou na fatura); sem ela, vale o jeito antigo.
+        if (snapshot.CardBillsToday is { } cardToday)
+        {
+            cardReminders = [.. cardToday.Select(c => (c.Description, c.Value, c.Account))];
+        }
+
         if (pendingExpenses.Count == 0 && pendingIncomes.Count == 0 && overdueExpenses.Count == 0 && overdueIncomes.Count == 0
             && snapshot.OverdueInvoices.Count == 0 && cardReminders.Count == 0 && snapshot.InvoicesDueToday.Count == 0)
         {

@@ -25,6 +25,25 @@ public sealed class CheckinQueriesTests(PostgresFixture postgres) : IAsyncLifeti
 
     private Task<CheckinSnapshot> SnapshotAsync(string today) => _queries.GetSnapshotAsync(_user, JobsEnv.Day(today), CancellationToken.None);
 
+    [Fact]
+    [Trait("AC", "013-41")]
+    public async Task CardBillsToday_AreListedEvenWhenTheEngineAlreadyLaunchedThem_Deviation267()
+    {
+        var card = await _env.CardAsync(_user, "Cartão Inter");
+        var launched = await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Gympass", 183.2m, day: 18);
+        await _env.TransactionAsync(_user, card, "Despesa Essencial", "2026-03-18", "Gympass", -183.2m, scheduleId: launched, competence: "2026-03-18");
+        await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Claude AI", 110m, day: 18);
+        await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Outro dia", 50m, day: 19);
+        await _env.ScheduleAsync(_user, card, "Renda", "Cashback", 10m, day: 18);
+        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Aluguel", 1500m, day: 18);
+
+        var snapshot = await SnapshotAsync("2026-03-18");
+
+        snapshot.CardBillsToday.ShouldNotBeNull();
+        snapshot.CardBillsToday.Select(c => (c.Description, c.Value)).ShouldBe([("Gympass", 183.2m), ("Claude AI", 110m)]);
+        snapshot.PendingBills.Select(b => b.Description).ShouldContain("Aluguel");
+    }
+
     [Theory]
     [Trait("AC", "013-41")]
     [InlineData(18, true)]
@@ -322,6 +341,36 @@ public sealed class NotificationQueriesTests(PostgresFixture postgres) : IAsyncL
 
         alerts.BillsToday.Select(b => (b.Description, b.Type, b.Value)).ShouldBe([("Fim", "Despesa", 100d)]);
         alerts.BillsTomorrow.Select(b => (b.Description, b.Type)).ShouldBe([("Salário", "Receita")]);
+    }
+
+    [Fact]
+    [Trait("AC", "013-30")]
+    public async Task FinancialAlerts_MarkTheBillsOfACreditCardAccount_Deviation267()
+    {
+        var repository = new FinancialAlertsRepository(postgres.Connections);
+        var card = await _env.CardAsync(_user, "Cartão Inter");
+        await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Gympass", 183.2m, day: 18);
+        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Aluguel", 1500m, day: 18);
+
+        var alerts = await repository.GetUpcomingAsync(_user, JobsEnv.Day("2026-03-18"), CancellationToken.None);
+
+        alerts.BillsToday.Select(b => (b.Description, b.OnCard)).ShouldBe([("Gympass", true), ("Aluguel", false)], ignoreOrder: true);
+    }
+
+    [Fact]
+    [Trait("AC", "013-30")]
+    public async Task FinancialAlerts_CardBillAlreadyLaunchedByTheEngine_StillAppears_ButALaunchedBillOfAnotherAccountDoesNot_Deviation267()
+    {
+        var repository = new FinancialAlertsRepository(postgres.Connections);
+        var card = await _env.CardAsync(_user, "Cartão Inter");
+        var onCard = await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Gympass", 183.2m, day: 18);
+        await _env.TransactionAsync(_user, card, "Despesa Essencial", "2026-03-18", "Gympass", -183.2m, scheduleId: onCard, competence: "2026-03-18");
+        var paid = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Aluguel", 1500m, day: 18);
+        await _env.TransactionAsync(_user, _account, "Despesa Essencial", "2026-03-18", "Aluguel", -1500m, scheduleId: paid, competence: "2026-03-18");
+
+        var alerts = await repository.GetUpcomingAsync(_user, JobsEnv.Day("2026-03-18"), CancellationToken.None);
+
+        alerts.BillsToday.Select(b => b.Description).ShouldBe(["Gympass"]);
     }
 
     [Fact]
