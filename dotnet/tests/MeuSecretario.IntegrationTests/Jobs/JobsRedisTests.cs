@@ -129,7 +129,7 @@ public sealed class JobsRedisTests(RedisFixture redis) : IClassFixture<RedisFixt
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var motor = new ScheduleMotor(
             new BlockingMotorRepository(started, release), new ScheduleExecutor(new BlockingMotorRepository(started, release)),
-            new RecordingBot(), _cache, new BrazilClock(TimeProvider.System), Runner(), new QuietLog(), new MeuSecretario.Infrastructure.Ops.OpsAlertChannel(false));
+            new BrazilClock(TimeProvider.System), Runner(), new QuietLog(), new MeuSecretario.Infrastructure.Ops.OpsAlertChannel(false));
         var lockKey = CacheKeys.JobLock("motor-agendamentos");
         await _mux.GetDatabase().KeyDeleteAsync(lockKey);
 

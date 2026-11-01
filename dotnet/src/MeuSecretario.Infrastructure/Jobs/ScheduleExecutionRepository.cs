@@ -44,9 +44,8 @@ public sealed class ScheduleExecutionRepository(IDbConnectionFactory connections
             $"""
             {SelectWithNextDue}
             WHERE a.ativo = TRUE
-              AND (
-                (a.tipo_agendamento IN ('FIXO', 'PARCELADO') AND {DueOnDay})
-                OR a.tipo_agendamento = 'LEMBRETE_VARIAVEL')
+              AND a.tipo_agendamento IN ('FIXO', 'PARCELADO')
+              AND {DueOnDay}
             ORDER BY a.id
             """,
             DayParameters(today),

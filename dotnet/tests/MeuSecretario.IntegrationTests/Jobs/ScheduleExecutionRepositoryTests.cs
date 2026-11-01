@@ -247,7 +247,7 @@ public sealed class ScheduleExecutionRepositoryTests(PostgresFixture postgres) :
 
     [Fact]
     [Trait("AC", "013-60")]
-    public async Task Candidates_AreFixedAndInstallmentsOfTheDay_AnnualOnlyInTheMonth_PlusEveryActiveReminder()
+    public async Task Candidates_AreFixedAndInstallmentsOfTheDay_AnnualOnlyInTheMonth_ButNeverTheVariableReminder_Deviation268()
     {
         var fixedToday = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "A", day: 18);
         var installmentToday = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "B", kind: "PARCELADO", day: 18, total: 3);
@@ -255,11 +255,11 @@ public sealed class ScheduleExecutionRepositoryTests(PostgresFixture postgres) :
         await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Inativo", day: 18, active: false);
         var annualRight = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Anual certo", periodicity: "ANUAL", month: 3, day: 18);
         await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Anual errado", periodicity: "ANUAL", month: 4, day: 18);
-        var reminder = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Lembrete", kind: "LEMBRETE_VARIAVEL", day: 25);
+        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Lembrete", kind: "LEMBRETE_VARIAVEL", day: 25);
 
         var candidates = await _repository.ListMotorCandidatesAsync(JobsEnv.Day("2026-03-18"), CancellationToken.None);
 
-        candidates.Select(c => c.Id).ShouldBe([fixedToday, installmentToday, annualRight, reminder]);
+        candidates.Select(c => c.Id).ShouldBe([fixedToday, installmentToday, annualRight]);
         candidates[^1].WhatsappNumber.ShouldBe("5511900000001");
     }
 

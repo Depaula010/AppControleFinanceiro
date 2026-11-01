@@ -107,14 +107,15 @@ public sealed class RollingCadenceTests(PostgresFixture postgres) : IAsyncLifeti
 
     [Fact]
     [Trait("AC", "013-60")]
-    public async Task WeeklyVariableReminder_CarriesItsNextDueToTheMotor()
+    public async Task WeeklyVariableReminder_IsNotAMotorCandidate_Deviation268()
     {
         var id = await _env.ScheduleAsync(
             _user, _account, "Despesa Essencial", "Gasolina Semanal", 100m, "LEMBRETE_VARIAVEL", "SEMANAL", day: 5, startDate: "2025-01-01");
         await _env.TransactionAsync(_user, _account, "Despesa Essencial", "2026-10-19", "Gasolina Semanal", -100m, scheduleId: id);
 
-        var candidates = await _executor.ListMotorCandidatesAsync(JobsEnv.Day("2026-10-24"), CancellationToken.None);
+        // Vence em 26/10, mas o motor não avisa nem lança conta de valor variável: ela aparece nos check-ins.
+        var candidates = await _executor.ListMotorCandidatesAsync(JobsEnv.Day("2026-10-26"), CancellationToken.None);
 
-        candidates.Single(c => c.Id == id).NextDue.ShouldBe(JobsEnv.Day("2026-10-26"));
+        candidates.ShouldNotContain(c => c.Id == id);
     }
 }

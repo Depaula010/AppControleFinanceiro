@@ -163,3 +163,4 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [265](265-menu-sem-gemini.md) | "menu" e "ajuda" respondem sem chamar o Gemini | operação | 012 | implementado |
 | [266](266-aviso-gemini-falhando.md) | Aviso ao dono quando o Gemini recusa as chamadas (cota, saldo, chave, modelo) | operação | 012 | implementado |
 | [267](267-cartao-informativo-nos-avisos.md) | Contas fixas do cartão aparecem nos avisos da manhã e da noite só como informação, mesmo depois de lançadas | correção | 013 | implementado |
+| [268](268-sem-lembrete-variavel-avulso.md) | Fim do aviso avulso de conta variável; alerta da manhã cobre contas semanais | correção | 013 | implementado |
