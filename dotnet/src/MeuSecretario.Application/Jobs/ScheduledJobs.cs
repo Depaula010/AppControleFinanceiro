@@ -187,15 +187,11 @@ public sealed class InvoiceProcessorJob(
 public sealed class ScheduleMotor(
     IScheduleExecutionRepository repository,
     IScheduleExecutor executor,
-    IBotClient bot,
-    ICache cache,
     IClock clock,
     JobRunner runner,
     IJobLog log,
     IOpsAlerts alerts) : IScheduleMotor, IScheduledJob
 {
-    private static readonly TimeSpan ReminderTtl = TimeSpan.FromHours(48);
-
     /// <summary>Quantos dias para trás o motor confere o que deveria ter lançado (desvio 262).</summary>
     public const int CatchUpDays = 3;
 
@@ -223,11 +219,8 @@ public sealed class ScheduleMotor(
         {
             try
             {
-                if (schedule.Kind == ScheduleKinds.VariableReminder)
-                {
-                    await RemindAsync(schedule, today, cancellationToken);
-                }
-                else if (ScheduleRules.MotorDayMatches(schedule, today))
+                // Desvio 268: conta de valor variável não é avisada nem lançada pelo motor; quem cuida dela são os check-ins.
+                if (schedule.Kind != ScheduleKinds.VariableReminder && ScheduleRules.MotorDayMatches(schedule, today))
                 {
                     var outcome = await executor.ExecuteAsync(new ScheduleExecutionRequest(schedule.Id, today), cancellationToken);
                     log.Info(Name, $"Agendamento ID {schedule.Id.ToString(CultureInfo.InvariantCulture)}: {Describe(outcome)}");
@@ -290,35 +283,6 @@ public sealed class ScheduleMotor(
             log.Warning(Name, message);
             alerts.Raise(Name, message);
         }
-    }
-
-    private async Task RemindAsync(ScheduleInfo schedule, DateOnly today, CancellationToken cancellationToken)
-    {
-        if (ScheduleRules.ReminderDueDate(schedule, today) is not { } due || string.IsNullOrEmpty(schedule.WhatsappNumber))
-        {
-            return;
-        }
-
-        var key = string.Create(CultureInfo.InvariantCulture, $"motor_lembrete:{schedule.Id}:{due:yyyy-MM-dd}");
-        var locked = false;
-        if (await cache.IsAvailableAsync(cancellationToken))
-        {
-            if (!await cache.SetIfNotExistsAsync(key, "sent", ReminderTtl, cancellationToken))
-            {
-                log.Info(Name, $"Lembrete do agendamento {schedule.Id.ToString(CultureInfo.InvariantCulture)} já enviado");
-                return;
-            }
-
-            locked = true;
-        }
-
-        var sent = await bot.SendTextAsync(schedule.WhatsappNumber, ScheduleRules.ReminderMessage(schedule), cancellationToken);
-        if (!sent && locked)
-        {
-            await cache.DeleteAsync(key, CancellationToken.None);
-        }
-
-        log.Info(Name, $"Lembrete do agendamento {schedule.Id.ToString(CultureInfo.InvariantCulture)}: {(sent ? "enviado" : "falha no envio")}");
     }
 
     private static string Describe(ScheduleExecutionOutcome outcome) => outcome switch

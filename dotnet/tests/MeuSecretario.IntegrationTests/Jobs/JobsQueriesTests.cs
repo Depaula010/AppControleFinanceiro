@@ -26,6 +26,24 @@ public sealed class CheckinQueriesTests(PostgresFixture postgres) : IAsyncLifeti
     private Task<CheckinSnapshot> SnapshotAsync(string today) => _queries.GetSnapshotAsync(_user, JobsEnv.Day(today), CancellationToken.None);
 
     [Fact]
+    [Trait("AC", "013-30")]
+    public async Task FinancialAlerts_WeeklyBill_AppearsOnItsDueDate_Deviation268()
+    {
+        var repository = new FinancialAlertsRepository(postgres.Connections);
+        // Semanal, sem lançamento: o vencimento é a data de início (2026-03-18) e cada 7 dias depois; dia_execucao não conta.
+        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Gasolina Semanal", 100m, "LEMBRETE_VARIAVEL", "SEMANAL", day: 5, startDate: "2026-03-18");
+
+        var onDueDate = await repository.GetUpcomingAsync(_user, JobsEnv.Day("2026-03-18"), CancellationToken.None);
+        var dayBefore = await repository.GetUpcomingAsync(_user, JobsEnv.Day("2026-03-17"), CancellationToken.None);
+        var otherDay = await repository.GetUpcomingAsync(_user, JobsEnv.Day("2026-03-20"), CancellationToken.None);
+
+        onDueDate.BillsToday.Select(b => b.Description).ShouldBe(["Gasolina Semanal"]);
+        dayBefore.BillsTomorrow.Select(b => b.Description).ShouldBe(["Gasolina Semanal"]);
+        otherDay.BillsToday.ShouldBeEmpty();
+        otherDay.BillsTomorrow.ShouldBeEmpty();
+    }
+
+    [Fact]
     [Trait("AC", "013-41")]
     public async Task CardBillsToday_AreListedEvenWhenTheEngineAlreadyLaunchedThem_Deviation267()
     {

@@ -215,13 +215,18 @@ public sealed class FinancialAlertsRepository(IDbConnectionFactory connections) 
             WHERE a.usuario_id = @uid
               AND a.ativo = TRUE
               AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
-              AND a.dia_execucao = @dia
-              AND (a.periodicidade <> 'ANUAL' OR EXTRACT(MONTH FROM a.data_inicio) = @mes)
-              AND (c.tipo_conta = 'Cartão de Crédito' OR NOT {JobSql.LaunchedInMonth})
+              AND (
+                  -- Desvio 268: semanal, quinzenal e diária vencem pelo próximo vencimento, não pelo dia do mês.
+                  ({SchedulePaymentSql.IsRolling("a")} AND {SchedulePaymentSql.NextDue("a", "@data")} = @data)
+                  OR (NOT {SchedulePaymentSql.IsRolling("a")}
+                      AND a.dia_execucao = @dia
+                      AND (a.periodicidade <> 'ANUAL' OR EXTRACT(MONTH FROM a.data_inicio) = @mes)
+                      AND (c.tipo_conta = 'Cartão de Crédito' OR NOT {JobSql.LaunchedInMonth})))
             ORDER BY a.dia_execucao ASC, a.id
             """,
             JobSql.With(
-                ("uid", userId, DbType.Int32), ("dia", day.Day, DbType.Int32), ("mes", day.Month, DbType.Int32), ("ano", day.Year, DbType.Int32)),
+                ("uid", userId, DbType.Int32), ("dia", day.Day, DbType.Int32), ("mes", day.Month, DbType.Int32), ("ano", day.Year, DbType.Int32),
+                ("data", JobSql.Day(day), DbType.Date)),
             cancellationToken: cancellationToken));
         return [.. rows.Select(r => new AlertBill(r.Id, r.Description, (double)(r.Amount ?? 0m), r.Category, r.Account, AlertBill.TypeFor(r.GroupName), r.AccountType == ScheduleRules.CardAccountType))];
     }

@@ -292,7 +292,7 @@ public class ScheduleMotorTests
             .Returns(new ScheduleExecutionOutcome.Posted(1, "x", -1m, null));
     }
 
-    private ScheduleMotor Motor() => new(_repository, _executor, _h.Bot, _h.Cache, _h.Clock, _h.Runner, _h.Log, _alerts);
+    private ScheduleMotor Motor() => new(_repository, _executor, _h.Clock, _h.Runner, _h.Log, _alerts);
 
     private static ScheduleInfo Schedule(
         int id, string kind = ScheduleKinds.Fixed, int day = 18, int notify = 0, decimal? amount = 100m, string whatsapp = "5511") =>
@@ -427,45 +427,15 @@ public class ScheduleMotorTests
 
     [Fact]
     [Trait("AC", "013-63")]
-    public async Task Reminder_FiresOnDueMinusNotifyDays_Once()
+    public async Task VariableReminder_IsNeverNotifiedByTheMotor_Deviation268()
     {
-        // vence dia 21, aviso 3 dias antes => hoje (18).
+        // vence dia 21, aviso 3 dias antes => seria hoje (18). O aviso avulso foi removido: a conta aparece nos check-ins.
         _repository.ListMotorCandidatesAsync(Arg.Any<DateOnly>(), Arg.Any<CancellationToken>())
-            .Returns([Schedule(7, ScheduleKinds.VariableReminder, day: 21, notify: 3), Schedule(8, ScheduleKinds.VariableReminder, day: 25, notify: 3)]);
+            .Returns([Schedule(7, ScheduleKinds.VariableReminder, day: 21, notify: 3), Schedule(8, ScheduleKinds.VariableReminder, day: 18, notify: 0)]);
 
         await Motor().RunAsync(CancellationToken.None);
-        await Motor().RunAsync(CancellationToken.None);
 
-        await _h.Bot.Received(1).SendTextAsync("5511", Arg.Is<string>(m => m.Contains("vence em 3 dias (no dia 21)", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
+        await _h.Bot.DidNotReceiveWithAnyArgs().SendTextAsync(default!, default!, default);
         await _executor.DidNotReceiveWithAnyArgs().ExecuteAsync(default!, default);
-        _h.Cache.TtlOf("motor_lembrete:7:2026-03-21")!.Value.TotalHours.ShouldBeInRange(47, 48);
-    }
-
-    [Fact]
-    [Trait("AC", "013-63")]
-    public async Task Reminder_FailedSend_ReleasesTheKeyForTheNextRun()
-    {
-        _repository.ListMotorCandidatesAsync(Arg.Any<DateOnly>(), Arg.Any<CancellationToken>())
-            .Returns([Schedule(7, ScheduleKinds.VariableReminder, day: 18, notify: 0)]);
-        _h.Bot.SendTextAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(false, true);
-
-        await Motor().RunAsync(CancellationToken.None);
-        await Motor().RunAsync(CancellationToken.None);
-
-        await _h.Bot.Received(2).SendTextAsync("5511", Arg.Any<string>(), Arg.Any<CancellationToken>());
-        _h.Cache.RawValue("motor_lembrete:7:2026-03-18").ShouldNotBeNull();
-    }
-
-    [Fact]
-    [Trait("AC", "013-63")]
-    public async Task Reminder_WithoutRedis_StillSends()
-    {
-        _h.Cache.Unavailable = true;
-        _repository.ListMotorCandidatesAsync(Arg.Any<DateOnly>(), Arg.Any<CancellationToken>())
-            .Returns([Schedule(7, ScheduleKinds.VariableReminder, day: 18, notify: 0)]);
-
-        await Motor().RunAsync(CancellationToken.None);
-
-        await _h.Bot.Received(1).SendTextAsync("5511", Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 }
