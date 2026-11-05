@@ -5,10 +5,16 @@ using MeuSecretario.Domain.Automation;
 namespace MeuSecretario.Domain.Whatsapp;
 
 /// <summary>Conta fixa ainda não executada no mês (<c>get_pending_bills_for_month</c>, só as colunas que o texto usa).</summary>
-public sealed record PendingBill(string Description, double Amount, string Category, int Day, string AccountType, string GroupName);
+/// <remarks><c>TotalInstallments</c> só existe em <c>PARCELADO</c>; com ele a linha mostra a parcela da vez (desvio 269).</remarks>
+public sealed record PendingBill(
+    string Description, double Amount, string Category, int Day, string AccountType, string GroupName,
+    int? TotalInstallments = null, int? ExecutedInstallments = null);
 
 /// <summary>Agendamento ativo do catálogo (<c>get_all_scheduled_bills</c>); <c>Periodicity</c> nulo vale <c>MENSAL</c>.</summary>
-public sealed record CatalogBill(string Description, double Amount, int Day, int? Month, string? Periodicity, string Category, string AccountType, string GroupName);
+/// <remarks><c>TotalInstallments</c> só existe em <c>PARCELADO</c>; com ele a linha mostra as parcelas já pagas (desvio 269).</remarks>
+public sealed record CatalogBill(
+    string Description, double Amount, int Day, int? Month, string? Periodicity, string Category, string AccountType, string GroupName,
+    int? TotalInstallments = null, int? ExecutedInstallments = null);
 
 /// <summary>
 /// Textos de <c>Consulta Contas Fixas</c> e <c>Consulta Todas Contas</c> (<c>FixedBillsService.list_pending_bills_formatted</c> e
@@ -66,7 +72,7 @@ public static class FixedBillsMessages
         foreach (var bill in bills)
         {
             var (status, neutral) = Status(bill.Day, today);
-            var item = new Item(bill.Description, bill.Amount, bill.Category, status, neutral);
+            var item = new Item(Bills.InstallmentLabel.Next(bill.Description, bill.ExecutedInstallments, bill.TotalInstallments), bill.Amount, bill.Category, status, neutral);
             if (bill.GroupName == IncomeGroup)
             {
                 incomes.Add(item);
@@ -153,7 +159,7 @@ public static class FixedBillsMessages
         foreach (var bill in bills)
         {
             var period = string.IsNullOrEmpty(bill.Periodicity) ? "MENSAL" : bill.Periodicity;
-            var item = new CatalogItem(bill.Description, bill.Amount, Due(period, bill.Day, bill.Month));
+            var item = new CatalogItem(Bills.InstallmentLabel.Paid(bill.Description, bill.ExecutedInstallments, bill.TotalInstallments), bill.Amount, Due(period, bill.Day, bill.Month));
             if (!groups.TryGetValue(period, out var group))
             {
                 group = new Group();

@@ -31,6 +31,7 @@ public static class BillConsistency
         var month = changes.Month.IsSet ? changes.Month.Value : current.Month;
         var total = changes.TotalInstallments.IsSet ? changes.TotalInstallments.Value : current.TotalInstallments;
         var amount = changes.Amount.IsSet ? changes.Amount.Value : current.Amount;
+        var executed = changes.ExecutedInstallments.IsSet ? changes.ExecutedInstallments.Value : current.ExecutedInstallments;
 
         var adjusted = changes;
 
@@ -48,9 +49,15 @@ public static class BillConsistency
 
         if (type == BillTypes.Installment)
         {
-            if (total is { } installments && installments < current.ExecutedInstallments)
+            if (total is { } installments && installments < executed)
             {
                 return new ConsistencyResult.Rejected(BillError.InstallmentsBelowExecuted);
+            }
+
+            // Desvio 269: quem informa as parcelas já pagas deixa ao menos uma por pagar (a última o executor quita e desativa).
+            if (changes.ExecutedInstallments.IsSet && total is { } limit && executed >= limit)
+            {
+                return new ConsistencyResult.Rejected(BillError.ExecutedInstallmentsInvalid);
             }
         }
         else
@@ -59,7 +66,7 @@ public static class BillConsistency
             {
                 adjusted = adjusted with { TotalInstallments = Change.Set<int?>(null) };
             }
-            if (current.ExecutedInstallments != 0)
+            if (current.ExecutedInstallments != 0 || changes.ExecutedInstallments is { IsSet: true, Value: not 0 })
             {
                 adjusted = adjusted with { ExecutedInstallments = Change.Set(0) };
             }

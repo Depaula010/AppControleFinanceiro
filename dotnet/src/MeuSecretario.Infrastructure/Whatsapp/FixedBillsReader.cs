@@ -25,6 +25,10 @@ public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsA
         public string TipoConta { get; set; } = "";
 
         public string NomeGrupo { get; set; } = "";
+
+        public int? TotalParcelas { get; set; }
+
+        public int? ParcelasExecutadas { get; set; }
     }
 
     private sealed class CatalogRow
@@ -44,6 +48,10 @@ public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsA
         public string TipoConta { get; set; } = "";
 
         public string NomeGrupo { get; set; } = "";
+
+        public int? TotalParcelas { get; set; }
+
+        public int? ParcelasExecutadas { get; set; }
     }
 
     private sealed class DueRow
@@ -55,6 +63,10 @@ public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsA
         public int DiaExecucao { get; set; }
 
         public string NomeGrupo { get; set; } = "";
+
+        public int? TotalParcelas { get; set; }
+
+        public int? ParcelasExecutadas { get; set; }
     }
 
     private sealed class InvoiceRow
@@ -73,7 +85,8 @@ public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsA
         var rows = await connection.QueryAsync<PendingRow>(new CommandDefinition(
             """
             SELECT a.descricao AS Descricao, a.valor_previsto AS ValorPrevisto, a.dia_execucao AS DiaExecucao,
-                   s.nome_sub AS Categoria, c.tipo_conta AS TipoConta, g.nome_grupo AS NomeGrupo
+                   s.nome_sub AS Categoria, c.tipo_conta AS TipoConta, g.nome_grupo AS NomeGrupo,
+                   a.total_parcelas AS TotalParcelas, a.parcelas_executadas AS ParcelasExecutadas
             FROM agendamentos a
             JOIN subcategoria s ON a.subcategoria_id = s.id
             JOIN macrocategoria m ON s.macro_id = m.id
@@ -81,10 +94,13 @@ public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsA
             JOIN contas c ON a.conta_id = c.id
             WHERE a.usuario_id = @userId
               AND a.ativo = TRUE
-              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+              AND (a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+                   OR (a.tipo_agendamento = 'PARCELADO' AND a.total_parcelas IS NOT NULL
+                       AND COALESCE(a.parcelas_executadas, 0) < a.total_parcelas))
               AND (a.periodicidade != 'ANUAL' OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = @month))
               AND (SELECT COUNT(*) FROM transacoes t
-                   WHERE t.descricao = a.descricao
+                   WHERE (t.descricao = a.descricao
+                          OR (a.tipo_agendamento = 'PARCELADO' AND t.agendamento_id = a.id))
                      AND t.usuario_id = a.usuario_id
                      AND t.data_transacao >= @firstDay
                      AND t.data_transacao <= @lastDay) = 0
@@ -92,7 +108,9 @@ public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsA
             """,
             new { userId, month, firstDay, lastDay },
             cancellationToken: cancellationToken));
-        return [.. rows.Select(r => new PendingBill(r.Descricao, (double)(r.ValorPrevisto ?? 0m), r.Categoria, r.DiaExecucao, r.TipoConta, r.NomeGrupo))];
+        return [.. rows.Select(r => new PendingBill(
+            r.Descricao, (double)(r.ValorPrevisto ?? 0m), r.Categoria, r.DiaExecucao, r.TipoConta, r.NomeGrupo,
+            r.TotalParcelas, r.ParcelasExecutadas))];
     }
 
     public async Task<IReadOnlyList<CatalogBill>> ListCatalogAsync(int userId, CancellationToken cancellationToken)
@@ -102,7 +120,8 @@ public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsA
             """
             SELECT a.descricao AS Descricao, a.valor_previsto AS ValorPrevisto, a.dia_execucao AS DiaExecucao,
                    a.mes_execucao AS MesExecucao, a.periodicidade AS Periodicidade, s.nome_sub AS Categoria,
-                   c.tipo_conta AS TipoConta, g.nome_grupo AS NomeGrupo
+                   c.tipo_conta AS TipoConta, g.nome_grupo AS NomeGrupo,
+                   a.total_parcelas AS TotalParcelas, a.parcelas_executadas AS ParcelasExecutadas
             FROM agendamentos a
             JOIN subcategoria s ON a.subcategoria_id = s.id
             JOIN macrocategoria m ON s.macro_id = m.id
@@ -124,7 +143,8 @@ public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsA
             new { userId },
             cancellationToken: cancellationToken));
         return [.. rows.Select(r => new CatalogBill(
-            r.Descricao, (double)(r.ValorPrevisto ?? 0m), r.DiaExecucao, r.MesExecucao, r.Periodicidade, r.Categoria, r.TipoConta, r.NomeGrupo))];
+            r.Descricao, (double)(r.ValorPrevisto ?? 0m), r.DiaExecucao, r.MesExecucao, r.Periodicidade, r.Categoria, r.TipoConta, r.NomeGrupo,
+            r.TotalParcelas, r.ParcelasExecutadas))];
     }
 
     public async Task<IReadOnlyList<DueBill>> ListDueBillsAsync(int userId, DueSlice slice, CancellationToken cancellationToken)
@@ -142,7 +162,8 @@ public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsA
 
         var rows = await connection.QueryAsync<DueRow>(new CommandDefinition(
             $"""
-            SELECT a.descricao AS Descricao, a.valor_previsto AS ValorPrevisto, a.dia_execucao AS DiaExecucao, g.nome_grupo AS NomeGrupo
+            SELECT a.descricao AS Descricao, a.valor_previsto AS ValorPrevisto, a.dia_execucao AS DiaExecucao, g.nome_grupo AS NomeGrupo,
+                   a.total_parcelas AS TotalParcelas, a.parcelas_executadas AS ParcelasExecutadas
             FROM agendamentos a
             JOIN contas c ON a.conta_id = c.id
             JOIN subcategoria s ON a.subcategoria_id = s.id
@@ -150,12 +171,15 @@ public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsA
             JOIN grupocategoria g ON m.grupo_id = g.id
             WHERE a.usuario_id = @userId
               AND a.ativo = TRUE
-              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+              AND (a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+                   OR (a.tipo_agendamento = 'PARCELADO' AND a.total_parcelas IS NOT NULL
+                       AND COALESCE(a.parcelas_executadas, 0) < a.total_parcelas))
               {days}
               AND (a.periodicidade != 'ANUAL' OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = @month))
               AND NOT EXISTS (
                   SELECT 1 FROM transacoes t
-                  WHERE t.descricao = a.descricao
+                  WHERE (t.descricao = a.descricao
+                         OR (a.tipo_agendamento = 'PARCELADO' AND t.agendamento_id = a.id))
                     AND t.usuario_id = a.usuario_id
                     AND EXTRACT(MONTH FROM t.data_transacao) = @month
                     AND EXTRACT(YEAR FROM t.data_transacao) = @year
@@ -164,7 +188,7 @@ public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsA
             """,
             new { userId, dayFrom = slice.DayFrom, dayTo = slice.DayTo, month = slice.Month, year = slice.Year },
             cancellationToken: cancellationToken));
-        return [.. rows.Select(r => new DueBill(r.Descricao, r.ValorPrevisto, r.DiaExecucao, r.NomeGrupo))];
+        return [.. rows.Select(r => new DueBill(r.Descricao, r.ValorPrevisto, r.DiaExecucao, r.NomeGrupo, r.TotalParcelas, r.ParcelasExecutadas))];
     }
 
     public async Task<IReadOnlyList<DueInvoice>> ListDueInvoicesAsync(int userId, DateOnly first, DateOnly last, CancellationToken cancellationToken)

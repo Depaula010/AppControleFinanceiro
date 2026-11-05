@@ -113,6 +113,7 @@ public sealed class BillRepository(IDbConnectionFactory connections) : IBillRepo
         parameters.Add("notify", data.NotifyDaysBefore, DbType.Int32);
         parameters.Add("include", data.IncludeInReserve, DbType.Boolean);
         parameters.Add("installments", data.TotalInstallments, DbType.Int32);
+        parameters.Add("executed", data.ExecutedInstallments, DbType.Int32);
 
         // Violações de CHECK ou FK propagam como exceção (o endpoint responde 500 fixo).
         var id = await connection.ExecuteScalarAsync<int>(new CommandDefinition(
@@ -121,7 +122,7 @@ public sealed class BillRepository(IDbConnectionFactory connections) : IBillRepo
                                       periodicidade, data_inicio, dia_execucao, mes_execucao, notificar_antes_dias, ativo,
                                       parcelas_executadas, incluir_na_reserva, total_parcelas)
             VALUES (@userId, @accountId, @subcategoryId, @description, @amount, @type, @periodicity, @startDate, @day,
-                    @month, @notify, true, 0, @include, @installments)
+                    @month, @notify, true, @executed, @include, @installments)
             RETURNING id
             """,
             parameters,

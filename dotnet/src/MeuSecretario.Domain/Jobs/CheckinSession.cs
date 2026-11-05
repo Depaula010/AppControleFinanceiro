@@ -55,6 +55,12 @@ public sealed record CheckinSessionItem
     [JsonPropertyName("total_parcelas")]
     public required int? TotalInstallments { get; init; }
 
+    /// <summary>Nome para as respostas: parcelado ganha a parcela da vez, <c>X (n/N)</c> (desvio 269). Não vai para o Redis.</summary>
+    [JsonIgnore]
+    public string Label => Kind == ScheduleKinds.Installment
+        ? Bills.InstallmentLabel.Next(Description, ExecutedInstallments, TotalInstallments)
+        : Description;
+
     /// <summary>Texto ISO <c>AAAA-MM-DD</c> (o Python converte <c>date</c> para <c>isoformat</c> antes de gravar).</summary>
     [JsonPropertyName("data_vencimento_real")]
     public required string? DueDate { get; init; }

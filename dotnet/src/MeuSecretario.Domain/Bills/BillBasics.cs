@@ -76,4 +76,7 @@ public enum BillError
     InstallmentsRequired,
     InstallmentsBelowExecuted,
     NothingToUpdate,
+
+    /// <summary>Desvio 269: <c>parcelas_executadas</c> fora de <c>0 ≤ x &lt; total_parcelas</c>.</summary>
+    ExecutedInstallmentsInvalid,
 }

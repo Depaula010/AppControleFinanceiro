@@ -408,7 +408,8 @@ public sealed class NotificationQueriesTests(PostgresFixture postgres) : IAsyncL
 
         var alerts = await repository.GetUpcomingAsync(_user, JobsEnv.Day("2026-03-18"), CancellationToken.None);
 
-        alerts.BillsToday.Select(b => b.Description).ShouldBe(["Aberta", "Anual certa"]);
+        // Desvio 270: o parcelado com parcela restante entra, com a parcela da vez no nome (desvio 269).
+        alerts.BillsToday.Select(b => b.Description).ShouldBe(["Aberta", "Anual certa", "Parcelada (1/3)"]);
     }
 
     [Fact]

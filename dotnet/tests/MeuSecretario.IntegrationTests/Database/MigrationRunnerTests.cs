@@ -58,6 +58,7 @@ public class MigrationRunnerTests(PostgresFixture postgres) : IClassFixture<Post
             "0000_baseline", "0001_usuarios_api_key_varchar255", "0020_categorias_globais", "0050_transacoes_observacoes_origem",
             "0070_notificationconfigs_dias_antes_vencimento", "0080_transacoes_competencia",
             "0090_transacoes_competencia_unica", "0100_configuracoes_gemini", "0110_coach_agenda_chaves",
+            "0120_parcelados_em_aberto",
         ]);
     }
 
@@ -92,6 +93,7 @@ public class MigrationRunnerTests(PostgresFixture postgres) : IClassFixture<Post
             "0000_baseline", "0001_usuarios_api_key_varchar255", "0020_categorias_globais", "0050_transacoes_observacoes_origem",
             "0070_notificationconfigs_dias_antes_vencimento", "0080_transacoes_competencia",
             "0090_transacoes_competencia_unica", "0100_configuracoes_gemini", "0110_coach_agenda_chaves",
+            "0120_parcelados_em_aberto",
         ]);
         await using var check = await dataSource.OpenConnectionAsync();
         (await check.ExecuteScalarAsync<int>("SELECT count(*) FROM subcategoria WHERE usuario_id IS NULL")).ShouldBe(61);

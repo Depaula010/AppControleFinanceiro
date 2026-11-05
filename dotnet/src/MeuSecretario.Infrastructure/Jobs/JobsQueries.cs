@@ -206,7 +206,8 @@ public sealed class FinancialAlertsRepository(IDbConnectionFactory connections) 
         var rows = await connection.QueryAsync<BillRow>(new CommandDefinition(
             $"""
             SELECT a.id AS Id, a.descricao AS Description, a.valor_previsto AS Amount, s.nome_sub AS Category,
-                   c.nome_conta AS Account, g.nome_grupo AS GroupName, c.tipo_conta AS AccountType
+                   c.nome_conta AS Account, g.nome_grupo AS GroupName, c.tipo_conta AS AccountType,
+                   a.tipo_agendamento AS Kind, a.parcelas_executadas AS ExecutedInstallments, a.total_parcelas AS TotalInstallments
             FROM agendamentos a
             JOIN subcategoria s ON a.subcategoria_id = s.id
             JOIN macrocategoria m ON s.macro_id = m.id
@@ -214,7 +215,7 @@ public sealed class FinancialAlertsRepository(IDbConnectionFactory connections) 
             JOIN contas c ON a.conta_id = c.id
             WHERE a.usuario_id = @uid
               AND a.ativo = TRUE
-              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+              AND {SchedulePaymentSql.ListedKind("a")}
               AND (
                   -- Desvio 268: semanal, quinzenal e diária vencem pelo próximo vencimento, não pelo dia do mês.
                   ({SchedulePaymentSql.IsRolling("a")} AND {SchedulePaymentSql.NextDue("a", "@data")} = @data)
@@ -228,7 +229,12 @@ public sealed class FinancialAlertsRepository(IDbConnectionFactory connections) 
                 ("uid", userId, DbType.Int32), ("dia", day.Day, DbType.Int32), ("mes", day.Month, DbType.Int32), ("ano", day.Year, DbType.Int32),
                 ("data", JobSql.Day(day), DbType.Date)),
             cancellationToken: cancellationToken));
-        return [.. rows.Select(r => new AlertBill(r.Id, r.Description, (double)(r.Amount ?? 0m), r.Category, r.Account, AlertBill.TypeFor(r.GroupName), r.AccountType == ScheduleRules.CardAccountType))];
+        return [.. rows.Select(r =>
+        {
+            var onCard = r.AccountType == ScheduleRules.CardAccountType;
+            var label = SchedulePaymentSql.NoticeLabel(r.Description, r.Kind, r.ExecutedInstallments, r.TotalInstallments, onCard);
+            return new AlertBill(r.Id, label, (double)(r.Amount ?? 0m), r.Category, r.Account, AlertBill.TypeFor(r.GroupName), onCard);
+        })];
     }
 
     private sealed class BillRow
@@ -246,6 +252,12 @@ public sealed class FinancialAlertsRepository(IDbConnectionFactory connections) 
         public string GroupName { get; set; } = string.Empty;
 
         public string AccountType { get; set; } = string.Empty;
+
+        public string? Kind { get; set; }
+
+        public int? ExecutedInstallments { get; set; }
+
+        public int? TotalInstallments { get; set; }
     }
 
     private sealed class InvoiceRow
@@ -267,7 +279,8 @@ public sealed class BillsReminderRepository(IDbConnectionFactory connections) : 
         var rows = await connection.QueryAsync<Row>(new CommandDefinition(
             $"""
             SELECT a.descricao AS Description, a.valor_previsto AS Amount, s.nome_sub AS Category,
-                   c.tipo_conta AS AccountType, g.nome_grupo AS GroupName
+                   c.tipo_conta AS AccountType, g.nome_grupo AS GroupName,
+                   a.tipo_agendamento AS Kind, a.parcelas_executadas AS ExecutedInstallments, a.total_parcelas AS TotalInstallments
             FROM agendamentos a
             JOIN subcategoria s ON a.subcategoria_id = s.id
             JOIN macrocategoria m ON s.macro_id = m.id
@@ -275,7 +288,7 @@ public sealed class BillsReminderRepository(IDbConnectionFactory connections) : 
             JOIN contas c ON a.conta_id = c.id
             WHERE a.usuario_id = @uid
               AND a.ativo = TRUE
-              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+              AND {SchedulePaymentSql.ListedKind("a")}
               AND a.dia_execucao = @dia
               AND (a.periodicidade <> 'ANUAL' OR a.mes_execucao = @mesAlvo)
               AND NOT {JobSql.LaunchedInMonth}
@@ -285,7 +298,10 @@ public sealed class BillsReminderRepository(IDbConnectionFactory connections) : 
                 ("uid", userId, DbType.Int32), ("dia", target.Day, DbType.Int32), ("mesAlvo", target.Month, DbType.Int32),
                 ("mes", today.Month, DbType.Int32), ("ano", today.Year, DbType.Int32)),
             cancellationToken: cancellationToken));
-        return [.. rows.Select(r => new ReminderBill(r.Description, (double)(r.Amount ?? 0m), r.Category, r.AccountType, r.GroupName))];
+        return [.. rows.Select(r => new ReminderBill(
+            SchedulePaymentSql.NoticeLabel(
+                r.Description, r.Kind, r.ExecutedInstallments, r.TotalInstallments, r.AccountType == ScheduleRules.CardAccountType),
+            (double)(r.Amount ?? 0m), r.Category, r.AccountType, r.GroupName))];
     }
 
     private sealed class Row
@@ -299,6 +315,12 @@ public sealed class BillsReminderRepository(IDbConnectionFactory connections) : 
         public string AccountType { get; set; } = string.Empty;
 
         public string GroupName { get; set; } = string.Empty;
+
+        public string? Kind { get; set; }
+
+        public int? ExecutedInstallments { get; set; }
+
+        public int? TotalInstallments { get; set; }
     }
 }
 

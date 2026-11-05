@@ -40,6 +40,7 @@ public sealed class AutomationModule : IFeatureModule
         services.AddScoped<CurrentInvoiceResolver>();
         services.AddScoped<BudgetValidator>();
         services.AddScoped<DirectPoster>();
+        services.AddScoped<BillSettlement>();
 
         services.AddScoped<ProcessAutomateNotification>();
         services.AddScoped<RegisterApiTransaction>();

@@ -10,18 +10,13 @@ namespace MeuSecretario.Application.Whatsapp;
 
 /// <summary>
 /// <c>FixedBillsService.settle_fixed_bill</c> (<c>fixed_bills_service.py</c>): despesa na conta e na subcategoria do
-/// agendamento, com a descrição dele, pela porta de lançamento da 004. Agendamento inexistente lança.
+/// agendamento, com a descrição dele, pela porta de lançamento da 004; parcelado vai pelo executor (desvio 270,
+/// <see cref="BillSettlement"/>). Agendamento inexistente lança.
 /// </summary>
-public sealed class FixedBillSettler(IAutomationLookups lookups, DirectPoster poster) : IFixedBillSettler
+public sealed class FixedBillSettler(BillSettlement settlement) : IFixedBillSettler
 {
-    public async Task<int> SettleAsync(int userId, int scheduleId, double amount, DateOnly day, CancellationToken cancellationToken)
-    {
-        var target = await lookups.FindSettleTargetAsync(userId, scheduleId, cancellationToken)
-                     ?? throw new AutomationFailureException("agendamento não encontrado");
-        var posted = await poster.PostAsync(
-            userId, target.AccountId, target.SubcategoryId, TransactionKind.Expense, amount, target.Description, day, cancellationToken);
-        return posted.TransactionId;
-    }
+    public async Task<int> SettleAsync(int userId, int scheduleId, double amount, DateOnly day, CancellationToken cancellationToken) =>
+        (await settlement.SettleAsync(userId, scheduleId, amount, day, cancellationToken)).TransactionId;
 }
 
 /// <summary>
@@ -73,7 +68,7 @@ public sealed class PaymentStep(
                     : (match.ExpectedAmount is { } expected && expected != 0 ? (double)expected : null);
                 if (amount is null or 0)
                 {
-                    missing.Add(match.Description);
+                    missing.Add(match.Label);
                     continue;
                 }
 
@@ -81,7 +76,7 @@ public sealed class PaymentStep(
                 {
                     await settler.SettleAsync(userId, match.ScheduleId, amount.Value, clock.Today, cancellationToken);
                     settled.Add(new SettledBill(
-                        match.Description, amount.Value, match.ExpectedAmount is { } e && e != 0 ? (double)e : 0, match.ScheduleType, match.Category));
+                        match.Label, amount.Value, match.ExpectedAmount is { } e && e != 0 ? (double)e : 0, match.ScheduleType, match.Category));
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {

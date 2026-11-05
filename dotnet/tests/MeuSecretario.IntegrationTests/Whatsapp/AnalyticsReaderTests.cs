@@ -116,7 +116,8 @@ public class AnalyticsReaderTests(PostgresFixture postgres) : IAsyncLifetime, IC
         data.MonthlyTotals.ShouldBe([new MonthTotal("2026-10", -50), new MonthTotal("2026-09", -300), new MonthTotal("2026-08", -200)]);
         data.SpentToDate.ShouldBe(-50);
         data.FixedCharges.Select(c => c.Description).ShouldBe(["Mercado", "Anual", "Tênis", "Aluguel"]); // ORDER BY valor_previsto DESC
-        data.Pending.Select(p => (p.Description, p.Value, p.Day)).ShouldBe([("Aluguel", -1500d, 10)]);
+        // Desvio 270: o parcelado com parcela restante falta no mês, com a parcela da vez no nome (desvio 269).
+        data.Pending.Select(p => (p.Description, p.Value, p.Day)).ShouldBe([("Aluguel", -1500d, 10), ("Tênis (3/6)", -150d, 10)]);
         data.Pending[0].GroupName.ShouldNotBeNull();
         data.Pending[0].AccountType.ShouldBe("Conta Corrente");
 

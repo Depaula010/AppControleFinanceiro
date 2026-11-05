@@ -333,7 +333,10 @@ public static class InvoiceMessages
                     "PARCELADO" => "📊 ",
                     _ => string.Empty,
                 };
-                var extra = string.IsNullOrEmpty(line.InstallmentInfo) ? string.Empty : $" ({line.InstallmentInfo})";
+                // Desvio 269: a transação do parcelado já se chama "X (n/N)"; o contador do agendamento só entra se faltar.
+                var extra = string.IsNullOrEmpty(line.InstallmentInfo) || Bills.InstallmentLabel.HasSuffix(line.Description)
+                    ? string.Empty
+                    : $" ({line.InstallmentInfo})";
                 sb.Append("  ").Append(emoji).Append(line.Description).Append(extra).Append(": ").Append(MoneyText.Brl(line.Value)).Append('\n');
             }
 

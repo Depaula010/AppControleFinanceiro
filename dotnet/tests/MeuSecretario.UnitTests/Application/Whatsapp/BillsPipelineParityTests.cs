@@ -17,6 +17,12 @@ public class BillsPipelineParityTests
     internal static readonly IReadOnlySet<string> Deviation210 =
         new HashSet<string>(StringComparer.Ordinal) { "checkin_todas_assim_confirma_tudo", "checkin_ok_ganha_do_nao" };
 
+    /// <summary>Desvio 269: nos cenários com parcelado, o nome na resposta ganha a parcela da vez; o resto do texto é o do Flask.</summary>
+    private static readonly Dictionary<string, (string From, string To)[]> Deviation269 = new(StringComparer.Ordinal)
+    {
+        ["checkin_cartao_e_parcelado"] = [("• Tênis\n", "• Tênis (2/3)\n"), ("• Última parcela\n", "• Última parcela (3/3)\n")],
+    };
+
     /// <summary>Resolver a fatura do cartão é detalhe do motor de agendamentos (013); o rótulo do Flask não tem equivalente aqui.</summary>
     private static readonly string[] IgnoredCalls = ["finance_service.get_or_create_fatura"];
 
@@ -92,6 +98,15 @@ public class BillsPipelineParityTests
         if (scenario.GetProperty("deviation").GetString() == "008" && expectedReply!.StartsWith("❌ Erro ao salvar transações: ", StringComparison.Ordinal))
         {
             expectedReply = CheckinReplyTexts.SaveFailed;
+        }
+
+        // Desvio 269: a resposta do check-in nomeia o parcelado com a parcela paga ("Tênis (2/3)").
+        if (Deviation269.TryGetValue(name, out var replacements))
+        {
+            foreach (var (from, to) in replacements)
+            {
+                expectedReply = expectedReply!.Replace(from, to, StringComparison.Ordinal);
+            }
         }
 
         if (reply != expectedReply)

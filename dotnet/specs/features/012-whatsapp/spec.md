@@ -254,6 +254,8 @@ Numeração a partir de 150 (130+ é da 013; 120-122 da 014). Arquivos em `parit
 | 231 | Linha: saldo inicial das contas **ativas** + transações consolidadas anteriores à janela + acumulado do período (só consolidadas, só contas ativas); pizza e barras: só consolidadas | `AnalyticsReader` |
 | 232 | `Comparação Mensal`: `SUM(ABS(valor))`, `formatar_moeda` (`R$ 2.555,50`), variação com vírgula decimal e positiva quando o gasto aumenta, desempate das variações iguais pelo nome da categoria | `MonthlyComparison`, `AnalyticsReader` |
 | 233 | `Análise Inteligente`: maiores gastos `ORDER BY ABS(valor) DESC, id`; dias da semana traduzidos no código (`WeekdayNames`) | `AnalyticsReader`, `AnalyticsReport` |
+| 269 | Parcelado com contador: `Consulta Todas Contas` mostra as já pagas (`Robo aspirador (4/18)`); contas fixas pendentes, vencimentos, contas atrasadas, respostas do check-in, "paguei" e previsão de gastos mostram a parcela da vez (`(5/18)`); detalhe da fatura não duplica o sufixo | `InstallmentLabel`, `FixedBillsMessages`, `DueDatesMessage`, `CheckinSessionItem.Label`, `FixedBill.Label` |
+| 270 | Parcelado com parcela restante entra em contas fixas pendentes, vencimentos, previsão de gastos e no "paguei" (quitado pelo executor do check-in) | `FixedBillsReader`, `AnalyticsReader`, `AutomationLookups`, `BillSettlement` |
 
 Não implementados (adiados): 154, 157 e 160.
 

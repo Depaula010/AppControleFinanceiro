@@ -11,7 +11,15 @@ public sealed record FixedBill(
     int DayOfMonth,
     string ScheduleType,
     int AccountId,
-    string Category);
+    string Category,
+    int? TotalInstallments = null,
+    int? ExecutedInstallments = null)
+{
+    /// <summary>Nome nas respostas: parcelado ganha a parcela que está sendo paga, <c>X (n/N)</c> (desvio 269).</summary>
+    public string Label => ScheduleType == Bills.BillTypes.Installment
+        ? Bills.InstallmentLabel.Next(Description, ExecutedInstallments, TotalInstallments)
+        : Description;
+}
 
 /// <summary>Casamento difuso da descrição do SMS com as contas fixas (<c>fixed_bills_service.py</c>, spec 011 §7.3; desvio 099).</summary>
 public static class BillMatching

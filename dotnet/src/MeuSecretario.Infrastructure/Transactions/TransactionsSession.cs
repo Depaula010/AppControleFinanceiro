@@ -151,6 +151,7 @@ internal sealed class TransactionsSession(NpgsqlConnection connection, NpgsqlTra
         parameters.Add("dataInicio", TransactionSql.Day(schedule.StartDate), DbType.Date);
         parameters.Add("dia", schedule.DayOfMonth, DbType.Int32);
         parameters.Add("total", schedule.Total, DbType.Int32);
+        parameters.Add("executadas", schedule.Executed, DbType.Int32);
 
         // incluir_na_reserva e notificar_antes_dias ficam nos defaults do banco; mes_execucao NULL (R6).
         return connection.ExecuteScalarAsync<int>(new CommandDefinition(
@@ -158,12 +159,56 @@ internal sealed class TransactionsSession(NpgsqlConnection connection, NpgsqlTra
             INSERT INTO agendamentos (usuario_id, conta_id, subcategoria_id, descricao, valor_previsto, tipo_agendamento,
                                       periodicidade, data_inicio, dia_execucao, total_parcelas, parcelas_executadas, ativo)
             VALUES (@userId, @contaId, @subcategoriaId, @descricao, @valor, 'PARCELADO', 'MENSAL',
-                    @dataInicio, @dia, @total, 1, TRUE)
+                    @dataInicio, @dia, @total, @executadas, TRUE)
             RETURNING id
             """,
             parameters,
             transaction,
             cancellationToken: cancellationToken));
+    }
+
+    public async Task<TrackedInstallmentSchedule?> FindActiveInstallmentScheduleAsync(
+        int userId, int accountId, string baseDescription, int total, CancellationToken cancellationToken)
+    {
+        var row = await connection.QueryFirstOrDefaultAsync<TrackedRow>(new CommandDefinition(
+            """
+            SELECT a.id AS Id, COALESCE(a.parcelas_executadas, 0) AS Executed
+            FROM agendamentos a
+            WHERE a.usuario_id = @userId
+              AND a.conta_id = @accountId
+              AND a.ativo = TRUE
+              AND a.tipo_agendamento = 'PARCELADO'
+              AND a.total_parcelas = @total
+              AND lower(trim(a.descricao)) = lower(trim(@baseDescription))
+            ORDER BY a.id
+            LIMIT 1
+            FOR UPDATE
+            """,
+            new { userId, accountId, total, baseDescription },
+            transaction,
+            cancellationToken: cancellationToken));
+        return row is null ? null : new TrackedInstallmentSchedule(row.Id, row.Executed);
+    }
+
+    public async Task AdvanceInstallmentScheduleAsync(int scheduleId, int executed, bool active, CancellationToken cancellationToken) =>
+        await connection.ExecuteAsync(new CommandDefinition(
+            "UPDATE agendamentos SET parcelas_executadas = @executed, ativo = @active, updated_at = CURRENT_TIMESTAMP WHERE id = @scheduleId",
+            new { scheduleId, executed, active },
+            transaction,
+            cancellationToken: cancellationToken));
+
+    public async Task LinkTransactionToScheduleAsync(int transactionId, int scheduleId, CancellationToken cancellationToken) =>
+        await connection.ExecuteAsync(new CommandDefinition(
+            "UPDATE transacoes SET agendamento_id = @scheduleId WHERE id = @transactionId",
+            new { transactionId, scheduleId },
+            transaction,
+            cancellationToken: cancellationToken));
+
+    private sealed class TrackedRow
+    {
+        public int Id { get; set; }
+
+        public int Executed { get; set; }
     }
 
     public Task<UpdatedTransaction?> UpdateTransactionAsync(

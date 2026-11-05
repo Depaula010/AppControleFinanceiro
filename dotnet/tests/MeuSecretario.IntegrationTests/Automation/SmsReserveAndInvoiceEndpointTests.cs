@@ -70,9 +70,9 @@ public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime,
 
     [Fact]
     [Trait("AC", "011-061")]
-    public async Task InstallmentsAndInactiveSchedules_NeverMatch()
+    public async Task InactiveSchedules_AndFinishedInstallments_NeverMatch()
     {
-        await _env.InsertScheduleAsync(_user, _checking, "Luz", type: "PARCELADO", total: 3, executed: 1);
+        await _env.InsertScheduleAsync(_user, _checking, "Luz", type: "PARCELADO", total: 3, executed: 3);
         await _env.InsertScheduleAsync(_user, _checking, "Luz", active: false);
         _env.Llm.Then("59");
 
@@ -80,6 +80,22 @@ public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime,
 
         status.ShouldBe(HttpStatusCode.OK);
         body.ShouldContain("Despesa registrada");
+    }
+
+    [Fact]
+    [Trait("Desvio", "270")]
+    public async Task AnInstallmentWithParcelsLeft_IsSettledByTheExecutor_AndAdvances()
+    {
+        var schedule = await _env.InsertScheduleAsync(_user, _checking, "Luz", type: "PARCELADO", total: 3, executed: 1);
+
+        var (status, body) = await _env.Post("/webhook-sms-payment", Body(date: "2026-10-03"));
+
+        status.ShouldBe(HttpStatusCode.OK);
+        body.ShouldContain("\"conta_identificada\":\"Luz (2/3)\"");
+        var row = (await _env.QueryAsync<(decimal Valor, string Descricao, int? Agendamento)>(
+            "SELECT valor, descricao, agendamento_id FROM transacoes")).Single();
+        row.ShouldBe((-150.50m, "Luz (2/3)", (int?)schedule));
+        (await _env.QueryAsync<int>("SELECT parcelas_executadas FROM agendamentos WHERE id = @schedule", new { schedule })).Single().ShouldBe(2);
     }
 
     [Fact]

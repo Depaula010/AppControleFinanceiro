@@ -330,8 +330,9 @@ public class TransactionPostingDbTests(PostgresFixture postgres) : IAsyncLifetim
         tx.Valor.ShouldBe(-33.33m);
         DateOnly.FromDateTime(tx.Data).ShouldBe(Day("2026-01-31"));
         tx.Fatura.ShouldBe(posted.InvoiceId);
-        tx.Agendamento.ShouldBeNull();
-        tx.Desc.ShouldBe("Geladeira");
+        // Desvio 271: a 1ª parcela sai como "(1/N)" e ligada ao parcelado (o populador não a lança de novo).
+        tx.Agendamento.ShouldBe(posted.ScheduleId);
+        tx.Desc.ShouldBe("Geladeira (1/3)");
 
         var schedule = (await _data.QueryAsync<(string Tipo, string Per, decimal? Valor, DateTime Inicio, int Dia, int Total, int Exec, bool Ativo, int Conta, int Sub, bool Reserva, int Notificar, int? Mes)>(
             """

@@ -26,6 +26,27 @@ internal static class SchedulePaymentSql
               OR COALESCE({schedule}.parcelas_executadas, 0) < {schedule}.total_parcelas))
         """;
 
+    /// <summary>
+    /// Tipos que entram nos avisos e listas de contas (desvio 270): fixas, lembretes variáveis e parceladas com parcela restante.
+    /// </summary>
+    public static string ListedKind(string schedule) => $"""
+        ({schedule}.tipo_agendamento IN ('{ScheduleKinds.Fixed}', '{ScheduleKinds.VariableReminder}')
+         OR ({schedule}.tipo_agendamento = '{ScheduleKinds.Installment}'
+             AND {schedule}.total_parcelas IS NOT NULL
+             AND COALESCE({schedule}.parcelas_executadas, 0) < {schedule}.total_parcelas))
+        """;
+
+    /// <summary>
+    /// Nome da conta num aviso (desvio 269): parcelado ganha <c>(n/N)</c>. Fora do cartão é a parcela da vez; no cartão o populador
+    /// da fatura já lançou a parcela antes do dia da cobrança, então o contador gravado já é o dela.
+    /// </summary>
+    public static string NoticeLabel(string description, string? kind, int? executed, int? total, bool onCard) =>
+        kind != ScheduleKinds.Installment
+            ? description
+            : onCard
+                ? InstallmentLabel.Paid(description, executed, total)
+                : InstallmentLabel.Next(description, executed, total);
+
     /// <summary>Agendamento de cadência contínua (<see cref="ScheduleCadence"/>): semanal, quinzenal ou diário.</summary>
     public static string IsRolling(string schedule) =>
         $"{schedule}.periodicidade IN ('{Periodicities.Daily}', '{Periodicities.Weekly}', '{Periodicities.Biweekly}')";

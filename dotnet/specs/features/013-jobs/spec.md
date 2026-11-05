@@ -200,6 +200,12 @@ A 007 rejeitou o desvio P-007-1: o campo `daysBeforeDue` da tela continua gravad
 - Um adaptador de leitura por assunto (SQL com Dapper, parâmetros nomeados, datas como `DbType.Date`): `NotificationConfigRepository`, `FinancialAlertsRepository`, `CheckinQueries`, `InvoiceJobRepository`, `ScheduleExecutionRepository`, `MonthlyReportRepository`. O SQL "já lançado" é um fragmento único reutilizado (desvio 012).
 - Logs por `IJobLog` (Application) implementado sobre `ILogger` e arquivo `{job}.log`.
 
+## 8.1 Desvios 269 a 271 (parcelados, 05/11/2026)
+
+- **269:** os avisos (resumo da manhã, lembrete de contas, check-in, bloco do cartão) mostram o parcelado com a parcela da vez, `X (n/N)`; no cartão, com o contador gravado, porque o populador já lançou a parcela da fatura (`SchedulePaymentSql.NoticeLabel`).
+- **270:** o parcelado com parcela restante entra nos alertas do resumo da manhã, no lembrete de contas e no bloco do cartão do check-in (`SchedulePaymentSql.ListedKind`).
+- **271:** a migration `0120` cria os parcelados das compras em aberto que só existiam como transação com `(n/N)`; o populador da fatura lança a parcela da fatura aberta e desativa o parcelado na última.
+
 ## 9. Desvios 130 a 139 (aprovados e implementados em 2026-10-09)
 
 A tabela abaixo é o registro original da proposta; o comportamento vigente é o descrito nas RN e nos AC acima. Notas do Rafael: 135 = não lançar `LEMBRETE_VARIAVEL` no populador (o usuário informa o valor real pelo bot); 132 obrigatório (também vale para `test-monthly-report`, 009c); 136 = cron por minuto. Os desvios 121 e 122 (014) não exigem mudança nesta feature: o job `ALERTAS-TAREFAS` já roda a cada minuto e só delega à 014 a janela `(agora + minutos_antes − 60 s, + 30 s]` e o filtro `usuarios.ativo`.

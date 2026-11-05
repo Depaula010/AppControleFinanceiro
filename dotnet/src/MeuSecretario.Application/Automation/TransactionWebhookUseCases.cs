@@ -312,6 +312,7 @@ public sealed class ProcessSmsPayment(
     IAutomationLookups lookups,
     TransactionCategorizer categorizer,
     DirectPoster poster,
+    BillSettlement settlement,
     IBotClient bot,
     IClock clock)
 {
@@ -373,14 +374,11 @@ public sealed class ProcessSmsPayment(
     private async Task<SmsPaymentResult> SettleAsync(
         AutomationUser user, FixedBill match, double value, DateOnly date, CancellationToken cancellationToken)
     {
-        var target = await lookups.FindSettleTargetAsync(user.UserId, match.ScheduleId, cancellationToken)
-                     ?? throw new AutomationFailureException("agendamento não encontrado");
+        // Desvio 270: parcelado vai pelo executor (liga a transação e avança o contador); o nome sai com a parcela paga.
+        var posted = await settlement.SettleAsync(user.UserId, match.ScheduleId, value, date, cancellationToken);
 
-        var posted = await poster.PostAsync(
-            user.UserId, target.AccountId, target.SubcategoryId, TransactionKind.Expense, value, target.Description, date, cancellationToken);
-
-        await bot.SendTextAsync(user.WhatsApp, AutomationTexts.BillSettled(match.Description, MoneyText.Brl(value), match.Category), cancellationToken);
-        return new SmsPaymentResult.Settled(match.Description, posted.TransactionId);
+        await bot.SendTextAsync(user.WhatsApp, AutomationTexts.BillSettled(match.Label, MoneyText.Brl(value), match.Category), cancellationToken);
+        return new SmsPaymentResult.Settled(match.Label, posted.TransactionId);
     }
 
     private async Task<SmsPaymentResult> RegisterLooseAsync(
