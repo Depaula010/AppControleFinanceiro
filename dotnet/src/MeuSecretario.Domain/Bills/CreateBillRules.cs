@@ -16,7 +16,8 @@ public sealed record NewBillData(
     bool IncludeInReserve,
     int? TotalInstallments,
     int SubcategoryId,
-    int AccountId);
+    int AccountId,
+    int ExecutedInstallments = 0);
 
 public abstract record CreateBillValidation
 {
@@ -37,6 +38,10 @@ internal static class BillFields
         PyNumber.TryInt(raw, out month) && month is >= 1 and <= 12;
 
     public static bool IsAbsentOrNull(RawValue raw) => raw is RawValue.AbsentValue or RawValue.NullValue;
+
+    /// <summary>Desvio 269: parcelas já pagas, inteiro não negativo (o limite superior depende do total, conferido por quem chama).</summary>
+    public static bool TryExecuted(RawValue raw, out int executed) =>
+        PyNumber.TryInt(raw, out executed) && executed >= 0;
 
     /// <summary>Data <c>YYYY-MM-DD</c> (desvio 072); qualquer outro tipo de valor é inválido.</summary>
     public static bool TryStartDate(RawValue raw, out DateOnly date)
@@ -130,6 +135,17 @@ public static class CreateBillRules
             installments = total;
         }
 
+        // Desvio 269: parcelas já pagas ao cadastrar uma compra que começou antes (só parcelado; nos outros tipos é ignorado).
+        var executed = 0;
+        var rawExecuted = body.Get("parcelas_executadas");
+        if (type == BillTypes.Installment && !BillFields.IsAbsentOrNull(rawExecuted))
+        {
+            if (!BillFields.TryExecuted(rawExecuted, out executed) || executed >= installments)
+            {
+                return Fail(BillError.ExecutedInstallmentsInvalid);
+            }
+        }
+
         // 11 e desvio 074: ANUAL sem mês não viola mais o CHECK, é 400
         int? month = null;
         if (periodicity == Periodicities.Annual)
@@ -173,7 +189,7 @@ public static class CreateBillRules
 
         return new CreateBillValidation.Ok(new NewBillData(
             description, amount, type, periodicity, day, month, notify, startDate, include, installments,
-            RawFields.ToId(subcategory), RawFields.ToId(account)));
+            RawFields.ToId(subcategory), RawFields.ToId(account), executed));
     }
 
     private static CreateBillValidation.Rejected Fail(BillError error) => new(error);

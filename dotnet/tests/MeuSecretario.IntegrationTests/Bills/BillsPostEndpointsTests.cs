@@ -376,6 +376,28 @@ public class BillsPostEndpointsTests(PostgresFixture postgres) : IAsyncLifetime,
     }
 
     [Fact]
+    [Trait("Desvio", "269")]
+    public async Task Installment_WithPaidInstallments_StoresThem()
+    {
+        var (status, body) = await Post(Mine(",\"total_parcelas\":18,\"parcelas_executadas\":4", "PARCELADO"));
+
+        status.ShouldBe(HttpStatusCode.Created, body);
+        body.ShouldContain("\"total_parcelas\":18,\"parcelas_executadas\":4}");
+    }
+
+    [Theory]
+    [Trait("Desvio", "269")]
+    [InlineData("6")]
+    [InlineData("-1")]
+    [InlineData("\"x\"")]
+    public async Task Installment_WithPaidInstallmentsOutOfRange_Is400(string paid)
+    {
+        await AssertBadRequest(
+            Mine($",\"total_parcelas\":6,\"parcelas_executadas\":{paid}", "PARCELADO"),
+            "Parcelas já pagas deve ser um número inteiro de 0 até o número de parcelas menos 1");
+    }
+
+    [Fact]
     [Trait("AC", "005-19")]
     public async Task InstallmentsOfAFixedBill_AreIgnored()
     {

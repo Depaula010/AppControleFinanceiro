@@ -6,7 +6,8 @@ using MeuSecretario.Domain.Jobs;
 namespace MeuSecretario.Domain.Whatsapp;
 
 /// <summary>Conta fixa que vence no período (<c>get_vencimentos_periodo</c>); valor nulo vale zero.</summary>
-public sealed record DueBill(string Description, decimal? Amount, int Day, string GroupName);
+/// <remarks><c>TotalInstallments</c> só existe em <c>PARCELADO</c>; com ele a linha mostra a parcela da vez (desvio 269).</remarks>
+public sealed record DueBill(string Description, decimal? Amount, int Day, string GroupName, int? TotalInstallments = null, int? ExecutedInstallments = null);
 
 /// <summary>Fatura aberta que vence no período, com o valor das despesas lançadas nela.</summary>
 public sealed record DueInvoice(string Card, DateOnly DueDate, decimal Value);
@@ -120,7 +121,7 @@ public static class DueDatesMessage
     {
         foreach (var bill in bills)
         {
-            sb.Append("• ").Append(bill.Description).Append(" - ").Append(Brl(bill.Amount ?? 0m))
+            sb.Append("• ").Append(Bills.InstallmentLabel.Next(bill.Description, bill.ExecutedInstallments, bill.TotalInstallments)).Append(" - ").Append(Brl(bill.Amount ?? 0m))
                 .Append(CultureInfo.InvariantCulture, $" (dia {bill.Day})\n");
         }
     }

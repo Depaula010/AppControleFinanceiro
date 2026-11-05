@@ -52,7 +52,8 @@ public class FixedBillsReaderTests(PostgresFixture postgres) : IAsyncLifetime, I
         await _env.InsertScheduleAsync(_user, _account, "Água", type: "LEMBRETE_VARIAVEL", day: 8, amount: null);
         await _env.InsertScheduleAsync(_user, _account, "Já pago", day: 3);
         await _env.InsertScheduleAsync(_user, _account, "Do mês passado", day: 4);
-        await _env.InsertScheduleAsync(_user, _account, "Parcelado", type: "PARCELADO", total: 3, day: 6);
+        await _env.InsertScheduleAsync(_user, _account, "Parcelado", type: "PARCELADO", total: 3, executed: 1, day: 6);
+        await _env.InsertScheduleAsync(_user, _account, "Quitado", type: "PARCELADO", total: 3, executed: 3, day: 6);
         await _env.InsertScheduleAsync(_user, _account, "Inativo", day: 7, active: false);
         await _env.InsertScheduleAsync(_other, await _env.Data.InsertAccountAsync(_other, "Dela"), "Alheio", day: 9);
         await _env.Data.InsertTransactionAsync(_user, _account, valor: -10m, data: "2026-10-03", descricao: "Já pago");
@@ -62,7 +63,10 @@ public class FixedBillsReaderTests(PostgresFixture postgres) : IAsyncLifetime, I
         var bills = await _reader.ListPendingAsync(_user, October1, October31, 10, CancellationToken.None);
 
         bills.Select(b => (b.Description, b.Day)).ShouldBe(
-            [("Do mês passado", 4), ("Aluguel", 5), ("Salário", 5), ("Água", 8), ("Netflix", 12), ("Luz", 20)]);
+            [("Do mês passado", 4), ("Aluguel", 5), ("Salário", 5), ("Parcelado", 6), ("Água", 8), ("Netflix", 12), ("Luz", 20)]);
+        // Desvio 270: o parcelado com parcela restante entra (o quitado não), com o contador para a parcela da vez.
+        bills.Single(b => b.Description == "Parcelado").ShouldSatisfyAllConditions(
+            b => b.TotalInstallments.ShouldBe(3), b => b.ExecutedInstallments.ShouldBe(1));
         bills.Single(b => b.Description == "Netflix").AccountType.ShouldBe("Cartão de Crédito");
         bills.Single(b => b.Description == "Salário").GroupName.ShouldBe("Renda");
         bills.Single(b => b.Description == "Água").Amount.ShouldBe(0d);
@@ -115,8 +119,9 @@ public class FixedBillsReaderTests(PostgresFixture postgres) : IAsyncLifetime, I
 
         var names = async (DueSlice slice) => (await _reader.ListDueBillsAsync(_user, slice, CancellationToken.None)).Select(b => b.Description).ToArray();
 
-        (await names(new DueSlice(7, 7, 10, 2026))).ShouldBe(["Dia 7", "Anual outubro"]);
-        (await names(new DueSlice(7, 30, 10, 2026))).ShouldBe(["Dia 7", "Anual outubro", "Dia 30"]);
+        // Desvio 270: o parcelado com parcela restante vence como as fixas.
+        (await names(new DueSlice(7, 7, 10, 2026))).ShouldBe(["Dia 7", "Anual outubro", "Parcelado"]);
+        (await names(new DueSlice(7, 30, 10, 2026))).ShouldBe(["Dia 7", "Anual outubro", "Parcelado", "Dia 30"]);
         (await names(new DueSlice(28, null, 10, 2026))).ShouldBe(["Dia 30"]);
         (await names(new DueSlice(null, 4, 11, 2026))).ShouldBe(["Dia 3"]);
     }

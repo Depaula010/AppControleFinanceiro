@@ -198,6 +198,18 @@ public static class UpdateBillRules
             installments = Change.Set<int?>(total);
         }
 
+        // Desvio 269: parcelas já pagas; o limite (menor que o total) é conferido no estado resultante (BillConsistency).
+        var executed = default(Change<int>);
+        var rawExecuted = body.Get("parcelas_executadas");
+        if (!BillFields.IsAbsentOrNull(rawExecuted))
+        {
+            if (!BillFields.TryExecuted(rawExecuted, out var value))
+            {
+                return RejectTail(BillError.ExecutedInstallmentsInvalid);
+            }
+            executed = Change.Set(value);
+        }
+
         // 15: o tipo já gravado não conta, só o que veio no corpo.
         if (head.Type is { IsSet: true, Value: BillTypes.Installment } && !body.Has("total_parcelas"))
         {
@@ -217,7 +229,7 @@ public static class UpdateBillRules
             start,
             include,
             installments,
-            default));
+            executed));
     }
 
     private static BillHeadResult.Rejected Reject(BillError error) => new(error);

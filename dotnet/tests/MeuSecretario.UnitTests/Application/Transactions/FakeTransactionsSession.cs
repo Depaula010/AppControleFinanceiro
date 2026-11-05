@@ -128,6 +128,35 @@ internal sealed class FakeTransactionsSession : ITransactionsSession
         return Task.FromResult(900 + Schedules.Count);
     }
 
+    /// <summary>Parcelados ativos que o gancho do desvio 271 encontra (conta, descrição-base, total → agendamento).</summary>
+    public List<(int AccountId, string Description, int Total, TrackedInstallmentSchedule Schedule)> ActiveInstallments { get; } = [];
+
+    public List<(int ScheduleId, int Executed, bool Active)> Advanced { get; } = [];
+
+    public List<(int TransactionId, int ScheduleId)> ScheduleLinks { get; } = [];
+
+    public Task<TrackedInstallmentSchedule?> FindActiveInstallmentScheduleAsync(
+        int userId, int accountId, string baseDescription, int total, CancellationToken cancellationToken) =>
+        Task.FromResult(ActiveInstallments
+            .Where(i => i.AccountId == accountId && i.Total == total
+                        && string.Equals(i.Description.Trim(), baseDescription.Trim(), StringComparison.OrdinalIgnoreCase))
+            .Select(i => i.Schedule)
+            .FirstOrDefault());
+
+    public Task AdvanceInstallmentScheduleAsync(int scheduleId, int executed, bool active, CancellationToken cancellationToken)
+    {
+        Write();
+        Advanced.Add((scheduleId, executed, active));
+        return Task.CompletedTask;
+    }
+
+    public Task LinkTransactionToScheduleAsync(int transactionId, int scheduleId, CancellationToken cancellationToken)
+    {
+        Write();
+        ScheduleLinks.Add((transactionId, scheduleId));
+        return Task.CompletedTask;
+    }
+
     public (int UserId, int Id, TransactionChanges Changes, Change<int?> Invoice)? Updated { get; private set; }
 
     public UpdatedTransaction? UpdateResult { get; set; } = new(1, "x", -1m, "Despesa", new DateOnly(2026, 1, 1));

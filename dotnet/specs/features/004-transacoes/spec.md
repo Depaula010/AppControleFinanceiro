@@ -465,7 +465,7 @@ Origem: `invoice_service.py:80-210`. É o que o bot e o Automate chamam antes de
 - **AC-004-124** Dadas as faturas de **outro usuário** (mesmo `conta_id` impossível) e fatura `Fechada` de outro cartão do mesmo usuário, então nenhuma é paga.
 
 **Compra parcelada**
-- **AC-004-130** Dada compra de 3 parcelas de 33,33 em 31/01/2026 num cartão, então: uma transação `Despesa -33.33` em 31/01 (com fatura do ciclo, descrição como veio) e um agendamento `PARCELADO`/`MENSAL` com `valor_previsto 33.33`, `data_inicio 2026-02-28` (dia inexistente), `dia_execucao 31`, `total_parcelas 3`, `parcelas_executadas 1`, `ativo`, mesma conta e subcategoria; a transação não tem `agendamento_id`.
+- **AC-004-130** Dada compra de 3 parcelas de 33,33 em 31/01/2026 num cartão, então: uma transação `Despesa -33.33` em 31/01 (com fatura do ciclo, descrição como veio) e um agendamento `PARCELADO`/`MENSAL` com `valor_previsto 33.33`, `data_inicio 2026-02-28` (dia inexistente), `dia_execucao 31`, `total_parcelas 3`, `parcelas_executadas 1`, `ativo`, mesma conta e subcategoria. **Desvio 271:** a transação sai como `"<descrição> (1/3)"` e com `agendamento_id` do parcelado criado; e uma despesa simples com `(n/N)` no fim da descrição cria (ou avança) o parcelado da compra.
 - **AC-004-131** Dado `TotalInstallments` 0 ou 1 ⇒ `InstallmentsInvalid` e nada gravado; conta/subcategoria inválidas ⇒ os erros do `PostSimple`.
 - **AC-004-132** Dado erro ao criar o agendamento (simulado), então a transação também não fica (mesma transação).
 - **AC-004-133** Dada conta que não é cartão, então a transação sai sem fatura e o agendamento é criado igual.

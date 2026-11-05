@@ -1,4 +1,5 @@
 using MeuSecretario.Application.Categories;
+using MeuSecretario.Domain.Bills;
 using MeuSecretario.Domain.Transactions;
 
 namespace MeuSecretario.Application.Transactions;
@@ -56,8 +57,41 @@ public sealed class TransactionPosting(ITransactionsUnitOfWork unitOfWork, ICate
         }
 
         var posted = await InsertSimpleAsync(session, command, account, cancellationToken);
+        if (command.Kind == TransactionKind.Expense && command.ScheduleId is null && InstallmentLabel.Parse(command.Description) is { } suffix)
+        {
+            await TrackInstallmentAsync(session, command, suffix, posted.TransactionId, cancellationToken);
+        }
+
         await session.CommitAsync(cancellationToken);
         return new PostingResult<PostedTransaction>.Ok(posted);
+    }
+
+    /// <summary>
+    /// Desvio 271: despesa com <c>(n/N)</c> é parcela de uma compra parcelada. Cria o parcelado (ou avança o existente) e liga a
+    /// transação a ele, na mesma transação do banco. Assim a compra fica em Contas Mensais até a última parcela, e o populador
+    /// da fatura não lança de novo a parcela que acabou de entrar.
+    /// </summary>
+    private static async Task TrackInstallmentAsync(
+        ITransactionsSession session, PostSimpleTransaction command, InstallmentSuffix suffix, int transactionId, CancellationToken cancellationToken)
+    {
+        var existing = await session.FindActiveInstallmentScheduleAsync(
+            command.UserId, command.AccountId, suffix.BaseDescription, suffix.Total, cancellationToken);
+        switch (InstallmentTracking.Decide(suffix, existing))
+        {
+            case InstallmentTrackingAction.Create create:
+                var plan = InstallmentTracking.PlanFor(command.Date, command.Amount, suffix);
+                var scheduleId = await session.InsertInstallmentScheduleAsync(
+                    new NewInstallmentSchedule(
+                        command.UserId, command.AccountId, command.SubcategoryId, suffix.BaseDescription, plan.Amount, plan.StartDate,
+                        plan.DayOfMonth, plan.Total, create.Executed),
+                    cancellationToken);
+                await session.LinkTransactionToScheduleAsync(transactionId, scheduleId, cancellationToken);
+                break;
+            case InstallmentTrackingAction.Advance advance:
+                await session.AdvanceInstallmentScheduleAsync(advance.ScheduleId, advance.Executed, !advance.Deactivate, cancellationToken);
+                await session.LinkTransactionToScheduleAsync(transactionId, advance.ScheduleId, cancellationToken);
+                break;
+        }
     }
 
     public async Task<PostingResult<PostedTransfer>> PostTransferAsync(PostTransfer command, CancellationToken cancellationToken)
@@ -190,11 +224,13 @@ public sealed class TransactionPosting(ITransactionsUnitOfWork unitOfWork, ICate
             return Fail<PostedInstallmentPurchase>(PostingError.SubcategoryNotFound);
         }
 
+        // Desvio 271: a 1ª parcela já sai como "X (1/N)" e ligada ao agendamento; sem a ligação, o populador da fatura lançava
+        // a (2/N) na mesma fatura naquela madrugada.
         var first = await InsertSimpleAsync(
             session,
             new PostSimpleTransaction(
                 command.UserId, command.AccountId, command.SubcategoryId, TransactionKind.Expense, command.InstallmentAmount,
-                command.Description, command.Date, Origin: command.Origin),
+                InstallmentLabel.Paid(command.Description, 1, command.TotalInstallments), command.Date, Origin: command.Origin),
             account,
             cancellationToken);
 
@@ -204,6 +240,7 @@ public sealed class TransactionPosting(ITransactionsUnitOfWork unitOfWork, ICate
                 command.UserId, command.AccountId, command.SubcategoryId, command.Description, plan.Amount, plan.StartDate,
                 plan.DayOfMonth, plan.Total),
             cancellationToken);
+        await session.LinkTransactionToScheduleAsync(first.TransactionId, scheduleId, cancellationToken);
 
         await session.CommitAsync(cancellationToken);
         return new PostingResult<PostedInstallmentPurchase>.Ok(new PostedInstallmentPurchase(first.TransactionId, scheduleId, first.InvoiceId));

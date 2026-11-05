@@ -78,6 +78,12 @@ public sealed class AnalyticsReader(IDbConnectionFactory connections) : IAnalyti
         public string? TipoConta { get; set; }
 
         public string? NomeGrupo { get; set; }
+
+        public string? TipoAgendamento { get; set; }
+
+        public int? TotalParcelas { get; set; }
+
+        public int? ParcelasExecutadas { get; set; }
     }
 
     private sealed class MacroRow
@@ -250,9 +256,11 @@ public sealed class AnalyticsReader(IDbConnectionFactory connections) : IAnalyti
             new { userId, currentMonth },
             cancellationToken: cancellationToken));
 
+        // Desvio 270: parcelado com parcela restante também entra nas contas que faltam no mês.
         var pending = await connection.QueryAsync<PendingRow>(new CommandDefinition(
-            """
-            SELECT a.descricao AS Descricao, a.valor_previsto AS ValorPrevisto, a.dia_execucao AS DiaExecucao, c.tipo_conta AS TipoConta, g.nome_grupo AS NomeGrupo
+            $"""
+            SELECT a.descricao AS Descricao, a.valor_previsto AS ValorPrevisto, a.dia_execucao AS DiaExecucao, c.tipo_conta AS TipoConta, g.nome_grupo AS NomeGrupo,
+                   a.tipo_agendamento AS TipoAgendamento, a.total_parcelas AS TotalParcelas, a.parcelas_executadas AS ParcelasExecutadas
             FROM agendamentos a
             JOIN contas c ON a.conta_id = c.id
             JOIN subcategoria s ON a.subcategoria_id = s.id
@@ -260,7 +268,7 @@ public sealed class AnalyticsReader(IDbConnectionFactory connections) : IAnalyti
             JOIN grupocategoria g ON m.grupo_id = g.id
             WHERE a.usuario_id = @userId
               AND a.ativo = true
-              AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+              AND {Jobs.SchedulePaymentSql.ListedKind("a")}
               AND a.periodicidade = 'MENSAL'
               AND NOT EXISTS (
                   SELECT 1 FROM transacoes t
@@ -281,7 +289,10 @@ public sealed class AnalyticsReader(IDbConnectionFactory connections) : IAnalyti
             [.. monthly.Select(r => new MonthTotal(r.Mes, ToDouble(r.Total)))],
             fixedCharges,
             spent is { } total && total != 0 ? ToDouble(total) : 0.0,
-            [.. pending.Select(r => new PendingBill(r.Descricao, ToDouble(r.ValorPrevisto), r.DiaExecucao, r.TipoConta, r.NomeGrupo))]);
+            [.. pending.Select(r => new PendingBill(
+                Jobs.SchedulePaymentSql.NoticeLabel(
+                    r.Descricao, r.TipoAgendamento, r.ParcelasExecutadas, r.TotalParcelas, r.TipoConta == Domain.Jobs.ScheduleRules.CardAccountType),
+                ToDouble(r.ValorPrevisto), r.DiaExecucao, r.TipoConta, r.NomeGrupo))]);
     }
 
     /// <summary>Agendamentos ativos do usuário, do maior valor previsto para o menor (a análise só usa FIXO e LEMBRETE_VARIAVEL).</summary>

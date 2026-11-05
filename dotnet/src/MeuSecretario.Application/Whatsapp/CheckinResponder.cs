@@ -127,7 +127,7 @@ public sealed class CheckinResponder(
         string line;
         if (reply.Kind == CheckinValueKind.Skip)
         {
-            line = CheckinReplyTexts.ValueSkipped(item.Description);
+            line = CheckinReplyTexts.ValueSkipped(item.Label);
         }
         else
         {
@@ -146,14 +146,14 @@ public sealed class CheckinResponder(
                 switch (outcome)
                 {
                     case ScheduleExecutionOutcome.Posted:
-                        line = CheckinReplyTexts.ValuePosted(item.Description, amount.Value);
+                        line = CheckinReplyTexts.ValuePosted(item.Label, amount.Value);
                         break;
                     case ScheduleExecutionOutcome.Skipped:
-                        line = CheckinReplyTexts.ValueAlreadyPosted(item.Description);
+                        line = CheckinReplyTexts.ValueAlreadyPosted(item.Label);
                         break;
                     default:
                         diagnostics.ItemNotConfirmed(item.Id, outcome.GetType().Name);
-                        line = CheckinReplyTexts.NotConfirmed([(item.Description, CheckinReplyTexts.NotEligibleReason)], includeHeader: true);
+                        line = CheckinReplyTexts.NotConfirmed([(item.Label, CheckinReplyTexts.NotEligibleReason)], includeHeader: true);
                         break;
                 }
             }
@@ -249,12 +249,12 @@ public sealed class CheckinResponder(
             // Já lançada no mês (Skipped) conta como confirmada: a conta está paga, só não se duplica o lançamento.
             if (outcome is ScheduleExecutionOutcome.Posted or ScheduleExecutionOutcome.Skipped)
             {
-                confirmed.Add(item.Description);
+                confirmed.Add(item.Label);
             }
             else
             {
                 diagnostics.ItemNotConfirmed(item.Id, outcome.GetType().Name);
-                notConfirmed.Add((item.Description, CheckinReplyTexts.NotEligibleReason));
+                notConfirmed.Add((item.Label, CheckinReplyTexts.NotEligibleReason));
             }
         }
 
@@ -284,6 +284,6 @@ public sealed class CheckinResponder(
     private static string Question(CheckinPendingValues queue)
     {
         var item = queue.Items[0];
-        return CheckinReplyTexts.ValueQuestion(item.Description, Expected(item), queue.Total - queue.Items.Count + 1, queue.Total);
+        return CheckinReplyTexts.ValueQuestion(item.Label, Expected(item), queue.Total - queue.Items.Count + 1, queue.Total);
     }
 }

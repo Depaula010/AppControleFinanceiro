@@ -50,8 +50,10 @@ public sealed record NewTransactionRow(
 
 public sealed record StoredTransaction(int Id, decimal Amount);
 
+/// <param name="Executed">Parcelas já lançadas (1 na compra parcelada do WhatsApp; <c>n</c> na compra que chega com <c>(n/N)</c>, desvio 271).</param>
 public sealed record NewInstallmentSchedule(
-    int UserId, int AccountId, int SubcategoryId, string Description, decimal Amount, DateOnly StartDate, int DayOfMonth, int Total);
+    int UserId, int AccountId, int SubcategoryId, string Description, decimal Amount, DateOnly StartDate, int DayOfMonth, int Total,
+    int Executed = 1);
 
 /// <summary>Leituras e escritas das 4 rotas, cada método com a sua transação. Todo método recebe o <c>userId</c> do token.</summary>
 public interface ITransactionRepository
@@ -107,6 +109,19 @@ public interface ITransactionsSession : IAsyncDisposable
     Task MarkInvoicePaidAsync(int invoiceId, CancellationToken cancellationToken);
 
     Task<int> InsertInstallmentScheduleAsync(NewInstallmentSchedule schedule, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Parcelado ativo do usuário na conta, com a mesma descrição (sem diferença de maiúsculas e espaços nas pontas) e o mesmo
+    /// total de parcelas (desvio 271); trava a linha até o fim da transação. <c>null</c> se não houver.
+    /// </summary>
+    Task<TrackedInstallmentSchedule?> FindActiveInstallmentScheduleAsync(
+        int userId, int accountId, string baseDescription, int total, CancellationToken cancellationToken);
+
+    /// <summary>Grava o contador de parcelas e o <c>ativo</c> do parcelado (desvio 271).</summary>
+    Task AdvanceInstallmentScheduleAsync(int scheduleId, int executed, bool active, CancellationToken cancellationToken);
+
+    /// <summary>Liga a transação ao agendamento (<c>agendamento_id</c>), para o populador da fatura não lançar a mesma parcela de novo.</summary>
+    Task LinkTransactionToScheduleAsync(int transactionId, int scheduleId, CancellationToken cancellationToken);
 
     /// <summary>PUT com recálculo de fatura (desvio 069): <paramref name="invoice"/> só grava se <c>IsSet</c>.</summary>
     Task<UpdatedTransaction?> UpdateTransactionAsync(

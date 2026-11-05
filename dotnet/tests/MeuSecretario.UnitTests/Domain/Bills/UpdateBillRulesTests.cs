@@ -169,7 +169,9 @@ public class UpdateBillRulesTests
     public void OnlyUnrecognizedKeys_IsEmpty()
     {
         Changes(Raw.Body(("foo", Raw.N(1)))).IsEmpty.ShouldBeTrue();
-        Changes(Raw.Body(("parcelas_executadas", Raw.N(3)), ("ativo", BillRaw.B(false)), ("usuario_id", Raw.N(9)))).IsEmpty.ShouldBeTrue();
+        Changes(Raw.Body(("ativo", BillRaw.B(false)), ("usuario_id", Raw.N(9)))).IsEmpty.ShouldBeTrue();
+        // Desvio 269: parcelas_executadas passou a ser um campo do PUT.
+        Changes(Raw.Body(("parcelas_executadas", Raw.N(3)))).IsEmpty.ShouldBeFalse();
         Changes(Raw.Body(("descricao", Raw.T("x")))).IsEmpty.ShouldBeFalse();
     }
 
@@ -206,8 +208,9 @@ public class BillConsistencyTests
         Change<string> periodicity = default,
         Change<int?> month = default,
         Change<decimal?> amount = default,
-        Change<int?> total = default) =>
-        None with { Type = type, Periodicity = periodicity, Month = month, Amount = amount, TotalInstallments = total };
+        Change<int?> total = default,
+        Change<int> executed = default) =>
+        None with { Type = type, Periodicity = periodicity, Month = month, Amount = amount, TotalInstallments = total, ExecutedInstallments = executed };
 
     private static BillError? ErrorOf(CurrentBill current, BillChanges changes) =>
         BillConsistency.Check(current, changes) is ConsistencyResult.Rejected rejected ? rejected.Reason : null;
@@ -322,4 +325,35 @@ public class BillConsistencyTests
 
         Adjusted(Monthly(), changes).ShouldBe(changes);
     }
+    // ---------- desvio 269: parcelas já pagas no PUT ----------
+
+    [Fact]
+    [Trait("Desvio", "269")]
+    public void PaidInstallments_BelowTheTotal_AreKept()
+    {
+        var adjusted = Adjusted(Monthly("PARCELADO", total: 18, executed: 0), With(executed: Change.Set(4)));
+
+        adjusted.ExecutedInstallments.ShouldBe(Change.Set(4));
+    }
+
+    [Fact]
+    [Trait("Desvio", "269")]
+    public void PaidInstallments_AtOrAboveTheTotal_AreRejected()
+    {
+        var current = Monthly("PARCELADO", total: 6, executed: 1);
+
+        ErrorOf(current, With(executed: Change.Set(6))).ShouldBe(BillError.ExecutedInstallmentsInvalid);
+        ErrorOf(current, With(total: Change.Set<int?>(4), executed: Change.Set(4))).ShouldBe(BillError.ExecutedInstallmentsInvalid);
+        ErrorOf(current, With(total: Change.Set<int?>(4), executed: Change.Set(3))).ShouldBeNull();
+    }
+
+    [Fact]
+    [Trait("Desvio", "269")]
+    public void LoweringPaidInstallments_AllowsASmallerTotal() =>
+        ErrorOf(Monthly("PARCELADO", total: 6, executed: 5), With(total: Change.Set<int?>(4), executed: Change.Set(2))).ShouldBeNull();
+
+    [Fact]
+    [Trait("Desvio", "269")]
+    public void PaidInstallments_OutsideInstallment_AreZeroed() =>
+        Adjusted(Monthly(), With(executed: Change.Set(3))).ExecutedInstallments.ShouldBe(Change.Set(0));
 }

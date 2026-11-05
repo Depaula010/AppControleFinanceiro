@@ -72,6 +72,10 @@ public sealed class AutomationLookups(IDbConnectionFactory connections) : IAutom
         public int ContaId { get; set; }
 
         public string Categoria { get; set; } = "";
+
+        public int? TotalParcelas { get; set; }
+
+        public int? ParcelasExecutadas { get; set; }
     }
 
     private sealed class SettleRow
@@ -81,6 +85,10 @@ public sealed class AutomationLookups(IDbConnectionFactory connections) : IAutom
         public int ContaId { get; set; }
 
         public int SubcategoriaId { get; set; }
+
+        public string TipoAgendamento { get; set; } = "";
+
+        public int DiaExecucao { get; set; }
     }
 
     public async Task<IReadOnlyList<AccountRef>> ListActiveAccountsAsync(int userId, CancellationToken cancellationToken)
@@ -168,18 +176,21 @@ public sealed class AutomationLookups(IDbConnectionFactory connections) : IAutom
     public async Task<IReadOnlyList<FixedBill>> ListFixedBillsAsync(int userId, CancellationToken cancellationToken)
     {
         await using var connection = await connections.OpenAsync(cancellationToken);
+        // Desvio 270: parcelado com parcela restante também casa ("paguei a parcela do robô").
         var rows = await connection.QueryAsync<BillRow>(new CommandDefinition(
-            """
+            $"""
             SELECT a.id AS Id, a.descricao AS Descricao, a.valor_previsto AS ValorPrevisto, a.dia_execucao AS DiaExecucao,
-                   a.tipo_agendamento AS TipoAgendamento, a.conta_id AS ContaId, s.nome_sub AS Categoria
+                   a.tipo_agendamento AS TipoAgendamento, a.conta_id AS ContaId, s.nome_sub AS Categoria,
+                   a.total_parcelas AS TotalParcelas, a.parcelas_executadas AS ParcelasExecutadas
             FROM agendamentos a
             JOIN subcategoria s ON a.subcategoria_id = s.id
-            WHERE a.usuario_id = @userId AND a.ativo = TRUE AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+            WHERE a.usuario_id = @userId AND a.ativo = TRUE AND {Jobs.SchedulePaymentSql.ListedKind("a")}
             ORDER BY a.id
             """,
             new { userId },
             cancellationToken: cancellationToken));
-        return rows.Select(r => new FixedBill(r.Id, r.Descricao, r.ValorPrevisto, r.DiaExecucao, r.TipoAgendamento, r.ContaId, r.Categoria)).ToList();
+        return rows.Select(r => new FixedBill(
+            r.Id, r.Descricao, r.ValorPrevisto, r.DiaExecucao, r.TipoAgendamento, r.ContaId, r.Categoria, r.TotalParcelas, r.ParcelasExecutadas)).ToList();
     }
 
     public async Task<SettleTarget?> FindSettleTargetAsync(int userId, int scheduleId, CancellationToken cancellationToken)
@@ -187,13 +198,14 @@ public sealed class AutomationLookups(IDbConnectionFactory connections) : IAutom
         await using var connection = await connections.OpenAsync(cancellationToken);
         var row = await connection.QueryFirstOrDefaultAsync<SettleRow>(new CommandDefinition(
             """
-            SELECT a.descricao AS Descricao, a.conta_id AS ContaId, a.subcategoria_id AS SubcategoriaId
+            SELECT a.descricao AS Descricao, a.conta_id AS ContaId, a.subcategoria_id AS SubcategoriaId,
+                   a.tipo_agendamento AS TipoAgendamento, a.dia_execucao AS DiaExecucao
             FROM agendamentos a JOIN contas c ON a.conta_id = c.id
             WHERE a.id = @scheduleId AND a.usuario_id = @userId
             """,
             new { scheduleId, userId },
             cancellationToken: cancellationToken));
-        return row is null ? null : new SettleTarget(row.Descricao, row.ContaId, row.SubcategoriaId);
+        return row is null ? null : new SettleTarget(row.Descricao, row.ContaId, row.SubcategoriaId, row.TipoAgendamento, row.DiaExecucao);
     }
 }
 

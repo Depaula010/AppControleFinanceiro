@@ -173,7 +173,8 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
 
     // Desvio 267: contas fixas do cartão cobradas hoje, lançadas ou não. Só aviso (o cartão cobra sozinho na fatura).
     private const string CardBillsTodaySql = """
-        SELECT a.descricao AS Description, a.valor_previsto AS Amount, c.nome_conta AS Account
+        SELECT a.descricao AS Description, a.valor_previsto AS Amount, c.nome_conta AS Account,
+               a.tipo_agendamento AS Kind, a.parcelas_executadas AS ExecutedInstallments, a.total_parcelas AS TotalInstallments
         FROM agendamentos a
         JOIN contas c ON a.conta_id = c.id
         JOIN subcategoria s ON a.subcategoria_id = s.id
@@ -183,7 +184,8 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
           AND a.ativo = TRUE
           AND c.tipo_conta = 'Cartão de Crédito'
           AND g.nome_grupo <> 'Renda'
-          AND a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+          AND (a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
+               OR (a.tipo_agendamento = 'PARCELADO' AND a.total_parcelas IS NOT NULL))
           AND (a.periodicidade = 'MENSAL' OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = EXTRACT(MONTH FROM @hoje)))
           AND a.dia_execucao = EXTRACT(DAY FROM @hoje)
         ORDER BY a.id
@@ -225,7 +227,10 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
             overdueBills,
             [.. overdueInvoices.Select(i => new OverdueInvoice(i.Id, i.Name, JobSql.ToDate(i.DueDate), i.Status, i.Total, i.AccountId))],
             [.. dueToday.Select(i => new DueTodayInvoice(i.Id, i.Name, JobSql.ToDate(i.DueDate), i.Status, i.Total, i.AccountId))],
-            [.. cardBills.Select(c => new CardBillNotice(c.Description, c.Amount ?? 0m, c.Account))]);
+            [.. cardBills.Select(c => new CardBillNotice(
+                SchedulePaymentSql.NoticeLabel(c.Description, c.Kind, c.ExecutedInstallments, c.TotalInstallments, onCard: true),
+                c.Amount ?? 0m,
+                c.Account))]);
     }
 
     private static CheckinBill ToBill(BillRow row) => new(
@@ -275,6 +280,12 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
         public decimal? Amount { get; set; }
 
         public string Account { get; set; } = string.Empty;
+
+        public string? Kind { get; set; }
+
+        public int? ExecutedInstallments { get; set; }
+
+        public int? TotalInstallments { get; set; }
     }
 
     private sealed class InvoiceRow

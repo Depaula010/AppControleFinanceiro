@@ -45,6 +45,7 @@ public static class BillsMessages
         BillError.InstallmentsRequired => "Número de parcelas é obrigatório para contas parceladas",
         BillError.InstallmentsBelowExecuted => "Número de parcelas não pode ser menor que as parcelas já executadas",
         BillError.NothingToUpdate => "Nenhum campo para atualizar",
+        BillError.ExecutedInstallmentsInvalid => "Parcelas já pagas deve ser um número inteiro de 0 até o número de parcelas menos 1",
         _ => throw new ArgumentOutOfRangeException(nameof(error), error, "Erro de agendamento sem mensagem."),
     };
 }

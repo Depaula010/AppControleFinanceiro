@@ -145,7 +145,8 @@ public class AutomationLookupsTests(PostgresFixture postgres) : IAsyncLifetime, 
         var account = await _env.Data.InsertAccountAsync(_user, "Nubank");
         var luz = await _env.InsertScheduleAsync(_user, account, "Luz", amount: 120.00m, day: 10);
         var internet = await _env.InsertScheduleAsync(_user, account, "Internet", type: "LEMBRETE_VARIAVEL", amount: null);
-        await _env.InsertScheduleAsync(_user, account, "Notebook", type: "PARCELADO", total: 3, executed: 1);
+        var notebook = await _env.InsertScheduleAsync(_user, account, "Notebook", type: "PARCELADO", total: 3, executed: 1);
+        await _env.InsertScheduleAsync(_user, account, "Quitado", type: "PARCELADO", total: 3, executed: 3);
         await _env.InsertScheduleAsync(_user, account, "Inativa", active: false);
         var otherAccount = await _env.Data.InsertAccountAsync(_other, "Conta");
         await _env.InsertScheduleAsync(_other, otherAccount, "Alheia");
@@ -156,8 +157,10 @@ public class AutomationLookupsTests(PostgresFixture postgres) : IAsyncLifetime, 
         [
             (luz, "Luz", (decimal?)120.00m, "FIXO", account),
             (internet, "Internet", null, "LEMBRETE_VARIAVEL", account),
+            (notebook, "Notebook", 100.00m, "PARCELADO", account),   // desvio 270: parcelado com parcela restante casa
         ]);
         bills[0].Category.ShouldBe("Outros");
+        bills[2].Label.ShouldBe("Notebook (2/3)");
     }
 
     [Fact]
@@ -167,7 +170,7 @@ public class AutomationLookupsTests(PostgresFixture postgres) : IAsyncLifetime, 
         var account = await _env.Data.InsertAccountAsync(_user, "Nubank");
         var luz = await _env.InsertScheduleAsync(_user, account, "Luz", subcategoryId: 59);
 
-        (await _lookups.FindSettleTargetAsync(_user, luz, CancellationToken.None)).ShouldBe(new SettleTarget("Luz", account, 59));
+        (await _lookups.FindSettleTargetAsync(_user, luz, CancellationToken.None)).ShouldBe(new SettleTarget("Luz", account, 59, "FIXO", 10));
         (await _lookups.FindSettleTargetAsync(_other, luz, CancellationToken.None)).ShouldBeNull();
     }
 

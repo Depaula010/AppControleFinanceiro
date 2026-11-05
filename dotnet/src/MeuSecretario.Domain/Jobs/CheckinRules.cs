@@ -116,16 +116,12 @@ public static class CheckinRules
         return [.. overdue.Where(b => !ids.Contains(b.Id))];
     }
 
-    /// <summary>Descrição com a parcela atual (<c>X (n/total)</c>) para <c>PARCELADO</c> com total.</summary>
+    /// <summary>Descrição com a parcela da vez (<c>X (n/total)</c>) para <c>PARCELADO</c> com total (desvio 269).</summary>
     public static string DescriptionWithInstallment(CheckinBill bill)
     {
         ArgumentNullException.ThrowIfNull(bill);
-        if (bill.Kind == ScheduleKinds.Installment && bill.TotalInstallments is { } total && total != 0)
-        {
-            var current = (bill.ExecutedInstallments ?? 0) + 1;
-            return $"{bill.Description} ({current.ToString(CultureInfo.InvariantCulture)}/{total.ToString(CultureInfo.InvariantCulture)})";
-        }
-
-        return bill.Description;
+        return bill.Kind == ScheduleKinds.Installment
+            ? Bills.InstallmentLabel.Next(bill.Description, bill.ExecutedInstallments, bill.TotalInstallments)
+            : bill.Description;
     }
 }

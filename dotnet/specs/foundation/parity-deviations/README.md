@@ -164,3 +164,6 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [266](266-aviso-gemini-falhando.md) | Aviso ao dono quando o Gemini recusa as chamadas (cota, saldo, chave, modelo) | operação | 012 | implementado |
 | [267](267-cartao-informativo-nos-avisos.md) | Contas fixas do cartão aparecem nos avisos da manhã e da noite só como informação, mesmo depois de lançadas | correção | 013 | implementado |
 | [268](268-sem-lembrete-variavel-avulso.md) | Fim do aviso avulso de conta variável; alerta da manhã cobre contas semanais | correção | 013 | implementado |
+| [269](269-contador-de-parcelas.md) | Contador de parcelas `x/N` no site e no bot; cadastro com parcelas já pagas | correção | 005, 012, 013 | implementado |
+| [270](270-parcelados-nos-avisos.md) | Contas parceladas entram nos avisos e no "paguei" | correção | 011, 012, 013 | implementado |
+| [271](271-compra-parcelada-vira-conta.md) | Compra parcelada (descrição com `(n/N)`) vira conta parcelada até a última parcela | correção | 004, 005, 011, 013 | implementado |

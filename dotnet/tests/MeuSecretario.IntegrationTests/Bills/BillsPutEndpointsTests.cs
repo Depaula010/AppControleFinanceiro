@@ -468,7 +468,7 @@ public class BillsPutEndpointsTests(PostgresFixture postgres) : IAsyncLifetime, 
     [Theory]
     [Trait("AC", "005-54")]
     [InlineData("""{"foo":1}""")]
-    [InlineData("""{"parcelas_executadas":3,"ativo":false}""")]
+    [InlineData("""{"ativo":false}""")]
     [InlineData("""{"usuario_id":99}""")]
     public async Task OnlyUnrecognizedKeys_Is400NothingToUpdate(string json)
     {

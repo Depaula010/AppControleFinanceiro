@@ -345,6 +345,110 @@ public class TransactionPostingTests : IAsyncDisposable
         _session.Committed.ShouldBeFalse();
     }
 
+    // ---------- desvio 271: despesa com (n/N) vira conta parcelada ----------
+
+    private static PostSimpleTransaction Installment(string description, int account = 3, string date = "2026-08-28", decimal amount = 511m) =>
+        new(User, account, 7, TransactionKind.Expense, amount, description, Day(date), Origin: "automate");
+
+    [Fact]
+    [Trait("Desvio", "271")]
+    public async Task ExpenseWithSuffix_CreatesTheInstallmentSchedule_AndLinksTheTransaction()
+    {
+        var posted = Ok(await _posting.PostSimpleAsync(Installment("ZP ROGGI 62899 (1/6)"), CancellationToken.None));
+
+        var schedule = _session.Schedules.Single();
+        schedule.Description.ShouldBe("ZP ROGGI 62899");
+        schedule.Amount.ShouldBe(511m);
+        schedule.Total.ShouldBe(6);
+        schedule.Executed.ShouldBe(1);
+        schedule.DayOfMonth.ShouldBe(28);
+        schedule.StartDate.ShouldBe(Day("2026-09-28"));
+        schedule.AccountId.ShouldBe(3);
+        schedule.SubcategoryId.ShouldBe(7);
+        _session.ScheduleLinks.ShouldBe([(posted.TransactionId, 901)]);
+        _session.Inserted.Single().Description.ShouldBe("ZP ROGGI 62899 (1/6)");
+        _session.Committed.ShouldBeTrue();
+    }
+
+    [Fact]
+    [Trait("Desvio", "271")]
+    public async Task ExpenseWithSuffix_AdvancesTheExistingSchedule()
+    {
+        _session.ActiveInstallments.Add((3, "zp roggi 62899", 6, new TrackedInstallmentSchedule(70, 2)));
+
+        var posted = Ok(await _posting.PostSimpleAsync(Installment("ZP ROGGI 62899 (3/6)"), CancellationToken.None));
+
+        _session.Schedules.ShouldBeEmpty();
+        _session.Advanced.ShouldBe([(70, 3, true)]);
+        _session.ScheduleLinks.ShouldBe([(posted.TransactionId, 70)]);
+    }
+
+    [Fact]
+    [Trait("Desvio", "271")]
+    public async Task TheLastInstallment_DeactivatesTheSchedule()
+    {
+        _session.ActiveInstallments.Add((3, "ZP ROGGI 62899", 6, new TrackedInstallmentSchedule(70, 5)));
+
+        Ok(await _posting.PostSimpleAsync(Installment("ZP ROGGI 62899 (6/6)"), CancellationToken.None));
+
+        _session.Advanced.ShouldBe([(70, 6, false)]);
+    }
+
+    [Fact]
+    [Trait("Desvio", "271")]
+    public async Task AnInstallmentAlreadyCounted_ChangesNothing()
+    {
+        _session.ActiveInstallments.Add((3, "ZP ROGGI 62899", 6, new TrackedInstallmentSchedule(70, 3)));
+
+        Ok(await _posting.PostSimpleAsync(Installment("ZP ROGGI 62899 (3/6)"), CancellationToken.None));
+
+        _session.Advanced.ShouldBeEmpty();
+        _session.ScheduleLinks.ShouldBeEmpty();
+        _session.Schedules.ShouldBeEmpty();
+        _session.Inserted.Count.ShouldBe(1);
+    }
+
+    [Theory]
+    [Trait("Desvio", "271")]
+    [InlineData("KABUM (5/5)")]          // última parcela sem cadastro
+    [InlineData("Mercado")]              // sem sufixo
+    [InlineData("Pós graduação (Parcela)")]
+    [InlineData("Loja (0/3)")]
+    [InlineData("Loja (4/3)")]
+    [InlineData("Loja (1/1)")]
+    public async Task WithoutAnOpenInstallment_NoScheduleIsCreated(string description)
+    {
+        Ok(await _posting.PostSimpleAsync(Installment(description), CancellationToken.None));
+
+        _session.Schedules.ShouldBeEmpty();
+        _session.ScheduleLinks.ShouldBeEmpty();
+    }
+
+    [Fact]
+    [Trait("Desvio", "271")]
+    public async Task IncomeOrScheduledPostings_AreNotTracked()
+    {
+        Ok(await _posting.PostSimpleAsync(
+            new PostSimpleTransaction(User, 2, 7, TransactionKind.Income, 10m, "Reembolso (1/3)", Date), CancellationToken.None));
+        Ok(await _posting.PostSimpleAsync(
+            new PostSimpleTransaction(User, 2, 7, TransactionKind.Expense, 10m, "Robo aspirador (5/18)", Date, ScheduleId: 70), CancellationToken.None));
+
+        _session.Schedules.ShouldBeEmpty();
+        _session.ScheduleLinks.ShouldBeEmpty();
+    }
+
+    [Fact]
+    [Trait("Desvio", "271")]
+    public async Task TheSmsAccountSuffix_IsAccepted()
+    {
+        Ok(await _posting.PostSimpleAsync(Installment("LOJA X (2/5) (Cartão Inter)", account: 2), CancellationToken.None));
+
+        var schedule = _session.Schedules.Single();
+        schedule.Description.ShouldBe("LOJA X");
+        schedule.Executed.ShouldBe(2);
+        schedule.Total.ShouldBe(5);
+    }
+
     // ---------- compra parcelada ----------
 
     private static PostInstallmentPurchase Installments(int total = 3, int account = 3, int subcategory = 7, string date = "2026-01-31") =>
@@ -358,10 +462,11 @@ public class TransactionPostingTests : IAsyncDisposable
 
         var row = _session.Inserted.Single();
         row.Amount.ShouldBe(-33.33m);
-        row.Description.ShouldBe("Geladeira");
+        row.Description.ShouldBe("Geladeira (1/3)");   // desvio 271
         row.Date.ShouldBe(Day("2026-01-31"));
         row.ScheduleId.ShouldBeNull();
         row.InvoiceId.ShouldBe(_session.Invoices.Single().Id);
+        _session.ScheduleLinks.ShouldBe([(500, 901)]);   // desvio 271: a 1ª parcela fica ligada ao parcelado
 
         var schedule = _session.Schedules.Single();
         schedule.Amount.ShouldBe(33.33m);
@@ -370,6 +475,8 @@ public class TransactionPostingTests : IAsyncDisposable
         schedule.Total.ShouldBe(3);
         schedule.AccountId.ShouldBe(3);
         schedule.SubcategoryId.ShouldBe(7);
+        schedule.Description.ShouldBe("Geladeira");
+        schedule.Executed.ShouldBe(1);
         posted.ShouldBe(new PostedInstallmentPurchase(500, 901, row.InvoiceId));
         _session.Committed.ShouldBeTrue();
     }

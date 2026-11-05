@@ -328,4 +328,40 @@ public class CreateBillRulesTests
         data.IncludeInReserve.ShouldBeTrue();
         data.TotalInstallments.ShouldBeNull();
     }
+    // ---------- desvio 269: parcelas já pagas ----------
+
+    private static RawBody Installment(params (string Key, RawValue Value)[] extra) =>
+        BillRaw.Fixed([("tipo_agendamento", Raw.T("PARCELADO")), ("total_parcelas", Raw.N(6)), .. extra]);
+
+    [Fact]
+    [Trait("Desvio", "269")]
+    public void Installment_WithoutPaidInstallments_StartsAtZero() =>
+        Ok(Installment()).ExecutedInstallments.ShouldBe(0);
+
+    [Theory]
+    [Trait("Desvio", "269")]
+    [InlineData(0)]
+    [InlineData(2)]
+    [InlineData(5)]
+    public void Installment_AcceptsPaidInstallmentsBelowTheTotal(int paid) =>
+        Ok(Installment(("parcelas_executadas", Raw.N(paid)))).ExecutedInstallments.ShouldBe(paid);
+
+    [Fact]
+    [Trait("Desvio", "269")]
+    public void Installment_NullPaidInstallments_IsZero() =>
+        Ok(Installment(("parcelas_executadas", BillRaw.Null))).ExecutedInstallments.ShouldBe(0);
+
+    [Fact]
+    [Trait("Desvio", "269")]
+    public void Installment_RejectsPaidInstallmentsOutOfRange()
+    {
+        ErrorOf(Installment(("parcelas_executadas", Raw.N(6)))).ShouldBe(BillError.ExecutedInstallmentsInvalid);
+        ErrorOf(Installment(("parcelas_executadas", Raw.N(-1)))).ShouldBe(BillError.ExecutedInstallmentsInvalid);
+        ErrorOf(Installment(("parcelas_executadas", Raw.T("dois")))).ShouldBe(BillError.ExecutedInstallmentsInvalid);
+    }
+
+    [Fact]
+    [Trait("Desvio", "269")]
+    public void NonInstallment_IgnoresPaidInstallments() =>
+        Ok(BillRaw.Fixed(("parcelas_executadas", Raw.N(3)))).ExecutedInstallments.ShouldBe(0);
 }
