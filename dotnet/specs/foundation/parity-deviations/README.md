@@ -167,3 +167,4 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [269](269-contador-de-parcelas.md) | Contador de parcelas `x/N` no site e no bot; cadastro com parcelas já pagas | correção | 005, 012, 013 | implementado |
 | [270](270-parcelados-nos-avisos.md) | Contas parceladas entram nos avisos e no "paguei" | correção | 011, 012, 013 | implementado |
 | [271](271-compra-parcelada-vira-conta.md) | Compra parcelada (descrição com `(n/N)`) vira conta parcelada até a última parcela | correção | 004, 005, 011, 013 | implementado |
+| [272](272-contas-no-dia-do-vencimento.md) | Conta avisada e cobrada no dia do vencimento: motor só lança o que é de cartão; manhã sem "vence amanhã" | correção | 013 | implementado |

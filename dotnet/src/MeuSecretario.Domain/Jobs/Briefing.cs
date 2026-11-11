@@ -252,7 +252,7 @@ public static partial class BriefingPrompt
         prompt.Append("   - Se há eventos remotos vs presenciais\n");
         prompt.Append("   - Horários livres úteis para trabalho focado ou pausa\n");
         prompt.Append("   - Clima (especialmente se for chover ou temperatura extrema)\n");
-        prompt.Append("   - ALERTAS FINANCEIROS: contas e faturas que vencem hoje ou amanhã (use ⚠️ ou 💰)\n");
+        prompt.Append("   - ALERTAS FINANCEIROS: contas e faturas que vencem hoje (use ⚠️ ou 💰)\n");
         prompt.Append("   - Dicas úteis (ex: \"saia cedo\", \"leve guarda-chuva\", \"tempo livre para almoço\")\n");
         prompt.Append("6. Seja conciso mas informativo (máximo 20 linhas)\n");
         prompt.Append("7. Mantenha tom profissional mas amigável\n");
@@ -341,8 +341,6 @@ public static partial class BriefingPrompt
         var parts = new List<string>();
         var expensesToday = alerts.BillsToday.Where(b => b.Type == AlertBill.Expense).ToList();
         var incomesToday = alerts.BillsToday.Where(b => b.Type == AlertBill.Income).ToList();
-        var expensesTomorrow = alerts.BillsTomorrow.Where(b => b.Type == AlertBill.Expense).ToList();
-        var incomesTomorrow = alerts.BillsTomorrow.Where(b => b.Type == AlertBill.Income).ToList();
 
         var todayExpenses = expensesToday.Count > 0 || alerts.InvoicesToday.Count > 0;
         if (todayExpenses)
@@ -360,29 +358,6 @@ public static partial class BriefingPrompt
 
             parts.Add("VENCE HOJE (Receitas):");
             AddLines(parts, incomesToday, []);
-        }
-
-        var tomorrowExpenses = expensesTomorrow.Count > 0 || alerts.InvoicesTomorrow.Count > 0;
-        if (tomorrowExpenses)
-        {
-            if (todayExpenses || incomesToday.Count > 0)
-            {
-                parts.Add(string.Empty);
-            }
-
-            parts.Add("VENCE AMANHÃ (Despesas):");
-            AddLines(parts, expensesTomorrow, alerts.InvoicesTomorrow);
-        }
-
-        if (incomesTomorrow.Count > 0)
-        {
-            if (todayExpenses || incomesToday.Count > 0 || tomorrowExpenses)
-            {
-                parts.Add(string.Empty);
-            }
-
-            parts.Add("VENCE AMANHÃ (Receitas):");
-            AddLines(parts, incomesTomorrow, []);
         }
 
         return "\n\nALERTAS FINANCEIROS:\n" + string.Join("\n", parts);

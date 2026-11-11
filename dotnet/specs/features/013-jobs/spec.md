@@ -254,3 +254,5 @@ A tabela abaixo é o registro original da proposta; o comportamento vigente é o
 - **Q-013-8** `process_invoice_schedules` usa o mês/ano do **vencimento** da fatura como data do lançamento (e não o do ciclo de compras). Mantido (paridade); afeta qual mês enxerga a transação.
 - **Q-013-9** O check-in lê `usuarios.numero_whatsapp` sem normalizar; a chave Redis usa o número como veio. A 012 precisa usar a mesma forma ao ler a sessão.
 - **Q-013-10** Fatura `Aberta` com `data_fechamento` no futuro e agendamentos de lembrete não geram aviso de fechamento. Sem proposta.
+
+> **Desvio 272 (10/11/2026):** RN-013-30/31/32 passam a cobrir só o que vence **hoje** (sem o bloco "Vence amanhã"), e o motor (§4.7, RN-013-60) lança sozinho apenas `FIXO`/`PARCELADO` de conta de **cartão de crédito**; as demais são avisadas de manhã e cobradas no check-in da noite (RN-013-42), que as lança ao confirmar.

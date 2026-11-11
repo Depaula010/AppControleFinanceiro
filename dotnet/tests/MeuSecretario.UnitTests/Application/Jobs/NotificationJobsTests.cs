@@ -32,7 +32,7 @@ public class DailyBriefingJobTests
     private DailyBriefingJob Job() => new(_config, Service(), _alerts, _h.Bot, _users, _h.Clock, _h.Log);
 
     private static FinancialAlerts OneBill() => new(
-        [new AlertBill(1, "Aluguel", 1500, "Moradia", "Conta", AlertBill.Expense)], [], [], []);
+        [new AlertBill(1, "Aluguel", 1500, "Moradia", "Conta", AlertBill.Expense)], []);
 
     [Theory]
     [Trait("AC", "013-21")]
