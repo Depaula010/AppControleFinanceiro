@@ -17,6 +17,9 @@
 ## Impacto nos clientes
 Nenhuma rota muda. Mensagem da manhã sem "VENCE AMANHÃ"; check-in noturno passa a cobrar contas fixas e parceladas de conta corrente no dia do vencimento.
 
+## Limitação aceita
+Conta fixa ou parcelada fora do cartão só vira transação quando o usuário confirma no check-in noturno. Quem estiver sem check-in ativo (ou não responder) não terá essas contas lançadas sozinhas, e relatório mensal e previsão as mostram como pendentes até a confirmação.
+
 ## Alternativas
 Manter o motor lançando e o check-in perguntando mesmo assim (conta contaria como paga antes da confirmação; mais código).
 

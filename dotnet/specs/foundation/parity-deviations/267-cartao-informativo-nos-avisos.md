@@ -10,7 +10,7 @@
 - O motor de agendamentos (00:05) lança a conta do cartão na fatura no dia do vencimento. Daí em diante ela sai das duas consultas: **no próprio dia da cobrança o aviso some**, justamente quando deveria informar.
 
 ## Comportamento proposto (.NET)
-- **Manhã:** a conta fixa do cartão vai para um bloco próprio, **"💳 NA FATURA DO CARTÃO (só informativo)"** (`• Hoje: …`, `• Amanhã: …`), fora das seções de "vence", e **aparece mesmo se o motor já a lançou na fatura**. As contas de outras contas continuam saindo só enquanto não lançadas.
+- **Manhã (o "Amanhã:" foi retirado pelo desvio 272):** a conta fixa do cartão vai para um bloco próprio, **"💳 NA FATURA DO CARTÃO (só informativo)"** (`• Hoje: …`, `• Amanhã: …`), fora das seções de "vence", e **aparece mesmo se o motor já a lançou na fatura**. As contas de outras contas continuam saindo só enquanto não lançadas.
 - **Noite:** as contas fixas do cartão (FIXO e LEMBRETE_VARIAVEL, mensais ou anuais no mês, despesas) cobradas **hoje** saem no bloco "DÉBITO CARTÃO DE CRÉDITO … Será debitado hoje", lançadas ou não. Nunca recebem número nem entram na pergunta do "ok": o cartão cobra sozinho.
 - Um check-in só com contas do cartão é enviado (informativo, sem "COMO RESPONDER").
 - O lembrete de véspera (`BILLS-NOTIF`) já listava o cartão como informativo e não muda.

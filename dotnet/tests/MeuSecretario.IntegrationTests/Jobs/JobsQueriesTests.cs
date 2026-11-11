@@ -458,6 +458,8 @@ public sealed class NotificationQueriesTests(PostgresFixture postgres) : IAsyncL
         var alerts = await repository.GetUpcomingAsync(_user, JobsEnv.Day("2026-03-18"), CancellationToken.None);
 
         alerts.InvoicesToday.Select(i => (i.Card, i.Value)).ShouldBe([("Inter", 80.0), ("Nubank", 250.5)], ignoreOrder: true);
+        // Desvio 272: a fatura de amanhã (Nubank, 19/03) não entra no aviso de hoje.
+        alerts.InvoicesToday.Count.ShouldBe(2);
     }
 
     [Fact]

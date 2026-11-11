@@ -46,6 +46,20 @@ public sealed class MotorCatchUpTests(PostgresFixture postgres) : IAsyncLifetime
 
     [Fact]
     [Trait("AC", "013-60")]
+    public async Task CheckingAccountBillsOfTheLastThreeDays_AreNeverRecoveredByTheEngine_Deviation272()
+    {
+        var card = await _env.CardAsync(_user);
+        var onCard = await _env.ScheduleAsync(_user, card, "Despesa Essencial", "No cartão", day: 8);
+        var onAccount = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Na conta", day: 8);
+        var installmentOnAccount = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Parcelada na conta", kind: "PARCELADO", day: 9, total: 3);
+
+        (await CandidatesAsync("2026-03-08")).ShouldBe([onCard]);
+        (await CandidatesAsync("2026-03-09")).ShouldNotContain(installmentOnAccount);
+        (await CandidatesAsync("2026-03-08")).ShouldNotContain(onAccount);
+    }
+
+    [Fact]
+    [Trait("AC", "013-60")]
     public async Task Candidates_IncludeTheLastDayRule_AndTheRollingNextDue()
     {
         var card = await _env.CardAsync(_user);
