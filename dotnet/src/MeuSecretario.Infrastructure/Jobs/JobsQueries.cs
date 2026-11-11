@@ -158,11 +158,10 @@ public sealed class FinancialAlertsRepository(IDbConnectionFactory connections) 
 {
     public async Task<FinancialAlerts> GetUpcomingAsync(int userId, DateOnly day, CancellationToken cancellationToken)
     {
-        var tomorrow = day.AddDays(1);
         await using var connection = await connections.OpenAsync(cancellationToken);
 
+        // Desvio 272: só o que vence hoje (a conta é avisada no dia do vencimento e cobrada no check-in da noite).
         var today = await BillsAsync(connection, userId, day, cancellationToken);
-        var next = await BillsAsync(connection, userId, tomorrow, cancellationToken);
 
         var invoices = await connection.QueryAsync<InvoiceRow>(new CommandDefinition(
             """
@@ -173,31 +172,16 @@ public sealed class FinancialAlertsRepository(IDbConnectionFactory connections) 
             LEFT JOIN transacoes t ON f.id = t.fatura_id
             WHERE c.usuario_id = @uid
               AND f.status IN ('Aberta', 'Fechada')
-              AND (f.data_vencimento = @hoje OR f.data_vencimento = @amanha)
+              AND f.data_vencimento = @hoje
             GROUP BY c.nome_conta, f.data_vencimento, f.status
             ORDER BY f.data_vencimento ASC
             """,
-            JobSql.With(
-                ("uid", userId, DbType.Int32), ("hoje", JobSql.Day(day), DbType.Date), ("amanha", JobSql.Day(tomorrow), DbType.Date)),
+            JobSql.With(("uid", userId, DbType.Int32), ("hoje", JobSql.Day(day), DbType.Date)),
             cancellationToken: cancellationToken));
 
-        var invoicesToday = new List<AlertInvoice>();
-        var invoicesTomorrow = new List<AlertInvoice>();
-        foreach (var invoice in invoices)
-        {
-            var due = JobSql.ToDate(invoice.DueDate);
-            var item = new AlertInvoice(invoice.Card, (double)invoice.Total, due);
-            if (due == day)
-            {
-                invoicesToday.Add(item);
-            }
-            else if (due == tomorrow)
-            {
-                invoicesTomorrow.Add(item);
-            }
-        }
+        var invoicesToday = invoices.Select(i => new AlertInvoice(i.Card, (double)i.Total, JobSql.ToDate(i.DueDate))).ToList();
 
-        return new FinancialAlerts(today, next, invoicesToday, invoicesTomorrow);
+        return new FinancialAlerts(today, invoicesToday);
     }
 
     private static async Task<IReadOnlyList<AlertBill>> BillsAsync(

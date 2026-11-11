@@ -14,14 +14,14 @@ public class FinancialAlertCardTests
     {
         var alerts = new FinancialAlerts(
             [Bill("Aluguel", 1500), Bill("Gympass", 183.2, onCard: true)],
-            [Bill("Claude AI", 110, onCard: true)],
-            [], []);
+            []);
 
         var message = FinancialAlertFormatter.Format(alerts, includeGreeting: false);
 
         message.ShouldNotBeNull();
         message.ShouldContain("⚠️ *VENCE HOJE (Despesas):*\n• Aluguel - R$ 1500,00");
-        message.ShouldContain("💳 *NA FATURA DO CARTÃO (só informativo):*\n• Hoje: Gympass - R$ 183,20\n• Amanhã: Claude AI - R$ 110,00");
+        message.ShouldContain("💳 *NA FATURA DO CARTÃO (só informativo):*\n• Hoje: Gympass - R$ 183,20");
+        message.ShouldNotContain("Amanhã");
         message.ShouldNotContain("• Gympass - R$ 183,20");
         message.ShouldNotContain("VENCE AMANHÃ");
     }
@@ -30,7 +30,7 @@ public class FinancialAlertCardTests
     [Trait("AC", "013-32")]
     public void OnlyCardBills_StillProduceTheMessage_WithoutAnEmptyDueSection()
     {
-        var message = FinancialAlertFormatter.Format(new FinancialAlerts([Bill("Gympass", 183.2, onCard: true)], [], [], []), includeGreeting: true);
+        var message = FinancialAlertFormatter.Format(new FinancialAlerts([Bill("Gympass", 183.2, onCard: true)], []), includeGreeting: true);
 
         message.ShouldNotBeNull();
         message.ShouldStartWith("🌅 *Bom dia!*\n\n💰 *ALERTAS FINANCEIROS*");
@@ -42,7 +42,7 @@ public class FinancialAlertCardTests
     [Trait("AC", "013-32")]
     public void WithoutCardBills_TheTextIsTheSameAsBefore()
     {
-        var message = FinancialAlertFormatter.Format(new FinancialAlerts([Bill("Aluguel", 1500)], [], [], []), includeGreeting: false);
+        var message = FinancialAlertFormatter.Format(new FinancialAlerts([Bill("Aluguel", 1500)], []), includeGreeting: false);
 
         message.ShouldBe("💰 *ALERTAS FINANCEIROS*\n\n⚠️ *VENCE HOJE (Despesas):*\n• Aluguel - R$ 1500,00");
         message!.ShouldNotContain("CARTÃO");

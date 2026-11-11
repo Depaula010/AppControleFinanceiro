@@ -32,23 +32,40 @@ public sealed class MotorCatchUpTests(PostgresFixture postgres) : IAsyncLifetime
     [Trait("AC", "013-60")]
     public async Task Candidates_AreWhatMotorWouldHaveRunThatDay_FixedAndInstallments_NotReminders_NotInactive_NotNotYetStarted()
     {
-        var fixedDue = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Aluguel", day: 10);
-        var installment = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Curso", 200m, "PARCELADO", day: 10, total: 5, executed: 1);
-        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Lembrete", kind: "LEMBRETE_VARIAVEL", day: 10);
-        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Inativo", day: 10, active: false);
-        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Outro dia", day: 11);
-        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Ainda não existia", day: 10, startDate: "2026-03-15");
+        var card = await _env.CardAsync(_user);
+        var fixedDue = await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Aluguel", day: 10);
+        var installment = await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Curso", 200m, "PARCELADO", day: 10, total: 5, executed: 1);
+        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Conta corrente (Desvio 272)", day: 10);
+        await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Lembrete", kind: "LEMBRETE_VARIAVEL", day: 10);
+        await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Inativo", day: 10, active: false);
+        await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Outro dia", day: 11);
+        await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Ainda não existia", day: 10, startDate: "2026-03-15");
 
         (await CandidatesAsync("2026-03-10")).ShouldBe([fixedDue, installment]);
     }
 
     [Fact]
     [Trait("AC", "013-60")]
+    public async Task CheckingAccountBillsOfTheLastThreeDays_AreNeverRecoveredByTheEngine_Deviation272()
+    {
+        var card = await _env.CardAsync(_user);
+        var onCard = await _env.ScheduleAsync(_user, card, "Despesa Essencial", "No cartão", day: 8);
+        var onAccount = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Na conta", day: 8);
+        var installmentOnAccount = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Parcelada na conta", kind: "PARCELADO", day: 9, total: 3);
+
+        (await CandidatesAsync("2026-03-08")).ShouldBe([onCard]);
+        (await CandidatesAsync("2026-03-09")).ShouldNotContain(installmentOnAccount);
+        (await CandidatesAsync("2026-03-08")).ShouldNotContain(onAccount);
+    }
+
+    [Fact]
+    [Trait("AC", "013-60")]
     public async Task Candidates_IncludeTheLastDayRule_AndTheRollingNextDue()
     {
-        var monthEnd = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Fim de mês", day: 31);
-        var biweekly = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Terapia", 50m, "FIXO", "QUINZENAL", day: 20, startDate: "2026-02-20");
-        await _env.TransactionAsync(_user, _account, "Despesa Essencial", "2026-10-20", "Terapia", -50m, scheduleId: biweekly);
+        var card = await _env.CardAsync(_user);
+        var monthEnd = await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Fim de mês", day: 31);
+        var biweekly = await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Terapia", 50m, "FIXO", "QUINZENAL", day: 20, startDate: "2026-02-20");
+        await _env.TransactionAsync(_user, card, "Despesa Essencial", "2026-10-20", "Terapia", -50m, scheduleId: biweekly);
 
         (await CandidatesAsync("2026-04-30")).ShouldContain(monthEnd);   // 30/04 é o último dia de abril
         (await CandidatesAsync("2026-04-29")).ShouldNotContain(monthEnd);

@@ -37,6 +37,10 @@ public sealed class ScheduleExecutionRepository(IDbConnectionFactory connections
 
     private static readonly string Select = SelectWith(string.Empty);
 
+    /// <summary>
+    /// Desvio 272: o motor só lança sozinho o que é de cartão (vai na fatura). Conta fixa ou parcelada de outra conta é avisada de manhã e
+    /// cobrada no check-in da noite, e só vira paga quando o usuário confirma.
+    /// </summary>
     public async Task<IReadOnlyList<ScheduleInfo>> ListMotorCandidatesAsync(DateOnly today, CancellationToken cancellationToken)
     {
         await using var connection = await connections.OpenAsync(cancellationToken);
@@ -45,6 +49,7 @@ public sealed class ScheduleExecutionRepository(IDbConnectionFactory connections
             {SelectWithNextDue}
             WHERE a.ativo = TRUE
               AND a.tipo_agendamento IN ('FIXO', 'PARCELADO')
+              AND c.tipo_conta = '{ScheduleRules.CardAccountType}'
               AND {DueOnDay}
             ORDER BY a.id
             """,
@@ -65,6 +70,7 @@ public sealed class ScheduleExecutionRepository(IDbConnectionFactory connections
             {SelectWithNextDue}
             WHERE a.ativo = TRUE
               AND a.tipo_agendamento IN ('FIXO', 'PARCELADO')
+              AND c.tipo_conta = '{ScheduleRules.CardAccountType}'
               AND (a.data_inicio IS NULL OR a.data_inicio <= @today)
               AND {DueOnDay}
             ORDER BY a.id

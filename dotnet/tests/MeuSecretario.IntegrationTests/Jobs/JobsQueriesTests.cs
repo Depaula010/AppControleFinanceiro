@@ -38,9 +38,37 @@ public sealed class CheckinQueriesTests(PostgresFixture postgres) : IAsyncLifeti
         var otherDay = await repository.GetUpcomingAsync(_user, JobsEnv.Day("2026-03-20"), CancellationToken.None);
 
         onDueDate.BillsToday.Select(b => b.Description).ShouldBe(["Gasolina Semanal"]);
-        dayBefore.BillsTomorrow.Select(b => b.Description).ShouldBe(["Gasolina Semanal"]);
+        // Desvio 272: a véspera não avisa; a conta sai só no dia do vencimento.
+        dayBefore.BillsToday.ShouldBeEmpty();
         otherDay.BillsToday.ShouldBeEmpty();
-        otherDay.BillsTomorrow.ShouldBeEmpty();
+    }
+
+    [Fact]
+    [Trait("AC", "013-30")]
+    public async Task FixedBillOutsideTheCard_IsWarnedInTheMorningAndAskedAtNight_OnItsDueDate_Deviation272()
+    {
+        // Caso real de 10/11/2026: Escola, Natação e Robô aspirador (conta corrente) venciam no dia 10 e sumiam dos dois avisos.
+        var school = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Escola", 520m, day: 10);
+        var vacuum = await _env.ScheduleAsync(_user, _account, "Despesa Discricionária", "Robô aspirador", 221.98m, "PARCELADO", day: 10, total: 18, executed: 4);
+        var repository = new FinancialAlertsRepository(postgres.Connections);
+        var executor = new ScheduleExecutionRepository(postgres.Connections);
+
+        // O motor das 00:05 não vê essas contas: quem confirma é o usuário, à noite.
+        var candidates = await executor.ListMotorCandidatesAsync(JobsEnv.Day("2026-03-10"), CancellationToken.None);
+        candidates.Select(c => c.Id).ShouldNotContain(school);
+        candidates.Select(c => c.Id).ShouldNotContain(vacuum);
+
+        var morning = await repository.GetUpcomingAsync(_user, JobsEnv.Day("2026-03-10"), CancellationToken.None);
+        morning.BillsToday.Select(b => b.Description).ShouldBe(["Escola", "Robô aspirador (5/18)"], ignoreOrder: true);
+
+        var night = await SnapshotAsync("2026-03-10");
+        night.PendingBills.Select(b => b.Id).ShouldBe([school, vacuum], ignoreOrder: true);
+
+        // Depois que o usuário confirma pelo check-in, a conta sai dos dois.
+        await executor.ExecuteAsync(
+            new ScheduleExecutionRequest(school, JobsEnv.Day("2026-03-10"), AllowVariableReminder: true, Competence: JobsEnv.Day("2026-03-10")),
+            CancellationToken.None);
+        (await SnapshotAsync("2026-03-10")).PendingBills.Select(b => b.Id).ShouldBe([vacuum]);
     }
 
     [Fact]
@@ -349,7 +377,7 @@ public sealed class NotificationQueriesTests(PostgresFixture postgres) : IAsyncL
 
     [Fact]
     [Trait("AC", "013-30")]
-    public async Task FinancialAlerts_SplitTodayAndTomorrowAcrossTheMonthBoundary()
+    public async Task FinancialAlerts_OnlyTodayAcrossTheMonthBoundary_Deviation272()
     {
         var repository = new FinancialAlertsRepository(postgres.Connections);
         await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Fim", 100m, day: 31);
@@ -358,7 +386,7 @@ public sealed class NotificationQueriesTests(PostgresFixture postgres) : IAsyncL
         var alerts = await repository.GetUpcomingAsync(_user, JobsEnv.Day("2026-12-31"), CancellationToken.None);
 
         alerts.BillsToday.Select(b => (b.Description, b.Type, b.Value)).ShouldBe([("Fim", "Despesa", 100d)]);
-        alerts.BillsTomorrow.Select(b => (b.Description, b.Type)).ShouldBe([("Salário", "Receita")]);
+        // O que vence amanhã (dia 1) não entra.
     }
 
     [Fact]
@@ -414,7 +442,7 @@ public sealed class NotificationQueriesTests(PostgresFixture postgres) : IAsyncL
 
     [Fact]
     [Trait("AC", "013-30")]
-    public async Task FinancialAlerts_InvoicesOfTodayAndTomorrow_OpenAndClosedButNotPaid_WithTheExpenseTotal_Deviation131()
+    public async Task FinancialAlerts_InvoicesOfToday_OpenAndClosedButNotPaid_WithTheExpenseTotal_Deviation131()
     {
         var repository = new FinancialAlertsRepository(postgres.Connections);
         var card = await _env.CardAsync(_user);
@@ -430,7 +458,8 @@ public sealed class NotificationQueriesTests(PostgresFixture postgres) : IAsyncL
         var alerts = await repository.GetUpcomingAsync(_user, JobsEnv.Day("2026-03-18"), CancellationToken.None);
 
         alerts.InvoicesToday.Select(i => (i.Card, i.Value)).ShouldBe([("Inter", 80.0), ("Nubank", 250.5)], ignoreOrder: true);
-        alerts.InvoicesTomorrow.Select(i => i.Card).ShouldBe(["Nubank"]);
+        // Desvio 272: a fatura de amanhã (Nubank, 19/03) não entra no aviso de hoje.
+        alerts.InvoicesToday.Count.ShouldBe(2);
     }
 
     [Fact]

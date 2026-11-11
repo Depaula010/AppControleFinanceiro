@@ -87,10 +87,11 @@ public sealed class RollingCadenceTests(PostgresFixture postgres) : IAsyncLifeti
     [Trait("AC", "013-60")]
     public async Task BiweeklyFixed_IsAMotorCandidateOnlyOnItsNextDue_NotOnTheDayOfTheMonth()
     {
+        var card = await _env.CardAsync(_user);
         // Terapia: último lançamento em 20/10, dia_execucao 20. Próximo vencimento: 03/11 (e não 20/11).
         var id = await _env.ScheduleAsync(
-            _user, _account, "Despesa Essencial", "Terapia", 50m, "FIXO", "QUINZENAL", day: 20, startDate: "2026-02-20");
-        await _env.TransactionAsync(_user, _account, "Despesa Essencial", "2026-10-20", "Terapia", -50m, scheduleId: id);
+            _user, card, "Despesa Essencial", "Terapia", 50m, "FIXO", "QUINZENAL", day: 20, startDate: "2026-02-20");
+        await _env.TransactionAsync(_user, card, "Despesa Essencial", "2026-10-20", "Terapia", -50m, scheduleId: id);
 
         async Task<bool> IsCandidateAsync(string date) =>
             (await _executor.ListMotorCandidatesAsync(JobsEnv.Day(date), CancellationToken.None)).Any(c => c.Id == id);

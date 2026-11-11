@@ -8,6 +8,8 @@ public class JobsParityTests
 {
     private static readonly DateOnly Today = new(2026, 3, 18);
 
+    private static bool HasTomorrow(JsonElement bills, JsonElement invoices) => bills.GetArrayLength() > 0 || invoices.GetArrayLength() > 0;
+
     [Fact]
     [Trait("AC", "013-31")]
     public void FinancialAlerts_MatchPython()
@@ -17,8 +19,16 @@ public class JobsParityTests
             var input = c.GetProperty("input");
             var alerts = JobsFixture.Alerts(input.GetProperty("hoje"), input.GetProperty("amanha"), input.GetProperty("faturas_hoje"), input.GetProperty("faturas_amanha"));
             var expected = c.GetProperty("output").ValueKind == JsonValueKind.Null ? null : c.GetProperty("output").GetString();
+            var actual = FinancialAlertFormatter.Format(alerts, c.GetProperty("greeting").GetBoolean());
 
-            FinancialAlertFormatter.Format(alerts, c.GetProperty("greeting").GetBoolean()).ShouldBe(expected);
+            // Desvio 272: o dia seguinte não é mais avisado. Sem nada para amanhã, o texto é o do Flask; com algo, só some a parte de amanhã.
+            if (HasTomorrow(input.GetProperty("amanha"), input.GetProperty("faturas_amanha")))
+            {
+                actual?.ShouldNotContain("AMANHÃ");
+                continue;
+            }
+
+            actual.ShouldBe(expected);
         }
     }
 
@@ -50,9 +60,19 @@ public class JobsParityTests
     {
         foreach (var c in JobsFixture.Cases("briefing_prompt"))
         {
-            var data = JobsFixture.Briefing(c.GetProperty("input"));
+            var input = c.GetProperty("input");
+            var data = JobsFixture.Briefing(input);
 
-            BriefingPrompt.Build(data).ShouldBe(c.GetProperty("prompt").GetString());
+            // Desvio 272: o prompt só fala de contas que vencem hoje; com algo para amanhã nas fixtures, o texto do Flask não vale mais.
+            var prompt = BriefingPrompt.Build(data);
+            var alerts = input.GetProperty("alertas_financeiros");
+            if (HasTomorrow(alerts.GetProperty("contas_amanha"), alerts.GetProperty("faturas_amanha")))
+            {
+                prompt.ShouldNotContain("VENCE AMANHÃ");
+                continue;
+            }
+
+            prompt.ShouldBe(c.GetProperty("prompt").GetString()!.Replace("vencem hoje ou amanhã", "vencem hoje", StringComparison.Ordinal));
             BriefingPrompt.Fallback(data).ShouldBe(c.GetProperty("fallback").GetString());
         }
     }

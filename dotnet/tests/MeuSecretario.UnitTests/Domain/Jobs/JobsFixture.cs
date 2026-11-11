@@ -34,8 +34,9 @@ internal static class JobsFixture
         .. list.EnumerateArray().Select(i => new AlertInvoice(Str(i, "cartao"), Dbl(i, "valor"), Date(Str(i, "vencimento")))),
     ];
 
+    // Desvio 272: as listas de amanhã das fixtures do Flask não são mais lidas.
     public static FinancialAlerts Alerts(JsonElement hoje, JsonElement amanha, JsonElement faturasHoje, JsonElement faturasAmanha) =>
-        new(Bills(hoje), Bills(amanha), Invoices(faturasHoje), Invoices(faturasAmanha));
+        new(Bills(hoje), Invoices(faturasHoje));
 
     public static BriefingWeather? Weather(JsonElement element, string name)
     {

@@ -249,13 +249,16 @@ public sealed class ScheduleExecutionRepositoryTests(PostgresFixture postgres) :
     [Trait("AC", "013-60")]
     public async Task Candidates_AreFixedAndInstallmentsOfTheDay_AnnualOnlyInTheMonth_ButNeverTheVariableReminder_Deviation268()
     {
-        var fixedToday = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "A", day: 18);
-        var installmentToday = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "B", kind: "PARCELADO", day: 18, total: 3);
-        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Outro dia", day: 19);
-        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Inativo", day: 18, active: false);
-        var annualRight = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Anual certo", periodicity: "ANUAL", month: 3, day: 18);
-        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Anual errado", periodicity: "ANUAL", month: 4, day: 18);
-        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Lembrete", kind: "LEMBRETE_VARIAVEL", day: 25);
+        var card = await _env.CardAsync(_user);
+        var fixedToday = await _env.ScheduleAsync(_user, card, "Despesa Essencial", "A", day: 18);
+        var installmentToday = await _env.ScheduleAsync(_user, card, "Despesa Essencial", "B", kind: "PARCELADO", day: 18, total: 3);
+        await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Outro dia", day: 19);
+        await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Inativo", day: 18, active: false);
+        var annualRight = await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Anual certo", periodicity: "ANUAL", month: 3, day: 18);
+        await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Anual errado", periodicity: "ANUAL", month: 4, day: 18);
+        // Desvio 272: conta fora do cartão não é lançada pelo motor (o check-in pergunta).
+        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Conta corrente", day: 18);
+        await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Lembrete", kind: "LEMBRETE_VARIAVEL", day: 25);
 
         var candidates = await _repository.ListMotorCandidatesAsync(JobsEnv.Day("2026-03-18"), CancellationToken.None);
 
@@ -267,12 +270,13 @@ public sealed class ScheduleExecutionRepositoryTests(PostgresFixture postgres) :
     [Trait("AC", "013-60")]
     public async Task Candidates_OnTheLastDayOfAShortMonth_IncludeDay29To31_ButNotBefore()
     {
-        var day31 = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Dia 31", day: 31);
-        var day30 = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Dia 30", kind: "PARCELADO", day: 30, total: 3);
-        var day29Annual = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Anual 29", periodicity: "ANUAL", month: 4, day: 29);
-        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Anual de outro mês", periodicity: "ANUAL", month: 5, day: 31);
-        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Dia 10", day: 10);
-        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Inativo 31", day: 31, active: false);
+        var card = await _env.CardAsync(_user);
+        var day31 = await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Dia 31", day: 31);
+        var day30 = await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Dia 30", kind: "PARCELADO", day: 30, total: 3);
+        var day29Annual = await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Anual 29", periodicity: "ANUAL", month: 4, day: 29);
+        await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Anual de outro mês", periodicity: "ANUAL", month: 5, day: 31);
+        await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Dia 10", day: 10);
+        await _env.ScheduleAsync(_user, card, "Despesa Essencial", "Inativo 31", day: 31, active: false);
 
         var lastDay = await _repository.ListMotorCandidatesAsync(JobsEnv.Day("2026-04-30"), CancellationToken.None);
         var dayBefore = await _repository.ListMotorCandidatesAsync(JobsEnv.Day("2026-04-29"), CancellationToken.None);
