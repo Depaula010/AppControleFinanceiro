@@ -21,7 +21,7 @@ public interface IUserKeyReader
 
 /// <summary>Agendamento escolhido para quitação: descrição, conta e subcategoria (<c>settle_fixed_bill</c>).</summary>
 /// <remarks><c>Kind</c> e <c>Day</c> decidem a baixa de parcelado pelo executor (desvio 270).</remarks>
-public sealed record SettleTarget(string Description, int AccountId, int SubcategoryId, string Kind = "FIXO", int Day = 1);
+public sealed record SettleTarget(string Description, int AccountId, int SubcategoryId, string Kind = "FIXO", int Day = 1, string Periodicity = "MENSAL");
 
 /// <summary>Leituras de contas, categorias e contas fixas (spec 011 §7.3), sempre só contas ativas do usuário.</summary>
 public interface IAutomationLookups

@@ -189,8 +189,9 @@ public sealed class TransactionPosting(ITransactionsUnitOfWork unitOfWork, ICate
             cancellationToken);
         await session.LinkPairAsync(command.UserId, outgoing.Id, incoming.Id, cancellationToken);
 
-        // R5: a fatura vira Paga sem comparar o valor pago.
-        if (invoice is not null)
+        // R5: a fatura Fechada vira Paga sem comparar o valor pago. Desvio 274: sem Fechada, o pagamento só se liga à fatura do
+        // ciclo e NÃO a marca como Paga (o 2º pagamento parcial quitava a fatura aberta do mês seguinte e ela sumia dos avisos).
+        if (invoice is not null && closed is not null)
         {
             await session.MarkInvoicePaidAsync(invoice.Id, cancellationToken);
         }

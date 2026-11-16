@@ -89,6 +89,8 @@ public sealed class AutomationLookups(IDbConnectionFactory connections) : IAutom
         public string TipoAgendamento { get; set; } = "";
 
         public int DiaExecucao { get; set; }
+
+        public string Periodicidade { get; set; } = "MENSAL";
     }
 
     public async Task<IReadOnlyList<AccountRef>> ListActiveAccountsAsync(int userId, CancellationToken cancellationToken)
@@ -199,13 +201,13 @@ public sealed class AutomationLookups(IDbConnectionFactory connections) : IAutom
         var row = await connection.QueryFirstOrDefaultAsync<SettleRow>(new CommandDefinition(
             """
             SELECT a.descricao AS Descricao, a.conta_id AS ContaId, a.subcategoria_id AS SubcategoriaId,
-                   a.tipo_agendamento AS TipoAgendamento, a.dia_execucao AS DiaExecucao
+                   a.tipo_agendamento AS TipoAgendamento, a.dia_execucao AS DiaExecucao, a.periodicidade AS Periodicidade
             FROM agendamentos a JOIN contas c ON a.conta_id = c.id
             WHERE a.id = @scheduleId AND a.usuario_id = @userId
             """,
             new { scheduleId, userId },
             cancellationToken: cancellationToken));
-        return row is null ? null : new SettleTarget(row.Descricao, row.ContaId, row.SubcategoriaId, row.TipoAgendamento, row.DiaExecucao);
+        return row is null ? null : new SettleTarget(row.Descricao, row.ContaId, row.SubcategoriaId, row.TipoAgendamento, row.DiaExecucao, row.Periodicidade);
     }
 }
 

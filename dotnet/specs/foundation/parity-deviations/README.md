@@ -169,3 +169,5 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [271](271-compra-parcelada-vira-conta.md) | Compra parcelada (descrição com `(n/N)`) vira conta parcelada até a última parcela | correção | 004, 005, 011, 013 | implementado |
 | [272](272-contas-no-dia-do-vencimento.md) | Conta avisada e cobrada no dia do vencimento: motor só lança o que é de cartão; manhã sem "vence amanhã" | correção | 013 | implementado |
 | [273](273-correcoes-da-auditoria.md) | Correções da auditoria 2026-11-16: relatório de fatura sem pagamento, potes por usuário, saldo inicial, migration 0130, trava do "OK" | correção | 005, 006, 012, 013 | implementado |
+| [274](274-pagamento-sem-fechada-nao-quita-aberta.md) | Pagamento sem fatura Fechada não marca a fatura aberta como Paga | correção | 004, 013 | implementado |
+| [275](275-paguei-pelo-executor.md) | "Paguei X" e SMS de conta fixa/variável passam pelo executor (agendamento + competência) | correção | 011, 012, 013 | implementado |

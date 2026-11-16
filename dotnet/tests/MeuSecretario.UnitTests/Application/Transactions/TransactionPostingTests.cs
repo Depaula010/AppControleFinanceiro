@@ -266,13 +266,13 @@ public class TransactionPostingTests : IAsyncDisposable
 
     [Fact]
     [Trait("AC", "004-119")]
-    public async Task Payment_WithoutClosedInvoice_UsesTheCycleInvoice_CreatingIt()
+    public async Task Payment_WithoutClosedInvoice_UsesTheCycleInvoice_CreatingIt_AndKeepsItOpen()
     {
         var posted = Ok(await _posting.PostInvoicePaymentAsync(Payment(), CancellationToken.None));
 
         var invoice = _session.Invoices.Single();
         posted.InvoiceId.ShouldBe(invoice.Id);
-        invoice.Status.ShouldBe("Paga");
+        invoice.Status.ShouldBe("Aberta");
         invoice.Due.ShouldBe(Day("2026-04-15"));
     }
 
