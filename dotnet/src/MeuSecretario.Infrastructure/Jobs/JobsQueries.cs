@@ -166,7 +166,7 @@ public sealed class FinancialAlertsRepository(IDbConnectionFactory connections) 
         var invoices = await connection.QueryAsync<InvoiceRow>(new CommandDefinition(
             """
             SELECT c.nome_conta AS Card, f.data_vencimento AS DueDate,
-                   COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) AS Total
+                   GREATEST(COALESCE(-SUM(CASE WHEN t.tipo_transacao IN ('Despesa', 'Renda') THEN t.valor ELSE 0 END), 0), 0) AS Total
             FROM faturas f
             JOIN contas c ON f.conta_id = c.id
             LEFT JOIN transacoes t ON f.id = t.fatura_id
@@ -319,7 +319,7 @@ public sealed class InvoiceJobRepository(IDbConnectionFactory connections) : IIn
             """
             SELECT f.id AS Id, f.conta_id AS AccountId, f.data_fechamento AS ClosingDate, f.data_vencimento AS DueDate,
                    c.nome_conta AS AccountName, c.usuario_id AS UserId, u.numero_whatsapp AS WhatsappNumber,
-                   COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) AS Total
+                   GREATEST(COALESCE(-SUM(CASE WHEN t.tipo_transacao IN ('Despesa', 'Renda') THEN t.valor ELSE 0 END), 0), 0) AS Total
             FROM faturas f
             JOIN contas c ON f.conta_id = c.id
             JOIN usuarios u ON c.usuario_id = u.id
@@ -367,7 +367,7 @@ public sealed class InvoiceJobRepository(IDbConnectionFactory connections) : IIn
             """
             SELECT f.id AS Id, f.conta_id AS AccountId, f.data_vencimento AS DueDate, c.nome_conta AS AccountName,
                    c.usuario_id AS UserId, u.numero_whatsapp AS WhatsappNumber,
-                   COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) AS Total
+                   GREATEST(COALESCE(-SUM(CASE WHEN t.tipo_transacao IN ('Despesa', 'Renda') THEN t.valor ELSE 0 END), 0), 0) AS Total
             FROM faturas f
             JOIN contas c ON f.conta_id = c.id
             JOIN usuarios u ON c.usuario_id = u.id

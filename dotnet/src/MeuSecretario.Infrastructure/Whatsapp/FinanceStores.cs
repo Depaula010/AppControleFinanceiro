@@ -247,10 +247,10 @@ public sealed class FeedbackReader(IDbConnectionFactory connections, IClock cloc
         await using var connection = await connections.OpenAsync(cancellationToken);
         var row = await connection.QueryFirstOrDefaultAsync<InvoiceRow>(new CommandDefinition(
             """
-            SELECT c.nome_conta AS NomeConta, c.dia_fechamento AS DiaFechamento, COALESCE(SUM(ABS(t.valor)), 0) AS ValorTotal
+            SELECT c.nome_conta AS NomeConta, c.dia_fechamento AS DiaFechamento, GREATEST(COALESCE(-SUM(CASE WHEN t.tipo_transacao IN ('Despesa', 'Renda') THEN t.valor ELSE 0 END), 0), 0) AS ValorTotal
             FROM contas c
             LEFT JOIN faturas f ON f.conta_id = c.id AND f.data_vencimento > @today AND f.status = 'Aberta'
-            LEFT JOIN transacoes t ON t.fatura_id = f.id AND t.tipo_transacao = 'Despesa'
+            LEFT JOIN transacoes t ON t.fatura_id = f.id
             WHERE c.id = @accountId AND c.usuario_id = @userId AND c.tipo_conta = 'Cartão de Crédito'
             GROUP BY c.id, c.nome_conta, c.dia_fechamento
             """,

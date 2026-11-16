@@ -146,7 +146,7 @@ public class FixedBillsReaderTests(PostgresFixture postgres) : IAsyncLifetime, I
 
     [Fact]
     [Trait("AC", "012-402")]
-    public async Task DueInvoices_AreOpenOnesOfTheUser_WithTheSumOfTheExpenses()
+    public async Task DueInvoices_AreOpenOnesOfTheUser_WithTheNetTotal_Deviation279()
     {
         var card = await _env.Data.InsertCardAsync(_user, "Inter", 10, 17);
         var other = await _env.Data.InsertCardAsync(_other, "Dela", 10, 17);
@@ -160,6 +160,6 @@ public class FixedBillsReaderTests(PostgresFixture postgres) : IAsyncLifetime, I
 
         var invoices = await _reader.ListDueInvoicesAsync(_user, new DateOnly(2026, 10, 7), new DateOnly(2026, 10, 14), CancellationToken.None);
 
-        invoices.ShouldBe([new DueInvoice("Inter", new DateOnly(2026, 10, 10), 150.5m)]);
+        invoices.ShouldBe([new DueInvoice("Inter", new DateOnly(2026, 10, 10), 130.5m)]);
     }
 }

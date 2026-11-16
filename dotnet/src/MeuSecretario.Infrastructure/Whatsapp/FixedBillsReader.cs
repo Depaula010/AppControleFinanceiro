@@ -197,7 +197,7 @@ public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsA
         var rows = await connection.QueryAsync<InvoiceRow>(new CommandDefinition(
             """
             SELECT c.nome_conta AS NomeConta, f.data_vencimento AS DataVencimento,
-                   COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) AS ValorFatura
+                   GREATEST(COALESCE(-SUM(CASE WHEN t.tipo_transacao IN ('Despesa', 'Renda') THEN t.valor ELSE 0 END), 0), 0) AS ValorFatura
             FROM faturas f
             JOIN contas c ON f.conta_id = c.id
             LEFT JOIN transacoes t ON f.id = t.fatura_id

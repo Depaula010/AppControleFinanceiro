@@ -94,9 +94,21 @@ public class TransactionPostingDbTests(PostgresFixture postgres) : IAsyncLifetim
 
     [Fact]
     [Trait("AC", "004-24")]
-    public async Task Simple_IncomeOnACard_DoesNotLink()
+    public async Task Simple_IncomeOnACard_LinksToTheCycleInvoice_Deviation279()
     {
-        Ok(await _posting.PostSimpleAsync(Simple(TransactionKind.Income, account: _card, subcategory: IncomeSubcategory), CancellationToken.None))
+        var expense = Ok(await _posting.PostSimpleAsync(Simple(account: _card), CancellationToken.None));
+        var refund = Ok(await _posting.PostSimpleAsync(Simple(TransactionKind.Income, account: _card, subcategory: IncomeSubcategory), CancellationToken.None));
+
+        refund.InvoiceId.ShouldNotBeNull();
+        refund.InvoiceId.ShouldBe(expense.InvoiceId);
+        (await Count("faturas")).ShouldBe(1);
+    }
+
+    [Fact]
+    [Trait("AC", "004-24")]
+    public async Task Simple_IncomeOnACheckingAccount_NeverLinks()
+    {
+        Ok(await _posting.PostSimpleAsync(Simple(TransactionKind.Income, subcategory: IncomeSubcategory), CancellationToken.None))
             .InvoiceId.ShouldBeNull();
 
         (await Count("faturas")).ShouldBe(0);

@@ -219,15 +219,17 @@ public class UpdateTransactionTests : IAsyncDisposable
 
     [Fact]
     [Trait("AC", "004-56")]
-    public async Task MovingToANonCard_OrChangingToIncome_ClearsTheInvoice()
+    public async Task MovingToANonCard_ClearsTheInvoice_AndIncomeOnACardKeepsIt()
     {
         _repository.GetAsync(User, Id, Arg.Any<CancellationToken>()).Returns(new CurrentTransaction(Id, "Despesa", -50m, 3, Day("2026-03-10")));
 
         await Run(Raw.Body(("conta_id", Raw.N(2))));
         _session.Updated!.Value.Invoice.ShouldBe(Change.Set<int?>(null));
 
+        // Desvio 279: receita (estorno) em cartão também fica ligada à fatura do ciclo.
         await Run(Raw.Body(("tipo", Raw.T("Receita"))));
-        _session.Updated!.Value.Invoice.ShouldBe(Change.Set<int?>(null));
+        _session.Updated!.Value.Invoice.IsSet.ShouldBeTrue();
+        _session.Updated!.Value.Invoice.Value.ShouldNotBeNull();
     }
 
     [Fact]

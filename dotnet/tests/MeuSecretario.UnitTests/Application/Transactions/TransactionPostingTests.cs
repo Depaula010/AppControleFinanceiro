@@ -83,7 +83,7 @@ public class TransactionPostingTests : IAsyncDisposable
 
     [Fact]
     [Trait("AC", "004-112")]
-    public async Task ExpenseOnCard_LinksOrCreatesTheCycleInvoice_IncomeDoesNot()
+    public async Task ExpenseOnCard_LinksOrCreatesTheCycleInvoice_RefundLinksToTheSameOne_Deviation279()
     {
         var posted = Ok(await _posting.PostSimpleAsync(Simple(account: 3), CancellationToken.None));
 
@@ -93,7 +93,7 @@ public class TransactionPostingTests : IAsyncDisposable
         _session.Inserted.Single().InvoiceId.ShouldBe(posted.InvoiceId);
 
         var income = Ok(await _posting.PostSimpleAsync(Simple(TransactionKind.Income, account: 3), CancellationToken.None));
-        income.InvoiceId.ShouldBeNull();
+        income.InvoiceId.ShouldBe(posted.InvoiceId);
         _session.Invoices.Count.ShouldBe(1);
     }
 

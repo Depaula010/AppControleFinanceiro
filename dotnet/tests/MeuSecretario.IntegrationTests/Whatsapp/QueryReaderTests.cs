@@ -97,13 +97,13 @@ public class QueryReaderTests(PostgresFixture postgres) : IAsyncLifetime, IClass
 
         var summary = await _reader.GetOpenInvoicesAsync(_user, null, CancellationToken.None);
         summary.Select(i => (i.CardName, i.Value, i.DueDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture), i.Status)).ShouldBe(
-            [("Inter", 150d, "2026-10-17", "Aberta"), ("Inter", 0d, "2026-11-17", "Aberta")]);
+            [("Inter", 130d, "2026-10-17", "Aberta"), ("Inter", 0d, "2026-11-17", "Aberta")]);
         (await _reader.GetOpenInvoicesAsync(_user, card, CancellationToken.None)).Count.ShouldBe(1);
 
         var detail = await _reader.GetInvoiceDetailAsync(_user, card, CancellationToken.None);
-        detail!.Total.ShouldBe(150d);
+        detail!.Total.ShouldBe(130d);
         detail.Lines.Select(l => (l.Description, l.Value, l.ScheduleType, l.InstallmentInfo)).ShouldBe(
-            [("Cinema", 50d, "PARCELADO", "2/3"), ("Mercado", 100d, null, null)]);
+            [("Estorno", -20d, null, null), ("Cinema", 50d, "PARCELADO", "2/3"), ("Mercado", 100d, null, null)]);
         (await _reader.GetInvoiceDetailAsync(_user, await _env.Data.InsertAccountAsync(_user, "Outra"), CancellationToken.None)).ShouldBeNull();
     }
 

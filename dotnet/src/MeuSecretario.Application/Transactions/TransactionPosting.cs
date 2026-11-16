@@ -247,13 +247,12 @@ public sealed class TransactionPosting(ITransactionsUnitOfWork unitOfWork, ICate
         return new PostingResult<PostedInstallmentPurchase>.Ok(new PostedInstallmentPurchase(first.TransactionId, scheduleId, first.InvoiceId));
     }
 
-    /// <summary>Fatura (só despesa em cartão) e <c>INSERT</c>; as checagens de conta e subcategoria já passaram.</summary>
+    /// <summary>Fatura (despesa ou estorno em cartão, desvio 279) e <c>INSERT</c>; as checagens de conta e subcategoria já passaram.</summary>
     private static async Task<PostedTransaction> InsertSimpleAsync(
         ITransactionsSession session, PostSimpleTransaction command, PostingAccount account, CancellationToken cancellationToken)
     {
-        var invoice = command.Kind == TransactionKind.Expense
-            ? await InvoiceLinking.ResolveAsync(session, account, command.Date, cancellationToken)
-            : null;
+        // Desvio 279: a receita no cartão (estorno) também liga à fatura do ciclo e abate o total.
+        var invoice = await InvoiceLinking.ResolveAsync(session, account, command.Date, cancellationToken);
 
         var stored = await session.InsertTransactionAsync(
             new NewTransactionRow(

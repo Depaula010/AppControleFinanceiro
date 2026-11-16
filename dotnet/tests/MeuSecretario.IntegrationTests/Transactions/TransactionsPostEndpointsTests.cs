@@ -331,7 +331,7 @@ public class TransactionsPostEndpointsTests(PostgresFixture postgres) : IAsyncLi
 
     [Fact]
     [Trait("AC", "004-24")]
-    public async Task IncomeOnACard_ExpenseOnANonCard_AndCardWithoutDays_HaveNoInvoice()
+    public async Task IncomeOnACardLinksTheInvoice_ButNonCardAndCardWithoutDaysHaveNone_Deviation279()
     {
         var card = await _data.InsertCardAsync(_user, "Nubank", 10, 15);
         var noDays = await _data.Accounts.InsertAccountAsync(_user, "Cartão cru", "Cartão de Crédito");
@@ -340,8 +340,8 @@ public class TransactionsPostEndpointsTests(PostgresFixture postgres) : IAsyncLi
         await _http.Post(_user, Body(("conta_id", _account.J())));
         await _http.Post(_user, Body(("conta_id", noDays.J())));
 
-        (await _data.ScalarAsync<int>("SELECT count(*)::int FROM faturas")).ShouldBe(0);
-        (await _data.ScalarAsync<int>("SELECT count(*)::int FROM transacoes WHERE fatura_id IS NULL")).ShouldBe(3);
+        (await _data.ScalarAsync<int>("SELECT count(*)::int FROM faturas")).ShouldBe(1);
+        (await _data.ScalarAsync<int>("SELECT count(*)::int FROM transacoes WHERE fatura_id IS NULL")).ShouldBe(2);
     }
 
     [Fact]

@@ -142,7 +142,7 @@ public sealed class WhatsAppQueryReader(IDbConnectionFactory connections, IClock
         var limit = cardId is null ? string.Empty : "LIMIT 1";
         var rows = await connection.QueryAsync<InvoiceRow>(new CommandDefinition(
             $"""
-            SELECT c.nome_conta AS NomeConta, COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) AS ValorFatura,
+            SELECT c.nome_conta AS NomeConta, GREATEST(COALESCE(-SUM(CASE WHEN t.tipo_transacao IN ('Despesa', 'Renda') THEN t.valor ELSE 0 END), 0), 0) AS ValorFatura,
                    f.data_vencimento AS DataVencimento, f.status AS Status
             FROM faturas f
             JOIN contas c ON f.conta_id = c.id
@@ -163,7 +163,7 @@ public sealed class WhatsAppQueryReader(IDbConnectionFactory connections, IClock
         var invoice = await connection.QueryFirstOrDefaultAsync<InvoiceRow>(new CommandDefinition(
             """
             SELECT c.nome_conta AS NomeConta, f.id AS FaturaId, f.data_vencimento AS DataVencimento, f.status AS Status,
-                   COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) AS ValorFatura
+                   GREATEST(COALESCE(-SUM(CASE WHEN t.tipo_transacao IN ('Despesa', 'Renda') THEN t.valor ELSE 0 END), 0), 0) AS ValorFatura
             FROM faturas f
             JOIN contas c ON f.conta_id = c.id
             LEFT JOIN transacoes t ON f.id = t.fatura_id
@@ -185,7 +185,7 @@ public sealed class WhatsAppQueryReader(IDbConnectionFactory connections, IClock
                    a.parcelas_executadas AS ParcelasExecutadas, a.total_parcelas AS TotalParcelas
             FROM transacoes t
             LEFT JOIN agendamentos a ON t.agendamento_id = a.id
-            WHERE t.fatura_id = @invoiceId AND t.valor < 0
+            WHERE t.fatura_id = @invoiceId AND t.tipo_transacao IN ('Despesa', 'Renda')
             ORDER BY t.data_transacao DESC, t.descricao, t.id
             """,
             new { invoiceId = invoice.FaturaId },
@@ -198,7 +198,7 @@ public sealed class WhatsAppQueryReader(IDbConnectionFactory connections, IClock
             invoice.Status,
             [.. lines.Select(l => new InvoiceLine(
                 l.Descricao,
-                Math.Abs((double)l.Valor),
+                -(double)l.Valor,
                 DateOnly.FromDateTime(l.DataTransacao),
                 l.TipoAgendamento,
                 l.TipoAgendamento == "PARCELADO" && l.TotalParcelas is { } and not 0 ? $"{l.ParcelasExecutadas}/{l.TotalParcelas}" : null))]);
