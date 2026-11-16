@@ -131,7 +131,7 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [154](154-whatsapp-extracao-sem-parcelamento.md) | A extração de despesa e renda não pede data, conta, categoria nem parcelamento | correção | 012 | proposto |
 | [155](155-whatsapp-evento-pendente-mais-recente.md) | Evento pendente "mais recente" depende da ordem do KEYS | correção | 012 | implementado (feature 012, 2026-10-09) |
 | [156](156-whatsapp-origem-rota-sem-tratamento.md) | Resposta casa/trabalho/outro à pergunta de origem da rota não é tratada | correção | 012 | implementado (feature 012, 2026-10-09) |
-| [157](157-whatsapp-pagamento-fatura-inalcancavel.md) | Pagamento Fatura é inalcançável com "paguei..." | compatibilidade | 012 | proposto |
+| [157](157-whatsapp-pagamento-fatura-inalcancavel.md) | Pagamento Fatura é inalcançável com "paguei..." | compatibilidade | 012 | implementado (276) |
 | [158](158-whatsapp-analise-previsao-valores-negativos-e-erros.md) | Análise e previsão: valores negativos, desempate aleatório e KeyError sem histórico | correção | 012 | implementado (feature 012, 2026-10-09) |
 | [159](159-whatsapp-drive-erro-especifico.md) | Upload ao Drive: o motivo específico da falha nunca é mostrado | correção | 012 | implementado |
 | [160](160-whatsapp-quitar-conta-fixa-sem-handler.md) | Quitar Conta Fixa está no prompt do Gemini mas não tem ramo | correção | 012 | proposto |
@@ -157,7 +157,7 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [259](259-webhook-idempotente-message-id.md) | Webhook do WhatsApp ignora a mesma mensagem reenviada (message_id) | correção | 012 | implementado |
 | [260](260-pote-limite-em-decimal.md) | Limite do pote decidido em decimal | correção | 011 | implementado |
 | [261](261-observabilidade-aviso-e-correlacao.md) | Aviso de falha por WhatsApp e ID de correlação nos logs | operação | 012, 013 | implementado |
-| [262](262-motor-recupera-dias-perdidos.md) | Motor de agendamentos recupera o que ficou para trás | correção | 013 | implementado |
+| [262](262-motor-recupera-dias-perdidos.md) | Motor de agendamentos recupera o que ficou para trás | correção | 013 | implementado |
 | [263](263-gemini-modelo-e-versao-no-banco.md) | Modelo e versão da API do Gemini ficam na tabela `configuracoes` (troca por SQL, sem deploy) | operação | 010, 012 | implementado |
 | [264](264-checkin-fatura-pagavel.md) | Check-in noturno: a fatura de cartão vira item numerado e pagável (pergunta a conta) | correção | 012, 013 | implementado |
 | [265](265-menu-sem-gemini.md) | "menu" e "ajuda" respondem sem chamar o Gemini | operação | 012 | implementado |
@@ -171,3 +171,4 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [273](273-correcoes-da-auditoria.md) | Correções da auditoria 2026-11-16: relatório de fatura sem pagamento, potes por usuário, saldo inicial, migration 0130, trava do "OK" | correção | 005, 006, 012, 013 | implementado |
 | [274](274-pagamento-sem-fechada-nao-quita-aberta.md) | Pagamento sem fatura Fechada não marca a fatura aberta como Paga | correção | 004, 013 | implementado |
 | [275](275-paguei-pelo-executor.md) | "Paguei X" e SMS de conta fixa/variável passam pelo executor (agendamento + competência) | correção | 011, 012, 013 | implementado |
+| [276](276-fatura-no-paguei-centavos-e-parcela-apagada.md) | "Paguei … da fatura" paga a fatura (157); centavos das parcelas; apagar parcela devolve o contador | correção | 004, 012 | implementado |

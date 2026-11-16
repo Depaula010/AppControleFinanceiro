@@ -7,6 +7,14 @@ public class PaymentDomainTests
 {
     private static PaymentExtraction Parse(string json) => PaymentExtraction.Parse(JsonDocument.Parse(json).RootElement);
 
+    [Theory]
+    [InlineData("paguei 500 da fatura do nubank", true)]
+    [InlineData("Quitei a FATURA do inter", true)]
+    [InlineData("paguei a internet", false)]
+    [Trait("Desvio", "276")]
+    public void MentionsInvoice_SendsInvoicePaymentsPastTheFixedBillStep(string message, bool expected) =>
+        MessageIntent.MentionsInvoice(message).ShouldBe(expected);
+
     [Fact]
     [Trait("AC", "012-205")]
     public void Extraction_DefaultsAndTruthiness()

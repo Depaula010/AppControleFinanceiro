@@ -59,6 +59,8 @@ public sealed class TransactionRepository(IDbConnectionFactory connections) : IT
         public string TipoTransacao { get; set; } = "";
 
         public int? FaturaId { get; set; }
+
+        public int? AgendamentoId { get; set; }
     }
 
     public async Task<TransactionPage> ListAsync(int userId, ListFilter filter, CancellationToken cancellationToken)
@@ -162,7 +164,8 @@ public sealed class TransactionRepository(IDbConnectionFactory connections) : IT
 
         var row = await connection.QuerySingleOrDefaultAsync<DeleteRow>(new CommandDefinition(
             """
-            SELECT id AS Id, transferencia_par_id AS PairId, tipo_transacao AS TipoTransacao, fatura_id AS FaturaId
+            SELECT id AS Id, transferencia_par_id AS PairId, tipo_transacao AS TipoTransacao, fatura_id AS FaturaId,
+                   agendamento_id AS AgendamentoId
             FROM transacoes WHERE id = @id AND usuario_id = @userId FOR UPDATE
             """,
             new { id, userId },
@@ -188,6 +191,21 @@ public sealed class TransactionRepository(IDbConnectionFactory connections) : IT
             new { id, userId },
             transaction,
             cancellationToken: cancellationToken));
+
+        // Desvio 276: apagar a parcela lançada devolve o contador do parcelado (e o reativa se era a última); sem isso o populador
+        // relançava a parcela seguinte e a conta terminava uma parcela antes.
+        if (row.AgendamentoId is { } scheduleId)
+        {
+            await connection.ExecuteAsync(new CommandDefinition(
+                """
+                UPDATE agendamentos
+                SET parcelas_executadas = parcelas_executadas - 1, ativo = TRUE, updated_at = CURRENT_TIMESTAMP
+                WHERE id = @scheduleId AND usuario_id = @userId AND tipo_agendamento = 'PARCELADO' AND parcelas_executadas > 0
+                """,
+                new { scheduleId, userId },
+                transaction,
+                cancellationToken: cancellationToken));
+        }
 
         // Desvio 070: sem outro pagamento na fatura, ela deixa de estar Paga (Fechada se já fechou, senão Aberta).
         if (row.TipoTransacao == TransactionTypes.InvoicePayment && row.FaturaId is { } invoiceId)

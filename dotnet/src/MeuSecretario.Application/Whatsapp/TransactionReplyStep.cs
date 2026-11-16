@@ -170,8 +170,12 @@ public sealed class TransactionConfirmationSaver(DirectPoster poster, ITransacti
             throw new AutomationFailureException("valor fora do numeric(15,2)");
         }
 
+        // Desvio 276: o valor chega como total/N em double (33,3333...). Fecha o total em centavos, arredonda a parcela e joga o
+        // resíduo na 1ª (100 em 3x = 33,34 + 33,33 + 33,33), em vez de perder ou ganhar centavo no numeric(15,2).
+        var (perInstallment, first) = InstallmentSplit.Split(amount, installments.Value);
         var result = await posting.PostInstallmentPurchaseAsync(
-            new PostInstallmentPurchase(userId, accountId, categoryId, amount, installments.Value, description, date), cancellationToken);
+            new PostInstallmentPurchase(userId, accountId, categoryId, perInstallment, installments.Value, description, date, FirstInstallmentAmount: first),
+            cancellationToken);
         return result is PostingResult<PostedInstallmentPurchase>.Ok ok
             ? ok.Value.TransactionId
             : throw new AutomationFailureException("lançamento parcelado recusado: " + ((PostingResult<PostedInstallmentPurchase>.Failed)result).Error);

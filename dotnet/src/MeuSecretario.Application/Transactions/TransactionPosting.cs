@@ -230,7 +230,7 @@ public sealed class TransactionPosting(ITransactionsUnitOfWork unitOfWork, ICate
         var first = await InsertSimpleAsync(
             session,
             new PostSimpleTransaction(
-                command.UserId, command.AccountId, command.SubcategoryId, TransactionKind.Expense, command.InstallmentAmount,
+                command.UserId, command.AccountId, command.SubcategoryId, TransactionKind.Expense, command.FirstInstallmentAmount ?? command.InstallmentAmount,
                 InstallmentLabel.Paid(command.Description, 1, command.TotalInstallments), command.Date, Origin: command.Origin),
             account,
             cancellationToken);

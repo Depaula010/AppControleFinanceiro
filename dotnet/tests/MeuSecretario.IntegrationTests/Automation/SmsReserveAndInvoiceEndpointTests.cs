@@ -46,8 +46,7 @@ public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime,
         status.ShouldBe(HttpStatusCode.OK);
         body.ShouldBe($$"""{"status":"sucesso","mensagem":"Conta fixa quitada com sucesso!","conta_identificada":"Luz","transaction_id":{{row.Id}}}""");
         (row.Valor, row.Tipo, row.Descricao, row.Conta, row.Sub, row.Schedule, DateOnly.FromDateTime(row.Data), row.Fatura, row.Origem)
-            .ShouldBe((-150.50m, "Despesa", "Luz", _checking, 59, null, new DateOnly(2026, 10, 2), null, null));
-        _ = schedule;
+            .ShouldBe((-150.50m, "Despesa", "Luz", _checking, 59, (int?)schedule, new DateOnly(2026, 10, 2), null, null)); // desvio 275: ligada ao agendamento
         _env.Bot.Sent.Single().Message.ShouldBe(
             "✅ *CONTA QUITADA!* ✅\n\n📝 Luz\n💰 R$ 150,50\n📊 Outros\n\n_Esta conta não será mais cobrada automaticamente este mês._");
         _env.Llm.Requests.ShouldBeEmpty();

@@ -82,6 +82,13 @@ public static class MessageIntent
         return trimmedUpper.Length > 0 && trimmedUpper.All(char.IsDigit);
     }
 
+    /// <summary>
+    /// Desvio 276: "paguei 500 da fatura do nubank" fala de fatura de cartão, não de conta fixa. Quem diz "fatura" segue para a
+    /// intenção <c>Pagamento Fatura</c> (o exemplo do próprio menu), em vez de virar despesa avulsa.
+    /// </summary>
+    public static bool MentionsInvoice(string message) =>
+        message.Contains("fatura", StringComparison.OrdinalIgnoreCase);
+
     public static bool HasPaymentWord(string message)
     {
         var lower = message.ToLowerInvariant();
