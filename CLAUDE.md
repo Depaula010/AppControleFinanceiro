@@ -23,7 +23,7 @@ dotnet test  dotnet/MeuSecretario.slnx            # ~2.9k unit + ~2.1k integraç
 dotnet run --project dotnet/src/MeuSecretario.Api -- --migrate   # aplica migrations pendentes (usa DATABASE_URL)
 ```
 
-Variáveis obrigatórias: `DATABASE_URL, API_SECRET_KEY, ENCRYPTION_KEY, GEMINI_API_KEY, REDIS_URL`. Opcionais: `WEBHOOK_SIGNATURE_KEY, BOT_WHATSAPP_URL, BOT_SESSION_NAME, BOT_SESSION_ID, BOT_API_KEY, GOOGLE_CLIENT_ID/SECRET/REDIRECT_URI, WEATHER_API_KEY, OPENROUTE_API_KEY, JOBS_ENABLED, LOG_TO_FILE, LOG_DIR, RATE_LIMIT_ENABLED, API_KEYS_ROUTES_ENABLED, REGISTRATION_ENABLED` (padrão false: `/auth/register` responde 403), `TASK_ALERTS_ENABLED` (padrão true). Modelo em `.env.example`.
+Variáveis obrigatórias: `DATABASE_URL, API_SECRET_KEY, ENCRYPTION_KEY, GEMINI_API_KEY, REDIS_URL`. Opcionais: `WEBHOOK_SIGNATURE_KEY, WEBHOOK_API_KEY` (x-api-key só do `/webhook-whatsapp`; ausente cai em `API_SECRET_KEY`), `BOT_WHATSAPP_URL, BOT_SESSION_NAME, BOT_SESSION_ID, BOT_API_KEY, GOOGLE_CLIENT_ID/SECRET/REDIRECT_URI, WEATHER_API_KEY, OPENROUTE_API_KEY, JOBS_ENABLED, LOG_TO_FILE, LOG_DIR, RATE_LIMIT_ENABLED, API_KEYS_ROUTES_ENABLED, REGISTRATION_ENABLED` (padrão false: `/auth/register` responde 403), `TASK_ALERTS_ENABLED` (padrão true). Modelo em `.env.example`.
 
 ## 3. Arquitetura (`dotnet/`)
 
@@ -41,7 +41,7 @@ Monólito modular em camadas: `Domain` (regras puras) → `Application` (casos d
 | 009 Admin/segurança | `/admin/*` (`x-api-key` = `API_SECRET_KEY`), filtro de segurança (whitelist = rotas registradas, bloqueio de IP no Redis `security:*`) |
 | 010 Integrações | Redis, bot, Gemini (modelo e versão da API na tabela `configuracoes`: `UPDATE configuracoes SET valor=... WHERE chave='gemini.modelo'`, vale em até 60 s), Google (OAuth/Calendar/Drive), clima, OpenRoute |
 | 011 Automação | `/webhook-automate, /api/transacao, /webhook-sms-payment, /api/agendamento/{id}/reserva, /api/agendamentos/reserva, /api/fatura/{id}/reprocessar` |
-| 012 WhatsApp | `POST /webhook-whatsapp` (HMAC `X-Webhook-Signature` opcional + `x-api-key`), intenções por Gemini, estado `pending_*` no Redis |
+| 012 WhatsApp | `POST /webhook-whatsapp` (HMAC `X-Webhook-Signature` opcional + `x-api-key` = `WEBHOOK_API_KEY`, ou `API_SECRET_KEY` se não definida), intenções por Gemini, estado `pending_*` no Redis |
 | 013 Jobs | Quartz no processo (`JOBS_ENABLED=true`): resumo matinal (minuto a minuto), check-in noturno 18–23h, alertas de tarefas (1 min), faturas 00:01, motor de agendamentos 00:05, relatórios mensais (dia 1 às 08:00 e 23:00) |
 | 014 Alertas de calendário | `/calendar-alerts/*` (JWT; o `<id>` precisa ser o do token) |
 

@@ -20,6 +20,13 @@ public sealed class AppSettings
     public string GeminiModel { get; init; } = "gemini-2.5-flash-lite";
 
     public string WebhookSignatureKey { get; init; } = string.Empty;
+
+    /// <summary>
+    /// <c>WEBHOOK_API_KEY</c> (opcional, desvio 284): o <c>x-api-key</c> aceito só por <c>/webhook-whatsapp</c>. Ausente ou vazia, o webhook
+    /// continua aceitando a <c>API_SECRET_KEY</c> (produção não quebra). Com ela, quem ler o banco do bot (onde a chave do webhook fica
+    /// gravada) não consegue mais forjar JWT nem chamar <c>/admin</c>.
+    /// </summary>
+    public string WebhookApiKey { get; init; } = string.Empty;
     public string BotWhatsappUrl { get; init; } = string.Empty;
 
     /// <summary>
@@ -107,6 +114,12 @@ public sealed class AppSettings
             errors.Add($"API_SECRET_KEY deve ter no mínimo {MinSecretKeyLength} caracteres");
         }
 
+        var webhookApiKey = Optional("WEBHOOK_API_KEY");
+        if (webhookApiKey.Length is > 0 and < MinSecretKeyLength)
+        {
+            errors.Add($"WEBHOOK_API_KEY deve ter no mínimo {MinSecretKeyLength} caracteres");
+        }
+
         if (encryptionKey.Length > 0 && !Security.FernetEncryptionService.IsValidKey(encryptionKey))
         {
             errors.Add("ENCRYPTION_KEY inválida: deve ser uma chave Fernet (base64 url-safe de 32 bytes)");
@@ -168,6 +181,7 @@ public sealed class AppSettings
             RedisUrl = redisUrl,
             GeminiModel = Optional("GEMINI_MODEL", "gemini-2.5-flash-lite"),
             WebhookSignatureKey = Optional("WEBHOOK_SIGNATURE_KEY", apiSecretKey),
+            WebhookApiKey = webhookApiKey,
             BotWhatsappUrl = Optional("BOT_WHATSAPP_URL"),
             OpsAlertWhatsapp = new string([.. Optional("OPS_ALERT_WHATSAPP").Where(char.IsAsciiDigit)]),
             BotSessionName = Optional("BOT_SESSION_NAME", "sessao-principal"),
