@@ -48,6 +48,9 @@ public interface IDashboardRepository
     /// <summary>Despesas consolidadas desde <paramref name="from"/>, por dia da semana, de domingo a sábado.</summary>
     Task<IReadOnlyList<WeekdayExpense>> WeekdayExpensesAsync(int userId, DateOnly from, CancellationToken cancellationToken);
 
+    /// <summary>Desvio 283: soma dos saldos das contas ativas <b>sem</b> o corte de hoje (lançamentos futuros incluídos).</summary>
+    Task<decimal> SumProjectedBalanceAsync(int userId, CancellationToken cancellationToken);
+
     /// <summary>As 10 últimas transações (data e <c>created_at</c> decrescentes), de qualquer tipo.</summary>
     Task<IReadOnlyList<RecentTransaction>> ListRecentAsync(int userId, CancellationToken cancellationToken);
 

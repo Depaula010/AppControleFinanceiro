@@ -22,6 +22,7 @@ public class DashboardUseCasesTests
     public async Task Summary_UsesTheMonthWindowUpToTodayAndIgnoresOtherTypes()
     {
         _repository.ListActiveAccountBalancesAsync(7, Arg.Any<CancellationToken>()).Returns([100m, 70m]);
+        _repository.SumProjectedBalanceAsync(7, Arg.Any<CancellationToken>()).Returns(-30m);
         _repository.SumByTypeAsync(7, new DateOnly(2026, 10, 1), Today, Arg.Any<CancellationToken>()).Returns(
         [
             new TypeTotal("Renda", 1000m),
@@ -32,7 +33,7 @@ public class DashboardUseCasesTests
 
         var summary = await new GetDashboardSummary(_repository, _clock).ExecuteAsync(7, CancellationToken.None);
 
-        summary.ShouldBe(new DashboardSummary(170, 1000, 300, 700, "Outubro/2026"));
+        summary.ShouldBe(new DashboardSummary(170, 1000, 300, 700, "Outubro/2026", -30));   // desvio 283: projetado sem o corte de hoje
     }
 
     [Fact]

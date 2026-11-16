@@ -16,6 +16,7 @@ public static class DashboardResponses
             ["despesas_mes"] = summary.MonthExpense,
             ["saldo_mes"] = summary.MonthNet,
             ["mes_referencia"] = summary.ReferenceMonth,
+            ["saldo_projetado"] = summary.ProjectedBalance ?? summary.TotalBalance,
         });
 
     public static IResult Charts(DashboardCharts charts) =>

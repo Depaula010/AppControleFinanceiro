@@ -24,7 +24,8 @@ public sealed record AccountListItem(
     decimal? LimiteCredito,
     int? DiaFechamento,
     int? DiaVencimento,
-    decimal Saldo);
+    decimal Saldo,
+    decimal SaldoProjetado);
 
 public abstract record CreateAccountResult
 {

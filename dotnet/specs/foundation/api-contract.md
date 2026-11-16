@@ -81,13 +81,15 @@ Legenda de auth: **JWT**, **KEY** (`x-api-key`), **UAK** (`user_api_key`), **—
 | GET | `/api/dashboard/recent`, `/api/transactions/recent`, `/api/transacoes/recentes` |
 | GET | `/api/dashboard/alerts` |
 
+`summary` devolve também `saldo_projetado` no fim (desvio 283). `alerts` pode trazer contas vencidas nos últimos 7 dias e ainda não pagas, com `dias_restantes` negativo e `tipo` `danger` (desvio 280).
+
 ### Contas (A, JWT) — feature 002
 | Método | Caminho (alias) |
 |---|---|
 | GET, POST | `/api/accounts`, `/api/contas` |
 | PUT, DELETE | `/api/accounts/<int:id>`, `/api/contas/<int:id>` |
 
-`tipo_conta` aceito: `Conta Corrente`, `Conta Poupança`, `Investimento`, `Cartão de Crédito`, `Dinheiro`, `Outro`. GET devolve `{id,nome,banco,tipo,saldo}`; POST/PUT usam `nome_conta`, `tipo_conta`, `saldo_inicial`. DELETE é soft delete (`ativa=false`) e bloqueia se houver transações.
+`tipo_conta` aceito: `Conta Corrente`, `Conta Poupança`, `Investimento`, `Cartão de Crédito`, `Dinheiro`, `Outro`. GET devolve `{id,nome,banco,tipo,saldo}` mais `saldo_projetado` (desvio 283: o saldo sem o corte de hoje, com os lançamentos de data futura); POST/PUT usam `nome_conta`, `tipo_conta`, `saldo_inicial`. DELETE é soft delete (`ativa=false`) e bloqueia se houver transações.
 
 ### Transações (A, JWT) — feature 004
 | Método | Caminho |

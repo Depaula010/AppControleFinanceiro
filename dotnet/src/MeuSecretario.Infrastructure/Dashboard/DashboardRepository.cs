@@ -34,6 +34,26 @@ public sealed class DashboardRepository(IDbConnectionFactory connections, IClock
         return balances.ToList();
     }
 
+    public async Task<decimal> SumProjectedBalanceAsync(int userId, CancellationToken cancellationToken)
+    {
+        await using var connection = await connections.OpenAsync(cancellationToken);
+
+        // Desvio 283: o mesmo saldo do resumo, sem o corte de data (os lançamentos futuros, como as contas do cartão do mês seguinte, contam).
+        return await connection.ExecuteScalarAsync<decimal>(new CommandDefinition(
+            """
+            SELECT COALESCE(SUM(s.saldo), 0)
+            FROM (
+                SELECT c.saldo_inicial + COALESCE(SUM(t.valor), 0) AS saldo
+                FROM contas c
+                LEFT JOIN transacoes t ON c.id = t.conta_id AND t.consolidada = true
+                WHERE c.usuario_id = @userId AND c.ativa = true
+                GROUP BY c.id
+            ) s
+            """,
+            new { userId },
+            cancellationToken: cancellationToken));
+    }
+
     public async Task<IReadOnlyList<TypeTotal>> SumByTypeAsync(int userId, DateOnly firstDay, DateOnly lastDay, CancellationToken cancellationToken)
     {
         await using var connection = await connections.OpenAsync(cancellationToken);

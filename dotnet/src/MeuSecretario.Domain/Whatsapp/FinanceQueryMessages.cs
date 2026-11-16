@@ -5,7 +5,8 @@ using MeuSecretario.Domain.Automation;
 
 namespace MeuSecretario.Domain.Whatsapp;
 
-public sealed record AccountBalance(string Name, string Type, double Balance);
+/// <param name="Projected">Desvio 283: saldo sem o corte de hoje (com as faturas e contas futuras); <c>null</c> = igual ao de hoje.</param>
+public sealed record AccountBalance(string Name, string Type, double Balance, double? Projected = null);
 
 /// <summary>Pote com o gasto do período do pote (soma bruta de <c>valor</c>, negativa para despesas).</summary>
 public sealed record PotLine(string Name, double Limit, double RawSpent);
@@ -44,7 +45,7 @@ public static class BalanceMessages
         if (accounts.Count == 1)
         {
             var account = accounts[0];
-            return $"{AccountIcons.For(account.Type)} *{account.Name}* ({account.Type})\n\n💵 Saldo: *{MoneyText.Brl(account.Balance)}*";
+            return $"{AccountIcons.For(account.Type)} *{account.Name}* ({account.Type})\n\n💵 Saldo: *{MoneyText.Brl(account.Balance)}*{ProjectedNote(account.Projected, account.Balance)}";
         }
 
         var sb = new StringBuilder("💰 *Seus Saldos:*\n\n");
@@ -56,8 +57,17 @@ public static class BalanceMessages
             total += account.Balance;
         }
 
-        return sb.Append("💵 *Total Geral:* ").Append(MoneyText.Brl(total)).ToString();
+        var projectedTotal = accounts.Sum(a => a.Projected ?? a.Balance);
+        return sb.Append("💵 *Total Geral:* ").Append(MoneyText.Brl(total)).Append(ProjectedNote(projectedTotal, total)).ToString();
     }
+
+    /// <summary>
+    /// Desvio 283: "(projetado com faturas futuras: R$ Y)" só quando o saldo projetado difere do de hoje (diferença menor que 1 centavo é arredondamento).
+    /// </summary>
+    private static string ProjectedNote(double? projected, double today) =>
+        projected is { } value && Math.Abs(value - today) >= 0.005
+            ? $"\n_(projetado com faturas futuras: {MoneyText.Brl(value)})_"
+            : string.Empty;
 }
 
 /// <summary><c>Consulta Reserva</c> e <c>Consulta Detalhes Reserva</c> (<c>whatsapp_handler.py</c>).</summary>

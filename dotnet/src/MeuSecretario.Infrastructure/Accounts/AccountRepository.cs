@@ -24,15 +24,16 @@ public sealed class AccountRepository(IDbConnectionFactory connections, IClock c
     {
         await using var connection = await connections.OpenAsync(cancellationToken);
 
-        // Desvio 007: só transações consolidadas entram no saldo. Desvio 278: e só as de hoje para trás (o populador cria contas de cartão futuras). Sem COLLATE: a ordem é a do banco, como no Flask.
+        // Desvio 007: só transações consolidadas entram no saldo. Desvio 278: e só as de hoje para trás (o populador cria contas de cartão futuras); desvio 283: <c>SaldoProjetado</c> é o mesmo saldo sem o corte de hoje. Sem COLLATE: a ordem é a do banco, como no Flask.
         var rows = await connection.QueryAsync<AccountListItem>(new CommandDefinition(
             """
             SELECT c.id AS Id, c.nome_conta AS NomeConta, c.tipo_conta AS TipoConta, c.saldo_inicial AS SaldoInicial,
                    c.cor_hex AS CorHex, c.icone AS Icone, c.limite_credito AS LimiteCredito,
                    c.dia_fechamento AS DiaFechamento, c.dia_vencimento AS DiaVencimento,
-                   c.saldo_inicial + COALESCE(SUM(t.valor), 0) AS Saldo
+                   c.saldo_inicial + COALESCE(SUM(t.valor) FILTER (WHERE t.data_transacao <= @today), 0) AS Saldo,
+                   c.saldo_inicial + COALESCE(SUM(t.valor), 0) AS SaldoProjetado
             FROM contas c
-            LEFT JOIN transacoes t ON t.conta_id = c.id AND t.consolidada = true AND t.data_transacao <= @today
+            LEFT JOIN transacoes t ON t.conta_id = c.id AND t.consolidada = true
             WHERE c.usuario_id = @userId AND c.ativa = true
             GROUP BY c.id
             ORDER BY c.tipo_conta, c.nome_conta

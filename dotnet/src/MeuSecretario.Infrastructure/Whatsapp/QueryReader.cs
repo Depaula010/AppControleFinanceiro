@@ -20,6 +20,8 @@ public sealed class WhatsAppQueryReader(IDbConnectionFactory connections, IClock
         public string TipoConta { get; set; } = "";
 
         public decimal Saldo { get; set; }
+
+        public decimal Projetado { get; set; }
     }
 
     private sealed class PotRow
@@ -89,16 +91,18 @@ public sealed class WhatsAppQueryReader(IDbConnectionFactory connections, IClock
         var filter = accountId is null ? string.Empty : "AND c.id = @accountId";
         var rows = await connection.QueryAsync<BalanceRow>(new CommandDefinition(
             $"""
-            SELECT c.nome_conta AS NomeConta, c.tipo_conta AS TipoConta, c.saldo_inicial + COALESCE(SUM(t.valor), 0) AS Saldo
+            SELECT c.nome_conta AS NomeConta, c.tipo_conta AS TipoConta,
+                   c.saldo_inicial + COALESCE(SUM(t.valor) FILTER (WHERE t.data_transacao <= @today), 0) AS Saldo,
+                   c.saldo_inicial + COALESCE(SUM(t.valor), 0) AS Projetado
             FROM contas c
-            LEFT JOIN transacoes t ON c.id = t.conta_id AND t.consolidada = true AND t.data_transacao <= @today
+            LEFT JOIN transacoes t ON c.id = t.conta_id AND t.consolidada = true
             WHERE c.usuario_id = @userId {filter} AND c.ativa = true
             GROUP BY c.id, c.nome_conta, c.tipo_conta, c.saldo_inicial
             ORDER BY c.tipo_conta, c.nome_conta, c.id
             """,
             new { userId, accountId, today = clock.Today.ToDateTime(TimeOnly.MinValue) },
             cancellationToken: cancellationToken));
-        return [.. rows.Select(r => new AccountBalance(r.NomeConta, r.TipoConta, (double)r.Saldo))];
+        return [.. rows.Select(r => new AccountBalance(r.NomeConta, r.TipoConta, (double)r.Saldo, (double)r.Projetado))];
     }
 
     public async Task<IReadOnlyList<PotLine>> GetPotsAsync(int userId, DateOnly today, CancellationToken cancellationToken)

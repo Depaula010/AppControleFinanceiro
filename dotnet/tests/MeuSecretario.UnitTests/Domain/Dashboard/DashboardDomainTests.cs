@@ -12,7 +12,7 @@ public class DashboardSummaryCalculatorTests
     {
         var summary = DashboardSummaryCalculator.Calculate([], 0m, 0m, Today);
 
-        summary.ShouldBe(new DashboardSummary(0, 0, 0, 0, "Outubro/2026"));
+        summary.ShouldBe(new DashboardSummary(0, 0, 0, 0, "Outubro/2026", 0));
     }
 
     [Fact]

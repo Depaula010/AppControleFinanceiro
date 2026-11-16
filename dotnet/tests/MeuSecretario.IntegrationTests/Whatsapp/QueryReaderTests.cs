@@ -31,6 +31,21 @@ public class QueryReaderTests(PostgresFixture postgres) : IAsyncLifetime, IClass
 
     [Fact]
     [Trait("AC", "012-301")]
+    public async Task Balances_ProjectedIncludesFutureMovements_Deviation283()
+    {
+        var card = await _env.Data.InsertAccountAsync(_user, "Cartao");
+        await _env.Data.InsertTransactionAsync(_user, card, valor: -100m, data: "2026-10-05");
+        await _env.Data.InsertTransactionAsync(_user, card, valor: -60m, data: "2026-11-20");
+
+        var reader = new WhatsAppQueryReader(postgres.Connections, new BillsHttp.FixedClock(Today));
+
+        var balance = (await reader.GetBalancesAsync(_user, card, CancellationToken.None)).Single();
+
+        (balance.Balance, balance.Projected).ShouldBe((-100d, -160d));
+    }
+
+    [Fact]
+    [Trait("AC", "012-301")]
     public async Task Balances_AreConsolidatedActiveOnly_OrderedByTypeThenName()
     {
         var checking = await _env.Data.InsertAccountAsync(_user, "Zeta");

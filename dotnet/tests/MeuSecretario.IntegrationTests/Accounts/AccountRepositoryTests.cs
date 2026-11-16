@@ -73,6 +73,11 @@ public class AccountRepositoryTests(PostgresFixture postgres) : IAsyncLifetime, 
         list.Single(x => x.NomeConta == "Corrente").Saldo.ShouldBe(4950m);
         list.Single(x => x.NomeConta == "Cartao").Saldo.ShouldBe(-800m);
         list.Single(x => x.NomeConta == "Vazia").Saldo.ShouldBe(7m);
+
+        // Desvio 283: o projetado é o saldo sem o corte de hoje (inclui a conta fixa de dezembro e o lançamento de amanhã).
+        list.Single(x => x.NomeConta == "Corrente").SaldoProjetado.ShouldBe(4940m);
+        list.Single(x => x.NomeConta == "Cartao").SaldoProjetado.ShouldBe(-1000m);
+        list.Single(x => x.NomeConta == "Vazia").SaldoProjetado.ShouldBe(7m);
     }
 
     [Fact]
@@ -127,7 +132,7 @@ public class AccountRepositoryTests(PostgresFixture postgres) : IAsyncLifetime, 
 
         var item = (await _repository.ListActiveAsync(user, CancellationToken.None)).Single();
 
-        item.ShouldBe(new AccountListItem(item.Id, "Nubank", AccountTypes.Card, 10m, "#112233", "card", 5000m, 5, 10, 10m));
+        item.ShouldBe(new AccountListItem(item.Id, "Nubank", AccountTypes.Card, 10m, "#112233", "card", 5000m, 5, 10, 10m, 10m));
     }
 
     // ============================== buscar e nome em uso ==============================

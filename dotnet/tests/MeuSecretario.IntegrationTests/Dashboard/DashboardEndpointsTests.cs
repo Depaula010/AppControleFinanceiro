@@ -172,7 +172,7 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime,
         var (status, body) = await _kit.SendAsync("/api/dashboard/summary", other);
 
         status.ShouldBe(HttpStatusCode.OK);
-        body.ShouldBe(DashboardTestKit.Ok("""{"saldo_total":0,"receitas_mes":0,"despesas_mes":0,"saldo_mes":0,"mes_referencia":"Outubro/2026"}"""));
+        body.ShouldBe(DashboardTestKit.Ok("""{"saldo_total":0,"receitas_mes":0,"despesas_mes":0,"saldo_mes":0,"mes_referencia":"Outubro/2026","saldo_projetado":0}"""));
     }
 
     [Fact]
@@ -205,9 +205,10 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime,
         var (status, body) = await _kit.SendAsync("/api/dashboard/summary", _user);
 
         // saldo (desvio 278: só até hoje, 15/10; o -1000 de 16/10 ainda não conta): Corrente 100+100-10 = 190; Carteira 50-40-60-7 = -57; a conta inativa fica de fora.
+        // saldo_projetado (desvio 283): o mesmo sem o corte de hoje, 133 - 1000 = -867.
         // mês: receitas 100; despesas 10 + 20 (a conta inativa conta); sem a não consolidada, a futura e o mês anterior.
         status.ShouldBe(HttpStatusCode.OK);
-        body.ShouldBe(DashboardTestKit.Ok("""{"saldo_total":133,"receitas_mes":100,"despesas_mes":30,"saldo_mes":70,"mes_referencia":"Outubro/2026"}"""));
+        body.ShouldBe(DashboardTestKit.Ok("""{"saldo_total":133,"receitas_mes":100,"despesas_mes":30,"saldo_mes":70,"mes_referencia":"Outubro/2026","saldo_projetado":-867}"""));
     }
 
     [Fact]
@@ -628,6 +629,8 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime,
         private static PostgresException Failure() => new("segredo interno", "ERROR", "ERROR", PostgresErrorCodes.UniqueViolation);
 
         public Task<IReadOnlyList<decimal>> ListActiveAccountBalancesAsync(int userId, CancellationToken cancellationToken) => throw Failure();
+
+        public Task<decimal> SumProjectedBalanceAsync(int userId, CancellationToken cancellationToken) => throw Failure();
 
         public Task<IReadOnlyList<TypeTotal>> SumByTypeAsync(int userId, DateOnly firstDay, DateOnly lastDay, CancellationToken cancellationToken) => throw Failure();
 

@@ -12,12 +12,13 @@ public sealed class GetDashboardSummary(IDashboardRepository repository, IClock 
         var today = clock.Today;
         var balances = await repository.ListActiveAccountBalancesAsync(userId, cancellationToken);
         var totals = await repository.SumByTypeAsync(userId, ChartsWindow.MonthStart(today), today, cancellationToken);
+        var projected = await repository.SumProjectedBalanceAsync(userId, cancellationToken);
 
         // Só Renda e Despesa contam; Transferência e Pagamento Fatura são ignorados (api.py).
         var income = totals.Where(t => t.Type == TransactionTypes.Income).Sum(t => t.Total);
         var expense = totals.Where(t => t.Type == TransactionTypes.Expense).Sum(t => t.Total);
 
-        return DashboardSummaryCalculator.Calculate(balances, income, expense, today);
+        return DashboardSummaryCalculator.Calculate(balances, income, expense, today, projected);
     }
 }
 
