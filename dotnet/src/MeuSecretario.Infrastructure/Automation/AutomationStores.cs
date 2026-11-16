@@ -231,6 +231,16 @@ internal sealed class InvoiceScheduleSession(NpgsqlConnection connection, Npgsql
             r.TotalParcelas, r.ParcelasExecutadas, r.NomeGrupo)).ToList();
     }
 
+    public async Task<(int ClosingDay, int DueDay)?> GetCardCycleAsync(int cardAccountId, CancellationToken cancellationToken)
+    {
+        var row = await connection.QuerySingleOrDefaultAsync<(int? Closing, int? Due)>(new CommandDefinition(
+            "SELECT dia_fechamento AS Closing, dia_vencimento AS Due FROM contas WHERE id = @cardAccountId",
+            new { cardAccountId },
+            transaction,
+            cancellationToken: cancellationToken));
+        return row.Closing is > 0 && row.Due is > 0 ? (row.Closing.Value, row.Due.Value) : null;
+    }
+
     public async Task<bool> TransactionExistsAsync(int invoiceId, int scheduleId, CancellationToken cancellationToken) =>
         await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
             "SELECT EXISTS (SELECT 1 FROM transacoes WHERE fatura_id = @invoiceId AND agendamento_id = @scheduleId)",

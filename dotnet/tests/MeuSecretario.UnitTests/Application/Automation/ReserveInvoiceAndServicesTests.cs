@@ -365,6 +365,11 @@ public class InvoiceScheduleProcessorTests
             return Task.FromResult(schedules);
         }
 
+        public (int ClosingDay, int DueDay)? Cycle { get; set; }
+
+        public Task<(int ClosingDay, int DueDay)?> GetCardCycleAsync(int cardAccountId, CancellationToken cancellationToken) =>
+            Task.FromResult(Cycle);
+
         public Task<bool> TransactionExistsAsync(int invoiceId, int scheduleId, CancellationToken cancellationToken) =>
             Task.FromResult(Existing.Contains((invoiceId, scheduleId)));
 

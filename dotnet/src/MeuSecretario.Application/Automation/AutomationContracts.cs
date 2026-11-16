@@ -112,6 +112,9 @@ public interface IInvoiceScheduleSession : IAsyncDisposable
 
     Task<bool> TransactionExistsAsync(int invoiceId, int scheduleId, CancellationToken cancellationToken);
 
+    /// <summary>Dias de fechamento e vencimento do cartão (desvio 277); nulo quando a conta não os tem.</summary>
+    Task<(int ClosingDay, int DueDay)?> GetCardCycleAsync(int cardAccountId, CancellationToken cancellationToken);
+
     Task InsertTransactionAsync(NewScheduledTransaction row, CancellationToken cancellationToken);
 
     Task AdvanceInstallmentAsync(int scheduleId, int newInstallmentsExecuted, bool active, CancellationToken cancellationToken);

@@ -1,5 +1,7 @@
 # Runbook: o bot do WhatsApp parou de responder
 
+> **Atenção (2026-11-16):** o canal em produção agora é o **telegram-gateway** (`docker logs telegram-gateway`); este runbook descreve o `whatsapp-saas-bot`, que ficou como reserva. A parte do backend e do Gemini (elos 2 e 3) continua valendo.
+
 Escrito depois do incidente de 26 e 27/10/2026, em que o bot ficou mudo por **três causas diferentes e encadeadas** (saldo do Gemini, modelo desativado e chave pessoal com prioridade; depois chaves do Signal corrompidas no bot). A regra do roteiro: **descubra em qual elo da cadeia a mensagem morre, antes de mexer em qualquer coisa**.
 
 ```

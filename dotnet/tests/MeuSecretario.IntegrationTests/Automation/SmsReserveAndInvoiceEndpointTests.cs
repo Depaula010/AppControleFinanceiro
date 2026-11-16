@@ -609,8 +609,8 @@ public class ReprocessEndpointTests(PostgresFixture postgres) : IAsyncLifetime, 
         rows.Select(r => (r.Descricao, r.Valor, r.Tipo, DateOnly.FromDateTime(r.Data), r.Schedule, r.Fatura, r.Consolidada)).ShouldBe(
         [
             ("Notebook (3/3)", -300.00m, "Despesa", new DateOnly(2026, 4, 5), notebook, _invoice, true),
-            ("Bônus", 100.00m, "Renda", new DateOnly(2026, 4, 20), salary, _invoice, true),
-            ("Netflix", -49.90m, "Despesa", new DateOnly(2026, 4, 30), netflix, _invoice, true),
+            ("Bônus", 100.00m, "Renda", new DateOnly(2026, 3, 20), salary, _invoice, true), // desvio 277: dia 20 > fechamento 10, é do ciclo de março
+            ("Netflix", -49.90m, "Despesa", new DateOnly(2026, 3, 31), netflix, _invoice, true),
         ]);
         var installment = (await _env.QueryAsync<(int Executed, bool Active)>("SELECT parcelas_executadas, ativo FROM agendamentos WHERE id = @notebook", new { notebook })).Single();
         installment.ShouldBe((3, false));
@@ -697,6 +697,8 @@ public class ReprocessEndpointTests(PostgresFixture postgres) : IAsyncLifetime, 
         var posted = (await _env.QueryAsync<(string Descricao, int? Fatura, DateTime Data)>("SELECT descricao, fatura_id, data_transacao FROM transacoes")).Single();
         posted.Descricao.ShouldBe("Netflix");
         posted.Fatura.ShouldBe(invoice.Id);
-        DateOnly.FromDateTime(posted.Data).ShouldBe(new DateOnly(invoice.Due.Year, invoice.Due.Month, 12));
+        // Desvio 277: dia 12 vem depois do fechamento (10), então a conta é do ciclo do mês anterior ao do vencimento.
+        var previous = DateOnly.FromDateTime(invoice.Due).AddMonths(-1);
+        DateOnly.FromDateTime(posted.Data).ShouldBe(new DateOnly(previous.Year, previous.Month, 12));
     }
 }
