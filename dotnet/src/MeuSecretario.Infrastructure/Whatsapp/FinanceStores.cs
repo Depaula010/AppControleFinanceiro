@@ -1,3 +1,4 @@
+using MeuSecretario.Application.Abstractions;
 using Dapper;
 using MeuSecretario.Application.Whatsapp;
 using MeuSecretario.Domain.Automation;
@@ -117,7 +118,7 @@ public sealed class WhatsAppFinanceReader(IDbConnectionFactory connections) : IW
 }
 
 /// <summary>Leituras do feedback da transação salva (<c>transaction_feedback_service.py</c>), com o período do pote do desvio 015.</summary>
-public sealed class FeedbackReader(IDbConnectionFactory connections) : IFeedbackReader
+public sealed class FeedbackReader(IDbConnectionFactory connections, IClock clock) : IFeedbackReader
 {
     private sealed class TransactionRow
     {
@@ -265,11 +266,11 @@ public sealed class FeedbackReader(IDbConnectionFactory connections) : IFeedback
             """
             SELECT c.nome_conta AS NomeConta, c.saldo_inicial + COALESCE(SUM(t.valor), 0) AS Saldo
             FROM contas c
-            LEFT JOIN transacoes t ON t.conta_id = c.id AND t.usuario_id = @userId
+            LEFT JOIN transacoes t ON t.conta_id = c.id AND t.usuario_id = @userId AND t.data_transacao <= @today
             WHERE c.id = @accountId AND c.usuario_id = @userId
             GROUP BY c.id, c.nome_conta, c.saldo_inicial
             """,
-            new { userId, accountId },
+            new { userId, accountId, today = clock.Today.ToDateTime(TimeOnly.MinValue) },
             cancellationToken: cancellationToken));
         if (row is null)
         {

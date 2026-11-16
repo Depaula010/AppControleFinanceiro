@@ -118,6 +118,7 @@ public sealed class PostgresFixture : IAsyncLifetime
         builder.UseSetting("REDIS_URL", "redis://localhost:6379");
         builder.UseSetting("PASSWORD_HASH_ITERATIONS", "1000");
         builder.UseSetting("LOG_TO_FILE", "false");
+        builder.UseSetting("REGISTRATION_ENABLED", "true"); // o padrão de produção é false (desvio 278)
     });
 
     private WebApplicationFactory<Program>? _api;

@@ -197,11 +197,12 @@ Front (médio):
 | M9 pote sem filtro de usuário | corrigido | desvio 273 |
 | Baixos do front (`\|\| 3`, label, interceptor) | corrigido | front |
 | Documentação (§4/§5 do CLAUDE.md, runbook, índice de desvios) | atualizada | |
+| M10 saldo inclui lançamentos futuros | corrigido: saldo só até hoje | desvio 278 |
+| Cortes de produto (tela Assinatura, "dias antes", cadastro público por flag, flag dos alertas de tarefa) | feitos | desvio 278 + front |
 | M2 estorno não abate a fatura | **pendente** (muda regra de total da fatura em 6 consultas) | |
 | M6 três regras de "conta paga" | **pendente** (unificar com `SchedulePaymentSql`) | |
-| M10 saldo inclui lançamentos futuros | **pendente** (precisa da sua decisão: saldo de hoje ou projetado) | |
+| Saldo "projetado" como campo novo | **pendente** (desvio posterior) | |
 | M11 chave única (JWT/admin/webhook) | **pendente** (rotação de segredos, §9.2 do CLAUDE.md) | |
 | M12 desvio 154 (data/conta/parcelas no "gastei") | **pendente** | |
 | M13 avisos de fatura às 00:01 | **pendente** | |
 | Baixos do backend (rate limit, lock dos jobs, percentuais do relatório, QUINZENAL 2,16 x 2, textos sem acento, dinheiro sem milhar) | **pendentes** | |
-| Código a cortar (assinatura, módulo 008, "dias antes") | **pendente** (decisão de produto) | |

@@ -13,7 +13,10 @@ public sealed class JobsModule : IFeatureModule
     public void AddServices(IServiceCollection services)
     {
         services.AddOptions<JobsOptions>().Configure<IConfiguration>((options, configuration) =>
-            options.Enabled = string.Equals(configuration["JOBS_ENABLED"], "true", StringComparison.OrdinalIgnoreCase));
+            {
+                options.Enabled = string.Equals(configuration["JOBS_ENABLED"], "true", StringComparison.OrdinalIgnoreCase);
+                options.TaskAlertsEnabled = !string.Equals(configuration["TASK_ALERTS_ENABLED"], "false", StringComparison.OrdinalIgnoreCase);
+            });
         services.AddJobs();
     }
 

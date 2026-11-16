@@ -1,3 +1,4 @@
+using MeuSecretario.Application.Abstractions;
 using System.Data;
 using System.Globalization;
 using Dapper;
@@ -12,7 +13,7 @@ namespace MeuSecretario.Infrastructure.Dashboard;
 /// é <c>ativa</c> em <c>contas</c> e <c>ativo</c> em <c>agendamentos</c>. Mês e dia da semana saem do banco em
 /// formato fixo (<c>TO_CHAR(..., 'YYYY-MM')</c>, <c>EXTRACT(DOW)</c>), sem depender de <c>lc_time</c> (desvio 009).
 /// </summary>
-public sealed class DashboardRepository(IDbConnectionFactory connections) : IDashboardRepository
+public sealed class DashboardRepository(IDbConnectionFactory connections, IClock clock) : IDashboardRepository
 {
     public async Task<IReadOnlyList<decimal>> ListActiveAccountBalancesAsync(int userId, CancellationToken cancellationToken)
     {
@@ -21,12 +22,12 @@ public sealed class DashboardRepository(IDbConnectionFactory connections) : IDas
             """
             SELECT c.saldo_inicial + COALESCE(SUM(t.valor), 0) AS saldo
             FROM contas c
-            LEFT JOIN transacoes t ON c.id = t.conta_id AND t.consolidada = true
+            LEFT JOIN transacoes t ON c.id = t.conta_id AND t.consolidada = true AND t.data_transacao <= @today
             WHERE c.usuario_id = @userId AND c.ativa = true
             GROUP BY c.id, c.tipo_conta, c.nome_conta, c.saldo_inicial
             ORDER BY c.tipo_conta, c.nome_conta, c.id
             """,
-            new { userId },
+            new { userId, today = clock.Today.ToDateTime(TimeOnly.MinValue) },
             cancellationToken: cancellationToken));
 
         return balances.ToList();

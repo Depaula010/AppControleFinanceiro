@@ -1,3 +1,4 @@
+using MeuSecretario.IntegrationTests.Bills;
 using MeuSecretario.Application.Whatsapp;
 using MeuSecretario.Domain.Whatsapp;
 using MeuSecretario.Infrastructure.Whatsapp;
@@ -22,7 +23,7 @@ public class FinanceStoresTests(PostgresFixture postgres) : IAsyncLifetime, ICla
         await postgres.ResetAsync();
         _env = new AutomationEnv(postgres);
         _reader = new WhatsAppFinanceReader(postgres.Connections);
-        _feedback = new FeedbackReader(postgres.Connections);
+        _feedback = new FeedbackReader(postgres.Connections, new BillsHttp.FixedClock(new DateOnly(2100, 1, 1)));
         _user = await _env.SeedUserAsync();
         _other = await _env.SeedUserAsync("5511999990001", "outra-chave");
     }

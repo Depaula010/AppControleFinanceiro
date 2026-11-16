@@ -57,6 +57,9 @@ public static class JobSchedules
 public sealed class JobsOptions
 {
     public bool Enabled { get; set; }
+
+    /// <summary><c>TASK_ALERTS_ENABLED</c> (padrão <c>true</c>): <c>false</c> não agenda o job de alertas de tarefas do Google Calendar (014).</summary>
+    public bool TaskAlertsEnabled { get; set; } = true;
 }
 
 public enum JobRunOutcome

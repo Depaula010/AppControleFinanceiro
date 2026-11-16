@@ -1,3 +1,4 @@
+using MeuSecretario.Application.Abstractions;
 using Dapper;
 using MeuSecretario.Application.Whatsapp;
 using MeuSecretario.Domain.Automation;
@@ -10,7 +11,7 @@ namespace MeuSecretario.Infrastructure.Whatsapp;
 /// Consultas financeiras do WhatsApp (<c>finance_service.py</c>, <c>period_query_service.py</c>), portadas literalmente: datas como
 /// parâmetro (<c>IClock</c>), só contas ativas (desvio 039) e <c>ORDER BY</c> completo onde o Flask não fecha a ordem.
 /// </summary>
-public sealed class WhatsAppQueryReader(IDbConnectionFactory connections) : IWhatsAppQueryReader
+public sealed class WhatsAppQueryReader(IDbConnectionFactory connections, IClock clock) : IWhatsAppQueryReader
 {
     private sealed class BalanceRow
     {
@@ -90,12 +91,12 @@ public sealed class WhatsAppQueryReader(IDbConnectionFactory connections) : IWha
             $"""
             SELECT c.nome_conta AS NomeConta, c.tipo_conta AS TipoConta, c.saldo_inicial + COALESCE(SUM(t.valor), 0) AS Saldo
             FROM contas c
-            LEFT JOIN transacoes t ON c.id = t.conta_id AND t.consolidada = true
+            LEFT JOIN transacoes t ON c.id = t.conta_id AND t.consolidada = true AND t.data_transacao <= @today
             WHERE c.usuario_id = @userId {filter} AND c.ativa = true
             GROUP BY c.id, c.nome_conta, c.tipo_conta, c.saldo_inicial
             ORDER BY c.tipo_conta, c.nome_conta, c.id
             """,
-            new { userId, accountId },
+            new { userId, accountId, today = clock.Today.ToDateTime(TimeOnly.MinValue) },
             cancellationToken: cancellationToken));
         return [.. rows.Select(r => new AccountBalance(r.NomeConta, r.TipoConta, (double)r.Saldo))];
     }

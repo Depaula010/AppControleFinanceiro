@@ -173,3 +173,4 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [275](275-paguei-pelo-executor.md) | "Paguei X" e SMS de conta fixa/variável passam pelo executor (agendamento + competência) | correção | 011, 012, 013 | implementado |
 | [276](276-fatura-no-paguei-centavos-e-parcela-apagada.md) | "Paguei … da fatura" paga a fatura (157); centavos das parcelas; apagar parcela devolve o contador | correção | 004, 012 | implementado |
 | [277](277-populador-no-ciclo-da-fatura.md) | Populador de faturas lança a conta do cartão na data do ciclo (dia depois do fechamento vai para o mês anterior) | correção | 011, 013 | implementado |
+| [278](278-saldo-de-hoje-e-flags.md) | Saldo só até hoje; cadastro público desligado por flag (403); flag dos alertas de tarefa (ligado) | correção | 001, 002, 006, 012, 013, 014 | implementado |

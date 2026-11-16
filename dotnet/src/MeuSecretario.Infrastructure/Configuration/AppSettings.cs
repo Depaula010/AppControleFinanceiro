@@ -54,6 +54,12 @@ public sealed class AppSettings
     /// </summary>
     public bool ApiKeysRoutesEnabled { get; init; }
 
+    /// <summary>
+    /// <c>REGISTRATION_ENABLED</c>: só com <c>true</c> o <c>POST /auth/register</c> cria usuário (desvio 278). Padrão false: app de um
+    /// usuário só. A rota continua registrada (rota desconhecida bloquearia o IP pelo filtro do 009) e responde 403.
+    /// </summary>
+    public bool RegistrationEnabled { get; init; }
+
     private static DateTimeOffset? ParseLegacyUntil(string text)
     {
         var invariant = System.Globalization.CultureInfo.InvariantCulture;
@@ -179,6 +185,7 @@ public sealed class AppSettings
             LogDirectory = Optional("LOG_DIR", "logs"),
             LogToFile = !string.Equals(Optional("LOG_TO_FILE", "true"), "false", StringComparison.OrdinalIgnoreCase),
             ApiKeysRoutesEnabled = string.Equals(Optional("API_KEYS_ROUTES_ENABLED", "false"), "true", StringComparison.OrdinalIgnoreCase),
+            RegistrationEnabled = string.Equals(Optional("REGISTRATION_ENABLED", "false"), "true", StringComparison.OrdinalIgnoreCase),
         };
     }
 }

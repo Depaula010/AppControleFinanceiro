@@ -1,3 +1,4 @@
+using MeuSecretario.Application.Abstractions;
 using System.Data;
 using Dapper;
 using MeuSecretario.Application.Accounts;
@@ -10,7 +11,7 @@ namespace MeuSecretario.Infrastructure.Accounts;
 /// <summary>
 /// Acesso a <c>contas</c> com Dapper (spec 002). O SQL monta-se só com fragmentos fixos; todo valor vai parametrizado.
 /// </summary>
-public sealed class AccountRepository(IDbConnectionFactory connections) : IAccountRepository
+public sealed class AccountRepository(IDbConnectionFactory connections, IClock clock) : IAccountRepository
 {
     private const string DetailColumns =
         """
@@ -23,7 +24,7 @@ public sealed class AccountRepository(IDbConnectionFactory connections) : IAccou
     {
         await using var connection = await connections.OpenAsync(cancellationToken);
 
-        // Desvio 007: só transações consolidadas entram no saldo. Sem COLLATE: a ordem é a do banco, como no Flask.
+        // Desvio 007: só transações consolidadas entram no saldo. Desvio 278: e só as de hoje para trás (o populador cria contas de cartão futuras). Sem COLLATE: a ordem é a do banco, como no Flask.
         var rows = await connection.QueryAsync<AccountListItem>(new CommandDefinition(
             """
             SELECT c.id AS Id, c.nome_conta AS NomeConta, c.tipo_conta AS TipoConta, c.saldo_inicial AS SaldoInicial,
@@ -31,12 +32,12 @@ public sealed class AccountRepository(IDbConnectionFactory connections) : IAccou
                    c.dia_fechamento AS DiaFechamento, c.dia_vencimento AS DiaVencimento,
                    c.saldo_inicial + COALESCE(SUM(t.valor), 0) AS Saldo
             FROM contas c
-            LEFT JOIN transacoes t ON t.conta_id = c.id AND t.consolidada = true
+            LEFT JOIN transacoes t ON t.conta_id = c.id AND t.consolidada = true AND t.data_transacao <= @today
             WHERE c.usuario_id = @userId AND c.ativa = true
             GROUP BY c.id
             ORDER BY c.tipo_conta, c.nome_conta
             """,
-            new { userId },
+            new { userId, today = clock.Today.ToDateTime(TimeOnly.MinValue) },
             cancellationToken: cancellationToken));
 
         return rows.AsList();

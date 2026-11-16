@@ -204,10 +204,10 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime,
 
         var (status, body) = await _kit.SendAsync("/api/dashboard/summary", _user);
 
-        // saldo: Corrente 100+100-10 = 190; Carteira 50-40-60-7-1000 = -1057; a conta inativa fica de fora.
+        // saldo (desvio 278: só até hoje, 15/10; o -1000 de 16/10 ainda não conta): Corrente 100+100-10 = 190; Carteira 50-40-60-7 = -57; a conta inativa fica de fora.
         // mês: receitas 100; despesas 10 + 20 (a conta inativa conta); sem a não consolidada, a futura e o mês anterior.
         status.ShouldBe(HttpStatusCode.OK);
-        body.ShouldBe(DashboardTestKit.Ok("""{"saldo_total":-867,"receitas_mes":100,"despesas_mes":30,"saldo_mes":70,"mes_referencia":"Outubro/2026"}"""));
+        body.ShouldBe(DashboardTestKit.Ok("""{"saldo_total":133,"receitas_mes":100,"despesas_mes":30,"saldo_mes":70,"mes_referencia":"Outubro/2026"}"""));
     }
 
     [Fact]
