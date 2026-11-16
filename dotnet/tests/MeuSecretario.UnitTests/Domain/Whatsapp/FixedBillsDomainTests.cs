@@ -82,34 +82,6 @@ public class FixedBillsDomainTests
         }
     }
 
-    [Theory]
-    [InlineData("2026-10-07", "2026-10-07", 1, "7-7")]
-    [InlineData("2026-10-07", "2026-10-14", 1, "7-14")]
-    [InlineData("2026-10-28", "2026-11-04", 2, "28->|<-4")]
-    [InlineData("2026-12-28", "2027-01-04", 2, "28->|<-4")]
-    [Trait("AC", "012-402")]
-    public void DuePlan_OneQueryInsideAMonth_TwoAcrossTheTurn(string from, string to, int slices, string shape)
-    {
-        var plan = DueDatesMessage.Plan(FixedBillsFixture.Date(from), FixedBillsFixture.Date(to));
-        plan.Count.ShouldBe(slices);
-        var text = string.Join("|", plan.Select(s => s switch
-        {
-            { DayFrom: { } a, DayTo: { } b } => $"{a}-{b}",
-            { DayFrom: { } a } => $"{a}->",
-            _ => $"<-{s.DayTo}",
-        }));
-        text.ShouldBe(shape);
-    }
-
-    [Fact]
-    [Trait("AC", "012-402")]
-    public void DuePlan_AcrossTheTurn_UsesEachSlicesOwnMonthAndYear()
-    {
-        var plan = DueDatesMessage.Plan(new DateOnly(2026, 12, 28), new DateOnly(2027, 1, 4));
-        plan[0].ShouldBe(new DueSlice(28, null, 12, 2026));
-        plan[1].ShouldBe(new DueSlice(null, 4, 1, 2027));
-    }
-
     [Fact]
     [Trait("AC", "012-402")]
     public void DueDates_NothingToShow_NamesThePeriodInLowercase()

@@ -448,7 +448,7 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime,
         await bills.InsertScheduleAsync(_user, _account, "Inativo", "FIXO", "MENSAL", dia: 15, valor: 5m, ativo: false);
         var annual = await bills.InsertScheduleAsync(_user, _account, "Anual", "FIXO", "ANUAL", dia: 18, mes: 10, valor: 1200.5m);
         var weekly = await bills.InsertScheduleAsync(
-            _user, _account, "Semanal", "FIXO", "SEMANAL", dia: 5, valor: 30m, dataInicio: "2026-10-05");
+            _user, _account, "Semanal", "FIXO", "SEMANAL", dia: 5, valor: 30m, dataInicio: "2026-10-19");
         var other = await bills.InsertUserAsync("5511777777777", "Outro");
         var otherAccount = await bills.InsertAccountAsync(other, "Outra");
         await bills.InsertScheduleAsync(other, otherAccount, "De outro", "FIXO", "MENSAL", dia: 15, valor: 5m);
@@ -462,6 +462,21 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime,
             $$"""{"id":"{{annual}}","descricao":"Anual","subcategoria":"Outros","valor_previsto":1200.5,"dia_execucao":18,"dias_restantes":3,"data_vencimento":"2026-10-18","tipo":"info","tipo_agendamento":"FIXO"},""" +
             $$"""{"id":"{{weekly}}","descricao":"Semanal","subcategoria":"Outros","valor_previsto":30,"dia_execucao":5,"dias_restantes":4,"data_vencimento":"2026-10-19","tipo":"info","tipo_agendamento":"FIXO"},""" +
             $$"""{"id":"{{seven}}","descricao":"Em sete","subcategoria":"Outros","valor_previsto":null,"dia_execucao":22,"dias_restantes":7,"data_vencimento":"2026-10-22","tipo":"info","tipo_agendamento":"LEMBRETE_VARIAVEL"}]"""));
+    }
+
+    [Fact]
+    [Trait("AC", "006-50")]
+    public async Task Alerts_UnpaidBillOfTheLastSevenDaysShowsAsOverdue_UntilPaid_Deviation280()
+    {
+        var overdue = await _kit.Bills.InsertScheduleAsync(_user, _account, "Atrasada", "FIXO", "MENSAL", dia: 12, valor: 40m);
+
+        var (_, body) = await _kit.SendAsync("/api/dashboard/alerts", _user);
+
+        body.ShouldContain($$"""{"id":"{{overdue}}","descricao":"Atrasada","subcategoria":"Outros","valor_previsto":40,"dia_execucao":12,"dias_restantes":-3,"data_vencimento":"2026-10-12","tipo":"danger","tipo_agendamento":"FIXO"}""");
+
+        await _kit.Transactions.InsertTransactionAsync(_user, _account, "Despesa", -40m, "2026-10-13", "Atrasada");
+        var (_, after) = await _kit.SendAsync("/api/dashboard/alerts", _user);
+        after.ShouldNotContain("Atrasada");
     }
 
     [Fact]

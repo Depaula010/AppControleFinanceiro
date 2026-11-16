@@ -8,8 +8,8 @@ namespace MeuSecretario.Application.Whatsapp;
 public interface IWhatsAppFixedBillsReader
 {
     /// <summary>
-    /// <c>get_pending_bills_for_month</c>: agendamentos ativos <c>FIXO</c>/<c>LEMBRETE_VARIAVEL</c> do mês (anuais só no mês certo) que ainda
-    /// não têm transação de mesma <c>descricao</c> do usuário entre <paramref name="firstDay"/> e <paramref name="lastDay"/>.
+    /// <c>get_pending_bills_for_month</c>: agendamentos ativos do mês (anuais só no mês certo; contínuos com vencimento até o fim do mês, atrasados
+    /// inclusive) cuja ocorrência ainda não foi paga, pela regra do check-in (desvio 280).
     /// </summary>
     Task<IReadOnlyList<PendingBill>> ListPendingAsync(int userId, DateOnly firstDay, DateOnly lastDay, int month, CancellationToken cancellationToken);
 
@@ -17,10 +17,10 @@ public interface IWhatsAppFixedBillsReader
     Task<IReadOnlyList<CatalogBill>> ListCatalogAsync(int userId, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Um trecho de <c>get_vencimentos_periodo</c> (contas fixas por dia do mês, ainda não pagas no mês de referência; a checagem de "já
-    /// pago" não filtra o usuário, como o Flask: desvio 161 proposto).
+    /// <c>get_vencimentos_periodo</c>: contas que vencem de <paramref name="first"/> a <paramref name="last"/> e ainda não foram pagas. O
+    /// próximo vencimento e o "já pago" são os do check-in (desvio 280): semanal aparece na semana em que vence e o dia 31 vence no 30 em mês curto.
     /// </summary>
-    Task<IReadOnlyList<DueBill>> ListDueBillsAsync(int userId, DueSlice slice, CancellationToken cancellationToken);
+    Task<IReadOnlyList<DueBill>> ListDueBillsAsync(int userId, DateOnly first, DateOnly last, CancellationToken cancellationToken);
 
     /// <summary>Faturas <c>Aberta</c> do usuário que vencem entre as datas, com o valor das despesas lançadas.</summary>
     Task<IReadOnlyList<DueInvoice>> ListDueInvoicesAsync(int userId, DateOnly first, DateOnly last, CancellationToken cancellationToken);
@@ -69,12 +69,7 @@ public abstract class DueDatesIntent(IWhatsAppFixedBillsReader reader, IClock cl
     public async Task<string> HandleAsync(IntentContext context, CancellationToken cancellationToken)
     {
         var (start, end, reference) = Range(clock.Today);
-        var bills = new List<DueBill>();
-        foreach (var slice in DueDatesMessage.Plan(start, end))
-        {
-            bills.AddRange(await reader.ListDueBillsAsync(context.User.Id, slice, cancellationToken));
-        }
-
+        var bills = await reader.ListDueBillsAsync(context.User.Id, start, end, cancellationToken);
         var invoices = await reader.ListDueInvoicesAsync(context.User.Id, start, end, cancellationToken);
         return DueDatesMessage.Format(bills, invoices, Period, reference);
     }

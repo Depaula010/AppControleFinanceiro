@@ -53,9 +53,9 @@ public sealed class GetDashboardAlerts(IDashboardRepository repository, IClock c
 {
     public async Task<IReadOnlyList<DashboardAlert>> ExecuteAsync(int userId, CancellationToken cancellationToken)
     {
-        // Os vencimentos caem entre hoje e hoje + 7: as transações pagas só interessam nos meses dessas duas datas.
+        // Os vencimentos caem entre hoje - 7 (atrasadas, desvio 280) e hoje + 7: as transações pagas só interessam nos meses dessas datas.
         var today = clock.Today;
-        var from = ChartsWindow.MonthStart(today);
+        var from = ChartsWindow.MonthStart(today.AddDays(-DashboardAlerts.OverdueDays));
         var toExclusive = ChartsWindow.NextMonthStart(today.AddDays(DashboardAlerts.WindowDays));
         return DashboardAlerts.Build(
             await repository.ListActiveSchedulesAsync(userId, from, toExclusive, cancellationToken), today);

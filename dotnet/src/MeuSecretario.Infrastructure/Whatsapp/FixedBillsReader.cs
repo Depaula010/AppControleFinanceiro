@@ -2,13 +2,15 @@ using Dapper;
 using MeuSecretario.Application.Whatsapp;
 using MeuSecretario.Domain.Whatsapp;
 using MeuSecretario.Infrastructure.Database;
+using MeuSecretario.Infrastructure.Jobs;
 
 namespace MeuSecretario.Infrastructure.Whatsapp;
 
 /// <summary>
-/// Contas fixas e vencimentos do WhatsApp (<c>fixed_bills_service.py</c> e <c>finance_service.get_vencimentos_periodo</c>), portados
-/// literalmente: datas como parâmetro (<c>IClock</c>), "já pago" por igualdade de <c>descricao</c> (spec 012 §6.d; a checagem dos
-/// vencimentos não filtra o usuário, desvio 161 proposto) e <c>ORDER BY</c> completo onde o Flask deixa empate.
+/// Contas fixas e vencimentos do WhatsApp (<c>fixed_bills_service.py</c> e <c>finance_service.get_vencimentos_periodo</c>) com datas como
+/// parâmetro (<c>IClock</c>) e <c>ORDER BY</c> completo onde o Flask deixa empate. Desvio 280: o vencimento e o "já pago" das contas
+/// pendentes e dos vencimentos vêm de <see cref="SchedulePaymentSql"/>, a mesma definição do check-in (o Flask comparava <c>descricao</c> e
+/// mês, e o desvio 161 passou a filtrar o usuário).
 /// </summary>
 public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsAppFixedBillsReader
 {
@@ -82,9 +84,11 @@ public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsA
         int userId, DateOnly firstDay, DateOnly lastDay, int month, CancellationToken cancellationToken)
     {
         await using var connection = await connections.OpenAsync(cancellationToken);
+
+        // Desvio 280: o vencimento do mês e o "já pago" são os do check-in (SchedulePaymentSql). Contínuo atrasado também pende.
         var rows = await connection.QueryAsync<PendingRow>(new CommandDefinition(
-            """
-            SELECT a.descricao AS Descricao, a.valor_previsto AS ValorPrevisto, a.dia_execucao AS DiaExecucao,
+            $"""
+            SELECT a.descricao AS Descricao, a.valor_previsto AS ValorPrevisto, EXTRACT(DAY FROM d.due)::int AS DiaExecucao,
                    s.nome_sub AS Categoria, c.tipo_conta AS TipoConta, g.nome_grupo AS NomeGrupo,
                    a.total_parcelas AS TotalParcelas, a.parcelas_executadas AS ParcelasExecutadas
             FROM agendamentos a
@@ -92,21 +96,16 @@ public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsA
             JOIN macrocategoria m ON s.macro_id = m.id
             JOIN grupocategoria g ON m.grupo_id = g.id
             JOIN contas c ON a.conta_id = c.id
+            CROSS JOIN LATERAL {SchedulePaymentSql.DueDates("a", "@firstDay", "@lastDay")} AS d(due)
             WHERE a.usuario_id = @userId
               AND a.ativo = TRUE
-              AND (a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
-                   OR (a.tipo_agendamento = 'PARCELADO' AND a.total_parcelas IS NOT NULL
-                       AND COALESCE(a.parcelas_executadas, 0) < a.total_parcelas))
-              AND (a.periodicidade != 'ANUAL' OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = @month))
-              AND (SELECT COUNT(*) FROM transacoes t
-                   WHERE (t.descricao = a.descricao
-                          OR (a.tipo_agendamento = 'PARCELADO' AND t.agendamento_id = a.id))
-                     AND t.usuario_id = a.usuario_id
-                     AND t.data_transacao >= @firstDay
-                     AND t.data_transacao <= @lastDay) = 0
-            ORDER BY a.dia_execucao ASC, a.id
+              AND {SchedulePaymentSql.ListedKind("a")}
+              AND (({SchedulePaymentSql.IsRolling("a")} AND d.due <= @lastDay)
+                   OR d.due BETWEEN @firstDay AND @lastDay)
+              AND NOT EXISTS (SELECT 1 FROM transacoes t WHERE {SchedulePaymentSql.Paid("a", "t", "d.due", "a.descricao")})
+            ORDER BY d.due ASC, a.id
             """,
-            new { userId, month, firstDay, lastDay },
+            new { userId, firstDay = firstDay.ToDateTime(TimeOnly.MinValue), lastDay = lastDay.ToDateTime(TimeOnly.MinValue) },
             cancellationToken: cancellationToken));
         return [.. rows.Select(r => new PendingBill(
             r.Descricao, (double)(r.ValorPrevisto ?? 0m), r.Categoria, r.DiaExecucao, r.TipoConta, r.NomeGrupo,
@@ -147,46 +146,30 @@ public sealed class FixedBillsReader(IDbConnectionFactory connections) : IWhatsA
             r.TotalParcelas, r.ParcelasExecutadas))];
     }
 
-    public async Task<IReadOnlyList<DueBill>> ListDueBillsAsync(int userId, DueSlice slice, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<DueBill>> ListDueBillsAsync(int userId, DateOnly first, DateOnly last, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(slice);
         await using var connection = await connections.OpenAsync(cancellationToken);
 
-        // Fragmentos fixos escolhidos por if; o texto do cliente nunca entra na consulta.
-        var days = (slice.DayFrom, slice.DayTo) switch
-        {
-            ({ } _, { } _) => "AND a.dia_execucao BETWEEN @dayFrom AND @dayTo",
-            ({ } _, null) => "AND a.dia_execucao >= @dayFrom",
-            _ => "AND a.dia_execucao <= @dayTo",
-        };
-
+        // Desvio 280: próximo vencimento (cadência, mês curto) e "já pago" (competência) pelo mesmo SQL do check-in.
         var rows = await connection.QueryAsync<DueRow>(new CommandDefinition(
             $"""
-            SELECT a.descricao AS Descricao, a.valor_previsto AS ValorPrevisto, a.dia_execucao AS DiaExecucao, g.nome_grupo AS NomeGrupo,
-                   a.total_parcelas AS TotalParcelas, a.parcelas_executadas AS ParcelasExecutadas
+            SELECT a.descricao AS Descricao, a.valor_previsto AS ValorPrevisto, EXTRACT(DAY FROM d.due)::int AS DiaExecucao,
+                   g.nome_grupo AS NomeGrupo, a.total_parcelas AS TotalParcelas, a.parcelas_executadas AS ParcelasExecutadas
             FROM agendamentos a
             JOIN contas c ON a.conta_id = c.id
             JOIN subcategoria s ON a.subcategoria_id = s.id
             JOIN macrocategoria m ON s.macro_id = m.id
             JOIN grupocategoria g ON m.grupo_id = g.id
+            CROSS JOIN LATERAL {SchedulePaymentSql.DueDates("a", "@start", "@end")} AS d(due)
             WHERE a.usuario_id = @userId
               AND a.ativo = TRUE
-              AND (a.tipo_agendamento IN ('FIXO', 'LEMBRETE_VARIAVEL')
-                   OR (a.tipo_agendamento = 'PARCELADO' AND a.total_parcelas IS NOT NULL
-                       AND COALESCE(a.parcelas_executadas, 0) < a.total_parcelas))
-              {days}
-              AND (a.periodicidade != 'ANUAL' OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = @month))
-              AND NOT EXISTS (
-                  SELECT 1 FROM transacoes t
-                  WHERE (t.descricao = a.descricao
-                         OR (a.tipo_agendamento = 'PARCELADO' AND t.agendamento_id = a.id))
-                    AND t.usuario_id = a.usuario_id
-                    AND EXTRACT(MONTH FROM t.data_transacao) = @month
-                    AND EXTRACT(YEAR FROM t.data_transacao) = @year
-              )
-            ORDER BY a.dia_execucao ASC, a.id
+              AND {SchedulePaymentSql.ListedKind("a")}
+              AND d.due BETWEEN @start AND @end
+              AND (a.data_inicio IS NULL OR d.due >= a.data_inicio)
+              AND NOT EXISTS (SELECT 1 FROM transacoes t WHERE {SchedulePaymentSql.Paid("a", "t", "d.due", "a.descricao")})
+            ORDER BY d.due ASC, a.id
             """,
-            new { userId, dayFrom = slice.DayFrom, dayTo = slice.DayTo, month = slice.Month, year = slice.Year },
+            new { userId, start = first.ToDateTime(TimeOnly.MinValue), end = last.ToDateTime(TimeOnly.MinValue) },
             cancellationToken: cancellationToken));
         return [.. rows.Select(r => new DueBill(r.Descricao, r.ValorPrevisto, r.DiaExecucao, r.NomeGrupo, r.TotalParcelas, r.ParcelasExecutadas))];
     }
