@@ -114,7 +114,7 @@ public class AccountsAuthAndGetTests(PostgresFixture postgres) : IAsyncLifetime,
 
         status.ShouldBe(HttpStatusCode.OK);
         body.ShouldBe(
-            $$"""{"status":"success","data":[{"id":{{id}},"nome":"Carteira","banco":"Dinheiro","tipo":"Dinheiro","saldo":70.55,"nome_conta":"Carteira","tipo_conta":"Dinheiro","saldo_inicial":100,"cor_hex":"#3B82F6","icone":"wallet","limite_credito":null,"dia_fechamento":null,"dia_vencimento":null}]}""");
+            $$"""{"status":"success","data":[{"id":{{id}},"nome":"Carteira","banco":"Dinheiro","tipo":"Dinheiro","saldo":70.55,"nome_conta":"Carteira","tipo_conta":"Dinheiro","saldo_inicial":100,"cor_hex":"#3B82F6","icone":"wallet","limite_credito":null,"dia_fechamento":null,"dia_vencimento":null,"saldo_projetado":70.55}]}""");
     }
 
     [Fact]
@@ -127,7 +127,7 @@ public class AccountsAuthAndGetTests(PostgresFixture postgres) : IAsyncLifetime,
 
         var (_, body) = await _http.Get(user);
 
-        body.ShouldContain($$"""{"id":{{card}},"nome":"Nubank","banco":"Cartão de Crédito","tipo":"Cartão de Crédito","saldo":0,"nome_conta":"Nubank","tipo_conta":"Cartão de Crédito","saldo_inicial":0,"cor_hex":"#112233","icone":"card","limite_credito":5000,"dia_fechamento":5,"dia_vencimento":10}""");
+        body.ShouldContain($$"""{"id":{{card}},"nome":"Nubank","banco":"Cartão de Crédito","tipo":"Cartão de Crédito","saldo":0,"nome_conta":"Nubank","tipo_conta":"Cartão de Crédito","saldo_inicial":0,"cor_hex":"#112233","icone":"card","limite_credito":5000,"dia_fechamento":5,"dia_vencimento":10,"saldo_projetado":0}""");
         body.ShouldContain($$"""{"id":{{zero}},"nome":"Zerado","banco":"Conta Corrente","tipo":"Conta Corrente","saldo":0,"nome_conta":"Zerado","tipo_conta":"Conta Corrente","saldo_inicial":0,"cor_hex":"#3B82F6","icone":"wallet","limite_credito":null""");
     }
 

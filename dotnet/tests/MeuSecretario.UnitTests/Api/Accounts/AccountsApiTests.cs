@@ -117,13 +117,13 @@ public class AccountsResponsesTests
     [Trait("AC", "002-01")]
     public async Task List_HasTheOriginalFiveKeysThenTheExtras_InOrder()
     {
-        var items = new List<AccountListItem> { new(1, "Carteira", "Dinheiro", 100m, "#3B82F6", "wallet", null, null, null, 150.5m) };
+        var items = new List<AccountListItem> { new(1, "Carteira", "Dinheiro", 100m, "#3B82F6", "wallet", null, null, null, 150.5m, 150.5m) };
 
         var (status, json) = await ResultRunner.Run(AccountsResponses.List(items));
 
         status.ShouldBe(200);
         json.ShouldBe(
-            """{"status":"success","data":[{"id":1,"nome":"Carteira","banco":"Dinheiro","tipo":"Dinheiro","saldo":150.5,"nome_conta":"Carteira","tipo_conta":"Dinheiro","saldo_inicial":100,"cor_hex":"#3B82F6","icone":"wallet","limite_credito":null,"dia_fechamento":null,"dia_vencimento":null}]}""");
+            """{"status":"success","data":[{"id":1,"nome":"Carteira","banco":"Dinheiro","tipo":"Dinheiro","saldo":150.5,"nome_conta":"Carteira","tipo_conta":"Dinheiro","saldo_inicial":100,"cor_hex":"#3B82F6","icone":"wallet","limite_credito":null,"dia_fechamento":null,"dia_vencimento":null,"saldo_projetado":150.5}]}""");
     }
 
     [Fact]
@@ -140,11 +140,12 @@ public class AccountsResponsesTests
     [Trait("AC", "002-06")]
     public async Task List_BalanceIsANumberWithCents()
     {
-        var items = new List<AccountListItem> { new(1, "A", "Outro", 0m, null, null, 0m, null, null, 70.55m) };
+        var items = new List<AccountListItem> { new(1, "A", "Outro", 0m, null, null, 0m, null, null, 70.55m, 50.55m) };
 
         var (_, json) = await ResultRunner.Run(AccountsResponses.List(items));
 
         json.ShouldContain("\"saldo\":70.55");
+        json.ShouldContain("\"saldo_projetado\":50.55");   // desvio 283: campo novo, no fim
         json.ShouldContain("\"limite_credito\":null");   // zero sai null (RN-002-11)
     }
 

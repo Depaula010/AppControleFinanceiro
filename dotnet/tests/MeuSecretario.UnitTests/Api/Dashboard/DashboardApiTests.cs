@@ -20,14 +20,14 @@ public class DashboardApiTests
 
     [Fact]
     [Trait("AC", "006-19")]
-    public async Task Summary_HasFiveKeysInOrder()
+    public async Task Summary_HasFiveKeysInOrder_ThenTheProjectedBalance_Deviation283()
     {
         var (status, json) = await ResultRunner.Run(
-            DashboardResponses.Summary(new DashboardSummary(5430.5, 8000, 3245.3, 4754.7, "Outubro/2026")));
+            DashboardResponses.Summary(new DashboardSummary(5430.5, 8000, 3245.3, 4754.7, "Outubro/2026", 5100.25)));
 
         status.ShouldBe(200);
         json.ShouldBe(
-            """{"status":"success","data":{"saldo_total":5430.5,"receitas_mes":8000,"despesas_mes":3245.3,"saldo_mes":4754.7,"mes_referencia":"Outubro/2026"}}""");
+            """{"status":"success","data":{"saldo_total":5430.5,"receitas_mes":8000,"despesas_mes":3245.3,"saldo_mes":4754.7,"mes_referencia":"Outubro/2026","saldo_projetado":5100.25}}""");
     }
 
     [Fact]

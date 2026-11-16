@@ -1,6 +1,6 @@
 # Desvio 157 — Pagamento Fatura é inalcançável com "paguei..."
 
-- **Estado:** proposto
+- **Estado:** implementado (desvio 276)
 - **Features afetadas:** 012
 - **Severidade:** compatibilidade
 
@@ -21,3 +21,5 @@ Decidir com o Rafael (mudança de produto).
 
 ## Decisão do Rafael
 Adiado para depois da virada (2026-10-09); continua `proposto`, não implementado.
+
+Aprovado e implementado em 16/11/2026 (desvio 276): texto com "fatura" segue para `Pagamento Fatura`.

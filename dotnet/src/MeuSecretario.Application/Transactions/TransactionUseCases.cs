@@ -144,7 +144,7 @@ public sealed class UpdateTransaction(ITransactionRepository transactions, ITran
         var account = await session.FindActiveAccountAsync(userId, accountId, cancellationToken);
         if (account is not null)
         {
-            var resolved = type == TransactionTypes.Expense
+            var resolved = type is TransactionTypes.Expense or TransactionTypes.Income
                 ? await InvoiceLinking.ResolveAsync(session, account, date, cancellationToken)
                 : null;
             invoice = Change.Set<int?>(resolved?.Id);

@@ -15,6 +15,8 @@ public static class AuthMessages
     public const string RegisterMissingDays = "Campos obrigatórios: dia_vencimento, dia_fechamento";
     public const string DaysNotInteger = "Dias inválidos: dia_vencimento e dia_fechamento devem ser números inteiros";
     public const string WhatsappTaken = "WhatsApp já cadastrado";
+
+    public const string RegistrationDisabled = "Cadastro desativado";
     public const string Registered = "Usuário cadastrado com sucesso";
     public const string RegisterFailed = "Erro ao cadastrar usuário. Tente novamente.";
 

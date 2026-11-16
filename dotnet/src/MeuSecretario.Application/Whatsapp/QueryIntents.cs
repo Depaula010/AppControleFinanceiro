@@ -147,9 +147,9 @@ public sealed class AdjustBalanceIntent(IAutomationLookups lookups, IWhatsAppQue
     public async Task<string> HandleAsync(IntentContext context, CancellationToken cancellationToken)
     {
         var userId = context.User.Id;
-        var value = AdjustBalance.ParseValue(context.Message);
         var accounts = await lookups.ListActiveAccountsAsync(userId, cancellationToken);
         var account = AdjustBalance.FindAccount(context.Message, accounts);
+        var value = AdjustBalance.ParseValue(context.Message, account?.Name);
 
         if (value is null)
         {

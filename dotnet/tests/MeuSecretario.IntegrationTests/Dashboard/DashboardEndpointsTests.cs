@@ -172,7 +172,7 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime,
         var (status, body) = await _kit.SendAsync("/api/dashboard/summary", other);
 
         status.ShouldBe(HttpStatusCode.OK);
-        body.ShouldBe(DashboardTestKit.Ok("""{"saldo_total":0,"receitas_mes":0,"despesas_mes":0,"saldo_mes":0,"mes_referencia":"Outubro/2026"}"""));
+        body.ShouldBe(DashboardTestKit.Ok("""{"saldo_total":0,"receitas_mes":0,"despesas_mes":0,"saldo_mes":0,"mes_referencia":"Outubro/2026","saldo_projetado":0}"""));
     }
 
     [Fact]
@@ -204,10 +204,11 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime,
 
         var (status, body) = await _kit.SendAsync("/api/dashboard/summary", _user);
 
-        // saldo: Corrente 100+100-10 = 190; Carteira 50-40-60-7-1000 = -1057; a conta inativa fica de fora.
+        // saldo (desvio 278: só até hoje, 15/10; o -1000 de 16/10 ainda não conta): Corrente 100+100-10 = 190; Carteira 50-40-60-7 = -57; a conta inativa fica de fora.
+        // saldo_projetado (desvio 283): o mesmo sem o corte de hoje, 133 - 1000 = -867.
         // mês: receitas 100; despesas 10 + 20 (a conta inativa conta); sem a não consolidada, a futura e o mês anterior.
         status.ShouldBe(HttpStatusCode.OK);
-        body.ShouldBe(DashboardTestKit.Ok("""{"saldo_total":-867,"receitas_mes":100,"despesas_mes":30,"saldo_mes":70,"mes_referencia":"Outubro/2026"}"""));
+        body.ShouldBe(DashboardTestKit.Ok("""{"saldo_total":133,"receitas_mes":100,"despesas_mes":30,"saldo_mes":70,"mes_referencia":"Outubro/2026","saldo_projetado":-867}"""));
     }
 
     [Fact]
@@ -448,7 +449,7 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime,
         await bills.InsertScheduleAsync(_user, _account, "Inativo", "FIXO", "MENSAL", dia: 15, valor: 5m, ativo: false);
         var annual = await bills.InsertScheduleAsync(_user, _account, "Anual", "FIXO", "ANUAL", dia: 18, mes: 10, valor: 1200.5m);
         var weekly = await bills.InsertScheduleAsync(
-            _user, _account, "Semanal", "FIXO", "SEMANAL", dia: 5, valor: 30m, dataInicio: "2026-10-05");
+            _user, _account, "Semanal", "FIXO", "SEMANAL", dia: 5, valor: 30m, dataInicio: "2026-10-19");
         var other = await bills.InsertUserAsync("5511777777777", "Outro");
         var otherAccount = await bills.InsertAccountAsync(other, "Outra");
         await bills.InsertScheduleAsync(other, otherAccount, "De outro", "FIXO", "MENSAL", dia: 15, valor: 5m);
@@ -462,6 +463,21 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime,
             $$"""{"id":"{{annual}}","descricao":"Anual","subcategoria":"Outros","valor_previsto":1200.5,"dia_execucao":18,"dias_restantes":3,"data_vencimento":"2026-10-18","tipo":"info","tipo_agendamento":"FIXO"},""" +
             $$"""{"id":"{{weekly}}","descricao":"Semanal","subcategoria":"Outros","valor_previsto":30,"dia_execucao":5,"dias_restantes":4,"data_vencimento":"2026-10-19","tipo":"info","tipo_agendamento":"FIXO"},""" +
             $$"""{"id":"{{seven}}","descricao":"Em sete","subcategoria":"Outros","valor_previsto":null,"dia_execucao":22,"dias_restantes":7,"data_vencimento":"2026-10-22","tipo":"info","tipo_agendamento":"LEMBRETE_VARIAVEL"}]"""));
+    }
+
+    [Fact]
+    [Trait("AC", "006-50")]
+    public async Task Alerts_UnpaidBillOfTheLastSevenDaysShowsAsOverdue_UntilPaid_Deviation280()
+    {
+        var overdue = await _kit.Bills.InsertScheduleAsync(_user, _account, "Atrasada", "FIXO", "MENSAL", dia: 12, valor: 40m);
+
+        var (_, body) = await _kit.SendAsync("/api/dashboard/alerts", _user);
+
+        body.ShouldContain($$"""{"id":"{{overdue}}","descricao":"Atrasada","subcategoria":"Outros","valor_previsto":40,"dia_execucao":12,"dias_restantes":-3,"data_vencimento":"2026-10-12","tipo":"danger","tipo_agendamento":"FIXO"}""");
+
+        await _kit.Transactions.InsertTransactionAsync(_user, _account, "Despesa", -40m, "2026-10-13", "Atrasada");
+        var (_, after) = await _kit.SendAsync("/api/dashboard/alerts", _user);
+        after.ShouldNotContain("Atrasada");
     }
 
     [Fact]
@@ -613,6 +629,8 @@ public class DashboardEndpointsTests(PostgresFixture postgres) : IAsyncLifetime,
         private static PostgresException Failure() => new("segredo interno", "ERROR", "ERROR", PostgresErrorCodes.UniqueViolation);
 
         public Task<IReadOnlyList<decimal>> ListActiveAccountBalancesAsync(int userId, CancellationToken cancellationToken) => throw Failure();
+
+        public Task<decimal> SumProjectedBalanceAsync(int userId, CancellationToken cancellationToken) => throw Failure();
 
         public Task<IReadOnlyList<TypeTotal>> SumByTypeAsync(int userId, DateOnly firstDay, DateOnly lastDay, CancellationToken cancellationToken) => throw Failure();
 

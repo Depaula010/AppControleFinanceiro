@@ -37,7 +37,8 @@ public sealed record PostInstallmentPurchase(
     int UserId, int AccountId, int SubcategoryId,
     decimal InstallmentAmount,      // valor de CADA parcela, positivo; quem chama divide o total
     int TotalInstallments,          // >= 2
-    string Description, DateOnly Date, string? Origin = null);
+    string Description, DateOnly Date, string? Origin = null,
+    decimal? FirstInstallmentAmount = null); // desvio 276: a 1ª parcela leva o resíduo dos centavos (soma das N parcelas = total)
 
 public sealed record PostedTransaction(int TransactionId, decimal StoredAmount, int? InvoiceId, DateOnly? InvoiceDueDate);
 

@@ -1,3 +1,4 @@
+using MeuSecretario.Infrastructure.Configuration;
 using MeuSecretario.Api.Contracts;
 using MeuSecretario.Api.Http;
 using MeuSecretario.Api.Modules;
@@ -30,8 +31,13 @@ public sealed class AuthModule : IFeatureModule
     }
 
     private static async Task<IResult> RegisterAsync(
-        HttpRequest request, RegisterUser useCase, ILogger<AuthModule> logger, CancellationToken cancellationToken)
+        HttpRequest request, RegisterUser useCase, AppSettings settings, ILogger<AuthModule> logger, CancellationToken cancellationToken)
     {
+        if (!settings.RegistrationEnabled)
+        {
+            return Envelopes.A.Error(AuthMessages.RegistrationDisabled, StatusCodes.Status403Forbidden);
+        }
+
         try
         {
             var body = await JsonBody.ReadObjectAsync(request, cancellationToken);

@@ -27,6 +27,12 @@ public interface ICache
     /// <summary><c>true</c> se não houve erro, mesmo que a chave não existisse.</summary>
     Task<bool> DeleteAsync(string key, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Apaga a chave só se o valor cru ainda for <paramref name="rawValue"/> (liberar lock sem apagar o de outro dono, desvio 285). O padrão
+    /// é apagar sem conferir; <c>RedisCache</c> e o cache em memória dos testes conferem de verdade.
+    /// </summary>
+    Task<bool> DeleteIfEqualsAsync(string key, string rawValue, CancellationToken cancellationToken = default) => DeleteAsync(key, cancellationToken);
+
     /// <summary>Glob do Redis (<c>SCAN</c>); ordem não garantida; vazia sem Redis.</summary>
     Task<IReadOnlyList<string>> KeysByPatternAsync(string pattern, CancellationToken cancellationToken = default);
 }

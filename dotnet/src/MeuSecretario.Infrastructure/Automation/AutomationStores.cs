@@ -204,8 +204,10 @@ internal sealed class InvoiceScheduleSession(NpgsqlConnection connection, Npgsql
         public string NomeGrupo { get; set; } = "";
     }
 
-    public async Task<IReadOnlyList<ScheduleToPost>> ListSchedulesAsync(int cardAccountId, int referenceMonth, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<ScheduleToPost>> ListSchedulesAsync(int cardAccountId, DateOnly referenceDate, CancellationToken cancellationToken)
     {
+        // Desvio 285: data_inicio futura nao entra na fatura. FOR UPDATE OF a trava a linha do agendamento ate o commit do populador: o
+        // job das 00:01 e o EnsureCurrent (ou o executor do check-in) nao processam o mesmo agendamento ao mesmo tempo, o que duplicava a parcela.
         var rows = await connection.QueryAsync<ScheduleDbRow>(new CommandDefinition(
             """
             SELECT a.id AS AgendamentoId, a.tipo_agendamento AS TipoAgendamento, a.descricao AS Descricao,
@@ -220,15 +222,27 @@ internal sealed class InvoiceScheduleSession(NpgsqlConnection connection, Npgsql
               AND a.ativo = TRUE
               AND a.tipo_agendamento IN ('FIXO', 'PARCELADO', 'LEMBRETE_VARIAVEL')
               AND (a.periodicidade != 'ANUAL' OR (a.periodicidade = 'ANUAL' AND a.mes_execucao = @referenceMonth))
+              AND (a.data_inicio IS NULL OR a.data_inicio <= @referenceDate)
             ORDER BY a.dia_execucao, a.descricao, a.id
+            FOR UPDATE OF a
             """,
-            new { cardAccountId, referenceMonth },
+            new { cardAccountId, referenceMonth = referenceDate.Month, referenceDate = referenceDate.ToDateTime(TimeOnly.MinValue) },
             transaction,
             cancellationToken: cancellationToken));
 
         return rows.Select(r => new ScheduleToPost(
             r.AgendamentoId, r.UsuarioId, r.TipoAgendamento, r.Descricao, r.ValorPrevisto, r.DiaExecucao, r.SubcategoriaId,
             r.TotalParcelas, r.ParcelasExecutadas, r.NomeGrupo)).ToList();
+    }
+
+    public async Task<(int ClosingDay, int DueDay)?> GetCardCycleAsync(int cardAccountId, CancellationToken cancellationToken)
+    {
+        var row = await connection.QuerySingleOrDefaultAsync<(int? Closing, int? Due)>(new CommandDefinition(
+            "SELECT dia_fechamento AS Closing, dia_vencimento AS Due FROM contas WHERE id = @cardAccountId",
+            new { cardAccountId },
+            transaction,
+            cancellationToken: cancellationToken));
+        return row.Closing is > 0 && row.Due is > 0 ? (row.Closing.Value, row.Due.Value) : null;
     }
 
     public async Task<bool> TransactionExistsAsync(int invoiceId, int scheduleId, CancellationToken cancellationToken) =>
@@ -254,8 +268,8 @@ internal sealed class InvoiceScheduleSession(NpgsqlConnection connection, Npgsql
         await connection.ExecuteAsync(new CommandDefinition(
             """
             INSERT INTO transacoes (usuario_id, conta_id, subcategoria_id, fatura_id, agendamento_id, descricao, valor,
-                                    tipo_transacao, data_transacao, consolidada)
-            VALUES (@userId, @accountId, @subcategoryId, @invoiceId, @scheduleId, @description, @amount, @dbType, @date, TRUE)
+                                    tipo_transacao, data_transacao, consolidada, competencia)
+            VALUES (@userId, @accountId, @subcategoryId, @invoiceId, @scheduleId, @description, @amount, @dbType, @date, TRUE, @date)
             """,
             parameters,
             transaction,

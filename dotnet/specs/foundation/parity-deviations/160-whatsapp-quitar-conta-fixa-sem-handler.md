@@ -1,6 +1,6 @@
 # Desvio 160 — Quitar Conta Fixa está no prompt do Gemini mas não tem ramo
 
-- **Estado:** proposto
+- **Estado:** implementado (linha removida do prompt, desvio 285)
 - **Features afetadas:** 012
 - **Severidade:** correção
 

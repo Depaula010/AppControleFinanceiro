@@ -166,7 +166,7 @@ public sealed class FinancialAlertsRepository(IDbConnectionFactory connections) 
         var invoices = await connection.QueryAsync<InvoiceRow>(new CommandDefinition(
             """
             SELECT c.nome_conta AS Card, f.data_vencimento AS DueDate,
-                   COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) AS Total
+                   GREATEST(COALESCE(-SUM(CASE WHEN t.tipo_transacao IN ('Despesa', 'Renda') THEN t.valor ELSE 0 END), 0), 0) AS Total
             FROM faturas f
             JOIN contas c ON f.conta_id = c.id
             LEFT JOIN transacoes t ON f.id = t.fatura_id
@@ -319,7 +319,7 @@ public sealed class InvoiceJobRepository(IDbConnectionFactory connections) : IIn
             """
             SELECT f.id AS Id, f.conta_id AS AccountId, f.data_fechamento AS ClosingDate, f.data_vencimento AS DueDate,
                    c.nome_conta AS AccountName, c.usuario_id AS UserId, u.numero_whatsapp AS WhatsappNumber,
-                   COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) AS Total
+                   GREATEST(COALESCE(-SUM(CASE WHEN t.tipo_transacao IN ('Despesa', 'Renda') THEN t.valor ELSE 0 END), 0), 0) AS Total
             FROM faturas f
             JOIN contas c ON f.conta_id = c.id
             JOIN usuarios u ON c.usuario_id = u.id
@@ -360,6 +360,28 @@ public sealed class InvoiceJobRepository(IDbConnectionFactory connections) : IIn
         return [.. rows.Select(r => new OpenInvoiceRef(r.Id, r.AccountId, JobSql.ToDate(r.DueDate), r.AccountName))];
     }
 
+    public async Task<IReadOnlyList<ClosedInvoice>> ListClosedSinceAsync(int userId, DateOnly closedSince, CancellationToken cancellationToken)
+    {
+        await using var connection = await connections.OpenAsync(cancellationToken);
+        var rows = await connection.QueryAsync<ClosedRow>(new CommandDefinition(
+            """
+            SELECT f.id AS Id, f.conta_id AS AccountId, f.data_fechamento AS ClosingDate, f.data_vencimento AS DueDate,
+                   c.nome_conta AS AccountName, c.usuario_id AS UserId, u.numero_whatsapp AS WhatsappNumber,
+                   GREATEST(COALESCE(-SUM(CASE WHEN t.tipo_transacao IN ('Despesa', 'Renda') THEN t.valor ELSE 0 END), 0), 0) AS Total
+            FROM faturas f
+            JOIN contas c ON f.conta_id = c.id
+            JOIN usuarios u ON c.usuario_id = u.id
+            LEFT JOIN transacoes t ON f.id = t.fatura_id
+            WHERE f.status = 'Fechada' AND c.usuario_id = @uid AND f.data_fechamento >= @since
+            GROUP BY f.id, f.conta_id, f.data_fechamento, f.data_vencimento, c.nome_conta, c.usuario_id, u.numero_whatsapp
+            ORDER BY f.data_fechamento ASC, f.id
+            """,
+            JobSql.With(("uid", userId, DbType.Int32), ("since", JobSql.Day(closedSince), DbType.Date)),
+            cancellationToken: cancellationToken));
+        return [.. rows.Select(r => new ClosedInvoice(
+            r.Id, r.AccountId, r.AccountName, JobSql.ToDate(r.ClosingDate), JobSql.ToDate(r.DueDate), (double)r.Total, r.UserId, r.WhatsappNumber))];
+    }
+
     public async Task<IReadOnlyList<DueSoonInvoice>> ListDueSoonAsync(DateOnly dueDate, int daysUntilDue, CancellationToken cancellationToken)
     {
         await using var connection = await connections.OpenAsync(cancellationToken);
@@ -367,7 +389,7 @@ public sealed class InvoiceJobRepository(IDbConnectionFactory connections) : IIn
             """
             SELECT f.id AS Id, f.conta_id AS AccountId, f.data_vencimento AS DueDate, c.nome_conta AS AccountName,
                    c.usuario_id AS UserId, u.numero_whatsapp AS WhatsappNumber,
-                   COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) AS Total
+                   GREATEST(COALESCE(-SUM(CASE WHEN t.tipo_transacao IN ('Despesa', 'Renda') THEN t.valor ELSE 0 END), 0), 0) AS Total
             FROM faturas f
             JOIN contas c ON f.conta_id = c.id
             JOIN usuarios u ON c.usuario_id = u.id

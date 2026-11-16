@@ -23,6 +23,10 @@ public class FinancePipelineParityTests
         ["resposta_ok_sem_descricao_final_falha"] = "150",
         ["resposta_ok_parcelada_sem_descricao_final"] = "150",
         ["transferencia_com_contas"] = "151",
+        ["ajuste_valor_decimal_ponto"] = "273", // "12.50" agora é 12,50 (no Flask era 1.250)
+        ["despesa_parcelada"] = "281", // "em 3x de 90" agora é 3 parcelas de 90 (total 270), no Flask 90 no total
+        ["despesa_parcelada_cartao"] = "281",
+        ["despesa_data_inventada_pelo_modelo"] = "281", // a data informada aparece na confirmação (linha 📅)
     };
 
     /// <summary>

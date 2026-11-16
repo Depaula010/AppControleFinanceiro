@@ -192,7 +192,7 @@ public class ProcessAutomateNotificationTests
         posted.Description.ShouldBe("Mercado");
         posted.Date.ShouldBe(AutomationHarness.Today);
         posted.Origin.ShouldBeNull();
-        _h.BotMessage().ShouldBe("Transacao salva!\n\nDescricao: Mercado\nValor: R$ 45,90\nCategoria: Alimentação -> Supermercado");
+        _h.BotMessage().ShouldBe("Transação salva!\n\nDescrição: Mercado\nValor: R$ 45,90\nCategoria: Alimentação -> Supermercado");
         await _h.Pending.DidNotReceiveWithAnyArgs().CreateAsync(default!, default!, default);
     }
 

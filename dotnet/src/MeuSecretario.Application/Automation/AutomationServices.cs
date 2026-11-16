@@ -173,8 +173,9 @@ public sealed class InvoiceScheduleProcessor(IInvoiceScheduleUnitOfWork unitOfWo
         var reminders = 0;
         var errors = 0;
         var details = new List<InvoiceScheduleDetail>();
+        var cycle = await session.GetCardCycleAsync(cardAccountId, cancellationToken);
 
-        foreach (var schedule in await session.ListSchedulesAsync(cardAccountId, referenceDate.Month, cancellationToken))
+        foreach (var schedule in await session.ListSchedulesAsync(cardAccountId, referenceDate, cancellationToken))
         {
             if (schedule.ScheduleType == InvoiceScheduleRules.Reminder)
             {
@@ -208,7 +209,7 @@ public sealed class InvoiceScheduleProcessor(IInvoiceScheduleUnitOfWork unitOfWo
                         schedule.UserId, cardAccountId, schedule.SubcategoryId, invoiceId, schedule.ScheduleId, description,
                         InvoiceScheduleRules.SignedAmount(schedule.ExpectedAmount, income),
                         income ? "Renda" : "Despesa",
-                        InvoiceScheduleRules.TransactionDate(referenceDate, schedule.DayOfMonth)),
+                        InvoiceScheduleRules.CycleTransactionDate(referenceDate, schedule.DayOfMonth, cycle?.ClosingDay, cycle?.DueDay)),
                     cancellationToken);
 
                 if (isInstallment)

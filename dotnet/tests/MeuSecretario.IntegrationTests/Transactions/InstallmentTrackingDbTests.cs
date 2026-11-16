@@ -65,6 +65,21 @@ public class InstallmentTrackingDbTests(PostgresFixture postgres) : IAsyncLifeti
     }
 
     [Fact]
+    [Trait("Desvio", "276")]
+    public async Task DeletingAnInstallment_GivesTheCounterBack_AndReactivatesTheSchedule()
+    {
+        await PostAsync("Curso (1/2)", "2026-08-10");
+        var last = ((PostingResult<PostedTransaction>.Ok)await PostAsync("Curso (2/2)", "2026-09-10")).Value;
+        (await ScheduleAsync()).Ativo.ShouldBeFalse();
+
+        var repository = new TransactionRepository(postgres.Connections);
+        (await repository.DeleteWithPairAsync(_user, last.TransactionId, Day("2026-09-11"), CancellationToken.None)).ShouldBeTrue();
+
+        var schedule = await ScheduleAsync();
+        (schedule.Exec, schedule.Ativo).ShouldBe((1, true));
+    }
+
+    [Fact]
     [Trait("Desvio", "271")]
     public async Task TheLastInstallment_DeactivatesTheSchedule()
     {

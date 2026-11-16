@@ -73,10 +73,14 @@ public static class MonthlyReportRules
     public static ReportTotals Totals(double expenses, double incomes, int transactions) =>
         new(expenses, incomes, incomes - expenses, transactions);
 
-    public static IReadOnlyList<ReportCategory> TopCategories(IReadOnlyList<(string Category, double Value)> rows)
+    /// <param name="totalExpenses">
+    /// Desvio 285: total de despesas do período, base do percentual ("Mercado = 27,8% do que gastei"). Sem ele, a base é a soma dos próprios
+    /// itens (o Flask dividia pela soma do top 5, e as cinco categorias sempre somavam 100%).
+    /// </param>
+    public static IReadOnlyList<ReportCategory> TopCategories(IReadOnlyList<(string Category, double Value)> rows, double? totalExpenses = null)
     {
         ArgumentNullException.ThrowIfNull(rows);
-        var total = rows.Sum(r => r.Value);
+        var total = totalExpenses is { } all && all != 0 ? all : rows.Sum(r => r.Value);
         return [.. rows.Select(r => new ReportCategory(r.Category, r.Value, total != 0 ? r.Value / total * 100 : 0))];
     }
 

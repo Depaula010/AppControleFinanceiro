@@ -103,11 +103,17 @@ public sealed class JobsScheduler(
             .Build();
     }
 
-    public static async Task ScheduleAllAsync(IScheduler scheduler, TimeZoneInfo timeZone, CancellationToken cancellationToken)
+    public static async Task ScheduleAllAsync(
+        IScheduler scheduler, TimeZoneInfo timeZone, CancellationToken cancellationToken, bool taskAlertsEnabled = true)
     {
         ArgumentNullException.ThrowIfNull(scheduler);
         foreach (var schedule in JobSchedules.All)
         {
+            if (!taskAlertsEnabled && schedule.LockName == JobSchedules.TaskAlerts)
+            {
+                continue;
+            }
+
             var job = JobBuilder.Create<ScheduledJobAdapter>()
                 .WithIdentity(schedule.LockName)
                 .UsingJobData(ScheduledJobAdapter.JobKey, schedule.LockName)
@@ -126,7 +132,7 @@ public sealed class JobsScheduler(
         }
 
         _scheduler = await factory.GetScheduler(cancellationToken);
-        await ScheduleAllAsync(_scheduler, clock.TimeZone, cancellationToken);
+        await ScheduleAllAsync(_scheduler, clock.TimeZone, cancellationToken, options.Value.TaskAlertsEnabled);
         await _scheduler.Start(cancellationToken);
         _started = true;
         JobsLog.Enabled(logger, JobSchedules.All.Count, JobSchedules.TimeZoneId);
@@ -185,7 +191,8 @@ public static class JobsServiceCollectionExtensions
         // Portas para a 009c.
         services.AddScoped<IScheduleMotor>(sp => sp.GetRequiredService<ScheduleMotor>());
         services.AddScoped<IDailyBriefingJob>(sp => sp.GetRequiredService<DailyBriefingJob>());
-        services.AddScoped<IMonthlyReportJob>(sp => sp.GetRequiredService<MonthlyReportJob>());
+        services.AddScoped<IMonthlyReportJob>(sp => new LockedMonthlyReportJob(
+            sp.GetRequiredService<MonthlyReportJob>(), sp.GetRequiredService<JobRunner>(), sp.GetRequiredService<IClock>()));
         services.AddScoped<IBillsNotificationJob>(sp => sp.GetRequiredService<BillsNotificationJob>());
 
         // Os agendados.

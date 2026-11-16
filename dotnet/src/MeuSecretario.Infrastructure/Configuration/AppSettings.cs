@@ -20,6 +20,13 @@ public sealed class AppSettings
     public string GeminiModel { get; init; } = "gemini-2.5-flash-lite";
 
     public string WebhookSignatureKey { get; init; } = string.Empty;
+
+    /// <summary>
+    /// <c>WEBHOOK_API_KEY</c> (opcional, desvio 284): o <c>x-api-key</c> aceito só por <c>/webhook-whatsapp</c>. Ausente ou vazia, o webhook
+    /// continua aceitando a <c>API_SECRET_KEY</c> (produção não quebra). Com ela, quem ler o banco do bot (onde a chave do webhook fica
+    /// gravada) não consegue mais forjar JWT nem chamar <c>/admin</c>.
+    /// </summary>
+    public string WebhookApiKey { get; init; } = string.Empty;
     public string BotWhatsappUrl { get; init; } = string.Empty;
 
     /// <summary>
@@ -53,6 +60,12 @@ public sealed class AppSettings
     /// Padrão false: desligadas respondem 404.
     /// </summary>
     public bool ApiKeysRoutesEnabled { get; init; }
+
+    /// <summary>
+    /// <c>REGISTRATION_ENABLED</c>: só com <c>true</c> o <c>POST /auth/register</c> cria usuário (desvio 278). Padrão false: app de um
+    /// usuário só. A rota continua registrada (rota desconhecida bloquearia o IP pelo filtro do 009) e responde 403.
+    /// </summary>
+    public bool RegistrationEnabled { get; init; }
 
     private static DateTimeOffset? ParseLegacyUntil(string text)
     {
@@ -99,6 +112,12 @@ public sealed class AppSettings
         if (apiSecretKey.Length is > 0 and < MinSecretKeyLength)
         {
             errors.Add($"API_SECRET_KEY deve ter no mínimo {MinSecretKeyLength} caracteres");
+        }
+
+        var webhookApiKey = Optional("WEBHOOK_API_KEY");
+        if (webhookApiKey.Length is > 0 and < MinSecretKeyLength)
+        {
+            errors.Add($"WEBHOOK_API_KEY deve ter no mínimo {MinSecretKeyLength} caracteres");
         }
 
         if (encryptionKey.Length > 0 && !Security.FernetEncryptionService.IsValidKey(encryptionKey))
@@ -162,6 +181,7 @@ public sealed class AppSettings
             RedisUrl = redisUrl,
             GeminiModel = Optional("GEMINI_MODEL", "gemini-2.5-flash-lite"),
             WebhookSignatureKey = Optional("WEBHOOK_SIGNATURE_KEY", apiSecretKey),
+            WebhookApiKey = webhookApiKey,
             BotWhatsappUrl = Optional("BOT_WHATSAPP_URL"),
             OpsAlertWhatsapp = new string([.. Optional("OPS_ALERT_WHATSAPP").Where(char.IsAsciiDigit)]),
             BotSessionName = Optional("BOT_SESSION_NAME", "sessao-principal"),
@@ -179,6 +199,7 @@ public sealed class AppSettings
             LogDirectory = Optional("LOG_DIR", "logs"),
             LogToFile = !string.Equals(Optional("LOG_TO_FILE", "true"), "false", StringComparison.OrdinalIgnoreCase),
             ApiKeysRoutesEnabled = string.Equals(Optional("API_KEYS_ROUTES_ENABLED", "false"), "true", StringComparison.OrdinalIgnoreCase),
+            RegistrationEnabled = string.Equals(Optional("REGISTRATION_ENABLED", "false"), "true", StringComparison.OrdinalIgnoreCase),
         };
     }
 }

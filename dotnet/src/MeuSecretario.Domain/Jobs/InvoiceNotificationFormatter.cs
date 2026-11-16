@@ -1,3 +1,4 @@
+using MeuSecretario.Domain.Automation;
 using System.Globalization;
 
 namespace MeuSecretario.Domain.Jobs;
@@ -34,7 +35,7 @@ public static class InvoiceNotificationFormatter
                $"Cartão: *{invoice.AccountName}*\n" +
                $"Fechamento: {Date(invoice.ClosingDate)}\n" +
                $"Vencimento: {Date(invoice.DueDate)}\n" +
-               $"Valor Total: *R$ {PyNumber.FixedComma(invoice.Total)}*\n\n" +
+               $"Valor Total: *{MoneyText.Brl(invoice.Total)}*\n\n" +
                "ℹ️ A partir de agora, novas compras entrarão na próxima fatura.";
     }
 
@@ -47,18 +48,9 @@ public static class InvoiceNotificationFormatter
         return $"{emoji} *VENCIMENTO PRÓXIMO*\n\n" +
                $"Cartão: *{invoice.AccountName}*\n" +
                $"Vence: {daysText} ({Date(invoice.DueDate)})\n" +
-               $"Valor: *R$ {PyNumber.FixedComma(invoice.Total)}*\n\n" +
+               $"Valor: *{MoneyText.Brl(invoice.Total)}*\n\n" +
                "💡 Não se esqueça de garantir saldo para o pagamento!";
     }
-
-    /// <summary>Alerta de fatura vencida (<c>format_overdue_alert</c>): sem uso nos jobs; fica para a 012.</summary>
-    public static string Overdue(string accountName, DateOnly dueDate, double total, int daysLate) =>
-        $"🚨 *FATURA VENCIDA*\n\n" +
-        $"Cartão: *{accountName}*\n" +
-        $"Venceu há: *{daysLate.ToString(CultureInfo.InvariantCulture)} dia(s)*\n" +
-        $"Data de Vencimento: {Date(dueDate)}\n" +
-        $"Valor: *R$ {PyNumber.FixedComma(total)}*\n\n" +
-        "⚠️ Pague o quanto antes para evitar juros e multas!";
 
     /// <summary><c>strftime('%d/%m/%Y')</c>.</summary>
     public static string Date(DateOnly date) => date.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);

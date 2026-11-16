@@ -1,4 +1,5 @@
 using System.Globalization;
+using MeuSecretario.Domain.Transactions;
 
 namespace MeuSecretario.Domain.Automation;
 
@@ -25,6 +26,29 @@ public static class InvoiceScheduleRules
     /// <summary><c>date(ano, mes, dia_execucao)</c> do mês e ano da referência; dia inexistente cai no último dia.</summary>
     public static DateOnly TransactionDate(DateOnly reference, int day) =>
         new(reference.Year, reference.Month, Math.Min(day, DateTime.DaysInMonth(reference.Year, reference.Month)));
+
+    /// <summary>
+    /// Desvio 277: data do lançamento dentro do ciclo da fatura. Dia do agendamento depois do fechamento (ex.: dia 15 com fechamento 13)
+    /// pertence à fatura do mês seguinte, então o lançamento da fatura que vence em <paramref name="invoiceDue"/> é do mês anterior.
+    /// Sem os dias do cartão, segue o comportamento antigo (<see cref="TransactionDate"/>).
+    /// </summary>
+    public static DateOnly CycleTransactionDate(DateOnly invoiceDue, int day, int? closingDay, int? dueDay)
+    {
+        var inDueMonth = TransactionDate(invoiceDue, day);
+        if (closingDay is not > 0 || dueDay is not > 0)
+        {
+            return inDueMonth;
+        }
+
+        if (InvoiceCycle.ForPurchase(closingDay.Value, dueDay.Value, inDueMonth).Due == invoiceDue)
+        {
+            return inDueMonth;
+        }
+
+        var previousMonth = new DateOnly(invoiceDue.Year, invoiceDue.Month, 1).AddMonths(-1);
+        var inPreviousMonth = TransactionDate(previousMonth, day);
+        return InvoiceCycle.ForPurchase(closingDay.Value, dueDay.Value, inPreviousMonth).Due == invoiceDue ? inPreviousMonth : inDueMonth;
+    }
 
     /// <summary>Descrição lançada: a do agendamento, ou <c>"X (n/total)"</c> na parcela (<c>total</c> nulo escreve <c>None</c>).</summary>
     public static string Description(string description, string scheduleType, int installmentsExecuted, int? total) =>

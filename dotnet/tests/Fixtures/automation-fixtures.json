@@ -6520,19 +6520,19 @@
    "descricao": "Luz",
    "valor": 150.5,
    "categoria": "Energia",
-   "text": "✅ *CONTA QUITADA!* ✅\n\n📝 Luz\n💰 R$ 150,50\n📊 Energia\n\n_Esta conta não será mais cobrada automaticamente este mês._"
+   "text": "✅ *CONTA QUITADA!* ✅\n\n📝 Luz\n💰 R$ 150,50\n📊 Energia\n\n_Conta marcada como paga neste mês._"
   },
   {
    "descricao": "Aluguel",
    "valor": 1500,
    "categoria": "Moradia",
-   "text": "✅ *CONTA QUITADA!* ✅\n\n📝 Aluguel\n💰 R$ 1.500,00\n📊 Moradia\n\n_Esta conta não será mais cobrada automaticamente este mês._"
+   "text": "✅ *CONTA QUITADA!* ✅\n\n📝 Aluguel\n💰 R$ 1.500,00\n📊 Moradia\n\n_Conta marcada como paga neste mês._"
   },
   {
    "descricao": "Netflix",
    "valor": 39.9,
    "categoria": "Streaming",
-   "text": "✅ *CONTA QUITADA!* ✅\n\n📝 Netflix\n💰 R$ 39,90\n📊 Streaming\n\n_Esta conta não será mais cobrada automaticamente este mês._"
+   "text": "✅ *CONTA QUITADA!* ✅\n\n📝 Netflix\n💰 R$ 39,90\n📊 Streaming\n\n_Conta marcada como paga neste mês._"
   }
  ]
 }

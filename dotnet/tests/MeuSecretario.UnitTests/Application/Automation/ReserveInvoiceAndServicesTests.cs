@@ -359,11 +359,16 @@ public class InvoiceScheduleProcessorTests
 
         private (int Inserted, int Advanced) _savepoint;
 
-        public Task<IReadOnlyList<ScheduleToPost>> ListSchedulesAsync(int cardAccountId, int referenceMonth, CancellationToken cancellationToken)
+        public Task<IReadOnlyList<ScheduleToPost>> ListSchedulesAsync(int cardAccountId, DateOnly referenceDate, CancellationToken cancellationToken)
         {
-            RequestedMonth = referenceMonth;
+            RequestedMonth = referenceDate.Month;
             return Task.FromResult(schedules);
         }
+
+        public (int ClosingDay, int DueDay)? Cycle { get; set; }
+
+        public Task<(int ClosingDay, int DueDay)?> GetCardCycleAsync(int cardAccountId, CancellationToken cancellationToken) =>
+            Task.FromResult(Cycle);
 
         public Task<bool> TransactionExistsAsync(int invoiceId, int scheduleId, CancellationToken cancellationToken) =>
             Task.FromResult(Existing.Contains((invoiceId, scheduleId)));

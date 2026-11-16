@@ -1,6 +1,6 @@
 # Desvio 154 — A extração de despesa e renda não pede data, conta, categoria nem parcelamento
 
-- **Estado:** proposto
+- **Estado:** implementado (pelo desvio 281, que lê data, parcelas e valor da parcela do texto)
 - **Features afetadas:** 012
 - **Severidade:** correção
 
@@ -20,4 +20,4 @@ Manter como está (paridade estrita), que é o que a 012 implementa (campos lido
 Aprovar.
 
 ## Decisão do Rafael
-Adiado para depois da virada (2026-10-09); continua `proposto`, não implementado.
+Adiado para depois da virada (2026-10-09). Implementado em 2026-11-16 pelo desvio 281 ("faça todos"), lendo o texto da mensagem em vez de chamar o Gemini.

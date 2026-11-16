@@ -10,6 +10,7 @@ using MeuSecretario.Domain.Automation;
 using MeuSecretario.Domain.Whatsapp;
 using MeuSecretario.Infrastructure.Automation;
 using MeuSecretario.Infrastructure.Configuration;
+using MeuSecretario.Infrastructure.Security;
 using MeuSecretario.Infrastructure.Whatsapp;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -25,6 +26,7 @@ public sealed class WhatsAppModule : IFeatureModule
     public void AddServices(IServiceCollection services)
     {
         services.TryAddSingleton<IPendingIdGenerator, UuidPendingIdGenerator>();
+        services.TryAddSingleton<WebhookApiKeyValidator>(); // desvio 284: WEBHOOK_API_KEY (cai em API_SECRET_KEY)
         services.AddScoped<IWhatsAppUserLookup, WhatsAppUserLookup>();
         services.AddScoped<IWebhookDeduplicator, CacheWebhookDeduplicator>();
         services.AddScoped<IPendingTransactionState, PendingTransactionState>();
@@ -56,7 +58,7 @@ public sealed class WhatsAppModule : IFeatureModule
         IDatabaseHealth database,
         IIntegrationSettings settings,
         AppSettings appSettings,
-        IApiKeyValidator apiKeys,
+        WebhookApiKeyValidator apiKeys,
         HandleWhatsAppMessage useCase,
         IWebhookDeduplicator deduplicator,
         IOpsAlerts alerts,

@@ -65,6 +65,22 @@ internal static class SchedulePaymentSql
         """;
 
     /// <summary>
+    /// Vencimentos de um agendamento que interessam ao intervalo <paramref name="from"/> a <paramref name="to"/> (expressões SQL de data), um
+    /// por linha, para usar em <c>CROSS JOIN LATERAL ... AS d(due)</c> (desvio 280). Contínuo (semanal, quinzenal, diário): só o próximo
+    /// vencimento (<see cref="NextDue"/>, "como em" <paramref name="to"/>), que pode estar atrasado. Mensal e anual: o dia de cada mês do
+    /// intervalo, limitado ao último dia do mês (dia 31 em mês curto vence no 30; mesma regra de <c>MonthDays.Clamp</c>), e o anual só no
+    /// <c>mes_execucao</c>. O chamador filtra por data e por <see cref="Paid"/>.
+    /// </summary>
+    public static string DueDates(string schedule, string from, string to) => $"""
+        (SELECT {NextDue(schedule, to)} AS due WHERE {IsRolling(schedule)}
+         UNION ALL
+         SELECT (mo.m + (LEAST({schedule}.dia_execucao, EXTRACT(DAY FROM mo.m + INTERVAL '1 month - 1 day')::int) - 1) * INTERVAL '1 day')::date
+         FROM generate_series(DATE_TRUNC('month', {from}::date), DATE_TRUNC('month', {to}::date), INTERVAL '1 month') AS mo(m)
+         WHERE NOT ({IsRolling(schedule)}) AND {schedule}.dia_execucao >= 1
+           AND ({schedule}.periodicidade <> 'ANUAL' OR {schedule}.mes_execucao = EXTRACT(MONTH FROM mo.m)))
+        """;
+
+    /// <summary>
     /// A ocorrência do vencimento <paramref name="expected"/> (expressão SQL de data) está paga, por uma transação <paramref name="tx"/>.
     /// <list type="number">
     /// <item>Transação do agendamento com <c>competencia</c> = vencimento: quita exatamente aquele vencimento (desvio 253).</item>

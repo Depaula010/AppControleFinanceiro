@@ -9,38 +9,36 @@ namespace MeuSecretario.Application.Automation;
 public sealed record SettledPosting(int TransactionId, string Description);
 
 /// <summary>
-/// Baixa de uma conta do cadastro pelo "paguei" do WhatsApp e pelo SMS. Fixa e lembrete variável: despesa avulsa com a
-/// descrição do agendamento (<c>settle_fixed_bill</c>). Parcelado (desvio 270): pelo mesmo executor do check-in, que liga a
-/// transação ao agendamento, grava a competência e o nome <c>X (n/N)</c> e avança o contador (desativa na última parcela).
+/// Baixa de uma conta do cadastro pelo "paguei" do WhatsApp e pelo SMS. Toda conta (fixa, lembrete variável e parcelada) passa pelo
+/// mesmo executor do check-in (desvios 270 e 275): a transação fica ligada ao agendamento, com a competência do vencimento, e o
+/// parcelado ganha <c>X (n/N)</c> e avança o contador (desativa na última parcela). Sem isso, conta semanal paga por "paguei" nunca
+/// saía do check-in e podia ser lançada duas vezes.
 /// </summary>
-public sealed class BillSettlement(IAutomationLookups lookups, DirectPoster poster, IScheduleExecutor executor)
+public sealed class BillSettlement(IAutomationLookups lookups, IScheduleExecutor executor)
 {
     public async Task<SettledPosting> SettleAsync(int userId, int scheduleId, double amount, DateOnly day, CancellationToken cancellationToken)
     {
         var target = await lookups.FindSettleTargetAsync(userId, scheduleId, cancellationToken)
                      ?? throw new AutomationFailureException("agendamento não encontrado");
 
-        if (target.Kind != ScheduleKinds.Installment)
-        {
-            var posted = await poster.PostAsync(
-                userId, target.AccountId, target.SubcategoryId, TransactionKind.Expense, amount, target.Description, day, cancellationToken);
-            return new SettledPosting(posted.TransactionId, target.Description);
-        }
-
         if (!MoneyDecimal.TryFromDouble(amount, out var value))
         {
             throw new AutomationFailureException("valor inválido");
         }
 
-        var lastDay = DateTime.DaysInMonth(day.Year, day.Month);
-        var competence = new DateOnly(day.Year, day.Month, Math.Clamp(target.Day, 1, lastDay));
+        // Mensal/anual: o vencimento do mês do pagamento. Cadência contínua (semanal, quinzenal, diária): o próprio dia.
+        var competence = ScheduleCadence.IsRolling(target.Periodicity)
+            ? day
+            : new DateOnly(day.Year, day.Month, Math.Clamp(target.Day, 1, DateTime.DaysInMonth(day.Year, day.Month)));
         var outcome = await executor.ExecuteAsync(
-            new ScheduleExecutionRequest(scheduleId, day, Amount: value, Competence: competence), cancellationToken);
+            new ScheduleExecutionRequest(scheduleId, day, AllowVariableReminder: true, Amount: value, Competence: competence), cancellationToken);
         return outcome switch
         {
             ScheduleExecutionOutcome.Posted p => new SettledPosting(p.TransactionId, p.Description),
-            ScheduleExecutionOutcome.Skipped => throw new AutomationFailureException("parcela já lançada no mês"),
-            _ => throw new AutomationFailureException("parcelado sem parcela a pagar"),
+            ScheduleExecutionOutcome.Skipped => throw new AutomationFailureException(
+                target.Kind == ScheduleKinds.Installment ? "parcela já lançada no mês" : "conta já lançada neste vencimento"),
+            _ => throw new AutomationFailureException(
+                target.Kind == ScheduleKinds.Installment ? "parcelado sem parcela a pagar" : "conta não pode ser lançada"),
         };
     }
 }

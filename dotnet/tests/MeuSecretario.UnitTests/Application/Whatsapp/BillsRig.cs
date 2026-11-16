@@ -80,23 +80,29 @@ internal sealed class ScriptedFixedBillsReader(JsonElement config, List<string> 
             r.GetProperty("tipo_conta").GetString()!, r.GetProperty("nome_grupo").GetString()!))]);
     }
 
-    public Task<IReadOnlyList<DueBill>> ListDueBillsAsync(int userId, DueSlice slice, CancellationToken cancellationToken)
+    public Task<IReadOnlyList<DueBill>> ListDueBillsAsync(int userId, DateOnly first, DateOnly last, CancellationToken cancellationToken)
     {
-        var kind = (slice.DayFrom, slice.DayTo) switch
-        {
-            ({ }, { }) => "single",
-            ({ }, null) => "first",
-            _ => "second",
-        };
-        var from = slice.DayFrom?.ToString(CultureInfo.InvariantCulture) ?? "-";
-        var to = slice.DayTo?.ToString(CultureInfo.InvariantCulture) ?? "-";
-        calls.Add($"vencimentos:{kind}:{from}:{to}:{slice.Month}/{slice.Year}");
-        Fail("vencimentos");
+        // As fixtures do Flask descrevem um ou dois trechos por dia do mês (get_vencimentos_periodo). A consulta de verdade agora é uma só
+        // (desvio 280); o rig registra e responde no formato antigo para manter os cenários de paridade.
+        (string Kind, int? From, int? To, int Month, int Year)[] slices = first.Month != last.Month
+            ? [("first", first.Day, null, first.Month, first.Year), ("second", null, last.Day, last.Month, last.Year)]
+            : [("single", first.Day, last.Day, first.Month, first.Year)];
 
-        var rows = config.TryGetProperty("due_bills", out var due) && due.TryGetProperty(kind, out var list) ? list.EnumerateArray() : [];
-        return Task.FromResult<IReadOnlyList<DueBill>>([.. rows.Select(r => new DueBill(
-            r.GetProperty("descricao").GetString()!, ScenarioJson.Money(r.GetProperty("valor_previsto")), r.GetProperty("dia_execucao").GetInt32(),
-            r.GetProperty("nome_grupo").GetString()!))]);
+        var result = new List<DueBill>();
+        foreach (var (kind, dayFrom, dayTo, month, year) in slices)
+        {
+            var from = dayFrom?.ToString(CultureInfo.InvariantCulture) ?? "-";
+            var to = dayTo?.ToString(CultureInfo.InvariantCulture) ?? "-";
+            calls.Add($"vencimentos:{kind}:{from}:{to}:{month}/{year}");
+            Fail("vencimentos");
+
+            var rows = config.TryGetProperty("due_bills", out var due) && due.TryGetProperty(kind, out var list) ? list.EnumerateArray() : [];
+            result.AddRange(rows.Select(r => new DueBill(
+                r.GetProperty("descricao").GetString()!, ScenarioJson.Money(r.GetProperty("valor_previsto")), r.GetProperty("dia_execucao").GetInt32(),
+                r.GetProperty("nome_grupo").GetString()!)));
+        }
+
+        return Task.FromResult<IReadOnlyList<DueBill>>(result);
     }
 
     public Task<IReadOnlyList<DueInvoice>> ListDueInvoicesAsync(int userId, DateOnly first, DateOnly last, CancellationToken cancellationToken)

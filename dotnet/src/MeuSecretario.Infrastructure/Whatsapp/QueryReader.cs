@@ -1,3 +1,4 @@
+using MeuSecretario.Application.Abstractions;
 using Dapper;
 using MeuSecretario.Application.Whatsapp;
 using MeuSecretario.Domain.Automation;
@@ -10,7 +11,7 @@ namespace MeuSecretario.Infrastructure.Whatsapp;
 /// Consultas financeiras do WhatsApp (<c>finance_service.py</c>, <c>period_query_service.py</c>), portadas literalmente: datas como
 /// parâmetro (<c>IClock</c>), só contas ativas (desvio 039) e <c>ORDER BY</c> completo onde o Flask não fecha a ordem.
 /// </summary>
-public sealed class WhatsAppQueryReader(IDbConnectionFactory connections) : IWhatsAppQueryReader
+public sealed class WhatsAppQueryReader(IDbConnectionFactory connections, IClock clock) : IWhatsAppQueryReader
 {
     private sealed class BalanceRow
     {
@@ -19,6 +20,8 @@ public sealed class WhatsAppQueryReader(IDbConnectionFactory connections) : IWha
         public string TipoConta { get; set; } = "";
 
         public decimal Saldo { get; set; }
+
+        public decimal Projetado { get; set; }
     }
 
     private sealed class PotRow
@@ -88,16 +91,18 @@ public sealed class WhatsAppQueryReader(IDbConnectionFactory connections) : IWha
         var filter = accountId is null ? string.Empty : "AND c.id = @accountId";
         var rows = await connection.QueryAsync<BalanceRow>(new CommandDefinition(
             $"""
-            SELECT c.nome_conta AS NomeConta, c.tipo_conta AS TipoConta, c.saldo_inicial + COALESCE(SUM(t.valor), 0) AS Saldo
+            SELECT c.nome_conta AS NomeConta, c.tipo_conta AS TipoConta,
+                   c.saldo_inicial + COALESCE(SUM(t.valor) FILTER (WHERE t.data_transacao <= @today), 0) AS Saldo,
+                   c.saldo_inicial + COALESCE(SUM(t.valor), 0) AS Projetado
             FROM contas c
             LEFT JOIN transacoes t ON c.id = t.conta_id AND t.consolidada = true
             WHERE c.usuario_id = @userId {filter} AND c.ativa = true
             GROUP BY c.id, c.nome_conta, c.tipo_conta, c.saldo_inicial
             ORDER BY c.tipo_conta, c.nome_conta, c.id
             """,
-            new { userId, accountId },
+            new { userId, accountId, today = clock.Today.ToDateTime(TimeOnly.MinValue) },
             cancellationToken: cancellationToken));
-        return [.. rows.Select(r => new AccountBalance(r.NomeConta, r.TipoConta, (double)r.Saldo))];
+        return [.. rows.Select(r => new AccountBalance(r.NomeConta, r.TipoConta, (double)r.Saldo, (double)r.Projetado))];
     }
 
     public async Task<IReadOnlyList<PotLine>> GetPotsAsync(int userId, DateOnly today, CancellationToken cancellationToken)
@@ -141,7 +146,7 @@ public sealed class WhatsAppQueryReader(IDbConnectionFactory connections) : IWha
         var limit = cardId is null ? string.Empty : "LIMIT 1";
         var rows = await connection.QueryAsync<InvoiceRow>(new CommandDefinition(
             $"""
-            SELECT c.nome_conta AS NomeConta, COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) AS ValorFatura,
+            SELECT c.nome_conta AS NomeConta, GREATEST(COALESCE(-SUM(CASE WHEN t.tipo_transacao IN ('Despesa', 'Renda') THEN t.valor ELSE 0 END), 0), 0) AS ValorFatura,
                    f.data_vencimento AS DataVencimento, f.status AS Status
             FROM faturas f
             JOIN contas c ON f.conta_id = c.id
@@ -162,7 +167,7 @@ public sealed class WhatsAppQueryReader(IDbConnectionFactory connections) : IWha
         var invoice = await connection.QueryFirstOrDefaultAsync<InvoiceRow>(new CommandDefinition(
             """
             SELECT c.nome_conta AS NomeConta, f.id AS FaturaId, f.data_vencimento AS DataVencimento, f.status AS Status,
-                   COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) AS ValorFatura
+                   GREATEST(COALESCE(-SUM(CASE WHEN t.tipo_transacao IN ('Despesa', 'Renda') THEN t.valor ELSE 0 END), 0), 0) AS ValorFatura
             FROM faturas f
             JOIN contas c ON f.conta_id = c.id
             LEFT JOIN transacoes t ON f.id = t.fatura_id
@@ -184,7 +189,7 @@ public sealed class WhatsAppQueryReader(IDbConnectionFactory connections) : IWha
                    a.parcelas_executadas AS ParcelasExecutadas, a.total_parcelas AS TotalParcelas
             FROM transacoes t
             LEFT JOIN agendamentos a ON t.agendamento_id = a.id
-            WHERE t.fatura_id = @invoiceId AND t.valor < 0
+            WHERE t.fatura_id = @invoiceId AND t.tipo_transacao IN ('Despesa', 'Renda')
             ORDER BY t.data_transacao DESC, t.descricao, t.id
             """,
             new { invoiceId = invoice.FaturaId },
@@ -197,7 +202,7 @@ public sealed class WhatsAppQueryReader(IDbConnectionFactory connections) : IWha
             invoice.Status,
             [.. lines.Select(l => new InvoiceLine(
                 l.Descricao,
-                Math.Abs((double)l.Valor),
+                -(double)l.Valor,
                 DateOnly.FromDateTime(l.DataTransacao),
                 l.TipoAgendamento,
                 l.TipoAgendamento == "PARCELADO" && l.TotalParcelas is { } and not 0 ? $"{l.ParcelasExecutadas}/{l.TotalParcelas}" : null))]);

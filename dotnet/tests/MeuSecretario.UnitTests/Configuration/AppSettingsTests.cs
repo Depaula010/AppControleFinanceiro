@@ -1,4 +1,5 @@
 using MeuSecretario.Infrastructure.Configuration;
+using MeuSecretario.Infrastructure.Security;
 
 namespace MeuSecretario.UnitTests.Configuration;
 
@@ -109,6 +110,44 @@ public class AppSettingsTests
         values["WEBHOOK_SIGNATURE_KEY"] = "outra-chave";
 
         Load(values).WebhookSignatureKey.ShouldBe("outra-chave");
+    }
+
+    [Fact]
+    public void Load_WebhookApiKey_IsEmptyByDefault_AndTheValidatorFallsBackToTheApiSecretKey_Deviation284()
+    {
+        var settings = Load(Valid());
+
+        settings.WebhookApiKey.ShouldBeEmpty();
+        new WebhookApiKeyValidator(settings).IsValid(SecretKey).ShouldBeTrue();
+        new WebhookApiKeyValidator(settings).IsValid("outra").ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Load_WebhookApiKey_WhenSet_ReplacesTheApiSecretKeyOnlyForTheWebhook_Deviation284()
+    {
+        var separate = new string('w', 40);
+        var values = Valid();
+        values["WEBHOOK_API_KEY"] = separate;
+
+        var settings = Load(values);
+        var validator = new WebhookApiKeyValidator(settings);
+
+        settings.ApiSecretKey.ShouldBe(SecretKey);
+        validator.IsValid(separate).ShouldBeTrue();
+        validator.IsValid(SecretKey).ShouldBeFalse();
+        validator.IsValid(null).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Load_WebhookApiKey_TooShort_IsRejected_WithoutEchoingTheValue_Deviation284()
+    {
+        var values = Valid();
+        values["WEBHOOK_API_KEY"] = "curta-secreta";
+
+        var ex = Should.Throw<InvalidOperationException>(() => Load(values));
+
+        ex.Message.ShouldContain("WEBHOOK_API_KEY");
+        ex.Message.ShouldNotContain("curta-secreta");
     }
 
     [Fact]

@@ -39,7 +39,7 @@ public sealed class PaymentStep(
 
     public async Task<string?> HandleAsync(PipelineContext context, CancellationToken cancellationToken)
     {
-        if (!MessageIntent.HasPaymentWord(context.Message))
+        if (!MessageIntent.HasPaymentWord(context.Message) || MessageIntent.MentionsInvoice(context.Message))
         {
             return null;
         }

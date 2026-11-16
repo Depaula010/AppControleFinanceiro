@@ -132,7 +132,7 @@ internal sealed class AutomationHarness
 
     public MeuSecretario.Application.Jobs.IScheduleExecutor Executor { get; } = Substitute.For<MeuSecretario.Application.Jobs.IScheduleExecutor>();
 
-    public BillSettlement Settlement => new(Lookups, Poster, Executor);
+    public BillSettlement Settlement => new(Lookups, Executor);
 
     public ProcessSmsPayment Sms => new(Health, Auth, Lookups, Categorizer, Poster, Settlement, Bot, Clock);
 
@@ -149,6 +149,10 @@ internal sealed class AutomationHarness
 
     public string BotMessage() =>
         (string)Bot.ReceivedCalls().Single(c => c.GetMethodInfo().Name == nameof(IBotClient.SendTextAsync)).GetArguments()[1]!;
+
+    /// <summary>O pedido que a baixa de conta mandou ao executor de agendamentos (desvio 275).</summary>
+    public MeuSecretario.Application.Jobs.ScheduleExecutionRequest Settled() =>
+        (MeuSecretario.Application.Jobs.ScheduleExecutionRequest)Executor.ReceivedCalls().Single().GetArguments()[0]!;
 
     public PostSimpleTransaction Posted() =>
         (PostSimpleTransaction)Posting.ReceivedCalls().Single(c => c.GetMethodInfo().Name == nameof(ITransactionPosting.PostSimpleAsync)).GetArguments()[0]!;

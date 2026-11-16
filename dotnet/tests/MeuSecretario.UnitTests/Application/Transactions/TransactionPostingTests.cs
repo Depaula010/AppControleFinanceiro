@@ -83,7 +83,7 @@ public class TransactionPostingTests : IAsyncDisposable
 
     [Fact]
     [Trait("AC", "004-112")]
-    public async Task ExpenseOnCard_LinksOrCreatesTheCycleInvoice_IncomeDoesNot()
+    public async Task ExpenseOnCard_LinksOrCreatesTheCycleInvoice_RefundLinksToTheSameOne_Deviation279()
     {
         var posted = Ok(await _posting.PostSimpleAsync(Simple(account: 3), CancellationToken.None));
 
@@ -93,7 +93,7 @@ public class TransactionPostingTests : IAsyncDisposable
         _session.Inserted.Single().InvoiceId.ShouldBe(posted.InvoiceId);
 
         var income = Ok(await _posting.PostSimpleAsync(Simple(TransactionKind.Income, account: 3), CancellationToken.None));
-        income.InvoiceId.ShouldBeNull();
+        income.InvoiceId.ShouldBe(posted.InvoiceId);
         _session.Invoices.Count.ShouldBe(1);
     }
 
@@ -266,13 +266,13 @@ public class TransactionPostingTests : IAsyncDisposable
 
     [Fact]
     [Trait("AC", "004-119")]
-    public async Task Payment_WithoutClosedInvoice_UsesTheCycleInvoice_CreatingIt()
+    public async Task Payment_WithoutClosedInvoice_UsesTheCycleInvoice_CreatingIt_AndKeepsItOpen()
     {
         var posted = Ok(await _posting.PostInvoicePaymentAsync(Payment(), CancellationToken.None));
 
         var invoice = _session.Invoices.Single();
         posted.InvoiceId.ShouldBe(invoice.Id);
-        invoice.Status.ShouldBe("Paga");
+        invoice.Status.ShouldBe("Aberta");
         invoice.Due.ShouldBe(Day("2026-04-15"));
     }
 

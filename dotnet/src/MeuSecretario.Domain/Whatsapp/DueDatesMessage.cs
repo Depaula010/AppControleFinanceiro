@@ -12,14 +12,7 @@ public sealed record DueBill(string Description, decimal? Amount, int Day, strin
 /// <summary>Fatura aberta que vence no período, com o valor das despesas lançadas nela.</summary>
 public sealed record DueInvoice(string Card, DateOnly DueDate, decimal Value);
 
-/// <summary>
-/// Um trecho da busca de contas fixas por dia do mês. O Flask faz uma consulta quando o período cabe num mês e duas quando
-/// cruza a virada (<c>finance_service.py</c>): <c>DayFrom</c> sem <c>DayTo</c> é o fim do primeiro mês, <c>DayTo</c> sem
-/// <c>DayFrom</c> é o começo do seguinte. <c>Month</c> e <c>Year</c> são os da checagem de "já pago" e da periodicidade anual.
-/// </summary>
-public sealed record DueSlice(int? DayFrom, int? DayTo, int Month, int Year);
-
-/// <summary>Plano de consultas e texto de <c>Vencimentos Hoje</c>, <c>Vencimentos Amanhã</c> e <c>Vencimentos Essa Semana</c>.</summary>
+/// <summary>Texto de <c>Vencimentos Hoje</c>, <c>Vencimentos Amanhã</c> e <c>Vencimentos Essa Semana</c>.</summary>
 public static class DueDatesMessage
 {
     public const string TodayPeriod = "HOJE";
@@ -29,24 +22,6 @@ public static class DueDatesMessage
     public const string WeekPeriod = "NOS PRÓXIMOS 7 DIAS";
 
     private const string IncomeGroup = "Renda";
-
-    /// <summary>
-    /// Os trechos de consulta do período. Cruzando a virada, o primeiro trecho usa mês e ano do início e o segundo os do fim
-    /// (o Flask ignora os dias intermediários: do dia inicial ao fim do primeiro mês e do dia 1 ao dia final do seguinte).
-    /// </summary>
-    public static IReadOnlyList<DueSlice> Plan(DateOnly start, DateOnly end)
-    {
-        if (start.Month != end.Month)
-        {
-            return
-            [
-                new DueSlice(start.Day, null, start.Month, start.Year),
-                new DueSlice(null, end.Day, end.Month, end.Year),
-            ];
-        }
-
-        return [new DueSlice(start.Day, end.Day, start.Month, start.Year)];
-    }
 
     public static string Nothing(string period)
     {

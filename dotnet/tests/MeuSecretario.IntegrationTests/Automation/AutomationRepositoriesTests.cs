@@ -170,7 +170,7 @@ public class AutomationLookupsTests(PostgresFixture postgres) : IAsyncLifetime, 
         var account = await _env.Data.InsertAccountAsync(_user, "Nubank");
         var luz = await _env.InsertScheduleAsync(_user, account, "Luz", subcategoryId: 59);
 
-        (await _lookups.FindSettleTargetAsync(_user, luz, CancellationToken.None)).ShouldBe(new SettleTarget("Luz", account, 59, "FIXO", 10));
+        (await _lookups.FindSettleTargetAsync(_user, luz, CancellationToken.None)).ShouldBe(new SettleTarget("Luz", account, 59, "FIXO", 10, "MENSAL"));
         (await _lookups.FindSettleTargetAsync(_other, luz, CancellationToken.None)).ShouldBeNull();
     }
 

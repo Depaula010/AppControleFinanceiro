@@ -5,7 +5,8 @@ using MeuSecretario.Domain.Automation;
 
 namespace MeuSecretario.Domain.Whatsapp;
 
-public sealed record AccountBalance(string Name, string Type, double Balance);
+/// <param name="Projected">Desvio 283: saldo sem o corte de hoje (com as faturas e contas futuras); <c>null</c> = igual ao de hoje.</param>
+public sealed record AccountBalance(string Name, string Type, double Balance, double? Projected = null);
 
 /// <summary>Pote com o gasto do período do pote (soma bruta de <c>valor</c>, negativa para despesas).</summary>
 public sealed record PotLine(string Name, double Limit, double RawSpent);
@@ -44,7 +45,7 @@ public static class BalanceMessages
         if (accounts.Count == 1)
         {
             var account = accounts[0];
-            return $"{AccountIcons.For(account.Type)} *{account.Name}* ({account.Type})\n\n💵 Saldo: *{MoneyText.Brl(account.Balance)}*";
+            return $"{AccountIcons.For(account.Type)} *{account.Name}* ({account.Type})\n\n💵 Saldo: *{MoneyText.Brl(account.Balance)}*{ProjectedNote(account.Projected, account.Balance)}";
         }
 
         var sb = new StringBuilder("💰 *Seus Saldos:*\n\n");
@@ -56,8 +57,17 @@ public static class BalanceMessages
             total += account.Balance;
         }
 
-        return sb.Append("💵 *Total Geral:* ").Append(MoneyText.Brl(total)).ToString();
+        var projectedTotal = accounts.Sum(a => a.Projected ?? a.Balance);
+        return sb.Append("💵 *Total Geral:* ").Append(MoneyText.Brl(total)).Append(ProjectedNote(projectedTotal, total)).ToString();
     }
+
+    /// <summary>
+    /// Desvio 283: "(projetado com faturas futuras: R$ Y)" só quando o saldo projetado difere do de hoje (diferença menor que 1 centavo é arredondamento).
+    /// </summary>
+    private static string ProjectedNote(double? projected, double today) =>
+        projected is { } value && Math.Abs(value - today) >= 0.005
+            ? $"\n_(projetado com faturas futuras: {MoneyText.Brl(value)})_"
+            : string.Empty;
 }
 
 /// <summary><c>Consulta Reserva</c> e <c>Consulta Detalhes Reserva</c> (<c>whatsapp_handler.py</c>).</summary>
@@ -202,12 +212,29 @@ public static partial class AdjustBalance
     public const string MissingValue = "🤔 Não consegui identificar o valor. Exemplo: 'ajustar saldo inicial Banco Inter 5000'";
     public const string Failed = "❌ Erro ao atualizar o saldo inicial. Tente novamente.";
 
-    /// <summary>Tira os pontos, troca a vírgula por ponto e pega o primeiro número (<c>\d+(?:\.\d+)?</c>).</summary>
-    public static double? ParseValue(string message)
+    /// <summary>
+    /// Valor do ajuste (auditoria 2026-11-16, M5): tira o nome da conta antes de procurar o número (senão "C6 1500" lê 6), aceita
+    /// "1.500,50", "5000.50" e o sinal de menos ("-300"), pelo mesmo leitor de números do check-in.
+    /// </summary>
+    public static double? ParseValue(string message, string? accountName = null)
     {
-        var clean = message.Replace(".", string.Empty, StringComparison.Ordinal).Replace(',', '.');
-        var match = Number().Match(clean);
-        return match.Success ? double.Parse(AsciiDigits(match.Value), NumberStyles.Float, CultureInfo.InvariantCulture) : null;
+        var text = message;
+        if (!string.IsNullOrEmpty(accountName))
+        {
+            var at = text.IndexOf(accountName, StringComparison.OrdinalIgnoreCase);
+            if (at >= 0)
+            {
+                text = text.Remove(at, accountName.Length);
+            }
+        }
+
+        var match = Number().Match(text);
+        if (!match.Success || !CheckinValueParser.TryParseAmount(AsciiDigits(match.Groups["num"].Value), out var amount))
+        {
+            return null;
+        }
+
+        return (double)(match.Groups["sign"].Success ? -amount : amount);
     }
 
     /// <summary>A primeira conta cujo nome (sem diferenciar caixa) está contido na mensagem.</summary>
@@ -246,7 +273,7 @@ public static partial class AdjustBalance
         return sb.ToString();
     }
 
-    [GeneratedRegex(@"(\d+(?:\.\d+)?)")]
+    [GeneratedRegex(@"(?<sign>(?<![\w])-)?(?<num>\d[\d.,]*)")]
     private static partial Regex Number();
 }
 

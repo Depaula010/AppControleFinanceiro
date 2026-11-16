@@ -49,6 +49,17 @@ public sealed class RedisCache(ConfigurationOptions options, TimeProvider time, 
             return true;
         }, false, cancellationToken);
 
+    public Task<bool> DeleteIfEqualsAsync(string key, string rawValue, CancellationToken cancellationToken = default) =>
+        ExecuteAsync("delete_if_equals", async (_, db) =>
+        {
+            // Atômico no servidor: só apaga se o valor ainda é o de quem pede (lock de outro processo não é liberado por engano).
+            var removed = (long)await db.ScriptEvaluateAsync(
+                "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end",
+                [(RedisKey)key],
+                [(RedisValue)rawValue]);
+            return removed > 0;
+        }, false, cancellationToken);
+
     public Task<IReadOnlyList<string>> KeysByPatternAsync(string pattern, CancellationToken cancellationToken = default) =>
         ExecuteAsync<IReadOnlyList<string>>("keys", async (multiplexer, db) =>
         {

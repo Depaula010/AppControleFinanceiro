@@ -1,3 +1,4 @@
+using MeuSecretario.IntegrationTests.Bills;
 using MeuSecretario.Application.Accounts;
 using MeuSecretario.Domain.Accounts;
 using MeuSecretario.Infrastructure.Accounts;
@@ -9,7 +10,7 @@ namespace MeuSecretario.IntegrationTests.Accounts;
 [Trait("Category", "Docker")]
 public class AccountRepositoryTests(PostgresFixture postgres) : IAsyncLifetime, IClassFixture<PostgresFixture>
 {
-    private readonly AccountRepository _repository = new(postgres.Connections);
+    private readonly AccountRepository _repository = new(postgres.Connections, new BillsHttp.FixedClock(new DateOnly(2100, 1, 1)));
     private readonly AccountsTestData _data = new(postgres.DataSource);
 
     public async Task InitializeAsync() => await postgres.ResetAsync();
@@ -43,6 +44,40 @@ public class AccountRepositoryTests(PostgresFixture postgres) : IAsyncLifetime, 
 
         list.Single(a => a.NomeConta == "Carteira").Saldo.ShouldBe(70m);
         list.Single(a => a.NomeConta == "Outra").Saldo.ShouldBe(1005m);
+    }
+
+    [Fact]
+    [Trait("Desvio", "278")]
+    public async Task List_Balance_IgnoresTransactionsAfterToday_ButKeepsTodayAndTheAccountWithoutMovements()
+    {
+        var user = await _data.InsertUserAsync();
+        var checking = await _data.InsertAccountAsync(user, "Corrente", saldoInicial: 5000m);
+        var card = await _data.InsertAccountAsync(user, "Cartao", saldoInicial: 0m);
+        await _data.InsertAccountAsync(user, "Vazia", saldoInicial: 7m);
+        async Task Post(int account, decimal value, string date)
+        {
+            await using var connection = await postgres.DataSource.OpenConnectionAsync();
+            await Dapper.SqlMapper.ExecuteAsync(connection,
+                "INSERT INTO transacoes (usuario_id, conta_id, subcategoria_id, descricao, valor, tipo_transacao, consolidada, data_transacao) VALUES (@user, @account, (SELECT id FROM subcategoria ORDER BY id LIMIT 1), 't', @value, 'Despesa', TRUE, @date::date)",
+                new { user, account, value, date });
+        }
+
+        await Post(card, -800m, "2026-11-10");
+        await Post(card, -200m, "2026-12-15"); // conta fixa do cartao, criada pelo populador
+        await Post(checking, -50m, "2026-11-16"); // hoje entra
+        await Post(checking, -10m, "2026-11-17"); // amanha nao entra
+
+        var repository = new AccountRepository(postgres.Connections, new BillsHttp.FixedClock(new DateOnly(2026, 11, 16)));
+        var list = await repository.ListActiveAsync(user, CancellationToken.None);
+
+        list.Single(x => x.NomeConta == "Corrente").Saldo.ShouldBe(4950m);
+        list.Single(x => x.NomeConta == "Cartao").Saldo.ShouldBe(-800m);
+        list.Single(x => x.NomeConta == "Vazia").Saldo.ShouldBe(7m);
+
+        // Desvio 283: o projetado é o saldo sem o corte de hoje (inclui a conta fixa de dezembro e o lançamento de amanhã).
+        list.Single(x => x.NomeConta == "Corrente").SaldoProjetado.ShouldBe(4940m);
+        list.Single(x => x.NomeConta == "Cartao").SaldoProjetado.ShouldBe(-1000m);
+        list.Single(x => x.NomeConta == "Vazia").SaldoProjetado.ShouldBe(7m);
     }
 
     [Fact]
@@ -97,7 +132,7 @@ public class AccountRepositoryTests(PostgresFixture postgres) : IAsyncLifetime, 
 
         var item = (await _repository.ListActiveAsync(user, CancellationToken.None)).Single();
 
-        item.ShouldBe(new AccountListItem(item.Id, "Nubank", AccountTypes.Card, 10m, "#112233", "card", 5000m, 5, 10, 10m));
+        item.ShouldBe(new AccountListItem(item.Id, "Nubank", AccountTypes.Card, 10m, "#112233", "card", 5000m, 5, 10, 10m, 10m));
     }
 
     // ============================== buscar e nome em uso ==============================

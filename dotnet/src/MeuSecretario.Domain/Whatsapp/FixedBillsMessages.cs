@@ -40,7 +40,7 @@ public static class FixedBillsMessages
     {
         "MENSAL" => 1.0,
         "SEMANAL" => 4.33,
-        "QUINZENAL" => 2.16,
+        "QUINZENAL" => (double)Bills.Periodicities.BiweeklyPerMonth,
         "DIARIA" => 30.0,
         _ => null,
     };

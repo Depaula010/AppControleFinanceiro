@@ -15,7 +15,7 @@
 • _"qual valor da fatura?"_ - Consultar valor da fatura
 • _"quanto gastei com comida?"_ - Gasto por categoria
 • _"quais contas tenho?"_ - Listar contas cadastradas
-• _"quanto de reserva?"_ - Reserva de emergência (6x média)
+• _"quanto de reserva?"_ - Reserva de emergência (meses de gasto essencial)
 • _"tenho conta que vence hoje?"_ - Vencimentos de hoje
 • _"tenho conta que vence amanhã?"_ - Vencimentos de amanhã
 • _"contas que vencem essa semana?"_ - Vencimentos dos próximos 7 dias

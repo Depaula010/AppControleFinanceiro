@@ -18,7 +18,7 @@ public class ListAccountsTests
     public async Task ReturnsWhatTheRepositoryListsForTheUser()
     {
         var repository = Substitute.For<IAccountRepository>();
-        var items = new List<AccountListItem> { new(1, "A", "Dinheiro", 10m, "#3B82F6", "wallet", null, null, null, 15m) };
+        var items = new List<AccountListItem> { new(1, "A", "Dinheiro", 10m, "#3B82F6", "wallet", null, null, null, 15m, 15m) };
         repository.ListActiveAsync(42, Arg.Any<CancellationToken>()).Returns(items);
 
         var result = await new ListAccounts(repository).ExecuteAsync(42, CancellationToken.None);

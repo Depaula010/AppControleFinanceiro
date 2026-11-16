@@ -21,7 +21,7 @@ public interface IUserKeyReader
 
 /// <summary>Agendamento escolhido para quitação: descrição, conta e subcategoria (<c>settle_fixed_bill</c>).</summary>
 /// <remarks><c>Kind</c> e <c>Day</c> decidem a baixa de parcelado pelo executor (desvio 270).</remarks>
-public sealed record SettleTarget(string Description, int AccountId, int SubcategoryId, string Kind = "FIXO", int Day = 1);
+public sealed record SettleTarget(string Description, int AccountId, int SubcategoryId, string Kind = "FIXO", int Day = 1, string Periodicity = "MENSAL");
 
 /// <summary>Leituras de contas, categorias e contas fixas (spec 011 §7.3), sempre só contas ativas do usuário.</summary>
 public interface IAutomationLookups
@@ -107,10 +107,13 @@ public sealed record NewScheduledTransaction(
 /// <summary>Uma transação do banco para processar uma fatura; sem <see cref="CommitAsync"/> o descarte desfaz tudo.</summary>
 public interface IInvoiceScheduleSession : IAsyncDisposable
 {
-    /// <summary>Ativos da conta do cartão; <c>ANUAL</c> só com <c>mes_execucao</c> = <paramref name="referenceMonth"/>; ordem <c>dia_execucao, descricao</c>.</summary>
-    Task<IReadOnlyList<ScheduleToPost>> ListSchedulesAsync(int cardAccountId, int referenceMonth, CancellationToken cancellationToken);
+    /// <summary>Ativos da conta do cartão com <c>data_inicio</c> até <paramref name="referenceDate"/> (desvio 285); <c>ANUAL</c> só no mês dela; ordem <c>dia_execucao, descricao</c>.</summary>
+    Task<IReadOnlyList<ScheduleToPost>> ListSchedulesAsync(int cardAccountId, DateOnly referenceDate, CancellationToken cancellationToken);
 
     Task<bool> TransactionExistsAsync(int invoiceId, int scheduleId, CancellationToken cancellationToken);
+
+    /// <summary>Dias de fechamento e vencimento do cartão (desvio 277); nulo quando a conta não os tem.</summary>
+    Task<(int ClosingDay, int DueDay)?> GetCardCycleAsync(int cardAccountId, CancellationToken cancellationToken);
 
     Task InsertTransactionAsync(NewScheduledTransaction row, CancellationToken cancellationToken);
 

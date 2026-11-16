@@ -234,7 +234,7 @@ public sealed class BillRepository(IDbConnectionFactory connections) : IBillRepo
     {
         await using var connection = await connections.OpenAsync(cancellationToken);
 
-        // RN-005-13: ordem fixa, para a soma de double ser determinística. O GROUP BY por grupo (e não por lado)
+        // Desvio 285: parcelado já quitado (executadas == total, ainda ativo) não entra. RN-005-13: ordem fixa, para a soma de double ser determinística. O GROUP BY por grupo (e não por lado)
         // mantém as mesmas parcelas que o Flask somava.
         var rows = await connection.QueryAsync<SummaryRowDto>(new CommandDefinition(
             $"""
@@ -246,6 +246,7 @@ public sealed class BillRepository(IDbConnectionFactory connections) : IBillRepo
             LEFT JOIN macrocategoria m ON s.macro_id = m.id
             LEFT JOIN grupocategoria g ON m.grupo_id = g.id
             WHERE a.usuario_id = @userId AND a.ativo = TRUE AND a.valor_previsto IS NOT NULL AND a.valor_previsto > 0
+              AND (a.tipo_agendamento <> 'PARCELADO' OR a.total_parcelas IS NULL OR COALESCE(a.parcelas_executadas, 0) < a.total_parcelas)
             GROUP BY a.periodicidade, g.nome_grupo, CASE WHEN {IncomePredicate} THEN true ELSE false END
             ORDER BY a.periodicidade, g.nome_grupo, 2
             """,

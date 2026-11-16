@@ -36,13 +36,16 @@ public class QueryDomainTests
     }
 
     [Theory]
-    [InlineData("ajustar saldo nubank 1.500,50", 1500.5)]
-    [InlineData("saldo 12.50", 1250d)]
-    [InlineData("saldo 0,5", 0.5)]
-    [InlineData("saldo 100", 100d)]
+    [InlineData("ajustar saldo nubank 1.500,50", null, 1500.5)]
+    [InlineData("saldo 12.50", null, 12.5)]
+    [InlineData("saldo 0,5", null, 0.5)]
+    [InlineData("saldo 100", null, 100d)]
+    [InlineData("ajustar saldo inicial C6 1500", "C6", 1500d)] // auditoria M5: o 6 do nome da conta não é o valor
+    [InlineData("ajustar saldo inicial Inter 5000.50", "Inter", 5000.5)]
+    [InlineData("ajustar saldo inicial Inter -300", "Inter", -300d)]
     [Trait("AC", "012-305")]
-    public void AdjustBalance_ParsesTheValueLikeThePython(string message, double expected) =>
-        AdjustBalance.ParseValue(message).ShouldBe(expected);
+    public void AdjustBalance_ParsesTheValue(string message, string? account, double expected) =>
+        AdjustBalance.ParseValue(message, account).ShouldBe(expected);
 
     [Fact]
     public void AdjustBalance_NoNumber_IsNull() => AdjustBalance.ParseValue("ajustar saldo nubank").ShouldBeNull();

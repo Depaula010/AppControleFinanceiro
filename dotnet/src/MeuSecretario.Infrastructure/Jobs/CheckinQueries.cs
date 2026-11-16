@@ -146,7 +146,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
 
     private const string OverdueInvoicesSql = """
         SELECT f.id AS Id, c.nome_conta AS Name, f.data_vencimento AS DueDate, f.status AS Status, f.conta_id AS AccountId,
-               COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) AS Total
+               GREATEST(COALESCE(-SUM(CASE WHEN t.tipo_transacao IN ('Despesa', 'Renda') THEN t.valor ELSE 0 END), 0), 0) AS Total
         FROM faturas f
         JOIN contas c ON f.conta_id = c.id
         LEFT JOIN transacoes t ON f.id = t.fatura_id
@@ -160,7 +160,7 @@ public sealed class CheckinQueries(IDbConnectionFactory connections) : ICheckinQ
 
     private const string DueTodaySql = """
         SELECT f.id AS Id, c.nome_conta AS Name, f.data_vencimento AS DueDate, f.status AS Status, f.conta_id AS AccountId,
-               COALESCE(SUM(CASE WHEN t.valor < 0 THEN ABS(t.valor) ELSE 0 END), 0) AS Total
+               GREATEST(COALESCE(-SUM(CASE WHEN t.tipo_transacao IN ('Despesa', 'Renda') THEN t.valor ELSE 0 END), 0), 0) AS Total
         FROM faturas f
         JOIN contas c ON f.conta_id = c.id
         LEFT JOIN transacoes t ON f.id = t.fatura_id

@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Application.Automation;
 using MeuSecretario.Application.Transactions;
 using MeuSecretario.Domain.Automation;
@@ -18,8 +19,14 @@ public sealed class TransactionReplyStep(
     IAutomationLookups lookups,
     TransactionConfirmationSaver saver,
     IFeedbackService feedback,
-    TransferConfirmation transfers) : IWhatsAppStep
+    TransferConfirmation transfers,
+    ICache cache) : IWhatsAppStep
 {
+    /// <summary>Enquanto uma resposta à pendência é processada, outra igual (toque duplo) espera (auditoria 2026-11-16, M8).</summary>
+    private static readonly TimeSpan LockTtl = TimeSpan.FromSeconds(30);
+
+    public const string AlreadyProcessing = "⏳ Já estou processando sua confirmação. Aguarde um instante.";
+
     public int Order => StepOrder.TransactionReply;
 
     public async Task<string?> HandleAsync(PipelineContext context, CancellationToken cancellationToken)
@@ -42,6 +49,24 @@ public sealed class TransactionReplyStep(
             return upper is "CANCELAR" or "CANCELA" or "NÃO" or "NAO" ? WhatsAppTexts.NothingPendingToCancel : null;
         }
 
+        var lockKey = $"pending_reply_lock:{context.Number}:{lastId}";
+        if (!await cache.SetIfNotExistsAsync(lockKey, "1", LockTtl, cancellationToken))
+        {
+            return AlreadyProcessing;
+        }
+
+        try
+        {
+            return await ProcessAsync(context, lastId, upper, cancellationToken);
+        }
+        finally
+        {
+            await cache.DeleteAsync(lockKey, CancellationToken.None);
+        }
+    }
+
+    private async Task<string?> ProcessAsync(PipelineContext context, string lastId, string upper, CancellationToken cancellationToken)
+    {
         var pending = await state.GetAsync(context.Number, lastId, cancellationToken);
         if (TransferConfirmation.IsTransfer(pending) && upper is "TROCAR" or "MUDAR" or "ALTERAR")
         {
@@ -145,8 +170,12 @@ public sealed class TransactionConfirmationSaver(DirectPoster poster, ITransacti
             throw new AutomationFailureException("valor fora do numeric(15,2)");
         }
 
+        // Desvio 276: o valor chega como total/N em double (33,3333...). Fecha o total em centavos, arredonda a parcela e joga o
+        // resíduo na 1ª (100 em 3x = 33,34 + 33,33 + 33,33), em vez de perder ou ganhar centavo no numeric(15,2).
+        var (perInstallment, first) = InstallmentSplit.Split(amount, installments.Value);
         var result = await posting.PostInstallmentPurchaseAsync(
-            new PostInstallmentPurchase(userId, accountId, categoryId, amount, installments.Value, description, date), cancellationToken);
+            new PostInstallmentPurchase(userId, accountId, categoryId, perInstallment, installments.Value, description, date, FirstInstallmentAmount: first),
+            cancellationToken);
         return result is PostingResult<PostedInstallmentPurchase>.Ok ok
             ? ok.Value.TransactionId
             : throw new AutomationFailureException("lançamento parcelado recusado: " + ((PostingResult<PostedInstallmentPurchase>.Failed)result).Error);

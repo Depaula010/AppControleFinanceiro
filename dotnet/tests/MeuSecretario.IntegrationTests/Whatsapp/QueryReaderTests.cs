@@ -1,3 +1,4 @@
+using MeuSecretario.IntegrationTests.Bills;
 using MeuSecretario.Domain.Whatsapp;
 using MeuSecretario.Infrastructure.Whatsapp;
 using MeuSecretario.IntegrationTests.Automation;
@@ -21,12 +22,27 @@ public class QueryReaderTests(PostgresFixture postgres) : IAsyncLifetime, IClass
     {
         await postgres.ResetAsync();
         _env = new AutomationEnv(postgres);
-        _reader = new WhatsAppQueryReader(postgres.Connections);
+        _reader = new WhatsAppQueryReader(postgres.Connections, new BillsHttp.FixedClock(new DateOnly(2100, 1, 1)));
         _user = await _env.SeedUserAsync();
         _other = await _env.SeedUserAsync("5511999990001", "outra-chave");
     }
 
     public Task DisposeAsync() => Task.CompletedTask;
+
+    [Fact]
+    [Trait("AC", "012-301")]
+    public async Task Balances_ProjectedIncludesFutureMovements_Deviation283()
+    {
+        var card = await _env.Data.InsertAccountAsync(_user, "Cartao");
+        await _env.Data.InsertTransactionAsync(_user, card, valor: -100m, data: "2026-10-05");
+        await _env.Data.InsertTransactionAsync(_user, card, valor: -60m, data: "2026-11-20");
+
+        var reader = new WhatsAppQueryReader(postgres.Connections, new BillsHttp.FixedClock(Today));
+
+        var balance = (await reader.GetBalancesAsync(_user, card, CancellationToken.None)).Single();
+
+        (balance.Balance, balance.Projected).ShouldBe((-100d, -160d));
+    }
 
     [Fact]
     [Trait("AC", "012-301")]
@@ -96,13 +112,13 @@ public class QueryReaderTests(PostgresFixture postgres) : IAsyncLifetime, IClass
 
         var summary = await _reader.GetOpenInvoicesAsync(_user, null, CancellationToken.None);
         summary.Select(i => (i.CardName, i.Value, i.DueDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture), i.Status)).ShouldBe(
-            [("Inter", 150d, "2026-10-17", "Aberta"), ("Inter", 0d, "2026-11-17", "Aberta")]);
+            [("Inter", 130d, "2026-10-17", "Aberta"), ("Inter", 0d, "2026-11-17", "Aberta")]);
         (await _reader.GetOpenInvoicesAsync(_user, card, CancellationToken.None)).Count.ShouldBe(1);
 
         var detail = await _reader.GetInvoiceDetailAsync(_user, card, CancellationToken.None);
-        detail!.Total.ShouldBe(150d);
+        detail!.Total.ShouldBe(130d);
         detail.Lines.Select(l => (l.Description, l.Value, l.ScheduleType, l.InstallmentInfo)).ShouldBe(
-            [("Cinema", 50d, "PARCELADO", "2/3"), ("Mercado", 100d, null, null)]);
+            [("Estorno", -20d, null, null), ("Cinema", 50d, "PARCELADO", "2/3"), ("Mercado", 100d, null, null)]);
         (await _reader.GetInvoiceDetailAsync(_user, await _env.Data.InsertAccountAsync(_user, "Outra"), CancellationToken.None)).ShouldBeNull();
     }
 

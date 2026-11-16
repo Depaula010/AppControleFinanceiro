@@ -46,10 +46,9 @@ public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime,
         status.ShouldBe(HttpStatusCode.OK);
         body.ShouldBe($$"""{"status":"sucesso","mensagem":"Conta fixa quitada com sucesso!","conta_identificada":"Luz","transaction_id":{{row.Id}}}""");
         (row.Valor, row.Tipo, row.Descricao, row.Conta, row.Sub, row.Schedule, DateOnly.FromDateTime(row.Data), row.Fatura, row.Origem)
-            .ShouldBe((-150.50m, "Despesa", "Luz", _checking, 59, null, new DateOnly(2026, 10, 2), null, null));
-        _ = schedule;
+            .ShouldBe((-150.50m, "Despesa", "Luz", _checking, 59, (int?)schedule, new DateOnly(2026, 10, 2), null, null)); // desvio 275: ligada ao agendamento
         _env.Bot.Sent.Single().Message.ShouldBe(
-            "✅ *CONTA QUITADA!* ✅\n\n📝 Luz\n💰 R$ 150,50\n📊 Outros\n\n_Esta conta não será mais cobrada automaticamente este mês._");
+            "✅ *CONTA QUITADA!* ✅\n\n📝 Luz\n💰 R$ 150,50\n📊 Outros\n\n_Conta marcada como paga neste mês._");
         _env.Llm.Requests.ShouldBeEmpty();
     }
 
@@ -113,7 +112,7 @@ public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime,
         (row.Valor, row.Descricao, row.Conta, row.Sub, row.Fatura, DateOnly.FromDateTime(row.Data))
             .ShouldBe((-80.50m, "Mercado Extra (swile)", _wallet, 59, null, new DateOnly(2026, 10, 3)));
         _env.Bot.Sent.Single().Message.ShouldBe(
-            "Pagamento Registrado!\n\nMercado Extra\nR$ 80,50\nswile\n\n_Nao encontrei uma conta fixa correspondente, entao registrei como despesa avulsa._");
+            "Pagamento Registrado!\n\nMercado Extra\nR$ 80,50\nswile\n\n_Não encontrei uma conta fixa correspondente, então registrei como despesa avulsa._");
         // Desvio 096: a extração que o Flask ignorava saiu; só a categorização chama o Gemini.
         _env.Llm.Requests.Count.ShouldBe(1);
         _env.Llm.Requests[0].Prompt.ShouldNotContain("Paguei");
@@ -610,8 +609,8 @@ public class ReprocessEndpointTests(PostgresFixture postgres) : IAsyncLifetime, 
         rows.Select(r => (r.Descricao, r.Valor, r.Tipo, DateOnly.FromDateTime(r.Data), r.Schedule, r.Fatura, r.Consolidada)).ShouldBe(
         [
             ("Notebook (3/3)", -300.00m, "Despesa", new DateOnly(2026, 4, 5), notebook, _invoice, true),
-            ("Bônus", 100.00m, "Renda", new DateOnly(2026, 4, 20), salary, _invoice, true),
-            ("Netflix", -49.90m, "Despesa", new DateOnly(2026, 4, 30), netflix, _invoice, true),
+            ("Bônus", 100.00m, "Renda", new DateOnly(2026, 3, 20), salary, _invoice, true), // desvio 277: dia 20 > fechamento 10, é do ciclo de março
+            ("Netflix", -49.90m, "Despesa", new DateOnly(2026, 3, 31), netflix, _invoice, true),
         ]);
         var installment = (await _env.QueryAsync<(int Executed, bool Active)>("SELECT parcelas_executadas, ativo FROM agendamentos WHERE id = @notebook", new { notebook })).Single();
         installment.ShouldBe((3, false));
@@ -698,6 +697,8 @@ public class ReprocessEndpointTests(PostgresFixture postgres) : IAsyncLifetime, 
         var posted = (await _env.QueryAsync<(string Descricao, int? Fatura, DateTime Data)>("SELECT descricao, fatura_id, data_transacao FROM transacoes")).Single();
         posted.Descricao.ShouldBe("Netflix");
         posted.Fatura.ShouldBe(invoice.Id);
-        DateOnly.FromDateTime(posted.Data).ShouldBe(new DateOnly(invoice.Due.Year, invoice.Due.Month, 12));
+        // Desvio 277: dia 12 vem depois do fechamento (10), então a conta é do ciclo do mês anterior ao do vencimento.
+        var previous = DateOnly.FromDateTime(invoice.Due).AddMonths(-1);
+        DateOnly.FromDateTime(posted.Data).ShouldBe(new DateOnly(previous.Year, previous.Month, 12));
     }
 }

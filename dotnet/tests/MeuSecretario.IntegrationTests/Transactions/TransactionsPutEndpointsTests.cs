@@ -383,7 +383,7 @@ public class TransactionsPutEndpointsTests(PostgresFixture postgres) : IAsyncLif
 
     [Fact]
     [Trait("AC", "004-56")]
-    public async Task MovingToANonCard_OrToIncome_ClearsTheInvoice()
+    public async Task MovingToANonCard_ClearsTheInvoice_AndChangingToIncomeKeepsItOnACard_Deviation279()
     {
         var card = await _data.InsertCardAsync(_user, "Nubank", 10, 15);
         var invoice = await _data.InsertInvoiceAsync(card, "2026-03-15", "2026-03-10");
@@ -394,7 +394,7 @@ public class TransactionsPutEndpointsTests(PostgresFixture postgres) : IAsyncLif
         await Put("""{"tipo":"Receita"}""", second);
 
         (await Row(first)).Fatura.ShouldBeNull();
-        (await Row(second)).Fatura.ShouldBeNull();
+        (await Row(second)).Fatura.ShouldBe(invoice);
     }
 
     [Fact]

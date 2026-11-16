@@ -58,8 +58,26 @@ public class FixedBillsDomainTests
                 r.GetProperty("periodicidade").GetString(), r.GetProperty("categoria").GetString()!,
                 r.GetProperty("tipo_conta").GetString()!, r.GetProperty("nome_grupo").GetString()!)).ToList();
 
-            FixedBillsMessages.Catalog(bills).ShouldBe(c.GetProperty("text").GetString(), c.GetProperty("label").GetString());
+            // Desvio 285: o total mensal usa o fator quinzenal 26/12 (o Flask usava 2,16); a linha do total é conferida à parte.
+            StripTotal(FixedBillsMessages.Catalog(bills)).ShouldBe(StripTotal(c.GetProperty("text").GetString()!), c.GetProperty("label").GetString());
         }
+    }
+
+    private static string StripTotal(string text) =>
+        System.Text.RegularExpressions.Regex.Replace(text, @"💸 Total despesas mensais: R\$ [\d.,]+", "💸 Total despesas mensais: X");
+
+    [Fact]
+    [Trait("AC", "012-401")]
+    public void Catalog_Total_UsesTheUnifiedBiweeklyFactor_Deviation285()
+    {
+        var text = FixedBillsMessages.Catalog(
+        [
+            new CatalogBill("Faxina", 200, 15, null, "QUINZENAL", "Casa", "Conta Corrente", "Despesa Essencial"),
+            new CatalogBill("Aluguel", 1500, 5, null, "MENSAL", "Moradia", "Conta Corrente", "Despesa Essencial"),
+        ]);
+
+        // 1500 + 200 x 26/12 = 1.933,33
+        text.ShouldContain("Total despesas mensais: R$ 1.933,33");
     }
 
     [Fact]
@@ -80,34 +98,6 @@ public class FixedBillsDomainTests
             DueDatesMessage.Format(bills, invoices, c.GetProperty("period").GetString()!, FixedBillsFixture.Date(c.GetProperty("reference").GetString()!))
                 .ShouldBe(c.GetProperty("text").GetString(), $"{c.GetProperty("label").GetString()} / {c.GetProperty("period").GetString()}");
         }
-    }
-
-    [Theory]
-    [InlineData("2026-10-07", "2026-10-07", 1, "7-7")]
-    [InlineData("2026-10-07", "2026-10-14", 1, "7-14")]
-    [InlineData("2026-10-28", "2026-11-04", 2, "28->|<-4")]
-    [InlineData("2026-12-28", "2027-01-04", 2, "28->|<-4")]
-    [Trait("AC", "012-402")]
-    public void DuePlan_OneQueryInsideAMonth_TwoAcrossTheTurn(string from, string to, int slices, string shape)
-    {
-        var plan = DueDatesMessage.Plan(FixedBillsFixture.Date(from), FixedBillsFixture.Date(to));
-        plan.Count.ShouldBe(slices);
-        var text = string.Join("|", plan.Select(s => s switch
-        {
-            { DayFrom: { } a, DayTo: { } b } => $"{a}-{b}",
-            { DayFrom: { } a } => $"{a}->",
-            _ => $"<-{s.DayTo}",
-        }));
-        text.ShouldBe(shape);
-    }
-
-    [Fact]
-    [Trait("AC", "012-402")]
-    public void DuePlan_AcrossTheTurn_UsesEachSlicesOwnMonthAndYear()
-    {
-        var plan = DueDatesMessage.Plan(new DateOnly(2026, 12, 28), new DateOnly(2027, 1, 4));
-        plan[0].ShouldBe(new DueSlice(28, null, 12, 2026));
-        plan[1].ShouldBe(new DueSlice(null, 4, 1, 2027));
     }
 
     [Fact]

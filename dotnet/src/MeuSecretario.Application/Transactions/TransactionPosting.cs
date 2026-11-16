@@ -189,8 +189,9 @@ public sealed class TransactionPosting(ITransactionsUnitOfWork unitOfWork, ICate
             cancellationToken);
         await session.LinkPairAsync(command.UserId, outgoing.Id, incoming.Id, cancellationToken);
 
-        // R5: a fatura vira Paga sem comparar o valor pago.
-        if (invoice is not null)
+        // R5: a fatura Fechada vira Paga sem comparar o valor pago. Desvio 274: sem Fechada, o pagamento só se liga à fatura do
+        // ciclo e NÃO a marca como Paga (o 2º pagamento parcial quitava a fatura aberta do mês seguinte e ela sumia dos avisos).
+        if (invoice is not null && closed is not null)
         {
             await session.MarkInvoicePaidAsync(invoice.Id, cancellationToken);
         }
@@ -229,7 +230,7 @@ public sealed class TransactionPosting(ITransactionsUnitOfWork unitOfWork, ICate
         var first = await InsertSimpleAsync(
             session,
             new PostSimpleTransaction(
-                command.UserId, command.AccountId, command.SubcategoryId, TransactionKind.Expense, command.InstallmentAmount,
+                command.UserId, command.AccountId, command.SubcategoryId, TransactionKind.Expense, command.FirstInstallmentAmount ?? command.InstallmentAmount,
                 InstallmentLabel.Paid(command.Description, 1, command.TotalInstallments), command.Date, Origin: command.Origin),
             account,
             cancellationToken);
@@ -246,13 +247,12 @@ public sealed class TransactionPosting(ITransactionsUnitOfWork unitOfWork, ICate
         return new PostingResult<PostedInstallmentPurchase>.Ok(new PostedInstallmentPurchase(first.TransactionId, scheduleId, first.InvoiceId));
     }
 
-    /// <summary>Fatura (só despesa em cartão) e <c>INSERT</c>; as checagens de conta e subcategoria já passaram.</summary>
+    /// <summary>Fatura (despesa ou estorno em cartão, desvio 279) e <c>INSERT</c>; as checagens de conta e subcategoria já passaram.</summary>
     private static async Task<PostedTransaction> InsertSimpleAsync(
         ITransactionsSession session, PostSimpleTransaction command, PostingAccount account, CancellationToken cancellationToken)
     {
-        var invoice = command.Kind == TransactionKind.Expense
-            ? await InvoiceLinking.ResolveAsync(session, account, command.Date, cancellationToken)
-            : null;
+        // Desvio 279: a receita no cartão (estorno) também liga à fatura do ciclo e abate o total.
+        var invoice = await InvoiceLinking.ResolveAsync(session, account, command.Date, cancellationToken);
 
         var stored = await session.InsertTransactionAsync(
             new NewTransactionRow(

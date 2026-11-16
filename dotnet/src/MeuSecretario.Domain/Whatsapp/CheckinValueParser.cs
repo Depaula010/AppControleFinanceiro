@@ -59,6 +59,9 @@ public static partial class CheckinValueParser
         return new CheckinValueReply(CheckinValueKind.Invalid, null);
     }
 
+    /// <summary>Converte um número digitado no formato brasileiro ou americano ("1.234,56", "1,234.56", "150,5"); só positivo.</summary>
+    public static bool TryParseAmount(string text, out decimal amount) => TryAmount(text, out amount);
+
     private static bool TryAmount(string text, out decimal amount)
     {
         amount = 0;

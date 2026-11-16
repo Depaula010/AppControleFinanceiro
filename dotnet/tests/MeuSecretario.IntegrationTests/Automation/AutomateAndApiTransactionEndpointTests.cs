@@ -121,7 +121,7 @@ public class AutomateEndpointTests(PostgresFixture postgres) : IAsyncLifetime, I
         row.Fatura.ShouldBeNull();
         row.Conta.ShouldBe(_checking);
         DateOnly.FromDateTime(row.Data).ShouldBe(_env.Today);
-        _env.Bot.Sent.Single().Message.ShouldBe("Transacao salva!\n\nDescricao: Mercado\nValor: R$ 45,90\nCategoria: Despesas Gerais -> Outros");
+        _env.Bot.Sent.Single().Message.ShouldBe("Transação salva!\n\nDescrição: Mercado\nValor: R$ 45,90\nCategoria: Despesas Gerais -> Outros");
     }
 
     [Fact]
@@ -403,7 +403,7 @@ public class ApiTransacaoEndpointTests(PostgresFixture postgres) : IAsyncLifetim
         var row = (await _env.QueryAsync<(decimal Valor, string Tipo, string? Origem, string Descricao, int Conta)>(
             "SELECT valor, tipo_transacao, origem, descricao, conta_id FROM transacoes")).Single();
         row.ShouldBe((-15.90m, "Despesa", null, "Sorveteria - 2 sorvetes", _checking));
-        _env.Bot.Sent.Single().Message.ShouldBe("Transacao salva!\n\nSorveteria - 2 sorvetes\nR$ 15,90\nDespesas Gerais -> Outros");
+        _env.Bot.Sent.Single().Message.ShouldBe("Transação salva!\n\nSorveteria - 2 sorvetes\nR$ 15,90\nDespesas Gerais -> Outros");
     }
 
     [Fact]

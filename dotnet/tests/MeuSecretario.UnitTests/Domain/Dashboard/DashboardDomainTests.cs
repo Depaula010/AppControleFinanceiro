@@ -12,7 +12,7 @@ public class DashboardSummaryCalculatorTests
     {
         var summary = DashboardSummaryCalculator.Calculate([], 0m, 0m, Today);
 
-        summary.ShouldBe(new DashboardSummary(0, 0, 0, 0, "Outubro/2026"));
+        summary.ShouldBe(new DashboardSummary(0, 0, 0, 0, "Outubro/2026", 0));
     }
 
     [Fact]
@@ -176,8 +176,43 @@ public class DashboardAlertsTests
     [Trait("AC", "006-51")]
     public void Monthly_DayAlreadyPassed_GoesToNextMonth_AndIsDroppedWhenFar()
     {
-        DashboardAlerts.Build([Row(day: 10)], Today).ShouldBeEmpty();
+        DashboardAlerts.Build([Row(day: 7)], Today).ShouldBeEmpty();
         Single(Row(day: 3), new DateOnly(2026, 10, 28)).DueDate.ShouldBe(new DateOnly(2026, 11, 3));
+    }
+
+    [Fact]
+    [Trait("AC", "006-51")]
+    public void Monthly_DueInTheLastSevenDaysAndUnpaid_ShowsAsOverdue_Deviation280()
+    {
+        var alert = Single(Row(day: 10));
+
+        alert.DueDate.ShouldBe(new DateOnly(2026, 10, 10));
+        alert.DaysLeft.ShouldBe(-5);
+        alert.Level.ShouldBe("danger");
+        DashboardAlerts.Build([Row(day: 10, paid: [new DateOnly(2026, 10, 10)])], Today).ShouldBeEmpty();
+    }
+
+    [Fact]
+    [Trait("AC", "006-51")]
+    public void Monthly_OverdueAcrossTheMonthTurn_Deviation280()
+    {
+        var alert = Single(Row(day: 30), new DateOnly(2026, 11, 3));
+
+        alert.DueDate.ShouldBe(new DateOnly(2026, 10, 30));
+        alert.DaysLeft.ShouldBe(-4);
+    }
+
+    [Fact]
+    [Trait("AC", "006-51")]
+    public void Rolling_UsesTheDatabaseNextDue_AndShowsItOverdueWithinSevenDays_Deviation280()
+    {
+        var upcoming = Row("SEMANAL", day: 1, start: new DateOnly(2026, 10, 5)) with { RollingNextDue = new DateOnly(2026, 10, 19) };
+        var late = Row("SEMANAL", day: 1, start: new DateOnly(2026, 10, 5)) with { RollingNextDue = new DateOnly(2026, 10, 12) };
+        var stale = Row("SEMANAL", day: 1, start: new DateOnly(2026, 10, 5)) with { RollingNextDue = new DateOnly(2026, 10, 1) };
+
+        Single(upcoming).DaysLeft.ShouldBe(4);
+        Single(late).DaysLeft.ShouldBe(-3);
+        DashboardAlerts.Build([stale], Today).ShouldBeEmpty();
     }
 
     [Fact]
@@ -264,8 +299,8 @@ public class DashboardAlertsTests
     public void Annual_ThisYearWhenNotPassed_NextYearWhenPassed()
     {
         Single(Row("ANUAL", day: 18, month: 10)).DueDate.ShouldBe(new DateOnly(2026, 10, 18));
-        DashboardAlerts.Build([Row("ANUAL", day: 14, month: 10)], Today).ShouldBeEmpty();
-        NextDue(Row("ANUAL", day: 14, month: 10)).ShouldBe(new DateOnly(2027, 10, 14));
+        DashboardAlerts.Build([Row("ANUAL", day: 1, month: 10)], Today).ShouldBeEmpty();
+        NextDue(Row("ANUAL", day: 1, month: 10)).ShouldBe(new DateOnly(2027, 10, 1));
     }
 
     [Fact]

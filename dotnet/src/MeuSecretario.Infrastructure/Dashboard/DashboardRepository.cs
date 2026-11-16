@@ -1,9 +1,11 @@
+using MeuSecretario.Application.Abstractions;
 using System.Data;
 using System.Globalization;
 using Dapper;
 using MeuSecretario.Application.Dashboard;
 using MeuSecretario.Domain.Dashboard;
 using MeuSecretario.Infrastructure.Database;
+using MeuSecretario.Infrastructure.Jobs;
 
 namespace MeuSecretario.Infrastructure.Dashboard;
 
@@ -12,7 +14,7 @@ namespace MeuSecretario.Infrastructure.Dashboard;
 /// é <c>ativa</c> em <c>contas</c> e <c>ativo</c> em <c>agendamentos</c>. Mês e dia da semana saem do banco em
 /// formato fixo (<c>TO_CHAR(..., 'YYYY-MM')</c>, <c>EXTRACT(DOW)</c>), sem depender de <c>lc_time</c> (desvio 009).
 /// </summary>
-public sealed class DashboardRepository(IDbConnectionFactory connections) : IDashboardRepository
+public sealed class DashboardRepository(IDbConnectionFactory connections, IClock clock) : IDashboardRepository
 {
     public async Task<IReadOnlyList<decimal>> ListActiveAccountBalancesAsync(int userId, CancellationToken cancellationToken)
     {
@@ -21,15 +23,35 @@ public sealed class DashboardRepository(IDbConnectionFactory connections) : IDas
             """
             SELECT c.saldo_inicial + COALESCE(SUM(t.valor), 0) AS saldo
             FROM contas c
-            LEFT JOIN transacoes t ON c.id = t.conta_id AND t.consolidada = true
+            LEFT JOIN transacoes t ON c.id = t.conta_id AND t.consolidada = true AND t.data_transacao <= @today
             WHERE c.usuario_id = @userId AND c.ativa = true
             GROUP BY c.id, c.tipo_conta, c.nome_conta, c.saldo_inicial
             ORDER BY c.tipo_conta, c.nome_conta, c.id
             """,
-            new { userId },
+            new { userId, today = clock.Today.ToDateTime(TimeOnly.MinValue) },
             cancellationToken: cancellationToken));
 
         return balances.ToList();
+    }
+
+    public async Task<decimal> SumProjectedBalanceAsync(int userId, CancellationToken cancellationToken)
+    {
+        await using var connection = await connections.OpenAsync(cancellationToken);
+
+        // Desvio 283: o mesmo saldo do resumo, sem o corte de data (os lançamentos futuros, como as contas do cartão do mês seguinte, contam).
+        return await connection.ExecuteScalarAsync<decimal>(new CommandDefinition(
+            """
+            SELECT COALESCE(SUM(s.saldo), 0)
+            FROM (
+                SELECT c.saldo_inicial + COALESCE(SUM(t.valor), 0) AS saldo
+                FROM contas c
+                LEFT JOIN transacoes t ON c.id = t.conta_id AND t.consolidada = true
+                WHERE c.usuario_id = @userId AND c.ativa = true
+                GROUP BY c.id
+            ) s
+            """,
+            new { userId },
+            cancellationToken: cancellationToken));
     }
 
     public async Task<IReadOnlyList<TypeTotal>> SumByTypeAsync(int userId, DateOnly firstDay, DateOnly lastDay, CancellationToken cancellationToken)
@@ -145,36 +167,38 @@ public sealed class DashboardRepository(IDbConnectionFactory connections) : IDas
         await using var connection = await connections.OpenAsync(cancellationToken);
 
         // Desvio 095: fora os agendamentos de receita (grupo Renda ou macro Receitas Gerais; o mesmo predicado da 005).
-        // Desvio 094: PaidDates = datas das transações do próprio agendamento (agendamento_id) ou, sem vínculo, de mesma
-        // descrição, na janela dos alertas (desvio 012).
+        // Desvio 280: PaidDates = vencimentos do intervalo já pagos e RollingNextDue = próximo vencimento de cadência contínua, ambos pela
+        // definição única do check-in (SchedulePaymentSql). Tipos listados nos avisos e parcelado com parcela restante (desvio 270).
+        var paidLast = paidToExclusive.AddDays(-1);
         var rows = await connection.QueryAsync<ScheduleDbRow>(new CommandDefinition(
-            """
+            $"""
             SELECT a.id AS Id, a.descricao AS Description, a.valor_previsto AS Amount, a.tipo_agendamento AS Type,
                    a.periodicidade AS Periodicity, a.dia_execucao AS Day, a.mes_execucao AS Month,
                    a.data_inicio AS StartDate, sc.nome_sub AS SubcategoryName,
                    ARRAY(
-                       SELECT DISTINCT t.data_transacao::text
-                       FROM transacoes t
-                       WHERE t.usuario_id = a.usuario_id
-                         AND t.data_transacao >= @paidFrom AND t.data_transacao < @paidTo
-                         AND (t.agendamento_id = a.id OR (t.agendamento_id IS NULL AND t.descricao = a.descricao))
-                   ) AS PaidDates
+                       SELECT d.due::text
+                       FROM {SchedulePaymentSql.DueDates("a", "@paidFrom", "@paidLast")} AS d(due)
+                       WHERE EXISTS (SELECT 1 FROM transacoes t WHERE {SchedulePaymentSql.Paid("a", "t", "d.due", "a.descricao")})
+                   ) AS PaidDates,
+                   CASE WHEN {SchedulePaymentSql.IsRolling("a")} THEN {SchedulePaymentSql.NextDue("a", "@paidLast")} END AS RollingNextDue
             FROM agendamentos a
             LEFT JOIN subcategoria sc ON a.subcategoria_id = sc.id
             LEFT JOIN macrocategoria mc ON sc.macro_id = mc.id
             LEFT JOIN grupocategoria g ON mc.grupo_id = g.id
             WHERE a.usuario_id = @userId AND a.ativo = true
+              AND {SchedulePaymentSql.ListedKind("a")}
               AND NOT (COALESCE(g.nome_grupo, '') = 'Renda'
                    OR (COALESCE(g.nome_grupo, '') = 'Geral' AND COALESCE(mc.nome_macro, '') = 'Receitas Gerais'))
             ORDER BY a.dia_execucao, a.id
             """,
-            Params(userId, ("paidFrom", paidFrom), ("paidTo", paidToExclusive)),
+            Params(userId, ("paidFrom", paidFrom), ("paidLast", paidLast)),
             cancellationToken: cancellationToken));
 
         return rows.Select(r => new ScheduleRow(
             r.Id, r.Description, r.Amount, r.Type, r.Periodicity, r.Day, r.Month,
             r.StartDate is { } start ? DateOnly.FromDateTime(start) : null, r.SubcategoryName,
-            (r.PaidDates ?? []).Select(d => DateOnly.ParseExact(d, "yyyy-MM-dd", CultureInfo.InvariantCulture)).ToList())).ToList();
+            (r.PaidDates ?? []).Select(d => DateOnly.ParseExact(d, "yyyy-MM-dd", CultureInfo.InvariantCulture)).ToList(),
+            r.RollingNextDue is { } rolling ? DateOnly.FromDateTime(rolling) : null)).ToList();
     }
 
     /// <summary>O Dapper não conhece <see cref="DateOnly"/>: a data viaja como <see cref="DateTime"/> à meia-noite.</summary>
@@ -262,5 +286,7 @@ public sealed class DashboardRepository(IDbConnectionFactory connections) : IDas
         public string? SubcategoryName { get; set; }
 
         public string[]? PaidDates { get; set; }
+
+        public DateTime? RollingNextDue { get; set; }
     }
 }

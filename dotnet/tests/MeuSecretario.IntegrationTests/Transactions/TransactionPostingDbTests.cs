@@ -94,9 +94,21 @@ public class TransactionPostingDbTests(PostgresFixture postgres) : IAsyncLifetim
 
     [Fact]
     [Trait("AC", "004-24")]
-    public async Task Simple_IncomeOnACard_DoesNotLink()
+    public async Task Simple_IncomeOnACard_LinksToTheCycleInvoice_Deviation279()
     {
-        Ok(await _posting.PostSimpleAsync(Simple(TransactionKind.Income, account: _card, subcategory: IncomeSubcategory), CancellationToken.None))
+        var expense = Ok(await _posting.PostSimpleAsync(Simple(account: _card), CancellationToken.None));
+        var refund = Ok(await _posting.PostSimpleAsync(Simple(TransactionKind.Income, account: _card, subcategory: IncomeSubcategory), CancellationToken.None));
+
+        refund.InvoiceId.ShouldNotBeNull();
+        refund.InvoiceId.ShouldBe(expense.InvoiceId);
+        (await Count("faturas")).ShouldBe(1);
+    }
+
+    [Fact]
+    [Trait("AC", "004-24")]
+    public async Task Simple_IncomeOnACheckingAccount_NeverLinks()
+    {
+        Ok(await _posting.PostSimpleAsync(Simple(TransactionKind.Income, subcategory: IncomeSubcategory), CancellationToken.None))
             .InvoiceId.ShouldBeNull();
 
         (await Count("faturas")).ShouldBe(0);
@@ -277,13 +289,13 @@ public class TransactionPostingDbTests(PostgresFixture postgres) : IAsyncLifetim
 
     [Fact]
     [Trait("AC", "004-119")]
-    public async Task Payment_WithoutAClosedInvoice_PaysTheCycleInvoice_CreatedIfMissing()
+    public async Task Payment_WithoutAClosedInvoice_LinksTheCycleInvoice_KeepsItOpen_CreatedIfMissing()
     {
         var posted = Ok(await _posting.PostInvoicePaymentAsync(
             new PostInvoicePayment(_user, _checking, _card, 1m, Day("2026-03-20")), CancellationToken.None));
 
         posted.InvoiceDueDate.ShouldBe(Day("2026-04-15"));
-        (await _data.ScalarAsync<string>("SELECT status FROM faturas WHERE id = @id", new { id = posted.InvoiceId })).ShouldBe("Paga");
+        (await _data.ScalarAsync<string>("SELECT status FROM faturas WHERE id = @id", new { id = posted.InvoiceId })).ShouldBe("Aberta");
     }
 
     [Fact]

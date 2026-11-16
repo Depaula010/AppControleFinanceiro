@@ -119,11 +119,11 @@ public class AutomationTextsTests
     [Fact]
     public void SavedTexts_UseFlaskWordingWithoutAccents()
     {
-        AutomationTexts.AutomateSaved("Mercado", 45.9, "A -> B").ShouldBe("Transacao salva!\n\nDescricao: Mercado\nValor: R$ 45,90\nCategoria: A -> B");
-        AutomationTexts.AutomateSaved(null, 1, "X").ShouldContain("Descricao: None");
-        AutomationTexts.ApiSaved("Padaria - pao", 8, "A -> B").ShouldBe("Transacao salva!\n\nPadaria - pao\nR$ 8,00\nA -> B");
+        AutomationTexts.AutomateSaved("Mercado", 45.9, "A -> B").ShouldBe("Transação salva!\n\nDescrição: Mercado\nValor: R$ 45,90\nCategoria: A -> B");
+        AutomationTexts.AutomateSaved(null, 1, "X").ShouldContain("Descrição: None");
+        AutomationTexts.ApiSaved("Padaria - pao", 8, "A -> B").ShouldBe("Transação salva!\n\nPadaria - pao\nR$ 8,00\nA -> B");
         AutomationTexts.SmsRegistered("Luz", "R$ 10,00", "swile").ShouldBe(
-            "Pagamento Registrado!\n\nLuz\nR$ 10,00\nswile\n\n_Nao encontrei uma conta fixa correspondente, entao registrei como despesa avulsa._");
+            "Pagamento Registrado!\n\nLuz\nR$ 10,00\nswile\n\n_Não encontrei uma conta fixa correspondente, então registrei como despesa avulsa._");
     }
 }
 

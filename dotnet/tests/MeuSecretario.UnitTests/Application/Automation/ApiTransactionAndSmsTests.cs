@@ -207,7 +207,7 @@ public class RegisterApiTransactionTests
         posted.Amount.ShouldBe(15.9m);
         posted.Description.ShouldBe("Sorveteria - 2 sorvetes");
         posted.Origin.ShouldBeNull();
-        _h.BotMessage().ShouldBe("Transacao salva!\n\nSorveteria - 2 sorvetes\nR$ 15,90\nAlimentação -> Supermercado");
+        _h.BotMessage().ShouldBe("Transação salva!\n\nSorveteria - 2 sorvetes\nR$ 15,90\nAlimentação -> Supermercado");
     }
 
     [Fact]
@@ -244,6 +244,8 @@ public class ProcessSmsPaymentTests
     public ProcessSmsPaymentTests()
     {
         _h.Lookups.FindSettleTargetAsync(AutomationHarness.UserId, 10, Arg.Any<CancellationToken>()).Returns(new SettleTarget("Luz", 2, 31));
+        _h.Executor.ExecuteAsync(Arg.Any<MeuSecretario.Application.Jobs.ScheduleExecutionRequest>(), Arg.Any<CancellationToken>())
+            .Returns(new MeuSecretario.Application.Jobs.ScheduleExecutionOutcome.Posted(500, "Luz", -150.5m, null));
         _h.Lookups.FindAccountIdWithFallbackAsync(AutomationHarness.UserId, "Carteira", Arg.Any<CancellationToken>()).Returns(1);
     }
 
@@ -284,16 +286,16 @@ public class ProcessSmsPaymentTests
         var settled = result.ShouldBeOfType<SmsPaymentResult.Settled>();
         settled.BillDescription.ShouldBe("Luz");
         settled.TransactionId.ShouldBe(500);
-        var posted = _h.Posted();
-        posted.AccountId.ShouldBe(2);
-        posted.SubcategoryId.ShouldBe(31);
-        posted.Kind.ShouldBe(TransactionKind.Expense);
-        posted.Amount.ShouldBe(150.5m);
-        posted.Description.ShouldBe("Luz");
-        posted.Date.ShouldBe(new DateOnly(2026, 10, 2));
-        posted.ScheduleId.ShouldBeNull();
+        // Desvio 275: a baixa passa pelo executor (agendamento + competência), não por uma despesa avulsa.
+        var request = _h.Settled();
+        request.ScheduleId.ShouldBe(10);
+        request.Amount.ShouldBe(150.5m);
+        request.Date.ShouldBe(new DateOnly(2026, 10, 2));
+        request.Competence.ShouldBe(new DateOnly(2026, 10, 1)); // dia 1 do cadastro (SettleTarget padrão), no mês do pagamento
+        request.AllowVariableReminder.ShouldBeTrue();
+        await _h.Posting.DidNotReceiveWithAnyArgs().PostSimpleAsync(default!, default);
         _h.BotMessage().ShouldBe(
-            "✅ *CONTA QUITADA!* ✅\n\n📝 Luz\n💰 R$ 150,50\n📊 Energia\n\n_Esta conta não será mais cobrada automaticamente este mês._");
+            "✅ *CONTA QUITADA!* ✅\n\n📝 Luz\n💰 R$ 150,50\n📊 Energia\n\n_Conta marcada como paga neste mês._");
         _h.Llm.Requests.ShouldBeEmpty();
     }
 
@@ -303,7 +305,7 @@ public class ProcessSmsPaymentTests
     {
         await Run("""{"user_api_key":"chave-do-atalho","descricao_pagamento":"luz","valor_pago":10,"conta_pagamento":"swile"}""");
 
-        _h.Posted().Date.ShouldBe(AutomationHarness.Today);
+        _h.Settled().Date.ShouldBe(AutomationHarness.Today);
     }
 
     [Fact]
@@ -325,7 +327,7 @@ public class ProcessSmsPaymentTests
         posted.Amount.ShouldBe(80.5m);
         posted.Description.ShouldBe("Mercado Extra (swile)");
         _h.BotMessage().ShouldBe(
-            "Pagamento Registrado!\n\nMercado Extra\nR$ 80,50\nswile\n\n_Nao encontrei uma conta fixa correspondente, entao registrei como despesa avulsa._");
+            "Pagamento Registrado!\n\nMercado Extra\nR$ 80,50\nswile\n\n_Não encontrei uma conta fixa correspondente, então registrei como despesa avulsa._");
     }
 
     [Fact]
@@ -361,7 +363,7 @@ public class ProcessSmsPaymentTests
         var result = await Run("""{"user_api_key":"chave-do-atalho","descricao_pagamento":"luz","valor_pago":"150.50","conta_pagamento":"swile"}""");
 
         result.ShouldBeOfType<SmsPaymentResult.Settled>();
-        _h.Posted().Amount.ShouldBe(150.5m);
+        _h.Settled().Amount.ShouldBe(150.5m);
         _h.BotMessage().ShouldContain("💰 R$ 150,50");
     }
 
@@ -376,7 +378,7 @@ public class ProcessSmsPaymentTests
         result.ShouldBeOfType<SmsPaymentResult.Registered>();
         _h.Posted().Amount.ShouldBe(80.5m);
         _h.BotMessage().ShouldBe(
-            "Pagamento Registrado!\n\nMercado Extra\nR$ 80,50\nswile\n\n_Nao encontrei uma conta fixa correspondente, entao registrei como despesa avulsa._");
+            "Pagamento Registrado!\n\nMercado Extra\nR$ 80,50\nswile\n\n_Não encontrei uma conta fixa correspondente, então registrei como despesa avulsa._");
     }
 
     [Theory]
@@ -399,7 +401,7 @@ public class ProcessSmsPaymentTests
     {
         await Run("""{"user_api_key":"chave-do-atalho","descricao_pagamento":"luz","valor_pago":10,"conta_pagamento":"swile","data_pagamento":"20260115"}""");
 
-        _h.Posted().Date.ShouldBe(new DateOnly(2026, 1, 15));
+        _h.Settled().Date.ShouldBe(new DateOnly(2026, 1, 15));
     }
 
     [Theory]

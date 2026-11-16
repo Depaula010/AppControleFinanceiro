@@ -23,6 +23,7 @@ public static class AccountsResponses
                 ["limite_credito"] = Limit(a.LimiteCredito),
                 ["dia_fechamento"] = a.DiaFechamento,
                 ["dia_vencimento"] = a.DiaVencimento,
+                ["saldo_projetado"] = (double)a.SaldoProjetado,
             }).ToList());
 
     public static IResult Created(AccountDetails account) =>

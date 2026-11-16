@@ -106,9 +106,14 @@ public class FixedBillsReaderTests(PostgresFixture postgres) : IAsyncLifetime, I
         catalog.Single(b => b.Description == "Anual").Month.ShouldBe(3);
     }
 
+    private static readonly DateOnly D1007 = new(2026, 10, 7);
+
+    private async Task<string[]> DueNames(DateOnly start, DateOnly end) =>
+        [.. (await _reader.ListDueBillsAsync(_user, start, end, CancellationToken.None)).Select(b => b.Description)];
+
     [Fact]
     [Trait("AC", "012-402")]
-    public async Task DueBills_Slices_FilterByDayAndAnnualMonth()
+    public async Task DueBills_FilterByDateWindowAndAnnualMonth_AcrossTheMonthTurn()
     {
         await _env.InsertScheduleAsync(_user, _account, "Dia 3", day: 3);
         await _env.InsertScheduleAsync(_user, _account, "Dia 7", day: 7);
@@ -117,13 +122,56 @@ public class FixedBillsReaderTests(PostgresFixture postgres) : IAsyncLifetime, I
         await _env.InsertScheduleAsync(_user, _account, "Anual março", periodicity: "ANUAL", month: 3, day: 7);
         await _env.InsertScheduleAsync(_user, _account, "Parcelado", type: "PARCELADO", total: 3, day: 7);
 
-        var names = async (DueSlice slice) => (await _reader.ListDueBillsAsync(_user, slice, CancellationToken.None)).Select(b => b.Description).ToArray();
-
         // Desvio 270: o parcelado com parcela restante vence como as fixas.
-        (await names(new DueSlice(7, 7, 10, 2026))).ShouldBe(["Dia 7", "Anual outubro", "Parcelado"]);
-        (await names(new DueSlice(7, 30, 10, 2026))).ShouldBe(["Dia 7", "Anual outubro", "Parcelado", "Dia 30"]);
-        (await names(new DueSlice(28, null, 10, 2026))).ShouldBe(["Dia 30"]);
-        (await names(new DueSlice(null, 4, 11, 2026))).ShouldBe(["Dia 3"]);
+        (await DueNames(D1007, D1007)).ShouldBe(["Dia 7", "Anual outubro", "Parcelado"]);
+        (await DueNames(D1007, new DateOnly(2026, 10, 30))).ShouldBe(["Dia 7", "Anual outubro", "Parcelado", "Dia 30"]);
+        (await DueNames(new DateOnly(2026, 10, 28), new DateOnly(2026, 11, 4))).ShouldBe(["Dia 30", "Dia 3"]);
+    }
+
+    [Fact]
+    [Trait("AC", "012-402")]
+    public async Task DueBills_DayThirtyOneFallsOnTheLastDayOfAShortMonth_Deviation280()
+    {
+        await _env.InsertScheduleAsync(_user, _account, "Dia 31", day: 31);
+
+        (await DueNames(new DateOnly(2026, 11, 29), new DateOnly(2026, 11, 29))).ShouldBeEmpty();
+        var bills = await _reader.ListDueBillsAsync(_user, new DateOnly(2026, 11, 30), new DateOnly(2026, 11, 30), CancellationToken.None);
+        bills.Select(b => (b.Description, b.Day)).ShouldBe([("Dia 31", 30)]);
+        (await DueNames(new DateOnly(2026, 12, 31), new DateOnly(2026, 12, 31))).ShouldBe(["Dia 31"]);
+    }
+
+    [Fact]
+    [Trait("AC", "012-402")]
+    public async Task DueBills_WeeklyBillAppearsInTheWeekItFallsDue_AndLeavesOncePaidByCompetence_Deviation280()
+    {
+        var weekly = await _env.InsertScheduleAsync(_user, _account, "Feira", periodicity: "SEMANAL", day: 1);
+        await _env.Data.ExecuteAsync("UPDATE agendamentos SET data_inicio = DATE '2026-10-10' WHERE id = @weekly", new { weekly });
+
+        // Vence sábado 10/10: aparece em "essa semana" de 07/10 a 14/10, mas não em "hoje" (07/10).
+        (await DueNames(D1007, new DateOnly(2026, 10, 14))).ShouldBe(["Feira"]);
+        (await DueNames(D1007, D1007)).ShouldBeEmpty();
+
+        // Paga a ocorrência de 10/10 (competência): o próximo vencimento passa a ser 17/10.
+        var paid = await _env.Data.InsertTransactionAsync(_user, _account, valor: -10m, data: "2026-10-10", descricao: "Feira");
+        await _env.Data.ExecuteAsync("UPDATE transacoes SET agendamento_id = @weekly, competencia = DATE '2026-10-10' WHERE id = @paid", new { weekly, paid });
+        (await DueNames(D1007, new DateOnly(2026, 10, 14))).ShouldBeEmpty();
+        (await DueNames(new DateOnly(2026, 10, 15), new DateOnly(2026, 10, 22))).ShouldBe(["Feira"]);
+    }
+
+    [Fact]
+    [Trait("AC", "012-401")]
+    public async Task Pending_WeeklyBillOverdueStillPends_AndPaidByCompetenceLeaves_Deviation280()
+    {
+        var weekly = await _env.InsertScheduleAsync(_user, _account, "Feira", periodicity: "SEMANAL", day: 1);
+        await _env.Data.ExecuteAsync("UPDATE agendamentos SET data_inicio = DATE '2026-10-03' WHERE id = @weekly", new { weekly });
+
+        (await _reader.ListPendingAsync(_user, October1, October31, 10, CancellationToken.None)).Select(b => (b.Description, b.Day)).ShouldBe([("Feira", 3)]);
+
+        var paid = await _env.Data.InsertTransactionAsync(_user, _account, valor: -10m, data: "2026-10-03", descricao: "Feira");
+        await _env.Data.ExecuteAsync("UPDATE transacoes SET agendamento_id = @weekly, competencia = DATE '2026-10-03' WHERE id = @paid", new { weekly, paid });
+
+        // O próximo vencimento (10/10) é de outubro e segue pendente; pagas todas até o fim do mês, sai da lista.
+        (await _reader.ListPendingAsync(_user, October1, October31, 10, CancellationToken.None)).Select(b => b.Day).ShouldBe([10]);
     }
 
     [Fact]
@@ -137,16 +185,14 @@ public class FixedBillsReaderTests(PostgresFixture postgres) : IAsyncLifetime, I
         await _env.Data.InsertTransactionAsync(_other, await _env.Data.InsertAccountAsync(_other, "Dela"), valor: -10m, data: "2026-10-02", descricao: "Pago por outro");
         await _env.Data.InsertTransactionAsync(_user, _account, valor: -10m, data: "2026-09-02", descricao: "Pago em setembro");
 
-        var bills = await _reader.ListDueBillsAsync(_user, new DueSlice(7, 7, 10, 2026), CancellationToken.None);
-
         // Desvio 161: a checagem de "já pago" filtra o usuário; a transação de outro usuário com a mesma descrição não esconde a conta
         // (o Flask a escondia e devolvia só "Pago em setembro").
-        bills.Select(b => b.Description).ShouldBe(["Pago por outro", "Pago em setembro"]);
+        (await DueNames(D1007, D1007)).ShouldBe(["Pago por outro", "Pago em setembro"]);
     }
 
     [Fact]
     [Trait("AC", "012-402")]
-    public async Task DueInvoices_AreOpenOnesOfTheUser_WithTheSumOfTheExpenses()
+    public async Task DueInvoices_AreOpenOnesOfTheUser_WithTheNetTotal_Deviation279()
     {
         var card = await _env.Data.InsertCardAsync(_user, "Inter", 10, 17);
         var other = await _env.Data.InsertCardAsync(_other, "Dela", 10, 17);
@@ -160,6 +206,6 @@ public class FixedBillsReaderTests(PostgresFixture postgres) : IAsyncLifetime, I
 
         var invoices = await _reader.ListDueInvoicesAsync(_user, new DateOnly(2026, 10, 7), new DateOnly(2026, 10, 14), CancellationToken.None);
 
-        invoices.ShouldBe([new DueInvoice("Inter", new DateOnly(2026, 10, 10), 150.5m)]);
+        invoices.ShouldBe([new DueInvoice("Inter", new DateOnly(2026, 10, 10), 130.5m)]);
     }
 }

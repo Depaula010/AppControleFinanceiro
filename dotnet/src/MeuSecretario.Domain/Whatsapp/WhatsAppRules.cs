@@ -82,6 +82,13 @@ public static class MessageIntent
         return trimmedUpper.Length > 0 && trimmedUpper.All(char.IsDigit);
     }
 
+    /// <summary>
+    /// Desvio 276: "paguei 500 da fatura do nubank" fala de fatura de cartão, não de conta fixa. Quem diz "fatura" segue para a
+    /// intenção <c>Pagamento Fatura</c> (o exemplo do próprio menu), em vez de virar despesa avulsa.
+    /// </summary>
+    public static bool MentionsInvoice(string message) =>
+        message.Contains("fatura", StringComparison.OrdinalIgnoreCase);
+
     public static bool HasPaymentWord(string message)
     {
         var lower = message.ToLowerInvariant();
@@ -111,9 +118,7 @@ public static class WhatsAppTexts
 {
     public const string NotRegistered =
         "Olá! 👋 Parece que você ainda não tem cadastro no Meu Secretário.\n\n" +
-        "Para começar a usar, crie sua conta em nosso site:\n" +
-        "https://app.meusecretario.com/register\n\n" +
-        "Após criar sua conta, volte aqui e eu estarei pronto para ajudar! 😊";
+        "Peça seu acesso ao administrador e, depois de cadastrado, volte aqui: eu estarei pronto para ajudar! 😊";
 
     public const string NothingPendingToConfirm =
         "✅ Não encontrei nada pendente para confirmar.\n\nSe quer registrar algo, diga:\nExemplo: 'gastei 50 em comida'";

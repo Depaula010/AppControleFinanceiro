@@ -43,8 +43,6 @@ public static class AnalyticsReport
 
     public const string Footer = "\n\n💬 _Para análises mais específicas, pergunte:_\n• _\"Quanto gastei com [categoria]?\"_\n• _\"Comparar gastos de [mês]\"_";
 
-    /// <summary><c>f"{x:,.2f}"</c>. O zero negativo (<c>-0.0</c>) mantém o sinal, como no Python.</summary>
-    public static string Money(double value) => value == 0 && double.IsNegative(value) ? "-" + PyNumber.Thousands(0.0) : PyNumber.Thousands(value);
 
     /// <summary><c>f"{x:+.1f}"</c>. O zero negativo (<c>-0.0</c>) sai com o sinal de menos, como no Python.</summary>
     public static string WithSign(double value) => value == 0 && double.IsNegative(value) ? "-0.0" : PyNumber.WithSign(value);
