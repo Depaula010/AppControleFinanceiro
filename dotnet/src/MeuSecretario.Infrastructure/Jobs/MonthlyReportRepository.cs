@@ -89,7 +89,7 @@ public sealed class MonthlyReportRepository(IDbConnectionFactory connections) : 
             FROM transacoes t
             INNER JOIN subcategoria sc ON t.subcategoria_id = sc.id
             WHERE t.usuario_id = @uid AND t.data_transacao BETWEEN @start AND @end
-              AND t.tipo_transacao = 'Despesa' AND t.consolidada = TRUE
+              AND t.tipo_transacao = 'Despesa' AND t.consolidada = TRUE AND t.usuario_id = @uid
             GROUP BY sc.nome_sub
             ORDER BY Total DESC, sc.nome_sub
             LIMIT 5
@@ -117,7 +117,7 @@ public sealed class MonthlyReportRepository(IDbConnectionFactory connections) : 
             LEFT JOIN potesubcategorias psc ON p.id = psc.pote_id
             LEFT JOIN transacoes t ON psc.subcategoria_id = t.subcategoria_id
                 AND t.data_transacao BETWEEN @start AND @end
-                AND t.tipo_transacao = 'Despesa' AND t.consolidada = TRUE
+                AND t.tipo_transacao = 'Despesa' AND t.consolidada = TRUE AND t.usuario_id = @uid
             WHERE p.usuario_id = @uid AND p.ativo = TRUE
             GROUP BY p.id, p.nome_pote, p.valor_limite
             ORDER BY p.nome_pote

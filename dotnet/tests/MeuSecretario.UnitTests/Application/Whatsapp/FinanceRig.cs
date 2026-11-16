@@ -493,7 +493,7 @@ internal sealed class FinanceRig
         var steps = new List<IWhatsAppStep>
         {
             new CheckinStep(new CheckinSessionState(Cache), new RecordingCheckinResponder(Cache, Calls, "RESPOSTA-DO-CHECKIN")),
-            new TransactionReplyStep(transactionState, lookups, saver, feedback, new TransferConfirmation(posting)),
+            new TransactionReplyStep(transactionState, lookups, saver, feedback, new TransferConfirmation(posting), Cache),
             new PaymentStep(Llm, lookups, categories, categorizer, resolver, settler, new DirectPoster(posting), clock, new NullFinanceDiagnostics()),
             new BareCancelStep(transactionState, events),
         };

@@ -11704,7 +11704,7 @@
    "name": "ajuste_valor_decimal_ponto",
    "group": "012c",
    "layer": "pipeline",
-   "deviation": null,
+   "deviation": "273",
    "texto": "ajustar saldo nubank 12.50",
    "numero": "5531999990001@s.whatsapp.net",
    "config": {

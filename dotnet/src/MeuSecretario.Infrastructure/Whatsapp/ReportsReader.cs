@@ -56,13 +56,13 @@ public sealed class ReportsReader(IDbConnectionFactory connections) : IReportsRe
             SELECT COALESCE(SUM(-t.valor) FILTER (WHERE t.valor < 0), 0) AS Purchases,
                    COALESCE(SUM(t.valor) FILTER (WHERE t.valor > 0), 0) AS Refunds,
                    COUNT(*) AS Count
-            FROM transacoes t WHERE t.fatura_id = @invoiceId
+            FROM transacoes t WHERE t.fatura_id = @invoiceId AND t.tipo_transacao <> 'Pagamento Fatura'
             """,
             new { invoiceId = invoice.Id },
             cancellationToken: cancellationToken));
 
         var categories = await connection.QueryAsync<CategoryRow>(new CommandDefinition(
-            CategoriesSql("t.fatura_id = @invoiceId"),
+            CategoriesSql("t.fatura_id = @invoiceId AND t.tipo_transacao <> 'Pagamento Fatura'"),
             new { invoiceId = invoice.Id },
             cancellationToken: cancellationToken));
 
@@ -70,7 +70,7 @@ public sealed class ReportsReader(IDbConnectionFactory connections) : IReportsRe
             """
             SELECT t.descricao AS Description, t.data_transacao AS Date, -t.valor AS Amount
             FROM transacoes t
-            WHERE t.fatura_id = @invoiceId AND t.valor < 0
+            WHERE t.fatura_id = @invoiceId AND t.tipo_transacao <> 'Pagamento Fatura' AND t.valor < 0
             ORDER BY t.valor ASC, t.data_transacao DESC, t.id
             LIMIT @limit
             """,
@@ -86,7 +86,7 @@ public sealed class ReportsReader(IDbConnectionFactory connections) : IReportsRe
                        ((regexp_match(t.descricao, '\((\d+)/(\d+)\)\s*$'))[1])::int AS atual,
                        ((regexp_match(t.descricao, '\((\d+)/(\d+)\)\s*$'))[2])::int AS total
                 FROM transacoes t
-                WHERE t.fatura_id = @invoiceId AND t.valor < 0 AND t.descricao ~ '\(\d+/\d+\)\s*$'
+                WHERE t.fatura_id = @invoiceId AND t.tipo_transacao <> 'Pagamento Fatura' AND t.valor < 0 AND t.descricao ~ '\(\d+/\d+\)\s*$'
             ) x
             WHERE x.atual < x.total
             """,
