@@ -1573,7 +1573,7 @@
    "name": "despesa_parcelada",
    "group": "012a",
    "layer": "pipeline",
-   "deviation": null,
+   "deviation": "281",
    "texto": "comprei em 3x de 90",
    "numero": "5531999990001@s.whatsapp.net",
    "config": {
@@ -1683,7 +1683,7 @@
    "name": "despesa_parcelada_cartao",
    "group": "012a",
    "layer": "pipeline",
-   "deviation": null,
+   "deviation": "281",
    "texto": "comprei no cartão inter em 3x de 90",
    "numero": "5531999990001@s.whatsapp.net",
    "config": {
@@ -3111,7 +3111,7 @@
    "name": "despesa_data_inventada_pelo_modelo",
    "group": "012a",
    "layer": "pipeline",
-   "deviation": null,
+   "deviation": "281",
    "texto": "gastei 50 na padaria",
    "numero": "5531999990001@s.whatsapp.net",
    "config": {

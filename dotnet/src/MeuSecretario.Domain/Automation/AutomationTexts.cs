@@ -157,7 +157,8 @@ public static class ConfirmationMessage
     /// A linha do cartão leva o emoji de cartão (o Python tem o caractere U+FFFD no lugar, arquivo corrompido; desvio 100).
     /// </summary>
     public static string Build(
-        PendingTransaction data, IReadOnlyList<CategoryOption> categories, string transactionId, int? installments = null, double? totalValue = null)
+        PendingTransaction data, IReadOnlyList<CategoryOption> categories, string transactionId, int? installments = null, double? totalValue = null,
+        DateOnly? today = null)
     {
         var local = data.Local;
         var description = data.Description;
@@ -192,6 +193,12 @@ public static class ConfirmationMessage
             ? $"💵 *{MoneyText.Brl(totalValue)}* ({installments}x de {valueText})\n"
             : $"💵 *{valueText}*\n");
         sb.Append(CultureInfo.InvariantCulture, $"{typeEmoji} {data.TransactionType}\n");
+
+        // Desvio 281: data informada no texto ("ontem", "dia 10") aparece para o usuário conferir antes do OK.
+        if (today is { } now && DateOnly.TryParseExact(data.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var when) && when != now)
+        {
+            sb.Append(CultureInfo.InvariantCulture, $"📅 {when:dd/MM/yyyy}\n");
+        }
 
         if (!string.IsNullOrEmpty(data.AccountName))
         {

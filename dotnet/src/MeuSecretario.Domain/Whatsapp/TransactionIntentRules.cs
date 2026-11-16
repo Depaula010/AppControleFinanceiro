@@ -9,7 +9,8 @@ namespace MeuSecretario.Domain.Whatsapp;
 /// <summary>
 /// O que <c>extract_income_params</c>/<c>extract_expense_params</c> tiram da resposta do Gemini (<c>gemini_service.py</c>).
 /// O prompt só pede <c>valor_decimal</c> e <c>descricao_bruta</c>; <c>data</c>, <c>conta</c> e <c>parcelamento</c> só existem se o
-/// modelo os inventar (desvio 154 proposto: portado como está).
+/// modelo os inventar. Desvio 281 (antigo 154): a data, as parcelas e o valor da parcela vêm também do texto da mensagem
+/// (<see cref="TransactionTextHints"/>) por <see cref="WithHints"/>.
 /// </summary>
 /// <param name="NotNone"><c>valor is not None</c> no Python (<c>false</c>/<c>0</c>/<c>""</c> são "não nulos" mas falsos).</param>
 /// <param name="Invalid">Valor verdadeiro que não é número: o Python quebra em <c>valor &lt;= 0</c> (<c>TypeError</c>).</param>
@@ -82,6 +83,35 @@ public sealed record ExtractedTransaction(
 
         JsonElement? installments = root.TryGetProperty("parcelamento", out var installmentsElement) ? installmentsElement.Clone() : null;
         return new ExtractedTransaction(value, notNone, invalid, description, date, account, installments);
+    }
+
+    /// <summary>
+    /// Desvio 281: aplica o que o texto diz. Data lida do texto vence a do modelo; data do modelo só vale se for ISO válida (antes, qualquer
+    /// texto virava exceção na compra de cartão). "10x" vira o número de parcelas (só despesa) e "10x de 300" também fixa o total (10 x 300).
+    /// </summary>
+    public ExtractedTransaction WithHints(TextHints hints, string type)
+    {
+        ArgumentNullException.ThrowIfNull(hints);
+        var result = this;
+        if (hints.Date is { } date)
+        {
+            result = result with { Date = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) };
+        }
+        else if (result.Date is not null && !DateOnly.TryParseExact(result.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
+        {
+            result = result with { Date = null };
+        }
+
+        if (type == TransactionIntentRules.Expense && hints.Installments is { } count)
+        {
+            result = result with { Installments = JsonSerializer.SerializeToElement(count) };
+            if (hints.InstallmentValue is { } each)
+            {
+                result = result with { Value = (double)(each * count), NotNone = true, Invalid = false };
+            }
+        }
+
+        return result;
     }
 
     /// <summary>Com o valor trocado pelo previsto do agendamento recorrente.</summary>

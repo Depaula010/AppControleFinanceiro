@@ -1,3 +1,4 @@
+using System.Globalization;
 using MeuSecretario.Application.Abstractions;
 using MeuSecretario.Application.Automation;
 using MeuSecretario.Domain.Automation;
@@ -35,7 +36,8 @@ public abstract class TransactionIntent(
         var raw = await llm.GenerateTextAsync(
             new LlmRequest(AutomationPrompts.ExtractTransactionDetails(context.Message, type), userId, LlmCachePolicies.ExtractTransaction),
             cancellationToken);
-        var extracted = ExtractedTransaction.Parse(LlmJson.Parse(raw), type);
+        var hints = TransactionTextHints.Parse(context.Message, clock.Today);
+        var extracted = ExtractedTransaction.Parse(LlmJson.Parse(raw), type).WithHints(hints, type);
 
         int? scheduleAccountId = null;
         int? scheduleSubcategoryId = null;
@@ -58,7 +60,8 @@ public abstract class TransactionIntent(
             return invalid;
         }
 
-        var resolved = await resolver.ResolveAsync(userId, type, context.Message, extracted.AccountName, scheduleAccountId, cancellationToken);
+        // Desvio 281: a conta citada é procurada no texto sem a data e as parcelas ("dia 10" não é nome de conta).
+        var resolved = await resolver.ResolveAsync(userId, type, hints.CleanText, extracted.AccountName, scheduleAccountId, cancellationToken);
         if (resolved is null)
         {
             return TransactionIntentRules.AccountNotFound;
@@ -81,13 +84,11 @@ public abstract class TransactionIntent(
         int? invoiceId = null;
         if (!income && TransactionIntentRules.IsCreditAccount(resolved.Account.Type))
         {
-            if (extracted.Date is not null)
-            {
-                // O Flask passa o texto da data a get_or_create_fatura, que lê .day (AttributeError).
-                throw new InvalidOperationException("Data da transação não é uma data.");
-            }
-
-            invoiceId = await invoices.ResolveAsync(userId, resolved.Account.Id, clock.Today, cancellationToken);
+            // Desvio 281: o Flask passava o texto da data a get_or_create_fatura (AttributeError, "Ops!"). Agora a fatura é a do ciclo da data.
+            var purchaseDay = extracted.Date is { } text && DateOnly.TryParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)
+                ? parsed
+                : clock.Today;
+            invoiceId = await invoices.ResolveAsync(userId, resolved.Account.Id, purchaseDay, cancellationToken);
         }
 
         var build = TransactionIntentRules.BuildPending(type, extracted, userId, resolved.Account, categoryId, invoiceId, scheduleDescription, clock.Today);
@@ -100,7 +101,7 @@ public abstract class TransactionIntent(
         var transactionId = await pending.CreateAsync(context.Number, data, cancellationToken);
         return transactionId is null
             ? TransactionIntentRules.PendingFailed
-            : ConfirmationMessage.Build(build.Message, options, transactionId, build.Installments, build.Total);
+            : ConfirmationMessage.Build(build.Message, options, transactionId, build.Installments, build.Total, clock.Today);
     }
 }
 
