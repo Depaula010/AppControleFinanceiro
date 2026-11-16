@@ -191,7 +191,8 @@ public static class JobsServiceCollectionExtensions
         // Portas para a 009c.
         services.AddScoped<IScheduleMotor>(sp => sp.GetRequiredService<ScheduleMotor>());
         services.AddScoped<IDailyBriefingJob>(sp => sp.GetRequiredService<DailyBriefingJob>());
-        services.AddScoped<IMonthlyReportJob>(sp => sp.GetRequiredService<MonthlyReportJob>());
+        services.AddScoped<IMonthlyReportJob>(sp => new LockedMonthlyReportJob(
+            sp.GetRequiredService<MonthlyReportJob>(), sp.GetRequiredService<JobRunner>(), sp.GetRequiredService<IClock>()));
         services.AddScoped<IBillsNotificationJob>(sp => sp.GetRequiredService<BillsNotificationJob>());
 
         // Os agendados.

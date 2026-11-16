@@ -66,7 +66,8 @@ public class ReserveFactorTests
             ReserveFactor.For(Periodicities.Monthly, months).ShouldBe(c.GetProperty("monthly").GetInt32());
             ReserveFactor.For(Periodicities.Annual, months).ShouldBe(1);
             ReserveFactor.For(Periodicities.Weekly, months).ShouldBe(c.GetProperty("weekly").GetInt32(), $"semanal N={months}");
-            ReserveFactor.For(Periodicities.Biweekly, months).ShouldBe(c.GetProperty("biweekly").GetInt32());
+            // Desvio 285: quinzenal vale N x 26/12 (o Flask usava 2N).
+            ReserveFactor.For(Periodicities.Biweekly, months).ShouldBe(months * 26.0 / 12, 1e-9);
             ReserveFactor.For(Periodicities.Daily, months).ShouldBe(c.GetProperty("daily").GetInt32());
         }
     }
@@ -102,8 +103,12 @@ public class EmergencyReserveTests
 
             var result = EmergencyReserve.Calculate(months, totals);
 
-            result.Total.ShouldBe(BillsFixtures.D(c, "total"), $"meses={months}");
-            result.MonthlyEquivalent.ShouldBe(BillsFixtures.D(c, "monthly_equivalent"), $"meses={months}");
+            // Desvio 285: o fator quinzenal passou de 2 para 26/12 por mês; o esperado do Flask é corrigido pela diferença.
+            var biweekly = totals.Where(t => t.Periodicity == Periodicities.Biweekly).Sum(t => t.Total);
+            var delta = biweekly * months * ((double)Periodicities.BiweeklyPerMonth - 2);
+            var tolerance = delta == 0 ? 0 : 1e-6;
+            result.Total.ShouldBe(BillsFixtures.D(c, "total") + delta, tolerance, $"meses={months}");
+            result.MonthlyEquivalent.ShouldBe(months > 0 ? (BillsFixtures.D(c, "total") + delta) / months : 0, tolerance == 0 ? 1e-9 : tolerance, $"meses={months}");
         }
     }
 
@@ -118,8 +123,9 @@ public class EmergencyReserveTests
             new(Periodicities.Biweekly, 50), new(Periodicities.Weekly, 10),
         ]);
 
-        result.Total.ShouldBe(3020.0);
-        PyRound.Round2(result.MonthlyEquivalent).ShouldBe(503.33);
+        // Desvio 285: 50 quinzenal x 6 x 26/12 = 650 (eram 600).
+        result.Total.ShouldBe(3070.0, 1e-9);
+        PyRound.Round2(result.MonthlyEquivalent).ShouldBe(511.67);
     }
 
     [Fact]
@@ -172,14 +178,14 @@ public class BillsSummaryCalculatorTests
             reserveTotal: 1,
             months: 6);
 
-        // 100 + 2×30 + 50×2,16 + 10×4,33 na ordem recebida, como double
+        // 100 + 2×30 + 50×26/12 + 10×4,33 na ordem recebida, como double, arredondado a 2 casas (desvio 285; era 2,16 e sem arredondar)
         var expected = 0.0;
         expected += 2 * 30.0;
         expected += 100;
-        expected += 50 * 2.16;
+        expected += 50 * (double)Periodicities.BiweeklyPerMonth;
         expected += 10 * 4.33;
-        summary.MonthlyExpenses.ShouldBe(expected);
-        Math.Abs(summary.MonthlyExpenses - 311.3).ShouldBeLessThan(1e-9);
+        summary.MonthlyExpenses.ShouldBe(PyRound.Round2(expected));
+        summary.MonthlyExpenses.ShouldBe(311.63);
         summary.AnnualExpenses.ShouldBe(1200);
         summary.MonthlyIncome.ShouldBe(3000);
     }
@@ -217,13 +223,21 @@ public class BillsSummaryCalculatorTests
 
     [Fact]
     [Trait("AC", "005-93")]
-    public void Calculate_UsesTheReserveTotalAndRoundsOnlyTheGoal()
+    public void Calculate_UsesTheReserveTotal_AndRoundsEveryMoneyValueToTwoPlaces_Deviation285()
     {
         var summary = BillsSummaryCalculator.Calculate([Expense(Periodicities.Monthly, 100.123)], 3020, 6);
 
         summary.ReserveGoal.ShouldBe(3020.0);
         summary.ReserveMonthlyEquivalent.ShouldBe(503.33);
-        summary.MonthlyExpenses.ShouldBe(100.123);
+        summary.MonthlyExpenses.ShouldBe(100.12);
+    }
+
+    [Fact]
+    [Trait("AC", "005-90")]
+    public void Calculate_DoesNotLeakFloatingPointNoise_Deviation285()
+    {
+        // 0,1 + 0,2 em double dá 0.30000000000000004; o resumo mostra 0.3.
+        BillsSummaryCalculator.Calculate([Expense(Periodicities.Monthly, 0.1), Expense(Periodicities.Monthly, 0.2)], 0, 6).MonthlyExpenses.ShouldBe(0.3);
     }
 
     [Fact]

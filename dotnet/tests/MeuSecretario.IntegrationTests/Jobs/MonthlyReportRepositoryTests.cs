@@ -76,6 +76,19 @@ public sealed class MonthlyReportRepositoryTests(PostgresFixture postgres) : IAs
 
     [Fact]
     [Trait("AC", "013-71")]
+    public async Task Data_PendingAccounts_ExcludeWhatWasAlreadyPaidInThePeriod_Deviation285()
+    {
+        var rent = await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Aluguel", 700m, day: 10);
+        await _env.ScheduleAsync(_user, _account, "Despesa Essencial", "Luz", 120m, day: 12);
+        await _env.TransactionAsync(_user, _account, "Despesa Essencial", "2026-02-10", "Aluguel", -700m, scheduleId: rent, competence: "2026-02-10");
+
+        var data = await _repository.GetDataAsync(_user, MonthlyMoment.InicioMes, JobsEnv.Day("2026-03-01"), CancellationToken.None);
+
+        data.Accounts.ShouldBe(new ReportAccounts(1, 700, 1, 120));
+    }
+
+    [Fact]
+    [Trait("AC", "013-71")]
     public async Task Data_TopCategories_AreOrderedFromTheBiggestSpend_Deviation132()
     {
         await _env.TransactionAsync(_user, _account, "Despesa Essencial", "2026-03-05", "Pequena", -10m);

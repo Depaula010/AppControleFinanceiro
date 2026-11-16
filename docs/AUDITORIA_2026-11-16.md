@@ -199,10 +199,18 @@ Front (médio):
 | Documentação (§4/§5 do CLAUDE.md, runbook, índice de desvios) | atualizada | |
 | M10 saldo inclui lançamentos futuros | corrigido: saldo só até hoje | desvio 278 |
 | Cortes de produto (tela Assinatura, "dias antes", cadastro público por flag, flag dos alertas de tarefa) | feitos | desvio 278 + front |
-| M2 estorno não abate a fatura | **pendente** (muda regra de total da fatura em 6 consultas) | |
-| M6 três regras de "conta paga" | **pendente** (unificar com `SchedulePaymentSql`) | |
-| Saldo "projetado" como campo novo | **pendente** (desvio posterior) | |
-| M11 chave única (JWT/admin/webhook) | **pendente** (rotação de segredos, §9.2 do CLAUDE.md) | |
-| M12 desvio 154 (data/conta/parcelas no "gastei") | **pendente** | |
-| M13 avisos de fatura às 00:01 | **pendente** | |
-| Baixos do backend (rate limit, lock dos jobs, percentuais do relatório, QUINZENAL 2,16 x 2, textos sem acento, dinheiro sem milhar) | **pendentes** | |
+| M2 estorno não abate a fatura | corrigido | desvio 279 |
+| M6 três regras de "conta paga" | corrigido (dashboard mostra atrasadas dos últimos 7 dias) | desvio 280 |
+| Saldo "projetado" como campo novo | corrigido (`saldo_projetado`; front e bot) | desvio 283 |
+| M11 chave única (JWT/admin/webhook) | **código pronto** (`WEBHOOK_API_KEY` opcional); a troca real é manual do Rafael, ver desvio 284 | desvio 284 |
+| M12 desvio 154 (data/conta/parcelas no "gastei") | corrigido (leitura determinística do texto) | desvio 281 |
+| M13 avisos de fatura às 00:01 | corrigido (resumo da manhã, respeita `alertas_financeiros_ativos`) | desvio 282 |
+| Baixos do backend: lock dos jobs, rotas admin sem trava, relatório mensal (percentual e pendentes), QUINZENAL 26/12 e arredondamento, parcelado quitado no resumo, aviso de fechamento não reenviado, textos sem acento, "(Débito)" em receita, "6x", link morto, dinheiro sem milhar, `Quitar Conta Fixa`, código morto, populador (`data_inicio`, competência, `FOR UPDATE`) | corrigido | desvios 282 e 285 |
+| Rate limit desligado (`/auth/login`) | **não feito**: decisão do desvio 081, fora desta rodada | |
+| Front: specs quebrados (modal de conta, título do scaffold) | corrigido; `ng test` 35 de 35 | front |
+
+### Passos manuais que ficam com o Rafael
+- Rotacionar de verdade a chave do webhook e a `API_SECRET_KEY` (desvio 284 e `CLAUDE.md` §9.2): criar o secret `WEBHOOK_API_KEY`, acrescentá-lo ao `.env` do `deploy.yml`, atualizar `sessions.metadata.webhook_auth_token` no banco do bot e só depois rotacionar a `API_SECRET_KEY`.
+- Conferir em produção o índice da migration 0090 (`SELECT 1 FROM pg_indexes WHERE indexname='ux_transacoes_agendamento_competencia'`).
+- Receitas em cartão lançadas antes do desvio 279 continuam sem fatura (sem backfill).
+- Fazer o merge das branches e o deploy (nada foi enviado com `push`).

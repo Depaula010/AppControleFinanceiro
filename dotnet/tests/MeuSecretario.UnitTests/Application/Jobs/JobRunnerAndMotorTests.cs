@@ -42,9 +42,28 @@ public class JobRunnerTests
         var outcome = await _h.Runner.RunAsync(job, CancellationToken.None);
 
         outcome.ShouldBe(JobRunOutcome.Completed);
-        during.ShouldBe("running");
+        during.ShouldNotBeNull().Length.ShouldBe(32);   // desvio 285: valor único por execução (Guid "N")
+        during.ShouldNotBe("running");
         ttl!.Value.TotalSeconds.ShouldBeInRange(299, 300);
         _h.Cache.RawValue(CacheKeys.JobLock("TESTE")).ShouldBeNull();
+    }
+
+    [Fact]
+    [Trait("AC", "013-03")]
+    public async Task Run_LockThatExpiredAndWasTakenByAnotherRun_IsNotReleasedByTheFirst_Deviation285()
+    {
+        var job = new FakeJob(async _ =>
+        {
+            // Passou do TTL: a chave sumiu e outra execução pegou o lock.
+            await _h.Cache.DeleteAsync(CacheKeys.JobLock("TESTE"), CancellationToken.None);
+            await _h.Cache.SetIfNotExistsAsync(CacheKeys.JobLock("TESTE"), "da-outra-execucao", TimeSpan.FromMinutes(5), CancellationToken.None);
+        });
+
+        var outcome = await _h.Runner.RunAsync(job, CancellationToken.None);
+
+        outcome.ShouldBe(JobRunOutcome.Completed);
+        _h.Cache.RawValue(CacheKeys.JobLock("TESTE")).ShouldBe("da-outra-execucao");
+        _h.Log.Lines.ShouldContain(l => l.Contains("nada a liberar", StringComparison.Ordinal));
     }
 
     [Fact]

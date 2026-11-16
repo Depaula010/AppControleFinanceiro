@@ -232,6 +232,9 @@ public class JobsRulesTests
         MonthlyReportRules.Comparison(200, 100).VariationPercent.ShouldBe(100);
         MonthlyReportRules.TopCategories([("A", -30), ("B", -10)]).Select(c => c.Percent).ShouldBe([75d, 25d]);
         MonthlyReportRules.TopCategories([("A", 0)]).Single().Percent.ShouldBe(0);
+        // Desvio 285: com o total de despesas do periodo, o percentual e a fatia do total (nao a do top 5).
+        MonthlyReportRules.TopCategories([("A", 30), ("B", 10)], 200).Select(c => c.Percent).ShouldBe([15d, 5d]);
+        MonthlyReportRules.TopCategories([("A", 30), ("B", 10)], 0).Select(c => c.Percent).ShouldBe([75d, 25d]);
         MonthlyReportRules.Pot("Lazer", 0, 10).Percent.ShouldBe(0);
         MonthlyReportRules.Pot("Lazer", 100, -50).Percent.ShouldBe(-50);
         MonthlyReportRules.PreviousMonth(new DateOnly(2026, 1, 1)).ShouldBe((new DateOnly(2025, 12, 1), new DateOnly(2025, 12, 31)));

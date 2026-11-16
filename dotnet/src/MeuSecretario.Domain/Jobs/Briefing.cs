@@ -1,3 +1,4 @@
+using MeuSecretario.Domain.Automation;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -367,12 +368,12 @@ public static partial class BriefingPrompt
     {
         foreach (var bill in bills)
         {
-            parts.Add($"• {bill.Description} - R$ {PyNumber.FixedComma(bill.Value)}");
+            parts.Add($"• {bill.Description} - {MoneyText.Brl(bill.Value)}");
         }
 
         foreach (var invoice in invoices)
         {
-            parts.Add($"• Fatura {invoice.Card} - R$ {PyNumber.FixedComma(invoice.Value)}");
+            parts.Add($"• Fatura {invoice.Card} - {MoneyText.Brl(invoice.Value)}");
         }
     }
 }

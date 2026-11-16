@@ -17,7 +17,7 @@ public sealed record BillsSummary(
 public static class BillsSummaryCalculator
 {
     public const double WeeklyFactor = 4.33;
-    public const double BiweeklyFactor = 2.16;
+    public const double BiweeklyFactor = (double)Periodicities.BiweeklyPerMonth;
     public const int DailyFactor = 30;
 
     /// <param name="rows">Na ordem da consulta (<c>periodicidade, grupo</c>): a soma de <see cref="double"/> depende dela.</param>
@@ -52,7 +52,9 @@ public static class BillsSummaryCalculator
         }
 
         var equivalent = months > 0 ? reserveTotal / months : 0;
-        return new BillsSummary(expenses, annual, income, PyRound.Round2(reserveTotal), PyRound.Round2(equivalent), months);
+        // Desvio 285: valores em reais saem com 2 casas (a soma de doubles dava 300.30000000000004).
+        return new BillsSummary(
+            PyRound.Round2(expenses), PyRound.Round2(annual), PyRound.Round2(income), PyRound.Round2(reserveTotal), PyRound.Round2(equivalent), months);
     }
 
     /// <summary>Contribuição mensal; <c>0</c> para <c>ANUAL</c> (separado) e periodicidade desconhecida.</summary>

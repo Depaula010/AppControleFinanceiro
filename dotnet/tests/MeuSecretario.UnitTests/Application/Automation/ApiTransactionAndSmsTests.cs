@@ -207,7 +207,7 @@ public class RegisterApiTransactionTests
         posted.Amount.ShouldBe(15.9m);
         posted.Description.ShouldBe("Sorveteria - 2 sorvetes");
         posted.Origin.ShouldBeNull();
-        _h.BotMessage().ShouldBe("Transacao salva!\n\nSorveteria - 2 sorvetes\nR$ 15,90\nAlimentação -> Supermercado");
+        _h.BotMessage().ShouldBe("Transação salva!\n\nSorveteria - 2 sorvetes\nR$ 15,90\nAlimentação -> Supermercado");
     }
 
     [Fact]
@@ -295,7 +295,7 @@ public class ProcessSmsPaymentTests
         request.AllowVariableReminder.ShouldBeTrue();
         await _h.Posting.DidNotReceiveWithAnyArgs().PostSimpleAsync(default!, default);
         _h.BotMessage().ShouldBe(
-            "✅ *CONTA QUITADA!* ✅\n\n📝 Luz\n💰 R$ 150,50\n📊 Energia\n\n_Esta conta não será mais cobrada automaticamente este mês._");
+            "✅ *CONTA QUITADA!* ✅\n\n📝 Luz\n💰 R$ 150,50\n📊 Energia\n\n_Conta marcada como paga neste mês._");
         _h.Llm.Requests.ShouldBeEmpty();
     }
 
@@ -327,7 +327,7 @@ public class ProcessSmsPaymentTests
         posted.Amount.ShouldBe(80.5m);
         posted.Description.ShouldBe("Mercado Extra (swile)");
         _h.BotMessage().ShouldBe(
-            "Pagamento Registrado!\n\nMercado Extra\nR$ 80,50\nswile\n\n_Nao encontrei uma conta fixa correspondente, entao registrei como despesa avulsa._");
+            "Pagamento Registrado!\n\nMercado Extra\nR$ 80,50\nswile\n\n_Não encontrei uma conta fixa correspondente, então registrei como despesa avulsa._");
     }
 
     [Fact]
@@ -378,7 +378,7 @@ public class ProcessSmsPaymentTests
         result.ShouldBeOfType<SmsPaymentResult.Registered>();
         _h.Posted().Amount.ShouldBe(80.5m);
         _h.BotMessage().ShouldBe(
-            "Pagamento Registrado!\n\nMercado Extra\nR$ 80,50\nswile\n\n_Nao encontrei uma conta fixa correspondente, entao registrei como despesa avulsa._");
+            "Pagamento Registrado!\n\nMercado Extra\nR$ 80,50\nswile\n\n_Não encontrei uma conta fixa correspondente, então registrei como despesa avulsa._");
     }
 
     [Theory]

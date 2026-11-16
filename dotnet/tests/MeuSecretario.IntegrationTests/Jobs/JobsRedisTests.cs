@@ -101,7 +101,20 @@ public sealed class JobsRedisTests(RedisFixture redis) : IClassFixture<RedisFixt
 
     [Fact]
     [Trait("AC", "013-03")]
-    public async Task Lock_IsTheRawRunningValueWithFiveMinutes_SecondRunnerSkips_AndItIsReleased()
+    public async Task DeleteIfEquals_OnlyRemovesTheKeyWhenTheValueIsTheCallers_Deviation285()
+    {
+        var key = CacheKeys.JobLock("DONO-" + _suffix);
+        await _cache.SetIfNotExistsAsync(key, "dono-a", TimeSpan.FromMinutes(1));
+
+        (await _cache.DeleteIfEqualsAsync(key, "dono-b")).ShouldBeFalse();
+        (await _cache.ExistsAsync(key)).ShouldBeTrue();
+        (await _cache.DeleteIfEqualsAsync(key, "dono-a")).ShouldBeTrue();
+        (await _cache.ExistsAsync(key)).ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("AC", "013-03")]
+    public async Task Lock_IsAUniqueValuePerRunWithFiveMinutes_SecondRunnerSkips_AndItIsReleased()
     {
         var name = "TESTE-" + _suffix;
         var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -110,7 +123,7 @@ public sealed class JobsRedisTests(RedisFixture redis) : IClassFixture<RedisFixt
         await started.Task;
 
         var db = _mux.GetDatabase();
-        ((string?)await db.StringGetAsync(CacheKeys.JobLock(name))).ShouldBe("running");
+        ((string?)await db.StringGetAsync(CacheKeys.JobLock(name))).ShouldNotBeNull().Length.ShouldBe(32);   // desvio 285: valor único por execução
         (await db.KeyTimeToLiveAsync(CacheKeys.JobLock(name)))!.Value.TotalSeconds.ShouldBeInRange(290, 300);
         var second = await Runner().RunAsync(new BlockingJob(name, new TaskCompletionSource(), new TaskCompletionSource()), CancellationToken.None);
         release.SetResult();

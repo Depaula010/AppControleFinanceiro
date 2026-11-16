@@ -58,8 +58,26 @@ public class FixedBillsDomainTests
                 r.GetProperty("periodicidade").GetString(), r.GetProperty("categoria").GetString()!,
                 r.GetProperty("tipo_conta").GetString()!, r.GetProperty("nome_grupo").GetString()!)).ToList();
 
-            FixedBillsMessages.Catalog(bills).ShouldBe(c.GetProperty("text").GetString(), c.GetProperty("label").GetString());
+            // Desvio 285: o total mensal usa o fator quinzenal 26/12 (o Flask usava 2,16); a linha do total é conferida à parte.
+            StripTotal(FixedBillsMessages.Catalog(bills)).ShouldBe(StripTotal(c.GetProperty("text").GetString()!), c.GetProperty("label").GetString());
         }
+    }
+
+    private static string StripTotal(string text) =>
+        System.Text.RegularExpressions.Regex.Replace(text, @"💸 Total despesas mensais: R\$ [\d.,]+", "💸 Total despesas mensais: X");
+
+    [Fact]
+    [Trait("AC", "012-401")]
+    public void Catalog_Total_UsesTheUnifiedBiweeklyFactor_Deviation285()
+    {
+        var text = FixedBillsMessages.Catalog(
+        [
+            new CatalogBill("Faxina", 200, 15, null, "QUINZENAL", "Casa", "Conta Corrente", "Despesa Essencial"),
+            new CatalogBill("Aluguel", 1500, 5, null, "MENSAL", "Moradia", "Conta Corrente", "Despesa Essencial"),
+        ]);
+
+        // 1500 + 200 x 26/12 = 1.933,33
+        text.ShouldContain("Total despesas mensais: R$ 1.933,33");
     }
 
     [Fact]

@@ -128,13 +128,13 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [151](151-whatsapp-transferencia-quebrada.md) | Transferência por WhatsApp falha sempre | correção | 012 | implementado (feature 012, 2026-10-09) |
 | [152](152-whatsapp-notificacoes-gemini-500.md) | Configurar Notificações pelo ramo do Gemini grava e responde 500 | correção | 012 | implementado |
 | [153](153-whatsapp-api-key-cifrada.md) | Solicitar API Key devolve o valor cru da coluna | correção | 012 | implementado |
-| [154](154-whatsapp-extracao-sem-parcelamento.md) | A extração de despesa e renda não pede data, conta, categoria nem parcelamento | correção | 012 | proposto |
+| [154](154-whatsapp-extracao-sem-parcelamento.md) | A extração de despesa e renda não pede data, conta, categoria nem parcelamento | correção | 012 | implementado (281) |
 | [155](155-whatsapp-evento-pendente-mais-recente.md) | Evento pendente "mais recente" depende da ordem do KEYS | correção | 012 | implementado (feature 012, 2026-10-09) |
 | [156](156-whatsapp-origem-rota-sem-tratamento.md) | Resposta casa/trabalho/outro à pergunta de origem da rota não é tratada | correção | 012 | implementado (feature 012, 2026-10-09) |
 | [157](157-whatsapp-pagamento-fatura-inalcancavel.md) | Pagamento Fatura é inalcançável com "paguei..." | compatibilidade | 012 | implementado (276) |
 | [158](158-whatsapp-analise-previsao-valores-negativos-e-erros.md) | Análise e previsão: valores negativos, desempate aleatório e KeyError sem histórico | correção | 012 | implementado (feature 012, 2026-10-09) |
 | [159](159-whatsapp-drive-erro-especifico.md) | Upload ao Drive: o motivo específico da falha nunca é mostrado | correção | 012 | implementado |
-| [160](160-whatsapp-quitar-conta-fixa-sem-handler.md) | Quitar Conta Fixa está no prompt do Gemini mas não tem ramo | correção | 012 | proposto |
+| [160](160-whatsapp-quitar-conta-fixa-sem-handler.md) | Quitar Conta Fixa está no prompt do Gemini mas não tem ramo | correção | 012 | implementado (285) |
 | [161](161-whatsapp-vencimentos-sem-filtro-de-usuario.md) | Vencimentos comparam a descrição sem filtrar o usuário | correção | 012 | implementado (feature 012, 2026-10-09) |
 | [170](170-whatsapp-feedback-pote-so-uma-subcategoria.md) | Feedback da transação soma só a subcategoria da transação no pote | correção | 012 | implementado (feature 012, 2026-10-09) |
 | [190](190-whatsapp-desativar-notificacao-vira-ativar.md) | Desativar resumo matinal ou check-in por WhatsApp ativa | correção | 012 | implementado |
@@ -174,3 +174,10 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [276](276-fatura-no-paguei-centavos-e-parcela-apagada.md) | "Paguei … da fatura" paga a fatura (157); centavos das parcelas; apagar parcela devolve o contador | correção | 004, 012 | implementado |
 | [277](277-populador-no-ciclo-da-fatura.md) | Populador de faturas lança a conta do cartão na data do ciclo (dia depois do fechamento vai para o mês anterior) | correção | 011, 013 | implementado |
 | [278](278-saldo-de-hoje-e-flags.md) | Saldo só até hoje; cadastro público desligado por flag (403); flag dos alertas de tarefa (ligado) | correção | 001, 002, 006, 012, 013, 014 | implementado |
+| [279](279-estorno-abate-a-fatura.md) | Estorno (receita no cartão) liga à fatura do ciclo e abate o total | correção | 004, 006, 012, 013 | implementado |
+| [280](280-uma-regra-de-conta-paga-e-a-vencer.md) | Uma só regra de "conta paga" e "a vencer" (check-in, Contas Fixas, vencimentos, dashboard com atrasadas) | correção | 006, 012, 013 | implementado |
+| [281](281-data-e-parcelas-no-gastei.md) | "Gastei" lê data, parcelas e valor da parcela do texto (implementa o 154) | correção | 012 | implementado |
+| [282](282-avisos-de-fatura-no-resumo-da-manha.md) | Avisos de fatura fechada e vencimento próximo saem no resumo da manhã e respeitam os alertas | correção | 013 | implementado |
+| [283](283-saldo-projetado.md) | Campo novo `saldo_projetado` (dashboard, contas e bot) | acréscimo | 002, 006, 012 | implementado |
+| [284](284-chave-propria-do-webhook.md) | `WEBHOOK_API_KEY` opcional para o x-api-key do webhook (troca real é manual) | segurança | 009, 012 | implementado (código) |
+| [285](285-baixos-da-auditoria.md) | Baixos do backend: lock com dono, relatório mensal, quinzenal 26/12, textos, milhar, populador | correção | 005, 011, 012, 013 | implementado |

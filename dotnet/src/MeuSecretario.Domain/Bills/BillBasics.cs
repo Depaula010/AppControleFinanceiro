@@ -25,6 +25,12 @@ public static class Periodicities
     public const string Monthly = "MENSAL";
     public const string Annual = "ANUAL";
 
+    /// <summary>
+    /// Quinzenas por mês (26 por ano / 12 meses = 2,1666...), a única definição do fator quinzenal (desvio 285). O resumo usava 2,16 e a
+    /// reserva usava 2.
+    /// </summary>
+    public const decimal BiweeklyPerMonth = 26m / 12m;
+
     public static IReadOnlyList<string> All { get; } = [Daily, Weekly, Biweekly, Monthly, Annual];
 
     public static bool IsValid(string value) => All.Contains(value, StringComparer.Ordinal);

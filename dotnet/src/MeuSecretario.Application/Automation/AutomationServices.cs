@@ -175,7 +175,7 @@ public sealed class InvoiceScheduleProcessor(IInvoiceScheduleUnitOfWork unitOfWo
         var details = new List<InvoiceScheduleDetail>();
         var cycle = await session.GetCardCycleAsync(cardAccountId, cancellationToken);
 
-        foreach (var schedule in await session.ListSchedulesAsync(cardAccountId, referenceDate.Month, cancellationToken))
+        foreach (var schedule in await session.ListSchedulesAsync(cardAccountId, referenceDate, cancellationToken))
         {
             if (schedule.ScheduleType == InvoiceScheduleRules.Reminder)
             {

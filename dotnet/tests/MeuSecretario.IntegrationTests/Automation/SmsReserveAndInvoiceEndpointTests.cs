@@ -48,7 +48,7 @@ public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime,
         (row.Valor, row.Tipo, row.Descricao, row.Conta, row.Sub, row.Schedule, DateOnly.FromDateTime(row.Data), row.Fatura, row.Origem)
             .ShouldBe((-150.50m, "Despesa", "Luz", _checking, 59, (int?)schedule, new DateOnly(2026, 10, 2), null, null)); // desvio 275: ligada ao agendamento
         _env.Bot.Sent.Single().Message.ShouldBe(
-            "✅ *CONTA QUITADA!* ✅\n\n📝 Luz\n💰 R$ 150,50\n📊 Outros\n\n_Esta conta não será mais cobrada automaticamente este mês._");
+            "✅ *CONTA QUITADA!* ✅\n\n📝 Luz\n💰 R$ 150,50\n📊 Outros\n\n_Conta marcada como paga neste mês._");
         _env.Llm.Requests.ShouldBeEmpty();
     }
 
@@ -112,7 +112,7 @@ public class SmsPaymentEndpointTests(PostgresFixture postgres) : IAsyncLifetime,
         (row.Valor, row.Descricao, row.Conta, row.Sub, row.Fatura, DateOnly.FromDateTime(row.Data))
             .ShouldBe((-80.50m, "Mercado Extra (swile)", _wallet, 59, null, new DateOnly(2026, 10, 3)));
         _env.Bot.Sent.Single().Message.ShouldBe(
-            "Pagamento Registrado!\n\nMercado Extra\nR$ 80,50\nswile\n\n_Nao encontrei uma conta fixa correspondente, entao registrei como despesa avulsa._");
+            "Pagamento Registrado!\n\nMercado Extra\nR$ 80,50\nswile\n\n_Não encontrei uma conta fixa correspondente, então registrei como despesa avulsa._");
         // Desvio 096: a extração que o Flask ignorava saiu; só a categorização chama o Gemini.
         _env.Llm.Requests.Count.ShouldBe(1);
         _env.Llm.Requests[0].Prompt.ShouldNotContain("Paguei");

@@ -87,6 +87,19 @@ public sealed class InMemoryCache(FakeTimeProvider? time = null) : ICache
     public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default) =>
         Task.FromResult(Get(key) is not null);
 
+    public Task<bool> DeleteIfEqualsAsync(string key, string rawValue, CancellationToken cancellationToken = default)
+    {
+        if (Unavailable)
+        {
+            return Task.FromResult(false);
+        }
+
+        lock (_gate)
+        {
+            return Task.FromResult(Get(key) == rawValue && _store.Remove(key));
+        }
+    }
+
     public Task<bool> DeleteAsync(string key, CancellationToken cancellationToken = default)
     {
         if (Unavailable)

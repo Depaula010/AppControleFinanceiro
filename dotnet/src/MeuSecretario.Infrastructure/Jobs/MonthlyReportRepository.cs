@@ -135,13 +135,19 @@ public sealed class MonthlyReportRepository(IDbConnectionFactory connections) : 
             Period(),
             cancellationToken: cancellationToken));
 
+        // Desvio 285: "pendentes" = o que ainda não foi pago no período (mesma regra do check-in, SchedulePaymentSql). Antes contava todo
+        // agendamento ativo, inclusive os já pagos. Contínuo (semanal, quinzenal, diário) entra se o próximo vencimento já chegou até o fim.
         var pending = await connection.QuerySingleAsync<CountRow>(new CommandDefinition(
-            """
-            SELECT COUNT(*) AS Quantity, SUM(valor_previsto) AS Total
-            FROM agendamentos
-            WHERE usuario_id = @uid AND ativo = TRUE
-              AND ((tipo_agendamento = 'FIXO' AND data_inicio <= @end)
-                   OR (tipo_agendamento = 'PARCELADO' AND parcelas_executadas < total_parcelas AND data_inicio <= @end))
+            $"""
+            SELECT COUNT(*) AS Quantity, SUM(a.valor_previsto) AS Total
+            FROM agendamentos a
+            CROSS JOIN LATERAL {SchedulePaymentSql.DueDates("a", "@start", "@end")} AS d(due)
+            WHERE a.usuario_id = @uid AND a.ativo = TRUE
+              AND a.tipo_agendamento IN ('FIXO', 'PARCELADO')
+              AND (a.tipo_agendamento = 'FIXO' OR (a.total_parcelas IS NOT NULL AND COALESCE(a.parcelas_executadas, 0) < a.total_parcelas))
+              AND a.data_inicio <= @end
+              AND (({SchedulePaymentSql.IsRolling("a")} AND d.due <= @end) OR d.due BETWEEN @start AND @end)
+              AND NOT EXISTS (SELECT 1 FROM transacoes t WHERE {SchedulePaymentSql.Paid("a", "t", "d.due", "a.descricao")})
             """,
             Period(),
             cancellationToken: cancellationToken));
@@ -149,7 +155,7 @@ public sealed class MonthlyReportRepository(IDbConnectionFactory connections) : 
         return new MonthlyReportData(
             month, year, start, end,
             MonthlyReportRules.Totals(expenses, incomes, count),
-            MonthlyReportRules.TopCategories([.. topRows.Select(r => (r.Category, (double)r.Total))]),
+            MonthlyReportRules.TopCategories([.. topRows.Select(r => (r.Category, (double)r.Total))], expenses),
             MonthlyReportRules.Comparison(comparison.CurrentValue is { } c && c != 0 ? (double)c : 0, comparison.PreviousValue is { } p && p != 0 ? (double)p : 0),
             [.. pots.Select(r => MonthlyReportRules.Pot(r.Name, (double)r.LimitValue, (double)r.Used))],
             new ReportAccounts(

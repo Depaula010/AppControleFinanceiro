@@ -188,12 +188,12 @@ public class BillsGetAndSummaryEndpointsTests(PostgresFixture postgres) : IAsync
         var expenses = 0.0;
         expenses += 2 * 30.0;
         expenses += 100.0;
-        expenses += 50 * 2.16;
+        expenses += 50 * (double)MeuSecretario.Domain.Bills.Periodicities.BiweeklyPerMonth;   // desvio 285: 26/12 em vez de 2,16
         expenses += 10 * 4.33;
         status.ShouldBe(HttpStatusCode.OK);
-        Math.Abs(expenses - 311.3).ShouldBeLessThan(1e-9);
+        Math.Abs(expenses - 311.6333333).ShouldBeLessThan(1e-6);
         body.ShouldBe(
-            $$$$"""{"status":"success","data":{"total_despesas_mensais":{{{{R(expenses)}}}},"total_despesas_anuais":1200,"total_receitas_mensais":3000,"reserva_emergencia":{"meta":{{{{R(PyRound.Round2(expenses * 6))}}}},"gasto_mensal_equivalente":{{{{R(PyRound.Round2(expenses * 6 / 6))}}}},"meses_configurados":6}}}""");
+            $$$$"""{"status":"success","data":{"total_despesas_mensais":{{{{R(PyRound.Round2(expenses))}}}},"total_despesas_anuais":1200,"total_receitas_mensais":3000,"reserva_emergencia":{"meta":{{{{R(PyRound.Round2(expenses * 6))}}}},"gasto_mensal_equivalente":{{{{R(PyRound.Round2(expenses * 6 / 6))}}}},"meses_configurados":6}}}""");
     }
 
     [Fact]
@@ -204,7 +204,7 @@ public class BillsGetAndSummaryEndpointsTests(PostgresFixture postgres) : IAsync
 
         var (_, body) = await _http.Get(_user, "/api/bills/summary");
 
-        body.ShouldContain("\"reserva_emergencia\":{\"meta\":3020,\"gasto_mensal_equivalente\":503.33,\"meses_configurados\":6}");
+        body.ShouldContain("\"reserva_emergencia\":{\"meta\":3070,\"gasto_mensal_equivalente\":511.67,\"meses_configurados\":6}");
     }
 
     [Fact]

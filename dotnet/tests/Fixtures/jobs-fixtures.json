@@ -51,7 +51,7 @@
     "faturas_amanha": []
    },
    "greeting": false,
-   "output": "💰 *ALERTAS FINANCEIROS*\n\n⚠️ *VENCE HOJE (Despesas):*\n• Aluguel - R$ 1500,00\n• Fatura Nubank - R$ 320,46\n\n💵 *VENCE HOJE (Receitas):*\n• Salário - R$ 5000,50"
+   "output": "💰 *ALERTAS FINANCEIROS*\n\n⚠️ *VENCE HOJE (Despesas):*\n• Aluguel - R$ 1.500,00\n• Fatura Nubank - R$ 320,46\n\n💵 *VENCE HOJE (Receitas):*\n• Salário - R$ 5.000,50"
   },
   {
    "input": {
@@ -84,7 +84,7 @@
     "faturas_amanha": []
    },
    "greeting": true,
-   "output": "🌅 *Bom dia!*\n\n💰 *ALERTAS FINANCEIROS*\n\n⚠️ *VENCE HOJE (Despesas):*\n• Aluguel - R$ 1500,00\n• Fatura Nubank - R$ 320,46\n\n💵 *VENCE HOJE (Receitas):*\n• Salário - R$ 5000,50"
+   "output": "🌅 *Bom dia!*\n\n💰 *ALERTAS FINANCEIROS*\n\n⚠️ *VENCE HOJE (Despesas):*\n• Aluguel - R$ 1.500,00\n• Fatura Nubank - R$ 320,46\n\n💵 *VENCE HOJE (Receitas):*\n• Salário - R$ 5.000,50"
   },
   {
    "input": {
@@ -216,7 +216,7 @@
   },
   {
    "total": 1234.5,
-   "output": "💳 *FATURA FECHADA*\n\nCartão: *Nubank*\nFechamento: 10/03/2026\nVencimento: 17/03/2026\nValor Total: *R$ 1234,50*\n\nℹ️ A partir de agora, novas compras entrarão na próxima fatura."
+   "output": "💳 *FATURA FECHADA*\n\nCartão: *Nubank*\nFechamento: 10/03/2026\nVencimento: 17/03/2026\nValor Total: *R$ 1.234,50*\n\nℹ️ A partir de agora, novas compras entrarão na próxima fatura."
   },
   {
    "total": 99.995,
@@ -346,7 +346,7 @@
     },
     "data": "2026-03-18"
    },
-   "prompt": "Você é um assistente pessoal humanizado. Gere um resumo matinal da agenda do usuário.\n\nDATA: 18/03/2026 (quarta-feira)\n\nEVENTOS DO DIA:\n1. 09:00 (30 min) - Daily [remoto]\n2. 12:30 (90 min) - Almoço com João em Restaurante X, Campinas, SP\n3. Dia inteiro - Feriado\n\nClima: Parcialmente nublado, 24°C - Chance de chuva: 45%\n\nClimas em outras cidades (você tem eventos lá):\nCampinas: Sol, 28°C\n\n\nHorários livres entre eventos:\n• 09:30-12:30 (3h)\n• 14:00-16:45 (2h45min)\n\n\nALERTAS FINANCEIROS:\nVENCE HOJE (Despesas):\n• Aluguel - R$ 1500,00\n• Fatura Nubank - R$ 320,45\n\nVENCE HOJE (Receitas):\n• Salário - R$ 5000,00\n\nVENCE AMANHÃ (Despesas):\n• Internet - R$ 99,90\n• Fatura Inter - R$ 10,00\n\nVENCE AMANHÃ (Receitas):\n• Freela - R$ 800,00\n\nINSTRUÇÕES:\n1. Comece com uma saudação amigável (ex: \"☀️ Bom dia!\", \"🌅 Olá!\")\n2. IMPORTANTE: Use o dia da semana CORRETO informado acima (quarta-feira)\n3. Resuma os compromissos de forma clara e objetiva\n4. Use emojis apropriados (mas sem exagerar)\n5. Destaque informações importantes:\n   - Se há eventos remotos vs presenciais\n   - Horários livres úteis para trabalho focado ou pausa\n   - Clima (especialmente se for chover ou temperatura extrema)\n   - ALERTAS FINANCEIROS: contas e faturas que vencem hoje ou amanhã (use ⚠️ ou 💰)\n   - Dicas úteis (ex: \"saia cedo\", \"leve guarda-chuva\", \"tempo livre para almoço\")\n6. Seja conciso mas informativo (máximo 20 linhas)\n7. Mantenha tom profissional mas amigável\n8. NÃO invente informações que não estão nos dados fornecidos\n9. Se houver alertas financeiros, destaque-os claramente no resumo\n\nFORMATAÇÃO (IMPORTANTE):\n- Use *texto* para negrito (WhatsApp)\n- Para listas, use \"•\" (bullet) ou \"-\", NUNCA use \"*\" como marcador\n- Organize seções com títulos em negrito\n- EVITE usar dois asteriscos seguidos (** ou * *)\n\nGere APENAS o texto da mensagem, sem introduções ou formatação extra.\n",
+   "prompt": "Você é um assistente pessoal humanizado. Gere um resumo matinal da agenda do usuário.\n\nDATA: 18/03/2026 (quarta-feira)\n\nEVENTOS DO DIA:\n1. 09:00 (30 min) - Daily [remoto]\n2. 12:30 (90 min) - Almoço com João em Restaurante X, Campinas, SP\n3. Dia inteiro - Feriado\n\nClima: Parcialmente nublado, 24°C - Chance de chuva: 45%\n\nClimas em outras cidades (você tem eventos lá):\nCampinas: Sol, 28°C\n\n\nHorários livres entre eventos:\n• 09:30-12:30 (3h)\n• 14:00-16:45 (2h45min)\n\n\nALERTAS FINANCEIROS:\nVENCE HOJE (Despesas):\n• Aluguel - R$ 1.500,00\n• Fatura Nubank - R$ 320,45\n\nVENCE HOJE (Receitas):\n• Salário - R$ 5.000,00\n\nVENCE AMANHÃ (Despesas):\n• Internet - R$ 99,90\n• Fatura Inter - R$ 10,00\n\nVENCE AMANHÃ (Receitas):\n• Freela - R$ 800,00\n\nINSTRUÇÕES:\n1. Comece com uma saudação amigável (ex: \"☀️ Bom dia!\", \"🌅 Olá!\")\n2. IMPORTANTE: Use o dia da semana CORRETO informado acima (quarta-feira)\n3. Resuma os compromissos de forma clara e objetiva\n4. Use emojis apropriados (mas sem exagerar)\n5. Destaque informações importantes:\n   - Se há eventos remotos vs presenciais\n   - Horários livres úteis para trabalho focado ou pausa\n   - Clima (especialmente se for chover ou temperatura extrema)\n   - ALERTAS FINANCEIROS: contas e faturas que vencem hoje ou amanhã (use ⚠️ ou 💰)\n   - Dicas úteis (ex: \"saia cedo\", \"leve guarda-chuva\", \"tempo livre para almoço\")\n6. Seja conciso mas informativo (máximo 20 linhas)\n7. Mantenha tom profissional mas amigável\n8. NÃO invente informações que não estão nos dados fornecidos\n9. Se houver alertas financeiros, destaque-os claramente no resumo\n\nFORMATAÇÃO (IMPORTANTE):\n- Use *texto* para negrito (WhatsApp)\n- Para listas, use \"•\" (bullet) ou \"-\", NUNCA use \"*\" como marcador\n- Organize seções com títulos em negrito\n- EVITE usar dois asteriscos seguidos (** ou * *)\n\nGere APENAS o texto da mensagem, sem introduções ou formatação extra.\n",
    "fallback": "☀️ Bom dia! Sua agenda de hoje:\n\n1. 09:00 (30 min) - Daily [remoto]\n2. 12:30 (90 min) - Almoço com João em Restaurante X, Campinas, SP\n3. Dia inteiro - Feriado\n\nClima: Parcialmente nublado, 24°C - Chance de chuva: 45%\n\nHorários livres entre eventos:\n• 09:30-12:30 (3h)\n• 14:00-16:45 (2h45min)"
   },
   {

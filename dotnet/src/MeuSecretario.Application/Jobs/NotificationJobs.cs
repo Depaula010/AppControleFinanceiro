@@ -681,6 +681,34 @@ public sealed class MonthlyReportJob(
     }
 }
 
+/// <summary>
+/// O que as rotas admin <c>trigger-monthly-reports-*</c> e o comando do usuário usam (desvio 285): a mesma trava do job agendado, para um
+/// disparo manual não rodar junto com o das 08:00 / 23:00 e mandar o relatório duas vezes. O agendador usa <see cref="MonthlyReportJob"/>
+/// direto (o <see cref="JobRunner"/> já travou).
+/// </summary>
+public sealed class LockedMonthlyReportJob(MonthlyReportJob inner, JobRunner runner, IClock clock) : IMonthlyReportJob
+{
+    public async Task<MonthlyReportRunResult> RunAsync(MonthlyMoment moment, CancellationToken cancellationToken)
+    {
+        MonthlyReportRunResult? result = null;
+        var lockName = moment == MonthlyMoment.InicioMes ? JobSchedules.StartOfMonthReport : JobSchedules.EndOfMonthReport;
+        var ran = await runner.RunLockedAsync(
+            "RELATORIO-MENSAL", lockName, async token => result = await inner.RunAsync(moment, token), cancellationToken);
+        if (ran && result is not null)
+        {
+            return result;
+        }
+
+        var local = TimeZoneInfo.ConvertTime(clock.UtcNow, clock.TimeZone);
+        return new MonthlyReportRunResult(
+            MonthlyReportRules.MomentName(moment), local.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), 0, 0, 0, [],
+            [new MonthlyReportErrorEntry(null, null, "em_execucao", "Relatório já em execução por outro processo")], 0);
+    }
+
+    public Task<ManualReportResult> SendManualAsync(int userId, MonthlyMoment moment, CancellationToken cancellationToken) =>
+        inner.SendManualAsync(userId, moment, cancellationToken);
+}
+
 /// <summary>Relatório do mês anterior: dia 1 às 08:00 (job 2).</summary>
 public sealed class StartOfMonthReportJob(MonthlyReportJob report, IJobLog log) : IScheduledJob
 {

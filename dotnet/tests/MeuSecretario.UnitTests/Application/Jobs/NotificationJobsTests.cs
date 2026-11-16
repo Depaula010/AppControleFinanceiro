@@ -170,7 +170,7 @@ public class DailyBriefingJobTests
         await _h.Bot.Received(1).SendTextAsync("5511", Arg.Is<string>(m =>
             m.StartsWith("☀️ Bom dia! Você não tem compromissos agendados para hoje! 🎉\n\n", StringComparison.Ordinal)
             && m.Contains("Clima: Nublado, 24°C", StringComparison.Ordinal)
-            && m.Contains("• Aluguel - R$ 1500,00", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
+            && m.Contains("• Aluguel - R$ 1.500,00", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -588,6 +588,34 @@ public class MonthlyReportJobTests
     }
 
     private MonthlyReportJob Job() => new(_repository, _h.Bot, _chart, _h.Clock, _h.Log);
+
+    private LockedMonthlyReportJob Locked() => new(Job(), _h.Runner, _h.Clock);
+
+    [Fact]
+    [Trait("AC", "013-70")]
+    public async Task AdminTrigger_RunsUnderTheScheduledJobsLock_AndReleasesIt_Deviation285()
+    {
+        Recipients();
+
+        var result = await Locked().RunAsync(MonthlyMoment.InicioMes, CancellationToken.None);
+
+        result.Errors.ShouldBeEmpty();
+        await _repository.Received(1).ListRecipientsAsync(MonthlyMoment.InicioMes, Arg.Any<TimeOnly>(), Arg.Any<TimeOnly>(), Arg.Any<CancellationToken>());
+        _h.Cache.RawValue(CacheKeys.JobLock(JobSchedules.StartOfMonthReport)).ShouldBeNull();
+    }
+
+    [Fact]
+    [Trait("AC", "013-70")]
+    public async Task AdminTrigger_WhileTheScheduledJobHoldsTheLock_DoesNotRunAndSaysSo_Deviation285()
+    {
+        await _h.Cache.SetIfNotExistsAsync(CacheKeys.JobLock(JobSchedules.EndOfMonthReport), "agendador", TimeSpan.FromMinutes(5), CancellationToken.None);
+
+        var result = await Locked().RunAsync(MonthlyMoment.FimMes, CancellationToken.None);
+
+        await _repository.DidNotReceive().ListRecipientsAsync(Arg.Any<MonthlyMoment>(), Arg.Any<TimeOnly>(), Arg.Any<TimeOnly>(), Arg.Any<CancellationToken>());
+        result.Errors.Single().Error.ShouldBe("Relatório já em execução por outro processo");
+        _h.Cache.RawValue(CacheKeys.JobLock(JobSchedules.EndOfMonthReport)).ShouldBe("agendador");
+    }
 
     private static MonthlyReportData Data(int transactions) => new(
         2, 2026, new DateOnly(2026, 2, 1), new DateOnly(2026, 2, 28), new ReportTotals(10, 100, 90, transactions),

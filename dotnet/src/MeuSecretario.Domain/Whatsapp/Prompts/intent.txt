@@ -20,7 +20,7 @@ Analise a mensagem: "⟦MSG⟧"
     - "Consulta Potes" → Status dos potes de gastos
     - "Consulta Contas Fixas" → Contas fixas pendentes (só as não pagas)
     - "Consulta Todas Contas" → TODAS as contas do mês, pagas e pendentes: "todas as minhas contas", "listar todas as contas", "quais contas tenho esse mês", "me mostra todas as contas"
-    - "Consulta Reserva" → Reserva de emergência (6 meses)
+    - "Consulta Reserva" → Reserva de emergência
     - "Consulta Detalhes Reserva" → Ver QUAIS contas estão incluídas na reserva: "detalhes da reserva", "quais contas na reserva", "mostrar contas da reserva", "listar reserva"
     - "Listar Contas" → Quais contas cadastradas
 
@@ -31,7 +31,6 @@ Analise a mensagem: "⟦MSG⟧"
     - "Contas Atrasadas" → "tenho conta ATRASADA?", "CONTAS VENCIDAS", "o que JÁ VENCEU?", "contas pendentes", "o que não paguei?" (PASSADO)
 
     ✅ AÇÕES:
-    - "Quitar Conta Fixa" → Marcar conta fixa como paga
     - "Criar Evento" → criar/agendar/marcar evento no calendário
     - "Deletar Evento" → deletar/cancelar/remover evento
     - "Consultar Agenda" → Ver compromissos

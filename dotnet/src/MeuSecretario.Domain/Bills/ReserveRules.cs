@@ -11,14 +11,14 @@ public static class ReserveFactor
 
     /// <summary>
     /// <c>MENSAL N</c>, <c>ANUAL 1</c> (integral), <c>SEMANAL round(N × 4,33)</c> (meio-par, como o <c>round</c> do Python),
-    /// <c>QUINZENAL 2N</c>, <c>DIARIA 30N</c>; periodicidade desconhecida não entra (0).
+    /// <c>QUINZENAL N × 26/12</c> (desvio 285; era 2N), <c>DIARIA 30N</c>; periodicidade desconhecida não entra (0).
     /// </summary>
     public static double For(string periodicity, int months) => periodicity switch
     {
         Periodicities.Monthly => months,
         Periodicities.Annual => 1,
         Periodicities.Weekly => Math.Round(months * WeeksPerMonth, MidpointRounding.ToEven),
-        Periodicities.Biweekly => months * 2,
+        Periodicities.Biweekly => months * (double)Periodicities.BiweeklyPerMonth,
         Periodicities.Daily => months * DaysPerMonth,
         _ => 0,
     };

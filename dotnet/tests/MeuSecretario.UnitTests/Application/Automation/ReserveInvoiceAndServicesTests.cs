@@ -359,9 +359,9 @@ public class InvoiceScheduleProcessorTests
 
         private (int Inserted, int Advanced) _savepoint;
 
-        public Task<IReadOnlyList<ScheduleToPost>> ListSchedulesAsync(int cardAccountId, int referenceMonth, CancellationToken cancellationToken)
+        public Task<IReadOnlyList<ScheduleToPost>> ListSchedulesAsync(int cardAccountId, DateOnly referenceDate, CancellationToken cancellationToken)
         {
-            RequestedMonth = referenceMonth;
+            RequestedMonth = referenceDate.Month;
             return Task.FromResult(schedules);
         }
 

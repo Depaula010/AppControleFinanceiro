@@ -118,9 +118,7 @@ public static class WhatsAppTexts
 {
     public const string NotRegistered =
         "Olá! 👋 Parece que você ainda não tem cadastro no Meu Secretário.\n\n" +
-        "Para começar a usar, crie sua conta em nosso site:\n" +
-        "https://app.meusecretario.com/register\n\n" +
-        "Após criar sua conta, volte aqui e eu estarei pronto para ajudar! 😊";
+        "Peça seu acesso ao administrador e, depois de cadastrado, volte aqui: eu estarei pronto para ajudar! 😊";
 
     public const string NothingPendingToConfirm =
         "✅ Não encontrei nada pendente para confirmar.\n\nSe quer registrar algo, diga:\nExemplo: 'gastei 50 em comida'";

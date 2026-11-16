@@ -107,8 +107,8 @@ public sealed record NewScheduledTransaction(
 /// <summary>Uma transação do banco para processar uma fatura; sem <see cref="CommitAsync"/> o descarte desfaz tudo.</summary>
 public interface IInvoiceScheduleSession : IAsyncDisposable
 {
-    /// <summary>Ativos da conta do cartão; <c>ANUAL</c> só com <c>mes_execucao</c> = <paramref name="referenceMonth"/>; ordem <c>dia_execucao, descricao</c>.</summary>
-    Task<IReadOnlyList<ScheduleToPost>> ListSchedulesAsync(int cardAccountId, int referenceMonth, CancellationToken cancellationToken);
+    /// <summary>Ativos da conta do cartão com <c>data_inicio</c> até <paramref name="referenceDate"/> (desvio 285); <c>ANUAL</c> só no mês dela; ordem <c>dia_execucao, descricao</c>.</summary>
+    Task<IReadOnlyList<ScheduleToPost>> ListSchedulesAsync(int cardAccountId, DateOnly referenceDate, CancellationToken cancellationToken);
 
     Task<bool> TransactionExistsAsync(int invoiceId, int scheduleId, CancellationToken cancellationToken);
 

@@ -47,11 +47,11 @@ public static class AutomationTexts
 {
     /// <summary>Automate sem Redis (<c>transaction_handler.py</c>); descrição nula escreve <c>None</c>.</summary>
     public static string AutomateSaved(string? description, double value, string categoryLabel) =>
-        $"Transacao salva!\n\nDescricao: {description ?? "None"}\nValor: {MoneyText.Brl(value)}\nCategoria: {categoryLabel}";
+        $"Transação salva!\n\nDescrição: {description ?? "None"}\nValor: {MoneyText.Brl(value)}\nCategoria: {categoryLabel}";
 
     /// <summary><c>/api/transacao</c> sem Redis (<c>transaction_handler.py</c>).</summary>
     public static string ApiSaved(string finalDescription, double value, string categoryLabel) =>
-        $"Transacao salva!\n\n{finalDescription}\n{MoneyText.Brl(value)}\n{categoryLabel}";
+        $"Transação salva!\n\n{finalDescription}\n{MoneyText.Brl(value)}\n{categoryLabel}";
 
     /// <summary>Quitação por SMS (<c>fixed_bills_service.py</c>); <paramref name="paid"/> já é o texto do <c>formatar_moeda</c>.</summary>
     public static string BillSettled(string description, string paidFormatted, string category) =>
@@ -59,7 +59,7 @@ public static class AutomationTexts
         + $"📝 {description}\n"
         + $"💰 {paidFormatted}\n"
         + $"📊 {category}\n\n"
-        + "_Esta conta não será mais cobrada automaticamente este mês._";
+        + "_Conta marcada como paga neste mês._";
 
     /// <summary>Despesa avulsa por SMS (<c>transaction_handler.py</c>).</summary>
     public static string SmsRegistered(string description, string paidFormatted, string paymentAccount) =>
@@ -67,7 +67,7 @@ public static class AutomationTexts
         + $"{description}\n"
         + $"{paidFormatted}\n"
         + $"{paymentAccount}\n\n"
-        + "_Nao encontrei uma conta fixa correspondente, entao registrei como despesa avulsa._";
+        + "_Não encontrei uma conta fixa correspondente, então registrei como despesa avulsa._";
 }
 
 /// <summary>Dados de uma transação aguardando confirmação (<c>transacao_data</c> do Flask, na ordem das chaves).</summary>
@@ -210,14 +210,15 @@ public static class ConfirmationMessage
             }
             else
             {
-                var label = data.PaymentType switch
+                var label = data.TransactionType == "Renda" && data.PaymentType == "debito" ? null : data.PaymentType switch
                 {
                     "debito" => "Débito",
                     "pix" => "PIX",
                     "dinheiro" => "Dinheiro",
                     var other => other ?? "None",
                 };
-                sb.Append(CultureInfo.InvariantCulture, $"🏦 {data.AccountName} ({label})\n");
+                // Desvio 285: receita não é "Débito"; só o nome da conta.
+                sb.Append(label is null ? $"🏦 {data.AccountName}\n" : $"🏦 {data.AccountName} ({label})\n");
             }
         }
 

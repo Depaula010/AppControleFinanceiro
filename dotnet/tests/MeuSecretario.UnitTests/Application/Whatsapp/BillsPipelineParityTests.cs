@@ -23,6 +23,12 @@ public class BillsPipelineParityTests
         ["checkin_cartao_e_parcelado"] = [("• Tênis\n", "• Tênis (2/3)\n"), ("• Última parcela\n", "• Última parcela (3/3)\n")],
     };
 
+    /// <summary>Desvio 285: o total mensal do catálogo usa o fator quinzenal 26/12 (200 x 26/12 = 433,33 em vez de 432).</summary>
+    private static readonly Dictionary<string, (string From, string To)[]> Deviation285 = new(StringComparer.Ordinal)
+    {
+        ["todas_catalogo"] = [("Total despesas mensais: R$ 2.451,60", "Total despesas mensais: R$ 2.452,93")],
+    };
+
     /// <summary>Resolver a fatura do cartão é detalhe do motor de agendamentos (013); o rótulo do Flask não tem equivalente aqui.</summary>
     private static readonly string[] IgnoredCalls = ["finance_service.get_or_create_fatura"];
 
@@ -104,6 +110,14 @@ public class BillsPipelineParityTests
         if (Deviation269.TryGetValue(name, out var replacements))
         {
             foreach (var (from, to) in replacements)
+            {
+                expectedReply = expectedReply!.Replace(from, to, StringComparison.Ordinal);
+            }
+        }
+
+        if (Deviation285.TryGetValue(name, out var totalReplacements))
+        {
+            foreach (var (from, to) in totalReplacements)
             {
                 expectedReply = expectedReply!.Replace(from, to, StringComparison.Ordinal);
             }

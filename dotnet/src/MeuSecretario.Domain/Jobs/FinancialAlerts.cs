@@ -1,3 +1,4 @@
+using MeuSecretario.Domain.Automation;
 namespace MeuSecretario.Domain.Jobs;
 
 /// <summary>Conta agendada que vence hoje (<c>get_upcoming_bills_and_invoices</c>, spec 013 RN-013-30).</summary>
@@ -73,7 +74,7 @@ public static class FinancialAlertFormatter
             parts.Add("\n💳 *NA FATURA DO CARTÃO (só informativo):*");
             foreach (var bill in cardToday)
             {
-                parts.Add($"• Hoje: {bill.Description} - R$ {PyNumber.FixedComma(bill.Value)}");
+                parts.Add($"• Hoje: {bill.Description} - {MoneyText.Brl(bill.Value)}");
             }
         }
 
@@ -84,7 +85,7 @@ public static class FinancialAlertFormatter
     {
         foreach (var bill in bills)
         {
-            parts.Add($"• {bill.Description} - R$ {PyNumber.FixedComma(bill.Value)}");
+            parts.Add($"• {bill.Description} - {MoneyText.Brl(bill.Value)}");
         }
     }
 
@@ -92,7 +93,7 @@ public static class FinancialAlertFormatter
     {
         foreach (var invoice in invoices)
         {
-            parts.Add($"• Fatura {invoice.Card} - R$ {PyNumber.FixedComma(invoice.Value)}");
+            parts.Add($"• Fatura {invoice.Card} - {MoneyText.Brl(invoice.Value)}");
         }
     }
 }

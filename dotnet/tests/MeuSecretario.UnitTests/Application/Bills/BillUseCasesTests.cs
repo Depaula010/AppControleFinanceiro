@@ -309,9 +309,9 @@ public class EmergencyReserveServiceTests
 
         var status = await new EmergencyReserveService(repository).GetStatusAsync(42, CancellationToken.None);
 
-        status.Total.ShouldBe(3020.0);
+        status.Total.ShouldBe(3070.0, 1e-9);   // desvio 285: quinzenal x 26/12
         status.Months.ShouldBe(6);
-        status.MonthlyEquivalent.ShouldBe(3020.0 / 6);
+        status.MonthlyEquivalent.ShouldBe(3070.0 / 6, 1e-9);
     }
 
     [Fact]

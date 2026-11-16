@@ -74,8 +74,6 @@ public sealed class JobRunner(ICache cache, IClock clock, IJobLog log)
 {
     public static readonly TimeSpan LockTtl = TimeSpan.FromSeconds(300);
 
-    private const string LockValue = "running";
-
     public async Task<JobRunOutcome> RunAsync(IScheduledJob job, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(job);
@@ -119,10 +117,14 @@ public sealed class JobRunner(ICache cache, IClock clock, IJobLog log)
     {
         ArgumentNullException.ThrowIfNull(body);
         var key = CacheKeys.JobLock(lockName);
+
+        // Desvio 285: valor único por execução; só quem pegou o lock o libera (antes qualquer um apagava, e um job lento que passou do TTL
+        // de 5 min apagava o lock da execução seguinte).
+        var owner = Guid.NewGuid().ToString("N");
         var acquired = false;
         if (await cache.IsAvailableAsync(cancellationToken))
         {
-            acquired = await cache.SetIfNotExistsAsync(key, LockValue, LockTtl, cancellationToken);
+            acquired = await cache.SetIfNotExistsAsync(key, owner, LockTtl, cancellationToken);
             if (!acquired)
             {
                 log.Warning(jobName, "Job já em execução por outro processo, pulando...");
@@ -145,8 +147,14 @@ public sealed class JobRunner(ICache cache, IClock clock, IJobLog log)
         {
             if (acquired)
             {
-                await cache.DeleteAsync(key, CancellationToken.None);
-                log.Info(jobName, $"Lock liberado (key: {key})");
+                if (await cache.DeleteIfEqualsAsync(key, owner, CancellationToken.None))
+                {
+                    log.Info(jobName, $"Lock liberado (key: {key})");
+                }
+                else
+                {
+                    log.Warning(jobName, $"Lock já expirado ou de outra execução, nada a liberar (key: {key})");
+                }
             }
         }
     }
