@@ -57,6 +57,12 @@ public interface IInvoiceJobRepository
     Task<IReadOnlyList<OpenInvoiceRef>> ListOpenAsync(CancellationToken cancellationToken);
 
     Task<IReadOnlyList<DueSoonInvoice>> ListDueSoonAsync(DateOnly dueDate, int daysUntilDue, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Desvio 282: faturas <c>Fechada</c> do usuário cujo fechamento foi de <paramref name="closedSince"/> em diante. O resumo da manhã avisa as
+    /// que ainda não foram avisadas (o fechamento das 00:01 já não manda mensagem).
+    /// </summary>
+    Task<IReadOnlyList<ClosedInvoice>> ListClosedSinceAsync(int userId, DateOnly closedSince, CancellationToken cancellationToken);
 }
 
 /// <param name="InvoiceId">Nulo = resolver a fatura do cartão na data.</param>

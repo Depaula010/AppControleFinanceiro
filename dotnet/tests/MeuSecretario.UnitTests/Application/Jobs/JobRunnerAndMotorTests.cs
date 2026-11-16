@@ -188,10 +188,9 @@ public class InvoiceProcessorJobTests
     {
         _repository.CloseExpiredAsync(Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns([]);
         _repository.ListOpenAsync(Arg.Any<CancellationToken>()).Returns([]);
-        _repository.ListDueSoonAsync(Arg.Any<DateOnly>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns([]);
     }
 
-    private InvoiceProcessorJob Job() => new(_repository, _h.Bot, _h.Cache, _h.Clock, _invoices, _schedules, _h.Log);
+    private InvoiceProcessorJob Job() => new(_repository, _h.Clock, _invoices, _schedules, _h.Log);
 
     private static ClosedInvoice Closed(int id = 5) => new(id, 9, "Nubank", new DateOnly(2026, 3, 10), new DateOnly(2026, 3, 17), 1234.5, 3, "5511");
 
@@ -202,34 +201,19 @@ public class InvoiceProcessorJobTests
         await Job().ExecuteAsync(CancellationToken.None);
 
         await _repository.Received(1).CloseExpiredAsync(new DateOnly(2026, 3, 18), Arg.Any<CancellationToken>());
-        await _repository.Received(1).ListDueSoonAsync(new DateOnly(2026, 3, 21), 3, Arg.Any<CancellationToken>());
     }
 
     [Fact]
     [Trait("AC", "013-51")]
-    public async Task ClosedInvoice_SendsOnce_AndRemembersForSevenDaysOnlyWhenSent()
+    public async Task ClosedInvoice_NoLongerSendsAnythingAtMidnight_Deviation282()
     {
         _repository.CloseExpiredAsync(Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns([Closed()]);
 
         await Job().ExecuteAsync(CancellationToken.None);
-        await Job().ExecuteAsync(CancellationToken.None);
 
-        await _h.Bot.Received(1).SendTextAsync("5511", Arg.Is<string>(m => m.StartsWith("💳 *FATURA FECHADA*", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
-        _h.Cache.RawValue(CacheKeys.InvoiceClosed(5)).ShouldBe("true");
-        _h.Cache.TtlOf(CacheKeys.InvoiceClosed(5))!.Value.TotalDays.ShouldBeInRange(6.9, 7);
-    }
-
-    [Fact]
-    [Trait("AC", "013-51")]
-    public async Task ClosedInvoice_FailedSend_DoesNotRemember()
-    {
-        _repository.CloseExpiredAsync(Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns([Closed()]);
-        _h.Bot.SendTextAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(false);
-
-        await Job().ExecuteAsync(CancellationToken.None);
-
+        await _h.Bot.DidNotReceive().SendTextAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
         _h.Cache.RawValue(CacheKeys.InvoiceClosed(5)).ShouldBeNull();
-        _h.Log.Lines.ShouldContain(l => l.StartsWith("WARNING", StringComparison.Ordinal));
+        await _repository.DidNotReceive().ListDueSoonAsync(Arg.Any<DateOnly>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -242,7 +226,6 @@ public class InvoiceProcessorJobTests
         await Job().ExecuteAsync(CancellationToken.None);
 
         await _invoices.Received(2).EnsureCurrentAsync(3, 9, Arg.Any<CancellationToken>());
-        await _h.Bot.Received(2).SendTextAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -262,20 +245,6 @@ public class InvoiceProcessorJobTests
 
         await _schedules.Received(1).ProcessAsync(2, 11, new DateOnly(2026, 4, 15), Arg.Any<CancellationToken>());
         _h.Log.Lines.ShouldContain(l => l.Contains("3 agendamentos processados (Fixos: 2, Parcelados: 1, Lembretes: 0)", StringComparison.Ordinal));
-    }
-
-    [Fact]
-    [Trait("AC", "013-53")]
-    public async Task DueSoon_SendsOnce_AndRemembersTheWarning()
-    {
-        _repository.ListDueSoonAsync(Arg.Any<DateOnly>(), 3, Arg.Any<CancellationToken>())
-            .Returns([new DueSoonInvoice(8, 9, "Inter", new DateOnly(2026, 3, 21), 10, 3, "5533", 3)]);
-
-        await Job().ExecuteAsync(CancellationToken.None);
-        await Job().ExecuteAsync(CancellationToken.None);
-
-        await _h.Bot.Received(1).SendTextAsync("5533", Arg.Is<string>(m => m.Contains("em 3 dias (21/03/2026)", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
-        _h.Cache.RawValue(CacheKeys.InvoiceDueWarning3d(8)).ShouldBe("true");
     }
 }
 

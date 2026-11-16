@@ -17,10 +17,13 @@ public class DailyBriefingJobTests
     private readonly IWeatherClient _weather = Substitute.For<IWeatherClient>();
     private readonly IFinancialAlertsRepository _alerts = Substitute.For<IFinancialAlertsRepository>();
     private readonly ILlmClient _llm = Substitute.For<ILlmClient>();
+    private readonly IInvoiceJobRepository _invoices = Substitute.For<IInvoiceJobRepository>();
 
     public DailyBriefingJobTests()
     {
         _h.At(7);
+        _invoices.ListClosedSinceAsync(Arg.Any<int>(), Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns([]);
+        _invoices.ListDueSoonAsync(Arg.Any<DateOnly>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns([]);
         _users.GetLocationAsync(Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(new BriefingUser("São Paulo", "SP", "5511"));
         _alerts.GetUpcomingAsync(Arg.Any<int>(), Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns(FinancialAlerts.Empty);
         _calendar.GetEventsInRangeAsync(Arg.Any<int>(), Arg.Any<DateOnly>(), Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns([]);
@@ -29,7 +32,7 @@ public class DailyBriefingJobTests
 
     private DailyBriefingService Service() => new(_users, _calendar, _weather, _alerts, _llm, _h.Log);
 
-    private DailyBriefingJob Job() => new(_config, Service(), _alerts, _h.Bot, _users, _h.Clock, _h.Log);
+    private DailyBriefingJob Job() => new(_config, Service(), _alerts, _h.Bot, _users, _h.Clock, _h.Log, _invoices, _h.Cache);
 
     private static FinancialAlerts OneBill() => new(
         [new AlertBill(1, "Aluguel", 1500, "Moradia", "Conta", AlertBill.Expense)], []);
@@ -46,6 +49,75 @@ public class DailyBriefingJobTests
     [InlineData(false, false, "R", "A", null)]
     public void Unify_FollowsTheFlagMatrix(bool summaryActive, bool alertsActive, string? summary, string? alerts, string? expected) =>
         DailyBriefingJob.Unify(summaryActive, alertsActive, summary, alerts).ShouldBe(expected);
+
+    private static ClosedInvoice ClosedInvoice(int id = 5, int day = 17) => new(id, 9, "Nubank", new DateOnly(2026, 3, 10), new DateOnly(2026, 3, day), 1234.5, 1, "5511");
+
+    [Fact]
+    [Trait("AC", "013-51")]
+    public async Task InvoiceNotices_ClosedInvoice_IsAnnouncedInTheMorning_OnceAndOnlyWhenSent_Deviation282()
+    {
+        _config.GetOrCreateAsync(1, Arg.Any<CancellationToken>()).Returns(new UserNotificationConfig(false, true));
+        _invoices.ListClosedSinceAsync(1, new DateOnly(2026, 3, 11), Arg.Any<CancellationToken>()).Returns([ClosedInvoice()]);
+        _h.Bot.SendTextAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(false, true);
+
+        await Job().ExecuteAsync(CancellationToken.None);
+        _h.Cache.RawValue(CacheKeys.InvoiceClosed(5)).ShouldBeNull();
+
+        await Job().ExecuteAsync(CancellationToken.None);
+        await Job().ExecuteAsync(CancellationToken.None);
+
+        _h.Cache.RawValue(CacheKeys.InvoiceClosed(5)).ShouldBe("true");
+        await _h.Bot.Received(2).SendTextAsync("5511", Arg.Is<string>(m => m.StartsWith("💳 *FATURA FECHADA*", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    [Trait("AC", "013-51")]
+    public async Task InvoiceNotices_AlertsOff_SendNothing_Deviation282()
+    {
+        _config.GetOrCreateAsync(1, Arg.Any<CancellationToken>()).Returns(new UserNotificationConfig(true, false));
+        _invoices.ListClosedSinceAsync(1, Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns([ClosedInvoice()]);
+        _invoices.ListDueSoonAsync(Arg.Any<DateOnly>(), 3, Arg.Any<CancellationToken>())
+            .Returns([new DueSoonInvoice(8, 9, "Inter", new DateOnly(2026, 3, 21), 10, 1, "5511", 3)]);
+
+        await Job().ExecuteAsync(CancellationToken.None);
+
+        await _h.Bot.DidNotReceive().SendTextAsync(Arg.Any<string>(), Arg.Is<string>(m => m.Contains("FATURA FECHADA", StringComparison.Ordinal) || m.Contains("VENCIMENTO PRÓXIMO", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
+        await _invoices.DidNotReceive().ListClosedSinceAsync(Arg.Any<int>(), Arg.Any<DateOnly>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    [Trait("AC", "013-52")]
+    public async Task InvoiceNotices_DueIn3Days_IsSentToItsOwnerOnce_Deviation282()
+    {
+        _config.GetOrCreateAsync(1, Arg.Any<CancellationToken>()).Returns(new UserNotificationConfig(false, true));
+        _invoices.ListDueSoonAsync(new DateOnly(2026, 3, 21), 3, Arg.Any<CancellationToken>()).Returns(
+        [
+            new DueSoonInvoice(8, 9, "Inter", new DateOnly(2026, 3, 21), 10, 1, "5511", 3),
+            new DueSoonInvoice(9, 9, "Outro", new DateOnly(2026, 3, 21), 10, 2, "5599", 3),
+        ]);
+
+        await Job().ExecuteAsync(CancellationToken.None);
+        await Job().ExecuteAsync(CancellationToken.None);
+
+        await _h.Bot.Received(1).SendTextAsync("5511", Arg.Is<string>(m => m.Contains("em 3 dias (21/03/2026)", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
+        await _h.Bot.DidNotReceive().SendTextAsync("5599", Arg.Any<string>(), Arg.Any<CancellationToken>());
+        _h.Cache.RawValue(CacheKeys.InvoiceDueWarning3d(8)).ShouldBe("true");
+    }
+
+    [Fact]
+    [Trait("AC", "013-51")]
+    public async Task InvoiceNotices_ClosedInvoiceDueToday_IsNotRepeated_BecauseTheAlertsBlockAlreadyShowsIt_Deviation282()
+    {
+        _config.GetOrCreateAsync(1, Arg.Any<CancellationToken>()).Returns(new UserNotificationConfig(false, true));
+        _alerts.GetUpcomingAsync(1, Arg.Any<DateOnly>(), Arg.Any<CancellationToken>())
+            .Returns(new FinancialAlerts([], [new AlertInvoice("Nubank", 1234.5, new DateOnly(2026, 3, 18))]));
+        _invoices.ListClosedSinceAsync(1, Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns([ClosedInvoice(day: 18)]);
+
+        await Job().ExecuteAsync(CancellationToken.None);
+
+        await _h.Bot.DidNotReceive().SendTextAsync(Arg.Any<string>(), Arg.Is<string>(m => m.Contains("FATURA FECHADA", StringComparison.Ordinal)), Arg.Any<CancellationToken>());
+        _h.Cache.RawValue(CacheKeys.InvoiceClosed(5)).ShouldBe("true");
+    }
 
     [Fact]
     [Trait("AC", "013-20")]

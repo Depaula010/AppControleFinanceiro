@@ -130,8 +130,15 @@ public sealed class DailyBriefingJob(
     IBotClient bot,
     IBriefingDataRepository users,
     IClock clock,
-    IJobLog log) : IScheduledJob, IDailyBriefingJob
+    IJobLog log,
+    IInvoiceJobRepository invoices,
+    ICache cache) : IScheduledJob, IDailyBriefingJob
 {
+    private static readonly TimeSpan InvoiceNoticeTtl = TimeSpan.FromDays(7);
+
+    /// <summary>Quantos dias depois do fechamento o aviso "fatura fechada" ainda é tentado (cobre mensagem que falhou no envio).</summary>
+    private const int ClosedNoticeDays = 7;
+
     public string Name => JobSchedules.MorningSummary;
 
     public string LockName => JobSchedules.MorningSummary;
@@ -219,17 +226,21 @@ public sealed class DailyBriefingJob(
                 if (message is null)
                 {
                     log.Info(Name, $"Nenhuma mensagem para enviar ao usuário {id}");
-                    continue;
                 }
-
-                // Desvio 139: o retorno do bot é conferido; falha vira erro registrado, não "enviada".
-                if (await bot.SendTextAsync(recipient.WhatsappNumber, message, cancellationToken))
+                else if (await bot.SendTextAsync(recipient.WhatsappNumber, message, cancellationToken))
                 {
+                    // Desvio 139: o retorno do bot é conferido; falha vira erro registrado, não "enviada".
                     log.Info(Name, $"Mensagem enviada para usuário {id}");
                 }
                 else
                 {
                     log.Failure(Name, $"Falha ao enviar a mensagem para usuário {id}");
+                }
+
+                // Desvio 282: só com os alertas financeiros ligados; os avisos de fatura saem aqui, depois do resumo.
+                if (settings.FinancialAlertsActive)
+                {
+                    await SendInvoiceNoticesAsync(recipient, today, cancellationToken);
                 }
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
@@ -239,6 +250,65 @@ public sealed class DailyBriefingJob(
         }
 
         log.Info(Name, "Processamento finalizado");
+    }
+
+    /// <summary>
+    /// Desvio 282: "FATURA FECHADA" (fechada nos últimos dias e ainda não avisada) e "VENCIMENTO PRÓXIMO" (vence em 3 dias). A fatura que vence
+    /// hoje já aparece no bloco de alertas do resumo, então não ganha um segundo aviso (mas a chave de "já avisada" é gravada). Cada aviso
+    /// só é lembrado como enviado quando o envio dá certo; se falhar, a próxima manhã tenta de novo.
+    /// </summary>
+    private async Task SendInvoiceNoticesAsync(NotifiedUser recipient, DateOnly today, CancellationToken cancellationToken)
+    {
+        var id = recipient.UserId.ToString(CultureInfo.InvariantCulture);
+        try
+        {
+            var upcoming = await alerts.GetUpcomingAsync(recipient.UserId, today, cancellationToken);
+            bool ShownToday(string card, DateOnly due) => upcoming.InvoicesToday.Any(i => i.Card == card && i.DueDate == due);
+
+            foreach (var invoice in await invoices.ListClosedSinceAsync(recipient.UserId, today.AddDays(-ClosedNoticeDays), cancellationToken))
+            {
+                var key = CacheKeys.InvoiceClosed(invoice.Id);
+                if (await cache.ExistsAsync(key, cancellationToken))
+                {
+                    continue;
+                }
+
+                if (ShownToday(invoice.AccountName, invoice.DueDate)
+                    || await bot.SendTextAsync(recipient.WhatsappNumber, InvoiceNotificationFormatter.Closed(invoice), cancellationToken))
+                {
+                    await cache.SetJsonAsync(key, true, InvoiceNoticeTtl, cancellationToken);
+                    log.Info(Name, $"Aviso de fatura fechada - Fatura #{invoice.Id.ToString(CultureInfo.InvariantCulture)}");
+                }
+                else
+                {
+                    log.Warning(Name, $"Falha ao enviar aviso de fatura fechada - Fatura #{invoice.Id.ToString(CultureInfo.InvariantCulture)}");
+                }
+            }
+
+            var dueSoon = (await invoices.ListDueSoonAsync(today.AddDays(3), 3, cancellationToken)).Where(i => i.UserId == recipient.UserId);
+            foreach (var invoice in dueSoon)
+            {
+                var key = CacheKeys.InvoiceDueWarning3d(invoice.Id);
+                if (await cache.ExistsAsync(key, cancellationToken))
+                {
+                    continue;
+                }
+
+                if (await bot.SendTextAsync(recipient.WhatsappNumber, InvoiceNotificationFormatter.DueDateWarning(invoice), cancellationToken))
+                {
+                    await cache.SetJsonAsync(key, true, InvoiceNoticeTtl, cancellationToken);
+                    log.Info(Name, $"Alerta de vencimento enviado - Fatura #{invoice.Id.ToString(CultureInfo.InvariantCulture)}");
+                }
+                else
+                {
+                    log.Warning(Name, $"Falha ao enviar alerta de vencimento - Fatura #{invoice.Id.ToString(CultureInfo.InvariantCulture)}");
+                }
+            }
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            log.Failure(Name, $"Erro nos avisos de fatura do usuário {id}: {ex.GetType().Name}");
+        }
     }
 
     public async Task<DailyBriefingRunResult> RunForCurrentMinuteAsync(CancellationToken cancellationToken)

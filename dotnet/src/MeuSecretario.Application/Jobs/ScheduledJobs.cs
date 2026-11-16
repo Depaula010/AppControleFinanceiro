@@ -48,18 +48,17 @@ public sealed class ScheduleExecutor(IScheduleExecutionRepository repository) : 
         repository.ExecuteAsync(request, cancellationToken);
 }
 
-/// <summary>Processador de faturas, 00:01 (<c>invoice_processor.py</c>, spec 013 §4.6).</summary>
+/// <summary>
+/// Processador de faturas, 00:01 (<c>invoice_processor.py</c>, spec 013 §4.6). Desvio 282: fecha, garante a fatura corrente e popula, mas
+/// <b>não manda mais mensagem</b>; os avisos "FATURA FECHADA" e "VENCIMENTO PRÓXIMO" saem no resumo da manhã (<see cref="DailyBriefingJob"/>).
+/// </summary>
 public sealed class InvoiceProcessorJob(
     IInvoiceJobRepository repository,
-    IBotClient bot,
-    ICache cache,
     IClock clock,
     IInvoiceService invoiceService,
     IInvoiceScheduleProcessor schedules,
     IJobLog log) : IScheduledJob
 {
-    private static readonly TimeSpan DedupeTtl = TimeSpan.FromDays(7);
-
     public string Name => JobSchedules.InvoiceProcessor;
 
     public string LockName => JobSchedules.InvoiceProcessor;
@@ -68,7 +67,6 @@ public sealed class InvoiceProcessorJob(
     {
         await CloseInvoicesAsync(cancellationToken);
         await PopulateOpenInvoicesAsync(cancellationToken);
-        await WarnDueSoonAsync(cancellationToken);
         log.Info(Name, "Processamento de faturas concluído!");
     }
 
@@ -85,24 +83,7 @@ public sealed class InvoiceProcessorJob(
         log.Info(Name, $"Encontradas {closed.Count.ToString(CultureInfo.InvariantCulture)} fatura(s) para fechar");
         foreach (var invoice in closed)
         {
-            var key = CacheKeys.InvoiceClosed(invoice.Id);
-            if (!await cache.ExistsAsync(key, cancellationToken))
-            {
-                var sent = await bot.SendTextAsync(invoice.WhatsappNumber, InvoiceNotificationFormatter.Closed(invoice), cancellationToken);
-                if (sent)
-                {
-                    await cache.SetJsonAsync(key, true, DedupeTtl, cancellationToken);
-                    log.Info(Name, $"Notificação de fechamento enviada - Fatura #{invoice.Id.ToString(CultureInfo.InvariantCulture)}");
-                }
-                else
-                {
-                    log.Warning(Name, $"Falha ao enviar notificação - Fatura #{invoice.Id.ToString(CultureInfo.InvariantCulture)}");
-                }
-            }
-            else
-            {
-                log.Info(Name, $"Notificação já enviada anteriormente - Fatura #{invoice.Id.ToString(CultureInfo.InvariantCulture)}");
-            }
+            log.Info(Name, $"Fatura #{invoice.Id.ToString(CultureInfo.InvariantCulture)} fechada");
 
             try
             {
@@ -145,39 +126,6 @@ public sealed class InvoiceProcessorJob(
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 log.Failure(Name, $"Erro ao processar fatura #{invoice.Id.ToString(CultureInfo.InvariantCulture)}: {ex.GetType().Name}");
-            }
-        }
-    }
-
-    private async Task WarnDueSoonAsync(CancellationToken cancellationToken)
-    {
-        log.Info(Name, "Buscando faturas com vencimento próximo (3 dias)...");
-        var target = clock.Today.AddDays(3);
-        var invoices = await repository.ListDueSoonAsync(target, 3, cancellationToken);
-        if (invoices.Count == 0)
-        {
-            log.Info(Name, "Nenhuma fatura vence em 3 dias");
-            return;
-        }
-
-        foreach (var invoice in invoices)
-        {
-            var key = CacheKeys.InvoiceDueWarning3d(invoice.Id);
-            if (await cache.ExistsAsync(key, cancellationToken))
-            {
-                log.Info(Name, $"Alerta já enviado - Fatura #{invoice.Id.ToString(CultureInfo.InvariantCulture)}");
-                continue;
-            }
-
-            var sent = await bot.SendTextAsync(invoice.WhatsappNumber, InvoiceNotificationFormatter.DueDateWarning(invoice), cancellationToken);
-            if (sent)
-            {
-                await cache.SetJsonAsync(key, true, DedupeTtl, cancellationToken);
-                log.Info(Name, $"Alerta de vencimento enviado - Fatura #{invoice.Id.ToString(CultureInfo.InvariantCulture)}");
-            }
-            else
-            {
-                log.Warning(Name, $"Falha ao enviar alerta - Fatura #{invoice.Id.ToString(CultureInfo.InvariantCulture)}");
             }
         }
     }

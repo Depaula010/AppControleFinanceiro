@@ -538,6 +538,23 @@ public sealed class InvoiceJobRepositoryTests(PostgresFixture postgres) : IAsync
     }
 
     [Fact]
+    [Trait("AC", "013-51")]
+    public async Task ListClosedSince_ReturnsOnlyTheUsersRecentlyClosedInvoices_WithTheNetTotal_Deviation282()
+    {
+        var recent = await _env.InvoiceAsync(_card, "2026-03-20", "2026-03-15", "Fechada");
+        await _env.TransactionAsync(_user, _card, "Despesa Essencial", "2026-03-02", "compra", -80m, invoiceId: recent);
+        await _env.TransactionAsync(_user, _card, "Despesa Essencial", "2026-03-03", "estorno", 20m, invoiceId: recent);
+        await _env.InvoiceAsync(_card, "2026-03-05", "2026-03-01", "Fechada");
+        await _env.InvoiceAsync(_card, "2026-04-20", "2026-03-17");
+        await _env.InvoiceAsync(_card, "2026-02-20", "2026-03-16", "Paga");
+
+        var closed = await _repository.ListClosedSinceAsync(_user, JobsEnv.Day("2026-03-11"), CancellationToken.None);
+
+        closed.Select(c => (c.Id, c.Total)).ShouldBe([(recent, 60d)]);
+        (await _repository.ListClosedSinceAsync(_user + 999, JobsEnv.Day("2026-03-11"), CancellationToken.None)).ShouldBeEmpty();
+    }
+
+    [Fact]
     [Trait("AC", "013-55")]
     public async Task ListOpen_ReturnsEveryOpenInvoiceOrderedByDueDate()
     {
