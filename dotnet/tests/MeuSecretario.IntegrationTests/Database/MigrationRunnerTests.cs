@@ -58,7 +58,7 @@ public class MigrationRunnerTests(PostgresFixture postgres) : IClassFixture<Post
             "0000_baseline", "0001_usuarios_api_key_varchar255", "0020_categorias_globais", "0050_transacoes_observacoes_origem",
             "0070_notificationconfigs_dias_antes_vencimento", "0080_transacoes_competencia",
             "0090_transacoes_competencia_unica", "0100_configuracoes_gemini", "0110_coach_agenda_chaves",
-            "0120_parcelados_em_aberto", "0130_reaplica_indice_competencia_unica",
+            "0120_parcelados_em_aberto", "0130_reaplica_indice_competencia_unica", "0140_categoria_trabalho",
         ]);
     }
 
@@ -93,11 +93,11 @@ public class MigrationRunnerTests(PostgresFixture postgres) : IClassFixture<Post
             "0000_baseline", "0001_usuarios_api_key_varchar255", "0020_categorias_globais", "0050_transacoes_observacoes_origem",
             "0070_notificationconfigs_dias_antes_vencimento", "0080_transacoes_competencia",
             "0090_transacoes_competencia_unica", "0100_configuracoes_gemini", "0110_coach_agenda_chaves",
-            "0120_parcelados_em_aberto", "0130_reaplica_indice_competencia_unica",
+            "0120_parcelados_em_aberto", "0130_reaplica_indice_competencia_unica", "0140_categoria_trabalho",
         ]);
         await using var check = await dataSource.OpenConnectionAsync();
-        (await check.ExecuteScalarAsync<int>("SELECT count(*) FROM subcategoria WHERE usuario_id IS NULL")).ShouldBe(61);
-        (await check.ExecuteScalarAsync<int>("SELECT count(*) FROM macrocategoria WHERE usuario_id IS NULL")).ShouldBe(18);
+        (await check.ExecuteScalarAsync<int>("SELECT count(*) FROM subcategoria WHERE usuario_id IS NULL")).ShouldBe(66); // 61 + 5 da macro Trabalho (0140)
+        (await check.ExecuteScalarAsync<int>("SELECT count(*) FROM macrocategoria WHERE usuario_id IS NULL")).ShouldBe(19); // 18 + Trabalho (0140)
         (await check.ExecuteScalarAsync<int>("SELECT count(*) FROM grupocategoria")).ShouldBe(5);
         (await check.ExecuteScalarAsync<int>(
             "SELECT character_maximum_length FROM information_schema.columns WHERE table_name = 'usuarios' AND column_name = 'api_key_automate'"))
