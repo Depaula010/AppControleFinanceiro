@@ -49,6 +49,9 @@ public static class CalendarEventPayloads
         // Desvio 057: sem hora de fim, o fim é início + 1 h e passa para o dia seguinte quando ultrapassa 24:00.
         var endLocal = end is { } explicitEnd ? date.ToDateTime(explicitEnd) : startLocal + DefaultDuration;
 
+        // Desvio 287: fim explícito <= início (ex.: 20:00 às 00:00) atravessa a meia-noite; o Google recusa fim antes do início.
+        endLocal = RollOverMidnight(startLocal, endLocal);
+
         return new CalendarPayload(
             summary,
             descriptionOrNull,
@@ -111,11 +114,15 @@ public static class CalendarEventPayloads
         var startTime = newStart ?? TimeOnly.FromDateTime(existingStart);
         var startLocal = targetDate.ToDateTime(startTime);
         var endLocal = newEnd is { } explicitEnd ? targetDate.ToDateTime(explicitEnd) : startLocal + duration;
+        endLocal = RollOverMidnight(startLocal, endLocal);
 
         return (
             new CalendarTime(null, IsoLocal(startLocal, zone), TimeZoneName),
             new CalendarTime(null, IsoLocal(endLocal, zone), TimeZoneName));
     }
+
+    /// <summary>Desvio 287: fim no mesmo dia que não vem depois do início passa para o dia seguinte.</summary>
+    private static DateTime RollOverMidnight(DateTime start, DateTime end) => end <= start ? end.AddDays(1) : end;
 
     /// <summary><c>2025-11-20T07:00:00-03:00</c>: relógio local + deslocamento do fuso naquele instante.</summary>
     public static string IsoLocal(DateTime local, TimeZoneInfo zone)

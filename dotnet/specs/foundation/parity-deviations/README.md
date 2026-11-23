@@ -181,3 +181,4 @@ Os desvios 002, 003, 005, 006 e 008 alteram o que está exposto/autenticado e pr
 | [283](283-saldo-projetado.md) | Campo novo `saldo_projetado` (dashboard, contas e bot) | acréscimo | 002, 006, 012 | implementado |
 | [284](284-chave-propria-do-webhook.md) | `WEBHOOK_API_KEY` opcional para o x-api-key do webhook (troca real é manual) | segurança | 009, 012 | implementado (código) |
 | [285](285-baixos-da-auditoria.md) | Baixos do backend: lock com dono, relatório mensal, quinzenal 26/12, textos, milhar, populador | correção | 005, 011, 012, 013 | implementado |
+| [287](287-evento-ate-meia-noite.md) | Evento com fim <= início passa para o dia seguinte | correção | 010, 012 | implementado |

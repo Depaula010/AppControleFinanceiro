@@ -69,6 +69,30 @@ public class CalendarEventPayloadsTests
     }
 
     [Theory]
+    [InlineData(20, 0, 0, 0, "2025-11-20T20:00:00-03:00", "2025-11-21T00:00:00-03:00")]
+    [InlineData(22, 0, 1, 30, "2025-11-20T22:00:00-03:00", "2025-11-21T01:30:00-03:00")]
+    [InlineData(9, 0, 9, 0, "2025-11-20T09:00:00-03:00", "2025-11-21T09:00:00-03:00")]
+    [Trait("AC", "010-92")]
+    public void ForNew_EndNotAfterStart_RollsToNextDay(int sh, int sm, int eh, int em, string start, string end)
+    {
+        var payload = CalendarEventPayloads.ForNew("Formatura", new DateOnly(2025, 11, 20), new TimeOnly(sh, sm), new TimeOnly(eh, em), null, null, Zone);
+
+        payload.Start.DateTimeText.ShouldBe(start);
+        payload.End.DateTimeText.ShouldBe(end);
+    }
+
+    [Fact]
+    [Trait("AC", "010-92")]
+    public void ForUpdate_EndAtMidnight_RollsToNextDay()
+    {
+        var existing = new ExistingEventTimes(null, "2025-11-20T10:00:00-03:00", null, "2025-11-20T11:00:00-03:00");
+
+        var result = CalendarEventPayloads.ForUpdate(existing, null, new TimeOnly(20, 0), new TimeOnly(0, 0), Zone);
+
+        result!.Value.End.DateTimeText.ShouldBe("2025-11-21T00:00:00-03:00");
+    }
+
+    [Theory]
     [InlineData("")]
     [InlineData(null)]
     [Trait("AC", "010-92")]
